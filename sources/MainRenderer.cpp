@@ -1,7 +1,11 @@
 /*Author: Vingt-2
 	BLAengine
 */
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+
 #include "std.h"
 #include "Helpers.h"
 #include "OBJImport.h"
