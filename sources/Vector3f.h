@@ -11,7 +11,7 @@ public:
 	float sqrMagnitude;
 
 	Vector3f(void);
-	Vector3f::Vector3f(int x, int y, int z);
+	Vector3f(int x, int y, int z);
 	~Vector3f(void);
 
 	//Operator overloading and Operations:
@@ -23,7 +23,7 @@ public:
 	const Vector3f operator* (int scalar);
 	const Vector3f operator/ (int scalar);
 
-	float Vector3f::DotProduct(const Vector3f &secondVector);
+	float DotProduct(const Vector3f &secondVector);
 
 	float GetMagnitude() const;
 	Vector3f Normalized();
