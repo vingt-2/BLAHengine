@@ -21,7 +21,7 @@ public:
 	const Vector3f operator+ (const Vector3f &secondVector);
 	const Vector3f operator- (const Vector3f &secondVector);
 	const Vector3f operator* (int scalar);
-	const Vector3f operator/ (int );
+	const Vector3f operator/ (int scalar);
 
 	float Vector3f::DotProduct(const Vector3f &secondVector);
 
