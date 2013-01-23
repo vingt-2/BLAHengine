@@ -1,35 +1,42 @@
+/*Author: Vingt-2
+	BLAengine
+*/
 #include "Vector3f.h"
 
 Vector3f::Vector3f(void):
-	x(0.0f),y(0.0f),z(0.0f)
+	x(0.0f),y(0.0f),z(0.0f),
+	sqrMagnitude(0)
 {}
 
 Vector3f::Vector3f(int x, int y, int z):
-	x(x),y(y),z(z)
-{
-}
+	x(x),y(y),z(z),
+	sqrMagnitude(x*x+y*y+z*z)
+{}
 
 Vector3f::~Vector3f(void) 
 {}
 
-//Operator overloaders:
+//Operator overloads and Vector Operations:
 void Vector3f::operator+= (const Vector3f &secondVector)
 {
 	this -> x = this-> x + secondVector.x ;
 	this -> y = this-> y + secondVector.y ;
 	this -> z = this-> z + secondVector.z ;
+	UpdateMagnitude();
 }
 void Vector3f::operator-= (const Vector3f &secondVector)
 {
 	this -> x = this-> x - secondVector.x ;
 	this -> y = this-> y - secondVector.y ;
 	this -> z = this-> z - secondVector.z ;
+	UpdateMagnitude();
 }
 void Vector3f::operator*= (int scalar)
 {
 	this -> x = this-> x * scalar ;
 	this -> y = this-> y * scalar ;
 	this -> z = this-> z * scalar ;
+	UpdateMagnitude();
 }
 const Vector3f Vector3f::operator+ (const Vector3f &secondVector)
 {
@@ -56,32 +63,34 @@ const Vector3f Vector3f::operator/(int scalar)
 	return divResult;
 }
 
+float Vector3f::DotProduct(const Vector3f &secondVector)
+{
+	return this->x*secondVector.x + this->y*secondVector.y + this->z*secondVector.z;
+}
 
 float Vector3f::GetMagnitude() const
 {
-	float sqrMagnitude = GetSqrMagnitude();
-	return sqrMagnitude * sqrMagnitude;
+	return sqrt(sqrMagnitude);
 }
-
-float Vector3f::GetSqrMagnitude() const
-{
-	return x*x + y*y + z*z ;
-	Vector3f bitte();
-}
-
 
 void Vector3f::Normalize()
 {
-	float magnitude = GetMagnitude();
+	float magnitude = sqrt(sqrMagnitude);
 	this->x *= 1 / magnitude;
 	this->y *= 1 / magnitude;
 	this->z *= 1 / magnitude;
+	UpdateMagnitude();
 }
 
 Vector3f Vector3f::Normalized()
 {
 	Vector3f result(*this);
-	result / GetMagnitude();
+	result / sqrt(sqrMagnitude);
 	return result;
+}
+
+void Vector3f::UpdateMagnitude()
+{
+	sqrMagnitude = x*x+y*y+z*z;
 }
 

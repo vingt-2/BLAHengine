@@ -1,3 +1,7 @@
+/*Author: Vingt-2
+	BLAengine
+*/
+
 #include "OBJImport.h"
 
 
@@ -15,21 +19,21 @@ OBJImport::~OBJImport(void)
 
 bool OBJImport::ImportMesh(string filename)
 {
-    std::cout << "Importing " << filename << ".\n";
-    ifstream fileStream (filename,ifstream::in);
-    string lineInFile = " ";
-    
+	cout << "Importing " << filename << ".\n";
+	ifstream fileStream (filename,ifstream::in);
+	string lineInFile = " ";
+
 	// Pushing a zero vertice in the vertices because ObjImport starts counting faces at 1,
 	// Keeping things consistent
-    meshVertices.push_back(Vector3f());
+	meshVertices.push_back(Vector3f());
 
 	if(fileStream.good())
-    {
+	{
 		// And 1 useless counter, 1!
-        int uselessLines = 0;
-        while(fileStream.good())
-        {
-            getline(fileStream,lineInFile);
+		int uselessLines = 0;
+		while(fileStream.good())
+		{
+			getline(fileStream,lineInFile);
 			try
 			{
 				if(lineInFile.at(0) == 'v')
@@ -53,15 +57,15 @@ bool OBJImport::ImportMesh(string filename)
 			{
 				//	Non conventional shit is expected when parsing a file, just discard it.
 			}
-        }
-        fileStream.close();
-        std::cout << filename << " imported, " << meshVertices.size() << " vertices and " << meshFaces.size() << " faces.\n";
-        //std::cout << uselessLines << " unused Lines\n";
-        return true;
-    }
-    else
-    {
-        std::cout << "Failed to Import " << filename << ".\n";
-        return false;
-    }
+		}
+		fileStream.close();
+		cout << filename << " imported, " << meshVertices.size() << " vertices and " << meshFaces.size() << " faces.\n";
+		//cout << uselessLines << " unused Lines\n";
+		return true;
+	}
+	else
+	{
+		cout << "Failed to Import " << filename << ".\n";
+		return false;
+	}
 }
