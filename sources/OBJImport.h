@@ -2,18 +2,14 @@
 	BLAengine
 */
 #include "std.h"
-#include "Vector3f.h"
 #include "Helpers.h"
+#include "MeshRenderer.h"
 
 class OBJImport
 {
 public:
-	std::vector<Vector3f> meshVertices;
-	std::vector<Vector3f> meshFaces;
-	std::vector<Vector3f> texCoords;
-
 	bool OldImportMesh(char* filename);
-	bool ImportMesh(string filename);
+	bool ImportMesh(const string filename, MeshRenderer *mesh);
 
 	//Constr/deconstr
 	OBJImport(void);

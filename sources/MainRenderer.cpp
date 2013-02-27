@@ -1,255 +1,229 @@
-/*Author: Vingt-2
-	BLAengine
-*/
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-
+// Include standard headers
 #include "std.h"
-#include "Helpers.h"
+#include "Graphics.h"
 #include "OBJImport.h"
+#include "Texture.h"
+#include "Shader.h"
 
-OBJImport meshObj;
+bool initializeContext(char* windowTitle );
+bool display();
+void idle(int* fps_frames,GLfloat* fps_time,int* fps);
 
-int screen_width = 800;
-int screen_height = 600;
+GLuint VertexArrayID;
+GLuint MatrixID;
+GLuint programID;
+GLuint vertexbuffer;
+GLuint uvbuffer;
+GLuint textureID;
 
-float SHRINK_FACTOR = 5;
+vec2 tangentAcceleration;
+vec2 mousePosition;
 
-int updatingAcceleration = 0;
+MeshRenderer* mainMesh = new MeshRenderer();
 
-float angleX = 0;
-float angleY = 0;
 
-int previousMouseX = 0;
-int previousMouseY = 0;
-
-float accelerationX = 0;
-float accelerationY = 0;
-char MODEL_TO_LOAD[16] = "vache.obj";
-string fpsString = " ";
-
-unsigned int fps_time;
-unsigned int fps_frames = 0;
-float fps = 0;
-
-void draw_string(float x, float y, void *font, char *string)
+bool initializeContext(char* windowTitle )
 {
-	char *c;
-	glColor3f(1.0, 1.0, 1.0);
-	glRasterPos3f(x, y, 0);
-	for (c = string; *c; c++)
+	// Initialise GLFW
+	if( !glfwInit() )
 	{
-		glutBitmapCharacter(font, *c);
+		fprintf( stderr, "Failed to initialize GLFW\n" );
+		return -1;
 	}
+
+	glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4);
+	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
+	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 3);
+	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// Open a window and create its OpenGL context
+	if( !glfwOpenWindow( 1024, 768, 0,0,0,0, 32,0, GLFW_WINDOW ) )
+	{
+		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+		glfwTerminate();
+		return -1;
+	}
+
+	// Initialize GLEW
+	glewExperimental = true; // Needed for core profile
+	if (glewInit() != GLEW_OK) 
+	{
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	glfwSetWindowTitle( windowTitle );
+
+	// Ensure we can capture the escape key being pressed below
+	glfwEnable( GLFW_STICKY_KEYS );
+	glfwSetMousePos(1024/2, 768/2);
+
+	// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+	return true;
 }
 
-void display()
+bool display()
 {
-	int i, j;
-	//char buf[16] = "stuff";
-
+	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0, 1.0f * screen_width / screen_height, 0.1, 10.0);
+	// Use our shader
+	glUseProgram(programID);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0.0, 2.0, 0.0,
-		0.0, 0.0, -4.0,
-		0.0, 1.0, 0.0);
-	glTranslatef(0.0, 0.0, -5.0);
-	glRotatef(angleY, 1.0, 0.0, 0.0);
-	glRotatef(angleX, 0.0, 1.0, 0.0);
-	//	printf("meshSize: %i\n",meshObj.meshFaces.size());
-	glBegin(GL_TRIANGLES);
-	int debugCount=0;
-	while(1);
-	for (i = 0; i < meshObj.meshFaces.size(); i++)
-	{
-		debugCount++;
-		glColor3f((GLfloat)fmod(i*i,1),(GLfloat)fmod(i*i,2),(GLfloat)fmod(i*i,3));
+	mat4 ProjectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 
-		glVertex3f((GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).x).x/SHRINK_FACTOR,
-			(GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).x).y/SHRINK_FACTOR,
-			(GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).x).z/SHRINK_FACTOR);
+	mat4 ViewMatrix =
+		glm::lookAt
+		(	
+			vec3(10,5,0), // Camera is at (10,0,0), in World Space
+			vec3(0,0,0), // and looks at the origin
+			vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+		);
 
-		glVertex3f((GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).y).x/SHRINK_FACTOR,
-			(GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).y).y/SHRINK_FACTOR,
-			(GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).y).z/SHRINK_FACTOR);
+	ViewMatrix = glm::rotate(ViewMatrix,tangentAcceleration.x,vec3(0,1,0));
 
-		glVertex3f((GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).z).x/SHRINK_FACTOR,
-			(GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).z).y/SHRINK_FACTOR,
-			(GLfloat)meshObj.meshVertices.at((int)meshObj.meshFaces.at(i).z).z/SHRINK_FACTOR);
-	}
-	glEnd();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	mat4 ModelMatrix = mat4(1.0);
 
-	// snprintf(buf, 16, "FPS: %.1f", fps);
-	draw_string(-0.9, -0.9, GLUT_BITMAP_HELVETICA_18, MODEL_TO_LOAD);
-	draw_string(0.8, 0.9, GLUT_BITMAP_HELVETICA_18, (char*)fpsString.data());
-	draw_string(0.8, -0.9, GLUT_BITMAP_HELVETICA_18, (char*)DecimalToString(SHRINK_FACTOR, 4).data());
+	mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
+	// Send our transformation to the currently bound shader,
+	// in the "MVP" uniform
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-	glutSwapBuffers();
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                   // attribute
+		2,                   // size
+		GL_FLOAT,            // type
+		GL_FALSE,            // normalized?
+		0,                   // stride
+		(void*)0             // array buffer offset
+		);
+
+	// Draw the triangle !
+	glDrawArrays(GL_LINES, 0, mainMesh->meshVertices.size() );
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
+	// Swap buffers
+	glfwSwapBuffers();
+
+	return true;
 }
 
-void reshape(int width, int height)
+void UpdateAcceleration()
 {
-	screen_width = width;
-	screen_height = height;
-	glViewport(0, 0, screen_width, screen_height);
+	int x,y;
+
+	glfwGetMousePos(&x,&y);
+	if(mousePosition.x > x)
+	{
+		tangentAcceleration.x -= 0.1f;
+	}
+	else if(mousePosition.x < x)
+	{
+		tangentAcceleration.x += 0.1f;
+	}
+	mousePosition.x = x;
 }
 
-void GetMouseAcceleration(int x, int y)
+int main( void )
 {
-	int d_time = glutGet(GLUT_ELAPSED_TIME) - fps_time;
-	//float d_time = 0.1f;
-	if(x > previousMouseX)
-	{
-		accelerationX += d_time* 0.01f;
-	}
-	else if(x < previousMouseX)
-	{
-		accelerationX -= d_time* 0.01f;
-	}
+	bool terminationRequest = false;
 
-	if(y > previousMouseY)
-	{
-		accelerationY+= d_time* 0.01f;
-	}
-	else if (y < previousMouseY)
-	{
-		accelerationY -= d_time* 0.01f;
-	}
+	initializeContext("Obj renderer");
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
 
-	if(fabs(accelerationX) > 0.1f)
+	// Create and compile our GLSL program from the shaders
+	programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+
+	// Get a handle for our "MVP" uniform
+	MatrixID = glGetUniformLocation(programID, "MVP");
+
+	// Load the texture
+	//GLuint Texture = loadDDS("uvmap.DDS");
+	GLuint Texture = 0;
+
+	// Get a handle for our "myTextureSampler" uniform
+	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+
+	// Read our .obj file
+	OBJImport objImporter;
+	bool importMesh = objImporter.ImportMesh("bla.obj",mainMesh);
+
+	// Load it into a VBO
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, mainMesh->meshVertices.size() * sizeof(vec3), &(mainMesh->meshVertices[0]), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, mainMesh->meshUVs.size() * sizeof(vec2), &(mainMesh->meshUVs[0]), GL_STATIC_DRAW);
+
+	int fps_frames=0;
+	GLfloat fps_time = glfwGetTime();
+	int fps = 0;
+
+	while(!terminationRequest)
 	{
-		int sign = accelerationX < 0 ? -1 : 1;
-		accelerationX = sign * 0.1f;
-	}
-	if(fabs(accelerationY) > 0.11f)
-	{
-		int sign = accelerationY < 0 ? -1 : 1;
-		accelerationY = sign * 0.1f;
-	}
+		idle(&fps_frames,&fps_time,&fps);
+		UpdateAcceleration();
+		display();
 
-	updatingAcceleration = 1;
-
-	previousMouseX = x;
-	previousMouseY = y;
-}
-
-void UpdateMouseAcceleration()
-{
-	glutPassiveMotionFunc( GetMouseAcceleration );
-	if(!updatingAcceleration)
-	{
-		int d_time = glutGet(GLUT_ELAPSED_TIME) - fps_time;
-
-		if(accelerationX != 0)
+		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) |  !glfwGetWindowParam( GLFW_OPENED ) )
 		{
-			if(accelerationX < 0)
-			{
-				accelerationX += d_time*0.00001f;
-			}
-			else
-			{
-				accelerationX -=d_time*0.00001f;
-			}
-		}
-
-		if(accelerationY != 0)
-		{
-			if(accelerationY < 0)
-			{
-				accelerationY += d_time*0.00001f;
-			}
-			else
-			{
-				accelerationY -=d_time*0.00001f;
-			}
+			terminationRequest = true;
 		}
 	}
 
-	updatingAcceleration = 0;
+	// Cleanup VBO and shader
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
+	glDeleteProgram(programID);
+	glDeleteTextures(1, &TextureID);
+	glDeleteVertexArrays(1, &VertexArrayID);
 
-	//printf("%f, %f Mouse \n",accelerationX, accelerationY);
-
-}
-
-void UpdateKeyboardInput(unsigned char key,int mouseX,int mouseY)
-{
-	if(key == 'w')
-	{
-		SHRINK_FACTOR -= 0.1f;
-	}
-	if(key == 's')
-	{
-		SHRINK_FACTOR += 0.1f;
-	}
-	if(key == 'a')
-	{
-		accelerationX -= 0.1f;
-	}
-	if(key == 'd')
-	{
-		accelerationX += 0.1f;
-	}
-}
-
-void idle()
-{
-	int d_time;
-	UpdateMouseAcceleration();
-	glutKeyboardFunc( UpdateKeyboardInput );
-
-	angleX +=  accelerationX;
-	angleY +=  accelerationY;
-
-	fps_frames++;
-	d_time = glutGet(GLUT_ELAPSED_TIME) - fps_time;
-	if (d_time > 1000.0)
-	{
-		fps = fps_frames / (d_time / 1000.0);
-		fps_time = glutGet(GLUT_ELAPSED_TIME);
-		fps_frames = 0;
-		fpsString.replace(0, 20,"Fps: " + DecimalToString((int)fps,4));
-	}
-	glutPostRedisplay();
-}
-
-int main(int argc, char **argv)
-{
-
-	char* loadName = MODEL_TO_LOAD;
-
-	meshObj = OBJImport();
-	meshObj.ImportMesh(loadName);
-	glutInit(&argc, argv);
-	glutInitWindowSize(screen_width, screen_height);
-	glutCreateWindow("Renderer");
-
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-
-
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutIdleFunc(idle);
-
-	fps_time = glutGet(GLUT_ELAPSED_TIME);
-	glutMainLoop();
+	glfwTerminate();
 
 	return 0;
 }
 
+void idle(int* fps_frames,GLfloat* fps_time,int* fps)
+{
+	GLfloat d_time;
+
+	(*fps_frames) ++;
+
+	d_time = glfwGetTime() - *fps_time;
+	if (d_time > 1.0)
+	{
+		*fps = *fps_frames / (d_time);
+		*fps_time = glfwGetTime();
+		*fps_frames = 0;
+	}
+}
