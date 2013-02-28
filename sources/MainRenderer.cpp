@@ -62,19 +62,19 @@ int main( void )
 	bool terminationRequest = false;
 
 	Renderer render;
-	render.initializeContext("BLAengine - OBJViewer ");
+	render.initializeContext("BLAengine - OBJViewer");
 
 	OBJImport objImporter;
 	MeshRenderer* mesh_1 = new MeshRenderer();
 	MeshRenderer* mesh_2 = new MeshRenderer();
 
 
-	objImporter.ImportMesh("bla.obj",mesh_1);
-	mesh_1->LoadShaders( "Vertex_Shader.glsl", "Fragment_Shader.glsl" );
+	objImporter.ImportMesh("../models/bla.obj",mesh_1);
+	mesh_1->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	mesh_1->GenerateArrays();
 	render.objects.push_back(mesh_1);
 	objImporter.ImportMesh("cube.obj",mesh_2);
-	mesh_2->LoadShaders( "Vertex_Shader.glsl", "Fragment_Shader.glsl" );
+	mesh_2->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	mesh_2->GenerateArrays();
 	render.objects.push_back(mesh_2);
 

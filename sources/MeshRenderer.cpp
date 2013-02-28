@@ -23,8 +23,6 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 
 	mat4 MVP = projection * view * model;
 
-	// Send our transformation to the currently bound shader,
-	// in the "MVP" uniform
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	// 1rst attribute buffer : vertices
