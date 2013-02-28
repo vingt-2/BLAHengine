@@ -70,11 +70,11 @@ int main( void )
 
 
 	objImporter.ImportMesh("bla.obj",mesh_1);
-	mesh_1->LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+	mesh_1->LoadShaders( "Vertex_Shader.glsl", "Fragment_Shader.glsl" );
 	mesh_1->GenerateArrays();
 	render.objects.push_back(mesh_1);
 	objImporter.ImportMesh("cube.obj",mesh_2);
-	mesh_2->LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+	mesh_2->LoadShaders( "Vertex_Shader.glsl", "Fragment_Shader.glsl" );
 	mesh_2->GenerateArrays();
 	render.objects.push_back(mesh_2);
 
