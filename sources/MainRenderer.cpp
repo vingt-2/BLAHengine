@@ -5,6 +5,7 @@
 
 vec2 tangentAcceleration;
 vec2 mousePosition;
+Renderer render;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -38,7 +39,13 @@ void LockFramerate(GLfloat hzFrequency)
 void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 {
 	GetFPS(fps_frames,fps_time, fps);
-	LockFramerate(100.f); // Lock framerate 100 hz
+	//LockFramerate(100.f); // Lock framerate 100 hz
+}
+
+void GLFWCALL OnResize(int xRes,int yRes)
+{
+	render.Resize(xRes,yRes);
+	cout << "IM AM RESSIIIZZZING \n";
 }
 
 int main( void )
@@ -47,24 +54,21 @@ int main( void )
 
 	Renderer render;
 	render.InitializeContext("BLAengine - OBJViewer");
-
-	OBJImport objImporter;
-	MeshRenderer* mesh_1 = new MeshRenderer();
-	MeshRenderer* mesh_2 = new MeshRenderer();
+	GameObject* object_1 = new GameObject();
 
 
-	objImporter.ImportMesh("../models/bla.obj",mesh_1);
-	mesh_1->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
-	mesh_1->GenerateArrays();
-	render.renderVector.push_back(mesh_1);
-	objImporter.ImportMesh("cube.obj",mesh_2);
-	mesh_2->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
-	mesh_2->GenerateArrays();
-	render.renderVector.push_back(mesh_2);
+	OBJImport::ImportMesh("../models/cube.obj",object_1->meshRenderer);
+	object_1->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
+	object_1->meshRenderer->GenerateArrays();
+	render.renderVector.push_back(object_1->meshRenderer);
+
+
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
 	int fps = 0;
+
+	vec3 objectPosition = vec3(0);
 
 	while(!terminationRequest)
 	{
@@ -74,6 +78,12 @@ int main( void )
 		title << "BLAengine: " << fps << " fps";
 		title.str();
 		glfwSetWindowTitle(title.str().data());
+
+		glfwSetWindowSizeCallback(OnResize);
+
+		objectPosition.x = objectPosition.x + 0.01f;
+
+		object_1->SetPosition(objectPosition);
 
 
 		UpdateAcceleration();

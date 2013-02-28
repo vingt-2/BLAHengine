@@ -3,7 +3,8 @@
 MeshRenderer::MeshRenderer(void):
 		meshVertices(vector<vec3>()),
 		meshNormals	(vector<vec3>()),
-		meshUVs		(vector<vec2>())
+		meshUVs		(vector<vec2>()),
+		meshTransform(mat4(1))
 {}
 
 
@@ -21,13 +22,11 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 {
 	glUseProgram(shaderID);
 
-	mat4 model = mat4(1.0);
-
-	mat4 MVP = projection * view * model;
+	mat4 MVP = projection * view * meshTransform;
 
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);
 
-	// 1rst attribute buffer : vertices
+	// Enable vertices
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
@@ -39,7 +38,7 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 		(void*)0            // array buffer offset
 		);
 
-	// 2nd attribute buffer : UVs
+	// Enable UVs
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glVertexAttribPointer(
@@ -51,7 +50,7 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 		(void*)0             // array buffer offset
 		);
 
-	// Draw the triangle !
+	// Draw
 	glDrawArrays(GL_LINES, 0, meshVertices.size() );
 
 	glDisableVertexAttribArray(0);
@@ -63,6 +62,8 @@ bool MeshRenderer::GenerateArrays()
 {
 	glGenVertexArrays(1, &vertexArrayID);
 	glBindVertexArray(vertexArrayID);
+
+	//TO BE RELOCATED WHEN WE SUPPORT TEXTURES
 
 	// Load the texture
 	//GLuint Texture = loadDDS("uvmap.DDS");

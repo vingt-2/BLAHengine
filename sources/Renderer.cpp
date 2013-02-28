@@ -19,7 +19,7 @@ bool Renderer::InitializeContext(char* windowTitle )
 		return -1;
 	}
 
-	glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 16);
+	glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 16 );
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 3);
 	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -46,10 +46,10 @@ bool Renderer::InitializeContext(char* windowTitle )
 	glfwEnable( GLFW_STICKY_KEYS );
 	glfwSetMousePos(1024/2, 768/2);
 
-	// Dark blue background
+	//Neat grey background
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
 
-	// Enable depth test
+	// Enable z-buf test
 	glEnable(GL_DEPTH_TEST);
 
 	// Accept fragment if it closer to the camera than the former one
@@ -86,4 +86,9 @@ bool Renderer::Update()
 	glfwSwapBuffers();
 
 	return true;
+}
+
+void Renderer::Resize(int xRes,int yRes)
+{
+	 glfwSetWindowSize(xRes,yRes);
 }

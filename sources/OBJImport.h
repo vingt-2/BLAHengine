@@ -3,13 +3,13 @@
 */
 #include "std.h"
 #include "Helpers.h"
-#include "MeshRenderer.h"
+#include "GameObject.h"
 
 class OBJImport
 {
 public:
-	bool OldImportMesh(char* filename);
-	bool ImportMesh(const string filename, MeshRenderer *mesh);
+	static bool OldImportMesh(char* filename);
+	static bool ImportMesh(const string filename, MeshRenderer *mesh);
 
 	//Constr/deconstr
 	OBJImport(void);

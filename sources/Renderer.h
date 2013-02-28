@@ -8,6 +8,7 @@ public:
 	mat4 viewMatrix;
 	vector<MeshRenderer*> renderVector;
 
+	void Resize(int xRes,int yRes);
 	bool InitializeContext(char* windowTitle);
 	bool Update();
 

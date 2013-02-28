@@ -12,7 +12,7 @@ public:
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
 
-	mat4 modelMatrix;
+	mat4 meshTransform;
 
 	GLuint vertexArrayID;
 	GLuint vertexbuffer;
