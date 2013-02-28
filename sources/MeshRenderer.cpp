@@ -8,7 +8,9 @@ MeshRenderer::MeshRenderer(void):
 
 
 MeshRenderer::~MeshRenderer(void)
-{}
+{
+	CleanUp();
+}
 
 string MeshRenderer::ToString()
 {

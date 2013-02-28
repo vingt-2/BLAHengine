@@ -10,7 +10,7 @@ Renderer::~Renderer(void)
 {
 }
 
-bool Renderer::initializeContext(char* windowTitle )
+bool Renderer::InitializeContext(char* windowTitle )
 {
 	// Initialise GLFW
 	if( !glfwInit() )
@@ -78,12 +78,11 @@ bool Renderer::Update()
 
 	int i;
 
-	for(i = 0; i < objects.size();i++)
+	for(i = 0; i < renderVector.size();i++)
 	{
-		objects[i]->Draw(projectionMatrix,viewMatrix);
+		renderVector[i]->Draw(projectionMatrix,viewMatrix);
 	}
 
-	// Swap buffers
 	glfwSwapBuffers();
 
 	return true;

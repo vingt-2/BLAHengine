@@ -3,39 +3,10 @@
 #include "Graphics.h"
 #include "Renderer.h"
 
-void idle(int* fps_frames,GLfloat* fps_time,int* fps);
-
 vec2 tangentAcceleration;
 vec2 mousePosition;
 
-void UpdateAcceleration()
-{
-	int x,y;
-
-	glfwGetMousePos(&x,&y);
-	if(mousePosition.x > x)
-	{
-		tangentAcceleration.x -= 0.1f;
-	}
-	else if(mousePosition.x < x)
-	{
-		tangentAcceleration.x += 0.1f;
-	}
-
-	if(mousePosition.y > y)
-	{
-		tangentAcceleration.y += 0.1f;
-	}
-	else if(mousePosition.y < y)
-	{
-		tangentAcceleration.y -= 0.1f;
-	}
-
-	mousePosition.x = x;
-	mousePosition.y = y;
-}
-
-void idle(int* fps_frames,GLfloat* fps_time,int* fps)
+void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
 	GLfloat d_time;
 
@@ -48,13 +19,26 @@ void idle(int* fps_frames,GLfloat* fps_time,int* fps)
 		*fps_time = glfwGetTime();
 		*fps_frames = 0;
 	}
-	else if(d_time < 0.01)
+}
+
+void UpdateAcceleration()
+{
+	tangentAcceleration.x = 0.1f;
+	tangentAcceleration.y = 0.05f;
+}
+void LockFramerate(GLfloat hzFrequency)
+{
+	GLfloat deltaTime = glfwGetTime();
+	while(glfwGetTime() - deltaTime < 1/hzFrequency)
 	{
-		while(d_time < 0.01)
-		{
-			d_time = glfwGetTime() - *fps_time;
-		}
+		// Lock
 	}
+}
+
+void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
+{
+	GetFPS(fps_frames,fps_time, fps);
+	LockFramerate(100.f); // Lock framerate 100 hz
 }
 
 int main( void )
@@ -62,7 +46,7 @@ int main( void )
 	bool terminationRequest = false;
 
 	Renderer render;
-	render.initializeContext("BLAengine - OBJViewer");
+	render.InitializeContext("BLAengine - OBJViewer");
 
 	OBJImport objImporter;
 	MeshRenderer* mesh_1 = new MeshRenderer();
@@ -72,11 +56,11 @@ int main( void )
 	objImporter.ImportMesh("../models/bla.obj",mesh_1);
 	mesh_1->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	mesh_1->GenerateArrays();
-	render.objects.push_back(mesh_1);
+	render.renderVector.push_back(mesh_1);
 	objImporter.ImportMesh("cube.obj",mesh_2);
 	mesh_2->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	mesh_2->GenerateArrays();
-	render.objects.push_back(mesh_2);
+	render.renderVector.push_back(mesh_2);
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
@@ -84,8 +68,16 @@ int main( void )
 
 	while(!terminationRequest)
 	{
-		idle(&fps_frames,&fps_time,&fps);
+		Idle(&fps_frames,&fps_time,&fps);
+
+		stringstream title;
+		title << "BLAengine: " << fps << " fps";
+		title.str();
+		glfwSetWindowTitle(title.str().data());
+
+
 		UpdateAcceleration();
+
 		render.Update();
 
 		render.viewMatrix = glm::rotate(render.viewMatrix,tangentAcceleration.x,vec3(0,1,0));

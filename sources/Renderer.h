@@ -6,9 +6,9 @@ public:
 
 	mat4 projectionMatrix;
 	mat4 viewMatrix;
-	vector<MeshRenderer*> objects;
+	vector<MeshRenderer*> renderVector;
 
-	bool initializeContext(char* windowTitle);
+	bool InitializeContext(char* windowTitle);
 	bool Update();
 
 	Renderer(void);
