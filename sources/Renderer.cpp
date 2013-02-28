@@ -63,7 +63,7 @@ bool Renderer::InitializeContext(char* windowTitle )
 	viewMatrix =
 		glm::lookAt
 		(	
-			vec3(10,5,0), // Camera is at (10,0,0), in World Space
+			vec3(0,0,-1000), // Camera is at (10,0,0), in World Space
 			vec3(0,0,0), // and looks at the origin
 			vec3(0,1,0) // Head is up (set to 0,-1,0 to look upside-down)
 		);

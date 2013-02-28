@@ -3,13 +3,12 @@
 class GameObject
 {
 public:
-	MeshRenderer* meshRenderer;
-	Transform transform;
+MeshRenderer* meshRenderer;
+Transform transform;
 
-	void SetPosition(vec3 position);
+void SetPosition(vec3 position);
 
 
-	GameObject(void);
-	~GameObject(void);
+GameObject(void);
+~GameObject(void);
 };
-

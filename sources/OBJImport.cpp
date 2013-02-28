@@ -66,13 +66,22 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 					if(lineInFile.at(1) == ' ')
 					{
 						int vertexIndex[3], uvIndex[3], normalIndex[3];
-						sscanf(lineInFile.data(),"%*s %d/%d/%d %d/%d/%d %d/%d/%d\n",&vertexIndex[0],&uvIndex[0],&normalIndex[0]
-						,&vertexIndex[1],&uvIndex[1],&normalIndex[1]
-						,&vertexIndex[2],&uvIndex[2],&normalIndex[2]);
+						if(sscanf(lineInFile.data(),"%*s %d/%d/%d %d/%d/%d %d/%d/%d\n",&vertexIndex[0],&uvIndex[0],&normalIndex[0]
+							,&vertexIndex[1],&uvIndex[1],&normalIndex[1]
+								,&vertexIndex[2],&uvIndex[2],&normalIndex[2]) == 9 )
+						{
+							vertexIndices.push_back(vertexIndex[0]),vertexIndices.push_back(vertexIndex[1]),vertexIndices.push_back(vertexIndex[2]);
+							uvIndices.push_back(uvIndex[0]),uvIndices.push_back(uvIndex[1]),uvIndices.push_back(uvIndex[2]);
+							normalIndices.push_back(normalIndex[0]),normalIndices.push_back(normalIndex[1]),normalIndices.push_back(normalIndex[2]);
+						}
+						else if(sscanf(lineInFile.data(),"%*s %d//%d %d//%d %d//%d\n",&vertexIndex[0],&normalIndex[0]
+							,&vertexIndex[1],&normalIndex[1]
+								,&vertexIndex[2],&normalIndex[2]) == 6 )
+						{
+							vertexIndices.push_back(vertexIndex[0]),vertexIndices.push_back(vertexIndex[1]),vertexIndices.push_back(vertexIndex[2]);
+							normalIndices.push_back(normalIndex[0]),normalIndices.push_back(normalIndex[1]),normalIndices.push_back(normalIndex[2]);
+						}
 
-						vertexIndices.push_back(vertexIndex[0]),vertexIndices.push_back(vertexIndex[1]),vertexIndices.push_back(vertexIndex[2]);
-						uvIndices.push_back(uvIndex[0]),uvIndices.push_back(uvIndex[1]),uvIndices.push_back(uvIndex[2]);
-						normalIndices.push_back(normalIndex[0]),normalIndices.push_back(normalIndex[1]),normalIndices.push_back(normalIndex[2]);
 					}
 				}
 				else
@@ -90,16 +99,23 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 		for( int i=0; i<vertexIndices.size(); i++ )
 		{
 			int vertexIndex = vertexIndices[i];
-			int uvIndex = uvIndices[i];
+
+			if( uvIndices.size() > 0) 
+			{
+				int uvIndex = uvIndices[i];
+				vec2 uv = collectedUVs[uvIndex-1];
+				meshUVs     .push_back(uv);
+			}
+
 			int normalIndex = normalIndices[i];
 
 			// .OBJ vertex indexing starts at 1 not 0, so substract 1 to each index
 			vec3 vertex = collectedVertices[vertexIndex-1];
-			vec2 uv = collectedUVs[uvIndex-1];
+			// UVS old place
 			vec3 normal = collectedNormals[normalIndex-1];
 
 			meshVertices.push_back(vertex);
-			meshUVs     .push_back(uv);
+			// UVs old place
 			meshNormals .push_back(normal);
 		}
 

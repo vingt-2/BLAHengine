@@ -73,14 +73,18 @@ bool MeshRenderer::GenerateArrays()
 	GLuint TextureID  = glGetUniformLocation(shaderID, "myTextureSampler");
 
 	// Load it into a VBO
+
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, meshVertices.size() * sizeof(vec3), &(meshVertices[0]), GL_STATIC_DRAW);
 
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, meshUVs.size() * sizeof(vec2), &(meshUVs[0]), GL_STATIC_DRAW);
 
+	if( !meshUVs.empty() )
+	{
+		glGenBuffers(1, &uvbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glBufferData(GL_ARRAY_BUFFER, meshUVs.size() * sizeof(vec2), &(meshUVs[0]), GL_STATIC_DRAW);
+	}
 	return true;
 }
 

@@ -42,10 +42,13 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 	//LockFramerate(100.f); // Lock framerate 100 hz
 }
 
+
+// ACHTUNG ! Executed each frame, WTF ? investigate.
+// Oh BTW, it's broken
 void GLFWCALL OnResize(int xRes,int yRes)
 {
 	render.Resize(xRes,yRes);
-	cout << "IM AM RESSIIIZZZING \n";
+//	cout << "IM AM RESSIIIZZZING \n";
 }
 
 int main( void )
@@ -54,13 +57,20 @@ int main( void )
 
 	Renderer render;
 	render.InitializeContext("BLAengine - OBJViewer");
+
 	GameObject* object_1 = new GameObject();
+	GameObject* object_2 = new GameObject();
 
 
-	OBJImport::ImportMesh("../models/cube.obj",object_1->meshRenderer);
+	OBJImport::ImportMesh("../models/dude.obj",object_1->meshRenderer);
 	object_1->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	object_1->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_1->meshRenderer);
+
+	OBJImport::ImportMesh("../models/cube.obj",object_2->meshRenderer);
+	object_2->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
+	object_2->meshRenderer->GenerateArrays();
+	render.renderVector.push_back(object_2->meshRenderer);
 
 
 
@@ -81,12 +91,12 @@ int main( void )
 
 		glfwSetWindowSizeCallback(OnResize);
 
-		objectPosition.x = objectPosition.x + 0.01f;
+		//objectPosition.x = objectPosition.x + 0.01f;
 
 		object_1->SetPosition(objectPosition);
 
 
-		UpdateAcceleration();
+	//	UpdateAcceleration();
 
 		render.Update();
 
