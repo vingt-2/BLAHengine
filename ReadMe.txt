@@ -2,14 +2,12 @@
     BLAengine - OBJ viewer
 ========================================================================
 
-This code repository entitled BLAengine will hold the different evolutions of a basic realtime 3d rendering applications.
+This code repository holds the current evolution of a simple realtime 3d rendering application.
 The goal of this project is to help me gain proficiency in openGL programming:
 
-The current target is to have a perfectly functionnal OBJ viewer to test GSLS shaders on actual objects.
-I would then like to provide a gui to load multiple object in the scene, and to be able to place them in the world.
-Then i would add physics, collisions ... And continue like that until I get bored.
+The current target is to have a perfectly functionnal model viewer to test GSLS shaders on actual objects. I would then like to provide a gui to load multiple objects in the scene, and tools to place them in the world. Then I would add physics, collisions ... And eventually reach a point where I could actually use it as a game Engine for small projects.
 
-To be able to compile and run this code sample, you must provide the required headers to Graphics.h
-You will currently need GLEW to enable OpenGL 3.0, and the headers for glfw (similar to GL toolkit utility).
+To compile and run this code sample, make sur you provide your programmign environmment with the required headers used in Graphics.h
+You will currently need the headers for GLEW to enable OpenGL 3.0 and extensions, and GLFW (a GL toolkit utility), and finally the GLM headers (a 3D algebra Library).
 
-Cheers.
+Cheers !
