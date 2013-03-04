@@ -1,11 +1,13 @@
+#pragma once
+
 #include "OBJImport.h"
+#include "Camera.h"
 #include "std.h"
 class Renderer
 {
 public:
+	Camera* mainCamera;
 
-	mat4 projectionMatrix;
-	mat4 viewMatrix;
 	vector<MeshRenderer*> renderVector;
 
 	void Resize(int xRes,int yRes);

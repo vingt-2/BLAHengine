@@ -58,16 +58,6 @@ bool Renderer::InitializeContext(char* windowTitle )
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-	projectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-
-	viewMatrix =
-		glm::lookAt
-		(	
-			vec3(0,0,-1000), // Camera is at (10,0,0), in World Space
-			vec3(0,0,0), // and looks at the origin
-			vec3(0,1,0) // Head is up (set to 0,-1,0 to look upside-down)
-		);
-
 	return true;
 }
 
@@ -80,7 +70,7 @@ bool Renderer::Update()
 
 	for(i = 0; i < renderVector.size();i++)
 	{
-		renderVector[i]->Draw(projectionMatrix,viewMatrix);
+		renderVector[i]->Draw(mainCamera->projection,mainCamera->view);
 	}
 
 	glfwSwapBuffers();

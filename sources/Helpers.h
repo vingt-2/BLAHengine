@@ -1,3 +1,5 @@
+#pragma once
+
 /*Author: Vingt-2
 	BLAengine
 */

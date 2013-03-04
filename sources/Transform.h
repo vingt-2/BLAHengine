@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Graphics.h"
 #include "std.h"
 class Transform

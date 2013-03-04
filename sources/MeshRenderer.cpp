@@ -39,6 +39,8 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 		);
 
 	// Enable UVs
+	if( !meshUVs.empty() )
+	{
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glVertexAttribPointer(
@@ -49,12 +51,15 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 		0,                   // stride
 		(void*)0             // array buffer offset
 		);
-
+	}
 	// Draw
 	glDrawArrays(GL_LINES, 0, meshVertices.size() );
 
 	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
+	if( !meshUVs.empty() )
+	{
+		glDisableVertexAttribArray(1);
+	}
 	return true;
 }
 
@@ -73,6 +78,8 @@ bool MeshRenderer::GenerateArrays()
 	GLuint TextureID  = glGetUniformLocation(shaderID, "myTextureSampler");
 
 	// Load it into a VBO
+
+	cout << "bla";
 
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);

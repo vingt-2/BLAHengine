@@ -24,8 +24,15 @@ void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 
 void UpdateAcceleration()
 {
-	tangentAcceleration.x = 0.1f;
-	tangentAcceleration.y = 0.05f;
+	tangentAcceleration.x = 0.f;
+	tangentAcceleration.y = 0.f;
+
+	if( (glfwGetKey( GLFW_KEY_UP  ) == GLFW_PRESS))
+		tangentAcceleration.y = 0.01f;
+	if( (glfwGetKey( GLFW_KEY_DOWN  ) == GLFW_PRESS))
+		tangentAcceleration.y = -0.01f;
+
+
 }
 void LockFramerate(GLfloat hzFrequency)
 {
@@ -61,33 +68,50 @@ int main( void )
 	GameObject* object_1 = new GameObject();
 	GameObject* object_2 = new GameObject();
 
-
+	
 	OBJImport::ImportMesh("../models/dude.obj",object_1->meshRenderer);
 	object_1->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	object_1->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_1->meshRenderer);
-
+	
+	
 	OBJImport::ImportMesh("../models/cube.obj",object_2->meshRenderer);
 	object_2->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 
+	object_1->SetScale(vec3(0.01));
+	object_2->SetScale(vec3(0.45));
 
+	Camera* mainCamera = new Camera();
+
+	mainCamera->SetProjection(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f));
+
+	mainCamera->SetView(
+		glm::lookAt
+		(	
+			vec3(0,2,-10), // Camera is at (10,0,0), in World Space
+			vec3(0,0,0), // and looks at the origin
+			vec3(0,1,0) // Head is up (set to 0,-1,0 to look upside-down)
+		));
+	
+	render.mainCamera = mainCamera;
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
 	int fps = 0;
 
-	vec3 objectPosition = vec3(0);
+	vec3 objectPosition = vec3(2,0,0);
 
 	while(!terminationRequest)
 	{
 		Idle(&fps_frames,&fps_time,&fps);
-
+		
 		stringstream title;
 		title << "BLAengine: " << fps << " fps";
 		title.str();
 		glfwSetWindowTitle(title.str().data());
+		
 
 		glfwSetWindowSizeCallback(OnResize);
 
@@ -96,12 +120,13 @@ int main( void )
 		object_1->SetPosition(objectPosition);
 
 
-	//	UpdateAcceleration();
+		UpdateAcceleration();
 
 		render.Update();
 
-		render.viewMatrix = glm::rotate(render.viewMatrix,tangentAcceleration.x,vec3(0,1,0));
-		render.viewMatrix = glm::rotate(render.viewMatrix,tangentAcceleration.y,vec3(0,0,1));
+		mainCamera->transform.position = vec3(0,0,tangentAcceleration.y);
+		mainCamera->UpdateView();
+	//	render.viewMatrix = glm::rotate(render.viewMatrix,tangentAcceleration.y,vec3(0,0,1));
 
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
