@@ -7,8 +7,7 @@ public:
 MeshRenderer* meshRenderer;
 Transform transform;
 
-void SetScale(vec3 scale);
-void SetPosition(vec3 position);
+void Update();
 
 
 GameObject(void);

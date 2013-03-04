@@ -3,7 +3,7 @@
 
 GameObject::GameObject(void)
 {
-	meshRenderer = new MeshRenderer();
+	meshRenderer = new MeshRenderer(&(transform.modelTransform));
 }
 
 
@@ -11,14 +11,7 @@ GameObject::~GameObject(void)
 {
 }
 
-void GameObject::SetPosition(vec3 position)
+void GameObject::Update()
 {
-	this->transform.position = position;
-	this->meshRenderer->meshTransform = this->transform.GetTransform();
-}
-
-void GameObject::SetScale(vec3 scale)
-{
-	this->transform.scale = scale;
-	this->meshRenderer->meshTransform = this->transform.GetTransform();
+	transform.UpdateTransform();
 }

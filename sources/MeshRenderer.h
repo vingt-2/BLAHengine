@@ -14,7 +14,7 @@ public:
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
 
-	mat4 meshTransform;
+	mat4* modelTransform;
 
 	GLuint vertexArrayID;
 	GLuint vertexbuffer;
@@ -23,7 +23,7 @@ public:
 	GLuint shaderID;
 	GLuint matrixID;
 
-	MeshRenderer(void);
+	MeshRenderer(mat4* modelTransform);
 	~MeshRenderer(void);
 
 	bool Draw(mat4 projection, mat4 view);

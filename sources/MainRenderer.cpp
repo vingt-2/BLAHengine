@@ -80,8 +80,8 @@ int main( void )
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 
-	object_1->SetScale(vec3(0.01));
-	object_2->SetScale(vec3(0.45));
+	object_1->transform.scale	= vec3(0.01);
+	object_2->transform.scale	= vec3(0.45);
 
 	Camera* mainCamera = new Camera();
 
@@ -117,17 +117,20 @@ int main( void )
 
 		//objectPosition.x = objectPosition.x + 0.01f;
 
-		object_1->SetPosition(objectPosition);
+		objectPosition = objectPosition + vec3(tangentAcceleration,0);
 
+		object_1->transform.position = (objectPosition);
+
+		object_1->Update();
+		object_2->Update();
 
 		UpdateAcceleration();
 
-		render.Update();
-
-		mainCamera->transform.position = vec3(0,0,tangentAcceleration.y);
+		mainCamera->transform.position =  mainCamera->transform.position + vec3(0,0,tangentAcceleration.y);
+		mainCamera->Update();
 		mainCamera->UpdateView();
-	//	render.viewMatrix = glm::rotate(render.viewMatrix,tangentAcceleration.y,vec3(0,0,1));
 
+		render.Update();
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
 		{

@@ -19,11 +19,10 @@ void Camera::SetProjection(mat4 projection)
 
 void Camera::SetView(mat4 view)
 {
-	this->view = view;
+	transform.modelTransform = view;
 }
 
 void Camera::UpdateView()
 {
-	mat4 currentTransform = this->transform.GetTransform();
-	this->view = view * currentTransform;
+	this->view = transform.modelTransform;
 }
