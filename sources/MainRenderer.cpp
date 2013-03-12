@@ -104,14 +104,14 @@ int main( void )
 	GameObject* object_2 = new GameObject();
 
 	
-	OBJImport::ImportMesh("../models/dude.obj",object_1->meshRenderer);
-	object_1->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
+	OBJImport::ImportMesh("../resources/models/dude.obj",object_1->meshRenderer);
+	object_1->meshRenderer->LoadShaders( "../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl" );
 	object_1->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_1->meshRenderer);
 	
 	
-	OBJImport::ImportMesh("../models/bla.obj",object_2->meshRenderer);
-	object_2->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
+	OBJImport::ImportMesh("../resources/models/bla.obj",object_2->meshRenderer);
+	object_2->meshRenderer->LoadShaders( "../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl" );
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 
@@ -122,6 +122,8 @@ int main( void )
 
 	mainCamera->SetProjection(glm::perspective(45.f, 4.0f / 3.0f, 0.1f, 100.0f));
 
+
+	// Set view, places camera at (0,-2,-10) to look at vec3(0)
 	mainCamera->SetView(
 		glm::lookAt
 		(	
