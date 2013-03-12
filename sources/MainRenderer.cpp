@@ -7,6 +7,8 @@ vec2 tangentAcceleration;
 vec2 mousePosition;
 Renderer render;
 
+int previousX = 0, previousY = 0;
+
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
 	GLfloat d_time;
@@ -22,18 +24,52 @@ void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 	}
 }
 
-void UpdateAcceleration()
+void SimpleControls(GameObject* camera)
 {
 	tangentAcceleration.x = 0.f;
 	tangentAcceleration.y = 0.f;
+	int coeff = 1;
 
-	if( (glfwGetKey( GLFW_KEY_UP  ) == GLFW_PRESS))
-		tangentAcceleration.y = 0.01f;
-	if( (glfwGetKey( GLFW_KEY_DOWN  ) == GLFW_PRESS))
-		tangentAcceleration.y = -0.01f;
+	if ( (glfwGetKey(GLFW_KEY_LSHIFT) == GLFW_PRESS))
+		coeff = 5;
 
+	if( (glfwGetKey( 'W'  ) == GLFW_PRESS) )
+		tangentAcceleration.y = coeff * 0.1f;
+	if( (glfwGetKey( 'S'  ) == GLFW_PRESS) )
+		tangentAcceleration.y = coeff * -0.1f;
 
+	if( (glfwGetKey( 'A'  ) == GLFW_PRESS) )
+		tangentAcceleration.x = coeff * 0.1f;
+	if( (glfwGetKey( 'D'  ) == GLFW_PRESS) )
+		tangentAcceleration.x = coeff * -0.1f;
+
+	if( (glfwGetMouseButton( 1 ) == GLFW_PRESS) )
+	{
+		int x, y;
+		glfwGetMousePos(&x,&y);
+
+		if(x - previousX > 0)
+		{
+			camera->transform.rotation.y += 0.5f;
+		}
+		else if(x - previousX < 0)
+		{
+			camera->transform.rotation.y -= 0.5f;
+		}
+		if(y - previousY > 0)
+		{
+			camera->transform.rotation.x += 0.5f;
+		}
+		else if(y - previousY < 0)
+		{
+			camera->transform.rotation.x -= 0.5f;
+		}
+		previousX = x;
+		previousY = y;
+	}
 }
+
+
 void LockFramerate(GLfloat hzFrequency)
 {
 	GLfloat deltaTime = glfwGetTime();
@@ -55,7 +91,6 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 void GLFWCALL OnResize(int xRes,int yRes)
 {
 	render.Resize(xRes,yRes);
-//	cout << "IM AM RESSIIIZZZING \n";
 }
 
 int main( void )
@@ -75,24 +110,24 @@ int main( void )
 	render.renderVector.push_back(object_1->meshRenderer);
 	
 	
-	OBJImport::ImportMesh("../models/cube.obj",object_2->meshRenderer);
+	OBJImport::ImportMesh("../models/bla.obj",object_2->meshRenderer);
 	object_2->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 
 	object_1->transform.scale	= vec3(0.01);
-	object_2->transform.scale	= vec3(0.45);
+	object_2->transform.scale	= vec3(0.4);
 
 	Camera* mainCamera = new Camera();
 
-	mainCamera->SetProjection(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f));
+	mainCamera->SetProjection(glm::perspective(45.f, 4.0f / 3.0f, 0.1f, 100.0f));
 
 	mainCamera->SetView(
 		glm::lookAt
 		(	
-			vec3(0,2,-10), // Camera is at (10,0,0), in World Space
-			vec3(0,0,0), // and looks at the origin
-			vec3(0,1,0) // Head is up (set to 0,-1,0 to look upside-down)
+			vec3(0,2,-10), 
+			vec3(0,0,0),
+			vec3(0,1,0)
 		));
 	
 	render.mainCamera = mainCamera;
@@ -100,8 +135,6 @@ int main( void )
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
 	int fps = 0;
-
-	vec3 objectPosition = vec3(2,0,0);
 
 	while(!terminationRequest)
 	{
@@ -112,24 +145,19 @@ int main( void )
 		title.str();
 		glfwSetWindowTitle(title.str().data());
 		
-
 		glfwSetWindowSizeCallback(OnResize);
 
-		//objectPosition.x = objectPosition.x + 0.01f;
+		object_1->transform.position = vec3(2,0,0);
+		object_2->transform.position = vec3(-2,0,0);
 
-		objectPosition = objectPosition + vec3(tangentAcceleration,0);
-
-		object_1->transform.position = (objectPosition);
 
 		object_1->Update();
 		object_2->Update();
 
-		UpdateAcceleration();
+		SimpleControls(mainCamera);
 
-		mainCamera->transform.position =  mainCamera->transform.position + vec3(0,0,tangentAcceleration.y);
+		mainCamera->transform.position = mainCamera->transform.position + vec3(tangentAcceleration.x,0,tangentAcceleration.y);
 		mainCamera->Update();
-		mainCamera->UpdateView();
-
 		render.Update();
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )

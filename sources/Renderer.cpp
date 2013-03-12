@@ -70,7 +70,7 @@ bool Renderer::Update()
 
 	for(i = 0; i < renderVector.size();i++)
 	{
-		renderVector[i]->Draw(mainCamera->projection,mainCamera->view);
+		renderVector[i]->Draw(mainCamera->projection,*(mainCamera->view));
 	}
 
 	glfwSwapBuffers();

@@ -11,6 +11,7 @@ public:
 
 	mat4 modelTransform;
 
+
 	void UpdateTransform();
 
 	Transform(void);

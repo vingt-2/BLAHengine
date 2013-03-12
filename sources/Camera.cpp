@@ -2,9 +2,9 @@
 
 
 Camera::Camera():
-	projection(mat4(1)),
-	view(mat4(1))
+	projection(mat4(1))
 {
+	view = &(transform.modelTransform);
 }
 
 
@@ -20,9 +20,4 @@ void Camera::SetProjection(mat4 projection)
 void Camera::SetView(mat4 view)
 {
 	transform.modelTransform = view;
-}
-
-void Camera::UpdateView()
-{
-	this->view = transform.modelTransform;
 }
