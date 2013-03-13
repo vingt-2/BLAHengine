@@ -5,13 +5,9 @@
 
 vec2 tangentAcceleration;
 vec2 mousePosition;
-
-int screnWidth = 1680;
-int screenHeight = 1050;
-
 int previousX = 0, previousY = 0;
 
-	Renderer render;
+Renderer render;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -109,14 +105,14 @@ int main( void )
 	render.screenSize.x = 1000;
 	render.screenSize.y = 1000;
 	
-	OBJImport::ImportMesh("../models/dude.obj",object_1->meshRenderer);
-	object_1->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
+	OBJImport::ImportMesh("../resources/models/dude.obj",object_1->meshRenderer);
+	object_1->meshRenderer->LoadShaders( "../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl" );
 	object_1->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_1->meshRenderer);
 	
 	
-	OBJImport::ImportMesh("../models/bla.obj",object_2->meshRenderer);
-	object_2->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
+	OBJImport::ImportMesh("../resources/models/bla.obj",object_2->meshRenderer);
+	object_2->meshRenderer->LoadShaders( "../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl" );
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 
@@ -125,6 +121,7 @@ int main( void )
 
 	Camera* mainCamera = new Camera();
 
+	// Set view, places camera at (0,-2,-10) to look at vec3(0)
 	mainCamera->SetView(
 		glm::lookAt
 		(	
