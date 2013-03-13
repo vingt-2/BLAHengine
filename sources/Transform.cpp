@@ -15,7 +15,7 @@ Transform::~Transform(void)
 void Transform::UpdateTransform()
 {
 
-	// Yeah this whole "Delta change" thing is just bullshit, i'll fix that later wouldya ?
+	// This is the worst implementation on earth, GAH need to be well written once and for all
 
 	mat4 scaling = glm::scale(mat4(1), 1.f + (scale - previousScale));
 	mat4 translate = glm::translate(mat4(1),position - previousPosition);

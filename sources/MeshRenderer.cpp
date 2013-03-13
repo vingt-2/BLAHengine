@@ -54,7 +54,8 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 		);
 	}
 	// Draw
-	glDrawArrays(0x0003, 0, meshVertices.size() );
+	//glDrawArrays(0x0003, 0, meshVertices.size() );
+	glDrawArrays(GL_TRIANGLES,0, meshVertices.size() );
 
 	glDisableVertexAttribArray(0);
 	if( !meshUVs.empty() )

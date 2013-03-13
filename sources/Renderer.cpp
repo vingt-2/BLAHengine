@@ -3,6 +3,7 @@
 
 Renderer::Renderer(void)
 {
+	screenSize = vec2(1000,1000);
 }
 
 
@@ -12,6 +13,7 @@ Renderer::~Renderer(void)
 
 bool Renderer::InitializeContext(char* windowTitle )
 {
+
 	// Initialise GLFW
 	if( !glfwInit() )
 	{
@@ -25,7 +27,8 @@ bool Renderer::InitializeContext(char* windowTitle )
 	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	if( !glfwOpenWindow( 1024, 768, 0,0,0,0, 32,0, GLFW_WINDOW ) )
+
+	if( !glfwOpenWindow(screenSize.x, screenSize.y, 0,0,0,0, 32,0, GLFW_WINDOW ) )
 	{
 		fprintf( stderr, "Failed to open GLFW window.\n" );
 		glfwTerminate();
@@ -44,7 +47,7 @@ bool Renderer::InitializeContext(char* windowTitle )
 
 	// Ensure we can capture the escape key being pressed below
 	glfwEnable( GLFW_STICKY_KEYS );
-	glfwSetMousePos(1024/2, 768/2);
+	glfwSetMousePos(screenSize.x/2, screenSize.y/2);
 
 	//Neat grey background
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -64,11 +67,13 @@ bool Renderer::InitializeContext(char* windowTitle )
 bool Renderer::Update()
 {
 	// Clear the screen
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	int i;
+	mainCamera->SetProjection(glm::frustum(-0.0001f*screenSize.x, 0.0001f*screenSize.x,-0.0001f*screenSize.y, 0.0001f*screenSize.y, 0.1f, 100.0f));
+	glViewport(0,0,screenSize.x,screenSize.y);
 
-	for(i = 0; i < renderVector.size();i++)
+	for(int i = 0; i < renderVector.size();i++)
 	{
 		renderVector[i]->Draw(mainCamera->projection,*(mainCamera->view));
 	}
@@ -81,4 +86,6 @@ bool Renderer::Update()
 void Renderer::Resize(int xRes,int yRes)
 {
 	 glfwSetWindowSize(xRes,yRes);
+	 screenSize.x = xRes;
+	 screenSize.y = yRes;
 }

@@ -5,9 +5,13 @@
 
 vec2 tangentAcceleration;
 vec2 mousePosition;
-Renderer render;
+
+int screnWidth = 1680;
+int screenHeight = 1050;
 
 int previousX = 0, previousY = 0;
+
+	Renderer render;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -97,12 +101,13 @@ int main( void )
 {
 	bool terminationRequest = false;
 
-	Renderer render;
 	render.InitializeContext("BLAengine - OBJViewer");
 
 	GameObject* object_1 = new GameObject();
 	GameObject* object_2 = new GameObject();
 
+	render.screenSize.x = 1000;
+	render.screenSize.y = 1000;
 	
 	OBJImport::ImportMesh("../models/dude.obj",object_1->meshRenderer);
 	object_1->meshRenderer->LoadShaders( "../shaders/Vertex_Shader.glsl", "../shaders/Fragment_Shader.glsl" );
@@ -119,8 +124,6 @@ int main( void )
 	object_2->transform.scale	= vec3(0.4);
 
 	Camera* mainCamera = new Camera();
-
-	mainCamera->SetProjection(glm::perspective(45.f, 4.0f / 3.0f, 0.1f, 100.0f));
 
 	mainCamera->SetView(
 		glm::lookAt

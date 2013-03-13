@@ -11,6 +11,8 @@ public:
 
 	vector<MeshRenderer*> renderVector;
 
+	vec2 screenSize;
+
 	void Resize(int xRes,int yRes);
 	bool InitializeContext(char* windowTitle);
 	bool Update();
