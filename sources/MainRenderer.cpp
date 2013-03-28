@@ -50,19 +50,19 @@ void SimpleControls(GameObject* camera)
 
 		if(x - previousX > 0)
 		{
-			camera->transform.rotation.y += 0.01f;
+			camera->transform->rotation.y += 0.01f;
 		}
 		else if(x - previousX < 0)
 		{
-			camera->transform.rotation.y -= 0.01f;
+			camera->transform->rotation.y -= 0.01f;
 		}
 		if(y - previousY > 0)
 		{
-			camera->transform.rotation.x += 0.01f;
+			camera->transform->rotation.x += 0.01f;
 		}
 		else if(y - previousY < 0)
 		{
-			camera->transform.rotation.x -= 0.01f;
+			camera->transform->rotation.x -= 0.01f;
 		}
 		previousX = x;
 		previousY = y;
@@ -116,8 +116,8 @@ int main( void )
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 
-	object_1->transform.scale	= vec3(0.01);
-	object_2->transform.scale	= vec3(0.4);
+	object_1->transform->scale	= vec3(0.01);
+	object_2->transform->scale	= vec3(0.4);
 
 	Camera* mainCamera = new Camera();
 	
@@ -138,10 +138,10 @@ int main( void )
 		
 		glfwSetWindowSizeCallback(OnResize);
 
-		object_1->transform.position = vec3(10,0,0);
-		object_2->transform.position = vec3(-2,0,0);
+		object_1->rigidBody->SetPosition(vec3(10,0,0));
+		object_2->rigidBody->SetPosition(vec3(-2,0,0));
 
-		object_1->transform.rotation.y += 0.01f;
+		object_1->transform->rotation.y += 0.01f;
 
 
 		object_1->Update();
@@ -149,9 +149,7 @@ int main( void )
 
 		SimpleControls(mainCamera);
 
-		cout << (mainCamera->transform.transformMatrix * vec4(1,0,0,0)).x *180/3.14 << " " << (mainCamera->transform.transformMatrix  * vec4(1,0,0,0)).y * 180/3.14 << " " << (mainCamera->transform.transformMatrix  * vec4(1,0,0,0)).z *180/3.14 << "\n";
-
-		mainCamera->transform.position = mainCamera->transform.position + mainCamera->transform.LocalDirectionToWorld(vec3(tangentAcceleration.x,0,tangentAcceleration.y));
+		mainCamera->transform->position = mainCamera->transform->position + mainCamera->transform->LocalDirectionToWorld(vec3(tangentAcceleration.x,0,tangentAcceleration.y));
 		mainCamera->Update();
 		render.Update();
 

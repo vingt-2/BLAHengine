@@ -1,11 +1,12 @@
 #pragma once
 #include "MeshRenderer.h"
-#include "Transform.h"
+#include "RigidBody.h"
 class GameObject
 {
 public:
 MeshRenderer* meshRenderer;
-Transform transform;
+Transform* transform;
+RigidBody* rigidBody;
 
 void Update();
 

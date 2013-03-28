@@ -3,7 +3,9 @@
 
 GameObject::GameObject(void)
 {
-	meshRenderer = new MeshRenderer(&(transform.transformMatrix));
+	transform = new Transform();
+	rigidBody = new RigidBody(transform);
+	meshRenderer = new MeshRenderer(&(transform->transformMatrix));
 }
 
 
@@ -13,5 +15,6 @@ GameObject::~GameObject(void)
 
 void GameObject::Update()
 {
-	transform.UpdateTransform();
+	rigidBody->Update();
+	transform->UpdateTransform();
 }
