@@ -16,6 +16,8 @@ public:
 
 	vec3 LocalDirectionToWorld(vec3 direction);
 	vec3 LocalPositionToWorld(vec3 position);
+	vec3 WorldlDirectionToLocal(vec3 direction);
+	vec3 WorldlPositionToLocal(vec3 position);
 
 
 	Transform(void);

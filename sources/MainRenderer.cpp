@@ -151,7 +151,7 @@ int main( void )
 
 		cout << (mainCamera->transform.transformMatrix * vec4(1,0,0,0)).x *180/3.14 << " " << (mainCamera->transform.transformMatrix  * vec4(1,0,0,0)).y * 180/3.14 << " " << (mainCamera->transform.transformMatrix  * vec4(1,0,0,0)).z *180/3.14 << "\n";
 
-		mainCamera->transform.position = mainCamera->transform.position + vec3(tangentAcceleration.x,0,tangentAcceleration.y);
+		mainCamera->transform.position = mainCamera->transform.position + mainCamera->transform.LocalDirectionToWorld(vec3(tangentAcceleration.x,0,tangentAcceleration.y));
 		mainCamera->Update();
 		render.Update();
 

@@ -56,3 +56,19 @@ vec3 Transform::LocalPositionToWorld(vec3 direction)
 	hDirection = transformMatrix * hDirection;
 	return vec3(hDirection.x,hDirection.y,hDirection.z);
 }
+
+vec3 Transform::WorldlDirectionToLocal(vec3 direction)
+{
+	vec4 hDirection = vec4(direction.x,direction.y,direction.z,0.f);
+	hDirection = inverse(transformMatrix) * hDirection;
+	return vec3(hDirection.x,hDirection.y,hDirection.z);
+}
+
+vec3 Transform::WorldlPositionToLocal(vec3 direction)
+{
+	vec4 hDirection = vec4(direction.x,direction.y,direction.z,1.f);
+	hDirection = inverse(transformMatrix) * hDirection;
+	return vec3(hDirection.x,hDirection.y,hDirection.z);
+}
+
+
