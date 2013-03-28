@@ -26,46 +26,58 @@ void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 
 void SimpleControls(GameObject* camera)
 {
-	tangentAcceleration.x = 0.f;
-	tangentAcceleration.y = 0.f;
-	int coeff = 1;
+	vec3 tangentForce = vec3(0);
+	int coeff = 5;
 
-	if ( (glfwGetKey(GLFW_KEY_LSHIFT) == GLFW_PRESS))
-		coeff = 5;
+	if ( (glfwGetKey(GLFW_KEY_LSHIFT) == GLFW_PRESS) )
+		coeff = 25;
 
 	if( (glfwGetKey( 'W'  ) == GLFW_PRESS) )
-		tangentAcceleration.y = coeff * 0.1f;
+		tangentForce.z = 1;
 	if( (glfwGetKey( 'S'  ) == GLFW_PRESS) )
-		tangentAcceleration.y = coeff * -0.1f;
+		tangentForce.z = -1;
 
 	if( (glfwGetKey( 'A'  ) == GLFW_PRESS) )
-		tangentAcceleration.x = coeff * 0.1f;
+		tangentForce.x = 1;
 	if( (glfwGetKey( 'D'  ) == GLFW_PRESS) )
-		tangentAcceleration.x = coeff * -0.1f;
+		tangentForce.x = -1;
+
+	vec3 cameraForce = camera->transform->LocalDirectionToWorld(tangentForce);
+	cameraForce *= coeff;
+
+	camera->rigidBody->PushForce(cameraForce,RigidBody::Force::Impulse);
+
 
 	if( (glfwGetMouseButton( 1 ) == GLFW_PRESS) )
 	{
 		int x, y;
 		glfwGetMousePos(&x,&y);
 
+		vec3 cameraTorque = vec3(0);
+
 		if(x - previousX > 0)
 		{
-			camera->transform->rotation.y += 0.01f;
+			cameraTorque.y = 1.f;
 		}
 		else if(x - previousX < 0)
 		{
-			camera->transform->rotation.y -= 0.01f;
+			cameraTorque.y = -1.f;
 		}
 		if(y - previousY > 0)
 		{
-			camera->transform->rotation.x += 0.01f;
+			cameraTorque.x = 1.f;
 		}
 		else if(y - previousY < 0)
 		{
-			camera->transform->rotation.x -= 0.01f;
+			cameraTorque.x = -1.f;
 		}
 		previousX = x;
 		previousY = y;
+
+		cameraTorque *= 5;
+
+		camera->rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
+
 	}
 }
 
@@ -119,6 +131,10 @@ int main( void )
 	object_1->transform->scale	= vec3(0.01);
 	object_2->transform->scale	= vec3(0.4);
 
+	object_1->rigidBody->SetPosition(vec3(10,0,0));
+	object_2->rigidBody->SetPosition(vec3(-2,0,0));
+
+
 	Camera* mainCamera = new Camera();
 	
 	render.mainCamera = mainCamera;
@@ -138,18 +154,13 @@ int main( void )
 		
 		glfwSetWindowSizeCallback(OnResize);
 
-		object_1->rigidBody->SetPosition(vec3(10,0,0));
-		object_2->rigidBody->SetPosition(vec3(-2,0,0));
-
-		object_1->transform->rotation.y += 0.01f;
-
-
 		object_1->Update();
 		object_2->Update();
 
+		object_1->rigidBody->PushTorque(vec3(0,1,0),RigidBody::Force::Impulse);
+
 		SimpleControls(mainCamera);
 
-		mainCamera->transform->position = mainCamera->transform->position + mainCamera->transform->LocalDirectionToWorld(vec3(tangentAcceleration.x,0,tangentAcceleration.y));
 		mainCamera->Update();
 		render.Update();
 

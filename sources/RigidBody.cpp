@@ -11,7 +11,9 @@ RigidBody::RigidBody(Transform* p):
 	previousRotation(vec3(0))
 {
 	transform = p;
-	deltaTime = 1/60;
+	deltaTime = 1.f/60.f;
+	frictionCoefficient = 0.05f;
+	mass = 1.f;
 }
 
 
@@ -28,14 +30,16 @@ void RigidBody::Update()
 	UpdateTransform();
 }
 
-void RigidBody::PushForce(Force forcePushed)
+void RigidBody::PushForce(vec3 vector,RigidBody::Force::ForceMode mode)
 {
+	Force forcePushed(vector, mode);
 	forcesVector.push_back(forcePushed);
 }
 
-void RigidBody::PushTorque(Force torquePushed)
+void RigidBody::PushTorque(vec3 vector,RigidBody::Force::ForceMode mode)
 {
-	forcesVector.push_back(torquePushed);
+	Force torquePushed(vector, mode);
+	torqueVector.push_back(torquePushed);
 }
 
 void RigidBody::SetPosition(vec3 newPosition)
@@ -70,8 +74,8 @@ void RigidBody::UpdateAcceleration()
 	forcesVector = newVector;
 	acceleration = newAcceleration;
 
-	newAcceleration = vec3(0);
-	newVector = vector<Force>();
+	vec3 newAngular = vec3(0);
+	vector<Force> newAngularVector = vector<Force>();
 
 	for(uint i=0; i<torqueVector.size(); i++)
 	{
@@ -79,16 +83,16 @@ void RigidBody::UpdateAcceleration()
 
 		if(currentForce.mode == Force::ForceMode::Impulse)
 		{
-			newAcceleration += currentForce.force / mass;
+			newAngular += currentForce.force / mass;
 		}
 		else if(currentForce.mode == Force::ForceMode::Constant)
 		{
 			newAcceleration += currentForce.force / mass;
-			newVector.push_back(currentForce);
+			newAngularVector.push_back(currentForce);
 		}
 	}
-	torqueVector = newVector;
-	angularAcceleration = newAcceleration;
+	torqueVector = newAngularVector;
+	angularAcceleration = newAngular;
 }
 
 void RigidBody::UpdateVelocity()
@@ -102,7 +106,7 @@ void RigidBody::UpdateVelocity()
 	previousRotation = rotation;
 
 	velocity = newVelocity;
-	angularVelocity = newVelocity;
+	angularVelocity = newAngularVelocity;
 }
 
 void RigidBody::UpdateTransform()
@@ -112,5 +116,5 @@ void RigidBody::UpdateTransform()
 	transform->position += velocity + acceleration*deltaTime*deltaTime + friction;
 
 	vec3 angularFriction = -frictionCoefficient*angularVelocity;
-	transform->rotation += angularVelocity + angularAcceleration*deltaTime*deltaTime + friction;
+	transform->rotation += angularVelocity + angularAcceleration*deltaTime*deltaTime + angularFriction;
 }

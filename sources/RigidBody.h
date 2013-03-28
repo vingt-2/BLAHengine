@@ -37,8 +37,8 @@ public:
 
 	void Update();
 
-	void PushForce(Force force);
-	void PushTorque(Force torque);
+	void PushForce(vec3 vector,RigidBody::Force::ForceMode mode);
+	void PushTorque(vec3 vector,RigidBody::Force::ForceMode mode);
 	void SetPosition(vec3 Position);
 
 	RigidBody(Transform* parent);

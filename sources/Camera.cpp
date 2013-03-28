@@ -27,6 +27,7 @@ void Camera::UpdateView()
 
 void Camera::Update()
 {
+	rigidBody->Update();
 	transform->UpdateTransform();
 	UpdateView();
 }
