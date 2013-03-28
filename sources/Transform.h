@@ -9,17 +9,19 @@ public:
 	vec3 rotation;
 	vec3 scale;
 
-	mat4 modelTransform;
+	mat4 transformMatrix;
 
 
 	void UpdateTransform();
+
+	vec3 LocalDirectionToWorld(vec3 direction);
+	vec3 LocalPositionToWorld(vec3 position);
+
 
 	Transform(void);
 	~Transform(void);
 
 private:
-	vec3 previousPosition;
-	vec3 previousRotation;
-	vec3 previousScale;
+
 };
 

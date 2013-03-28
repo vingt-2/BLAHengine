@@ -3,7 +3,7 @@
 
 GameObject::GameObject(void)
 {
-	meshRenderer = new MeshRenderer(&(transform.modelTransform));
+	meshRenderer = new MeshRenderer(&(transform.transformMatrix));
 }
 
 

@@ -50,19 +50,19 @@ void SimpleControls(GameObject* camera)
 
 		if(x - previousX > 0)
 		{
-			camera->transform.rotation.y += 0.5f;
+			camera->transform.rotation.y += 0.01f;
 		}
 		else if(x - previousX < 0)
 		{
-			camera->transform.rotation.y -= 0.5f;
+			camera->transform.rotation.y -= 0.01f;
 		}
 		if(y - previousY > 0)
 		{
-			camera->transform.rotation.x += 0.5f;
+			camera->transform.rotation.x += 0.01f;
 		}
 		else if(y - previousY < 0)
 		{
-			camera->transform.rotation.x -= 0.5f;
+			camera->transform.rotation.x -= 0.01f;
 		}
 		previousX = x;
 		previousY = y;
@@ -120,15 +120,6 @@ int main( void )
 	object_2->transform.scale	= vec3(0.4);
 
 	Camera* mainCamera = new Camera();
-
-	// Set view, places camera at (0,-2,-10) to look at vec3(0)
-	mainCamera->SetView(
-		glm::lookAt
-		(	
-			vec3(0,2,-10), 
-			vec3(0,0,0),
-			vec3(0,1,0)
-		));
 	
 	render.mainCamera = mainCamera;
 
@@ -147,14 +138,18 @@ int main( void )
 		
 		glfwSetWindowSizeCallback(OnResize);
 
-		object_1->transform.position = vec3(2,0,0);
+		object_1->transform.position = vec3(10,0,0);
 		object_2->transform.position = vec3(-2,0,0);
+
+		object_1->transform.rotation.y += 0.01f;
 
 
 		object_1->Update();
 		object_2->Update();
 
 		SimpleControls(mainCamera);
+
+		cout << (mainCamera->transform.transformMatrix * vec4(1,0,0,0)).x *180/3.14 << " " << (mainCamera->transform.transformMatrix  * vec4(1,0,0,0)).y * 180/3.14 << " " << (mainCamera->transform.transformMatrix  * vec4(1,0,0,0)).z *180/3.14 << "\n";
 
 		mainCamera->transform.position = mainCamera->transform.position + vec3(tangentAcceleration.x,0,tangentAcceleration.y);
 		mainCamera->Update();

@@ -23,8 +23,7 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 {
 	glUseProgram(shaderID);
 
-	mat4 MVP = projection * view * (*modelTransform);
-
+	mat4 MVP = projection * view *  (*modelTransform);
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	// Enable vertices

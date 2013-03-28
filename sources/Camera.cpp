@@ -4,7 +4,7 @@
 Camera::Camera():
 	projection(mat4(1))
 {
-	view = &(transform.modelTransform);
+	UpdateView();
 }
 
 
@@ -17,7 +17,16 @@ void Camera::SetProjection(mat4 projection)
 	this->projection = projection;
 }
 
-void Camera::SetView(mat4 view)
+void Camera::UpdateView()
 {
-	transform.modelTransform = view;
+	viewTransform.position = -transform.position;
+	viewTransform.rotation = 1.f * transform.rotation;
+	viewTransform.UpdateTransform();
+	viewTransform.transformMatrix = inverse(viewTransform.transformMatrix);
+}
+
+void Camera::Update()
+{
+	transform.UpdateTransform();
+	UpdateView();
 }

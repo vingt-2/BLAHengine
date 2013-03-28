@@ -5,10 +5,12 @@ class Camera : public GameObject
 public:
 
 	mat4 projection;
-	mat4* view;
+	Transform viewTransform;
 	
 	void SetProjection(mat4 projection);
-	void SetView(mat4 view);
+	void UpdateView();
+
+	void Update();
 
 	Camera();
 	~Camera(void);
