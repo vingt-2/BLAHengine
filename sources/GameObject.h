@@ -4,9 +4,7 @@
 class GameObject
 {
 public:
-MeshRenderer* meshRenderer;
 Transform* transform;
-RigidBody* rigidBody;
 
 void Update();
 

@@ -10,8 +10,9 @@ RigidBody::RigidBody(Transform* p):
 	previousPosition(vec3(0)),
 	previousRotation(vec3(0))
 {
+	int extern fps;
 	transform = p;
-	deltaTime = 1.f/60.f;
+	deltaTime = 1.f/fps;
 	frictionCoefficient = 0.05f;
 	mass = 1.f;
 }

@@ -1,9 +1,10 @@
 #include "MeshRenderer.h"
 
-MeshRenderer::MeshRenderer(mat4* modelTransform):
+MeshRenderer::MeshRenderer(Transform* modelTransform):
 		meshVertices(vector<vec3>()),
 		meshNormals	(vector<vec3>()),
-		meshUVs		(vector<vec2>())
+		meshUVs		(vector<vec2>()),
+		renderType  (GL_TRIANGLES)
 {
 	this->modelTransform = modelTransform;
 }
@@ -23,7 +24,7 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 {
 	glUseProgram(shaderID);
 
-	mat4 MVP = projection * view *  (*modelTransform);
+	mat4 MVP = projection * view * (modelTransform->transformMatrix);
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	// Enable vertices
@@ -54,7 +55,7 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 	}
 	// Draw
 	//glDrawArrays(0x0003, 0, meshVertices.size() );
-	glDrawArrays(GL_TRIANGLES,0, meshVertices.size() );
+	glDrawArrays(renderType,0, meshVertices.size() );
 
 	glDisableVertexAttribArray(0);
 	if( !meshUVs.empty() )

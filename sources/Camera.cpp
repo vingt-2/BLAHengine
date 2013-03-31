@@ -4,6 +4,7 @@
 Camera::Camera():
 	projection(mat4(1))
 {
+	rigidBody = new RigidBody(transform);
 	UpdateView();
 }
 
@@ -27,7 +28,7 @@ void Camera::UpdateView()
 
 void Camera::Update()
 {
+	GameObject::Update();
 	rigidBody->Update();
-	transform->UpdateTransform();
 	UpdateView();
 }

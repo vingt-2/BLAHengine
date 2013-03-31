@@ -3,7 +3,7 @@
 
 Renderer::Renderer(void)
 {
-	screenSize = vec2(1000,1000);
+	screenSize = vec2(1280,1024);
 }
 
 
@@ -52,9 +52,6 @@ bool Renderer::InitializeContext(char* windowTitle )
 	//Neat grey background
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
 
-	// Enable z-buf test
-	glEnable(GL_DEPTH_TEST);
-
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
 
@@ -66,16 +63,30 @@ bool Renderer::InitializeContext(char* windowTitle )
 
 bool Renderer::Update()
 {
-	// Clear the screen
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	//Adjust Projection and ViewPort.
 	mainCamera->SetProjection(glm::frustum(-0.0001f*screenSize.x, 0.0001f*screenSize.x,-0.0001f*screenSize.y, 0.0001f*screenSize.y, 0.1f, 100.0f));
 	glViewport(0,0,screenSize.x,screenSize.y);
 
+	// Clear buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+	//Render Scene Objects.
+
+	// Enable Z-Buffer test.
+	glEnable(GL_DEPTH_TEST);
 	for(int i = 0; i < renderVector.size();i++)
 	{
 		renderVector[i]->Draw(mainCamera->projection,mainCamera->viewTransform.transformMatrix);
+	}
+
+	// Render Debug gizmos
+
+	// Disable Z-Buffer test for debug gizmos.
+	glDisable(GL_DEPTH_TEST);
+	for(int i = 0; i < debug->gizmoVector.size();i++)
+	{
+		debug->gizmoVector[i]->Draw(mainCamera->projection,mainCamera->viewTransform.transformMatrix);
 	}
 
 	glfwSwapBuffers();

@@ -2,11 +2,14 @@
 #include "std.h"
 #include "Graphics.h"
 #include "Renderer.h"
+#include "GameChar.h"
 
 vec2 tangentAcceleration;
 vec2 mousePosition;
 int previousX = 0, previousY = 0;
+int fps = 60;
 
+Debug debug;
 Renderer render;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
@@ -24,7 +27,7 @@ void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 	}
 }
 
-void SimpleControls(GameObject* camera)
+void SimpleControls(Camera* camera)
 {
 	vec3 tangentForce = vec3(0);
 	int coeff = 5;
@@ -79,6 +82,10 @@ void SimpleControls(GameObject* camera)
 		camera->rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
 
 	}
+	else
+	{
+		
+	}
 }
 
 
@@ -110,9 +117,10 @@ int main( void )
 	bool terminationRequest = false;
 
 	render.InitializeContext("BLAengine - OBJViewer");
+	render.debug = &debug;
 
-	GameObject* object_1 = new GameObject();
-	GameObject* object_2 = new GameObject();
+	GameChar* object_1 = new GameChar();
+	GameChar* object_2 = new GameChar();
 
 	render.screenSize.x = 1000;
 	render.screenSize.y = 1000;
@@ -134,14 +142,16 @@ int main( void )
 	object_1->rigidBody->SetPosition(vec3(10,0,0));
 	object_2->rigidBody->SetPosition(vec3(-2,0,0));
 
+	object_1->rigidBody->frictionCoefficient = 0.01f;
 
 	Camera* mainCamera = new Camera();
+	mainCamera->rigidBody->SetPosition(vec3(0,0,-10));
 	
 	render.mainCamera = mainCamera;
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
-	int fps = 0;
+	debug.DrawRay(object_1->transform->position,object_2->transform->position);
 
 	while(!terminationRequest)
 	{
@@ -157,7 +167,8 @@ int main( void )
 		object_1->Update();
 		object_2->Update();
 
-		object_1->rigidBody->PushTorque(vec3(0,1,0),RigidBody::Force::Impulse);
+		if( (glfwGetKey( 'F'  ) == GLFW_PRESS) )
+			object_1->rigidBody->PushTorque(vec3(0,10,0),RigidBody::Force::Impulse);
 
 		SimpleControls(mainCamera);
 

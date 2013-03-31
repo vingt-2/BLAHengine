@@ -3,6 +3,7 @@
 class Camera : public GameObject
 {
 public:
+	RigidBody* rigidBody;
 
 	mat4 projection;
 	Transform viewTransform;

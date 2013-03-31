@@ -3,6 +3,7 @@
 #include "Graphics.h"
 #include "std.h"
 #include "Vector3f.h"
+#include "Transform.h"
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
@@ -14,7 +15,7 @@ public:
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
 
-	mat4* modelTransform;
+	Transform* modelTransform;
 
 	GLuint vertexArrayID;
 	GLuint vertexbuffer;
@@ -22,8 +23,9 @@ public:
 	GLuint textureID;
 	GLuint shaderID;
 	GLuint matrixID;
+	GLuint renderType;
 
-	MeshRenderer(mat4* modelTransform);
+	MeshRenderer(Transform* modelTransform);
 	~MeshRenderer(void);
 
 	bool Draw(mat4 projection, mat4 view);

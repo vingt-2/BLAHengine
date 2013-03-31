@@ -3,11 +3,13 @@
 #include "OBJImport.h"
 #include "Camera.h"
 #include "std.h"
+#include "Debug.h"
 
 class Renderer
 {
 public:
 	Camera* mainCamera;
+	Debug* debug;
 
 	vector<MeshRenderer*> renderVector;
 
