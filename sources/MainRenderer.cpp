@@ -151,7 +151,7 @@ int main( void )
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
-	debug.DrawRay(object_1->transform->position,object_2->transform->position);
+	debug.DrawRay(object_1->transform->position,object_2->transform->position,vec3(0.f,0.5f,0.f));
 
 	while(!terminationRequest)
 	{

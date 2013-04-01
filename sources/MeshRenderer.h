@@ -11,15 +11,15 @@
 class MeshRenderer
 {
 public:
+	Transform* modelTransform;
+
 	vector<vec3> meshVertices;
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
 
-	Transform* modelTransform;
+	vector<vector<GLuint>> vboIDVector;
 
 	GLuint vertexArrayID;
-	GLuint vertexbuffer;
-	GLuint uvbuffer;
 	GLuint textureID;
 	GLuint shaderID;
 	GLuint matrixID;
@@ -30,6 +30,8 @@ public:
 
 	bool Draw(mat4 projection, mat4 view);
 	bool GenerateArrays();
+	void GenerateVertexArray(GLuint attributeNumber);
+	void GenerateUVArray(GLuint attributeNumber);
 	bool CleanUp();
 
 	GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path);

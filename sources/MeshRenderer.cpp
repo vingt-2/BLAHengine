@@ -1,12 +1,17 @@
 #include "MeshRenderer.h"
 
 MeshRenderer::MeshRenderer(Transform* modelTransform):
-		meshVertices(vector<vec3>()),
-		meshNormals	(vector<vec3>()),
-		meshUVs		(vector<vec2>()),
-		renderType  (GL_TRIANGLES)
+	meshVertices(vector<vec3>()),
+	meshNormals	(vector<vec3>()),
+	meshUVs		(vector<vec2>()),
+	vboIDVector	(vector<vector<GLuint>>()),
+	renderType  (GL_TRIANGLES)
 {
 	this->modelTransform = modelTransform;
+
+	//Generate a VAO for the mesh Renderer.
+	glGenVertexArrays(1, &vertexArrayID);
+
 }
 
 
@@ -27,78 +32,91 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 	mat4 MVP = projection * view * (modelTransform->transformMatrix);
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);
 
-	// Enable vertices
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-
-	// Enable UVs
-	if( !meshUVs.empty() )
+	for(uint vboIndex = 0; vboIndex < vboIDVector.size() ; vboIndex++)
 	{
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glVertexAttribPointer(
-		1,                   // attribute
-		2,                   // size
-		GL_FLOAT,            // type
-		GL_FALSE,            // normalized?
-		0,                   // stride
-		(void*)0             // array buffer offset
+		glEnableVertexAttribArray(vboIndex);
+		glBindBuffer(GL_ARRAY_BUFFER, vboIDVector.at(vboIndex)[0]);
+		glVertexAttribPointer
+		(
+			vboIDVector.at(vboIndex)[1],				// attribute
+			3,											// size
+			GL_FLOAT,									// type
+			GL_FALSE,									// normalized?
+			0,											// stride
+			(void*)0									// array buffer offset
 		);
 	}
-	// Draw
-	//glDrawArrays(0x0003, 0, meshVertices.size() );
-	glDrawArrays(renderType,0, meshVertices.size() );
 
-	glDisableVertexAttribArray(0);
-	if( !meshUVs.empty() )
+	// Draw VAO
+	glDrawArrays(renderType,0, meshVertices.size());
+
+	for(uint vboIndex = 0; vboIndex < vboIDVector.size() ; vboIndex++)
 	{
-		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(vboIndex);
 	}
 	return true;
 }
 
-bool MeshRenderer::GenerateArrays()
+void MeshRenderer::GenerateVertexArray(GLuint attributeNumber)
 {
-	glGenVertexArrays(1, &vertexArrayID);
 	glBindVertexArray(vertexArrayID);
 
 	//TO BE RELOCATED WHEN WE SUPPORT TEXTURES
 
 	// Load the texture
 	//GLuint Texture = loadDDS("uvmap.DDS");
-	GLuint Texture = 0;
+	//GLuint Texture = 0;
 
 	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID  = glGetUniformLocation(shaderID, "myTextureSampler");
+	//GLuint TextureID  = glGetUniformLocation(shaderID, "myTextureSampler");
 
 	// Load it into a VBO
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, meshVertices.size() * sizeof(vec3), &(meshVertices[0]), GL_STATIC_DRAW);
 
+	vector<GLuint> vertexVBO = vector<GLuint>();
+	vertexVBO.push_back(vertexBuffer);
+	vertexVBO.push_back(attributeNumber);
 
+	vboIDVector.push_back(vertexVBO);
+}
+
+void MeshRenderer::GenerateUVArray(GLuint attributeNumber)
+{
+	GLuint uvBuffer;
+	glGenBuffers(1, &uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, meshUVs.size() * sizeof(vec2), &(meshUVs[0]), GL_STATIC_DRAW);
+
+	vector<GLuint> uvsVBO = vector<GLuint>();
+	uvsVBO.push_back(uvBuffer);
+	uvsVBO.push_back(attributeNumber);
+
+	vboIDVector.push_back(uvsVBO);
+}
+
+bool MeshRenderer::GenerateArrays()
+{
+	GenerateVertexArray(0);
 	if( !meshUVs.empty() )
 	{
-		glGenBuffers(1, &uvbuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glBufferData(GL_ARRAY_BUFFER, meshUVs.size() * sizeof(vec2), &(meshUVs[0]), GL_STATIC_DRAW);
+		GenerateUVArray(1);
 	}
 	return true;
 }
 
 bool MeshRenderer::CleanUp()
 {
-	// Cleanup VBO and shader
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &uvbuffer);
+	// Cleanup VBO
+	for(uint vboIndex = 0; vboIndex < vboIDVector.size() ; vboIndex++)
+	{
+		glDeleteBuffers(1,&((vboIDVector.at(vboIndex))[0]));
+	}
+	vboIDVector.clear();
+
+	//Cleanup Shader
 	glDeleteProgram(shaderID);
 	glDeleteTextures(1, &textureID);
 	glDeleteVertexArrays(1, &vertexArrayID);
@@ -204,197 +222,197 @@ GLuint MeshRenderer::LoadShaders(const char * vertex_file_path,const char * frag
 GLuint MeshRenderer::loadBMP_custom(const char * imagepath)
 {
 
-        printf("Reading image %s\n", imagepath);
+	printf("Reading image %s\n", imagepath);
 
-        // Data read from the header of the BMP file
-        unsigned char header[54];
-        unsigned int dataPos;
-        unsigned int imageSize;
-        unsigned int width, height;
-        // Actual RGB data
-        unsigned char * data;
+	// Data read from the header of the BMP file
+	unsigned char header[54];
+	unsigned int dataPos;
+	unsigned int imageSize;
+	unsigned int width, height;
+	// Actual RGB data
+	unsigned char * data;
 
-        // Open the file
-        FILE * file = fopen(imagepath,"rb");
-        if (!file) 
-		{
-			printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", imagepath);
-			return 0;
-		}
+	// Open the file
+	FILE * file = fopen(imagepath,"rb");
+	if (!file) 
+	{
+		printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", imagepath);
+		return 0;
+	}
 
-        // Read the header, i.e. the 54 first bytes
+	// Read the header, i.e. the 54 first bytes
 
-        // If less than 54 byes are read, problem
-        if ( fread(header, 1, 54, file)!=54 ){
-                printf("Not a correct BMP file\n");
-                return 0;
-        }
-        // A BMP files always begins with "BM"
-        if ( header[0]!='B' || header[1]!='M' ){
-                printf("Not a correct BMP file\n");
-                return 0;
-        }
-        // Make sure this is a 24bpp file
-        if ( *(int*)&(header[0x1E])!=0  )         {printf("Not a correct BMP file\n");    return 0;}
-        if ( *(int*)&(header[0x1C])!=24 )         {printf("Not a correct BMP file\n");    return 0;}
+	// If less than 54 byes are read, problem
+	if ( fread(header, 1, 54, file)!=54 ){
+		printf("Not a correct BMP file\n");
+		return 0;
+	}
+	// A BMP files always begins with "BM"
+	if ( header[0]!='B' || header[1]!='M' ){
+		printf("Not a correct BMP file\n");
+		return 0;
+	}
+	// Make sure this is a 24bpp file
+	if ( *(int*)&(header[0x1E])!=0  )         {printf("Not a correct BMP file\n");    return 0;}
+	if ( *(int*)&(header[0x1C])!=24 )         {printf("Not a correct BMP file\n");    return 0;}
 
-        // Read the information about the image
-        dataPos    = *(int*)&(header[0x0A]);
-        imageSize  = *(int*)&(header[0x22]);
-        width      = *(int*)&(header[0x12]);
-        height     = *(int*)&(header[0x16]);
+	// Read the information about the image
+	dataPos    = *(int*)&(header[0x0A]);
+	imageSize  = *(int*)&(header[0x22]);
+	width      = *(int*)&(header[0x12]);
+	height     = *(int*)&(header[0x16]);
 
-        // Some BMP files are misformatted, guess missing information
-        if (imageSize==0)    imageSize=width*height*3; // 3 : one byte for each Red, Green and Blue component
-        if (dataPos==0)      dataPos=54; // The BMP header is done that way
+	// Some BMP files are misformatted, guess missing information
+	if (imageSize==0)    imageSize=width*height*3; // 3 : one byte for each Red, Green and Blue component
+	if (dataPos==0)      dataPos=54; // The BMP header is done that way
 
-        // Create a buffer
-        data = new unsigned char [imageSize];
+	// Create a buffer
+	data = new unsigned char [imageSize];
 
-        // Read the actual data from the file into the buffer
-        fread(data,1,imageSize,file);
+	// Read the actual data from the file into the buffer
+	fread(data,1,imageSize,file);
 
-        // Everything is in memory now, the file wan be closed
-        fclose (file);
+	// Everything is in memory now, the file wan be closed
+	fclose (file);
 
-        // Create one OpenGL texture
-        GLuint texID;
-        glGenTextures(1, &texID);
-       
-        // "Bind" the newly created texture : all future texture functions will modify this texture
-        glBindTexture(GL_TEXTURE_2D, texID);
+	// Create one OpenGL texture
+	GLuint texID;
+	glGenTextures(1, &texID);
 
-        // Give the image to OpenGL
-        glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, texID);
 
-        // OpenGL has now copied the data. Free our own version
-        delete [] data;
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
 
-        // Poor filtering, or ...
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// OpenGL has now copied the data. Free our own version
+	delete [] data;
 
-        // ... nice trilinear filtering.
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
+	// Poor filtering, or ...
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        // Return the ID of the texture we just created
-		this->textureID = texID;
-        return texID;
+	// ... nice trilinear filtering.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// Return the ID of the texture we just created
+	this->textureID = texID;
+	return texID;
 }
 
 GLuint MeshRenderer::loadTGA_glfw(const char * imagepath)
 {
 
-        // Create one OpenGL texture
-        GLuint texID;
-        glGenTextures(1, &texID);
+	// Create one OpenGL texture
+	GLuint texID;
+	glGenTextures(1, &texID);
 
-        // "Bind" the newly created texture : all future texture functions will modify this texture
-        glBindTexture(GL_TEXTURE_2D, texID);
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, texID);
 
-        // Read the file, call glTexImage2D with the right parameters
-        glfwLoadTexture2D(imagepath, 0);
+	// Read the file, call glTexImage2D with the right parameters
+	glfwLoadTexture2D(imagepath, 0);
 
-        // Nice trilinear filtering.
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
+	// Nice trilinear filtering.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
-        // Return the ID of the texture we just created
-		this->textureID = texID;
+	// Return the ID of the texture we just created
+	this->textureID = texID;
 
-        return texID;
+	return texID;
 }
 
 GLuint MeshRenderer::loadDDS(const char * imagepath)
 {
 
-        unsigned char header[124];
+	unsigned char header[124];
 
-        FILE *fp;
- 
-        /* try to open the file */
-        fp = fopen(imagepath, "rb");
-        if (fp == NULL)
-                return 0;
-   
-        /* verify the type of file */
-        char filecode[4];
-        fread(filecode, 1, 4, fp);
-        if (strncmp(filecode, "DDS ", 4) != 0) {
-                fclose(fp);
-                return 0;
-        }
-       
-        /* get the surface desc */
-        fread(&header, 124, 1, fp);
+	FILE *fp;
 
-        unsigned int height      = *(unsigned int*)&(header[8 ]);
-        unsigned int width           = *(unsigned int*)&(header[12]);
-        unsigned int linearSize  = *(unsigned int*)&(header[16]);
-        unsigned int mipMapCount = *(unsigned int*)&(header[24]);
-        unsigned int fourCC      = *(unsigned int*)&(header[80]);
+	/* try to open the file */
+	fp = fopen(imagepath, "rb");
+	if (fp == NULL)
+		return 0;
 
- 
-        unsigned char * buffer;
-        unsigned int bufsize;
-        /* how big is it going to be including all mipmaps? */
-        bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-        buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
-        fread(buffer, 1, bufsize, fp);
-        /* close the file pointer */
-        fclose(fp);
+	/* verify the type of file */
+	char filecode[4];
+	fread(filecode, 1, 4, fp);
+	if (strncmp(filecode, "DDS ", 4) != 0) {
+		fclose(fp);
+		return 0;
+	}
 
-        unsigned int components  = (fourCC == FOURCC_DXT1) ? 3 : 4;
-        unsigned int format;
-        switch(fourCC)
-        {
-        case FOURCC_DXT1:
-                format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-                break;
-        case FOURCC_DXT3:
-                format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-                break;
-        case FOURCC_DXT5:
-                format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-                break;
-        default:
-                free(buffer);
-                return 0;
-        }
+	/* get the surface desc */
+	fread(&header, 124, 1, fp);
 
-        // Create one OpenGL texture
-        GLuint texID;
-        glGenTextures(1, &texID);
+	unsigned int height      = *(unsigned int*)&(header[8 ]);
+	unsigned int width           = *(unsigned int*)&(header[12]);
+	unsigned int linearSize  = *(unsigned int*)&(header[16]);
+	unsigned int mipMapCount = *(unsigned int*)&(header[24]);
+	unsigned int fourCC      = *(unsigned int*)&(header[80]);
 
-        // "Bind" the newly created texture : all future texture functions will modify this texture
-        glBindTexture(GL_TEXTURE_2D, texID);
-        glPixelStorei(GL_UNPACK_ALIGNMENT,1);  
-       
-        unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-        unsigned int offset = 0;
 
-        /* load the mipmaps */
-        for (unsigned int level = 0; level < mipMapCount && (width || height); ++level)
-        {
-                unsigned int size = ((width+3)/4)*((height+3)/4)*blockSize;
-                glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,  
-                        0, size, buffer + offset);
-         
-                offset += size;
-                width  /= 2;
-                height /= 2;
-        }
+	unsigned char * buffer;
+	unsigned int bufsize;
+	/* how big is it going to be including all mipmaps? */
+	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
+	buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
+	fread(buffer, 1, bufsize, fp);
+	/* close the file pointer */
+	fclose(fp);
 
-        free(buffer);
+	unsigned int components  = (fourCC == FOURCC_DXT1) ? 3 : 4;
+	unsigned int format;
+	switch(fourCC)
+	{
+	case FOURCC_DXT1:
+		format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		break;
+	case FOURCC_DXT3:
+		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		break;
+	case FOURCC_DXT5:
+		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		break;
+	default:
+		free(buffer);
+		return 0;
+	}
 
-		this->textureID = texID;
+	// Create one OpenGL texture
+	GLuint texID;
+	glGenTextures(1, &texID);
 
-        return texID;
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);  
+
+	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+	unsigned int offset = 0;
+
+	/* load the mipmaps */
+	for (unsigned int level = 0; level < mipMapCount && (width || height); ++level)
+	{
+		unsigned int size = ((width+3)/4)*((height+3)/4)*blockSize;
+		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,  
+			0, size, buffer + offset);
+
+		offset += size;
+		width  /= 2;
+		height /= 2;
+	}
+
+	free(buffer);
+
+	this->textureID = texID;
+
+	return texID;
 }
