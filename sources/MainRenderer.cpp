@@ -10,9 +10,9 @@ vec2 mousePosition;
 int previousX = 0, previousY = 0;
 int fps = 60;
 
-Debug debug;
-Renderer render;
-SharedRessources sharedRessources;
+Debug* debug;
+Renderer* render;
+SharedRessources* sharedRessources;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -86,7 +86,7 @@ void SimpleControls(Camera* camera)
 	}
 	else
 	{
-		
+
 	}
 }
 
@@ -111,39 +111,43 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 // Oh BTW, it's broken
 void GLFWCALL OnResize(int xRes,int yRes)
 {
-	render.Resize(xRes,yRes);
+	render->Resize(xRes,yRes);
 }
 
 int main( void )
 {
+	render				= new Renderer();
+	sharedRessources	= new SharedRessources();
+	debug				= new Debug();
+
 	bool terminationRequest = false;
 
 	// OPENGL CONTEXT UP AND RUNNING
-	render.InitializeContext("BLAengine - OBJViewer");
+	render->InitializeContext("BLAengine - OBJViewer");
 
 	// NOW WE CAN LOAD SOME RESSOURCES
-	sharedRessources.LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
-	sharedRessources.LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
+	sharedRessources->LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
+	sharedRessources->LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
 
 
-	render.debug = &debug;
+	render->debug = debug;
 
 	GameChar* object_1 = new GameChar();
 	GameChar* object_2 = new GameChar();
 
-	render.screenSize.x = 1000;
-	render.screenSize.y = 1000;
-	
+	render->screenSize.x = 1000;
+	render->screenSize.y = 1000;
+
 	OBJImport::ImportMesh("../resources/models/dude.obj",object_1->meshRenderer);
 	object_1->meshRenderer->AssignMaterial("defaultShader");
 	object_1->meshRenderer->GenerateArrays();
-	render.renderVector.push_back(object_1->meshRenderer);
-	
-	
+	render->renderVector.push_back(object_1->meshRenderer);
+
+
 	OBJImport::ImportMesh("../resources/models/bla.obj",object_2->meshRenderer);
 	object_2->meshRenderer->AssignMaterial("defaultShader");
 	object_2->meshRenderer->GenerateArrays();
-	render.renderVector.push_back(object_2->meshRenderer);
+	render->renderVector.push_back(object_2->meshRenderer);
 
 	object_1->transform->scale	= vec3(0.01);
 	object_2->transform->scale	= vec3(0.4);
@@ -155,22 +159,22 @@ int main( void )
 
 	Camera* mainCamera = new Camera();
 	mainCamera->rigidBody->SetPosition(vec3(0,0,-10));
-	
-	render.mainCamera = mainCamera;
+
+	render->mainCamera = mainCamera;
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
-	debug.DrawRay(object_1->transform->position,object_2->transform->position,vec3(0.f,0.5f,0.f));
+	debug->DrawRay(object_1->transform->position,object_2->transform->position,vec3(0.f,0.5f,0.f));
 
 	while(!terminationRequest)
 	{
 		Idle(&fps_frames,&fps_time,&fps);
-		
+
 		stringstream title;
 		title << "BLAengine: " << fps << " fps";
 		title.str();
 		glfwSetWindowTitle(title.str().data());
-		
+
 		glfwSetWindowSizeCallback(OnResize);
 
 		object_1->Update();
@@ -182,7 +186,7 @@ int main( void )
 		SimpleControls(mainCamera);
 
 		mainCamera->Update();
-		render.Update();
+		render->Update();
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
 		{

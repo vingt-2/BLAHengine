@@ -126,8 +126,8 @@ bool MeshRenderer::CleanUp()
 
 bool MeshRenderer::AssignMaterial(const char* name)
 {
-	extern SharedRessources sharedRessources;
-	programID = sharedRessources.GetMaterial(name);
+	extern SharedRessources* sharedRessources;
+	programID = sharedRessources->GetMaterial(name);
 	if(programID != 0)
 	{
 		matrixID = glGetUniformLocation(programID, "MVP");
@@ -138,8 +138,8 @@ bool MeshRenderer::AssignMaterial(const char* name)
 
 bool MeshRenderer::AssignTexture(const char* name)
 {
-	extern SharedRessources sharedRessources;
-	programID = sharedRessources.GetMaterial(name);
+	extern SharedRessources* sharedRessources;
+	programID = sharedRessources->GetMaterial(name);
 	if(programID != 0)
 	{
 		return true;

@@ -19,7 +19,7 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 	vector<vec3> meshVertices;
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
-	cout << "Importing " << filename << ".\n";
+	cout << "[OBJ_MESH] Importing " << filename << ".\n";
 	ifstream fileStream (filename,ifstream::in);
 	string lineInFile = " ";
 

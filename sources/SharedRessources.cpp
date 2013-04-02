@@ -46,8 +46,10 @@ bool SharedRessources::LoadMaterial(const char * name, const char * vertex_file_
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 
+	printf("[SHADER]: \"%s\"\n", name);
+
 	// Compile Vertex Shader
-	printf("Compiling shader : %s\n", vertex_file_path);
+	printf("[SHADER] Compiling shader : \"%s\"\n", vertex_file_path);
 	char const * VertexSourcePointer = VertexShaderCode.c_str();
 	glShaderSource(VertexShaderID, 1, &VertexSourcePointer , NULL);
 	glCompileShader(VertexShaderID);
@@ -63,7 +65,7 @@ bool SharedRessources::LoadMaterial(const char * name, const char * vertex_file_
 	}
 
 	// Compile Fragment Shader
-	printf("Compiling shader : %s\n", fragment_file_path);
+	printf("[SHADER] Compiling shader : %s\n", fragment_file_path);
 	char const * FragmentSourcePointer = FragmentShaderCode.c_str();
 	glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer , NULL);
 	glCompileShader(FragmentShaderID);
@@ -80,7 +82,7 @@ bool SharedRessources::LoadMaterial(const char * name, const char * vertex_file_
 
 
 	// Link the program
-	printf("Linking program \"%s\"\n",name);
+	printf("[SHADER] Linking program \"%s\"\n",name);
 	GLuint ProgramID = glCreateProgram();
 	glAttachShader(ProgramID, VertexShaderID);
 	glAttachShader(ProgramID, FragmentShaderID);
@@ -302,7 +304,6 @@ bool SharedRessources::loadDDS(const char * name, const char * imagepath)
 }
 
 // No difference between getting a texture ID and a shader program ID yet, may come later, who knows
-
 GLuint SharedRessources::GetMaterial(const char* name)
 {
 	return ressourceTable[name];
