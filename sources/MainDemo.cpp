@@ -164,7 +164,6 @@ int main( void )
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
-	debug->DrawRay(object_1->transform->position,object_2->transform->position,vec3(0.f,0.5f,0.f));
 
 	while(!terminationRequest)
 	{
@@ -187,6 +186,8 @@ int main( void )
 
 		mainCamera->Update();
 		render->Update();
+
+		debug->DrawRay(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec3(0.f,0.5f,0.f));
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
 		{

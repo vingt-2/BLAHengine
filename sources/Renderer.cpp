@@ -88,6 +88,7 @@ bool Renderer::Update()
 	{
 		debug->gizmoVector[i]->Draw(mainCamera->projection,mainCamera->viewTransform.transformMatrix);
 	}
+	debug->gizmoVector.clear();
 
 	glfwSwapBuffers();
 
