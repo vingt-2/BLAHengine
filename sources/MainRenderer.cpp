@@ -3,6 +3,7 @@
 #include "Graphics.h"
 #include "Renderer.h"
 #include "GameChar.h"
+#include "SharedRessources.h"
 
 vec2 tangentAcceleration;
 vec2 mousePosition;
@@ -11,6 +12,7 @@ int fps = 60;
 
 Debug debug;
 Renderer render;
+SharedRessources sharedRessources;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -116,7 +118,14 @@ int main( void )
 {
 	bool terminationRequest = false;
 
+	// OPENGL CONTEXT UP AND RUNNING
 	render.InitializeContext("BLAengine - OBJViewer");
+
+	// NOW WE CAN LOAD SOME RESSOURCES
+	sharedRessources.LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
+	sharedRessources.LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
+
+
 	render.debug = &debug;
 
 	GameChar* object_1 = new GameChar();
@@ -126,13 +135,13 @@ int main( void )
 	render.screenSize.y = 1000;
 	
 	OBJImport::ImportMesh("../resources/models/dude.obj",object_1->meshRenderer);
-	object_1->meshRenderer->LoadShaders( "../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl" );
+	object_1->meshRenderer->AssignMaterial("defaultShader");
 	object_1->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_1->meshRenderer);
 	
 	
 	OBJImport::ImportMesh("../resources/models/bla.obj",object_2->meshRenderer);
-	object_2->meshRenderer->LoadShaders( "../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl" );
+	object_2->meshRenderer->AssignMaterial("defaultShader");
 	object_2->meshRenderer->GenerateArrays();
 	render.renderVector.push_back(object_2->meshRenderer);
 

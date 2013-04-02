@@ -17,7 +17,7 @@ void Debug::DrawRay(vec3 origin,vec3 destination,vec3 color)
 	MeshRenderer* ray = new MeshRenderer(transform);
 	ray->meshVertices.push_back(origin);
 	ray->meshVertices.push_back(destination);
-	ray->LoadShaders( "../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl" );
+	ray->AssignMaterial("debugShader");
 	ray->GenerateArrays();
 
 	vec3 colors[2] = { color, color };
@@ -29,7 +29,7 @@ void Debug::DrawRay(vec3 origin,vec3 destination,vec3 color)
 
 	vector<GLuint> colorVBO = vector<GLuint>();
 	colorVBO.push_back(colorBuffer);
-	colorVBO.push_back(1);
+	colorVBO.push_back(2);
 
 	ray->vboIDVector.push_back(colorVBO);
 	ray->renderType = GL_LINES;
