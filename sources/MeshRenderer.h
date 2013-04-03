@@ -15,7 +15,7 @@ public:
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
 
-	vector<vector<GLuint>> vboIDVector;
+	vector<pair<GLuint,GLuint>> vboIDVector;
 
 	GLuint vertexArrayID;
 	GLuint textureID;

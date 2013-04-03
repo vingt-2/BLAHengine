@@ -8,11 +8,18 @@ public:
 	vector<MeshRenderer*> gizmoVector;
 
 
-	void DrawRay(vec3 origin,vec3 destination,vec3 Color);
-	void DrawLine(vec3 origin,vec3 direction,vec3 length,vec3 Color);
+	void DrawLine(const vec3 origin,const vec3 destination);
+	void DrawLine(const vec3 origin,const vec3 destination,const vec3 color);
+	void DrawRay(const vec3 origin,const vec3 direction,const GLfloat length, const vec3 color);
+	void DrawRay(const vec3 origin,const vec3 direction,const GLfloat length);
 
 
 	Debug(void);
 	~Debug(void);
+
+private:
+
+	void GenerateLineMesh(const vec3 origin,const vec3 destination,const vec3* colorBuffer);
+
 };
 

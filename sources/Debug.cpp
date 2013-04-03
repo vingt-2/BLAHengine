@@ -11,7 +11,33 @@ Debug::~Debug(void)
 {
 }
 
-void Debug::DrawRay(vec3 origin,vec3 destination,vec3 color)
+void Debug::DrawLine(const vec3 origin,const vec3 destination)
+{
+	vec3 colorBuffer[2] = {origin,destination};
+	GenerateLineMesh(origin,destination,colorBuffer);
+}
+
+void Debug::DrawLine(const vec3 origin,const vec3 destination,const vec3 color)
+{
+	vec3 colorBuffer[2] = {color,color};
+	GenerateLineMesh(origin,destination,colorBuffer);
+}
+
+void Debug::DrawRay(const vec3 origin,const vec3 direction,const GLfloat length,const vec3 color)
+{
+	vec3 destination = origin + length* direction;
+	vec3 colorBuffer[2] = {color,color};
+	GenerateLineMesh(origin,destination,colorBuffer);
+}
+
+void Debug::DrawRay(const vec3 origin,const vec3 direction,const GLfloat length)
+{
+	vec3 destination = origin + length* direction;
+	vec3 colorBuffer[2] = {origin,destination};
+	GenerateLineMesh(origin,destination,colorBuffer);
+}
+
+void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const vec3* colorBuffer)
 {
 	Transform* transform = new Transform();
 	MeshRenderer* ray = new MeshRenderer(transform);
@@ -20,18 +46,17 @@ void Debug::DrawRay(vec3 origin,vec3 destination,vec3 color)
 	ray->AssignMaterial("debugShader");
 	ray->GenerateArrays();
 
-	vec3 colors[2] = { color, color };
+	glBindVertexArray(ray->vertexArrayID);
 
-	GLuint colorBuffer;
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 1, &colors[0], GL_STATIC_DRAW);
+	GLuint colorBufferID;
+	glGenBuffers(1, &colorBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBufferID);
+	glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(vec3), colorBuffer, GL_STATIC_DRAW);
 
-	vector<GLuint> colorVBO = vector<GLuint>();
-	colorVBO.push_back(colorBuffer);
-	colorVBO.push_back(2);
+	pair<GLuint,GLuint> colorVBO = pair<GLuint,GLuint> (colorBufferID,1);
 
 	ray->vboIDVector.push_back(colorVBO);
 	ray->renderType = GL_LINES;
+
 	gizmoVector.push_back(ray);
 }
