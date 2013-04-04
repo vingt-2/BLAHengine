@@ -9,6 +9,7 @@ GameObject::GameObject(void)
 
 GameObject::~GameObject(void)
 {
+	transform->~Transform();
 }
 
 void GameObject::Update()

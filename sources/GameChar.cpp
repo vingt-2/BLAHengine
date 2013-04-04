@@ -10,6 +10,9 @@ GameChar::GameChar(void)
 
 GameChar::~GameChar(void)
 {
+	GameObject::~GameObject();
+	rigidBody->~RigidBody();
+	meshRenderer->~MeshRenderer();
 }
 
 void GameChar::Update()

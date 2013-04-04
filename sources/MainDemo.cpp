@@ -187,7 +187,9 @@ int main( void )
 		mainCamera->Update();
 		render->Update();
 
-		debug->DrawLine(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec3(1.f,1.f,1.f));
+	//	debug->DrawLine(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec3(1.f,1.f,1.f));
+			
+		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.3f));
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
 		{

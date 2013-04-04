@@ -4,7 +4,7 @@ MeshRenderer::MeshRenderer(Transform* modelTransform):
 	meshVertices(vector<vec3>()),
 	meshNormals	(vector<vec3>()),
 	meshUVs		(vector<vec2>()),
-	vboIDVector	(vector<pair<GLuint,GLuint>>()),
+	vboIDVector	(vector<pair<GLuint,pair<GLuint,GLuint>>>()),
 	renderType  (GL_TRIANGLES)
 {
 	this->modelTransform = modelTransform;
@@ -38,8 +38,8 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 		glBindBuffer(GL_ARRAY_BUFFER, vboIDVector.at(vboIndex).first);
 		glVertexAttribPointer
 		(
-			vboIDVector.at(vboIndex).second,// attribute
-			3,							// size
+			vboIDVector.at(vboIndex).second.first,// attribute
+			vboIDVector.at(vboIndex).second.second,// size
 			GL_FLOAT,					// type
 			GL_FALSE,					// normalized?
 			0,							// stride
@@ -57,48 +57,13 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 	return true;
 }
 
-void MeshRenderer::GenerateVertexArray(GLuint attributeNumber)
-{
-	glBindVertexArray(vertexArrayID);
-
-	//TO BE RELOCATED WHEN WE SUPPORT TEXTURES
-
-	// Load the texture
-	//GLuint Texture = loadDDS("uvmap.DDS");
-	//GLuint Texture = 0;
-
-	// Get a handle for our "myTextureSampler" uniform
-	//GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
-
-	// Load it into a VBO
-	GLuint vertexBuffer;
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, meshVertices.size() * sizeof(vec3), &(meshVertices[0]), GL_STATIC_DRAW);
-
-	pair<GLuint,GLuint> vertexVBO = pair<GLuint,GLuint>(vertexBuffer,attributeNumber);
-
-	vboIDVector.push_back(vertexVBO);
-}
-
-void MeshRenderer::GenerateUVArray(GLuint attributeNumber)
-{
-	GLuint uvBuffer;
-	glGenBuffers(1, &uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, meshUVs.size() * sizeof(vec2), &(meshUVs[0]), GL_STATIC_DRAW);
-
-	pair<GLuint,GLuint> uvsVBO = pair<GLuint,GLuint>(uvBuffer,attributeNumber);
-
-	vboIDVector.push_back(uvsVBO);
-}
-
 bool MeshRenderer::GenerateArrays()
 {
-	GenerateVertexArray(0);
+	GenerateBufferObject<vec3>(&(meshVertices[0]),meshVertices.size() * sizeof(vec3), 3,0);
+
 	if( !meshUVs.empty() )
 	{
-		GenerateUVArray(1);
+		GenerateBufferObject<vec2>(&(meshUVs[0]),meshUVs.size() * sizeof(vec2),2,1);
 	}
 	return true;
 }
@@ -113,7 +78,7 @@ bool MeshRenderer::CleanUp()
 	vboIDVector.clear();
 
 	//Cleanup Shader
-	glDeleteProgram(programID);
+	//glDeleteProgram(programID);
 	glDeleteTextures(1, &textureID);
 	glDeleteVertexArrays(1, &vertexArrayID);
 

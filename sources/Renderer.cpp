@@ -84,11 +84,20 @@ bool Renderer::Update()
 
 	// Disable Z-Buffer test for debug gizmos.
 	glDisable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for(int i = 0; i < debug->gizmoVector.size();i++)
 	{
 		debug->gizmoVector[i]->Draw(mainCamera->projection,mainCamera->viewTransform.transformMatrix);
 	}
+	for(int i = 0; i < debug->gizmoVector.size();i++)
+	{
+		debug->gizmoVector[i]->~MeshRenderer();
+	}
+	
 	debug->gizmoVector.clear();
+	glDisable(GL_BLEND);
 
 	glfwSwapBuffers();
 

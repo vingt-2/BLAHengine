@@ -11,6 +11,8 @@ Camera::Camera():
 
 Camera::~Camera(void)
 {
+	GameObject::~GameObject();
+	rigidBody->~RigidBody();
 }
 
 void Camera::SetProjection(mat4 projection)

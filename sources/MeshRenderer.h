@@ -15,7 +15,7 @@ public:
 	vector<vec3> meshNormals;
 	vector<vec2> meshUVs;
 
-	vector<pair<GLuint,GLuint>> vboIDVector;
+	vector<pair<GLuint,pair<GLuint,GLuint>>> vboIDVector;
 
 	GLuint vertexArrayID;
 	GLuint textureID;
@@ -31,8 +31,23 @@ public:
 
 	bool Draw(mat4 projection, mat4 view);
 	bool GenerateArrays();
-	void GenerateVertexArray(GLuint attributeNumber);
-	void GenerateUVArray(GLuint attributeNumber);
+
+	template<typename objectType>
+	void GenerateBufferObject(const objectType* buffer, GLuint bufferSize, GLuint elementsPerObject, GLuint attributeNumber)
+	{
+		glBindVertexArray(vertexArrayID);
+
+		// Load it into a VBO
+		GLuint bufferObjectID;
+		glGenBuffers(1, &bufferObjectID);
+		glBindBuffer(GL_ARRAY_BUFFER, bufferObjectID);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, &(buffer[0]), GL_STATIC_DRAW);
+
+		pair<GLuint,pair<GLuint,GLuint>> bufferObject = pair<GLuint,pair<GLuint,GLuint>> (bufferObjectID,pair<GLuint,GLuint>(attributeNumber,elementsPerObject));
+
+		vboIDVector.push_back(bufferObject);
+	}
+
 	bool CleanUp();
 
 	string ToString(void);
