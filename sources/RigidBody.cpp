@@ -50,6 +50,13 @@ void RigidBody::SetPosition(vec3 newPosition)
 	transform->position = newPosition;
 }
 
+void RigidBody::SetRotation(vec3 newRotation)
+{
+	// don't loose it either
+	previousRotation = newRotation - angularVelocity;
+	transform->rotation = newRotation;
+}
+
 
 // Private:
 

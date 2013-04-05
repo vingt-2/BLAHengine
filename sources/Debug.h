@@ -14,6 +14,7 @@ public:
 	void DrawRay(const vec3 origin,const vec3 direction,const GLfloat length);
 
 	void DrawGrid(int size, const vec4 color);
+	void DrawBasis(Transform* transform,GLfloat opacity);
 
 	Debug(void);
 	~Debug(void);

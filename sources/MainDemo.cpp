@@ -128,6 +128,7 @@ int main( void )
 	// NOW WE CAN LOAD SOME RESSOURCES
 	sharedRessources->LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
 	sharedRessources->LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
+	sharedRessources->LoadMaterial("NoProjShader","../resources/shaders/NoProj_Vertex.glsl", "../resources/shaders/NoProj_Fragment.glsl");
 
 
 	render->debug = debug;
@@ -158,8 +159,9 @@ int main( void )
 	object_1->rigidBody->frictionCoefficient = 0.01f;
 
 	Camera* mainCamera = new Camera();
-	mainCamera->rigidBody->SetPosition(vec3(0,0,-10));
-
+	mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
+	mainCamera->rigidBody->SetRotation(vec3(3.14/9,0,0));
+	
 	render->mainCamera = mainCamera;
 
 	int fps_frames=0;
@@ -190,6 +192,7 @@ int main( void )
 	//	debug->DrawLine(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec3(1.f,1.f,1.f));
 			
 		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.3f));
+		debug->DrawBasis(object_1->transform,1.f);
 
 		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
 		{

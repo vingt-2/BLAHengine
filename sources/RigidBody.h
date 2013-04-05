@@ -40,6 +40,7 @@ public:
 	void PushForce(vec3 vector,RigidBody::Force::ForceMode mode);
 	void PushTorque(vec3 vector,RigidBody::Force::ForceMode mode);
 	void SetPosition(vec3 Position);
+	void SetRotation(vec3 rotation);
 
 	RigidBody(Transform* parent);
 	~RigidBody(void);

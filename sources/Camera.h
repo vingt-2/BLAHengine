@@ -13,6 +13,14 @@ public:
 
 	void Update();
 
+	vec3 UndoProjection(vec3 v)
+	{
+		vec4 vector(v,1);
+		vec4 newV = inverse(projection) * vector;
+		vec3 result(newV.x,newV.y,newV.z);
+		return result;
+	}
+
 	Camera();
 	~Camera(void);
 };

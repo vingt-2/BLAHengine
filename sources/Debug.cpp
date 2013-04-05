@@ -64,3 +64,11 @@ void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const ve
 
 	gizmoVector.push_back(ray);
 }
+
+void Debug::DrawBasis(Transform* transform,GLfloat opacity)
+{
+	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(100,0,0)),vec4(1,0,0,opacity));
+	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(0,100,0)),vec4(0,1,0,opacity));
+	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(0,0,100)),vec4(0,0,1,opacity));
+}
+
