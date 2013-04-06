@@ -1,4 +1,4 @@
-#include "RigidBody.h"
+#include "../../Headers/RigidBody.h"
 
 
 RigidBody::RigidBody(Transform* p):

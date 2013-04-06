@@ -1,4 +1,4 @@
-#include "GameChar.h"
+#include "../../Headers/GameChar.h"
 
 
 GameChar::GameChar(void)

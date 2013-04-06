@@ -1,9 +1,9 @@
 // Include standard headers
-#include "std.h"
-#include "Graphics.h"
-#include "Renderer.h"
-#include "GameChar.h"
-#include "SharedRessources.h"
+#include "../Headers/std.h"
+#include "../Headers/Graphics.h"
+#include "../Headers/Renderer.h"
+#include "../Headers/GameChar.h"
+#include "../Headers/SharedRessources.h"
 
 vec2 tangentAcceleration;
 vec2 mousePosition;

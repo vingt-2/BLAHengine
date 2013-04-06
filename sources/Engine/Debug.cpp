@@ -1,4 +1,4 @@
-#include "Debug.h"
+#include "../Headers/Debug.h"
 
 
 Debug::Debug(void):
