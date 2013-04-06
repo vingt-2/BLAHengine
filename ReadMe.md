@@ -1,4 +1,4 @@
-    BLAengine - OBJ viewer
+BLAengine - OBJ viewer
 ===================================
 
 "What's this ?"
