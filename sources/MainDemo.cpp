@@ -1,9 +1,16 @@
+/*
+This is a terribly awful quick testing pot-pourris of the features I put into the Engine,
+It's not part of the final architecture but is merely there to test the new features as they come.
+Hence the name "MainDemo.cpp".
+*/
+
+
 // Include standard headers
-#include "../Headers/std.h"
-#include "../Headers/Graphics.h"
-#include "../Headers/Renderer.h"
-#include "../Headers/GameChar.h"
-#include "../Headers/SharedRessources.h"
+#include "./Headers/std.h"
+#include "./Headers/Graphics.h"
+#include "./Headers/Renderer.h"
+#include "./Headers/GameChar.h"
+#include "./Headers/SharedRessources.h"
 
 vec2 tangentAcceleration;
 vec2 mousePosition;
@@ -128,16 +135,14 @@ int main( void )
 	// NOW WE CAN LOAD SOME RESSOURCES
 	sharedRessources->LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
 	sharedRessources->LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
-	sharedRessources->LoadMaterial("NoProjShader","../resources/shaders/NoProj_Vertex.glsl", "../resources/shaders/NoProj_Fragment.glsl");
-
 
 	render->debug = debug;
 
 	GameChar* object_1 = new GameChar();
 	GameChar* object_2 = new GameChar();
 
-	render->screenSize.x = 1000;
-	render->screenSize.y = 1000;
+	//render->screenSize.x = 1000;
+	//render->screenSize.y = 1000;
 
 	OBJImport::ImportMesh("../resources/models/dude.obj",object_1->meshRenderer);
 	object_1->meshRenderer->AssignMaterial("defaultShader");
