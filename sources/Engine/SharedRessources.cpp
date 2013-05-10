@@ -2,7 +2,7 @@
 
 
 SharedRessources::SharedRessources(void):
-	ressourceTable(map<const char*,int>())
+	ressourceTable(map<std::string,GLuint>())
 {
 }
 
@@ -11,7 +11,7 @@ SharedRessources::~SharedRessources(void)
 {
 }
 
-bool SharedRessources::LoadMaterial(const char * name, const char * vertex_file_path,const char * fragment_file_path)
+GLuint SharedRessources::LoadMaterial(const char * name, const char * vertex_file_path,const char * fragment_file_path)
 {
 
 	// Create the shaders
@@ -102,7 +102,7 @@ bool SharedRessources::LoadMaterial(const char * name, const char * vertex_file_
 
 	ressourceTable[name] = ProgramID;
 
-	return true;
+	return ProgramID;
 }
 
 bool SharedRessources::loadBMP_custom(const char * name, const char * imagepath)

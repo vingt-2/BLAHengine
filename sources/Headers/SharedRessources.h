@@ -13,7 +13,7 @@ public:
 	SharedRessources(void);
 	~SharedRessources(void);
 
-	bool LoadMaterial(const char * name, const char * vertexShaderPath,const char * fragmentShaderPath);
+	GLuint LoadMaterial(const char * name, const char * vertexShaderPath,const char * fragmentShaderPath);
 	bool loadBMP_custom(const char * name, const char * imagepath);
 	bool loadTGA_glfw(const char * name, const char * imagepath);
 	bool loadDDS(const char * name, const char * imagepath);
@@ -21,10 +21,14 @@ public:
 	GLuint GetMaterial(const char * name);
 	GLuint GetTexture(const char * name);
 
+	map<std::string,GLuint> GetTable()
+	{
+		return ressourceTable;
+	}
 
 private:
 
-	map<const char*, int> ressourceTable;
+	map<std::string,GLuint> ressourceTable;
 
 };
 

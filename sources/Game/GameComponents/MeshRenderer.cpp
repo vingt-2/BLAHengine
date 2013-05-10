@@ -9,7 +9,7 @@ MeshRenderer::MeshRenderer(Transform* modelTransform):
 {
 	this->modelTransform = modelTransform;
 
-	//Generate a VAO for the mesh Renderer.
+	//Generate a VAObject for the mesh Renderer.
 	glGenVertexArrays(1, &vertexArrayID);
 
 }
@@ -59,13 +59,23 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 
 bool MeshRenderer::GenerateArrays()
 {
-	GenerateBufferObject<vec3>(&(meshVertices[0]),meshVertices.size() * sizeof(vec3), 3,0);
-
-	if( !meshUVs.empty() )
+	bool success = false;
+	if(IsMeshValid())
 	{
-		GenerateBufferObject<vec2>(&(meshUVs[0]),meshUVs.size() * sizeof(vec2),2,1);
+		GenerateBufferObject<vec3>(&(meshVertices[0]),meshVertices.size() * sizeof(vec3), 3,0);
+
+		if( !meshUVs.empty() )
+		{
+			GenerateBufferObject<vec2>(&(meshUVs[0]),meshUVs.size() * sizeof(vec2),2,1);
+		}
+		success = true;
 	}
-	return true;
+	else
+	{
+		cout << "Can't generate arrays for \"" <<  this << "\", Mesh Invalid.\n";
+		success = false;
+	}
+	return success;
 }
 
 bool MeshRenderer::CleanUp()
@@ -106,4 +116,15 @@ bool MeshRenderer::AssignTexture(const char* name)
 		return true;
 	}
 		return false;
+}
+
+bool MeshRenderer::IsMeshValid()
+{
+	bool check = true;
+	if(meshVertices.empty())
+	{
+		check = false;
+	}
+	
+	return check;
 }

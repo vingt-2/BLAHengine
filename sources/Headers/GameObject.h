@@ -5,6 +5,7 @@ class GameObject
 {
 public:
 Transform* transform;
+std::string objectName;
 
 void Update();
 

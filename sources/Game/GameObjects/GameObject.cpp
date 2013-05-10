@@ -4,6 +4,7 @@
 GameObject::GameObject(void)
 {
 	transform = new Transform();
+	objectName = string("");
 }
 
 

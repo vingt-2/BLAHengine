@@ -9,6 +9,8 @@
 class MeshRenderer
 {
 public:
+
+	//Class Variables
 	Transform* modelTransform;
 
 	vector<vec3> meshVertices;
@@ -22,6 +24,8 @@ public:
 	GLuint programID;
 	GLuint matrixID;
 	GLuint renderType;
+
+	//Class functions
 
 	MeshRenderer(Transform* modelTransform);
 	~MeshRenderer(void);
@@ -51,5 +55,13 @@ public:
 	bool CleanUp();
 
 	string ToString(void);
+
+private:
+	//Public Variables
+
+
+	//Private functions
+	bool IsMeshValid();
+
 };
 
