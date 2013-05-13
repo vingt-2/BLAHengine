@@ -7,7 +7,9 @@ public:
 Transform* transform;
 std::string objectName;
 
-void Update();
+virtual void Update() =0;
+
+void UpdateTransform();
 
 
 GameObject(void);

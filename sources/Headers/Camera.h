@@ -1,16 +1,14 @@
 #pragma once
-#include "GameObject.h"
-class Camera : public GameObject
+#include "GameChar.h"
+class Camera : public GameChar
 {
 public:
 	// Members
-	RigidBody* rigidBody;
-	mat4 projection;
-	Transform viewTransform;
+	Transform	viewTransform;
+	mat4		projection;
 
 	// States
 	bool isControlEnabled;
-
 
 
 	// Functions

@@ -4,7 +4,6 @@
 GameObject::GameObject(void)
 {
 	transform = new Transform();
-	objectName = string("");
 }
 
 
@@ -13,7 +12,7 @@ GameObject::~GameObject(void)
 	transform->~Transform();
 }
 
-void GameObject::Update()
+void GameObject::UpdateTransform()
 {
-	transform->UpdateTransform();
+	this->transform->UpdateTransform();
 }

@@ -17,6 +17,6 @@ GameChar::~GameChar(void)
 
 void GameChar::Update()
 {
-	GameObject::Update();
+	this->UpdateTransform();
 	rigidBody->Update();
 }
