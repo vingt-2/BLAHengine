@@ -1,5 +1,4 @@
 #pragma once
-
 #include "OBJImport.h"
 #include "Camera.h"
 #include "std.h"
@@ -13,13 +12,24 @@ public:
 
 	vector<MeshRenderer*> renderVector;
 
-	vec2 screenSize;
 
-	void Resize(int xRes,int yRes);
-	bool InitializeContext(char* windowTitle);
 	bool Update();
+	void Resize(int xRes,int yRes);
+	bool GetStatus(){	return isContextEnabled;	}
+	GLFWwindow* GetWindow() {	return glfwWindow;	}
 
-	Renderer(void);
+
+
+	Renderer(char* windowTitle);
+	Renderer(char* windowTitle, vec2 screenSize);
 	~Renderer(void);
+
+private:
+
+	vec2 screenSize;
+	GLFWwindow* glfwWindow;
+	GLFWwindow* InitializeContext(char* windowTitle,vec2 screenSize);
+	bool isContextEnabled;
+
 };
 

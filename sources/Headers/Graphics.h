@@ -3,9 +3,5 @@
 #include <GL/glew.h>
 
 // Include GLFW
-#include <GL/glfw.h>
-
-// Include GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-using namespace glm; 
+//#define GLFW_INCLUDE_GLU
+#include <GL/glfw3.h>

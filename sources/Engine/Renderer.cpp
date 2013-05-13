@@ -1,9 +1,25 @@
 #include "../Headers/Renderer.h"
 
 
-Renderer::Renderer(void)
+Renderer::Renderer(char* windowTitle)
 {
+	isContextEnabled = false;
 	screenSize = vec2(1280,1024);
+	glfwWindow = InitializeContext(windowTitle, screenSize);
+	if(glfwWindow != NULL)
+	{
+		isContextEnabled = true;
+	}
+}
+
+Renderer::Renderer(char* windowTitle, vec2 screenSize)
+{
+	isContextEnabled = false;
+	glfwWindow = InitializeContext(windowTitle, screenSize);
+	if(glfwWindow != NULL)
+	{
+		isContextEnabled = true;
+	}
 }
 
 
@@ -11,43 +27,49 @@ Renderer::~Renderer(void)
 {
 }
 
-bool Renderer::InitializeContext(char* windowTitle )
+GLFWwindow* Renderer::InitializeContext(char* windowTitle,vec2 screenSize)
 {
 
+	GLFWwindow* window;
 	// Initialise GLFW
 	if( !glfwInit() )
 	{
-		fprintf( stderr, "Failed to initialize GLFW\n" );
-		return -1;
+		Debug::OutputToDebug("Failed to initialize GLFW\n" );
+		return NULL;
 	}
 
-	glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 16 );
-	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
-	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 3);
-	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES , 16 );
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR , 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR , 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
 	// Open a window and create its OpenGL context
 
-	if( !glfwOpenWindow(screenSize.x, screenSize.y, 0,0,0,0, 32,0, GLFW_WINDOW ) )
-	{
-		fprintf( stderr, "Failed to open GLFW window.\n" );
-		glfwTerminate();
-		return -1;
-	}
+	window = glfwCreateWindow(screenSize.x, screenSize.y,windowTitle, NULL,NULL);
+
+ 
+    glfwMakeContextCurrent(window);
+	//{
+	//	debug->OutputToDebug("Failed to open GLFW window.\n" );
+	//	glfwTerminate();
+	//	return false;
+	//}
 
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
 	if (glewInit() != GLEW_OK) 
 	{
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
+		Debug::OutputToDebug("Failed to initialize GLEW\n");
+		return NULL;
 	}
 
-	glfwSetWindowTitle( windowTitle );
+	glfwSetWindowTitle( window,windowTitle );
 
 	// Ensure we can capture the escape key being pressed below
-	glfwEnable( GLFW_STICKY_KEYS );
-	glfwSetMousePos(screenSize.x/2, screenSize.y/2);
+	glfwSetInputMode(window,GLFW_STICKY_KEYS,GL_TRUE);
+	glfwSetCursorPos(window,screenSize.x/2, screenSize.y/2);
 
 	//Neat grey background
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -58,7 +80,7 @@ bool Renderer::InitializeContext(char* windowTitle )
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-	return true;
+	return window;
 }
 
 bool Renderer::Update()
@@ -99,14 +121,17 @@ bool Renderer::Update()
 	debug->gizmoVector.clear();
 	glDisable(GL_BLEND);
 
-	glfwSwapBuffers();
+	glfwSwapInterval(1);
+
+	glfwSwapBuffers(glfwWindow);
+	glfwPollEvents();
 
 	return true;
 }
 
 void Renderer::Resize(int xRes,int yRes)
 {
-	 glfwSetWindowSize(xRes,yRes);
+	 glfwSetWindowSize(glfwWindow,xRes,yRes);
 	 screenSize.x = xRes;
 	 screenSize.y = yRes;
 }

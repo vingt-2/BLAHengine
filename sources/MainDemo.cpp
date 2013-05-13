@@ -6,20 +6,18 @@ Hence the name "MainDemo.cpp".
 
 
 // Include standard headers
+#pragma once
 #include "./Headers/std.h"
-#include "./Headers/Graphics.h"
 #include "./Headers/Renderer.h"
 #include "./Headers/GameChar.h"
 #include "./Headers/SharedRessources.h"
 
-vec2 tangentAcceleration;
-vec2 mousePosition;
-int previousX = 0, previousY = 0;
 int fps = 60;
+vec2* previousMouseInput = new vec2(0,0);
 
-Debug* debug;
-Renderer* render;
+Renderer* mainRenderer;
 SharedRessources* sharedRessources;
+Debug* debug;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -36,68 +34,6 @@ void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 	}
 }
 
-void SimpleControls(Camera* camera)
-{
-	vec3 tangentForce = vec3(0);
-	int coeff = 5;
-
-	if ( (glfwGetKey(GLFW_KEY_LSHIFT) == GLFW_PRESS) )
-		coeff = 25;
-
-	if( (glfwGetKey( 'W'  ) == GLFW_PRESS) )
-		tangentForce.z = 1;
-	if( (glfwGetKey( 'S'  ) == GLFW_PRESS) )
-		tangentForce.z = -1;
-
-	if( (glfwGetKey( 'A'  ) == GLFW_PRESS) )
-		tangentForce.x = 1;
-	if( (glfwGetKey( 'D'  ) == GLFW_PRESS) )
-		tangentForce.x = -1;
-
-	vec3 cameraForce = camera->transform->LocalDirectionToWorld(tangentForce);
-	cameraForce *= coeff;
-
-	camera->rigidBody->PushForce(cameraForce,RigidBody::Force::Impulse);
-
-
-	if( (glfwGetMouseButton( 1 ) == GLFW_PRESS) )
-	{
-		int x, y;
-		glfwGetMousePos(&x,&y);
-
-		vec3 cameraTorque = vec3(0);
-
-		if(x - previousX > 0)
-		{
-			cameraTorque.y = 1.f;
-		}
-		else if(x - previousX < 0)
-		{
-			cameraTorque.y = -1.f;
-		}
-		if(y - previousY > 0)
-		{
-			cameraTorque.x = 1.f;
-		}
-		else if(y - previousY < 0)
-		{
-			cameraTorque.x = -1.f;
-		}
-		previousX = x;
-		previousY = y;
-
-		cameraTorque *= 5;
-
-		camera->rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
-
-	}
-	else
-	{
-
-	}
-}
-
-
 void LockFramerate(GLfloat hzFrequency)
 {
 	GLfloat deltaTime = glfwGetTime();
@@ -107,53 +43,114 @@ void LockFramerate(GLfloat hzFrequency)
 	}
 }
 
+void SimpleControls(Camera* object)
+{
+
+	vec3 tangentForce = vec3(0);
+	int coeff = 5;
+
+	if ( (glfwGetKey(mainRenderer->GetWindow(),GLFW_KEY_LSHIFT) == GLFW_PRESS) )
+		coeff = 25;
+
+	if( (glfwGetKey(mainRenderer->GetWindow(), 'W'  ) == GLFW_PRESS) )
+		tangentForce.z = 1;
+	if( (glfwGetKey(mainRenderer->GetWindow(), 'S'  ) == GLFW_PRESS) )
+		tangentForce.z = -1;
+
+	if( (glfwGetKey(mainRenderer->GetWindow(), 'A'  ) == GLFW_PRESS) )
+		tangentForce.x = 1;
+	if( (glfwGetKey(mainRenderer->GetWindow(), 'D'  ) == GLFW_PRESS) )
+		tangentForce.x = -1;
+
+	vec3 cameraForce = object->transform->LocalDirectionToWorld(tangentForce);
+	cameraForce *= coeff;
+
+	object->rigidBody->PushForce(cameraForce,RigidBody::Force::Impulse);
+
+
+	if( (glfwGetMouseButton(mainRenderer->GetWindow(), 1 ) == GLFW_PRESS) )
+	{
+		double x, y;
+		glfwGetCursorPos(mainRenderer->GetWindow(),&x,&y);
+
+		vec3 cameraTorque = vec3(0);
+
+		if(x - previousMouseInput->x > 0)
+		{
+			cameraTorque.y = 1.f;
+		}
+		else if(x - previousMouseInput->x < 0)
+		{
+			cameraTorque.y = -1.f;
+		}
+		if(y - previousMouseInput->y > 0)
+		{
+			cameraTorque.x = 1.f;
+		}
+		else if(y - previousMouseInput->y < 0)
+		{
+			cameraTorque.x = -1.f;
+		}
+		previousMouseInput->x = x;
+		previousMouseInput->y = y;
+
+		cameraTorque *= 5;
+
+		object->rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
+	}
+	else
+	{
+
+	}
+}
+
 void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 {
 	GetFPS(fps_frames,fps_time, fps);
 	//LockFramerate(100.f); // Lock framerate 100 hz
 }
 
-
 // ACHTUNG ! Executed each frame, WTF ? investigate.
 // Oh BTW, it's broken
-void GLFWCALL OnResize(int xRes,int yRes)
-{
-	render->Resize(xRes,yRes);
-}
+//void GLFWCALL OnResize(int xRes,int yRes)
+//{
+//	mainRenderer->Resize(xRes,yRes);
+//}
 
 int main( void )
 {
-	render				= new Renderer();
-	sharedRessources	= new SharedRessources();
-	debug				= new Debug();
+	sharedRessources			= new SharedRessources();
+	debug						= new Debug();
+	mainRenderer				= new Renderer("BLAengine - OBJViewer");
 
 	bool terminationRequest = false;
 
 	// OPENGL CONTEXT UP AND RUNNING
-	render->InitializeContext("BLAengine - OBJViewer");
+	if(!mainRenderer->GetStatus())
+	{
+		debug->OutputToDebug("Failed to initiate Context!");
+		return -1;
+	}
 
 	// NOW WE CAN LOAD SOME RESSOURCES
 	sharedRessources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
 	sharedRessources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
 
-	render->debug = debug;
+	mainRenderer->debug = debug;
 
 	GameChar* object_1 = new GameChar();
 	GameChar* object_2 = new GameChar();
 
-	//render->screenSize.x = 1000;
-	//render->screenSize.y = 1000;
-
 	OBJImport::ImportMesh("./resources/models/dude.obj",object_1->meshRenderer);
 	object_1->meshRenderer->AssignMaterial("defaultShader");
 	object_1->meshRenderer->GenerateArrays();
-	render->renderVector.push_back(object_1->meshRenderer);
+	mainRenderer->renderVector.push_back(object_1->meshRenderer);
 
 
 	OBJImport::ImportMesh("./resources/models/bla.obj",object_2->meshRenderer);
 	object_2->meshRenderer->AssignMaterial("defaultShader");
 	object_2->meshRenderer->GenerateArrays();
-	render->renderVector.push_back(object_2->meshRenderer);
+	mainRenderer->renderVector.push_back(object_2->meshRenderer);
 
 	object_1->transform->scale	= vec3(0.01);
 	object_2->transform->scale	= vec3(0.4);
@@ -164,10 +161,11 @@ int main( void )
 	object_1->rigidBody->frictionCoefficient = 0.01f;
 
 	Camera* mainCamera = new Camera();
-	//mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
+	mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
 	mainCamera->rigidBody->SetRotation(vec3(3.14/9,0,0));
-	
-	render->mainCamera = mainCamera;
+	mainCamera->isControlEnabled = true;
+
+	mainRenderer->mainCamera = mainCamera;
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
@@ -179,14 +177,14 @@ int main( void )
 		stringstream title;
 		title << "BLAengine: " << fps << " fps";
 		title.str();
-		glfwSetWindowTitle(title.str().data());
+		glfwSetWindowTitle(mainRenderer->GetWindow(),title.str().data());
 
-		glfwSetWindowSizeCallback(OnResize);
+		//glfwSetWindowSizeCallback(OnResize);
 
 		object_1->Update();
 		object_2->Update();
 
-		if( (glfwGetKey( 'F'  ) == GLFW_PRESS) )
+		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{
 			object_1->rigidBody->PushTorque(vec3(0,10,0),RigidBody::Force::Impulse);
 		}
@@ -195,15 +193,15 @@ int main( void )
 
 
 		mainCamera->Update();
-		render->Update();
+		mainRenderer->Update();
 
-	//	debug->DrawLine(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec3(1.f,1.f,1.f));
+		debug->DrawLine(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec4(1.f,1.f,1.f,1.f));
 			
 
 		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.3f));
-		//debug->DrawBasis(object_1->transform,1.f);
+		debug->DrawBasis(object_1->transform,1.f);
 
-		if( (glfwGetKey( GLFW_KEY_ESC ) == GLFW_PRESS) | !glfwGetWindowParam( GLFW_OPENED ) )
+		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESC ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{
 			terminationRequest = true;
 		}

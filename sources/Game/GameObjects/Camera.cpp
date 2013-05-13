@@ -4,8 +4,14 @@
 Camera::Camera():
 	projection(mat4(1))
 {
+	extern GLFWwindow* window;
 	rigidBody = new RigidBody(transform);
 	UpdateView();
+
+	isControlEnabled = false;
+	//glfwGetCursorPos(window,&x,&y);
+	//previousMouseInput = new vec2(x,y);
+	previousMouseInput = new vec2(0,0);
 }
 
 
@@ -30,7 +36,12 @@ void Camera::UpdateView()
 
 void Camera::Update()
 {
-	GameObject::Update();
-	rigidBody->Update();
-	UpdateView();
+	if(isControlEnabled)
+	{
+		//SimpleControls();
+	}
+	// Regular updates
+	GameObject::Update(); // Parent class update
+	rigidBody->Update(); // rigidBody update
+	UpdateView(); // View Transform update
 }

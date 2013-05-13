@@ -21,9 +21,9 @@ void Transform::UpdateTransform()
 		vec4(position.x,position.y,position.z,1)
 	);
 
-	GLfloat phi		= rotation.x;
-	GLfloat theta	= rotation.y;
-	GLfloat psy		= rotation.z;
+	float phi		= rotation.x;
+	float theta	= rotation.y;
+	float psy		= rotation.z;
 
 	// Yep, I'm using a good old fashion rotation matrix. So what ?
 	// I'll get to quaternions later.

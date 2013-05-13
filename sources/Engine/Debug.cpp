@@ -72,3 +72,8 @@ void Debug::DrawBasis(Transform* transform,GLfloat opacity)
 	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(0,0,100)),vec4(0,0,1,opacity));
 }
 
+void Debug::OutputToDebug(char* debug)
+{
+	OutputDebugString(debug);
+	OutputDebugString("\n");
+}

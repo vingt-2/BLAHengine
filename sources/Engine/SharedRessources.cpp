@@ -190,31 +190,31 @@ bool SharedRessources::loadBMP_custom(const char * name, const char * imagepath)
 	return true;
 }
 
-bool SharedRessources::loadTGA_glfw(const char * name, const char * imagepath)
-{
-
-	// Create one OpenGL texture
-	GLuint texID;
-	glGenTextures(1, &texID);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, texID);
-
-	// Read the file, call glTexImage2D with the right parameters
-	glfwLoadTexture2D(imagepath, 0);
-
-	// Nice trilinear filtering.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// Return the ID of the texture we just created
-	ressourceTable[name] = texID;
-
-	return true;
-}
+//bool SharedRessources::loadTGA_glfw(const char * name, const char * imagepath)
+//{
+//
+//	// Create one OpenGL texture
+//	GLuint texID;
+//	glGenTextures(1, &texID);
+//
+//	// "Bind" the newly created texture : all future texture functions will modify this texture
+//	glBindTexture(GL_TEXTURE_2D, texID);
+//
+//	// Read the file, call glTexImage2D with the right parameters
+//	glfwLoadTexture2D(imagepath, 0);
+//
+//	// Nice trilinear filtering.
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//
+//	// Return the ID of the texture we just created
+//	ressourceTable[name] = texID;
+//
+//	return true;
+//}
 
 bool SharedRessources::loadDDS(const char * name, const char * imagepath)
 {
