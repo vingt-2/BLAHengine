@@ -1,4 +1,4 @@
-#include "../Headers/SharedRessources.h"
+#include "SharedRessources.h"
 
 
 SharedRessources::SharedRessources(void):

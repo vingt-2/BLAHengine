@@ -1,4 +1,14 @@
-#include "../Headers/Scene.h"
+#include "Scene.h"
+
+Scene::Scene()
+{
+	sceneObjectsVector = vector<GameObject*>();
+}
+
+Scene::~Scene()
+{
+
+}
 
 void Scene::AddObject(GameChar* objectPtr)
 {
@@ -23,4 +33,12 @@ int Scene::CountMeshs()
 		}
 	}
 	return count;
+}
+
+void Scene::Update()
+{
+	for(int i=0;i < sceneObjectsVector.size() ; i++)
+	{
+		sceneObjectsVector.at(i)->Update();
+	}
 }

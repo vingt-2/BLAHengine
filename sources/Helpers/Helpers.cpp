@@ -1,7 +1,7 @@
 /*Author: Vingt-2
 	BLAengine
 */
-#include "../Headers/Helpers.h"
+#include "Helpers.h"
 
 int StringToInt(char* string,int base)
 {

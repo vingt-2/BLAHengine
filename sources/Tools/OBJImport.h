@@ -3,9 +3,9 @@
 /*Author: Vingt-2
 	BLAengine
 */
-#include "std.h"
-#include "Helpers.h"
-#include "GameObject.h"
+#include "../Std/std.h"
+#include "../Helpers/Helpers.h"
+#include "../Game/GameObjects/GameObject.h"
 
 class OBJImport
 {

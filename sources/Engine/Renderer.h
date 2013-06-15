@@ -1,8 +1,8 @@
 #pragma once
-#include "OBJImport.h"
-#include "Camera.h"
-#include "std.h"
-#include "Debug.h"
+#include "../Tools/OBJImport.h"
+#include "../Game/GameObjects/Camera.h"
+#include "../Std/std.h"
+#include "../Engine/Debug.h"
 
 class Renderer
 {

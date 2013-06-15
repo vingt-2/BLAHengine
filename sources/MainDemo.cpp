@@ -7,10 +7,10 @@ Hence the name "MainDemo.cpp".
 
 // Include standard headers
 #pragma once
-#include "./Headers/std.h"
-#include "./Headers/Renderer.h"
-#include "./Headers/GameChar.h"
-#include "./Headers/SharedRessources.h"
+#include "./Std/std.h"
+#include "./Engine/Renderer.h"
+#include "./Engine/SharedRessources.h"
+#include "./Game/Scene.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
@@ -18,6 +18,7 @@ vec2* previousMouseInput = new vec2(0,0);
 Renderer* mainRenderer;
 SharedRessources* sharedRessources;
 Debug* debug;
+Scene* mainScene;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -122,6 +123,7 @@ int main( void )
 	sharedRessources			= new SharedRessources();
 	debug						= new Debug();
 	mainRenderer				= new Renderer("BLAengine - OBJViewer");
+	mainScene					= new Scene();
 
 	bool terminationRequest = false;
 
@@ -160,6 +162,9 @@ int main( void )
 
 	object_1->rigidBody->frictionCoefficient = 0.01f;
 
+	mainScene->AddObject(object_1);
+	mainScene->AddObject(object_2);
+
 	Camera* mainCamera = new Camera();
 	mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
 	mainCamera->rigidBody->SetRotation(vec3(3.14/9,0,0));
@@ -181,8 +186,7 @@ int main( void )
 
 		//glfwSetWindowSizeCallback(OnResize);
 
-		object_1->Update();
-		object_2->Update();
+		mainScene->Update();
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{

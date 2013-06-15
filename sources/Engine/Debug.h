@@ -1,6 +1,6 @@
 #pragma once
-#include "Graphics.h"
-#include "MeshRenderer.h"
+#include "../Std/Graphics.h"
+#include "../Game/GameComponents/MeshRenderer.h"
 
 /*
  TODO: 

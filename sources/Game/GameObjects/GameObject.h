@@ -1,6 +1,6 @@
 #pragma once
-#include "MeshRenderer.h"
-#include "RigidBody.h"
+#include "../GameComponents/MeshRenderer.h"
+#include "../GameComponents/RigidBody.h"
 class GameObject
 {
 public:

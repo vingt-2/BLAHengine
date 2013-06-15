@@ -1,8 +1,8 @@
-#include "../Headers/Window.h"
+#include "Window.h"
 
-Window::Window()
+Window::Window(char* windowTitle,vec2 screenSize)
 {
-	renderer = new Renderer();
+	renderer = new Renderer(windowTitle,screenSize);
 }
 
 GLFWwindow* Window::InitializeContext(char* windowTitle,vec2 screenSize)

@@ -1,20 +1,20 @@
 #pragma once
-#include "std.h"
-#include "GameObject.h"
-#include "GameManager.h"
-#include "GameChar.h"
+#include "../Std/std.h"
+#include "../Game/GameObjects/GameManager.h"
+#include "../Game/GameObjects/GameChar.h"
 
 class Scene
 {
 public:
+	Scene();
+	~Scene();
+
+	void Update();
 
 	void AddObject(GameChar* object);
 	void AddObject(GameManager* object);
 	int CountMeshs();
 
-
-	Scene();
-	~Scene();
 
 private:
 

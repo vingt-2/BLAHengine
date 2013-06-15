@@ -1,7 +1,7 @@
 /*Author: Vingt-2
 	BLAengine
 */
-#include "../Headers/Vector3f.h"
+#include "Vector3f.h"
 
 Vector3f::Vector3f(void):
 	x(0.0f),y(0.0f),z(0.0f),

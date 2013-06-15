@@ -1,4 +1,4 @@
-#include "../../Headers/MeshRenderer.h"
+#include "MeshRenderer.h"
 
 MeshRenderer::MeshRenderer(Transform* modelTransform):
 	meshVertices(vector<vec3>()),

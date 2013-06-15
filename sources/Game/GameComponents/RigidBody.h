@@ -1,6 +1,6 @@
 #pragma once
-#include "Maths.h"
-#include "std.h"
+#include "../../Std/Maths.h"
+#include "../../Std/std.h"
 #include "Transform.h"
 
 class RigidBody

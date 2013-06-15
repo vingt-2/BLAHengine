@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Graphics.h"
-#include "std.h"
-#include "Vector3f.h"
-#include "Transform.h"
-#include "SharedRessources.h"
+#include "../../Std/Graphics.h"
+#include "../../Std/std.h"
+#include "./Transform.h"
+#include "../../Engine/SharedRessources.h"
 
 class MeshRenderer
 {

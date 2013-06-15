@@ -1,4 +1,4 @@
-#include "../Headers/Renderer.h"
+#include "Renderer.h"
 
 
 Renderer::Renderer(char* windowTitle)

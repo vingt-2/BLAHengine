@@ -2,7 +2,7 @@
 BLAengine
 */
 
-#include "../Headers/OBJImport.h"
+#include "OBJImport.h"
 
 
 OBJImport::OBJImport(void)
