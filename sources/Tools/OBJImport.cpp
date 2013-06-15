@@ -122,11 +122,12 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 			meshNormals .push_back(normal);
 		}
 
-		mesh->meshVertices	= meshVertices;
-		mesh->meshNormals	= meshNormals;
-		mesh->meshUVs		= meshUVs;
+		mesh->m_meshVertices = meshVertices;
+		mesh->m_meshNormals	 = meshNormals;
+		mesh->m_meshUVs		 = meshUVs;
 
 		//cout << uselessLines << " unused Lines\n";
+		cout << "Imported: " << meshVertices.size() << " vertices, " << meshNormals.size() << " normals, " << meshUVs.size() << " UVs.\n";
 
 		return true;
 	}

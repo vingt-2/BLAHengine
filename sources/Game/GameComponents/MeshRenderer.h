@@ -10,19 +10,26 @@ class MeshRenderer
 public:
 
 	//Class Variables
-	Transform* modelTransform;
+	Transform* m_modelTransform;
 
-	vector<vec3> meshVertices;
-	vector<vec3> meshNormals;
-	vector<vec2> meshUVs;
+	vector<vec3> m_meshVertices;
+	vector<vec3> m_meshNormals;
+	vector<vec2> m_meshUVs;
 
-	vector<pair<GLuint,pair<GLuint,GLuint>>> vboIDVector;
+	vector<pair<GLuint,pair<GLuint,GLuint>>> m_vboIDVector;
 
-	GLuint vertexArrayID;
-	GLuint textureID;
-	GLuint programID;
-	GLuint matrixID;
-	GLuint renderType;
+	GLuint m_vertexArrayID;
+	GLuint m_textureID;
+	GLuint m_programID;
+	GLuint m_matrixID;
+	GLuint m_renderType;
+	
+
+
+	// diffuse and shit
+	GLuint m_diffuseTexture;
+	
+	vec3 m_directionalLight;
 
 	//Class functions
 
@@ -38,7 +45,7 @@ public:
 	template<typename objectType>
 	void GenerateBufferObject(const objectType* buffer, GLuint bufferSize, GLuint elementsPerObject, GLuint attributeNumber)
 	{
-		glBindVertexArray(vertexArrayID);
+		glBindVertexArray(m_vertexArrayID);
 
 		// Load it into a VBO
 		GLuint bufferObjectID;
@@ -48,7 +55,7 @@ public:
 
 		pair<GLuint,pair<GLuint,GLuint>> bufferObject = pair<GLuint,pair<GLuint,GLuint>> (bufferObjectID,pair<GLuint,GLuint>(attributeNumber,elementsPerObject));
 
-		vboIDVector.push_back(bufferObject);
+		m_vboIDVector.push_back(bufferObject);
 	}
 
 	bool CleanUp();
@@ -56,7 +63,9 @@ public:
 	string ToString(void);
 
 private:
-	//Public Variables
+	//private members
+
+	vector<pair<GLuint,GLuint>> m_activeTextures;
 
 
 	//Private functions

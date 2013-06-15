@@ -111,12 +111,6 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 	//LockFramerate(100.f); // Lock framerate 100 hz
 }
 
-// ACHTUNG ! Executed each frame, WTF ? investigate.
-// Oh BTW, it's broken
-//void GLFWCALL OnResize(int xRes,int yRes)
-//{
-//	mainRenderer->Resize(xRes,yRes);
-//}
 
 int main( void )
 {
@@ -137,24 +131,27 @@ int main( void )
 	// NOW WE CAN LOAD SOME RESSOURCES
 	sharedRessources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
 	sharedRessources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
+	
+	sharedRessources->loadBMP_custom("testDiffuse","./resources/textures/texture.bmp");
 
 	mainRenderer->debug = debug;
 
 	GameChar* object_1 = new GameChar();
 	GameChar* object_2 = new GameChar();
 
-	OBJImport::ImportMesh("./resources/models/dude.obj",object_1->meshRenderer);
+	OBJImport::ImportMesh("./resources/models/bla.obj",object_1->meshRenderer);
 	object_1->meshRenderer->AssignMaterial("defaultShader");
+	object_1->meshRenderer->AssignTexture("testDiffuse");
 	object_1->meshRenderer->GenerateArrays();
 	mainRenderer->renderVector.push_back(object_1->meshRenderer);
 
 
-	OBJImport::ImportMesh("./resources/models/bla.obj",object_2->meshRenderer);
+	OBJImport::ImportMesh("./resources/models/cube.obj",object_2->meshRenderer);
 	object_2->meshRenderer->AssignMaterial("defaultShader");
+	object_2->meshRenderer->AssignTexture("testDiffuse");
 	object_2->meshRenderer->GenerateArrays();
 	mainRenderer->renderVector.push_back(object_2->meshRenderer);
 
-	object_1->transform->scale	= vec3(0.01);
 	object_2->transform->scale	= vec3(0.4);
 
 	object_1->rigidBody->SetPosition(vec3(10,0,0));
@@ -169,6 +166,9 @@ int main( void )
 	mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
 	mainCamera->rigidBody->SetRotation(vec3(3.14/9,0,0));
 	mainCamera->isControlEnabled = true;
+
+	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
+	mainScene->AddDirectionalLight(light);
 
 	mainRenderer->mainCamera = mainCamera;
 
@@ -193,17 +193,21 @@ int main( void )
 			object_1->rigidBody->PushTorque(vec3(0,10,0),RigidBody::Force::Impulse);
 		}
 
+		if( (glfwGetKey(mainRenderer->GetWindow(), 'G'  ) == GLFW_PRESS) )
+		{
+			light->GetTransform()->rotation += vec3(0.1f,0.1f,0.1f);
+		}
+
 		SimpleControls(mainCamera);
 
 
 		mainCamera->Update();
 		mainRenderer->Update();
-
-		debug->DrawLine(object_2->transform->position,object_1->transform->LocalPositionToWorld(vec3(50.f,10.f,1.f)),vec4(1.f,1.f,1.f,1.f));
 			
 
 		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.3f));
 		debug->DrawBasis(object_1->transform,1.f);
+		debug->DrawBasis(object_2->transform,1.f);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESC ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{

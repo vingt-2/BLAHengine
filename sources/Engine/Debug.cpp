@@ -53,23 +53,23 @@ void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const ve
 {
 	Transform* transform = new Transform();
 	MeshRenderer* ray = new MeshRenderer(transform);
-	ray->meshVertices.push_back(origin);
-	ray->meshVertices.push_back(destination);
+	ray->m_meshVertices.push_back(origin);
+	ray->m_meshVertices.push_back(destination);
 	ray->AssignMaterial("debugShader");
 	ray->GenerateArrays();
 
 	ray->GenerateBufferObject<vec4>(colorBuffer,2*sizeof(vec4),4,1);
 	
-	ray->renderType = GL_LINES;
+	ray->m_renderType = GL_LINES;
 
 	gizmoVector.push_back(ray);
 }
 
 void Debug::DrawBasis(Transform* transform,GLfloat opacity)
 {
-	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(100,0,0)),vec4(1,0,0,opacity));
-	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(0,100,0)),vec4(0,1,0,opacity));
-	DrawLine((transform->LocalPositionToWorld(vec3(0,0,0))),transform->LocalPositionToWorld(vec3(0,0,100)),vec4(0,0,1,opacity));
+	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(1,0,0)))),1,vec4(1,0,0,opacity));
+	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(0,1,0)))),1,vec4(0,1,0,opacity));
+	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(0,0,1)))),1,vec4(0,0,1,opacity));
 }
 
 void Debug::OutputToDebug(char* debug)
