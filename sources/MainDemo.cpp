@@ -11,6 +11,7 @@ Hence the name "MainDemo.cpp".
 #include "./Engine/Renderer.h"
 #include "./Engine/SharedRessources.h"
 #include "./Game/Scene.h"
+#include "Game\GameComponents\Collider.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
@@ -133,34 +134,30 @@ int main( void )
 	sharedRessources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
 	
 	sharedRessources->loadBMP_custom("testDiffuse","./resources/textures/texture.bmp");
+	sharedRessources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
+	sharedRessources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
 
 	mainRenderer->debug = debug;
 
 	GameChar* object_1 = new GameChar();
-	GameChar* object_2 = new GameChar();
 
 	OBJImport::ImportMesh("./resources/models/bla.obj",object_1->meshRenderer);
 	object_1->meshRenderer->AssignMaterial("defaultShader");
-	object_1->meshRenderer->AssignTexture("testDiffuse");
+	object_1->meshRenderer->LoadTextureSample("earthDiffuse","texture");
+	object_1->meshRenderer->LoadTextureSample("earthNormals","normals");
 	object_1->meshRenderer->GenerateArrays();
 	mainRenderer->renderVector.push_back(object_1->meshRenderer);
 
-
-	OBJImport::ImportMesh("./resources/models/cube.obj",object_2->meshRenderer);
-	object_2->meshRenderer->AssignMaterial("defaultShader");
-	object_2->meshRenderer->AssignTexture("testDiffuse");
-	object_2->meshRenderer->GenerateArrays();
-	mainRenderer->renderVector.push_back(object_2->meshRenderer);
-
-	object_2->transform->scale	= vec3(0.4);
-
-	object_1->rigidBody->SetPosition(vec3(10,0,0));
-	object_2->rigidBody->SetPosition(vec3(-2,0,0));
+	object_1->rigidBody->SetPosition(vec3(0,0,0));
 
 	object_1->rigidBody->frictionCoefficient = 0.01f;
 
+	Collider collider(object_1->transform);
+	collider.GenerateBoundingBoxFromMesh(object_1->meshRenderer);
+	collider.UpdateRenderer();
+	mainRenderer->debug->gizmoVector.push_back(collider.m_colliderRenderer);
+
 	mainScene->AddObject(object_1);
-	mainScene->AddObject(object_2);
 
 	Camera* mainCamera = new Camera();
 	mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
@@ -195,8 +192,10 @@ int main( void )
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'G'  ) == GLFW_PRESS) )
 		{
-			light->GetTransform()->rotation += vec3(0.1f,0.1f,0.1f);
+			light->GetTransform()->rotation += vec3(0.f,0.1f,0.f);
 		}
+
+		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
 
 		SimpleControls(mainCamera);
 
@@ -205,9 +204,9 @@ int main( void )
 		mainRenderer->Update();
 			
 
-		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.3f));
+		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.05f));
+
 		debug->DrawBasis(object_1->transform,1.f);
-		debug->DrawBasis(object_2->transform,1.f);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESC ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{

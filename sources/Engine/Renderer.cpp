@@ -51,11 +51,6 @@ GLFWwindow* Renderer::InitializeContext(char* windowTitle,vec2 screenSize)
 
  
     glfwMakeContextCurrent(window);
-	//{
-	//	debug->OutputToDebug("Failed to open GLFW window.\n" );
-	//	glfwTerminate();
-	//	return false;
-	//}
 
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
@@ -85,11 +80,14 @@ GLFWwindow* Renderer::InitializeContext(char* windowTitle,vec2 screenSize)
 
 bool Renderer::Update()
 {
+	//Set OpenGL to this context.
+    glfwMakeContextCurrent(glfwWindow);
+
 	//Adjust Projection and ViewPort.
 	mainCamera->SetProjection(glm::frustum(-0.0001f*screenSize.x, 0.0001f*screenSize.x,-0.0001f*screenSize.y, 0.0001f*screenSize.y, 0.1f, 100.0f));
 	glViewport(0,0,screenSize.x,screenSize.y);
 
-	// Clear buffers
+	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -99,7 +97,7 @@ bool Renderer::Update()
 	glEnable(GL_DEPTH_TEST);
 	for(int i = 0; i < renderVector.size();i++)
 	{
-		renderVector[i]->Draw(mainCamera->projection,mainCamera->viewTransform.transformMatrix);
+		renderVector[i]->Draw(mainCamera->m_projection,mainCamera->m_viewTransform.transformMatrix);
 	}
 
 	// Render Debug gizmos
@@ -111,7 +109,7 @@ bool Renderer::Update()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for(int i = 0; i < debug->gizmoVector.size();i++)
 	{
-		debug->gizmoVector[i]->Draw(mainCamera->projection,mainCamera->viewTransform.transformMatrix);
+		debug->gizmoVector[i]->Draw(mainCamera->m_projection,mainCamera->m_viewTransform.transformMatrix);
 	}
 	for(int i = 0; i < debug->gizmoVector.size();i++)
 	{

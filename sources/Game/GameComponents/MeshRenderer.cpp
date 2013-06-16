@@ -5,6 +5,7 @@ MeshRenderer::MeshRenderer(Transform* modelTransform):
 	m_meshNormals	(vector<vec3>()),
 	m_meshUVs		(vector<vec2>()),
 	m_vboIDVector	(vector<pair<GLuint,pair<GLuint,GLuint>>>()),
+	m_textureSamplersVector (vector<pair<GLuint,GLuint>>()),
 	m_renderType  (GL_TRIANGLES),
 	m_directionalLight(vec3(0))
 {
@@ -26,6 +27,44 @@ string MeshRenderer::ToString()
 	return ("MRenderer: " + m_meshVertices.size()) ; 
 }
 
+bool MeshRenderer::AssignMaterial(const char* name)
+{
+	extern SharedRessources* sharedRessources;
+	m_programID = sharedRessources->GetMaterial(name);
+	if(m_programID != 0)
+	{
+		m_matrixID = glGetUniformLocation(m_programID, "MVP");
+		return true;
+	}
+	return false;
+}
+
+bool MeshRenderer::LoadTextureSample(const char* textureRessourceName,const char* sampleName)
+{
+	extern SharedRessources* sharedRessources;
+	if(m_programID != 0)
+	{
+		GLuint textureID = glGetUniformLocation(m_programID, sampleName);
+		GLuint textureRessource = sharedRessources->GetTexture(textureRessourceName);
+
+		m_textureSamplersVector.push_back(pair<GLuint,GLuint>(textureID,textureRessource));
+
+		return true;
+	}
+	return false;
+}
+
+bool MeshRenderer::IsMeshValid()
+{
+	bool check = true;
+	if(m_meshVertices.empty())
+	{
+		check = false;
+	}
+	
+	return check;
+}
+
 bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 {
 	glUseProgram(m_programID);
@@ -33,39 +72,31 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 	mat4 MVP = projection * view * (m_modelTransform->transformMatrix);
 	glUniformMatrix4fv(m_matrixID, 1, GL_FALSE, &MVP[0][0]);
 
-
+	//send modelTransform to shader <<--- HARDCODED
 	GLuint transformID = glGetUniformLocation(m_programID, "modelTransform");
 	glUniformMatrix4fv(transformID, 1, GL_FALSE, &(m_modelTransform->transformMatrix)[0][0]);
 
-	if(m_diffuseTexture != 0)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_diffuseTexture);
-
-		// Set our "myTextureSampler" sampler to user Texture Unit 0
-		glUniform1i(m_textureID, 0);
-	}
-
+	//send Light to shader <<--- HARDCODED
 	GLuint lightID = glGetUniformLocation(m_programID, "directionalLight");
 	glUniform3f(lightID,m_directionalLight.x,m_directionalLight.y,m_directionalLight.z);
 
-	for(uint vboIndex = 0; vboIndex < m_vboIDVector.size() ; vboIndex++)
+	// Send textureSamplers to shader
+	for(int samplerIndex = 0; samplerIndex < m_textureSamplersVector.size(); samplerIndex++)
 	{
-		glEnableVertexAttribArray(vboIndex);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vboIDVector.at(vboIndex).first);
-		glVertexAttribPointer
-		(
-			m_vboIDVector.at(vboIndex).second.first,	// attribute
-			m_vboIDVector.at(vboIndex).second.second,	// size
-			GL_FLOAT,					// type
-			GL_FALSE,					// normalized?
-			0,							// stride
-			(void*)0					// array buffer offset
-		);
+		glActiveTexture(GL_TEXTURE0 + samplerIndex);
+		glBindTexture(GL_TEXTURE_2D, m_textureSamplersVector.at(samplerIndex).second);
+
+		glUniform1i(m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
 	}
+
+	glBindVertexArray (m_vertexArrayID);
 
 	// Draw VAO
 	glDrawArrays(m_renderType,0, m_meshVertices.size());
+
+	glBindVertexArray (0);
+
+	glUseProgram(0);
 
 	for(uint vboIndex = 0; vboIndex < m_vboIDVector.size() ; vboIndex++)
 	{
@@ -74,8 +105,14 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 	return true;
 }
 
+// OpenGL Buffers related Code:
 bool MeshRenderer::GenerateArrays()
 {
+	//HARDCODED, suits:
+	// Input vertex data, different for all executions of this shader.
+	//layout(location = 0) in vec3 vertexPosition_modelspace;
+	//layout(location = 1) in vec2 vertexUV;
+	//layout(location = 2) in vec3 vertexNormals;
 	bool success = false;
 
 	int layoutIndex = 0;
@@ -106,7 +143,31 @@ bool MeshRenderer::GenerateArrays()
 	return success;
 }
 
+void MeshRenderer::GenerateVertexArrayID()
+{
+	// Vertex array of size 1 hardcoded for each MeshRenderer !
+	glGenVertexArrays(1, &m_vertexArrayID);
+}
+
 bool MeshRenderer::CleanUp()
+{
+	// Clean up all buffers associated to the mesh Vertex Array ID
+	CleanUpVBOs();
+
+	// Clean texture samplers 
+	for(GLushort texIndex = 0; texIndex < m_textureSamplersVector.size() ; texIndex++)
+	{
+		glDeleteTextures(1, &(m_textureSamplersVector.at(texIndex).first));
+	}
+	m_textureSamplersVector.clear();
+
+	//Cleanup Shader
+	//glDeleteProgram(m_programID);
+	DestroyVertexArrayID();
+	return true;
+}
+
+void MeshRenderer::CleanUpVBOs()
 {
 	// Cleanup VBO
 	for(uint vboIndex = 0; vboIndex < m_vboIDVector.size() ; vboIndex++)
@@ -114,46 +175,10 @@ bool MeshRenderer::CleanUp()
 		glDeleteBuffers(1,&((m_vboIDVector.at(vboIndex)).first));
 	}
 	m_vboIDVector.clear();
+}
 
-	//Cleanup Shader
-	//glDeleteProgram(programID);
-	glDeleteTextures(1, &m_textureID);
+void MeshRenderer::DestroyVertexArrayID()
+{
+	// Vertex array of size 1 hardcoded for each MeshRenderer !
 	glDeleteVertexArrays(1, &m_vertexArrayID);
-
-	return true;
-}
-
-bool MeshRenderer::AssignMaterial(const char* name)
-{
-	extern SharedRessources* sharedRessources;
-	m_programID = sharedRessources->GetMaterial(name);
-	if(m_programID != 0)
-	{
-		m_matrixID = glGetUniformLocation(m_programID, "MVP");
-		return true;
-	}
-		return false;
-}
-
-bool MeshRenderer::AssignTexture(const char* name)
-{
-	extern SharedRessources* sharedRessources;
-	if(m_programID != 0)
-	{
-		m_textureID = glGetUniformLocation(m_programID, "texture");
-		m_diffuseTexture = sharedRessources->GetTexture(name);
-		return true;
-	}
-		return false;
-}
-
-bool MeshRenderer::IsMeshValid()
-{
-	bool check = true;
-	if(m_meshVertices.empty())
-	{
-		check = false;
-	}
-	
-	return check;
 }

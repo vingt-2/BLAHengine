@@ -18,10 +18,8 @@ uniform vec3 directionalLight;
 void main()
 {	
 
-	// Output position of the vertex, in clip space : MVP * position
 	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
 
-	// No texture yet, interpolate the Coordinates as RGB for the fragments ... 
 	UVs = vertexUV;
 	normal = vertexNormals;
 

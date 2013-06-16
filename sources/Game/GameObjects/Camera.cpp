@@ -2,7 +2,7 @@
 
 
 Camera::Camera():
-	projection(mat4(1))
+	m_projection(mat4(1))
 {
 	rigidBody = new RigidBody(transform);
 	UpdateView();
@@ -19,15 +19,15 @@ Camera::~Camera(void)
 
 void Camera::SetProjection(mat4 projection)
 {
-	this->projection = projection;
+	this->m_projection = projection;
 }
 
 void Camera::UpdateView()
 {
-	viewTransform.position = -transform->position;
-	viewTransform.rotation = 1.f * transform->rotation;
-	viewTransform.UpdateTransform();
-	viewTransform.transformMatrix = inverse(viewTransform.transformMatrix);
+	m_viewTransform.position = -transform->position;
+	m_viewTransform.rotation = 1.f * transform->rotation;
+	m_viewTransform.UpdateTransform();
+	m_viewTransform.transformMatrix = inverse(m_viewTransform.transformMatrix);
 }
 
 void Camera::Update()

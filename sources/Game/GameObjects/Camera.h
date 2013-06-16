@@ -4,8 +4,8 @@ class Camera : public GameChar
 {
 public:
 	// Members
-	Transform	viewTransform;
-	mat4		projection;
+	Transform	m_viewTransform;
+	mat4		m_projection;
 
 	// States
 	bool isControlEnabled;
@@ -22,7 +22,7 @@ public:
 
 private:
 	// Private members
-	vec2* previousMouseInput;
+	vec2* m_previousMouseInput;
 
 	// Private Functions
 	void SimpleControls();

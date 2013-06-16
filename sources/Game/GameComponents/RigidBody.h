@@ -16,13 +16,13 @@ public:
 			Constant
 		};
 
-		ForceMode mode;
-		vec3 force;
+		ForceMode m_mode;
+		vec3 m_force;
 
 		Force(vec3 newForce,ForceMode newMode)
 		{
-			force = newForce;
-			mode = newMode;
+			m_force = newForce;
+			m_mode = newMode;
 		}
 		~Force()
 		{}
@@ -33,7 +33,7 @@ public:
 
 	float deltaTime;
 
-	Transform* transform;
+	Transform* m_transform;
 
 	void Update();
 
@@ -47,16 +47,16 @@ public:
 
 private:
 
-	vec3 acceleration;
-	vec3 velocity;
-	vec3 angularAcceleration;
-	vec3 angularVelocity;
+	vec3 m_acceleration;
+	vec3 m_velocity;
+	vec3 m_angularAcceleration;
+	vec3 m_angularVelocity;
 
-	vec3 previousPosition;
-	vec3 previousRotation;
+	vec3 m_previousPosition;
+	vec3 m_previousRotation;
 
-	vector<Force> forcesVector;
-	vector<Force> torqueVector;
+	vector<Force> m_forcesVector;
+	vector<Force> m_torquesVector;
 
 	void UpdateAcceleration();
 	void UpdateVelocity();
