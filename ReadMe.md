@@ -1,4 +1,4 @@
-BLAengine - OBJ viewer
+BLAengine - MainDemo: Model Viewer
 ===================================
 
 "Vat is this ?"
