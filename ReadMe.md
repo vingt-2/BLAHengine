@@ -19,7 +19,11 @@ More functionnality will be added and tested on the engine as it grows !
 ====
 Installation:
 
-To compile and run this code sample, make sur you provide your programming environmment with the required headers used in Graphics.h
-You will currently need the headers for GLEW to enable OpenGL 3.0 and extensions, and GLFW (a GL toolkit utility), as well as the binaries for these libraries.
+To compile and run this code sample, make sure you provide your programming environmment with:
+* GLEW to enable OpenGL 3.0 and extensions
+* GLFW (a GL toolkit library).
+* GLM, a C++ mathematics library for graphics programming that mimics GLSL maths definitions.
+
+Make sure you get all the STD/*.h includes right and you should be good to go ! 
 
 Cheers !
