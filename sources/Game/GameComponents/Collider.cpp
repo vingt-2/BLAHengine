@@ -60,7 +60,6 @@ void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 	}
 
 	cout << "(" << minX << "," << minY << "," << minZ << ")" <<  "(" << maxX << "," << maxY << "," << maxZ << ")";
-
 	m_meshVertices.push_back(vec3(maxX,0,0));
 	m_meshVertices.push_back(vec3(minX,0,0));
 	m_meshVertices.push_back(vec3(0,maxY,0));
