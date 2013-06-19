@@ -5,7 +5,7 @@ Collider::Collider(Transform* parentTransform):
 	m_colliderRenderer(new MeshRenderer(parentTransform))
 {
 	m_parentTransform = parentTransform;
-	m_colliderRenderer->m_renderType = GL_LINES;
+	m_colliderRenderer->m_renderType = 0x0003;
 }
 
 Collider::~Collider()
@@ -60,13 +60,14 @@ void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 	}
 
 	cout << "(" << minX << "," << minY << "," << minZ << ")" <<  "(" << maxX << "," << maxY << "," << maxZ << ")";
-	m_meshVertices.push_back(vec3(maxX,0,0));
-	m_meshVertices.push_back(vec3(minX,0,0));
-	m_meshVertices.push_back(vec3(0,maxY,0));
-	m_meshVertices.push_back(vec3(0,minY,0));
-	m_meshVertices.push_back(vec3(0,0,maxZ));
-	m_meshVertices.push_back(vec3(0,0,minZ));
-
+	m_meshVertices.push_back(vec3(maxX,maxY,maxZ));
+	m_meshVertices.push_back(vec3(maxX,maxY,minZ));
+	m_meshVertices.push_back(vec3(maxX,minY,maxZ));
+	m_meshVertices.push_back(vec3(maxX,minY,minZ));
+	m_meshVertices.push_back(vec3(minX,maxY,maxZ));
+	m_meshVertices.push_back(vec3(minX,maxY,minZ));
+	m_meshVertices.push_back(vec3(minX,minY,maxZ));
+	m_meshVertices.push_back(vec3(minX,minY,minZ));
 }
 
 void Collider::UpdateRenderer()
@@ -74,6 +75,6 @@ void Collider::UpdateRenderer()
 	m_colliderRenderer->CleanUp();
 	m_colliderRenderer->GenerateVertexArrayID();
 	m_colliderRenderer->m_meshVertices = m_meshVertices;
-	m_colliderRenderer->AssignMaterial("debugShader");
+	m_colliderRenderer->AssignMaterial("defaultShader");
 	m_colliderRenderer->GenerateArrays();
 }

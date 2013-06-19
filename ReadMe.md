@@ -2,7 +2,7 @@ BLAengine - MainDemo: Model Viewer
 ===================================
 
 "Vat is this ?"
-
+![alt tag](https://raw.github.com/vingt-2/BLAengine/master/BlaEngine-picture.png)
 =====
 
 This code repository holds the current evolution of a 3d rendering engine currently written for OpenGL.

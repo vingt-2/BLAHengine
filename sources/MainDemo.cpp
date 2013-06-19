@@ -141,7 +141,9 @@ int main( void )
 
 	GameChar* object_1 = new GameChar();
 
-	OBJImport::ImportMesh("./resources/models/bla.obj",object_1->meshRenderer);
+	OBJImport objImport;
+
+	objImport.ImportMesh("./resources/models/x-wing.obj",object_1->meshRenderer);
 	object_1->meshRenderer->AssignMaterial("defaultShader");
 	object_1->meshRenderer->LoadTextureSample("earthDiffuse","texture");
 	object_1->meshRenderer->LoadTextureSample("earthNormals","normals");
@@ -149,13 +151,14 @@ int main( void )
 	mainRenderer->renderVector.push_back(object_1->meshRenderer);
 
 	object_1->rigidBody->SetPosition(vec3(0,0,0));
+	object_1->transform->scale = vec3(1.f);
 
 	object_1->rigidBody->frictionCoefficient = 0.01f;
 
 	Collider collider(object_1->transform);
 	collider.GenerateBoundingBoxFromMesh(object_1->meshRenderer);
 	collider.UpdateRenderer();
-	mainRenderer->debug->gizmoVector.push_back(collider.m_colliderRenderer);
+	mainRenderer->renderVector.push_back(collider.m_colliderRenderer);
 
 	mainScene->AddObject(object_1);
 

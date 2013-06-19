@@ -11,7 +11,11 @@ class OBJImport
 {
 public:
 	static bool OldImportMesh(char* filename);
-	static bool ImportMesh(const string filename, MeshRenderer *mesh);
+
+	bool ImportMesh(const string filename, MeshRenderer *mesh);
+
+
+
 
 	//Constr/deconstr
 	OBJImport(void);
@@ -19,5 +23,12 @@ public:
 
 private: 
 
+	long m_currentMaxVertexPos;
+	long m_currentMaxUVPos;
+	long m_currentMaxNormalPos;
+
+	long FindVertexAtIndex(long index);
+	long FindUVAtIndex(long index);
+	long FindNormalAtIndex(long index);
 };
 
