@@ -1,15 +1,12 @@
 #pragma once
-
-#include "../../Std/Graphics.h"
 #include "../../Std/std.h"
 #include "./Transform.h"
-#include "../../Engine/SharedRessources.h"
-
+#include "../../Engine/SharedResources.h"
+#define BLA_LINE_RENDER 0x0003
 class MeshRenderer
 {
 public:
-
-	//Class Variables
+    
 	Transform* m_modelTransform;
 
 	vector<vec3> m_meshVertices;
@@ -20,15 +17,12 @@ public:
 
 	// Light Vector
 	vec3 m_directionalLight;
-
-	//Class functions
-
+    
 	MeshRenderer(Transform* modelTransform);
 	~MeshRenderer(void);
 
 	bool AssignMaterial(const char* name);
 	bool LoadTextureSample(const char* textureRessourceName,const char* sampleName);
-
 	bool Draw(mat4 projection, mat4 view);
 
 	// OpenGL Buffer related Code:
@@ -54,13 +48,13 @@ public:
 			elementsPerObject,			// size
 			GL_FLOAT,					// type
 			GL_FALSE,					// normalized?
-			0,							// stride
+			0,                          // stride
 			(void*)0					// array buffer offset
 		);
 
 		glBindVertexArray (0);
 
-		pair<GLuint,pair<GLuint,GLuint>> bufferObject = pair<GLuint,pair<GLuint,GLuint>> (bufferObjectID,pair<GLuint,GLuint>(attributeNumber,elementsPerObject));
+		pair<GLuint,pair<GLuint,GLuint> > bufferObject = pair<GLuint,pair<GLuint,GLuint> > (bufferObjectID,pair<GLuint,GLuint>(attributeNumber,elementsPerObject));
 
 		m_vboIDVector.push_back(bufferObject);
 	}
@@ -73,23 +67,20 @@ public:
 	bool IsMeshValid();
 
 private:
-	//private members
-	vector<pair<GLuint,GLuint>> m_activeTextures;
+    
+    vector <pair<GLuint,GLuint> > m_activeTextures;
 	
 	// ID of an openGL object (VAO) that lists VBOs 
 	GLuint m_vertexArrayID;
 	GLuint m_sizeOfVertexArray;
 	// Keeps track of the VBOs we've generated and added to our VAO
-	vector<pair<GLuint,pair<GLuint,GLuint>>> m_vboIDVector;
+	vector<pair<GLuint,pair<GLuint,GLuint> > > m_vboIDVector;
 
 	// All our textures samplers passed uniform to the shader
-	vector<pair<GLuint,GLuint>> m_textureSamplersVector;
+	vector<pair<GLuint,GLuint> > m_textureSamplersVector;
 
 	// Constant shader Infos
 	GLuint m_programID;
 	GLuint m_matrixID;
-
-	//Private functions
-
 };
 

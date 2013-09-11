@@ -4,20 +4,33 @@ It's not part of the final architecture but is merely there to test the new feat
 Hence the name "MainDemo.cpp".
 */
 
+#define FULLSCREEN_SETTING 1
 
 // Include standard headers
-#pragma once
 #include "./Std/std.h"
-#include "./Engine/Renderer.h"
-#include "./Engine/SharedRessources.h"
+#include "./std/Graphics.h"
+
+#ifdef USE_OSXGL32_RENDERER
+#include "./Engine/OSXGL32_Renderer.h"
+#define RENDERER 0
+#endif
+
+#ifdef USE_WINGL33_RENDERER
+#include "./Engine/WINGL33_Renderer.h"
+#define RENDERER 1
+#endif
+
 #include "./Game/Scene.h"
-#include "Game\GameComponents\Collider.h"
+#include "./Game/CursorPicker.h"
+#include "./Game/GameSingleton.h"
+#include "./Game/GameComponents/Collider.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
 
+GameSingleton* gameSingleton;
 Renderer* mainRenderer;
-SharedRessources* sharedRessources;
+SharedResources* sharedResources;
 Debug* debug;
 Scene* mainScene;
 
@@ -45,10 +58,11 @@ void LockFramerate(GLfloat hzFrequency)
 	}
 }
 
-void SimpleControls(Camera* object)
+void SimpleControls(GameChar* object)
 {
 
 	vec3 tangentForce = vec3(0);
+    vec3 movementForce = vec3(0);
 	int coeff = 5;
 
 	if ( (glfwGetKey(mainRenderer->GetWindow(),GLFW_KEY_LSHIFT) == GLFW_PRESS) )
@@ -64,10 +78,11 @@ void SimpleControls(Camera* object)
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'D'  ) == GLFW_PRESS) )
 		tangentForce.x = -1;
 
-	vec3 cameraForce = object->transform->LocalDirectionToWorld(tangentForce);
+	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
 
-	object->rigidBody->PushForce(cameraForce,RigidBody::Force::Impulse);
+	object->m_rigidBody->PushForce(cameraForce,RigidBody::Force::Impulse);
+    //object->
 
 
 	if( (glfwGetMouseButton(mainRenderer->GetWindow(), 1 ) == GLFW_PRESS) )
@@ -98,7 +113,7 @@ void SimpleControls(Camera* object)
 
 		cameraTorque *= 5;
 
-		object->rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
+		object->m_rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
 	}
 	else
 	{
@@ -115,27 +130,38 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 
 int main( void )
 {
-	sharedRessources			= new SharedRessources();
+	sharedResources             = new SharedResources();
 	debug						= new Debug();
-	mainRenderer				= new Renderer("BLAengine - OBJViewer");
-	mainScene					= new Scene();
+    
+    
+    int mainRenderFullScreen    = FULLSCREEN_SETTING;
+
+
+	//mainRenderer				= new OSXGL32Renderer((char*)"BLAengine - OBJViewer",mainRenderFullScreen);
+	mainRenderer				= new GL33Renderer((char*)"BLAengine - MainDemo",mainRenderFullScreen);
+
+    gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
+    
+    mainScene					= new Scene();
+    
+    CursorPicker cursorPicker(gameSingleton);
 
 	bool terminationRequest = false;
 
 	// OPENGL CONTEXT UP AND RUNNING
 	if(!mainRenderer->GetStatus())
 	{
-		debug->OutputToDebug("Failed to initiate Context!");
+		debug->OutputToDebug((char*)"Failed to initiate Context!");
 		return -1;
 	}
 
 	// NOW WE CAN LOAD SOME RESSOURCES
-	sharedRessources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
-	sharedRessources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
+	sharedResources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
+	sharedResources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
 	
-	sharedRessources->loadBMP_custom("testDiffuse","./resources/textures/texture.bmp");
-	sharedRessources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
-	sharedRessources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
+	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/texture.bmp");
+	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
+	sharedResources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
 
 	mainRenderer->debug = debug;
 
@@ -143,28 +169,28 @@ int main( void )
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("./resources/models/x-wing.obj",object_1->meshRenderer);
-	object_1->meshRenderer->AssignMaterial("defaultShader");
-	object_1->meshRenderer->LoadTextureSample("earthDiffuse","texture");
-	object_1->meshRenderer->LoadTextureSample("earthNormals","normals");
-	object_1->meshRenderer->GenerateArrays();
-	mainRenderer->renderVector.push_back(object_1->meshRenderer);
+	objImport.ImportMesh("./resources/models/x-wing.obj",object_1->m_meshRenderer);
+	object_1->m_meshRenderer->AssignMaterial("defaultShader");
+	object_1->m_meshRenderer->LoadTextureSample("earthDiffuse","texture");
+	object_1->m_meshRenderer->LoadTextureSample("earthNormals","normals");
+	object_1->m_meshRenderer->GenerateArrays();
+	mainRenderer->renderVector.push_back(object_1->m_meshRenderer);
 
-	object_1->rigidBody->SetPosition(vec3(0,0,0));
-	object_1->transform->scale = vec3(1.f);
+	object_1->m_rigidBody->SetPosition(vec3(0,0,0));
+	object_1->m_transform->scale = vec3(1.f);
 
-	object_1->rigidBody->frictionCoefficient = 0.01f;
+	object_1->m_rigidBody->frictionCoefficient = 0.01f;
 
-	Collider collider(object_1->transform);
-	collider.GenerateBoundingBoxFromMesh(object_1->meshRenderer);
+	Collider collider(object_1->m_transform);
+	collider.GenerateBoundingBoxFromMesh(object_1->m_meshRenderer);
 	collider.UpdateRenderer();
 	mainRenderer->renderVector.push_back(collider.m_colliderRenderer);
 
 	mainScene->AddObject(object_1);
 
 	Camera* mainCamera = new Camera();
-	mainCamera->rigidBody->SetPosition(vec3(0,-10,-15));
-	mainCamera->rigidBody->SetRotation(vec3(3.14/9,0,0));
+	mainCamera->m_rigidBody->SetPosition(vec3(0,-10,-15));
+	mainCamera->m_rigidBody->SetRotation(vec3(3.14/9,0,0));
 	mainCamera->isControlEnabled = true;
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
@@ -174,6 +200,8 @@ int main( void )
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
+    
+    Ray ray(vec3(0),vec3(0),0);
 
 	while(!terminationRequest)
 	{
@@ -190,32 +218,51 @@ int main( void )
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{
-			object_1->rigidBody->PushTorque(vec3(0,10,0),RigidBody::Force::Impulse);
+			object_1->m_rigidBody->PushTorque(vec3(0,10,0),RigidBody::Force::Impulse);
 		}
 
-		if( (glfwGetKey(mainRenderer->GetWindow(), 'G'  ) == GLFW_PRESS) )
+		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )
 		{
 			light->GetTransform()->rotation += vec3(0.f,0.1f,0.f);
 		}
+        else if( (glfwGetKey(mainRenderer->GetWindow(), 'L'  ) == GLFW_PRESS) )
+		{
+			light->GetTransform()->rotation += vec3(0.f,-0.1f,0.f);
+		}
+        if( (glfwGetKey(mainRenderer->GetWindow(), 'I'  ) == GLFW_PRESS) )
+        {
+            light->GetTransform()->rotation += vec3(0.f,0.f,0.1f);
+        }
+        else if( (glfwGetKey(mainRenderer->GetWindow(), 'K'  ) == GLFW_PRESS) )
+        {
+            light->GetTransform()->rotation += vec3(0.f,0.f,-0.1f);
+        }
+            
+        if(glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 0))
+        {
+            ray = cursorPicker.ScreenToRay(1000);
+			vec3 hitOnPlane = ray.RayToPlaneIntersection(vec3(0),vec3(1,0,0),vec3(0,0,1)).hitPosition;
+			object_1->m_rigidBody->SetPosition(hitOnPlane);
+		}
 
 		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
+        debug->DrawRay(ray.origin,ray.direction,ray.length);
 
 		SimpleControls(mainCamera);
-
-
+        
 		mainCamera->Update();
-		mainRenderer->Update();
-			
+		mainRenderer->Update();		
 
 		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.05f));
 
-		debug->DrawBasis(object_1->transform,1.f);
+		debug->DrawBasis(object_1->m_transform,1.f);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESC ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{
 			terminationRequest = true;
 		}
 	}
+
 
 	glfwTerminate();
 

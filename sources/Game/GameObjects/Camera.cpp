@@ -4,7 +4,7 @@
 Camera::Camera():
 	m_projection(mat4(1))
 {
-	rigidBody = new RigidBody(transform);
+	m_rigidBody = new RigidBody(m_transform);
 	UpdateView();
 
 	isControlEnabled = false;
@@ -14,7 +14,7 @@ Camera::Camera():
 Camera::~Camera(void)
 {
 	GameObject::~GameObject();
-	rigidBody->~RigidBody();
+	m_rigidBody->~RigidBody();
 }
 
 void Camera::SetProjection(mat4 projection)
@@ -24,8 +24,8 @@ void Camera::SetProjection(mat4 projection)
 
 void Camera::UpdateView()
 {
-	m_viewTransform.position = -transform->position;
-	m_viewTransform.rotation = 1.f * transform->rotation;
+	m_viewTransform.position = -m_transform->position;
+	m_viewTransform.rotation = 1.f * m_transform->rotation;
 	m_viewTransform.UpdateTransform();
 	m_viewTransform.transformMatrix = inverse(m_viewTransform.transformMatrix);
 }

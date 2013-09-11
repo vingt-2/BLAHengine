@@ -22,5 +22,5 @@
 
 	vec3 DirectionalLight::GetDirection()
 	{
-		return transform->LocalDirectionToWorld(m_lightDirection);
+		return m_transform->LocalDirectionToWorld(m_lightDirection);
 	}

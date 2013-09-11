@@ -1,35 +1,46 @@
 #pragma once
-#include "../Tools/OBJImport.h"
-#include "../Game/GameObjects/Camera.h"
 #include "../Std/std.h"
 #include "../Engine/Debug.h"
+#include "../Tools/OBJImport.h"
+#include "../Game/GameObjects/Camera.h"
 
 class Renderer
 {
 public:
+    enum RendererType
+    {
+        WIN_GL_33,
+        OSX_GL_32
+    };
+    
 	Camera* mainCamera;
 	Debug* debug;
+    
 
 	vector<MeshRenderer*> renderVector;
 
 
-	bool Update();
+	virtual bool Update() = 0;
 	void Resize(int xRes,int yRes);
-	bool GetStatus(){	return isContextEnabled;	}
-	GLFWwindow* GetWindow() {	return glfwWindow;	}
+    
+	bool GetStatus()        const   {	return isContextEnabled;	}
+	GLFWwindow* GetWindow() const   {	return glfwWindow;	}
+    vec2 GetRenderSize()    const   {   return renderSize;  }
+    
 
-
-
-	Renderer(char* windowTitle);
-	Renderer(char* windowTitle, vec2 screenSize);
+	Renderer(char* windowTitle,bool isFullScreen);
+	Renderer(char* windowTitle, bool isFullScreen, vec2 screenSize);
 	~Renderer(void);
 
-private:
+protected:
 
-	vec2 screenSize;
-	GLFWwindow* glfwWindow;
-	GLFWwindow* InitializeContext(char* windowTitle,vec2 screenSize);
-	bool isContextEnabled;
-
+    GLFWwindow* glfwWindow;
+    
+	
+    vec2 renderSize;
+    bool isContextEnabled;
+    bool isFullScreen;
+    
+    virtual GLFWwindow* InitializeContext(char* windowTitle) = 0;
 };
 

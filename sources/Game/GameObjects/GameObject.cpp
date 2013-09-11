@@ -3,16 +3,16 @@
 
 GameObject::GameObject(void)
 {
-	transform = new Transform();
+	m_transform = new Transform();
 }
 
 
 GameObject::~GameObject(void)
 {
-	transform->~Transform();
+	m_transform->~Transform();
 }
 
 void GameObject::UpdateTransform()
 {
-	this->transform->UpdateTransform();
+	this->m_transform->UpdateTransform();
 }

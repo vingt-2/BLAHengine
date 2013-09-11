@@ -1,5 +1,4 @@
 #pragma once
-#include "../Std/Graphics.h"
 #include "../Game/GameComponents/MeshRenderer.h"
 
 /*
@@ -24,7 +23,7 @@ public:
 	void DrawBasis(Transform* transform,GLfloat opacity);
 
 	//Common debug::
-	static void Debug::OutputToDebug(char* debug);
+	static void OutputToDebug(char* debug);
 
 	Debug(void);
 	~Debug(void);

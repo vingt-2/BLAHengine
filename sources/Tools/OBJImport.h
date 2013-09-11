@@ -1,8 +1,4 @@
 #pragma once
-
-/*Author: Vingt-2
-	BLAengine
-*/
 #include "../Std/std.h"
 #include "../Helpers/Helpers.h"
 #include "../Game/GameObjects/GameObject.h"
@@ -14,10 +10,6 @@ public:
 
 	bool ImportMesh(const string filename, MeshRenderer *mesh);
 
-
-
-
-	//Constr/deconstr
 	OBJImport(void);
 	~OBJImport(void);
 

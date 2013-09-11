@@ -10,7 +10,7 @@ public:
 
 	void SetDirection(vec3 direction);
 	vec3 GetDirection();
-	Transform* GetTransform() { return transform; } ;
+	Transform* GetTransform() { return m_transform; } ;
 	void Update();
 
 private:

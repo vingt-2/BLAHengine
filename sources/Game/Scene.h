@@ -3,6 +3,7 @@
 #include "../Game/GameObjects/GameManager.h"
 #include "../Game/GameObjects/GameChar.h"
 #include "../Game/GameObjects/DirectionalLight.h"
+#include "../Game/GameObjects/PointLight.h"
 
 class Scene
 {
@@ -25,5 +26,5 @@ private:
 	vector<GameObject*>  m_sceneObjectsVector;
 
 	vector<DirectionalLight*> m_directionalLights;
-
+    vector<PointLight*> m_pointLights;
 };

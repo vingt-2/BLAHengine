@@ -3,8 +3,8 @@
 class GameChar : public GameObject
 {
 public:
-	MeshRenderer* meshRenderer;
-	RigidBody* rigidBody;
+	MeshRenderer* m_meshRenderer;
+	RigidBody* m_rigidBody;
 
 	void Update();
 

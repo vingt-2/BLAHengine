@@ -4,9 +4,9 @@ MeshRenderer::MeshRenderer(Transform* modelTransform):
 	m_meshVertices(vector<vec3>()),
 	m_meshNormals	(vector<vec3>()),
 	m_meshUVs		(vector<vec2>()),
-	m_vboIDVector	(vector<pair<GLuint,pair<GLuint,GLuint>>>()),
-	m_textureSamplersVector (vector<pair<GLuint,GLuint>>()),
-	m_renderType  (GL_TRIANGLES),
+	m_vboIDVector	(vector<pair<GLuint,pair<GLuint,GLuint> > >()),
+	m_textureSamplersVector (vector<pair<GLuint,GLuint> >()),
+	m_renderType    (GL_TRIANGLES),
 	m_directionalLight(vec3(0))
 {
 	this->m_modelTransform = modelTransform;
@@ -24,13 +24,13 @@ MeshRenderer::~MeshRenderer(void)
 
 string MeshRenderer::ToString()
 {
-	return ("MRenderer: " + m_meshVertices.size()) ; 
+	return ("MRenderer: " + m_meshVertices.size()) ;
 }
 
 bool MeshRenderer::AssignMaterial(const char* name)
 {
-	extern SharedRessources* sharedRessources;
-	m_programID = sharedRessources->GetMaterial(name);
+	extern SharedResources* sharedResources;
+	m_programID = sharedResources->GetMaterial(name);
 	if(m_programID != 0)
 	{
 		m_matrixID = glGetUniformLocation(m_programID, "MVP");
@@ -41,11 +41,11 @@ bool MeshRenderer::AssignMaterial(const char* name)
 
 bool MeshRenderer::LoadTextureSample(const char* textureRessourceName,const char* sampleName)
 {
-	extern SharedRessources* sharedRessources;
+	extern SharedResources* sharedResources;
 	if(m_programID != 0)
 	{
 		GLuint textureID = glGetUniformLocation(m_programID, sampleName);
-		GLuint textureRessource = sharedRessources->GetTexture(textureRessourceName);
+		GLuint textureRessource = sharedResources->GetTexture(textureRessourceName);
 
 		m_textureSamplersVector.push_back(pair<GLuint,GLuint>(textureID,textureRessource));
 
@@ -92,7 +92,7 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 	glBindVertexArray (m_vertexArrayID);
 
 	// Draw VAO
-	glDrawArrays(m_renderType,0, m_meshVertices.size());
+	glDrawArrays(m_renderType,0, (GLint)m_meshVertices.size());
 
 	glBindVertexArray (0);
 
@@ -106,10 +106,12 @@ bool MeshRenderer::Draw(const mat4 projection,const mat4 view)
 }
 
 // OpenGL Buffers related Code:
+// HARDCODED FUNCTION TO SUIT MY SHADERS NEEDS !
 bool MeshRenderer::GenerateArrays()
 {
 	//HARDCODED, suits:
 	// Input vertex data, different for all executions of this shader.
+    
 	//layout(location = 0) in vec3 vertexPosition_modelspace;
 	//layout(location = 1) in vec2 vertexUV;
 	//layout(location = 2) in vec3 vertexNormals;

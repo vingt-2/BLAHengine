@@ -4,8 +4,8 @@
 class GameObject
 {
 public:
-Transform* transform;
-std::string objectName;
+Transform* m_transform;
+std::string m_objectName;
 
 virtual void Update() =0;
 

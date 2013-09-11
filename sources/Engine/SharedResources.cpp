@@ -1,17 +1,17 @@
-#include "SharedRessources.h"
+#include "SharedResources.h"
 
 
-SharedRessources::SharedRessources(void):
+SharedResources::SharedResources(void):
 	ressourceTable(map<std::string,GLuint>())
 {
 }
 
 
-SharedRessources::~SharedRessources(void)
+SharedResources::~SharedResources(void)
 {
 }
 
-GLuint SharedRessources::LoadMaterial(const char * name, const char * vertex_file_path,const char * fragment_file_path)
+GLuint SharedResources::LoadMaterial(const char * name, const char * vertex_file_path,const char * fragment_file_path)
 {
 
 	// Create the shaders
@@ -28,7 +28,7 @@ GLuint SharedRessources::LoadMaterial(const char * name, const char * vertex_fil
 			VertexShaderCode += "\n" + Line;
 		VertexShaderStream.close();
 	}else{
-		printf("Impossible to open %s. Are you in the right directory ?\n", vertex_file_path);
+		printf("%s could not be opened.\n", vertex_file_path);
 		return 0;
 	}
 
@@ -105,7 +105,7 @@ GLuint SharedRessources::LoadMaterial(const char * name, const char * vertex_fil
 	return ProgramID;
 }
 
-bool SharedRessources::loadBMP_custom(const char * name, const char * imagepath)
+bool SharedResources::loadBMP_custom(const char * name, const char * imagepath)
 {
 
 	printf("Reading image %s\n", imagepath);
@@ -122,13 +122,13 @@ bool SharedRessources::loadBMP_custom(const char * name, const char * imagepath)
 	FILE * file = fopen(imagepath,"rb");
 	if (!file) 
 	{
-		printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", imagepath);
+		printf("%s could not be opened.\n", imagepath);
 		return 0;
 	}
 
 	// Read the header, i.e. the 54 first bytes
 
-	// If less than 54 byes are read, problem
+	// If less than 54 bytes are read, problem
 	if ( fread(header, 1, 54, file)!=54 ){
 		printf("Not a correct BMP file\n");
 		return 0;
@@ -191,7 +191,7 @@ bool SharedRessources::loadBMP_custom(const char * name, const char * imagepath)
 }
 
 
-bool SharedRessources::loadDDS(const char * name, const char * imagepath)
+bool SharedResources::loadDDS(const char * name, const char * imagepath)
 {
 
 	unsigned char header[124];
@@ -279,12 +279,12 @@ bool SharedRessources::loadDDS(const char * name, const char * imagepath)
 }
 
 // No difference between getting a texture ID and a shader program ID yet, may come later, who knows
-GLuint SharedRessources::GetMaterial(const char* name)
+GLuint SharedResources::GetMaterial(const char* name)
 {
 	return ressourceTable[name];
 }
 
-GLuint SharedRessources::GetTexture(const char* name)
+GLuint SharedResources::GetTexture(const char* name)
 {
 	return ressourceTable[name];
 }

@@ -3,20 +3,20 @@
 
 GameChar::GameChar(void)
 {
-	rigidBody		= new RigidBody(transform);
-	meshRenderer	= new MeshRenderer(transform);
+	m_rigidBody		= new RigidBody(m_transform);
+	m_meshRenderer	= new MeshRenderer(m_transform);
 }
 
 
 GameChar::~GameChar(void)
 {
 	GameObject::~GameObject();
-	rigidBody->~RigidBody();
-	meshRenderer->~MeshRenderer();
+	m_rigidBody->~RigidBody();
+	m_meshRenderer->~MeshRenderer();
 }
 
 void GameChar::Update()
 {
 	this->UpdateTransform();
-	rigidBody->Update();
+	m_rigidBody->Update();
 }

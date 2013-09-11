@@ -22,7 +22,7 @@ void Transform::UpdateTransform()
 	);
 
 	float phi		= rotation.x;
-	float theta	= rotation.y;
+	float theta     = rotation.y;
 	float psy		= rotation.z;
 
 	// Yep, I'm using a good old fashion rotation matrix. So what ?

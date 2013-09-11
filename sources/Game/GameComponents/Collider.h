@@ -10,11 +10,16 @@ public:
 	~Collider();
 
 	vector<vec3> m_meshVertices;
+    
 	MeshRenderer* m_colliderRenderer;
+    
+    GLfloat m_boundingSphereRadius;
 
 	Transform* m_parentTransform;
 
 	void GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer);
-	void UpdateRenderer();
+	void GenerateBoundingSphereRadius(MeshRenderer* meshRenderer);
+    void UpdateRenderer();
 
+    
 };

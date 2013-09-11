@@ -74,6 +74,9 @@ void Debug::DrawBasis(Transform* transform,GLfloat opacity)
 
 void Debug::OutputToDebug(char* debug)
 {
-	OutputDebugString(debug);
-	OutputDebugString("\n");
+    
+    // WINDOWS SPECIFIC WINDOW HANDLER
+    
+    //	OutputDebugString(debug);
+    //	OutputDebugString("\n");
 }

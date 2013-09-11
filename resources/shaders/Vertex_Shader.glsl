@@ -9,6 +9,7 @@ layout(location = 2) in vec3 vertexNormals;
 out vec2 UVs;
 out vec3 normal;
 out vec3 lightVector;
+out mat4 inverseTransform;
 
 // Values that stay constant for the whole mesh.
 uniform mat4 MVP;
@@ -23,6 +24,8 @@ void main()
 	UVs = vertexUV;
 	normal = vertexNormals;
 
-	lightVector = normalize((inverse(modelTransform) * vec4(directionalLight,0)).rgb);
+	inverseTransform  = inverse(modelTransform);
+	
+	lightVector = normalize((inverseTransform * vec4(directionalLight,0)).rgb);
 }
 

@@ -5,7 +5,7 @@ Collider::Collider(Transform* parentTransform):
 	m_colliderRenderer(new MeshRenderer(parentTransform))
 {
 	m_parentTransform = parentTransform;
-	m_colliderRenderer->m_renderType = 0x0003;
+	m_colliderRenderer->m_renderType = BLA_LINE_RENDER;
 }
 
 Collider::~Collider()
@@ -14,7 +14,7 @@ Collider::~Collider()
 
 void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 {
-	cout << "\n [Collider] Generating Bounding Box From Mesh: ";
+	cout << "[Collider] Generating Bounding Box From Mesh: ";
 
 	GLfloat maxX, maxY, maxZ, minX, minY, minZ;
 
@@ -59,7 +59,7 @@ void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 		}
 	}
 
-	cout << "(" << minX << "," << minY << "," << minZ << ")" <<  "(" << maxX << "," << maxY << "," << maxZ << ")";
+	cout << "(" << minX << "," << minY << "," << minZ << ")" <<  "(" << maxX << "," << maxY << "," << maxZ << "). \n";
 	m_meshVertices.push_back(vec3(maxX,maxY,maxZ));
 	m_meshVertices.push_back(vec3(maxX,maxY,minZ));
 	m_meshVertices.push_back(vec3(maxX,minY,maxZ));
@@ -68,6 +68,20 @@ void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 	m_meshVertices.push_back(vec3(minX,maxY,minZ));
 	m_meshVertices.push_back(vec3(minX,minY,maxZ));
 	m_meshVertices.push_back(vec3(minX,minY,minZ));
+}
+void Collider::GenerateBoundingSphereRadius(MeshRenderer *meshRenderer)
+{
+    /*float maxVertexLength = meshRenderer->m_meshVertices.at(0).length();
+    for(GLuint i = 1; i<meshRenderer->m_meshVertices.size(); i++)
+	{
+		vec3 vertex = meshRenderer->m_meshVertices.at(i);
+        
+        if(maxVertexLength < vertex.length())
+        {
+            maxVertexLength = vertex.length();
+        }
+    }
+    m_boundingSphereRadius = maxVertexLength;*/
 }
 
 void Collider::UpdateRenderer()

@@ -1,14 +1,14 @@
 #include "RigidBody.h"
 
 
-RigidBody::RigidBody(Transform* p):
-	m_forcesVector(vector<Force>()),
-	m_torquesVector(vector<Force>()),
-	m_acceleration(vec3(0)),
-	m_velocity(vec3(0)),
-	m_angularVelocity(vec3(0)),
-	m_previousPosition(vec3(0)),
-	m_previousRotation(vec3(0))
+RigidBody::RigidBody    (Transform* p):
+	m_forcesVector      (vector<Force>()),
+	m_torquesVector     (vector<Force>()),
+	m_acceleration      (vec3(0)),
+	m_velocity          (vec3(0)),
+	m_angularVelocity   (vec3(0)),
+	m_previousPosition  (vec3(0)),
+	m_previousRotation  (vec3(0))
 {
 	int extern fps;
 	m_transform = p;
