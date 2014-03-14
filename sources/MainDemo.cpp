@@ -4,7 +4,7 @@ It's not part of the final architecture but is merely there to test the new feat
 Hence the name "MainDemo.cpp".
 */
 
-#define FULLSCREEN_SETTING 1
+#define FULLSCREEN_SETTING 0
 
 // Include standard headers
 #include "./Std/std.h"
@@ -65,7 +65,8 @@ void SimpleControls(GameChar* object)
     vec3 movementForce = vec3(0);
 	int coeff = 5;
 
-	if ( (glfwGetKey(mainRenderer->GetWindow(),GLFW_KEY_LSHIFT) == GLFW_PRESS) )
+
+	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
 		coeff = 25;
 
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'W'  ) == GLFW_PRESS) )
@@ -169,7 +170,7 @@ int main( void )
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("./resources/models/x-wing.obj",object_1->m_meshRenderer);
+	objImport.ImportMesh("./resources/models/earth.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	object_1->m_meshRenderer->LoadTextureSample("earthDiffuse","texture");
 	object_1->m_meshRenderer->LoadTextureSample("earthNormals","normals");
@@ -257,7 +258,7 @@ int main( void )
 
 		debug->DrawBasis(object_1->m_transform,1.f);
 
-		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESC ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
+		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{
 			terminationRequest = true;
 		}

@@ -92,7 +92,9 @@ GLFWwindow* OSXGL32Renderer::InitializeContext(char* windowTitle)
     {
         monitor = glfwGetPrimaryMonitor();
 
-        renderSize = vec2(glfwGetVideoMode(monitor).width,glfwGetVideoMode(monitor).height);
+		const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
+
+		renderSize = vec2(videoMode->width, videoMode->height);
     }
     
 	window = glfwCreateWindow(renderSize.x, renderSize.y,windowTitle, monitor,NULL);

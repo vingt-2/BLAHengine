@@ -6,7 +6,7 @@
 // Include GLFW
 #define GLFW_INCLUDE_GLU
 #define GLFW_INCLUDE_GLCOREARB
-#include <GL/glfw3.h>
+#include <GLFW/glfw3.h>
 #endif
 
 #ifdef USE_WINGL33_RENDERER
@@ -15,6 +15,6 @@
 #include <GL/glew.h>
 // Include GLFW
 #define GLFW_INCLUDE_GLU
-#include <GL/glfw3.h>
+#include <GLFW/glfw3.h>
 #endif
 

@@ -18,45 +18,59 @@ void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 
 	GLfloat maxX, maxY, maxZ, minX, minY, minZ;
 
-	for(GLuint i = 0; i<meshRenderer->m_meshVertices.size(); i++)
+	if (meshRenderer->m_meshVertices.size() > 0)
 	{
-		vec3 vertex = meshRenderer->m_meshVertices.at(i);
-		if(i == 0)
+
+		for (GLuint i = 0; i < meshRenderer->m_meshVertices.size(); i++)
 		{
-			maxX = vertex.x;
-			minX = vertex.x;
-			maxY = vertex.y;
-			minY = vertex.y;
-			maxZ = vertex.z;
-			minZ = vertex.z;
-		}
-		else
-		{
-			if( vertex.x > maxX )
+			vec3 vertex = meshRenderer->m_meshVertices.at(i);
+			if (i == 0)
 			{
 				maxX = vertex.x;
-			}
-			if( vertex.x < minX )
-			{
 				minX = vertex.x;
-			}
-			if( vertex.y > maxY )
-			{
 				maxY = vertex.y;
-			}
-			if( vertex.y < minY )
-			{
 				minY = vertex.y;
-			}
-			if( vertex.z > maxZ )
-			{
 				maxZ = vertex.z;
-			}
-			if( vertex.z < minZ )
-			{
 				minZ = vertex.z;
 			}
+			else
+			{
+				if (vertex.x > maxX)
+				{
+					maxX = vertex.x;
+				}
+				if (vertex.x < minX)
+				{
+					minX = vertex.x;
+				}
+				if (vertex.y > maxY)
+				{
+					maxY = vertex.y;
+				}
+				if (vertex.y < minY)
+				{
+					minY = vertex.y;
+				}
+				if (vertex.z > maxZ)
+				{
+					maxZ = vertex.z;
+				}
+				if (vertex.z < minZ)
+				{
+					minZ = vertex.z;
+				}
+			}
 		}
+	}
+	else
+	{
+		// Generate a canonical bounding box.
+		maxX = 1.f;
+		minX = -1.f;
+		maxY = 1.f;
+		minY = -1.f;
+		maxZ = 1.f;
+		minZ = -1.f;
 	}
 
 	cout << "(" << minX << "," << minY << "," << minZ << ")" <<  "(" << maxX << "," << maxY << "," << maxZ << "). \n";
