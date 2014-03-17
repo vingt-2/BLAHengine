@@ -12,9 +12,9 @@ RigidBody::RigidBody    (Transform* p):
 {
 	int extern fps;
 	m_transform = p;
-	deltaTime = 1.f/fps;
-	frictionCoefficient = 0.05f;
-	mass = 1.f;
+	m_deltaTime = 1.f/fps;
+	m_frictionCoefficient = 0.05f;
+	m_mass = 1.f;
 }
 
 
@@ -71,11 +71,11 @@ void RigidBody::UpdateAcceleration()
 
 		if(currentForce.m_mode == Force::ForceMode::Impulse)
 		{
-			newAcceleration += currentForce.m_force / mass;
+			newAcceleration += currentForce.m_force / m_mass;
 		}
 		else if(currentForce.m_mode == Force::ForceMode::Constant)
 		{
-			newAcceleration += currentForce.m_force / mass;
+			newAcceleration += currentForce.m_force / m_mass;
 			newVector.push_back(currentForce);
 		}
 	}
@@ -91,11 +91,11 @@ void RigidBody::UpdateAcceleration()
 
 		if(currentForce.m_mode == Force::ForceMode::Impulse)
 		{
-			newAngular += currentForce.m_force / mass;
+			newAngular += currentForce.m_force / m_mass;
 		}
 		else if(currentForce.m_mode == Force::ForceMode::Constant)
 		{
-			newAcceleration += currentForce.m_force / mass;
+			newAcceleration += currentForce.m_force / m_mass;
 			newAngularVector.push_back(currentForce);
 		}
 	}
@@ -119,10 +119,10 @@ void RigidBody::UpdateVelocity()
 
 void RigidBody::UpdateTransform()
 {
-	vec3 friction = -frictionCoefficient*m_velocity;
+	vec3 friction = -m_frictionCoefficient*m_velocity;
 	//	P = dP + d2P - fdP
-	m_transform->position += m_velocity + m_acceleration*deltaTime*deltaTime + friction;
+	m_transform->position += m_velocity + m_acceleration*m_deltaTime*m_deltaTime + friction;
 
-	vec3 angularFriction = -frictionCoefficient*m_angularVelocity;
-	m_transform->rotation += m_angularVelocity + m_angularAcceleration*deltaTime*deltaTime + angularFriction;
+	vec3 angularFriction = -m_frictionCoefficient*m_angularVelocity;
+	m_transform->rotation += m_angularVelocity + m_angularAcceleration*m_deltaTime*m_deltaTime + angularFriction;
 }

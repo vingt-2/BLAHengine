@@ -164,13 +164,13 @@ int main( void )
 	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
 
-	mainRenderer->debug = debug;
+	mainRenderer->m_debug = debug;
 
 	GameChar* object_1 = new GameChar();
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("./resources/models/earth.obj",object_1->m_meshRenderer);
+	objImport.ImportMesh("./resources/models/x-wing.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	object_1->m_meshRenderer->LoadTextureSample("earthDiffuse","texture");
 	object_1->m_meshRenderer->LoadTextureSample("earthNormals","normals");
@@ -180,7 +180,7 @@ int main( void )
 	object_1->m_rigidBody->SetPosition(vec3(0,0,0));
 	object_1->m_transform->scale = vec3(1.f);
 
-	object_1->m_rigidBody->frictionCoefficient = 0.01f;
+	object_1->m_rigidBody->m_frictionCoefficient = 0.01f;
 
 	Collider collider(object_1->m_transform);
 	collider.GenerateBoundingBoxFromMesh(object_1->m_meshRenderer);
@@ -190,14 +190,14 @@ int main( void )
 	mainScene->AddObject(object_1);
 
 	Camera* mainCamera = new Camera();
-	mainCamera->m_rigidBody->SetPosition(vec3(0,-10,-15));
-	mainCamera->m_rigidBody->SetRotation(vec3(3.14/9,0,0));
-	mainCamera->isControlEnabled = true;
+	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
+	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
+	mainCamera->m_isControlEnabled = true;
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
 
-	mainRenderer->mainCamera = mainCamera;
+	mainRenderer->m_mainCamera = mainCamera;
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
@@ -247,12 +247,12 @@ int main( void )
 		}
 
 		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
-        debug->DrawRay(ray.origin,ray.direction,ray.length);
+		debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
 
 		SimpleControls(mainCamera);
         
 		mainCamera->Update();
-		mainRenderer->Update();		
+		mainRenderer->Update();
 
 		debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.05f));
 

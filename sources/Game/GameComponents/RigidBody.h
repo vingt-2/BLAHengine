@@ -28,10 +28,10 @@ public:
 		{}
 	};
 
-	float mass;
-	float frictionCoefficient;
+	float m_mass;
+	float m_frictionCoefficient;
 
-	float deltaTime;
+	float m_deltaTime;
 
 	Transform* m_transform;
 

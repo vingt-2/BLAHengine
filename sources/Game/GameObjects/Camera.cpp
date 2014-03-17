@@ -7,7 +7,7 @@ Camera::Camera():
 	m_rigidBody = new RigidBody(m_transform);
 	UpdateView();
 
-	isControlEnabled = false;
+	m_isControlEnabled = false;
 }
 
 
@@ -32,7 +32,7 @@ void Camera::UpdateView()
 
 void Camera::Update()
 {
-	if(isControlEnabled)
+	if(m_isControlEnabled)
 	{
 		//SimpleControls();
 	}

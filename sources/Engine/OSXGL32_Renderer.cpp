@@ -20,7 +20,7 @@ bool OSXGL32Renderer::Update()
     glfwMakeContextCurrent(glfwWindow);
     
 	//Adjust Projection and ViewPort.
-	mainCamera->SetProjection(glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x,-0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 100.0f));
+	m_mainCamera->SetProjection(glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x,-0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 100.0f));
 	glViewport(0,0,renderSize.x,renderSize.y);
     
 	// Clear Screen Buffer
@@ -33,27 +33,27 @@ bool OSXGL32Renderer::Update()
 	glEnable(GL_DEPTH_TEST);
 	for(int i = 0; i < renderVector.size();i++)
 	{
-		renderVector[i]->Draw(mainCamera->m_projection,mainCamera->m_viewTransform.transformMatrix);
+		renderVector[i]->Draw(m_mainCamera->m_projection,m_mainCamera->m_viewTransform.transformMatrix);
 	}
     
-	// Render Debug gizmos
+	// Render m_debug gizmos
     
-	// Disable Z-Buffer test for debug gizmos.
+	// Disable Z-Buffer test for m_debug gizmos.
 	glDisable(GL_DEPTH_TEST);
     
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-	for(int i = 0; i < debug->gizmoVector.size();i++)
+	for (int i = 0; i < m_debug->m_gizmoVector.size(); i++)
 	{
-		debug->gizmoVector[i]->Draw(mainCamera->m_projection,mainCamera->m_viewTransform.transformMatrix);
+		m_debug->m_gizmoVector[i]->Draw(m_mainCamera->m_projection, m_mainCamera->m_viewTransform.transformMatrix);
 	}
-	for(int i = 0; i < debug->gizmoVector.size();i++)
+	for (int i = 0; i < m_debug->m_gizmoVector.size(); i++)
 	{
-		debug->gizmoVector[i]->~MeshRenderer();
+		m_debug->m_gizmoVector[i]->~MeshRenderer();
 	}
 	
-	debug->gizmoVector.clear();
+	m_debug->m_gizmoVector.clear();
 	glDisable(GL_BLEND);
     
 	glfwSwapInterval(1);

@@ -3,17 +3,17 @@
 
 /*
  TODO: 
-	SEPARATE render DEBUG, for a specific CONTEXT (when added multiple windows and context)
-	And Common debug asserts
+	SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
+	And Common m_debug asserts
 */
 
 class Debug
 {
 public:
 
-	vector<MeshRenderer*> gizmoVector;
+	vector<MeshRenderer*> m_gizmoVector;
 
-	//Render Debug:
+	//Render m_debug:
 	void DrawLine(const vec3 origin,const vec3 destination);
 	void DrawLine(const vec3 origin,const vec3 destination,const vec4 color);
 	void DrawRay(const vec3 origin,const vec3 direction,const GLfloat length, const vec4 color);
@@ -22,8 +22,8 @@ public:
 	void DrawGrid(int size, const vec4 color);
 	void DrawBasis(Transform* transform,GLfloat opacity);
 
-	//Common debug::
-	static void OutputToDebug(char* debug);
+	//Common m_debug::
+	static void OutputToDebug(char* m_debug);
 
 	Debug(void);
 	~Debug(void);

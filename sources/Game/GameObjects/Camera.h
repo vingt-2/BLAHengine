@@ -8,7 +8,7 @@ public:
 	mat4		m_projection;
 
 	// States
-	bool isControlEnabled;
+	bool m_isControlEnabled;
 
 
 	// Functions

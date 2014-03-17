@@ -13,8 +13,8 @@ public:
         OSX_GL_32
     };
     
-	Camera* mainCamera;
-	Debug* debug;
+	Camera* m_mainCamera;
+	Debug* m_debug;
     
 
 	vector<MeshRenderer*> renderVector;

@@ -14,9 +14,9 @@ public:
 class Ray
 {
 public:
-    vec3 origin;
-    vec3 direction;
-    float length;
+    vec3 m_origin;
+    vec3 m_direction;
+    float m_length;
     
     Ray(vec3 origin,vec3 direction,float length);
     Ray(vec3 origin,vec3 endPoint);

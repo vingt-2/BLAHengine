@@ -7,7 +7,7 @@ class CursorPicker
 {
 public:
 
-    const GameSingleton* gameSingleton;
+    const GameSingleton* m_gameSingleton;
     
     CursorPicker(const GameSingleton* singleton);
     

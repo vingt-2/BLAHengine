@@ -2,7 +2,7 @@
 
 
 Debug::Debug(void):
-	gizmoVector( vector<MeshRenderer*>() )
+	m_gizmoVector( vector<MeshRenderer*>() )
 {
 }
 
@@ -62,7 +62,7 @@ void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const ve
 	
 	ray->m_renderType = GL_LINES;
 
-	gizmoVector.push_back(ray);
+	m_gizmoVector.push_back(ray);
 }
 
 void Debug::DrawBasis(Transform* transform,GLfloat opacity)
@@ -72,7 +72,7 @@ void Debug::DrawBasis(Transform* transform,GLfloat opacity)
 	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(0,0,1)))),1,vec4(0,0,1,opacity));
 }
 
-void Debug::OutputToDebug(char* debug)
+void Debug::OutputToDebug(char* m_debug)
 {
     
     // WINDOWS SPECIFIC WINDOW HANDLER
