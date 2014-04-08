@@ -1,12 +1,12 @@
 #pragma once
-#include "../../Std/std.h"
+//#include "../../Std/std.h"
 #include "./Transform.h"
 #include "../../Engine/SharedResources.h"
 #define BLA_LINE_RENDER 0x0003
+
 class MeshRenderer
 {
 public:
-    
 	Transform* m_modelTransform;
 
 	vector<vec3> m_meshVertices;

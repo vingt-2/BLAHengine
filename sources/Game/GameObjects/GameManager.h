@@ -12,3 +12,11 @@ public:
 	void Update();
 };
 
+class RenderingManager
+{
+public :
+	int m_managerId;
+
+	RenderingManager(int managerID);
+};
+

@@ -31,9 +31,9 @@ bool OSXGL32Renderer::Update()
     
 	// Enable Z-Buffer test.
 	glEnable(GL_DEPTH_TEST);
-	for(int i = 0; i < renderVector.size();i++)
+	for(int i = 0; i < m_renderPool.size();i++)
 	{
-		renderVector[i]->Draw(m_mainCamera->m_projection,m_mainCamera->m_viewTransform.transformMatrix);
+		m_renderPool[i]->Draw(m_mainCamera->m_projection, m_mainCamera->m_viewTransform.transformMatrix);
 	}
     
 	// Render m_debug gizmos

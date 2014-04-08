@@ -37,6 +37,7 @@ GLuint SharedResources::LoadMaterial(const char * name, const char * vertex_file
 	std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in);
 	if(FragmentShaderStream.is_open())
 	{
+
 		std::string Line = "";
 		while(getline(FragmentShaderStream, Line))
 			FragmentShaderCode += "\n" + Line;

@@ -17,7 +17,7 @@ public:
 	Debug* m_debug;
     
 
-	vector<MeshRenderer*> renderVector;
+	vector<MeshRenderer*> m_renderPool;
 
 
 	virtual bool Update() = 0;

@@ -170,7 +170,7 @@ int main( void )
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("./resources/models/x-wing.obj",object_1->m_meshRenderer);
+	objImport.ImportMesh("./resources/models/bla.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	object_1->m_meshRenderer->LoadTextureSample("earthDiffuse","texture");
 	object_1->m_meshRenderer->LoadTextureSample("earthNormals","normals");
