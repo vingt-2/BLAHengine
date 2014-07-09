@@ -24,5 +24,3 @@ To compile and run this code sample, make sure you provide your programming envi
 * GLM, a C++ mathematics library for graphics programming that mimics GLSL maths definitions.
 
 Make sure you get all the STD/*.h includes resolved and linked and you should be good to go ! 
-
-Cheers !
