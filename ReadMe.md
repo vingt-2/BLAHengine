@@ -1,7 +1,6 @@
 BLAengine - MainDemo: Model Viewer
 ===================================
 
-"Vat is this ?"
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/BlaEngine-picture.png)
 =====
 
@@ -24,6 +23,6 @@ To compile and run this code sample, make sure you provide your programming envi
 * GLFW (a GL toolkit library).
 * GLM, a C++ mathematics library for graphics programming that mimics GLSL maths definitions.
 
-Make sure you get all the STD/*.h includes right and you should be good to go ! 
+Make sure you get all the STD/*.h includes resolved and linked and you should be good to go ! 
 
 Cheers !
