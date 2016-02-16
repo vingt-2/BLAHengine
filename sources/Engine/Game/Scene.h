@@ -1,5 +1,5 @@
 #pragma once
-#include "../Std/std.h"
+#include "../../Std/std.h"
 #include "../Game/GameObjects/GameManager.h"
 #include "../Game/GameObjects/GameChar.h"
 #include "../Game/GameObjects/DirectionalLight.h"

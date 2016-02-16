@@ -1,4 +1,5 @@
-#include "../../Std/Maths.h"
+#pragma once
+#include "../../../Std/Maths.h"
 
 class RaycastHit
 {

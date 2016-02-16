@@ -1,6 +1,6 @@
 #pragma once
-#include "../Engine/Renderer.h"
-#include "../Engine/SharedResources.h"
+#include "../Renderer/Renderer.h"
+#include "../AssetsManager/SharedResources.h"
 
 class GameSingleton
 {

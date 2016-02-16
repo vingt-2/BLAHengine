@@ -1,7 +1,7 @@
 #pragma once
 #include "../Std/std.h"
 #include "../Helpers/Helpers.h"
-#include "../Game/GameObjects/GameObject.h"
+#include "../Engine/Game/GameObjects/GameObject.h"
 
 class OBJImport
 {

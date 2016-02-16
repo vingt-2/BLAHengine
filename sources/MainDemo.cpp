@@ -16,14 +16,15 @@ Hence the name "MainDemo.cpp".
 #endif
 
 #ifdef USE_WINGL33_RENDERER
-#include "./Engine/WINGL33_Renderer.h"
+#include "./Engine/Renderer/WINGL33_Renderer.h"
 #define RENDERER 1
 #endif
 
-#include "./Game/Scene.h"
-#include "./Game/CursorPicker.h"
-#include "./Game/GameSingleton.h"
-#include "./Game/GameComponents/Collider.h"
+#include "Engine\Game\RenderingManager.h"
+#include "./Engine/Game/Scene.h"
+#include "./Engine/Game/CursorPicker.h"
+#include "./Engine/Game/GameSingleton.h"
+#include "./Engine/Game/GameComponents/Collider.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
@@ -157,12 +158,12 @@ int main( void )
 	}
 
 	// NOW WE CAN LOAD SOME RESSOURCES
-	sharedResources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
-	sharedResources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
+	sharedResources->LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
+	sharedResources->LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
 	
-	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/texture.bmp");
-	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
-	sharedResources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
+	sharedResources->loadBMP_custom("testDiffuse","../resources/textures/texture.bmp");
+	sharedResources->loadBMP_custom("earthDiffuse","../resources/textures/earth.bmp");
+	sharedResources->loadBMP_custom("earthNormals","../resources/textures/earth_NRM.bmp");
 
 	mainRenderer->m_debug = debug;
 
@@ -170,22 +171,24 @@ int main( void )
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("./resources/models/bla.obj",object_1->m_meshRenderer);
+	RenderingManager* renderingManager = new RenderingManager(1, mainRenderer);
+
+	objImport.ImportMesh("../resources/models/bla.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	object_1->m_meshRenderer->LoadTextureSample("earthDiffuse","texture");
 	object_1->m_meshRenderer->LoadTextureSample("earthNormals","normals");
 	object_1->m_meshRenderer->GenerateArrays();
-	mainRenderer->renderVector.push_back(object_1->m_meshRenderer);
+	renderingManager->RequestRenderTicket(*object_1);
 
 	object_1->m_rigidBody->SetPosition(vec3(0,0,0));
 	object_1->m_transform->scale = vec3(1.f);
 
 	object_1->m_rigidBody->m_frictionCoefficient = 0.01f;
 
-	Collider collider(object_1->m_transform);
-	collider.GenerateBoundingBoxFromMesh(object_1->m_meshRenderer);
-	collider.UpdateRenderer();
-	mainRenderer->renderVector.push_back(collider.m_colliderRenderer);
+	//Collider collider(object_1->m_transform);
+	//collider.GenerateBoundingBoxFromMesh(object_1->m_meshRenderer);
+	//collider.UpdateRenderer();
+	//rendering->renderVector.push_back(collider.m_colliderRenderer);
 
 	mainScene->AddObject(object_1);
 

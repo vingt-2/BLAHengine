@@ -1,6 +1,6 @@
 #pragma once
-#include "../Std/std.h"
-#include "../Std/Graphics.h"
+#include "../../Std/std.h"
+#include "../../Std/Graphics.h"
 //#include <fileapi.h>
 
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII

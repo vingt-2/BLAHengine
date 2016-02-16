@@ -1,6 +1,6 @@
 #pragma once
-#include"RenderingManager.h"
-#include"Engine\Renderer.h"
+#include "RenderingManager.h"
+#include "../Renderer/Renderer.h"
 class GameInstance
 {
 public:

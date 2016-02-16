@@ -1,6 +1,4 @@
-/*
-    GL33 Renderer implements the windows OpenGL3.3 Renderer used on Windows platform and uses GLEW to load modern GL.
-*/
+#pragma once
 #include "Renderer.h"
 
 class GL33Renderer : public Renderer

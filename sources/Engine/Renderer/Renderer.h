@@ -1,7 +1,7 @@
 #pragma once
-#include "../Std/std.h"
-#include "../Engine/Debug.h"
-#include "../Tools/OBJImport.h"
+#include "../../Std/std.h"
+#include "./../Game/Debug.h"
+#include "../../Tools/OBJImport.h"
 #include "../Game/GameObjects/Camera.h"
 
 class Renderer

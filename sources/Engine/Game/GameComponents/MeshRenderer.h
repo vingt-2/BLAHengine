@@ -1,7 +1,7 @@
 #pragma once
 //#include "../../Std/std.h"
 #include "./Transform.h"
-#include "../../Engine/SharedResources.h"
+#include "../../AssetsManager/SharedResources.h"
 #define BLA_LINE_RENDER 0x0003
 
 class MeshRenderer
