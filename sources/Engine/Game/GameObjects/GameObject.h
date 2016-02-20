@@ -7,7 +7,7 @@ public:
 Transform* m_transform;
 std::string m_objectName;
 
-virtual void Update() =0;
+virtual void Update() = 0;
 
 void UpdateTransform();
 

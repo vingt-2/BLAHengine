@@ -12,17 +12,24 @@ RenderingManager::~RenderingManager()
 
 }
 
-int RenderingManager::RequestRenderTicket(const GameObject& object)
+renderTicket RenderingManager::RequestRenderTicket(const GameObject& object)
 {
-	if (const GameChar* renderObject = dynamic_cast<const GameChar*> (&object)) 
+	if (const GameChar* meshObject = dynamic_cast<const GameChar*> (&object)) 
 	{
-		m_renderer->m_renderPool.push_back(renderObject->m_meshRenderer);
+		//m_renderer->m_renderPool.push_back(renderObject->m_meshRenderer);
+		//CHANGE THIS 
 		int renderTicket = 0;
+		this->m_ticketedObjects[renderTicket] = meshObject;
+
+		if (RenderObject* renderObject = this->m_renderer->LoadRenderObject(*(meshObject->m_meshRenderer)))
+		{
+			this->m_renderObjects[renderTicket] = renderObject;
+		}
 		return 1;
 	}
 	else 
 	{
-		printf("Rendering Manager Received non renderable objecet \m");
+		printf("Rendering Manager Received non renderable object \n");
 		return -1;
 	}
 }
@@ -30,4 +37,9 @@ int RenderingManager::RequestRenderTicket(const GameObject& object)
 void RenderingManager::Update()
 {
 	m_renderer->Update();
+}
+
+void RenderingManager::LoadObject(GameObject& object)
+{
+	
 }

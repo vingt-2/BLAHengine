@@ -4,6 +4,8 @@
 #include "../Renderer/Renderer.h"
 #include "../Renderer/WINGL33_Renderer.h"
 
+typedef int renderTicket;
+
 class RenderingManager
 {
 public:
@@ -13,16 +15,20 @@ public:
 
 	int GetManagerId();
 
-	int RequestRenderTicket(const GameObject& object);
+	renderTicket RequestRenderTicket(const GameObject& object);
 
 	void Update();
+
 
 private:
 
 	Renderer* m_renderer;
 
 	int m_managerId;
-	vector<pair<GameObject&, int>> m_ticketedObjects;
+	std::map<renderTicket,const GameObject* > m_ticketedObjects;
+	std::map<renderTicket,const RenderObject* >  m_renderObjects;
+	
+	void LoadObject(GameObject& object);
 };
 
 

@@ -4,15 +4,16 @@
 Renderer::Renderer(char* windowTitle,bool isFullScreen)
 {
 	isContextEnabled = false;
-    this->renderSize = vec2(1024,780);
-    this->isFullScreen = isFullScreen;
+	this->renderSize = vec2(1024,780);
+	this->isFullScreen = isFullScreen;
+	this->m_directionalLight = vec3(1, 0, 0);
 }
 
 Renderer::Renderer(char* windowTitle, bool isFullScreen, vec2 screenSize)
 {
 	isContextEnabled = false;
-    this->renderSize = screenSize;
-    this->isFullScreen = isFullScreen;
+	this->renderSize = screenSize;
+	this->isFullScreen = isFullScreen;
 }
 
 

@@ -282,10 +282,10 @@ bool SharedResources::loadDDS(const char * name, const char * imagepath)
 // No difference between getting a texture ID and a shader program ID yet, may come later, who knows
 GLuint SharedResources::GetMaterial(const char* name)
 {
-	return ressourceTable[name];
+	return ressourceTable.count(name) ? ressourceTable[name] : NULL;
 }
 
 GLuint SharedResources::GetTexture(const char* name)
 {
-	return ressourceTable[name];
+	return ressourceTable.count(name) ? ressourceTable[name] : NULL;
 }

@@ -85,26 +85,17 @@ void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
 }
 void Collider::GenerateBoundingSphereRadius(MeshRenderer *meshRenderer)
 {
-    /*float maxVertexLength = meshRenderer->m_meshVertices.at(0).length();
-    for(GLuint i = 1; i<meshRenderer->m_meshVertices.size(); i++)
+	/*float maxVertexLength = meshRenderer->m_meshVertices.at(0).length();
+	for(GLuint i = 1; i<meshRenderer->m_meshVertices.size(); i++)
 	{
 		vec3 vertex = meshRenderer->m_meshVertices.at(i);
-        
-        if(maxVertexLength < vertex.length())
-        {
-            maxVertexLength = vertex.length();
-        }
-    }
-    m_boundingSphereRadius = maxVertexLength;*/
-}
-
-void Collider::UpdateRenderer()
-{
-	m_colliderRenderer->CleanUp();
-	m_colliderRenderer->GenerateVertexArrayID();
-	m_colliderRenderer->m_meshVertices = m_meshVertices;
-	m_colliderRenderer->AssignMaterial("defaultShader");
-	m_colliderRenderer->GenerateArrays();
+		
+		if(maxVertexLength < vertex.length())
+		{
+			maxVertexLength = vertex.length();
+		}
+	}
+	m_boundingSphereRadius = maxVertexLength;*/
 }
 
 bool BoxCollider::RayIntersection(const Ray &ray, float startInterval, float endInterval)

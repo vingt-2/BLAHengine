@@ -52,7 +52,7 @@ void Scene::Update()
 			if(!m_directionalLights.empty())
 			{
 				m_directionalLights.at(0)->Update();
-				gameChar->m_meshRenderer->m_directionalLight = m_directionalLights.at(0)->GetDirection();
+				//gameChar->m_meshRenderer->m_directionalLight = m_directionalLights.at(0)->GetDirection();
 			}
 		}
 		m_sceneObjectsVector.at(i)->Update();

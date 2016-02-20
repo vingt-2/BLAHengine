@@ -1,5 +1,5 @@
 #pragma once
-#include "../Game/GameComponents/MeshRenderer.h"
+#include "../Game/GameObjects/GameObject.h"
 
 /*
  TODO: 
@@ -11,7 +11,7 @@ class Debug
 {
 public:
 
-	vector<MeshRenderer*> m_gizmoVector;
+	vector<GameObject*> m_gizmoVector;
 
 	//Render m_debug:
 	void DrawLine(const vec3 origin,const vec3 destination);
