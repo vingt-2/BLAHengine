@@ -32,7 +32,7 @@ vec2* previousMouseInput = new vec2(0,0);
 GameSingleton* gameSingleton;
 Renderer* mainRenderer;
 SharedResources* sharedResources;
-//Debug* debug;
+Debug* debug;
 Scene* mainScene;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
@@ -133,7 +133,7 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 int main( void )
 {
 	sharedResources             = new SharedResources();
-	//debug						= new Debug();
+	debug						= new Debug();
 	
 	
 	int mainRenderFullScreen    = FULLSCREEN_SETTING;
@@ -202,6 +202,13 @@ int main( void )
 	GLfloat fps_time = glfwGetTime();
 	
 	Ray ray(vec3(0),vec3(0),0);
+	debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
+
+	vector<int> gizmoRenderTickets;
+	for (int i = 0; i < debug->m_gizmoVector.size(); i++)
+	{
+		if(int ticket = renderingManager->RequestRenderTicket(*(debug->m_gizmoVector[i])));
+	}
 
 	while(!terminationRequest)
 	{
@@ -215,6 +222,8 @@ int main( void )
 		//glfwSetWindowSizeCallback(OnResize);
 
 		mainScene->Update();
+
+		object_1->m_rigidBody->PushTorque(vec3(0, 0.1f, 0), RigidBody::Force::Impulse);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{
@@ -253,7 +262,6 @@ int main( void )
 		mainCamera->Update();
 		mainRenderer->Update();
 
-		//debug->DrawGrid(10,vec4(0.9,0.9,0.9,0.05f));
 
 		//debug->DrawBasis(object_1->m_transform,1.f);*/
 

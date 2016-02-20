@@ -226,8 +226,6 @@ bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, string textureNam
 	{
 		GLuint textureID = glGetUniformLocation(object.m_programID, sampleName.data());
 		GLuint textureRessource = sharedResources->GetTexture(textureName.data());
-		printf("%d\n", textureID);
-		printf("%s\n", textureName.data());
 		object.m_textureSamplersVector.push_back(pair<GLuint, GLuint>(textureID, textureRessource));
 
 		return true;

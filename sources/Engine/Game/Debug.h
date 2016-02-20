@@ -1,5 +1,5 @@
 #pragma once
-#include "../Game/GameObjects/GameObject.h"
+#include "../Game/GameObjects/GameChar.h"
 
 /*
  TODO: 

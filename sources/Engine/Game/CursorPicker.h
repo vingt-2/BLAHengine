@@ -7,9 +7,9 @@ class CursorPicker
 {
 public:
 
-    const GameSingleton* m_gameSingleton;
-    
-    CursorPicker(const GameSingleton* singleton);
+	const GameSingleton* m_gameSingleton;
+	
+	CursorPicker(const GameSingleton* singleton);
 
 	Ray ScreenToRay(float length);
 	GameChar* PickGameCharInScene(const Scene* pickedScene, const Ray* ray);
