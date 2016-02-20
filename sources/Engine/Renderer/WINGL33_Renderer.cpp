@@ -35,7 +35,23 @@ bool GL33Renderer::Update()
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	
+	for (int i = 0; i < m_gizmoRenderPool.size(); i++)
+	{
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_gizmoRenderPool[i]))
+		{
+			this->Draw(*renderObject);
+		}
+	}
+	for (int i = 0; i < m_gizmoRenderPool.size(); i++)
+	{
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_gizmoRenderPool[i]))
+		{
+			CleanUp(*renderObject);
+		}
+	}
+	m_gizmoRenderPool.clear();
+
+
 	//Render Scene Objects.
 	
 	// Enable Z-Buffer test.
@@ -66,7 +82,7 @@ bool GL33Renderer::Update()
 	return true;
 }
 
-RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer)
+RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, int type)
 {
 	GL33RenderObject* object = new GL33RenderObject();
 	this->GenerateVertexArrayID(*object);
@@ -94,7 +110,10 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer)
 
 	object->m_renderType = meshRenderer.m_renderType;
 
-	m_renderPool.push_back(object);
+	if (type == 0)
+		m_renderPool.push_back(object);
+	else if (type == 1)
+		m_gizmoRenderPool.push_back(object);
 
 	return object;
 }

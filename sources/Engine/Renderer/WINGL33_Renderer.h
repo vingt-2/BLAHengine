@@ -44,7 +44,7 @@ public:
 	GL33Renderer(char* windowTitle,bool isFullScreen, vec2 renderSize);
 	~GL33Renderer();
 
-	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer);
+	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
 
 protected:
 	GLFWwindow* InitializeContext(char* windowTitle);

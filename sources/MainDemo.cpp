@@ -21,6 +21,7 @@ Hence the name "MainDemo.cpp".
 #endif
 
 #include "Engine\Game\RenderingManager.h"
+#include "Engine\Game\Debug.h"
 #include "./Engine/Game/Scene.h"
 #include "./Engine/Game/CursorPicker.h"
 #include "./Engine/Game/GameSingleton.h"
@@ -132,8 +133,7 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 
 int main( void )
 {
-	sharedResources             = new SharedResources();
-	debug						= new Debug();
+	sharedResources = new SharedResources();
 	
 	
 	int mainRenderFullScreen    = FULLSCREEN_SETTING;
@@ -145,6 +145,10 @@ int main( void )
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 	
 	mainScene					= new Scene();
+	RenderingManager* renderingManager = new RenderingManager(1, mainRenderer, RenderingManager::Game);
+	RenderingManager* debugRenderingManager = new RenderingManager(1, mainRenderer, RenderingManager::DebugGizmo);
+
+	debug = new Debug(debugRenderingManager);
 	
 	CursorPicker cursorPicker(gameSingleton);
 
@@ -171,8 +175,6 @@ int main( void )
 	GameChar* object_1 = new GameChar();
 
 	OBJImport objImport;
-
-	RenderingManager* renderingManager = new RenderingManager(1, mainRenderer);
 
 	objImport.ImportMesh("../resources/models/bla.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
@@ -204,11 +206,14 @@ int main( void )
 	Ray ray(vec3(0),vec3(0),0);
 	debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
 
-	vector<int> gizmoRenderTickets;
-	for (int i = 0; i < debug->m_gizmoVector.size(); i++)
-	{
-		if(int ticket = renderingManager->RequestRenderTicket(*(debug->m_gizmoVector[i])));
-	}
+	//vector<int> gizmoRenderTickets;
+	//for (int i = 0; i < debug->m_gizmoVector.size(); i++)
+	//{
+	//	if (int ticket = renderingManager->RequestRenderTicket(*(debug->m_gizmoVector[i])))
+	//	{
+	//		gizmoRenderTickets.push_back(ticket);
+	//	}
+	//}
 
 	while(!terminationRequest)
 	{
@@ -254,16 +259,15 @@ int main( void )
 			object_1->m_rigidBody->SetPosition(hitOnPlane);
 		}
 
-		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
-		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
+		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
+		debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
 
 		SimpleControls(mainCamera);
 		
 		mainCamera->Update();
 		mainRenderer->Update();
 
-
-		//debug->DrawBasis(object_1->m_transform,1.f);*/
+		debug->DrawBasis(object_1->m_transform,1.f);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{

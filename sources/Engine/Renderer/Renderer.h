@@ -1,6 +1,5 @@
 #pragma once
 #include "../../Std/std.h"
-#include "./../Game/Debug.h"
 #include "../../Tools/OBJImport.h"
 #include "../Game/GameObjects/Camera.h"
 
@@ -22,10 +21,10 @@ public:
 	};
 	
 	Camera* m_mainCamera;
-	Debug* m_debug;
 	
 
 	vector<RenderObject*> m_renderPool;
+	vector<RenderObject*> m_gizmoRenderPool;
 
 	//////
 	//
@@ -34,7 +33,7 @@ public:
 	vec3 m_directionalLight;
 
 	virtual bool Update() = 0;
-	virtual RenderObject* LoadRenderObject(const MeshRenderer& object) = 0;
+	virtual RenderObject* LoadRenderObject(const MeshRenderer& object,int type) = 0;
 
 	void Resize(int xRes,int yRes);
 	

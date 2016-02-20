@@ -4,7 +4,8 @@ MeshRenderer::MeshRenderer(Transform* modelTransform):
 	m_meshVertices  (vector<vec3>()),
 	m_meshNormals	(vector<vec3>()),
 	m_meshUVs		(vector<vec2>()),
-	m_renderType    (GL_TRIANGLES)
+	m_renderType    (GL_TRIANGLES),
+	m_renderTicket  (0)
 {
 	this->m_modelTransform = modelTransform;
 } 

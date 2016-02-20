@@ -1,9 +1,9 @@
 #include "./Debug.h"
 
 
-Debug::Debug(void):
-	m_gizmoVector( vector<GameObject*>() )
+Debug::Debug(RenderingManager* manager)
 {
+	this->m_debugRenderManager = manager;
 }
 
 
@@ -62,7 +62,7 @@ void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const ve
 	lineMesh->m_meshRenderer = ray;
 	lineMesh->m_transform = transform;
 
-	m_gizmoVector.push_back(lineMesh);
+	m_debugRenderManager->RequestRenderTicket(*lineMesh);
 }
 
 void Debug::DrawBasis(Transform* transform,GLfloat opacity)

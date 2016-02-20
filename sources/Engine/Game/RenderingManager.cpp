@@ -1,9 +1,11 @@
 #include "RenderingManager.h"
 
 
-RenderingManager::RenderingManager(int managerId,Renderer* renderer)
+RenderingManager::RenderingManager(int managerId,Renderer* renderer, RenderManagerType type)
 {
+	this->currentTicket = 1;
 	this->m_renderer = renderer;
+	this->m_renderManagerType = type;
 }
 
 
@@ -12,7 +14,7 @@ RenderingManager::~RenderingManager()
 
 }
 
-renderTicket RenderingManager::RequestRenderTicket(const GameObject& object)
+RenderTicket RenderingManager::RequestRenderTicket(const GameObject& object)
 {
 	if (const GameChar* meshObject = dynamic_cast<const GameChar*> (&object)) 
 	{
@@ -21,11 +23,12 @@ renderTicket RenderingManager::RequestRenderTicket(const GameObject& object)
 		int renderTicket = 0;
 		this->m_ticketedObjects[renderTicket] = meshObject;
 
-		if (RenderObject* renderObject = this->m_renderer->LoadRenderObject(*(meshObject->m_meshRenderer)))
+		if (RenderObject* renderObject = this->m_renderer->LoadRenderObject(*(meshObject->m_meshRenderer), m_renderManagerType))
 		{
 			this->m_renderObjects[renderTicket] = renderObject;
 		}
-		return 1;
+		meshObject->m_meshRenderer->m_renderTicket = this->currentTicket;
+		return this->currentTicket++;
 	}
 	else 
 	{

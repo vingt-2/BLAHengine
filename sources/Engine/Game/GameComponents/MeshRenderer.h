@@ -7,6 +7,9 @@
 class MeshRenderer
 {
 public:
+
+	int m_renderTicket;
+
 	Transform* m_modelTransform;
 
 	vector<vec3> m_meshVertices;

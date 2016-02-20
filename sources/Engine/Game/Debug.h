@@ -1,6 +1,6 @@
 #pragma once
 #include "../Game/GameObjects/GameChar.h"
-
+#include "../Game/RenderingManager.h"
 /*
  TODO: 
 	SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
@@ -11,7 +11,10 @@ class Debug
 {
 public:
 
-	vector<GameObject*> m_gizmoVector;
+	Debug(RenderingManager* renderManager);
+	~Debug();
+
+	RenderingManager* m_debugRenderManager;
 
 	//Render m_debug:
 	void DrawLine(const vec3 origin,const vec3 destination);
@@ -24,9 +27,6 @@ public:
 
 	//Common m_debug::
 	static void OutputToDebug(char* m_debug);
-
-	Debug(void);
-	~Debug(void);
 
 private:
 
