@@ -11,13 +11,17 @@ public:
 
 	Transform* m_modelTransform;
 
+	const vector<unsigned int>* m_toMeshTriangles;
 	const vector<vec3>* m_toMeshVertices;
 	const vector<vec3>* m_toMeshNormals;
+	const vector<vec3>* m_toMeshTangents;
+	const vector<vec3>* m_toMeshBiTangents;
 	const vector<vec2>* m_toMeshUVs;
 
 	vector <pair<GLuint, GLuint> > m_activeTextures;
 
 	// ID of an openGL object (VAO) that lists VBOs 
+	GLuint m_elementBufferId;
 	GLuint m_vertexArrayID;
 	GLuint m_sizeOfVertexArray;
 	// Keeps track of the VBOs we've generated and added to our VAO
@@ -53,6 +57,9 @@ protected:
 
 	template<typename objectType>
 	void GenerateBufferObject(GL33RenderObject& object, const objectType* buffer, GLuint bufferSize, GLuint elementsPerObject, GLuint attributeNumber);
+
+	void GenerateElementBuffer(GL33RenderObject& object, GLuint elementBufferId);
+
 	bool CleanUp(GL33RenderObject& object);
 	void CleanUpVBOs(GL33RenderObject& object);
 	bool AssignMaterial(GL33RenderObject& object, string materialName);

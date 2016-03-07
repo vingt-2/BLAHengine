@@ -17,14 +17,57 @@ OBJImport::~OBJImport(void)
 {
 } 
 
+typedef struct vertEntry{
+	vec3 vx;
+	vec3 vn;
+	vec2 vt;
+
+	bool operator==(const vertEntry& other) const
+	{
+		float epsilon = 0.00000000000001;
+
+		if (glm::distance(vx, other.vx) > epsilon)
+		{
+			return false;
+		}
+
+		if (glm::distance(vn, other.vn) > epsilon)
+		{
+			return false;
+		}
+
+		if (glm::distance(vt, other.vt) > epsilon)
+		{
+			return false;
+		}
+
+		return true;
+	}
+} ve_t;
+
+struct vertEntryHasher
+{
+	std::size_t operator()(const vertEntry& v) const
+	{
+		int p1 = 73856093;
+		int p2 = 19349663;
+		int p3 = 83492791;
+
+		int hashVx = (int)(100 * v.vx.x)*p1 ^ (int)(100 * v.vx.y)*p2 ^ (int)(100 * v.vx.z)*p3;
+		int hashVn = (int)(100 * v.vn.x)*p1 ^ (int)(100 * v.vn.y)*p2 ^ (int)(100 * v.vn.z)*p3;
+		int hashVt = (int)(100 * v.vt.x)*p1 ^ (int)(100 * v.vt.y)*p2;
+
+		return hashVx + hashVn + hashVt;
+	}
+};
+
 bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 {
-	vector<vec3> meshVertices;
-	vector<vec3> meshNormals;
-	vector<vec2> meshUVs;
 	cout << "[OBJ_MESH] Importing " << filename << ".\n";
 	ifstream fileStream (filename,ifstream::in);
 	string lineInFile = " ";
+
+	vector<unsigned int> meshTriangles;
 
 	vector<vec3> collectedVertices;
 	vector<vec2> collectedUVs;
@@ -96,48 +139,118 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 					uselessLines++;
 				}
 			}
-			catch(out_of_range& outOfRangeException)
-			{
-				//	Non conventional shit is expected when parsing a file, just discard it.
-			}
+			catch (out_of_range& outOfRangeException){}
 		}
 		fileStream.close();
-		
-		cout << vertexIndices.size() << "+ " << uvIndices.size();
 
 		int vertexInd = 0 ;
 		int uvInd = 0;
 		int normalInd = 0;
 
-		for( int index =0 ; index<vertexIndices.size(); index++ )
-		{
-			//printf("%i \n.",index);
-			vertexInd = vertexIndices[index];
+		
+		vector<vec3> meshVertices;
+		vector<vec3> meshNormals;
+		vector<vec2> meshUVs;
 
-			if( uvIndices.size() > 0) 
+		unordered_map<vertEntry, int, vertEntryHasher> storedTriplets;
+
+		int cacheMiss = 0;
+		int cacheHit = 0;
+
+		for (int index = 0; index < vertexIndices.size(); index += 3)
+		{
+			vertEntry v1, v2, v3;
+
+			v1.vx = collectedVertices[vertexIndices[index]];
+			v1.vt = collectedUVs[uvIndices[index]];
+			v1.vn = collectedNormals[normalIndices[index]];
+
+			v2.vx = collectedVertices[vertexIndices[index + 1]];
+			v2.vt = collectedUVs[uvIndices[index + 1]];
+			v2.vn = collectedNormals[normalIndices[index + 1]];
+
+			v3.vx = collectedVertices[vertexIndices[index + 2]];
+			v3.vt = collectedUVs[uvIndices[index + 2]];
+			v3.vn = collectedNormals[normalIndices[index + 2]];
+
+			if (storedTriplets.count(v1) == 0)
 			{
-				uvInd = uvIndices[index];
-				vec2 uv		= collectedUVs[uvInd];
-				meshUVs     .push_back(uv);
+				cacheMiss++;
+				int endArrayIndex = meshVertices.size();
+
+				meshVertices.push_back(v1.vx);
+				meshNormals.push_back(v1.vn);
+				meshUVs.push_back(v1.vt);
+
+				storedTriplets[v1] = endArrayIndex;
+				meshTriangles.push_back(endArrayIndex);
+			}
+			else
+			{
+
+				cacheHit++;
+				meshTriangles.push_back(storedTriplets[v1]);
 			}
 
-			normalInd = normalIndices[index];
+			if (storedTriplets.count(v2) == 0)
+			{
+				cacheMiss++;
+				int endArrayIndex = meshVertices.size();
 
-			vec3 vertex = collectedVertices[vertexInd];
-			// UVS old place
-			vec3 normal = collectedNormals[normalInd];
+				meshVertices.push_back(v2.vx);
+				meshNormals.push_back(v2.vn);
+				meshUVs.push_back(v2.vt);
 
-			meshVertices.push_back(vertex);
-			// UVs old place
-			meshNormals.push_back(normal);
+				storedTriplets[v2] = endArrayIndex;
+				meshTriangles.push_back(endArrayIndex);
+			}
+			else
+			{
+
+				cacheHit++;
+				meshTriangles.push_back(storedTriplets[v2]);
+			}
+
+			if (storedTriplets.count(v3) == 0)
+			{
+				cacheMiss++;
+				int endArrayIndex = meshVertices.size();
+
+				meshVertices.push_back(v3.vx);
+				meshNormals.push_back(v3.vn);
+				meshUVs.push_back(v3.vt);
+
+				storedTriplets[v3] = endArrayIndex;
+				meshTriangles.push_back(endArrayIndex);
+			}
+			else
+			{
+
+				cacheHit++;
+				meshTriangles.push_back(storedTriplets[v3]);
+			}
+
 		}
 
-		mesh->m_meshVertices = meshVertices;
-		mesh->m_meshNormals	 = meshNormals;
-		mesh->m_meshUVs		 = meshUVs;
+		//for (auto n : storedTriplets)
+		//{
+		//	cout << "Vertex: \n";
+		//	cout << n.first.vx.x << ", " << n.first.vx.y << ", " << n.first.vx.z << "\n";
+		//	cout << n.first.vn.x << ", " << n.first.vn.y << ", " << n.first.vn.z << "\n";
+		//	cout << n.first.vt.x << ", " << n.first.vt.y << "\n";
+		//	vertEntryHasher a = vertEntryHasher();
+		//	cout << "Has Hash: " << a.operator()(n.first) << "\n";
+		//}
 
-		//cout << uselessLines << " unused Lines\n";
-		cout << "Imported: " << meshVertices.size() << " vertices, " << meshNormals.size() << " normals, " << meshUVs.size() << " UVs.\n";
+		mesh->m_meshTriangles = meshTriangles;
+		mesh->m_meshVertices  = meshVertices;
+		mesh->m_meshNormals	  = meshNormals;
+		mesh->m_meshUVs		  = meshUVs;
+
+		mesh->computeTangents();
+
+		
+		cout << "Imported: " << meshTriangles.size() << " triangles, " << meshVertices.size() << " triplets, " << collectedVertices.size() << " vertices, " << collectedNormals.size() << " normals, " << collectedUVs.size() << " UVs.\n";
 
 		return true;
 	}

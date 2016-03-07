@@ -12,8 +12,11 @@ public:
 
 	Transform* m_modelTransform;
 
+	vector<unsigned int> m_meshTriangles;
 	vector<vec3> m_meshVertices;
 	vector<vec3> m_meshNormals;
+	vector<vec3> m_meshTangents;
+	vector<vec3> m_meshBiTangents;
 	vector<vec2> m_meshUVs;
 
 	vector <pair<string,string>> m_textures;
@@ -26,6 +29,8 @@ public:
 
 	bool AssignMaterial(const char* name);
 	bool AssignTexture(const char* textureName, const char* handleName);
+
+	bool computeTangents();
 
 	string ToString(void);
 	bool IsMeshValid();

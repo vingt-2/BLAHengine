@@ -35,6 +35,21 @@ bool GL33Renderer::Update()
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	//Render Scene Objects.
+	
+	// Enable Z-Buffer test.
+	glEnable(GL_DEPTH_TEST);
+	for (int i = 0; i < m_renderPool.size(); i++)
+	{
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
+		{
+			this->Draw(*renderObject);
+		}
+	}
+
+	// Render Debug gizmos (on top of frame)
+	// Disable Z-Buffer test so that it draws on top of scene.
+	glDisable(GL_DEPTH_TEST);
 	for (int i = 0; i < m_gizmoRenderPool.size(); i++)
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_gizmoRenderPool[i]))
@@ -50,24 +65,6 @@ bool GL33Renderer::Update()
 		}
 	}
 	m_gizmoRenderPool.clear();
-
-
-	//Render Scene Objects.
-	
-	// Enable Z-Buffer test.
-	glEnable(GL_DEPTH_TEST);
-	for (int i = 0; i < m_renderPool.size(); i++)
-	{
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
-		{
-			this->Draw(*renderObject);
-		}
-	}
-	
-	// Render m_debug gizmos
-	
-	// Disable Z-Buffer test for m_debug gizmos.
-	glDisable(GL_DEPTH_TEST);
 	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -87,8 +84,11 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 	GL33RenderObject* object = new GL33RenderObject();
 	this->GenerateVertexArrayID(*object);
 
+	object->m_toMeshTriangles = &(meshRenderer.m_meshTriangles);
 	object->m_toMeshVertices = &(meshRenderer.m_meshVertices);
 	object->m_toMeshNormals = &(meshRenderer.m_meshNormals);
+	object->m_toMeshTangents = &(meshRenderer.m_meshTangents);
+	object->m_toMeshBiTangents = &(meshRenderer.m_meshBiTangents);
 	object->m_toMeshUVs = &(meshRenderer.m_meshUVs);
 
 	object->m_modelTransform = meshRenderer.m_modelTransform;
@@ -146,7 +146,10 @@ bool GL33Renderer::Draw(GL33RenderObject& object)
 	glBindVertexArray(object.m_vertexArrayID);
 
 	// Draw VAO
-	glDrawArrays(object.m_renderType, 0, (GLint)object.m_toMeshVertices->size());
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object.m_elementBufferId); // Index buffer
+	glDrawElements(object.m_renderType, object.m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0 ); // Draw Triangles
+	//glDrawArrays(object.m_renderType, 0, (GLint)object.m_toMeshVertices->size());
 
 	glBindVertexArray(0);
 
@@ -167,6 +170,8 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 	//layout(location = 0) in vec3 vertexPosition_modelspace;
 	//layout(location = 1) in vec2 vertexUV;
 	//layout(location = 2) in vec3 vertexNormals;
+	//layout(location = 3) in vec3 vertexTangent;
+	//layout(location = 4) in vec3 vertexBiTangent;
 	bool success = false;
 
 	int layoutIndex = 0;
@@ -184,6 +189,26 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshNormals->size() * sizeof(vec3), 3, layoutIndex);
 		layoutIndex++;
 	}
+
+	if (!object.m_toMeshNormals->empty())
+	{
+		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshTangents->size() * sizeof(vec3), 3, layoutIndex);
+		layoutIndex++;
+	}
+
+	if (!object.m_toMeshNormals->empty())
+	{
+		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshBiTangents->size() * sizeof(vec3), 3, layoutIndex);
+		layoutIndex++;
+	}
+	int max = 0;
+	for (int i = 0; i < object.m_toMeshTriangles->size(); i++)
+	{
+		max = max < object.m_toMeshTriangles->at(i) ? object.m_toMeshTriangles->at(i) : max;
+	}
+	cout << max << "\n";
+
+	GenerateElementBuffer(object, object.m_elementBufferId);
 
 	success = true;
 
@@ -218,6 +243,17 @@ void GL33Renderer::GenerateBufferObject(GL33RenderObject& object, const objectTy
 
 	pair<GLuint, pair<GLuint, GLuint> > bufferObject = pair<GLuint, pair<GLuint, GLuint> >(bufferObjectID, pair<GLuint, GLuint>(attributeNumber, elementsPerObject));
 	object.m_vboIDVector.push_back(bufferObject);
+}
+
+void GL33Renderer::GenerateElementBuffer(GL33RenderObject& object, GLuint elementBufferId)
+{
+	glBindVertexArray(object.m_vertexArrayID);
+	glGenBuffers(1, &elementBufferId);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, object.m_toMeshTriangles->size() * sizeof(GLuint), &(object.m_toMeshTriangles->at(0)), GL_STATIC_DRAW);
+	glBindVertexArray(0);
 }
 
 void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)

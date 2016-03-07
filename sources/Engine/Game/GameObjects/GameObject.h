@@ -4,14 +4,14 @@
 class GameObject
 {
 public:
-Transform* m_transform;
-std::string m_objectName;
+	Transform* m_transform;
+	string m_objectName;
 
-virtual void Update() = 0;
+	virtual void Update() = 0;
 
-void UpdateTransform();
+	void UpdateTransform();
 
 
-GameObject(void);
-~GameObject(void);
+	GameObject(void);
+	~GameObject(void);
 };

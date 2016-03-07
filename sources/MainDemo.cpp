@@ -184,7 +184,7 @@ int main( void )
 	renderingManager->RequestRenderTicket(*object_1);
 
 	object_1->m_rigidBody->SetPosition(vec3(0,0,0));
-	object_1->m_transform->scale = vec3(1.f);
+	//object_1->m_transform->scale = vec3(0.01f);
 
 	object_1->m_rigidBody->m_frictionCoefficient = 0.01f;
 
@@ -204,16 +204,6 @@ int main( void )
 	GLfloat fps_time = glfwGetTime();
 	
 	Ray ray(vec3(0),vec3(0),0);
-	debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
-
-	//vector<int> gizmoRenderTickets;
-	//for (int i = 0; i < debug->m_gizmoVector.size(); i++)
-	//{
-	//	if (int ticket = renderingManager->RequestRenderTicket(*(debug->m_gizmoVector[i])))
-	//	{
-	//		gizmoRenderTickets.push_back(ticket);
-	//	}
-	//}
 
 	while(!terminationRequest)
 	{
@@ -259,15 +249,15 @@ int main( void )
 			object_1->m_rigidBody->SetPosition(hitOnPlane);
 		}
 
-		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
-		debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
+		//debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
+		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
+		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
+		//debug->DrawBasis(object_1->m_transform, 1.f);
 
 		SimpleControls(mainCamera);
 		
 		mainCamera->Update();
 		mainRenderer->Update();
-
-		debug->DrawBasis(object_1->m_transform,1.f);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{
