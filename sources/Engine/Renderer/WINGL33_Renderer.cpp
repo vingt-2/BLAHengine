@@ -201,12 +201,6 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshBiTangents->size() * sizeof(vec3), 3, layoutIndex);
 		layoutIndex++;
 	}
-	int max = 0;
-	for (int i = 0; i < object.m_toMeshTriangles->size(); i++)
-	{
-		max = max < object.m_toMeshTriangles->at(i) ? object.m_toMeshTriangles->at(i) : max;
-	}
-	cout << max << "\n";
 
 	GenerateElementBuffer(object, object.m_elementBufferId);
 

@@ -55,6 +55,8 @@ void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const ve
 	MeshRenderer* ray = new MeshRenderer(transform);
 	ray->m_meshVertices.push_back(origin);
 	ray->m_meshVertices.push_back(destination);
+	ray->m_meshTriangles.push_back(0);
+	ray->m_meshTriangles.push_back(1);
 	ray->AssignMaterial("debugShader");
 	ray->m_renderType = GL_LINES;
 

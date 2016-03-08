@@ -218,7 +218,7 @@ int main( void )
 
 		mainScene->Update();
 
-		object_1->m_rigidBody->PushTorque(vec3(0, 0.1f, 0), RigidBody::Force::Impulse);
+		//object_1->m_rigidBody->PushTorque(vec3(0, 0.1f, 0), RigidBody::Force::Impulse);
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{

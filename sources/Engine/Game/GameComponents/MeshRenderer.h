@@ -1,5 +1,4 @@
 #pragma once
-//#include "../../Std/std.h"
 #include "./Transform.h"
 #include "../../AssetsManager/SharedResources.h"
 #define BLA_LINE_RENDER 0x0003
@@ -30,7 +29,8 @@ public:
 	bool AssignMaterial(const char* name);
 	bool AssignTexture(const char* textureName, const char* handleName);
 
-	bool computeTangents();
+	bool ComputeTangents();
+	void NormalizeModelCoordinates();
 
 	string ToString(void);
 	bool IsMeshValid();

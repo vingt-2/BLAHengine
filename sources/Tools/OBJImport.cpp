@@ -162,15 +162,15 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 			vertEntry v1, v2, v3;
 
 			v1.vx = collectedVertices[vertexIndices[index]];
-			v1.vt = collectedUVs[uvIndices[index]];
+			v1.vt = index < uvIndices.size() ? collectedUVs[uvIndices[index]] : vec2(0,0);
 			v1.vn = collectedNormals[normalIndices[index]];
 
 			v2.vx = collectedVertices[vertexIndices[index + 1]];
-			v2.vt = collectedUVs[uvIndices[index + 1]];
+			v2.vt = index + 1 < uvIndices.size() ? collectedUVs[uvIndices[index + 1]] : vec2(0, 0);
 			v2.vn = collectedNormals[normalIndices[index + 1]];
 
 			v3.vx = collectedVertices[vertexIndices[index + 2]];
-			v3.vt = collectedUVs[uvIndices[index + 2]];
+			v3.vt = index + 2 < uvIndices.size() ? collectedUVs[uvIndices[index + 2]] : vec2(0, 0);
 			v3.vn = collectedNormals[normalIndices[index + 2]];
 
 			if (storedTriplets.count(v1) == 0)
@@ -232,24 +232,14 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 
 		}
 
-		//for (auto n : storedTriplets)
-		//{
-		//	cout << "Vertex: \n";
-		//	cout << n.first.vx.x << ", " << n.first.vx.y << ", " << n.first.vx.z << "\n";
-		//	cout << n.first.vn.x << ", " << n.first.vn.y << ", " << n.first.vn.z << "\n";
-		//	cout << n.first.vt.x << ", " << n.first.vt.y << "\n";
-		//	vertEntryHasher a = vertEntryHasher();
-		//	cout << "Has Hash: " << a.operator()(n.first) << "\n";
-		//}
-
 		mesh->m_meshTriangles = meshTriangles;
 		mesh->m_meshVertices  = meshVertices;
 		mesh->m_meshNormals	  = meshNormals;
 		mesh->m_meshUVs		  = meshUVs;
 
-		mesh->computeTangents();
+		mesh->ComputeTangents();
+		mesh->NormalizeModelCoordinates();
 
-		
 		cout << "Imported: " << meshTriangles.size() << " triangles, " << meshVertices.size() << " triplets, " << collectedVertices.size() << " vertices, " << collectedNormals.size() << " normals, " << collectedUVs.size() << " UVs.\n";
 
 		return true;
