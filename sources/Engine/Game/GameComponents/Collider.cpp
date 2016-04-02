@@ -1,126 +1,50 @@
 #include "Collider.h"
-
-Collider::Collider(Transform* parentTransform):
-	m_meshVertices(vector<vec3>()),
-	m_colliderRenderer(new MeshRenderer(parentTransform))
+Collider::Collider(GameChar* parentObject)
 {
-	m_parentTransform = parentTransform;
-	m_colliderRenderer->m_renderType = BLA_LINE_RENDER;
+	MeshRenderer* mesh = parentObject->m_meshRenderer;
+	
+	m_verticesInVec3f = new vector<ozcollide::Vec3f>();
+	for (auto v : mesh->m_meshVertices)
+	{
+		m_verticesInVec3f->push_back(ozcollide::Vec3f(v.x, v.y, v.z));
+	}
+
+	m_triangles = new vector<int>();
+	for (int tri = 0; tri < mesh->m_meshTriangles.size(); tri++)
+	{
+		m_triangles->push_back(mesh->m_meshTriangles[tri]);
+	}
+	
+	vector<Polygon> triangles;
+	for (int tri = 0; tri < mesh->m_meshTriangles.size(); tri += 3)
+	{
+		int i = mesh->m_meshTriangles[tri];
+
+		Polygon p;//we must build each face before add it to the list
+		ozcollide::Vec3f tmpNormal(mesh->m_meshNormals[i].x, mesh->m_meshNormals[i].y, mesh->m_meshNormals[i].z);
+
+		p.setIndicesMemory(3, &(m_triangles->at(tri)));//setting up indices
+
+		p.setNormal(tmpNormal);//adding normals (previously readed)
+		triangles.push_back(p);//adding the polygon to the polygon list
+	}
+
+	AABBTreePolyBuilder builder;
+	m_baseTree = builder.buildFromPolys(triangles.data(),//polygons
+		triangles.size(),//polygon count
+		m_verticesInVec3f->data(),//vertices
+		m_verticesInVec3f->size());//vertices count
 }
 
 Collider::~Collider()
 {
+	m_baseTree->destroy();
+	m_verticesInVec3f->clear();
+	m_triangles->clear();
 }
 
-void Collider::GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer)
+bool Collider::CollidesWith(Collider* otherCollider)
 {
-	cout << "[Collider] Generating Bounding Box From Mesh: ";
 
-	GLfloat maxX, maxY, maxZ, minX, minY, minZ;
-
-	if (meshRenderer->m_meshVertices.size() > 0)
-	{
-
-		for (GLuint i = 0; i < meshRenderer->m_meshVertices.size(); i++)
-		{
-			vec3 vertex = meshRenderer->m_meshVertices.at(i);
-			if (i == 0)
-			{
-				maxX = vertex.x;
-				minX = vertex.x;
-				maxY = vertex.y;
-				minY = vertex.y;
-				maxZ = vertex.z;
-				minZ = vertex.z;
-			}
-			else
-			{
-				if (vertex.x > maxX)
-				{
-					maxX = vertex.x;
-				}
-				if (vertex.x < minX)
-				{
-					minX = vertex.x;
-				}
-				if (vertex.y > maxY)
-				{
-					maxY = vertex.y;
-				}
-				if (vertex.y < minY)
-				{
-					minY = vertex.y;
-				}
-				if (vertex.z > maxZ)
-				{
-					maxZ = vertex.z;
-				}
-				if (vertex.z < minZ)
-				{
-					minZ = vertex.z;
-				}
-			}
-		}
-	}
-	else
-	{
-		// Generate a canonical bounding box.
-		maxX = 1.f;
-		minX = -1.f;
-		maxY = 1.f;
-		minY = -1.f;
-		maxZ = 1.f;
-		minZ = -1.f;
-	}
-
-	cout << "(" << minX << "," << minY << "," << minZ << ")" <<  "(" << maxX << "," << maxY << "," << maxZ << "). \n";
-	m_meshVertices.push_back(vec3(maxX,maxY,maxZ));
-	m_meshVertices.push_back(vec3(maxX,maxY,minZ));
-	m_meshVertices.push_back(vec3(maxX,minY,maxZ));
-	m_meshVertices.push_back(vec3(maxX,minY,minZ));
-	m_meshVertices.push_back(vec3(minX,maxY,maxZ));
-	m_meshVertices.push_back(vec3(minX,maxY,minZ));
-	m_meshVertices.push_back(vec3(minX,minY,maxZ));
-	m_meshVertices.push_back(vec3(minX,minY,minZ));
-}
-void Collider::GenerateBoundingSphereRadius(MeshRenderer *meshRenderer)
-{
-	/*float maxVertexLength = meshRenderer->m_meshVertices.at(0).length();
-	for(GLuint i = 1; i<meshRenderer->m_meshVertices.size(); i++)
-	{
-		vec3 vertex = meshRenderer->m_meshVertices.at(i);
-		
-		if(maxVertexLength < vertex.length())
-		{
-			maxVertexLength = vertex.length();
-		}
-	}
-	m_boundingSphereRadius = maxVertexLength;*/
-}
-
-bool BoxCollider::RayIntersection(const Ray &ray, float startInterval, float endInterval)
-{
-	/*
-	float tmin, tmax, tymin, tymax, tzmin, tzmax;
-	tmin = (bounds[r.sign[0]].x() - r.origin.x()) * r.inv_direction.x();
-		tmax = (bounds[1 - r.sign[0]].x() - r.origin.x()) * r.inv_direction.x();
-		tymin = (bounds[r.sign[1]].y() - r.origin.y()) * r.inv_direction.y();
-		tymax = (bounds[1 - r.sign[1]].y() - r.origin.y()) * r.inv_direction.y();
-		if ((tmin > tymax) || (tymin > tmax))
-			return false;
-		if (tymin > tmin)
-			tmin = tymin;
-		if (tymax < tmax)
-			tmax = tymax;
-		tzmin = (bounds[r.sign[2]].z() - r.origin.z()) * r.inv_direction.z();
-		tzmax = (bounds[1 - r.sign[2]].z() - r.origin.z()) * r.inv_direction.z();
-		if ((tmin > tzmax) || (tzmin > tmax))
-			return false;
-		if (tzmin > tmin)
-			tmin = tzmin;
-		if (tzmax < tmax)
-			3
-			tmax = tzmax;
-	*/
-	return false;
+	return true;
 }

@@ -11,7 +11,7 @@ public:
 
 	Transform* m_modelTransform;
 
-	vector<unsigned int> m_meshTriangles;
+	vector<uint32_t> m_meshTriangles;
 	vector<vec3> m_meshVertices;
 	vector<vec3> m_meshNormals;
 	vector<vec3> m_meshTangents;

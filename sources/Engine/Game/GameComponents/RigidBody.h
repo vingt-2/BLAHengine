@@ -6,60 +6,35 @@
 class RigidBody
 {
 public:
-
-	class Force
-	{
-	public:
-		enum ForceMode
-		{
-			Impulse,
-			Constant
-		};
-
-		ForceMode m_mode;
-		vec3 m_force;
-
-		Force(vec3 newForce,ForceMode newMode)
-		{
-			m_force = newForce;
-			m_mode = newMode;
-		}
-		~Force()
-		{}
-	};
+	vec3 m_previousPosition;
+	vec3 m_previousRotation;
+	vec3 m_acceleration;
+	vec3 m_velocity;
+	vec3 m_angularAcceleration;
+	vec3 m_angularVelocity;
 
 	float m_mass;
-	float m_frictionCoefficient;
-
-	float m_deltaTime;
 
 	Transform* m_transform;
 
 	void Update();
 
-	void PushForce(vec3 vector,RigidBody::Force::ForceMode mode);
-	void PushTorque(vec3 vector,RigidBody::Force::ForceMode mode);
+	void AddForce(vec3 vector);
+	void AddTorque(vec3 vector);
 	void SetPosition(vec3 Position);
 	void SetRotation(vec3 rotation);
+	vec3 GetForcesAccu() { return m_forcesAccu; };
+	vec3 GetTorquesAccu() { return m_torquesAccu; };
+	void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
 
 	RigidBody(Transform* parent);
 	~RigidBody(void);
 
 private:
 
-	vec3 m_acceleration;
-	vec3 m_velocity;
-	vec3 m_angularAcceleration;
-	vec3 m_angularVelocity;
+	vec3 m_forcesAccu;
+	vec3 m_torquesAccu;
 
-	vec3 m_previousPosition;
-	vec3 m_previousRotation;
-
-	vector<Force> m_forcesVector;
-	vector<Force> m_torquesVector;
-
-	void UpdateAcceleration();
-	void UpdateVelocity();
-	void UpdateTransform();
-
+	vec3 m_linearImpulseAccu;
+	vec3 m_angularImpulseAccu;
 };

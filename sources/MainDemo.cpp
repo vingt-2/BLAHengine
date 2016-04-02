@@ -26,6 +26,7 @@ Hence the name "MainDemo.cpp".
 #include "./Engine/Game/CursorPicker.h"
 #include "./Engine/Game/GameSingleton.h"
 #include "./Engine/Game/GameComponents/Collider.h"
+#include "./Engine/Game/RigidBodySystem.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
@@ -35,6 +36,7 @@ Renderer* mainRenderer;
 SharedResources* sharedResources;
 Debug* debug;
 Scene* mainScene;
+RigidBodySystem* rigidBodySystem;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -84,7 +86,7 @@ void SimpleControls(GameChar* object)
 	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
 
-	object->m_rigidBody->PushForce(cameraForce,RigidBody::Force::Impulse);
+	object->m_rigidBody->AddForce(cameraForce);
 	//object->
 
 
@@ -116,7 +118,7 @@ void SimpleControls(GameChar* object)
 
 		cameraTorque *= 5;
 
-		object->m_rigidBody->PushTorque(cameraTorque,RigidBody::Force::Impulse);
+		object->m_rigidBody->AddTorque(cameraTorque);
 	}
 	else
 	{
@@ -138,8 +140,6 @@ int main( void )
 	
 	int mainRenderFullScreen    = FULLSCREEN_SETTING;
 
-
-	//mainRenderer				= new OSXGL32Renderer((char*)"BLAengine - OBJViewer",mainRenderFullScreen);
 	mainRenderer				= new GL33Renderer((char*)"BLAengine - MainDemo",mainRenderFullScreen);
 
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
@@ -149,6 +149,7 @@ int main( void )
 	RenderingManager* debugRenderingManager = new RenderingManager(1, mainRenderer, RenderingManager::DebugGizmo);
 
 	debug = new Debug(debugRenderingManager);
+	rigidBodySystem = new RigidBodySystem();
 	
 	CursorPicker cursorPicker(gameSingleton);
 
@@ -176,17 +177,28 @@ int main( void )
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("../resources/models/bla.obj",object_1->m_meshRenderer);
+	objImport.ImportMesh("../resources/models/cube.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	object_1->m_meshRenderer->AssignTexture("earthDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
 
+	GameChar* object_2 = new GameChar();
+
+	objImport.ImportMesh("../resources/models/cube.obj", object_2->m_meshRenderer);
+	object_2->m_meshRenderer->AssignMaterial("defaultShader");
+	object_2->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+	object_1->m_meshRenderer->AssignTexture("earthNormals", "normals");
+
+	Collider* collider_1 = new Collider(object_1);
+
 	renderingManager->RequestRenderTicket(*object_1);
+	renderingManager->RequestRenderTicket(*object_2);
 
-	object_1->m_rigidBody->SetPosition(vec3(0,0,0));
-	//object_1->m_transform->scale = vec3(0.01f);
+	object_1->m_rigidBody->SetPosition(vec3(-3, 0, 0));
+	object_1->m_rigidBody->SetPosition(vec3(3, 0, 0));
 
-	object_1->m_rigidBody->m_frictionCoefficient = 0.01f;
+	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
+	rigidBodySystem->RegisterRigidBody(*(object_2->m_rigidBody));
 
 	mainScene->AddObject(object_1);
 
@@ -194,6 +206,8 @@ int main( void )
 	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
 	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
 	mainCamera->m_isControlEnabled = true;
+
+	rigidBodySystem->RegisterRigidBody(*(mainCamera->m_rigidBody));
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -207,6 +221,8 @@ int main( void )
 
 	while(!terminationRequest)
 	{
+		rigidBodySystem->SolveSystem();
+
 		Idle(&fps_frames,&fps_time,&fps);
 
 		stringstream title;
@@ -216,13 +232,31 @@ int main( void )
 
 		//glfwSetWindowSizeCallback(OnResize);
 
-		mainScene->Update();
+		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
+		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
-		//object_1->m_rigidBody->PushTorque(vec3(0, 0.1f, 0), RigidBody::Force::Impulse);
+		mainScene->Update();
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{
-			object_1->m_rigidBody->PushTorque(vec3(0,10,0),RigidBody::Force::Impulse);
+			object_1->m_rigidBody->AddTorque(vec3(0,10,0));
+		}
+
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
+		{
+			object_1->m_rigidBody->AddForce(vec3(0, 5, 0));
+		}
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
+		{
+			object_1->m_rigidBody->AddForce(vec3(-5, 0, 0));
+		}
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
+		{
+			object_1->m_rigidBody->AddForce(vec3(5, 0, 0));
+		}
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
+		{
+			object_1->m_rigidBody->AddForce(vec3(0, -5, 0));
 		}
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )

@@ -1,55 +1,23 @@
 #pragma once
 #include "MeshRenderer.h"
 #include "../GameAlgebra/Ray.h"
+#include "../GameObjects/GameChar.h"
+#include <ozcollide/ozcollide.h>
 
-class BoxCollider
-{
-public:
-	BoxCollider(const vec3 &min, const vec3 &max)
-	{
-		assert(min.x < max.x);
-		assert(min.y < max.y);
-		assert(min.z < max.z);
-
-		m_bounds[0] = min;
-		m_bounds[1] = max;
-	}
-
-	bool RayIntersection(const Ray &ray, float startInterval, float endInterval);
-	vec3 m_bounds[2];
-};
-
-class MeshCollider
-{
-public:
-	MeshCollider(const vector<vec3> &vertices)
-	{
-	
-	}
-
-	bool RayIntersect(const Ray &ray, float startInterval, float endInterval);
-	vector<vec3> m_vertices;
-};
+using namespace ozcollide;
 
 class Collider
 {
-
 public:
-
-	Collider(Transform* parentTransform);
+	Collider(GameChar* parent);
 	~Collider();
 
-	vector<vec3> m_meshVertices;
-    
-	MeshRenderer* m_colliderRenderer;
-    
-    GLfloat m_boundingSphereRadius;
+	AABBTreePoly* m_baseTree;
+	vector<Vec3f>* m_verticesInVec3f;
+	vector<int>* m_triangles;
 
-	Transform* m_parentTransform;
+	bool CollidesWith(Collider* otherCollider);
 
-	void GenerateBoundingBoxFromMesh(MeshRenderer* meshRenderer);
-	void GenerateBoundingSphereRadius(MeshRenderer* meshRenderer);
-    void UpdateRenderer();
+private:
 
-    
 };
