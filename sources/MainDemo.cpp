@@ -177,7 +177,7 @@ int main( void )
 
 	OBJImport objImport;
 
-	objImport.ImportMesh("../resources/models/cube.obj",object_1->m_meshRenderer);
+	objImport.ImportMesh("../resources/models/bla.obj",object_1->m_meshRenderer);
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	object_1->m_meshRenderer->AssignTexture("earthDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
@@ -194,13 +194,14 @@ int main( void )
 	renderingManager->RequestRenderTicket(*object_1);
 	renderingManager->RequestRenderTicket(*object_2);
 
-	object_1->m_rigidBody->SetPosition(vec3(-3, 0, 0));
-	object_1->m_rigidBody->SetPosition(vec3(3, 0, 0));
+	object_1->m_rigidBody->SetPosition(vec3(0, 0, 0));
+	object_2->m_rigidBody->SetPosition(vec3(5, 0, 0));
 
 	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
 	rigidBodySystem->RegisterRigidBody(*(object_2->m_rigidBody));
 
 	mainScene->AddObject(object_1);
+	mainScene->AddObject(object_2);
 
 	Camera* mainCamera = new Camera();
 	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
@@ -233,7 +234,6 @@ int main( void )
 		//glfwSetWindowSizeCallback(OnResize);
 
 		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
-		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
 		mainScene->Update();
 
@@ -279,14 +279,21 @@ int main( void )
 		if(glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 0))
 		{
 			ray = cursorPicker.ScreenToRay(1000);
-			vec3 hitOnPlane = ray.RayToPlaneIntersection(vec3(0),vec3(1,0,0),vec3(0,0,1)).hitPosition;
-			object_1->m_rigidBody->SetPosition(hitOnPlane);
+			vec3 origin = object_1->m_transform->WorldlPositionToLocal(ray.m_origin);
+			ozcollide::Vec3f p0(origin.x, origin.y, origin.z);
+			vec3 arrival =  origin + ray.m_length * object_1->m_transform->WorldlDirectionToLocal(ray.m_direction);
+			ozcollide::AABBTreePoly::SegmentColResult result;
+			ozcollide::Vec3f p1(arrival.x, arrival.y, arrival.z);
+			collider_1->m_baseTree->collideWithSegment(p0, p1, result);
+
+			//vec3 hitOnPlane = ray.RayToPlaneIntersection(vec3(0),vec3(1,0,0),vec3(0,0,1)).hitPosition;
+			//object_1->m_rigidBody->SetPosition(hitOnPlane);
 		}
 
-		//debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
-		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
-		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
-		//debug->DrawBasis(object_1->m_transform, 1.f);
+		debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
+		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
+		debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
+		debug->DrawBasis(object_1->m_transform, 1.f);
 
 		SimpleControls(mainCamera);
 		

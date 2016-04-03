@@ -9,13 +9,13 @@ Collider::Collider(GameChar* parentObject)
 		m_verticesInVec3f->push_back(ozcollide::Vec3f(v.x, v.y, v.z));
 	}
 
-	m_triangles = new vector<int>();
+	m_triIndices = new vector<int>();
 	for (int tri = 0; tri < mesh->m_meshTriangles.size(); tri++)
 	{
-		m_triangles->push_back(mesh->m_meshTriangles[tri]);
+		m_triIndices->push_back(mesh->m_meshTriangles[tri]);
 	}
 	
-	vector<Polygon> triangles;
+	m_triangles = new vector<Polygon>();
 	for (int tri = 0; tri < mesh->m_meshTriangles.size(); tri += 3)
 	{
 		int i = mesh->m_meshTriangles[tri];
@@ -23,15 +23,15 @@ Collider::Collider(GameChar* parentObject)
 		Polygon p;//we must build each face before add it to the list
 		ozcollide::Vec3f tmpNormal(mesh->m_meshNormals[i].x, mesh->m_meshNormals[i].y, mesh->m_meshNormals[i].z);
 
-		p.setIndicesMemory(3, &(m_triangles->at(tri)));//setting up indices
+		p.setIndicesMemory(3, &(m_triIndices->at(tri)));//setting up indices
 
 		p.setNormal(tmpNormal);//adding normals (previously readed)
-		triangles.push_back(p);//adding the polygon to the polygon list
+		m_triangles->push_back(p);//adding the polygon to the polygon list
 	}
 
 	AABBTreePolyBuilder builder;
-	m_baseTree = builder.buildFromPolys(triangles.data(),//polygons
-		triangles.size(),//polygon count
+	m_baseTree = builder.buildFromPolys(m_triangles->data(),//polygons
+		m_triangles->size(),//polygon count
 		m_verticesInVec3f->data(),//vertices
 		m_verticesInVec3f->size());//vertices count
 }
@@ -40,6 +40,7 @@ Collider::~Collider()
 {
 	m_baseTree->destroy();
 	m_verticesInVec3f->clear();
+	m_triIndices->clear();
 	m_triangles->clear();
 }
 
