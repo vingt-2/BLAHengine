@@ -4,6 +4,7 @@ RigidBodySystem::RigidBodySystem():
 	m_timeStep(0.01f),
 	m_uniformFriction(0.05f)
 {
+	m_collisionProcessor = new CollisionProcessor();
 }
 
 
@@ -14,8 +15,17 @@ RigidBodySystem::~RigidBodySystem()
 int RigidBodySystem::RegisterRigidBody(RigidBody &body)
 {
 	m_rigidBodyList.push_back(&body);
+	
+	if (body.m_collider)
+		m_collisionProcessor->m_bodiesList.push_back(&body);
 
 	return 0;
+}
+
+void RigidBodySystem::UpdateSystem()
+{
+	m_collisionProcessor->ProcessCollisions();
+	SolveSystem();
 }
 
 void RigidBodySystem::SolveSystem()

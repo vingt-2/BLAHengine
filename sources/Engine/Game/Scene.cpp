@@ -1,9 +1,12 @@
 #include "Scene.h"
 
-Scene::Scene()
+Scene::Scene(Camera* camera)
 {
-	m_directionalLights = vector<DirectionalLight*>();
-	m_sceneObjectsVector = vector<GameObject*>();
+	this->camera = camera;
+	this->m_rigidBodySystem = new RigidBodySystem();
+	this->m_directionalLights = vector<DirectionalLight*>();
+	this->m_sceneObjectsVector = vector<GameObject*>();
+	m_rigidBodySystem->RegisterRigidBody(*(camera->m_rigidBody));
 }
 
 Scene::~Scene()
@@ -16,7 +19,7 @@ void Scene::AddObject(GameChar* objectPtr)
 	m_sceneObjectsVector.push_back(objectPtr);
 
 	if (objectPtr->m_rigidBody->m_collider != NULL)
-		m_collisionProcessor.m_bodiesList.push_back(objectPtr->m_rigidBody);
+		m_rigidBodySystem->RegisterRigidBody(*(objectPtr->m_rigidBody));
 }
 void Scene::AddObject(GameManager* managerPtr)
 {
@@ -46,7 +49,8 @@ void Scene::AddDirectionalLight(DirectionalLight* light)
 
 void Scene::Update()
 {
-	m_collisionProcessor.ProcessCollisions();
+	m_rigidBodySystem->UpdateSystem();
+
 	for(int i=0;i < m_sceneObjectsVector.size() ; i++)
 	{
 		GameChar* gameChar = dynamic_cast<GameChar*>(m_sceneObjectsVector.at(i));

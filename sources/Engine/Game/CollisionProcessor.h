@@ -9,6 +9,7 @@ class Contact
 
 	vec3 m_contactNormalW;
 	vec3 m_contactPositionW;
+
 };
 
 class CollisionProcessor
@@ -18,9 +19,9 @@ public:
 	~CollisionProcessor();
 
 	vector<RigidBody*> m_bodiesList;
+	vector<vec3> m_collisionsPoints;
 
 	void ProcessCollisions();
-	
 private:
 
 	vector<Contact> m_currentContacts;

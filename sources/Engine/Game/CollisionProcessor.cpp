@@ -27,6 +27,7 @@ void CollisionProcessor::BroadPhaseDetection()
 
 void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2)
 {
+	m_collisionsPoints = vector<vec3>();
 	mat4 t1 = body1->m_transform->transformMatrix;
 	body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
 
@@ -34,13 +35,19 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 	body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
 
 	vector<pair<int, int>>* collidingTriangles = new vector<pair<int, int>>();
-	vector<float*>* collisionPoints = new vector<float*>();
+	vector<float> collisionPoints;
 	bool collision = body1->m_collider->m_collisionMesh->collision(body2->m_collider->m_collisionMesh);
 
 	if (collision)
 	{
-		body1->m_collider->m_collisionMesh->getCollisionPoints(collisionPoints);
-		cout << "Collision: " << collisionPoints->size() << " contact points.\n";
+		body1->m_collider->m_collisionMesh->getCollisionPoints(&collisionPoints);
+		
+		for (int i = 0; i < collisionPoints.size(); i += 3)
+		{
+			m_collisionsPoints.push_back(vec3(collisionPoints[i], collisionPoints[i + 1], collisionPoints[i + 2]));
+		}
+
+		cout << "Collision: " << m_collisionsPoints.size() << " contact points.\n";
 	}
 }
 

@@ -74,7 +74,7 @@ public:
   bool getCollisionPoint(float p[3], bool ModelSpace);
 
   bool getCollidingTriangles(std::vector<std::pair<int, int>>* pairs);
-  bool getCollisionPoints(std::vector<float*>* points);
+  bool getCollisionPoints(std::vector<float>* points);
 
 
   int getTriangleIndex(BoxedTriangle* bt)

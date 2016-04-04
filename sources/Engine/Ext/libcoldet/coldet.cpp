@@ -365,13 +365,14 @@ bool CollisionModel3DImpl::getCollidingTriangles(std::vector<std::pair<int, int>
 	}
 	return true;
 }
-bool CollisionModel3DImpl::getCollisionPoints(std::vector<float*>* points)
+bool CollisionModel3DImpl::getCollisionPoints(std::vector<float>* points)
 {
 	for (int i = 0; i < m_collisionPoints.size(); i++)
 	{
 		float* fltPtr = m_collisionPoints.at(i);
-		float f[3] = { fltPtr[0], fltPtr[1], fltPtr[2] };
-		points->push_back(f);
+		points->push_back(fltPtr[0]);
+		points->push_back(fltPtr[1]);
+		points->push_back(fltPtr[2]);
 	}
 	return true;
 }

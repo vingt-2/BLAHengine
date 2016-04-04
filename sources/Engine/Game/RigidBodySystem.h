@@ -1,5 +1,5 @@
 #include "../../Std/std.h"
-#include "GameComponents\RigidBody.h"
+#include "CollisionProcessor.h"
 
 #pragma once
 class RigidBodySystem
@@ -10,15 +10,17 @@ public:
 	RigidBodySystem();
 	~RigidBodySystem();
 
+	void UpdateSystem();
 	int RegisterRigidBody(RigidBody &body);
 	float GetTimeStep() { return m_timeStep; };
 
-	void SolveSystem();
+	CollisionProcessor* m_collisionProcessor;
 
 private:
 	vector<RigidBody*> m_rigidBodyList;
 	float m_timeStep;
 
+	void SolveSystem();
 	void UpdateAcceleration(RigidBody& body);
 	void UpdateVelocity(RigidBody& body);
 	void UpdateTransform(RigidBody& body);

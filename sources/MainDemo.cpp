@@ -143,8 +143,13 @@ int main( void )
 	mainRenderer				= new GL33Renderer((char*)"BLAengine - MainDemo",mainRenderFullScreen);
 
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
+
+	Camera* mainCamera = new Camera();
+	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
+	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
+	mainCamera->m_isControlEnabled = true;
 	
-	mainScene					= new Scene();
+	mainScene = new Scene(mainCamera);
 
 	RenderingManager* renderingManager = new RenderingManager(1, mainRenderer, RenderingManager::Game);
 	RenderingManager* debugRenderingManager = new RenderingManager(1, mainRenderer, RenderingManager::DebugGizmo);
@@ -177,7 +182,7 @@ int main( void )
 	OBJImport objImport;
 
 	MeshAsset mesh1;
-	objImport.ImportMesh("../resources/models/cube.obj", &mesh1);
+	objImport.ImportMesh("../resources/models/floor.obj", &mesh1);
 	MeshAsset mesh2;
 	objImport.ImportMesh("../resources/models/cube.obj", &mesh2);
 	GameChar* object_1 = new GameChar(&mesh1);
@@ -190,7 +195,6 @@ int main( void )
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
 	object_2->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
-	object_1->m_transform->scale = vec3(3,0.2,3);
 
 
 	renderingManager->RequestRenderTicket(*object_1);
@@ -204,11 +208,6 @@ int main( void )
 
 	mainScene->AddObject(object_1);
 	mainScene->AddObject(object_2);
-
-	Camera* mainCamera = new Camera();
-	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
-	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
-	mainCamera->m_isControlEnabled = true;
 
 	rigidBodySystem->RegisterRigidBody(*(mainCamera->m_rigidBody));
 
@@ -224,8 +223,6 @@ int main( void )
 
 	while(!terminationRequest)
 	{
-		rigidBodySystem->SolveSystem();
-
 		Idle(&fps_frames,&fps_time,&fps);
 
 		stringstream title;
