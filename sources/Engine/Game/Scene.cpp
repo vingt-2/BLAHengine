@@ -66,7 +66,7 @@ void Scene::Update()
 	}
 }
 
-vector<vec3>* Scene::GetContacts()
+vector<Contact>* Scene::GetContacts()
 {
-	return &(this->m_rigidBodySystem->m_collisionProcessor->m_collisionsPoints);
+	return &(this->m_rigidBodySystem->m_collisionProcessor->m_currentContacts);
 }

@@ -185,9 +185,9 @@ int main( void )
 	MeshAsset sphere;
 	MeshAsset mesh2;
 	objImport.ImportMesh("../resources/models/cube.obj", &mesh2);
-	objImport.ImportMesh("../resources/models/floor.obj", &mesh1);
+	objImport.ImportMesh("../resources/models/cube.obj", &mesh1);
 	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
-	GameChar* object_1 = new GameChar(&mesh1);
+	GameChar* object_1 = new GameChar(&sphere);
 	GameChar* object_2 = new GameChar(&mesh2);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
@@ -202,7 +202,7 @@ int main( void )
 	renderingManager->RequestRenderTicket(*object_1);
 	renderingManager->RequestRenderTicket(*object_2);
 
-	object_1->m_rigidBody->SetPosition(vec3(0, 0, 0));
+	object_1->m_rigidBody->SetPosition(vec3(3, 0, 0));
 	object_2->m_rigidBody->SetPosition(vec3(-3, 0, 0));
 
 	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
@@ -221,8 +221,10 @@ int main( void )
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
 	
-	 Ray ray(vec3(0),vec3(0),0);
+	Ray ray(vec3(0),vec3(0),0);
 
+	int frameCount = 0;
+	vector<Ray> debugRays;
 	while(!terminationRequest)
 	{
 		Idle(&fps_frames,&fps_time,&fps);
@@ -234,7 +236,7 @@ int main( void )
 
 		//glfwSetWindowSizeCallback(OnResize);
 
-		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
+//		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
 //		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
 		mainScene->Update();
@@ -290,23 +292,41 @@ int main( void )
 				hitOnPlane = ray.RayToPlaneIntersection(vec3(0), vec3(1, 0, 0), vec3(0, 0, 1)).hitPosition;
 			else
 				hitOnPlane = collide;
-			if (!isnan(hitOnPlane.x) && !isnan(hitOnPlane.y) && !isnan(hitOnPlane.z) ) object_2->m_rigidBody->SetPosition(hitOnPlane);
+			vec3 newPosition = object_2->m_transform->position;
+			newPosition.x = hitOnPlane.x;
+			newPosition.z = hitOnPlane.z;
+			if (!isnan(hitOnPlane.x) && !isnan(hitOnPlane.y) && !isnan(hitOnPlane.z)) object_2->m_rigidBody->SetPosition(newPosition);
 		}
 
-		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
+
+		// Draw contacts every 60 frames:
+		
+		if (frameCount % 60 == 0)
 		{
-			//GameChar* object = new GameChar(&sphere);
+			debugRays.clear();
+			for (int c = 0; c < mainScene->GetContacts()->size() && c < 4; c++)
+			{
+				Contact contact = mainScene->GetContacts()->at(c);
 
-			//object->m_meshRenderer->AssignMaterial("defaultShader");
+				GameChar* object = new GameChar(&sphere);
 
-			//object->m_meshRenderer->AssignTexture("testDiffuse", "texture");
-			//object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-			//object->m_transform->scale = vec3(0.1);
-			//object->m_transform->position = mainScene->GetContacts()->at(c);
-			//object->Update();
-			//renderingManager->RequestRenderTicket(*object);
-			vec3 contact = mainScene->GetContacts()->at(c);
-			cout << contact.x << ", " << contact.y << ", " << contact.z;
+				object->m_meshRenderer->AssignMaterial("defaultShader");
+
+				object->m_meshRenderer->AssignTexture("testDiffuse", "texture");
+				object->m_meshRenderer->AssignTexture("earthNormals", "normals");
+				object->m_transform->scale = vec3(0.1);
+				object->m_transform->position = contact.m_contactPositionW;
+				object->Update();
+				renderingManager->RequestRenderTicket(*object);
+
+				debugRays.push_back(Ray(contact.m_contactPositionW, contact.m_contactNormalBody1W, 10));
+				debugRays.push_back(Ray(contact.m_contactPositionW, contact.m_contactNormalBody2W, 10));
+			}
+		}
+
+		for (auto ray : debugRays)
+		{
+			debug->DrawRay(ray.m_origin,ray.m_direction,ray.m_length);
 		}
 		
 		
@@ -319,7 +339,8 @@ int main( void )
 		
 		mainCamera->Update();
 		mainRenderer->Update();
-
+			
+		frameCount++;
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{
 			terminationRequest = true;

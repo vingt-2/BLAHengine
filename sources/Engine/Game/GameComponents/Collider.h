@@ -13,5 +13,6 @@ public:
 	
 	CollisionModel3D* m_collisionMesh;
 	vector<vec3>* m_triVertices;
+	vector<vec3>* m_triNormals;
 	vector<uint32_t>* m_faces;
 };

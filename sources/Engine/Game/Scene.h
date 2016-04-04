@@ -21,7 +21,7 @@ public:
 	void AddDirectionalLight(DirectionalLight* directionalLight);
 
 	int CountObjects();
-	vector<vec3>* GetContacts();
+	vector<Contact>* GetContacts();
 
 private:
 

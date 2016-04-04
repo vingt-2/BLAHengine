@@ -2,6 +2,9 @@
 
 Collider::Collider(MeshRenderer* mesh)
 {
+	m_triVertices = &(mesh->m_meshVertices);
+	m_triNormals = &(mesh->m_meshNormals);
+
 	m_collisionMesh = newCollisionModel3D();
 	for (int i = 0; i < mesh->m_meshTriangles.size(); i += 3)
 	{
