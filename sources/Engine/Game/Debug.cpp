@@ -60,7 +60,7 @@ void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const ve
 	ray->AssignMaterial("debugShader");
 	ray->m_renderType = GL_LINES;
 
-	GameChar* lineMesh = new GameChar();
+	GameChar* lineMesh = new GameChar(NULL);
 	lineMesh->m_meshRenderer = ray;
 	lineMesh->m_transform = transform;
 

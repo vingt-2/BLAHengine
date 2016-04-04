@@ -14,6 +14,9 @@ Scene::~Scene()
 void Scene::AddObject(GameChar* objectPtr)
 {
 	m_sceneObjectsVector.push_back(objectPtr);
+
+	if (objectPtr->m_rigidBody->m_collider != NULL)
+		m_collisionProcessor.m_bodiesList.push_back(objectPtr->m_rigidBody);
 }
 void Scene::AddObject(GameManager* managerPtr)
 {
@@ -43,7 +46,7 @@ void Scene::AddDirectionalLight(DirectionalLight* light)
 
 void Scene::Update()
 {
-	
+	m_collisionProcessor.ProcessCollisions();
 	for(int i=0;i < m_sceneObjectsVector.size() ; i++)
 	{
 		GameChar* gameChar = dynamic_cast<GameChar*>(m_sceneObjectsVector.at(i));

@@ -10,7 +10,7 @@ Ray::Ray(vec3 origin, vec3 direction, float length)
 Ray::Ray(vec3 origin, vec3 endPoint)
 {
 	this->m_origin = origin;
-    vec3 dir = (endPoint-origin);
+	vec3 dir = (endPoint-origin);
 	this->m_length = dir.length();
 	this->m_direction = normalize(dir);
 }

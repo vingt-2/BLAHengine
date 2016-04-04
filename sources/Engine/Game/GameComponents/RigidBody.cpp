@@ -1,7 +1,7 @@
 #include "RigidBody.h"
 
 
-RigidBody::RigidBody    (Transform* p):
+RigidBody::RigidBody    (Transform* transform, MeshRenderer* mesh):
 	m_forcesAccu        (vec3(0)),
 	m_torquesAccu       (vec3(0)),
 	m_acceleration      (vec3(0)),
@@ -10,7 +10,13 @@ RigidBody::RigidBody    (Transform* p):
 	m_previousPosition  (vec3(0)),
 	m_previousRotation  (vec3(0))
 {
-	m_transform = p;
+	m_transform = transform;
+
+	if (mesh == NULL) 
+		m_collider = NULL;
+	else 
+		m_collider = new Collider(mesh);
+
 	m_mass = 1.f;
 }
 

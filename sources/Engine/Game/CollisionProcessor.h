@@ -1,3 +1,29 @@
-#include "../../Std/Maths.h"
+#pragma once
+#include"GameComponents\RigidBody.h"
 
-bool PointToTriangle(vec3 point, vec3 a, vec3 a);
+class Contact
+{
+	int m_contactIndex;
+	RigidBody* m_body1;
+	RigidBody* m_body2;
+
+	vec3 m_contactNormalW;
+	vec3 m_contactPositionW;
+};
+
+class CollisionProcessor
+{
+public:
+	CollisionProcessor();
+	~CollisionProcessor();
+
+	vector<RigidBody*> m_bodiesList;
+
+	void ProcessCollisions();
+	
+private:
+
+	vector<Contact> m_currentContacts;
+	void BroadPhaseDetection();
+	void NarrowPhaseDetection(RigidBody* body1, RigidBody* body2);
+};

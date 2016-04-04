@@ -1,7 +1,7 @@
 #pragma once
 #include "../../../Std/Maths.h"
-#include "../../../Std/std.h"
-#include "Transform.h"
+#include "../../../Std/std.h""
+#include "Collider.h"
 
 class RigidBody
 {
@@ -16,6 +16,7 @@ public:
 	float m_mass;
 
 	Transform* m_transform;
+	Collider* m_collider;
 
 	void Update();
 
@@ -27,7 +28,7 @@ public:
 	vec3 GetTorquesAccu() { return m_torquesAccu; };
 	void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
 
-	RigidBody(Transform* parent);
+	RigidBody(Transform* transform, MeshRenderer* mesh);
 	~RigidBody(void);
 
 private:

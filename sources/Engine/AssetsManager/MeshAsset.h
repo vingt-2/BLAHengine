@@ -7,6 +7,7 @@ class MeshAsset
 {
 public:
 
+	vector<uint32_t> m_meshTriangles;
 	vector<vec3> m_meshVertices;
 	vector<vec3> m_meshNormals;
 	vector<vec3> m_meshTangents;

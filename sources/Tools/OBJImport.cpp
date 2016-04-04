@@ -61,7 +61,7 @@ struct vertEntryHasher
 	}
 };
 
-bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
+bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 {
 	cout << "[OBJ_MESH] Importing " << filename << ".\n";
 	ifstream fileStream (filename,ifstream::in);
@@ -236,9 +236,6 @@ bool OBJImport::ImportMesh(const string filename, MeshRenderer *mesh)
 		mesh->m_meshVertices  = meshVertices;
 		mesh->m_meshNormals	  = meshNormals;
 		mesh->m_meshUVs		  = meshUVs;
-
-		mesh->ComputeTangents();
-		mesh->NormalizeModelCoordinates();
 
 		cout << "Imported: " << meshTriangles.size() << " triangles, " << meshVertices.size() << " triplets, " << collectedVertices.size() << " vertices, " << collectedNormals.size() << " normals, " << collectedUVs.size() << " UVs.\n";
 

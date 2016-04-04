@@ -27,6 +27,7 @@ Hence the name "MainDemo.cpp".
 #include "./Engine/Game/GameSingleton.h"
 #include "./Engine/Game/GameComponents/Collider.h"
 #include "./Engine/Game/RigidBodySystem.h"
+#include "./Engine/AssetsManager/MeshAsset.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
@@ -137,7 +138,6 @@ int main( void )
 {
 	sharedResources = new SharedResources();
 	
-	
 	int mainRenderFullScreen    = FULLSCREEN_SETTING;
 
 	mainRenderer				= new GL33Renderer((char*)"BLAengine - MainDemo",mainRenderFullScreen);
@@ -145,6 +145,7 @@ int main( void )
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 	
 	mainScene					= new Scene();
+
 	RenderingManager* renderingManager = new RenderingManager(1, mainRenderer, RenderingManager::Game);
 	RenderingManager* debugRenderingManager = new RenderingManager(1, mainRenderer, RenderingManager::DebugGizmo);
 
@@ -167,35 +168,35 @@ int main( void )
 	sharedResources->LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
 	sharedResources->LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
 	
-	sharedResources->loadBMP_custom("testDiffuse","../resources/textures/texture.bmp");
+	sharedResources->loadBMP_custom("testDiffuse","../resources/textures/test.bmp");
+	sharedResources->loadBMP_custom("blankDiffuse", "../resources/textures/blank.bmp");
 	sharedResources->loadBMP_custom("earthDiffuse","../resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","../resources/textures/earth_NRM.bmp");
 
 	//mainRenderer->m_debug = debug;
-
-	GameChar* object_1 = new GameChar();
-
 	OBJImport objImport;
 
-	objImport.ImportMesh("../resources/models/bla.obj",object_1->m_meshRenderer);
+	MeshAsset mesh1;
+	objImport.ImportMesh("../resources/models/cube.obj", &mesh1);
+	MeshAsset mesh2;
+	objImport.ImportMesh("../resources/models/cube.obj", &mesh2);
+	GameChar* object_1 = new GameChar(&mesh1);
+	GameChar* object_2 = new GameChar(&mesh2);
+
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
-	object_1->m_meshRenderer->AssignTexture("earthDiffuse","texture");
+	object_1->m_meshRenderer->AssignTexture("blankDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
-
-	GameChar* object_2 = new GameChar();
-
-	objImport.ImportMesh("../resources/models/cube.obj", object_2->m_meshRenderer);
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
 	object_2->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-	object_1->m_meshRenderer->AssignTexture("earthNormals", "normals");
+	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
+	object_2->m_transform->scale = vec3(0.1);
 
-	Collider* collider_1 = new Collider(object_1);
 
 	renderingManager->RequestRenderTicket(*object_1);
 	renderingManager->RequestRenderTicket(*object_2);
 
 	object_1->m_rigidBody->SetPosition(vec3(0, 0, 0));
-	object_2->m_rigidBody->SetPosition(vec3(5, 0, 0));
+	object_2->m_rigidBody->SetPosition(vec3(-3, 0, 0));
 
 	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
 	rigidBodySystem->RegisterRigidBody(*(object_2->m_rigidBody));
@@ -218,7 +219,7 @@ int main( void )
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
 	
-	Ray ray(vec3(0),vec3(0),0);
+	 Ray ray(vec3(0),vec3(0),0);
 
 	while(!terminationRequest)
 	{
@@ -233,30 +234,31 @@ int main( void )
 
 		//glfwSetWindowSizeCallback(OnResize);
 
-		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
+//		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
+//		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
 		mainScene->Update();
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{
-			object_1->m_rigidBody->AddTorque(vec3(0,10,0));
+			object_2->m_rigidBody->AddTorque(vec3(0,10,0));
 		}
 
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
 		{
-			object_1->m_rigidBody->AddForce(vec3(0, 5, 0));
+			object_2->m_rigidBody->AddForce(vec3(0, 5, 0));
 		}
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
 		{
-			object_1->m_rigidBody->AddForce(vec3(-5, 0, 0));
+			object_2->m_rigidBody->AddForce(vec3(-5, 0, 0));
 		}
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
 		{
-			object_1->m_rigidBody->AddForce(vec3(5, 0, 0));
+			object_2->m_rigidBody->AddForce(vec3(5, 0, 0));
 		}
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
 		{
-			object_1->m_rigidBody->AddForce(vec3(0, -5, 0));
+			object_2->m_rigidBody->AddForce(vec3(0, -5, 0));
 		}
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )
@@ -275,25 +277,27 @@ int main( void )
 		{
 			light->GetTransform()->rotation += vec3(0.f,0.f,-0.1f);
 		}
-			
+
+		//cout << collider_1->CollidesWith(collider_2);
+		
 		if(glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 0))
 		{
 			ray = cursorPicker.ScreenToRay(1000);
-			vec3 origin = object_1->m_transform->WorldlPositionToLocal(ray.m_origin);
-			ozcollide::Vec3f p0(origin.x, origin.y, origin.z);
-			vec3 arrival =  origin + ray.m_length * object_1->m_transform->WorldlDirectionToLocal(ray.m_direction);
-			ozcollide::AABBTreePoly::SegmentColResult result;
-			ozcollide::Vec3f p1(arrival.x, arrival.y, arrival.z);
-			collider_1->m_baseTree->collideWithSegment(p0, p1, result);
-
-			//vec3 hitOnPlane = ray.RayToPlaneIntersection(vec3(0),vec3(1,0,0),vec3(0,0,1)).hitPosition;
-			//object_1->m_rigidBody->SetPosition(hitOnPlane);
+			//vec3 collide = collider_1->RayCollision(ray);
+			vec3 collide(0);
+			vec3 hitOnPlane;
+			if (collide == vec3(0))
+				hitOnPlane = ray.RayToPlaneIntersection(vec3(0), vec3(1, 0, 0), vec3(0, 0, 1)).hitPosition;
+			else
+				hitOnPlane = collide;
+			if (!isnan(hitOnPlane.x) && !isnan(hitOnPlane.y) && !isnan(hitOnPlane.z) ) object_2->m_rigidBody->SetPosition(hitOnPlane);
 		}
-
-		debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
-		debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
-		debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
-		debug->DrawBasis(object_1->m_transform, 1.f);
+		
+		
+		//debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
+		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
+		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
+		//debug->DrawBasis(object_1->m_transform, 1.f);
 
 		SimpleControls(mainCamera);
 		

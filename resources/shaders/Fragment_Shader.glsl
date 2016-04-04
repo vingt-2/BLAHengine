@@ -20,5 +20,5 @@ void main()
 	vec3 diffuse = texture2D( texture, UVs ).rgb;
 	vec3 nrms = texture2D( normals, UVs ).rgb;
     
-	color = diffuse * (0.25 + (dot(normal,lightVector) ));
+	color = diffuse * (1 + (dot(normal,lightVector) ));
 }

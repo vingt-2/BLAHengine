@@ -1,5 +1,6 @@
 #pragma once
 #include "gameobject.h"
+#include "../../AssetsManager/MeshAsset.h"
 class GameChar : public GameObject
 {
 public:
@@ -8,7 +9,7 @@ public:
 
 	void Update();
 
-	GameChar(void);
+	GameChar(MeshAsset* mesh);
 	~GameChar(void);
 };
 

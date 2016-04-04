@@ -1,6 +1,4 @@
 #include "MeshAsset.h"
 
-void MeshAsset::ComputeTangents()
-{
-
-}
+MeshAsset::MeshAsset() {}
+MeshAsset::~MeshAsset() {}

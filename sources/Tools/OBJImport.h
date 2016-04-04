@@ -1,7 +1,7 @@
 #pragma once
 #include "../Std/std.h"
 #include "../Helpers/Helpers.h"
-#include "../Engine/Game/GameObjects/GameObject.h"
+#include "../Engine/AssetsManager/MeshAsset.h"
 #include <unordered_map>
 
 class OBJImport
@@ -9,7 +9,7 @@ class OBJImport
 public:
 	static bool OldImportMesh(char* filename);
 
-	bool ImportMesh(const string filename, MeshRenderer *mesh);
+	bool ImportMesh(const string filename, MeshAsset *mesh);
 
 	OBJImport(void);
 	~OBJImport(void);

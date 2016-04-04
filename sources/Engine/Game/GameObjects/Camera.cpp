@@ -2,9 +2,10 @@
 
 
 Camera::Camera():
+	GameChar(NULL),
 	m_projection(mat4(1))
 {
-	m_rigidBody = new RigidBody(m_transform);
+	m_rigidBody = new RigidBody(m_transform, NULL);
 	UpdateView();
 
 	m_isControlEnabled = false;
