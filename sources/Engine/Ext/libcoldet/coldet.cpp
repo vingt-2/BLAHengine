@@ -33,17 +33,19 @@ class Check
 public:
   Check() {}
   Check(BoxTreeNode* f, BoxTreeNode* s, int d)
-    : m_first(f), m_second(s), depth(d) {}
+	: m_first(f), m_second(s), depth(d) {}
   BoxTreeNode* m_first;
   BoxTreeNode* m_second;
   int depth;
 };
 
 bool CollisionModel3DImpl::collision(CollisionModel3D* other, 
-                                     int AccuracyDepth, 
-                                     int MaxProcessingTime,
-                                     float* other_transform)
+									 int AccuracyDepth, 
+									 int MaxProcessingTime,
+									 float* other_transform)
 {
+  m_intersectedTriangles.clear();
+  m_collisionPoints.clear();
   m_ColType=Models;
   CollisionModel3DImpl* o=static_cast<CollisionModel3DImpl*>(other);
   if (!m_Final) throw Inconsistency();
@@ -68,125 +70,134 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
   c.m_second=&o->m_Root;
   while (queue_idx>0)
   {
-    if (queue_idx>(Allocated/2)) // enlarge the queue.
-    {
-      Check c;
-      checks.insert(checks.end(),Allocated,c);
-      Allocated*=2;
-    }
-    EndTime=unsigned(get_tick_count());
-    if (EndTime >= (BeginTime+MaxProcessingTime)) throw TimeoutExpired();
+	if (queue_idx>(Allocated/2)) // enlarge the queue.
+	{
+	  Check c;
+	  checks.insert(checks.end(),Allocated,c);
+	  Allocated*=2;
+	}
+	EndTime=unsigned(get_tick_count());
+	if (EndTime >= (BeginTime+MaxProcessingTime)) throw TimeoutExpired();
 
-    // @@@ add depth check
-    //Check c=checks.back();
-    Check& c=checks[--queue_idx];
-    BoxTreeNode* first=c.m_first;
-    BoxTreeNode* second=c.m_second;
-    assert(first!=NULL);
-    assert(second!=NULL);
-    if (first->intersect(*second,rs))
-    {
-      int tnum1=first->getTrianglesNumber();
-      int tnum2=second->getTrianglesNumber();
-      if (tnum1>0 && tnum2>0)
-      {
-        {
-          for(int i=0;i<tnum2;i++)
-          {
-            BoxedTriangle* bt2=second->getTriangle(i);
-            Triangle tt(Transform(bt2->v1,rs.t),Transform(bt2->v2,rs.t),Transform(bt2->v3,rs.t));
-            for(int j=0;j<tnum1;j++)
-            {
-              BoxedTriangle* bt1=first->getTriangle(j);
-              if (tt.intersect(*bt1)) 
-              {
-                m_ColTri1=*bt1;
-                m_iColTri1=getTriangleIndex(bt1);
-                m_ColTri2=tt;
-                m_iColTri2=o->getTriangleIndex(bt2);
-                return true;
-              }
-            }
-          }
-        }
-      }
-      else
-      if (first->getSonsNumber()==0)
-      {
-        BoxTreeNode* s1=second->getSon(0);
-        BoxTreeNode* s2=second->getSon(1);
-        assert(s1!=NULL);
-        assert(s2!=NULL);
-        
-        Check& c1=checks[queue_idx++];
-        c1.m_first=first;
-        c1.m_second=s1;
+	// @@@ add depth check
+	//Check c=checks.back();
+	Check& c=checks[--queue_idx];
+	BoxTreeNode* first=c.m_first;
+	BoxTreeNode* second=c.m_second;
+	assert(first!=NULL);
+	assert(second!=NULL);
+	if (first->intersect(*second,rs))
+	{
+	  int tnum1=first->getTrianglesNumber();
+	  int tnum2=second->getTrianglesNumber();
+	  if (tnum1>0 && tnum2>0)
+	  {
+		{
+		  for(int i=0;i<tnum2;i++)
+		  {
+			BoxedTriangle* bt2=second->getTriangle(i);
+			Triangle tt(Transform(bt2->v1,rs.t),Transform(bt2->v2,rs.t),Transform(bt2->v3,rs.t));
+			for(int j=0;j<tnum1;j++)
+			{
+			  BoxedTriangle* bt1=first->getTriangle(j);
+			  if (tt.intersect(*bt1)) 
+			  {
+				m_ColTri1=*bt1;
+				m_iColTri1=getTriangleIndex(bt1);
+				m_ColTri2=tt;
+				m_iColTri2=o->getTriangleIndex(bt2);
 
-        Check& c2=checks[queue_idx++];
-        c2.m_first=first;
-        c2.m_second=s2;
-      }
-      else
-      if (second->getSonsNumber()==0)
-      {
-        BoxTreeNode* f1=first->getSon(0);
-        BoxTreeNode* f2=first->getSon(1);
-        assert(f1!=NULL);
-        assert(f2!=NULL);
-        
-        Check& c1=checks[queue_idx++];
-        c1.m_first=f1;
-        c1.m_second=second;
+				std::pair<int, int> tri(m_iColTri1, m_iColTri2);
+				m_intersectedTriangles.push_back(tri);
 
-        Check& c2=checks[queue_idx++];
-        c2.m_first=f2;
-        c2.m_second=second;
-      }
-      else
-      {
-        float v1=first->getVolume();
-        float v2=second->getVolume();
-        if (v1>v2)
-        {
-          BoxTreeNode* f1=first->getSon(0);
-          BoxTreeNode* f2=first->getSon(1);
-          assert(f1!=NULL);
-          assert(f2!=NULL);
+				Vector3D v = my_tri_tri_intersect(m_ColTri1, m_ColTri2);
+				float f[3] = { v.x, v.y, v.z };
+				m_collisionPoints.push_back(f);
+			  }
+			}
+		  }
+		}
+	  }
+	  else
+	  if (first->getSonsNumber()==0)
+	  {
+		BoxTreeNode* s1=second->getSon(0);
+		BoxTreeNode* s2=second->getSon(1);
+		assert(s1!=NULL);
+		assert(s2!=NULL);
+		
+		Check& c1=checks[queue_idx++];
+		c1.m_first=first;
+		c1.m_second=s1;
 
-          Check& c1=checks[queue_idx++];
-          c1.m_first=f1;
-          c1.m_second=second;
+		Check& c2=checks[queue_idx++];
+		c2.m_first=first;
+		c2.m_second=s2;
+	  }
+	  else
+	  if (second->getSonsNumber()==0)
+	  {
+		BoxTreeNode* f1=first->getSon(0);
+		BoxTreeNode* f2=first->getSon(1);
+		assert(f1!=NULL);
+		assert(f2!=NULL);
+		
+		Check& c1=checks[queue_idx++];
+		c1.m_first=f1;
+		c1.m_second=second;
 
-          Check& c2=checks[queue_idx++];
-          c2.m_first=f2;
-          c2.m_second=second;
-        }
-        else
-        {
-          BoxTreeNode* s1=second->getSon(0);
-          BoxTreeNode* s2=second->getSon(1);
-          assert(s1!=NULL);
-          assert(s2!=NULL);
+		Check& c2=checks[queue_idx++];
+		c2.m_first=f2;
+		c2.m_second=second;
+	  }
+	  else
+	  {
+		float v1=first->getVolume();
+		float v2=second->getVolume();
+		if (v1>v2)
+		{
+		  BoxTreeNode* f1=first->getSon(0);
+		  BoxTreeNode* f2=first->getSon(1);
+		  assert(f1!=NULL);
+		  assert(f2!=NULL);
 
-          Check& c1=checks[queue_idx++];
-          c1.m_first=first;
-          c1.m_second=s1;
+		  Check& c1=checks[queue_idx++];
+		  c1.m_first=f1;
+		  c1.m_second=second;
 
-          Check& c2=checks[queue_idx++];
-          c2.m_first=first;
-          c2.m_second=s2;
-        }
-      }
-    }
+		  Check& c2=checks[queue_idx++];
+		  c2.m_first=f2;
+		  c2.m_second=second;
+		}
+		else
+		{
+		  BoxTreeNode* s1=second->getSon(0);
+		  BoxTreeNode* s2=second->getSon(1);
+		  assert(s1!=NULL);
+		  assert(s2!=NULL);
+
+		  Check& c1=checks[queue_idx++];
+		  c1.m_first=first;
+		  c1.m_second=s1;
+
+		  Check& c2=checks[queue_idx++];
+		  c2.m_first=first;
+		  c2.m_second=s2;
+		}
+	  }
+	}
   }
+  if (m_intersectedTriangles.size() > 0)
+	  return true;
+  else
   return false;
 }
 
 bool CollisionModel3DImpl::rayCollision(const float origin[3], 
-                                        const float direction[3],
-                                        bool closest,
-                                        float segmin, 
-                                        float segmax)
+										const float direction[3],
+										bool closest,
+										float segmin, 
+										float segmax)
 {
   float mintparm=9e9f,tparm;
   Vector3D col_point;
@@ -195,67 +206,67 @@ bool CollisionModel3DImpl::rayCollision(const float origin[3],
   Vector3D D;
   if (m_Static)
   {
-    O=Transform(*(Vector3D*)origin,m_InvTransform);
-    D=rotateVector(*(Vector3D*)direction,m_InvTransform);
+	O=Transform(*(Vector3D*)origin,m_InvTransform);
+	D=rotateVector(*(Vector3D*)direction,m_InvTransform);
   }
   else
   {
-    Matrix3D inv=m_Transform.Inverse();
-    O=Transform(*(Vector3D*)origin,inv);
-    D=rotateVector(*(Vector3D*)direction,inv);
+	Matrix3D inv=m_Transform.Inverse();
+	O=Transform(*(Vector3D*)origin,inv);
+	D=rotateVector(*(Vector3D*)direction,inv);
   }
   if (segmin!=0.0f) // normalize ray
   {
-    O+=segmin*D;
-    segmax-=segmin;
-    segmin=0.0f;
+	O+=segmin*D;
+	segmax-=segmin;
+	segmin=0.0f;
   }
   if (segmax<segmin) 
   {
-    D=-D;
-    segmax=-segmax;
+	D=-D;
+	segmax=-segmax;
   }
   std::vector<BoxTreeNode*> checks;
   checks.push_back(&m_Root);
   while (!checks.empty())
   {
-    BoxTreeNode* b=checks.back();
-    checks.pop_back();
-    if (b->intersect(O,D,segmax))
-    {
-      int sons=b->getSonsNumber();
-      if (sons)
-        while (sons--) checks.push_back(b->getSon(sons));
-      else
-      {
-        int tri=b->getTrianglesNumber();
-        while (tri--)
-        {
-          BoxedTriangle* bt=b->getTriangle(tri);
-          Triangle* t=static_cast<Triangle*>(bt);
-          if (t->intersect(O,D,col_point,tparm,segmax)) 
-          {
-            if (closest)
-            {
-              if (tparm<mintparm)
-              {
-                mintparm=tparm;
-                m_ColTri1=*bt;
-                m_iColTri1=getTriangleIndex(bt);
-                m_ColPoint=col_point;
-              }
-            }
-            else
-            {
-              m_ColTri1=*bt;
-              m_iColTri1=getTriangleIndex(bt);
-              m_ColPoint=col_point;
-              return true;
-            }
-          }
-        }
-      }
-    }
+	BoxTreeNode* b=checks.back();
+	checks.pop_back();
+	if (b->intersect(O,D,segmax))
+	{
+	  int sons=b->getSonsNumber();
+	  if (sons)
+		while (sons--) checks.push_back(b->getSon(sons));
+	  else
+	  {
+		int tri=b->getTrianglesNumber();
+		while (tri--)
+		{
+		  BoxedTriangle* bt=b->getTriangle(tri);
+		  Triangle* t=static_cast<Triangle*>(bt);
+		  if (t->intersect(O,D,col_point,tparm,segmax)) 
+		  {
+			if (closest)
+			{
+			  if (tparm<mintparm)
+			  {
+				mintparm=tparm;
+				m_ColTri1=*bt;
+				m_iColTri1=getTriangleIndex(bt);
+				m_ColPoint=col_point;
+			  }
+			}
+			else
+			{
+			  m_ColTri1=*bt;
+			  m_iColTri1=getTriangleIndex(bt);
+			  m_ColPoint=col_point;
+			  return true;
+			}
+		  }
+		}
+	  }
+	}
   }
   if (closest && mintparm<9e9f) return true;
   return false;
@@ -266,39 +277,39 @@ bool CollisionModel3DImpl::sphereCollision(const float origin[3], float radius)
   m_ColType=Sphere;
   Vector3D O;
   if (m_Static)
-    O=Transform(*(Vector3D*)origin,m_InvTransform);
+	O=Transform(*(Vector3D*)origin,m_InvTransform);
   else
   {
-    Matrix3D inv=m_Transform.Inverse();
-    O=Transform(*(Vector3D*)origin,inv);
+	Matrix3D inv=m_Transform.Inverse();
+	O=Transform(*(Vector3D*)origin,inv);
   }
   std::vector<BoxTreeNode*> checks;
   checks.push_back(&m_Root);
   while (!checks.empty())
   {
-    BoxTreeNode* b=checks.back();
-    checks.pop_back();
-    if (b->intersect(O,radius))
-    {
-      int sons=b->getSonsNumber();
-      if (sons)
-        while (sons--) checks.push_back(b->getSon(sons));
-      else
-      {
-        int tri=b->getTrianglesNumber();
-        while (tri--)
-        {
-          BoxedTriangle* bt=b->getTriangle(tri);
-          Triangle* t=static_cast<Triangle*>(bt);
-          if (t->intersect(O,radius,m_ColPoint))
-          {
-            m_ColTri1=*bt;
-            m_iColTri1=getTriangleIndex(bt);
-            return true;
-          }
-        }
-      }
-    }
+	BoxTreeNode* b=checks.back();
+	checks.pop_back();
+	if (b->intersect(O,radius))
+	{
+	  int sons=b->getSonsNumber();
+	  if (sons)
+		while (sons--) checks.push_back(b->getSon(sons));
+	  else
+	  {
+		int tri=b->getTrianglesNumber();
+		while (tri--)
+		{
+		  BoxedTriangle* bt=b->getTriangle(tri);
+		  Triangle* t=static_cast<Triangle*>(bt);
+		  if (t->intersect(O,radius,m_ColPoint))
+		  {
+			m_ColTri1=*bt;
+			m_iColTri1=getTriangleIndex(bt);
+			return true;
+		  }
+		}
+	  }
+	}
   }
   return false;
 }
@@ -307,33 +318,33 @@ bool CollisionModel3DImpl::getCollidingTriangles(float t1[9], float t2[9], bool 
 {
   if (ModelSpace)
   {
-    if (t1!=NULL)
-    {
-      *((Vector3D*)&t1[0]) = m_ColTri1.v1;
-      *((Vector3D*)&t1[3]) = m_ColTri1.v2;
-      *((Vector3D*)&t1[6]) = m_ColTri1.v3;
-    }
-    if (t2!=NULL)
-    {
-      *((Vector3D*)&t2[0]) = m_ColTri2.v1;
-      *((Vector3D*)&t2[3]) = m_ColTri2.v2;
-      *((Vector3D*)&t2[6]) = m_ColTri2.v3;
-    }
+	if (t1!=NULL)
+	{
+	  *((Vector3D*)&t1[0]) = m_ColTri1.v1;
+	  *((Vector3D*)&t1[3]) = m_ColTri1.v2;
+	  *((Vector3D*)&t1[6]) = m_ColTri1.v3;
+	}
+	if (t2!=NULL)
+	{
+	  *((Vector3D*)&t2[0]) = m_ColTri2.v1;
+	  *((Vector3D*)&t2[3]) = m_ColTri2.v2;
+	  *((Vector3D*)&t2[6]) = m_ColTri2.v3;
+	}
   }
   else
   {
-    if (t1!=NULL)
-    {
-      *((Vector3D*)&t1[0]) = Transform(m_ColTri1.v1,m_Transform);
-      *((Vector3D*)&t1[3]) = Transform(m_ColTri1.v2,m_Transform);
-      *((Vector3D*)&t1[6]) = Transform(m_ColTri1.v3,m_Transform);
-    }
-    if (t2!=NULL)
-    {
-      *((Vector3D*)&t2[0]) = Transform(m_ColTri2.v1,m_Transform);
-      *((Vector3D*)&t2[3]) = Transform(m_ColTri2.v2,m_Transform);
-      *((Vector3D*)&t2[6]) = Transform(m_ColTri2.v3,m_Transform);
-    }
+	if (t1!=NULL)
+	{
+	  *((Vector3D*)&t1[0]) = Transform(m_ColTri1.v1,m_Transform);
+	  *((Vector3D*)&t1[3]) = Transform(m_ColTri1.v2,m_Transform);
+	  *((Vector3D*)&t1[6]) = Transform(m_ColTri1.v3,m_Transform);
+	}
+	if (t2!=NULL)
+	{
+	  *((Vector3D*)&t2[0]) = Transform(m_ColTri2.v1,m_Transform);
+	  *((Vector3D*)&t2[3]) = Transform(m_ColTri2.v2,m_Transform);
+	  *((Vector3D*)&t2[6]) = Transform(m_ColTri2.v3,m_Transform);
+	}
   }
   return true;
 }
@@ -345,15 +356,35 @@ bool CollisionModel3DImpl::getCollidingTriangles(int& t1, int& t2)
   return true;
 }
 
+bool CollisionModel3DImpl::getCollidingTriangles(std::vector<std::pair<int, int>>* pairs)
+{
+	for (int i = 0; i < m_intersectedTriangles.size(); i++)
+	{
+		std::pair<int, int> pair = m_intersectedTriangles.at(i);
+		pairs->push_back(std::pair<int, int>(pair.first, pair.second));
+	}
+	return true;
+}
+bool CollisionModel3DImpl::getCollisionPoints(std::vector<float*>* points)
+{
+	for (int i = 0; i < m_collisionPoints.size(); i++)
+	{
+		float* fltPtr = m_collisionPoints.at(i);
+		float f[3] = { fltPtr[0], fltPtr[1], fltPtr[2] };
+		points->push_back(f);
+	}
+	return true;
+}
+
 bool CollisionModel3DImpl::getCollisionPoint(float p[3], bool ModelSpace)
 {
   Vector3D& v=*((Vector3D*)p);
   switch (m_ColType) 
   {
-    case Models: v=my_tri_tri_intersect(m_ColTri1,m_ColTri2); break;
-    case Sphere:
-    case Ray:    v=m_ColPoint; break;
-    default:     v=Vector3D::Zero;
+	case Models: v=my_tri_tri_intersect(m_ColTri1,m_ColTri2); break;
+	case Sphere:
+	case Ray:    v=m_ColPoint; break;
+	default:     v=Vector3D::Zero;
   }
   if (!ModelSpace) v=Transform(v,m_Transform);
   return true;
@@ -381,8 +412,8 @@ bool SphereRayCollision(const float* center, float radius,
 }
 
 bool SphereSphereCollision(float c1[3], float r1,
-                           float c2[3], float r2,
-                           float point[3])
+						   float c2[3], float r2,
+						   float point[3])
 {
   Vector3D& C1=*((Vector3D*)c1);
   Vector3D& C2=*((Vector3D*)c2);
@@ -390,13 +421,13 @@ bool SphereSphereCollision(float c1[3], float r1,
   float sum=r1+r2;
   if (dist < sum*sum)
   {
-    Vector3D& P =*((Vector3D*)point);
+	Vector3D& P =*((Vector3D*)point);
 
-    P = C1 - C2;
-    P.Normalized();
-    P*=r1;
-    P += C1;
-    return true;
+	P = C1 - C2;
+	P.Normalized();
+	P*=r1;
+	P += C1;
+	return true;
   }
   return false;
 }

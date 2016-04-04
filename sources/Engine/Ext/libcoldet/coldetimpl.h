@@ -39,18 +39,18 @@ public:
   void setTriangleNumber(int num) { if (!m_Final) m_Triangles.reserve(num); }
 
   void addTriangle(float x1, float y1, float z1,
-                   float x2, float y2, float z2,
-                   float x3, float y3, float z3)
+				   float x2, float y2, float z2,
+				   float x3, float y3, float z3)
   {
-    addTriangle(Vector3D(x1,y1,z1),
-                Vector3D(x2,y2,z2),
-                Vector3D(x3,y3,z3));
+	addTriangle(Vector3D(x1,y1,z1),
+				Vector3D(x2,y2,z2),
+				Vector3D(x3,y3,z3));
   }
   void addTriangle(const float v1[3], const float v2[3], const float v3[3])
   {
-    addTriangle(Vector3D(v1[0],v1[1],v1[2]),
-                Vector3D(v2[0],v2[1],v2[2]),
-                Vector3D(v3[0],v3[1],v3[2]));
+	addTriangle(Vector3D(v1[0],v1[1],v1[2]),
+				Vector3D(v2[0],v2[1],v2[2]),
+				Vector3D(v3[0],v3[1],v3[2]));
   }
   void addTriangle(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3);
   void finalize();
@@ -60,27 +60,30 @@ public:
   void setTransform(const float m[16]) { setTransform(*(Matrix3D*)m); }
   void setTransform(const Matrix3D& m);
 
-  bool collision(CollisionModel3D* other, 
-                 int AccuracyDepth, 
-                 int MaxProcessingTime,
-                 float* other_transform);
+  bool collision(CollisionModel3D* other,
+				 int AccuracyDepth, 
+				 int MaxProcessingTime,
+				 float* other_transform);
 
   bool rayCollision(const float origin[3], const float direction[3], bool closest,
-                    float segmin, float segmax);
+					float segmin, float segmax);
   bool sphereCollision(const float origin[3], float radius);
 
   bool getCollidingTriangles(float t1[9], float t2[9], bool ModelSpace);
   bool getCollidingTriangles(int& t1, int& t2);
   bool getCollisionPoint(float p[3], bool ModelSpace);
 
+  bool getCollidingTriangles(std::vector<std::pair<int, int>>* pairs);
+  bool getCollisionPoints(std::vector<float*>* points);
+
 
   int getTriangleIndex(BoxedTriangle* bt)
   {
-    return int(bt-&(*m_Triangles.begin()));
+	return int(bt-&(*m_Triangles.begin()));
   }
 
   /** Stores all the actual triangles.  Other objects will use
-      pointers into this array.
+	  pointers into this array.
   */
   std::vector<BoxedTriangle> m_Triangles;
   /** Root of the hierarchy tree */
@@ -94,14 +97,17 @@ public:
   /** The collision point of the last test */
   Vector3D                   m_ColPoint;
 
+  std::vector<std::pair<int, int>>     m_intersectedTriangles;
+  std::vector<float*>				   m_collisionPoints;
+
   /** Type of the last collision test */
   enum { Models, Ray, Sphere }       
-                             m_ColType;
+							 m_ColType;
   /** Flag for indicating the model is finalized. */
   bool                       m_Final;
   /** Static models will maintain the same transform for a while
-      so the inverse transform is calculated each set instead
-      of in the collision test. */
+	  so the inverse transform is calculated each set instead
+	  of in the collision test. */
   bool                       m_Static;
 };
 

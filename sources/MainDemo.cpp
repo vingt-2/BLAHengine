@@ -168,7 +168,7 @@ int main( void )
 	sharedResources->LoadMaterial("defaultShader","../resources/shaders/Vertex_Shader.glsl", "../resources/shaders/Fragment_Shader.glsl");
 	sharedResources->LoadMaterial("debugShader","../resources/shaders/Debug_Vertex.glsl", "../resources/shaders/Debug_Fragment.glsl");
 	
-	sharedResources->loadBMP_custom("testDiffuse","../resources/textures/test.bmp");
+	sharedResources->loadBMP_custom("testDiffuse","../resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "../resources/textures/blank.bmp");
 	sharedResources->loadBMP_custom("earthDiffuse","../resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","../resources/textures/earth_NRM.bmp");
@@ -184,12 +184,13 @@ int main( void )
 	GameChar* object_2 = new GameChar(&mesh2);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
-	object_1->m_meshRenderer->AssignTexture("blankDiffuse","texture");
+	
+	object_1->m_meshRenderer->AssignTexture("testDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
 	object_2->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
-	object_2->m_transform->scale = vec3(0.1);
+	object_1->m_transform->scale = vec3(3,0.2,3);
 
 
 	renderingManager->RequestRenderTicket(*object_1);
@@ -234,7 +235,7 @@ int main( void )
 
 		//glfwSetWindowSizeCallback(OnResize);
 
-//		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
+		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
 //		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
 		mainScene->Update();
