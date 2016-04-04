@@ -182,9 +182,11 @@ int main( void )
 	OBJImport objImport;
 
 	MeshAsset mesh1;
-	objImport.ImportMesh("../resources/models/floor.obj", &mesh1);
+	MeshAsset sphere;
 	MeshAsset mesh2;
 	objImport.ImportMesh("../resources/models/cube.obj", &mesh2);
+	objImport.ImportMesh("../resources/models/floor.obj", &mesh1);
+	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
 	GameChar* object_1 = new GameChar(&mesh1);
 	GameChar* object_2 = new GameChar(&mesh2);
 
@@ -289,6 +291,22 @@ int main( void )
 			else
 				hitOnPlane = collide;
 			if (!isnan(hitOnPlane.x) && !isnan(hitOnPlane.y) && !isnan(hitOnPlane.z) ) object_2->m_rigidBody->SetPosition(hitOnPlane);
+		}
+
+		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
+		{
+			//GameChar* object = new GameChar(&sphere);
+
+			//object->m_meshRenderer->AssignMaterial("defaultShader");
+
+			//object->m_meshRenderer->AssignTexture("testDiffuse", "texture");
+			//object->m_meshRenderer->AssignTexture("earthNormals", "normals");
+			//object->m_transform->scale = vec3(0.1);
+			//object->m_transform->position = mainScene->GetContacts()->at(c);
+			//object->Update();
+			//renderingManager->RequestRenderTicket(*object);
+			vec3 contact = mainScene->GetContacts()->at(c);
+			cout << contact.x << ", " << contact.y << ", " << contact.z;
 		}
 		
 		

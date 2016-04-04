@@ -118,6 +118,11 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 	return object;
 }
 
+bool GL33Renderer::CancelRender(const MeshRenderer& object)
+{
+	return true;
+}
+
 bool GL33Renderer::Draw(GL33RenderObject& object)
 {
 	glUseProgram(object.m_programID);

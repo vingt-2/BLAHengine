@@ -34,6 +34,7 @@ public:
 
 	virtual bool Update() = 0;
 	virtual RenderObject* LoadRenderObject(const MeshRenderer& object,int type) = 0;
+	virtual bool		  CancelRender(const MeshRenderer& object) = 0;
 
 	void Resize(int xRes,int yRes);
 	

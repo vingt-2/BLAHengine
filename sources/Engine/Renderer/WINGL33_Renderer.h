@@ -49,6 +49,7 @@ public:
 	~GL33Renderer();
 
 	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
+	bool		  CancelRender(const MeshRenderer& object);
 
 protected:
 	GLFWwindow* InitializeContext(char* windowTitle);

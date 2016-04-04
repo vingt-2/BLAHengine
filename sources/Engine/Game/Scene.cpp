@@ -26,7 +26,7 @@ void Scene::AddObject(GameManager* managerPtr)
 	m_sceneObjectsVector.push_back(managerPtr);
 }
 
-int Scene::CountMeshs()
+int Scene::CountObjects()
 {
 	int count = 0;
 
@@ -64,4 +64,9 @@ void Scene::Update()
 		}
 		m_sceneObjectsVector.at(i)->Update();
 	}
+}
+
+vector<vec3>* Scene::GetContacts()
+{
+	return &(this->m_rigidBodySystem->m_collisionProcessor->m_collisionsPoints);
 }

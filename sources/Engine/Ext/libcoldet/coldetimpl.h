@@ -98,7 +98,7 @@ public:
   Vector3D                   m_ColPoint;
 
   std::vector<std::pair<int, int>>     m_intersectedTriangles;
-  std::vector<float*>				   m_collisionPoints;
+  std::vector<float>				   m_collisionPoints;
 
   /** Type of the last collision test */
   enum { Models, Ray, Sphere }       

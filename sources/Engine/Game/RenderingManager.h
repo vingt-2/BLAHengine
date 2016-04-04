@@ -16,6 +16,7 @@ public:
 	int GetManagerId();
 
 	RenderTicket RequestRenderTicket(const GameObject& object);
+	bool		 CancelRenderTicket(const GameObject& object);
 
 	void Update();
 

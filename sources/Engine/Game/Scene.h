@@ -20,8 +20,8 @@ public:
 
 	void AddDirectionalLight(DirectionalLight* directionalLight);
 
-	int CountMeshs();
-
+	int CountObjects();
+	vector<vec3>* GetContacts();
 
 private:
 

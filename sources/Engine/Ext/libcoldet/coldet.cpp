@@ -111,8 +111,12 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
 				m_intersectedTriangles.push_back(tri);
 
 				Vector3D v = my_tri_tri_intersect(m_ColTri1, m_ColTri2);
-				float f[3] = { v.x, v.y, v.z };
-				m_collisionPoints.push_back(f);
+				v = Transform(v, m_Transform);
+				//std::cout << v.x << ", " << v.y << ", " << v.z;
+
+				m_collisionPoints.push_back(v.x);
+				m_collisionPoints.push_back(v.y);
+				m_collisionPoints.push_back(v.z);
 			  }
 			}
 		  }
@@ -369,10 +373,7 @@ bool CollisionModel3DImpl::getCollisionPoints(std::vector<float>* points)
 {
 	for (int i = 0; i < m_collisionPoints.size(); i++)
 	{
-		float* fltPtr = m_collisionPoints.at(i);
-		points->push_back(fltPtr[0]);
-		points->push_back(fltPtr[1]);
-		points->push_back(fltPtr[2]);
+		points->push_back(m_collisionPoints.at(i));
 	}
 	return true;
 }
