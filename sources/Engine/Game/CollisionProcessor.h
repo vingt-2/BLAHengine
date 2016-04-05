@@ -19,6 +19,9 @@ public:
 	vec3 m_contactTangent2Body2W;
 	vec3 m_contactPositionW;
 
+	mat3 m_contactFrameIn1;
+	mat3 m_contactFrameIn2;
+
 	float m_normalJacobian[12];
 	float m_tangentJacobian1[12];
 	float m_tangentJacobian2[12];

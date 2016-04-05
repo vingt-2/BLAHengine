@@ -2,7 +2,8 @@
 
 RigidBodySystem::RigidBodySystem():
 	m_timeStep(0.01f),
-	m_uniformFriction(0.05f)
+	m_uniformFriction(0.05f),
+	m_gravity(vec3(0, -10, 0))
 {
 	m_collisionProcessor = new CollisionProcessor();
 }
@@ -24,6 +25,7 @@ int RigidBodySystem::RegisterRigidBody(RigidBody &body)
 
 void RigidBodySystem::UpdateSystem()
 {
+	ApplyWorldForces();
 	m_collisionProcessor->ProcessCollisions();
 	SolveSystem();
 }
@@ -33,9 +35,12 @@ void RigidBodySystem::SolveSystem()
 	for (RigidBody* bodyPtr : (m_rigidBodyList))
 	{
 		RigidBody& body = *bodyPtr;
-		UpdateAcceleration(body);
-		UpdateVelocity(body);
-		UpdateTransform(body);
+		if (!body.m_isPinned)
+		{
+			UpdateAcceleration(body);
+			UpdateVelocity(body);
+			UpdateTransform(body);
+		}
 	}
 }
 
@@ -73,4 +78,13 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 
 	vec3 angularFriction = -m_uniformFriction*body.m_angularVelocity;
 	transform->rotation += body.m_angularVelocity + body.m_angularAcceleration*m_timeStep*m_timeStep + angularFriction;
+}
+
+void RigidBodySystem::ApplyWorldForces()
+{
+	for (auto body : m_rigidBodyList)
+	{
+		if (body->m_applyGravity)
+			body->AddForce(m_gravity);
+	}
 }

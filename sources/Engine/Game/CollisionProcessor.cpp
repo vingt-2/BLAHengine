@@ -135,7 +135,6 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 				body1ContactTangent = tangent1Body1;
 				body2ContactTangent = tangent1Body2;
 
-				collisionPoint = body1ContactVertices[0];
 			}
 
 			m_collisionsPoints.push_back(collisionPoint);
@@ -150,7 +149,12 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 			vec3 tangentBody1W = body1->m_transform->LocalDirectionToWorld(body1ContactTangent);
 			vec3 tangentBody2W = body2->m_transform->LocalDirectionToWorld(body2ContactTangent);
 
-			Contact contact(body1, body2, collisionPoint, normalize(normalBody1W), normalize(normalBody2W), normalize(tangentBody1W), normalize(tangentBody2W));
+			Contact contact(body1, body2, 
+								collisionPoint, 
+								body1ContactNormal,
+								body2ContactNormal,
+								body1ContactTangent,
+								body2ContactTangent);
 
 			contact.ComputeJacobian();
 
@@ -163,6 +167,8 @@ void CollisionProcessor::ProcessCollisions()
 {
 	m_currentContacts.clear();
 	BroadPhaseDetection();
+
+
 }
 
 Contact::Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1W, vec3 normal2W, vec3 tangent1W, vec3 tangent2W)
@@ -170,8 +176,10 @@ Contact::Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1
 	m_body1 = body1;
 	m_body2 = body2;
 	m_contactPositionW = colPoint;
-	m_contactNormalBody1W = normal1W;
-	m_contactNormalBody2W = normal2W;
+
+
+	m_contactNormalBody1W = m_body1->m_transform->LocalDirectionToWorld(normal1W);
+	m_contactNormalBody2W = m_body2->m_transform->LocalDirectionToWorld(normal2W);
 	m_contactTangent1Body1W = tangent1W;
 	m_contactTangent1Body2W = tangent2W;
 }

@@ -1,14 +1,16 @@
 #include "RigidBody.h"
 
 
-RigidBody::RigidBody    (Transform* transform, MeshRenderer* mesh):
-	m_forcesAccu        (vec3(0)),
-	m_torquesAccu       (vec3(0)),
-	m_acceleration      (vec3(0)),
-	m_velocity          (vec3(0)),
-	m_angularVelocity   (vec3(0)),
-	m_previousPosition  (vec3(0)),
-	m_previousRotation  (vec3(0))
+RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
+	m_forcesAccu(vec3(0)),
+	m_torquesAccu(vec3(0)),
+	m_acceleration(vec3(0)),
+	m_velocity(vec3(0)),
+	m_angularVelocity(vec3(0)),
+	m_previousPosition(vec3(0)),
+	m_previousRotation(vec3(0)),
+	m_isPinned(false),
+	m_applyGravity(true)
 {
 	m_transform = transform;
 
@@ -19,8 +21,8 @@ RigidBody::RigidBody    (Transform* transform, MeshRenderer* mesh):
 
 	m_mass = 1.f;
 
-	inertiaTensor = mat3(m_mass);
-	invInertiaTensor = mat3(1.f/m_mass);
+	m_inertiaTensor = mat3(m_mass);
+	m_invInertiaTensor = mat3(1.f/m_mass);
 }
 
 

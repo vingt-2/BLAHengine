@@ -147,6 +147,7 @@ int main( void )
 	Camera* mainCamera = new Camera();
 	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
 	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
+	mainCamera->m_rigidBody->m_applyGravity = false;
 	mainCamera->m_isControlEnabled = true;
 	
 	mainScene = new Scene(mainCamera);
@@ -184,17 +185,31 @@ int main( void )
 
 	MeshAsset xwing;
 	MeshAsset sphere;
+	MeshAsset floor;
 	MeshAsset cube;
-	objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
+	//objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
 	objImport.ImportMesh("../resources/models/cube.obj", &cube);
+	objImport.ImportMesh("../resources/models/cube.obj", &floor);
+	mat4 scaleMat(vec4(10, 0, 0, 0), 
+					vec4(0, 0.2, 0, 0), 
+					vec4(0, 0, 10, 0),
+					vec4(0, 0, 0, 1));
+	for (auto &v : floor.m_meshVertices){
+		vec4 hP = scaleMat * vec4(v,1);
+		v = vec3(hP.x, hP.y, hP.z);
+	}
+	for (auto &v : floor.m_meshUVs){
+		v = mat2(100) * v;
+	}
 	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
-	GameChar* object_1 = new GameChar(&xwing);
-	GameChar* object_2 = new GameChar(&xwing);
+	GameChar* object_1 = new GameChar(&floor);
+	GameChar* object_2 = new GameChar(&sphere);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	
-	object_1->m_meshRenderer->AssignTexture("blankDiffuse","texture");
+	object_1->m_meshRenderer->AssignTexture("testDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
+	
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
 	object_2->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
@@ -210,8 +225,8 @@ int main( void )
 	renderingManager->RequestRenderTicket(*object_1);
 	renderingManager->RequestRenderTicket(*object_2);
 
-	object_1->m_rigidBody->SetPosition(vec3(0, 0, 0));
-	object_2->m_rigidBody->SetPosition(vec3(-200, 0, 0));
+	object_1->m_rigidBody->SetPosition(vec3(0, -5, 0));
+	object_2->m_rigidBody->SetPosition(vec3(0, 0, 0));
 
 	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
 	rigidBodySystem->RegisterRigidBody(*(object_2->m_rigidBody));
@@ -236,6 +251,7 @@ int main( void )
 
 	while(!terminationRequest)
 	{
+		object_1->m_rigidBody->m_isPinned = true;
 		Idle(&fps_frames,&fps_time,&fps);
 
 		stringstream title;
@@ -258,19 +274,19 @@ int main( void )
 
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
 		{
-			object_2->m_rigidBody->AddForce(vec3(0, 5, 0));
+			object_2->m_rigidBody->AddForce(vec3(0, 30, 0));
 		}
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
 		{
-			object_2->m_rigidBody->AddForce(vec3(-5, 0, 0));
+			object_2->m_rigidBody->AddForce(vec3(-30, 0, 0));
 		}
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
 		{
-			object_2->m_rigidBody->AddForce(vec3(5, 0, 0));
+			object_2->m_rigidBody->AddForce(vec3(30, 0, 0));
 		}
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
 		{
-			object_2->m_rigidBody->AddForce(vec3(0, -5, 0));
+			object_2->m_rigidBody->AddForce(vec3(0, -30, 0));
 		}
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )
@@ -323,6 +339,9 @@ int main( void )
 			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody1W, 1);
 			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body1W, 1);
 			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body1W, 1);
+
+			if (!(contact.m_contactPositionW == vec3(0)))
+				contact.m_body2->AddForce(-1.5f*contact.m_contactNormalBody2W);
 		}
 
 	

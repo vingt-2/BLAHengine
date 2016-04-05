@@ -13,11 +13,12 @@ public:
 	vec3 m_angularAcceleration;
 	vec3 m_angularVelocity;
 
-	mat3 inertiaTensor;
-	mat3 invInertiaTensor;
-
-
 	float m_mass;
+	mat3 m_inertiaTensor;
+	mat3 m_invInertiaTensor;
+
+	bool m_isPinned;
+	bool m_applyGravity;
 
 	Transform* m_transform;
 	Collider* m_collider;

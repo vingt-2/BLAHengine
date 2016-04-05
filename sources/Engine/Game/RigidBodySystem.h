@@ -6,6 +6,7 @@ class RigidBodySystem
 {
 public:
 	float m_uniformFriction;
+	vec3 m_gravity;
 
 	RigidBodySystem();
 	~RigidBodySystem();
@@ -24,5 +25,6 @@ private:
 	void UpdateAcceleration(RigidBody& body);
 	void UpdateVelocity(RigidBody& body);
 	void UpdateTransform(RigidBody& body);
+	void ApplyWorldForces();
 };
 
