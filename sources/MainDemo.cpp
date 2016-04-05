@@ -185,11 +185,11 @@ int main( void )
 	MeshAsset xwing;
 	MeshAsset sphere;
 	MeshAsset cube;
-	//objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
+	objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
 	objImport.ImportMesh("../resources/models/cube.obj", &cube);
 	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
-	GameChar* object_1 = new GameChar(&sphere);
-	GameChar* object_2 = new GameChar(&sphere);
+	GameChar* object_1 = new GameChar(&xwing);
+	GameChar* object_2 = new GameChar(&xwing);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	
@@ -233,6 +233,7 @@ int main( void )
 
 	int frameCount = 0;
 	vector<Ray> debugRays;
+
 	while(!terminationRequest)
 	{
 		Idle(&fps_frames,&fps_time,&fps);
@@ -248,6 +249,7 @@ int main( void )
 //		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
 		mainScene->Update();
+		mainScene->m_enableSimulation = true;
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
 		{

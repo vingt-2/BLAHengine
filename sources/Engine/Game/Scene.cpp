@@ -2,6 +2,7 @@
 
 Scene::Scene(Camera* camera)
 {
+	this->m_enableSimulation = false;
 	this->camera = camera;
 	this->m_rigidBodySystem = new RigidBodySystem();
 	this->m_directionalLights = vector<DirectionalLight*>();
@@ -49,7 +50,8 @@ void Scene::AddDirectionalLight(DirectionalLight* light)
 
 void Scene::Update()
 {
-	m_rigidBodySystem->UpdateSystem();
+	if (m_enableSimulation)
+		m_rigidBodySystem->UpdateSystem();
 
 	for(int i=0;i < m_sceneObjectsVector.size() ; i++)
 	{

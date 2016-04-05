@@ -23,6 +23,8 @@ public:
 	int CountObjects();
 	vector<Contact>* GetContacts();
 
+	bool m_enableSimulation;
+
 private:
 
 	Camera* camera;
