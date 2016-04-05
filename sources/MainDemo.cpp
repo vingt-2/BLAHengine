@@ -177,33 +177,41 @@ int main( void )
 	sharedResources->loadBMP_custom("blankDiffuse", "../resources/textures/blank.bmp");
 	sharedResources->loadBMP_custom("earthDiffuse","../resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","../resources/textures/earth_NRM.bmp");
+	sharedResources->loadBMP_custom("red", "../resources/textures/red.bmp");
 
 	//mainRenderer->m_debug = debug;
 	OBJImport objImport;
 
-	MeshAsset mesh1;
+	MeshAsset xwing;
 	MeshAsset sphere;
-	MeshAsset mesh2;
-	objImport.ImportMesh("../resources/models/cube.obj", &mesh2);
-	objImport.ImportMesh("../resources/models/cube.obj", &mesh1);
+	MeshAsset cube;
+	//objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
+	objImport.ImportMesh("../resources/models/cube.obj", &cube);
 	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
 	GameChar* object_1 = new GameChar(&sphere);
-	GameChar* object_2 = new GameChar(&mesh2);
+	GameChar* object_2 = new GameChar(&sphere);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	
-	object_1->m_meshRenderer->AssignTexture("testDiffuse","texture");
+	object_1->m_meshRenderer->AssignTexture("blankDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
-	object_2->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+	object_2->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
 
+	GameChar* debugSphere = new GameChar(&cube);
+	debugSphere->m_meshRenderer->AssignMaterial("defaultShader");
+	debugSphere->m_meshRenderer->AssignTexture("red", "texture");
+	debugSphere->m_meshRenderer->AssignTexture("earthNormals", "normals");
+	debugSphere->m_meshRenderer->m_renderType = 0x003;
+	debugSphere->m_transform->scale = vec3(0.1);
+	renderingManager->DebugSetupSphere(*debugSphere);
 
 	renderingManager->RequestRenderTicket(*object_1);
 	renderingManager->RequestRenderTicket(*object_2);
 
-	object_1->m_rigidBody->SetPosition(vec3(3, 0, 0));
-	object_2->m_rigidBody->SetPosition(vec3(-3, 0, 0));
+	object_1->m_rigidBody->SetPosition(vec3(0, 0, 0));
+	object_2->m_rigidBody->SetPosition(vec3(-200, 0, 0));
 
 	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
 	rigidBodySystem->RegisterRigidBody(*(object_2->m_rigidBody));
@@ -301,39 +309,27 @@ int main( void )
 
 		// Draw contacts every 60 frames:
 		
-		if (frameCount % 60 == 0)
+		debugRays.clear();
+		//cout << "Contacts Size: " << mainScene->GetContacts()->size() << ".\n";
+		for (int c = 0; c < mainScene->GetContacts()->size(); c+=2)
 		{
-			debugRays.clear();
-			for (int c = 0; c < mainScene->GetContacts()->size() && c < 4; c++)
-			{
-				Contact contact = mainScene->GetContacts()->at(c);
+			Contact contact = mainScene->GetContacts()->at(c);
 
-				GameChar* object = new GameChar(&sphere);
+			if (contact.m_contactPositionW != vec3(0,0,0))
+				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
 
-				object->m_meshRenderer->AssignMaterial("defaultShader");
-
-				object->m_meshRenderer->AssignTexture("testDiffuse", "texture");
-				object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-				object->m_transform->scale = vec3(0.1);
-				object->m_transform->position = contact.m_contactPositionW;
-				object->Update();
-				renderingManager->RequestRenderTicket(*object);
-
-				debugRays.push_back(Ray(contact.m_contactPositionW, contact.m_contactNormalBody1W, 10));
-				debugRays.push_back(Ray(contact.m_contactPositionW, contact.m_contactNormalBody2W, 10));
-			}
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody1W, 1);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body1W, 1);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body1W, 1);
 		}
 
-		for (auto ray : debugRays)
-		{
-			debug->DrawRay(ray.m_origin,ray.m_direction,ray.m_length);
-		}
-		
+	
 		
 		//debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
 		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
 		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
-		//debug->DrawBasis(object_1->m_transform, 1.f);
+		debug->DrawBasis(object_1->m_transform, 1.f);
+		debug->DrawBasis(object_2->m_transform, 1.f);
 
 		SimpleControls(mainCamera);
 		

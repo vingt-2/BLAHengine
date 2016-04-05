@@ -25,8 +25,7 @@ void Transform::UpdateTransform()
 	float theta     = rotation.y;
 	float psy		= rotation.z;
 
-	// Yep, I'm using a good old fashion rotation matrix. So what ?
-	// I'll get to quaternions later.
+	// Yep, I'm using a good old fashion euler angles. So what ?
 	mat4 rotationMatrix = mat4
 	(
 		vec4(cos(theta)*cos(psy),-cos(theta)*sin(psy),sin(theta),0),

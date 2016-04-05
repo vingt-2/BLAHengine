@@ -118,6 +118,7 @@ public:
   virtual bool sphereCollision(const float origin[3],
 							   float radius) = 0;
 
+
   /** Retrieve the pair of triangles that collided.
 	  Only valid after a call to collision() that returned true.
 	  t1 is this model's triangle and t2 is the other one.

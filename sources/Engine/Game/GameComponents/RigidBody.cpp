@@ -18,6 +18,9 @@ RigidBody::RigidBody    (Transform* transform, MeshRenderer* mesh):
 		m_collider = new Collider(mesh);
 
 	m_mass = 1.f;
+
+	inertiaTensor = mat3(m_mass);
+	invInertiaTensor = mat3(1.f/m_mass);
 }
 
 

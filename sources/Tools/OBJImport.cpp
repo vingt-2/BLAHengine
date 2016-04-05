@@ -63,6 +63,10 @@ struct vertEntryHasher
 
 bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 {
+
+	m_currentMaxVertexPos = 0;
+	m_currentMaxUVPos = 0;
+	m_currentMaxNormalPos = 0;
 	cout << "[OBJ_MESH] Importing " << filename << ".\n";
 	ifstream fileStream (filename,ifstream::in);
 	string lineInFile = " ";

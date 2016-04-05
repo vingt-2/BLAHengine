@@ -13,6 +13,10 @@ public:
 	vec3 m_angularAcceleration;
 	vec3 m_angularVelocity;
 
+	mat3 inertiaTensor;
+	mat3 invInertiaTensor;
+
+
 	float m_mass;
 
 	Transform* m_transform;

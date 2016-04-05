@@ -12,7 +12,7 @@ public:
 	~Collider();
 	
 	CollisionModel3D* m_collisionMesh;
+	vector<uint32_t>* m_vertIndices;
 	vector<vec3>* m_triVertices;
 	vector<vec3>* m_triNormals;
-	vector<uint32_t>* m_faces;
 };

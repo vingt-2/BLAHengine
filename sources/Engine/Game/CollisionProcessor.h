@@ -4,7 +4,7 @@
 class Contact
 {
 public:
-	Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1W, vec3 normal2W);
+	Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1W, vec3 normal2W, vec3 tangent1W, vec3 tangent2W);
 	~Contact();
 
 	int m_contactIndex;
@@ -13,12 +13,18 @@ public:
 
 	vec3 m_contactNormalBody1W;
 	vec3 m_contactNormalBody2W;
+	vec3 m_contactTangent1Body1W;
+	vec3 m_contactTangent1Body2W;
+	vec3 m_contactTangent2Body1W;
+	vec3 m_contactTangent2Body2W;
 	vec3 m_contactPositionW;
 
-	float contactJacobian[12];
+	float m_normalJacobian[12];
+	float m_tangentJacobian1[12];
+	float m_tangentJacobian2[12];
 
-private:
 	void ComputeJacobian();
+private:
 };
 
 class CollisionProcessor

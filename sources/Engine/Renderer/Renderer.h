@@ -25,6 +25,8 @@ public:
 
 	vector<RenderObject*> m_renderPool;
 	vector<RenderObject*> m_gizmoRenderPool;
+	RenderObject* debug_sphere;
+	vector<vec3> debug_sphere_requests;
 
 	//////
 	//

@@ -61,3 +61,32 @@ void RenderingManager::LoadObject(GameObject& object)
 {
 	
 }
+
+bool RenderingManager::DebugSetupSphere(const GameObject& sphere)
+{
+	if (const GameChar* meshObject = dynamic_cast<const GameChar*> (&sphere))
+	{
+		//m_renderer->m_renderPool.push_back(renderObject->m_meshRenderer);
+		//CHANGE THIS 
+		int renderTicket = ++(this->currentTicket);
+		this->m_ticketedObjects[renderTicket] = meshObject;
+
+		if (RenderObject* renderObject = this->m_renderer->LoadRenderObject(*(meshObject->m_meshRenderer), 2))
+		{
+			this->m_renderObjects[renderTicket] = renderObject;
+		}
+		meshObject->m_meshRenderer->m_renderTicket = this->currentTicket;
+		return this->currentTicket;
+	}
+	else
+	{
+		printf("Rendering Manager Received non renderable object \n");
+		return -1;
+	}
+}
+
+bool RenderingManager::DebugDrawRedSphere(vec3 position)
+{
+	this->m_renderer->debug_sphere_requests.push_back(position);
+	return true;
+}

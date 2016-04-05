@@ -18,6 +18,9 @@ public:
 	RenderTicket RequestRenderTicket(const GameObject& object);
 	bool		 CancelRenderTicket(const GameObject& object);
 
+	bool		 DebugSetupSphere(const GameObject& sphere);
+	bool		 DebugDrawRedSphere(vec3 position);
+
 	void Update();
 
 

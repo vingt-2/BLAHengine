@@ -57,6 +57,17 @@ bool GL33Renderer::Update()
 			this->Draw(*renderObject);
 		}
 	}
+	for (auto p : debug_sphere_requests)
+	{
+		//cout << "rendering sphere";
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(debug_sphere))
+		{
+			renderObject->m_modelTransform->position = p;
+			renderObject->m_modelTransform->UpdateTransform();
+			this->Draw(*renderObject);
+		}
+	}
+	debug_sphere_requests.clear();
 	for (int i = 0; i < m_gizmoRenderPool.size(); i++)
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_gizmoRenderPool[i]))
@@ -114,6 +125,8 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 		m_renderPool.push_back(object);
 	else if (type == 1)
 		m_gizmoRenderPool.push_back(object);
+	else if (type == 2)
+		debug_sphere = object;
 
 	return object;
 }
