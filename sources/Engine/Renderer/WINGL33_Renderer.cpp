@@ -62,7 +62,7 @@ bool GL33Renderer::Update()
 		//cout << "rendering sphere";
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(debug_sphere))
 		{
-			renderObject->m_modelTransform->position = p;
+			renderObject->m_modelTransform->m_position = p;
 			renderObject->m_modelTransform->UpdateTransform();
 			this->Draw(*renderObject);
 		}
@@ -141,12 +141,12 @@ bool GL33Renderer::Draw(GL33RenderObject& object)
 	glUseProgram(object.m_programID);
 
 	
-	mat4 MVP = this->m_mainCamera->m_projection * this->m_mainCamera->m_viewTransform.transformMatrix * (object.m_modelTransform->transformMatrix);
+	mat4 MVP = this->m_mainCamera->m_projection * this->m_mainCamera->m_viewTransform.m_transformMatrix * (object.m_modelTransform->m_transformMatrix);
 	glUniformMatrix4fv(object.m_matrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	//send modelTransform to shader <<--- HARDCODED
 	GLuint transformID = glGetUniformLocation(object.m_programID, "modelTransform");
-	glUniformMatrix4fv(transformID, 1, GL_FALSE, &(object.m_modelTransform->transformMatrix)[0][0]);
+	glUniformMatrix4fv(transformID, 1, GL_FALSE, &(object.m_modelTransform->m_transformMatrix)[0][0]);
 
 	//send Light to shader <<--- HARDCODED
 	GLuint lightID = glGetUniformLocation(object.m_programID, "directionalLight");

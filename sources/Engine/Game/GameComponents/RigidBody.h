@@ -25,11 +25,12 @@ public:
 
 	void Update();
 
-	void AddForce(vec3 vector);
+	void PushForceWorld(vec3 pushAt, vec3 forceInWorld);
+
+	void AddLinearForce(vec3 force);
 	void AddTorque(vec3 vector);
 	void AddImpulse(vec3 impulse);
-	void SetPosition(vec3 Position);
-	void SetRotation(vec3 rotation);
+
 	vec3 GetForcesAccu() { return m_forcesAccu; };
 	vec3 GetTorquesAccu() { return m_torquesAccu; };
 	void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }

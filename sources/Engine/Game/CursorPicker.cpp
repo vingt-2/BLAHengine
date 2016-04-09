@@ -19,10 +19,10 @@ Ray CursorPicker::ScreenToRay(float length)
 	
 	rayDirection.y = - ( ( ( 2.0f * (renderSize.y - (y))) / renderSize.y ) -1 ) / m_gameSingleton->renderer->m_mainCamera->m_projection[1][1];
 
-	mat4 inverseView = inverse(m_gameSingleton->renderer->m_mainCamera->m_viewTransform.transformMatrix);
+	mat4 inverseView = inverse(m_gameSingleton->renderer->m_mainCamera->m_viewTransform.m_transformMatrix);
 	
 	vec4 direction = (inverseView * vec4(rayDirection,0));
-	rayDirection = vec3(direction.x,direction.y,direction.z);
+	rayDirection = normalize(vec3(direction.x,direction.y,direction.z));
 	
 	vec3 rayOrigin = vec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
 	
@@ -44,7 +44,7 @@ GameChar* CursorPicker::PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &
 		GameChar* gameChar = dynamic_cast<GameChar*>(obj);
 		if (gameChar != NULL)
 		{
-			gameChar->m_rigidBody->m_collider->m_collisionMesh->setTransform(&(gameChar->m_transform->transformMatrix[0][0]));
+			gameChar->m_rigidBody->m_collider->m_collisionMesh->setTransform(&(gameChar->m_transform->m_transformMatrix[0][0]));
 
 			bool closestPoint = &hitInWorld != NULL;
 

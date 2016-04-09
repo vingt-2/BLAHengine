@@ -40,6 +40,8 @@ Scene* mainScene;
 RigidBodySystem* rigidBodySystem;
 GameChar* currentObject = NULL;
 
+vec3 cameraRotation = vec3(0);
+
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
 	GLfloat d_time;
@@ -75,19 +77,19 @@ void ObjectControl(GameChar* object)
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddForce(vec3(0, 30, 0));
+		object->m_rigidBody->AddLinearForce(vec3(0, 30, 0));
 	}
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddForce(vec3(-30, 0, 0));
+		object->m_rigidBody->AddLinearForce(vec3(-30, 0, 0));
 	}
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddForce(vec3(30, 0, 0));
+		object->m_rigidBody->AddLinearForce(vec3(30, 0, 0));
 	}
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddForce(vec3(0, -30, 0));
+		object->m_rigidBody->AddLinearForce(vec3(0, -30, 0));
 	}
 }
 
@@ -96,14 +98,14 @@ void SimpleControls(GameChar* object)
 
 	vec3 tangentForce = vec3(0);
 	vec3 movementForce = vec3(0);
-	float coeff = 1.f;
+	float coeff = 0.5f;
 
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
-		coeff = 1.5f;
+		coeff = 1.f;
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS))
-		coeff = 0.5f;
+		coeff = 0.25f;
 
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'W'  ) == GLFW_PRESS) )
 		tangentForce.z = 1.f;
@@ -118,7 +120,7 @@ void SimpleControls(GameChar* object)
 	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
 
-	object->m_transform->position += cameraForce;
+	object->m_transform->m_position += cameraForce;
 
 
 	if( (glfwGetMouseButton(mainRenderer->GetWindow(), 1 ) == GLFW_PRESS) )
@@ -126,30 +128,32 @@ void SimpleControls(GameChar* object)
 		double x, y;
 		glfwGetCursorPos(mainRenderer->GetWindow(),&x,&y);
 
-		vec3 cameraTorque = vec3(0);
+		vec3 deltaRotation = vec3(0);
 
 		if(x - previousMouseInput->x > 0)
 		{
-			cameraTorque.y = 1.f;
+			deltaRotation.y = 1.f;
 		}
 		else if(x - previousMouseInput->x < 0)
 		{
-			cameraTorque.y = -1.f;
+			deltaRotation.y = -1.f;
 		}
 		if(y - previousMouseInput->y > 0)
 		{
-			cameraTorque.x = 1.f;
+			deltaRotation.x = 1.f;
 		}
 		else if(y - previousMouseInput->y < 0)
 		{
-			cameraTorque.x = -1.f;
+			deltaRotation.x = -1.f;
 		}
 		previousMouseInput->x = x;
 		previousMouseInput->y = y;
 
-		cameraTorque *= 0.02;
+		deltaRotation *= 0.05;
 
-		object->m_transform->rotation += cameraTorque;
+		cameraRotation += deltaRotation;
+
+		object->m_transform->SetRotationUsingEuler(cameraRotation);
 	}
 	else
 	{
@@ -175,8 +179,8 @@ int main( void )
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 
 	Camera* mainCamera = new Camera();
-	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
-	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
+	mainCamera->m_transform->m_position = vec3(0, -10, -15);
+	mainCamera->m_transform->SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
 	mainCamera->m_isControlEnabled = true;
 	
 	mainScene = new Scene(mainCamera);
@@ -218,6 +222,7 @@ int main( void )
 	//objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
 	objImport.ImportMesh("../resources/models/cube.obj", &cube);
 	objImport.ImportMesh("../resources/models/cube.obj", &floor);
+	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
 	mat4 scaleMat(vec4(10, 0, 0, 0), 
 					vec4(0, 0.2, 0, 0), 
 					vec4(0, 0, 10, 0),
@@ -229,9 +234,9 @@ int main( void )
 	for (auto &v : floor.m_meshUVs){
 		v = mat2(100) * v;
 	}
-	objImport.ImportMesh("../resources/models/bla.obj", &sphere);
+
 	GameChar* object_1 = new GameChar(&floor);
-	GameChar* object_2 = new GameChar(&sphere);
+	GameChar* object_2 = new GameChar(&cube);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	
@@ -247,17 +252,16 @@ int main( void )
 	debugSphere->m_meshRenderer->AssignTexture("red", "texture");
 	debugSphere->m_meshRenderer->AssignTexture("earthNormals", "normals");
 	debugSphere->m_meshRenderer->m_renderType = 0x003;
-	debugSphere->m_transform->scale = vec3(0.1);
+	debugSphere->m_transform->m_scale = vec3(0.1);
 	renderingManager->DebugSetupSphere(*debugSphere);
 
 	renderingManager->RequestRenderTicket(*object_1);
 	renderingManager->RequestRenderTicket(*object_2);
-
-	object_1->m_rigidBody->SetPosition(vec3(0, -5, 0));
-	object_2->m_rigidBody->SetPosition(vec3(0, 0, 0));
-
 	mainScene->AddObject(object_1);
 	mainScene->AddObject(object_2);
+
+	object_1->m_transform->m_position = (vec3(0, -5, 0));
+	object_2->m_transform->m_position = (vec3(0, 0, 0));
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -282,7 +286,7 @@ int main( void )
 
 	while(!terminationRequest)
 	{
-		object_1->m_rigidBody->m_isPinned = false;
+		object_1->m_rigidBody->m_isPinned = true;
 		Idle(&fps_frames,&fps_time,&fps);
 
 		stringstream title;
@@ -317,19 +321,19 @@ int main( void )
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )
 		{
-			light->GetTransform()->rotation += vec3(0.f,0.1f,0.f);
+			light->GetTransform()->m_rotation += vec3(0.f,0.1f,0.f);
 		}
 		else if( (glfwGetKey(mainRenderer->GetWindow(), 'L'  ) == GLFW_PRESS) )
 		{
-			light->GetTransform()->rotation += vec3(0.f,-0.1f,0.f);
+			light->GetTransform()->m_rotation += vec3(0.f,-0.1f,0.f);
 		}
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'I'  ) == GLFW_PRESS) )
 		{
-			light->GetTransform()->rotation += vec3(0.f,0.f,0.1f);
+			light->GetTransform()->m_rotation += vec3(0.f,0.f,0.1f);
 		}
 		else if( (glfwGetKey(mainRenderer->GetWindow(), 'K'  ) == GLFW_PRESS) )
 		{
-			light->GetTransform()->rotation += vec3(0.f,0.f,-0.1f);
+			light->GetTransform()->m_rotation += vec3(0.f,0.f,-0.1f);
 		}
 
 		//cout << collider_1->CollidesWith(collider_2);
@@ -338,10 +342,8 @@ int main( void )
 		{
 			ray = cursorPicker.ScreenToRay(1000);
 			//debugRays.push_back(ray);
-			vec3 colPoint;
+			vec3 colPoint(0);
 			GameChar* object = cursorPicker.PickGameCharInScene(*mainScene, ray, colPoint);
-
-			renderingManager->DebugDrawRedSphere(colPoint);
 
 			if (currentObject == NULL || currentObject != object)
 			{
@@ -349,7 +351,8 @@ int main( void )
 			}
 			else
 			{
-				currentObject->m_rigidBody->AddForce(vec3(0, 1, 1));
+				renderingManager->DebugDrawRedSphere(colPoint);
+				object->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
 			}
 		}
 
@@ -364,23 +367,15 @@ int main( void )
 
 			if (contact.m_contactPositionW != vec3(0, 0, 0))
 			{
-				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
+				//renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+				/*debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);*/
 			}
 
 			vec3 vrel = object_2->m_rigidBody->m_velocity - object_1->m_rigidBody->m_velocity;
 			float vrelN = dot(vrel,contact.m_contactNormalBody2W)/mainScene->GetContacts()->size();
-			//if (!(contact.m_contactPositionW == vec3(0)))
-				//contact.m_body2->AddForce(-100* vrelN*contact.m_contactNormalBody2W);
 		}
-
-	
-		
-		//debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
-		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
-		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
 		
 		if (currentObject != NULL)
 		{
@@ -391,7 +386,9 @@ int main( void )
 		
 		mainCamera->Update();
 		mainRenderer->Update();
-			
+
+		//debug->DrawGrid(10, vec4(1));
+
 		frameCount++;
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )
 		{

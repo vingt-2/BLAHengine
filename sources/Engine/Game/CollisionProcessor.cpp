@@ -34,10 +34,10 @@ void CollisionProcessor::BroadPhaseDetection()
 void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2)
 {
 	m_collisionsPoints = vector<vec3>();
-	mat4 t1 = body1->m_transform->transformMatrix;
+	mat4 t1 = body1->m_transform->m_transformMatrix;
 	body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
 
-	mat4 t2 = body2->m_transform->transformMatrix;
+	mat4 t2 = body2->m_transform->m_transformMatrix;
 	body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
 
 	vector<pair<int, int>>* collidingTriangles = new vector<pair<int, int>>();
@@ -198,8 +198,8 @@ void Contact::ComputeJacobian()
 
 	m_contactTangent2Body2W = cross(m_contactNormalBody2W, m_contactTangent1Body2W);
 
-	vec3 radialBody1 = m_contactPositionW - m_body1->m_transform->position;
-	vec3 radialBody2 = m_contactPositionW - m_body2->m_transform->position;
+	vec3 radialBody1 = m_contactPositionW - m_body1->m_transform->m_position;
+	vec3 radialBody2 = m_contactPositionW - m_body2->m_transform->m_position;
 
 	vec3 crossNormal1 = cross(radialBody1, m_contactNormalBody1W);
 	vec3 crossNormal2 = cross(radialBody2, m_contactNormalBody2W);

@@ -4,3 +4,5 @@
 #include <glm/gtc/matrix_access.hpp>
 
 using namespace glm;
+
+mat3 matrixCross(vec3 vector);

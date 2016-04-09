@@ -25,10 +25,10 @@ void Camera::SetProjection(mat4 projection)
 
 void Camera::UpdateView()
 {
-	m_viewTransform.position = -m_transform->position;
-	m_viewTransform.rotation = 1.f * m_transform->rotation;
+	m_viewTransform.m_position = -m_transform->m_position;
+	m_viewTransform.m_rotation = 1.f * m_transform->m_rotation;
 	m_viewTransform.UpdateTransform();
-	m_viewTransform.transformMatrix = inverse(m_viewTransform.transformMatrix);
+	m_viewTransform.m_transformMatrix = inverse(m_viewTransform.m_transformMatrix);
 }
 
 void Camera::Update()

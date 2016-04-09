@@ -28,14 +28,23 @@ RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
 
 
 RigidBody::~RigidBody(void)
-{
-}
+{}
 
 void RigidBody::Update()
+{}
+
+void RigidBody::PushForceWorld(vec3 pushAt, vec3 forceInWorld)
 {
+	vec3 contactInBody = pushAt - m_transform->m_position;
+
+	vec3 torque = cross(forceInWorld, contactInBody);
+	torque = m_transform->WorldDirectionToLocal(torque);
+
+	AddTorque(torque);
+	AddLinearForce(forceInWorld / length(torque));
 }
 
-void RigidBody::AddForce(vec3 force)
+void RigidBody::AddLinearForce(vec3 force)
 {
 	m_forcesAccu += force;
 }
@@ -48,18 +57,4 @@ void RigidBody::AddTorque(vec3 torque)
 void RigidBody::AddImpulse(vec3 impulse)
 {
 	m_impulseAccu += impulse;
-}
-
-void RigidBody::SetPosition(vec3 newPosition)
-{
-	// Don't loose your speed friend
-	m_previousPosition = newPosition - m_velocity;
-	m_transform->position = newPosition;
-}
-
-void RigidBody::SetRotation(vec3 newRotation)
-{
-	// don't loose it either
-	m_previousRotation = newRotation - m_angularVelocity;
-	m_transform->rotation = newRotation;
 }
