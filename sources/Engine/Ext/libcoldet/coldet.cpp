@@ -112,7 +112,6 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
 
 				Vector3D v = my_tri_tri_intersect(m_ColTri1, m_ColTri2);
 				v = Transform(v, m_Transform);
-				//std::cout << v.x << ", " << v.y << ", " << v.z;
 
 				m_collisionPoints.push_back(v.x);
 				m_collisionPoints.push_back(v.y);

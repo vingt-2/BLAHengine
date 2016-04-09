@@ -132,8 +132,8 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 				body1ContactNormal = normalize(cross(tangent1Body1, tangent2Body1));
 				body2ContactNormal = normalize(cross(tangent1Body2, tangent2Body2));
 
-				body1ContactTangent = tangent1Body1;
-				body2ContactTangent = tangent1Body2;
+				body1ContactTangent = normalize(tangent1Body1);
+				body2ContactTangent = normalize(tangent1Body2);
 
 			}
 
@@ -171,23 +171,31 @@ void CollisionProcessor::ProcessCollisions()
 
 }
 
-Contact::Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1W, vec3 normal2W, vec3 tangent1W, vec3 tangent2W)
+Contact::Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1, vec3 normal2, vec3 tangent11, vec3 tangent21)
 {
 	m_body1 = body1;
 	m_body2 = body2;
 	m_contactPositionW = colPoint;
 
+	vec3 tangent12 = cross(normal1, tangent11);
+	vec3 tangent22 = cross(normal2, tangent21);
 
-	m_contactNormalBody1W = m_body1->m_transform->LocalDirectionToWorld(normal1W);
-	m_contactNormalBody2W = m_body2->m_transform->LocalDirectionToWorld(normal2W);
-	m_contactTangent1Body1W = tangent1W;
-	m_contactTangent1Body2W = tangent2W;
+	m_contactFrame1L = mat3(normal1, tangent11, tangent12);
+	m_contactFrame2L = mat3(normal1, tangent21, tangent22);
+
+	m_contactNormalBody1W = m_body1->m_transform->LocalDirectionToWorld(normal1);
+	m_contactNormalBody2W = m_body2->m_transform->LocalDirectionToWorld(normal2);
+	m_contactTangent1Body1W = m_body1->m_transform->LocalDirectionToWorld(tangent11);
+	m_contactTangent1Body2W = m_body2->m_transform->LocalDirectionToWorld(tangent21);
 }
 Contact::~Contact() {}
 
 void Contact::ComputeJacobian()
 {
-	m_contactTangent2Body1W = cross(m_contactNormalBody1W, m_contactTangent1Body1W);
+
+	m_contactTangent2Body1W = m_body1->m_transform->LocalDirectionToWorld(m_contactFrame1L[2]);
+	m_contactTangent2Body2W = m_body2->m_transform->LocalDirectionToWorld(m_contactFrame2L[2]);
+
 	m_contactTangent2Body2W = cross(m_contactNormalBody2W, m_contactTangent1Body2W);
 
 	vec3 radialBody1 = m_contactPositionW - m_body1->m_transform->position;

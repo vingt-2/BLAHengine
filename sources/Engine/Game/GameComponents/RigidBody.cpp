@@ -10,7 +10,8 @@ RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
 	m_previousPosition(vec3(0)),
 	m_previousRotation(vec3(0)),
 	m_isPinned(false),
-	m_applyGravity(true)
+	m_applyGravity(true),
+	m_impulseAccu(0)
 {
 	m_transform = transform;
 
@@ -42,6 +43,11 @@ void RigidBody::AddForce(vec3 force)
 void RigidBody::AddTorque(vec3 torque)
 {
 	m_torquesAccu += torque;
+}
+
+void RigidBody::AddImpulse(vec3 impulse)
+{
+	m_impulseAccu += impulse;
 }
 
 void RigidBody::SetPosition(vec3 newPosition)

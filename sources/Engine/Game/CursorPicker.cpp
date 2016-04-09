@@ -26,11 +26,48 @@ Ray CursorPicker::ScreenToRay(float length)
 	
 	vec3 rayOrigin = vec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
 	
-	
-	return Ray(rayOrigin, rayDirection, -length);
+	return Ray(rayOrigin, -1.f * rayDirection, length);
 }
 
-GameChar* PickGameCharInScene(const Scene* pickedScene,const Ray* ray)
+void PrintVec3(vec3 print)
 {
-	return 0;
+	cout << print.x << ", " << print.y << ", " << print.z << "\n";
+}
+
+GameChar* CursorPicker::PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &hitInWorld)
+{
+	vector<GameObject*> objects = pickedScene.GetObjects();
+	float minDistance = INFINITY;
+	GameChar* pickedObject = NULL;
+	for (auto obj : objects)
+	{
+		GameChar* gameChar = dynamic_cast<GameChar*>(obj);
+		if (gameChar != NULL)
+		{
+			gameChar->m_rigidBody->m_collider->m_collisionMesh->setTransform(&(gameChar->m_transform->transformMatrix[0][0]));
+
+			bool closestPoint = &hitInWorld != NULL;
+
+			bool collision = gameChar->m_rigidBody->m_collider->m_collisionMesh->rayCollision(&(ray.m_origin.x), &(ray.m_direction.x), closestPoint,0,ray.m_length);
+			
+			if (!collision) continue;
+
+			vec3 collisionPoint;
+			gameChar->m_rigidBody->m_collider->m_collisionMesh->getCollisionPoint(&(collisionPoint.x),false);
+
+			float distance = dot(collisionPoint - ray.m_origin, ray.m_direction);
+
+			if (distance > 0 && distance < minDistance) 
+			{
+				minDistance = distance;
+				pickedObject = gameChar;
+			}
+			if (&hitInWorld != NULL)
+			{
+				hitInWorld = collisionPoint;
+			}
+		}
+	}
+	
+	return pickedObject;
 }

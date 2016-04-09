@@ -20,14 +20,16 @@ public:
 
 	void AddDirectionalLight(DirectionalLight* directionalLight);
 
-	int CountObjects();
+	vector<GameObject*> GetObjects() { return m_sceneObjectsVector;  }
 	vector<Contact>* GetContacts();
+
+	int CountChar();
 
 	bool m_enableSimulation;
 
 private:
 
-	Camera* camera;
+	Camera* m_camera;
 	RigidBodySystem* m_rigidBodySystem;
 	vector<GameObject*>  m_sceneObjectsVector;
 	vector<DirectionalLight*> m_directionalLights;

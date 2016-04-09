@@ -1,9 +1,9 @@
 #include "RigidBodySystem.h"
 
 RigidBodySystem::RigidBodySystem():
-	m_timeStep(0.01f),
-	m_uniformFriction(0.05f),
-	m_gravity(vec3(0, -10, 0))
+	m_timeStep(0.05f),
+	m_uniformFriction(0.005f),
+	m_gravity(vec3(0, 0, 0))
 {
 	m_collisionProcessor = new CollisionProcessor();
 }
@@ -46,38 +46,33 @@ void RigidBodySystem::SolveSystem()
 
 void RigidBodySystem::UpdateAcceleration(RigidBody& body)
 {
-	body.m_acceleration = (body.GetForcesAccu() / body.m_mass);
-	body.m_angularAcceleration = (body.GetTorquesAccu() / body.m_mass);
+	vec3 linearFriction = m_uniformFriction * body.m_velocity;
+	vec3 angularFriction = m_uniformFriction * body.m_angularVelocity;
+
+	body.m_acceleration = (body.GetForcesAccu() - linearFriction / body.m_mass);
+	body.m_angularAcceleration = (body.GetTorquesAccu() - angularFriction / body.m_mass);
+	
 	body.ClearForces();
 }
 
+/*
+	Forward Euler Velocity Step
+*/
 void RigidBodySystem::UpdateVelocity(RigidBody& body)
 {
-	Transform* transform = body.m_transform;
-	vec3 position = transform->position;
-	vec3 newVelocity = position - body.m_previousPosition;
-	body.m_previousPosition = position;
-
-	vec3 rotation = transform->rotation;
-	vec3 newAngularVelocity = rotation - body.m_previousRotation;
-	body.m_previousRotation = rotation;
-
-	body.m_velocity = newVelocity;
-	body.m_angularVelocity = newAngularVelocity;
+	body.m_velocity = m_timeStep * body.m_acceleration;
+	body.m_angularVelocity += m_timeStep * body.m_angularAcceleration;
 }
 
 /*
-	Forward Euler solver
+	Forward Euler Transform Update
 */
 void RigidBodySystem::UpdateTransform(RigidBody& body)
 {
 	Transform* transform = body.m_transform;
-	vec3 friction = -m_uniformFriction*body.m_velocity;
-
-	transform->position += body.m_velocity + body.m_acceleration*m_timeStep*m_timeStep + friction;
-
-	vec3 angularFriction = -m_uniformFriction*body.m_angularVelocity;
-	transform->rotation += body.m_angularVelocity + body.m_angularAcceleration*m_timeStep*m_timeStep + angularFriction;
+	
+	transform->position += m_timeStep * body.m_velocity;
+	transform->rotation += m_timeStep * body.m_angularVelocity;
 }
 
 void RigidBodySystem::ApplyWorldForces()

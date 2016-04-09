@@ -29,7 +29,7 @@ bool GL33Renderer::Update()
 	glfwMakeContextCurrent(glfwWindow);
 	
 	//Adjust Projection and ViewPort.
-	m_mainCamera->SetProjection(glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x, -0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 100.0f));
+	m_mainCamera->SetProjection(glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x, -0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 10000.0f));
 	glViewport(0,0,renderSize.x,renderSize.y);
 	
 	// Clear Screen Buffer

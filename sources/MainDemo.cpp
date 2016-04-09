@@ -38,6 +38,7 @@ SharedResources* sharedResources;
 Debug* debug;
 Scene* mainScene;
 RigidBodySystem* rigidBodySystem;
+GameChar* currentObject = NULL;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -62,33 +63,62 @@ void LockFramerate(GLfloat hzFrequency)
 		// Lock
 	}
 }
+void ObjectControl(GameChar* object)
+{
+	if (object == NULL)
+		return;
+
+	if ((glfwGetKey(mainRenderer->GetWindow(), 'F') == GLFW_PRESS))
+	{
+		object->m_rigidBody->AddTorque(vec3(0, 10, 0));
+	}
+
+	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
+	{
+		object->m_rigidBody->AddForce(vec3(0, 30, 0));
+	}
+	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
+	{
+		object->m_rigidBody->AddForce(vec3(-30, 0, 0));
+	}
+	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
+	{
+		object->m_rigidBody->AddForce(vec3(30, 0, 0));
+	}
+	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
+	{
+		object->m_rigidBody->AddForce(vec3(0, -30, 0));
+	}
+}
 
 void SimpleControls(GameChar* object)
 {
 
 	vec3 tangentForce = vec3(0);
 	vec3 movementForce = vec3(0);
-	int coeff = 5;
+	float coeff = 1.f;
 
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
-		coeff = 25;
+		coeff = 1.5f;
+
+	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS))
+		coeff = 0.5f;
 
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'W'  ) == GLFW_PRESS) )
-		tangentForce.z = 1;
+		tangentForce.z = 1.f;
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'S'  ) == GLFW_PRESS) )
-		tangentForce.z = -1;
+		tangentForce.z = -1.f;
 
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'A'  ) == GLFW_PRESS) )
-		tangentForce.x = 1;
+		tangentForce.x = 1.f;
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'D'  ) == GLFW_PRESS) )
-		tangentForce.x = -1;
+		tangentForce.x = -1.f;
 
 	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
 
-	object->m_rigidBody->AddForce(cameraForce);
-	//object->
+	object->m_transform->position += cameraForce;
 
 
 	if( (glfwGetMouseButton(mainRenderer->GetWindow(), 1 ) == GLFW_PRESS) )
@@ -117,9 +147,9 @@ void SimpleControls(GameChar* object)
 		previousMouseInput->x = x;
 		previousMouseInput->y = y;
 
-		cameraTorque *= 5;
+		cameraTorque *= 0.02;
 
-		object->m_rigidBody->AddTorque(cameraTorque);
+		object->m_transform->rotation += cameraTorque;
 	}
 	else
 	{
@@ -147,7 +177,6 @@ int main( void )
 	Camera* mainCamera = new Camera();
 	mainCamera->m_rigidBody->SetPosition(vec3(0, -10, -15));
 	mainCamera->m_rigidBody->SetRotation(vec3(3.14 / 9, 0, 0));
-	mainCamera->m_rigidBody->m_applyGravity = false;
 	mainCamera->m_isControlEnabled = true;
 	
 	mainScene = new Scene(mainCamera);
@@ -166,7 +195,6 @@ int main( void )
 	if(!mainRenderer->GetStatus())
 	{
 		printf("Failed to initiate Context!");
-		//debug->OutputToDebug((char*)"Failed to initiate Context!");
 		return -1;
 	}
 
@@ -228,13 +256,8 @@ int main( void )
 	object_1->m_rigidBody->SetPosition(vec3(0, -5, 0));
 	object_2->m_rigidBody->SetPosition(vec3(0, 0, 0));
 
-	rigidBodySystem->RegisterRigidBody(*(object_1->m_rigidBody));
-	rigidBodySystem->RegisterRigidBody(*(object_2->m_rigidBody));
-
 	mainScene->AddObject(object_1);
 	mainScene->AddObject(object_2);
-
-	rigidBodySystem->RegisterRigidBody(*(mainCamera->m_rigidBody));
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -246,12 +269,20 @@ int main( void )
 	
 	Ray ray(vec3(0),vec3(0),0);
 
+	//
+	// Did you know ?
+	// There is a big ducking memory leak when you draw debug rays.
+	// So don't do it too much.
+	// Cheers
+	// 
+
 	int frameCount = 0;
 	vector<Ray> debugRays;
+	int lastPress = 0;
 
 	while(!terminationRequest)
 	{
-		object_1->m_rigidBody->m_isPinned = true;
+		object_1->m_rigidBody->m_isPinned = false;
 		Idle(&fps_frames,&fps_time,&fps);
 
 		stringstream title;
@@ -265,28 +296,23 @@ int main( void )
 //		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
 
 		mainScene->Update();
-		mainScene->m_enableSimulation = true;
 
-		if( (glfwGetKey(mainRenderer->GetWindow(), 'F'  ) == GLFW_PRESS) )
-		{
-			object_2->m_rigidBody->AddTorque(vec3(0,10,0));
-		}
+		if(currentObject == NULL)
+			ObjectControl(object_2);
+		else
+			ObjectControl(currentObject);
 
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (frameCount-lastPress) > 60)
 		{
-			object_2->m_rigidBody->AddForce(vec3(0, 30, 0));
-		}
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
-		{
-			object_2->m_rigidBody->AddForce(vec3(-30, 0, 0));
-		}
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
-		{
-			object_2->m_rigidBody->AddForce(vec3(30, 0, 0));
-		}
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
-		{
-			object_2->m_rigidBody->AddForce(vec3(0, -30, 0));
+			if (mainScene->m_enableSimulation)
+			{
+				mainScene->m_enableSimulation = false;
+			}
+			else
+			{
+				mainScene->m_enableSimulation = true;
+			}
+			lastPress = frameCount;
 		}
 
 		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )
@@ -311,37 +337,43 @@ int main( void )
 		if(glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 0))
 		{
 			ray = cursorPicker.ScreenToRay(1000);
-			//vec3 collide = collider_1->RayCollision(ray);
-			vec3 collide(0);
-			vec3 hitOnPlane;
-			if (collide == vec3(0))
-				hitOnPlane = ray.RayToPlaneIntersection(vec3(0), vec3(1, 0, 0), vec3(0, 0, 1)).hitPosition;
+			//debugRays.push_back(ray);
+			vec3 colPoint;
+			GameChar* object = cursorPicker.PickGameCharInScene(*mainScene, ray, colPoint);
+
+			renderingManager->DebugDrawRedSphere(colPoint);
+
+			if (currentObject == NULL || currentObject != object)
+			{
+				currentObject = object;
+			}
 			else
-				hitOnPlane = collide;
-			vec3 newPosition = object_2->m_transform->position;
-			newPosition.x = hitOnPlane.x;
-			newPosition.z = hitOnPlane.z;
-			if (!isnan(hitOnPlane.x) && !isnan(hitOnPlane.y) && !isnan(hitOnPlane.z)) object_2->m_rigidBody->SetPosition(newPosition);
+			{
+				currentObject->m_rigidBody->AddForce(vec3(0, 1, 1));
+			}
 		}
 
-
-		// Draw contacts every 60 frames:
-		
-		debugRays.clear();
+		for (auto r : debugRays)
+		{
+			debug->DrawRay(r.m_origin, r.m_direction, r.m_length);
+		}
 		//cout << "Contacts Size: " << mainScene->GetContacts()->size() << ".\n";
 		for (int c = 0; c < mainScene->GetContacts()->size(); c+=2)
 		{
 			Contact contact = mainScene->GetContacts()->at(c);
 
-			if (contact.m_contactPositionW != vec3(0,0,0))
+			if (contact.m_contactPositionW != vec3(0, 0, 0))
+			{
 				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);
+			}
 
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody1W, 1);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body1W, 1);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body1W, 1);
-
-			if (!(contact.m_contactPositionW == vec3(0)))
-				contact.m_body2->AddForce(-1.5f*contact.m_contactNormalBody2W);
+			vec3 vrel = object_2->m_rigidBody->m_velocity - object_1->m_rigidBody->m_velocity;
+			float vrelN = dot(vrel,contact.m_contactNormalBody2W)/mainScene->GetContacts()->size();
+			//if (!(contact.m_contactPositionW == vec3(0)))
+				//contact.m_body2->AddForce(-100* vrelN*contact.m_contactNormalBody2W);
 		}
 
 	
@@ -349,8 +381,11 @@ int main( void )
 		//debug->DrawGrid(10, vec4(0.9, 0.9, 0.9, 0.05f));
 		//debug->DrawRay(light->GetTransform()->position,light->GetDirection(),10);
 		//debug->DrawRay(ray.m_origin, ray.m_direction, ray.m_length);
-		debug->DrawBasis(object_1->m_transform, 1.f);
-		debug->DrawBasis(object_2->m_transform, 1.f);
+		
+		if (currentObject != NULL)
+		{
+			debug->DrawBasis(currentObject->m_transform, 1);
+		}
 
 		SimpleControls(mainCamera);
 		

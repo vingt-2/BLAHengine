@@ -3,11 +3,11 @@
 Scene::Scene(Camera* camera)
 {
 	this->m_enableSimulation = false;
-	this->camera = camera;
+	this->m_camera = camera;
 	this->m_rigidBodySystem = new RigidBodySystem();
 	this->m_directionalLights = vector<DirectionalLight*>();
 	this->m_sceneObjectsVector = vector<GameObject*>();
-	m_rigidBodySystem->RegisterRigidBody(*(camera->m_rigidBody));
+	//m_rigidBodySystem->RegisterRigidBody(*(camera->m_rigidBody));
 }
 
 Scene::~Scene()
@@ -27,7 +27,7 @@ void Scene::AddObject(GameManager* managerPtr)
 	m_sceneObjectsVector.push_back(managerPtr);
 }
 
-int Scene::CountObjects()
+int Scene::CountChar()
 {
 	int count = 0;
 
@@ -52,6 +52,7 @@ void Scene::Update()
 {
 	if (m_enableSimulation)
 		m_rigidBodySystem->UpdateSystem();
+	m_camera->m_rigidBody->Update();
 
 	for(int i=0;i < m_sceneObjectsVector.size() ; i++)
 	{

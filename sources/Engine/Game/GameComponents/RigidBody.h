@@ -27,6 +27,7 @@ public:
 
 	void AddForce(vec3 vector);
 	void AddTorque(vec3 vector);
+	void AddImpulse(vec3 impulse);
 	void SetPosition(vec3 Position);
 	void SetRotation(vec3 rotation);
 	vec3 GetForcesAccu() { return m_forcesAccu; };
@@ -40,6 +41,7 @@ private:
 
 	vec3 m_forcesAccu;
 	vec3 m_torquesAccu;
+	vec3 m_impulseAccu;
 
 	vec3 m_linearImpulseAccu;
 	vec3 m_angularImpulseAccu;

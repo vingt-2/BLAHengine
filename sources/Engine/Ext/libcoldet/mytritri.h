@@ -54,28 +54,16 @@ public:
     }
   }
 
+  bool sameSide(const Vector3D& p1, const Vector3D& p2, const Vector3D& a, const Vector3D& b)
+  {
+	  Vector3D cp1 = CrossProduct(b - a, p1 - a);
+	  Vector3D cp2 = CrossProduct(b - a, p2 - a);
+	  return ((cp1 * cp2) >= 0);
+  }
+
   bool pointInTri(const Vector3D& P)
   {
-    Vector3D u(P[i1]-v1[i1],
-               v2[i1]-v1[i1],
-               v3[i1]-v1[i1]);
-    Vector3D v(P[i2]-v1[i2],
-               v2[i2]-v1[i2],
-               v3[i2]-v1[i2]);
-    float a,b;
-    if (u.y==0.0f)
-    {
-      b=u.x/u.z;
-      if (b>=0.0f && b<=1.0f) a=(v.x-b*v.z)/v.y;
-      else return false;
-    }
-    else
-    {
-      b=(v.x*u.y-u.x*v.y)/(v.z*u.y-u.z*v.y);
-      if (b>=0.0f && b<=1.0f) a=(u.x-b*u.z)/u.y;
-      else return false;
-    }
-    return (a>=0 && (a+b)<=1);
+	  return (sameSide(P, v1, v2, v3) && sameSide(P, v2, v1, v3) && sameSide(P, v3, v1, v2));
   }
 
   const Vector3D& operator[] (int index) 
