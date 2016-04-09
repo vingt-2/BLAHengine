@@ -1,10 +1,8 @@
-BLAengine - MainDemo: Model Viewer
+BLAengine - Stuff does things
 ===================================
 
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/BlaEngine-picture.png)
 =====
-
-This code repository holds the current evolution of a 3d rendering engine currently written for OpenGL.
 
 The demo application "MainDemo" of the engine is a model viewer with the controls:
 
@@ -12,8 +10,6 @@ The demo application "MainDemo" of the engine is a model viewer with the control
 * Right-Click + mouse to rotate the camera.
 * F to apply a torque to the model.
 * G to rotate the directionnal light in the scene.
-
-More functionnality will be added and tested on the engine as it grows !
 
 ====
 Installation:
