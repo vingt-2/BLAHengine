@@ -4,7 +4,7 @@ CollisionProcessor::CollisionProcessor():
 	m_flagInterpolateNormals(false),
 	m_maxIterations(10),
 	m_bounce(0.f),
-	m_friction(1.f)
+	m_friction(0.f)
 {
 	m_bodiesList = vector<RigidBody*>();
 }
@@ -272,7 +272,7 @@ void CollisionProcessor::SolveContacts()
 				if (i == 0) // Normal direction 
 				{
 					newLambdas[index][0] = newLambdas[index][0] > 0 ? newLambdas[index][0] : 0;
-					newLambdas[index][0] = newLambdas[index][0] < 1 ? newLambdas[index][0] : 1;
+					//newLambdas[index][0] = newLambdas[index][0] < 1 ? newLambdas[index][0] : 1;
 				}
 				else if(i == 1)  // Tangential direction 1 
 				{
