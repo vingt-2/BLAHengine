@@ -1,7 +1,7 @@
 #include "RigidBodySystem.h"
 
 RigidBodySystem::RigidBodySystem():
-	m_timeStep(0.05f),
+	m_timeStep(0.01f),
 	m_uniformFriction(0.05f),
 	m_gravity(vec3(0, -0, 0))
 {
