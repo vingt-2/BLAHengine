@@ -3,6 +3,19 @@
 #include "../../../Std/std.h"
 #include "Collider.h"
 
+class NextState 
+{
+public:
+	NextState();
+
+	vec3 m_acceleration;
+	vec3 m_velocity;
+	vec3 m_angularAcceleration;
+	vec3 m_angularVelocity;
+	vec3 m_correctionLinearVelocity;
+	vec3 m_correctionAngularVelocity;
+};
+
 class RigidBody
 {
 public:
@@ -13,7 +26,13 @@ public:
 	vec3 m_angularAcceleration;
 	vec3 m_angularVelocity;
 
-	float m_mass;
+	vec3 m_debugCorrectionVelocity;
+
+	// Pack the next state if needed to avoid recomputing
+	NextState* m_nextState;
+
+	mat3 m_massTensor;
+	mat3 m_invMassTensor;
 	mat3 m_inertiaTensor;
 	mat3 m_invInertiaTensor;
 

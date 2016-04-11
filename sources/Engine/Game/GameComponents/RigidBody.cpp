@@ -11,7 +11,9 @@ RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
 	m_previousRotation(vec3(0)),
 	m_isPinned(false),
 	m_applyGravity(true),
-	m_impulseAccu(0)
+	m_impulseAccu(0),
+	m_massTensor(mat3(1)),
+	m_inertiaTensor(mat3(1))
 {
 	m_transform = transform;
 
@@ -20,10 +22,8 @@ RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
 	else 
 		m_collider = new Collider(mesh);
 
-	m_mass = 1.f;
-
-	m_inertiaTensor = mat3(m_mass);
-	m_invInertiaTensor = mat3(1.f/m_mass);
+	m_invMassTensor = inverse(m_massTensor);
+	m_invInertiaTensor = inverse(m_inertiaTensor);
 }
 
 
@@ -58,3 +58,12 @@ void RigidBody::AddImpulse(vec3 impulse)
 {
 	m_impulseAccu += impulse;
 }
+
+NextState::NextState():
+	m_acceleration(vec3(0)),
+	m_velocity(vec3(0)),
+	m_angularAcceleration(vec3(0)),
+	m_angularVelocity(vec3(0)),
+	m_correctionLinearVelocity(vec3(0)),
+	m_correctionAngularVelocity(vec3(0))
+{}

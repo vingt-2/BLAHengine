@@ -77,19 +77,19 @@ void ObjectControl(GameChar* object)
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_UP) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddLinearForce(vec3(0, 30, 0));
+		object->m_rigidBody->AddLinearForce(vec3(0, 5, 0));
 	}
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddLinearForce(vec3(-30, 0, 0));
+		object->m_rigidBody->AddLinearForce(vec3(-5, 0, 0));
 	}
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddLinearForce(vec3(30, 0, 0));
+		object->m_rigidBody->AddLinearForce(vec3(5, 0, 0));
 	}
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_DOWN) == GLFW_PRESS))
 	{
-		object->m_rigidBody->AddLinearForce(vec3(0, -30, 0));
+		object->m_rigidBody->AddLinearForce(vec3(0, -5, 0));
 	}
 }
 
@@ -352,7 +352,20 @@ int main( void )
 			else
 			{
 				renderingManager->DebugDrawRedSphere(colPoint);
-				object->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
+				object->m_rigidBody->PushForceWorld(colPoint, 10.f*ray.m_direction);
+			}
+		}
+
+		if (glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 2))
+		{
+			ray = cursorPicker.ScreenToRay(1000);
+			//debugRays.push_back(ray);
+			vec3 colPoint(0);
+			GameChar* object = cursorPicker.PickGameCharInScene(*mainScene, ray, colPoint);
+			if (object != NULL)
+			{
+				object->m_rigidBody->m_velocity = vec3(0);
+				object->m_rigidBody->m_angularVelocity = vec3(0);
 			}
 		}
 
@@ -367,16 +380,18 @@ int main( void )
 
 			if (contact.m_contactPositionW != vec3(0, 0, 0))
 			{
-				//renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-				/*debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);*/
+				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);
 			}
 
 			vec3 vrel = object_2->m_rigidBody->m_velocity - object_1->m_rigidBody->m_velocity;
 			float vrelN = dot(vrel,contact.m_contactNormalBody2W)/mainScene->GetContacts()->size();
 		}
 		
+		debug->DrawRay(object_2->m_transform->m_position, object_2->m_rigidBody->m_debugCorrectionVelocity, 10);
+		cout << object_2->m_rigidBody->m_debugCorrectionVelocity.x << ", " << object_2->m_rigidBody->m_debugCorrectionVelocity.y << ", " << object_2->m_rigidBody->m_debugCorrectionVelocity.z << "\n";
 		if (currentObject != NULL)
 		{
 			debug->DrawBasis(currentObject->m_transform, 1);

@@ -21,10 +21,12 @@ private:
 	vector<RigidBody*> m_rigidBodyList;
 	float m_timeStep;
 
-	void SolveSystem();
+	void ApplyWorldForces();
+	void GetNewStates();
+	void UpdateStates();
+	
 	void UpdateAcceleration(RigidBody& body);
 	void UpdateVelocity(RigidBody& body);
 	void UpdateTransform(RigidBody& body);
-	void ApplyWorldForces();
 };
 

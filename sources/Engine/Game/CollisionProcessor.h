@@ -22,9 +22,9 @@ public:
 	mat3 m_contactFrame1L;
 	mat3 m_contactFrame2L;
 
-	float m_normalJacobian[12];
-	float m_tangentJacobian1[12];
-	float m_tangentJacobian2[12];
+	vector<vec3> m_normalJacobian;
+	vector<vec3> m_tangentJacobian1;
+	vector<vec3> m_tangentJacobian2;
 
 	void ComputeJacobian();
 private:
@@ -36,15 +36,19 @@ public:
 	CollisionProcessor();
 	~CollisionProcessor();
 
+	int m_maxIterations;
 	bool m_flagInterpolateNormals;
+	float m_friction;
+	float m_bounce;
 
 	vector<RigidBody*> m_bodiesList;
-	vector<vec3> m_collisionsPoints;
 	vector<Contact> m_currentContacts;
 
 	void ProcessCollisions();
 private:
-
+	void ComputeT(vector<vector<vec3>>& T);
+	void GetDiagonalElements(vector<vector<vec3>> T, vector<float>& D);
 	void BroadPhaseDetection();
 	void NarrowPhaseDetection(RigidBody* body1, RigidBody* body2);
+	void SolveContacts();
 };
