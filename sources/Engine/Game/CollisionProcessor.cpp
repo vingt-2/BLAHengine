@@ -2,9 +2,9 @@
 
 CollisionProcessor::CollisionProcessor():
 	m_flagInterpolateNormals(false),
-	m_maxIterations(10),
+	m_maxIterations(100),
 	m_bounce(0.f),
-	m_friction(0.f)
+	m_friction(10.f)
 {
 	m_bodiesList = vector<RigidBody*>();
 }
@@ -303,7 +303,8 @@ void CollisionProcessor::SolveContacts()
 		lambdas = newLambdas;
 		iteration++;
 	}
-	iteration++;
+	if(iteration > 99)
+		iteration++;
 }
 
 void CollisionProcessor::ComputeT(vector<vector<vec3>>& T)
@@ -399,7 +400,7 @@ void Contact::ComputeJacobian()
 
 	m_contactTangent2Body2W = cross(m_contactNormalBody2W, m_contactTangent1Body2W);
 
-	
+
 	float sign = dot(m_contactNormalBody1W, m_contactNormalBody2W) > 0 ? 1 : -1;
 
 	vec3 normal = (m_contactNormalBody1W + sign * m_contactNormalBody1W) / 2.f;

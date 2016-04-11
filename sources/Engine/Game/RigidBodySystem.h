@@ -5,6 +5,7 @@
 class RigidBodySystem
 {
 public:
+	int m_substeps;
 	float m_uniformFriction;
 	vec3 m_gravity;
 

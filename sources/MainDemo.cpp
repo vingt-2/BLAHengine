@@ -249,7 +249,7 @@ int main( void )
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
 
 	object_3->m_meshRenderer->AssignMaterial("defaultShader");
-	object_3->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	object_3->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
 	object_3->m_meshRenderer->AssignTexture("earthNormals", "normals");
 
 	GameChar* debugSphere = new GameChar(&cube);
@@ -268,7 +268,7 @@ int main( void )
 	mainScene->AddObject(object_3);
 
 	object_1->m_transform->m_position = (vec3(0, -5, 0));
-	object_2->m_transform->m_position = (vec3(-3, 0, 0));
+	object_2->m_transform->m_position = (vec3(-2.5, 0, 0));
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -388,9 +388,9 @@ int main( void )
 			if (contact.m_contactPositionW != vec3(0, 0, 0))
 			{
 				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);
 			}
 
 			vec3 vrel = object_2->m_rigidBody->m_velocity - object_1->m_rigidBody->m_velocity;

@@ -11,7 +11,7 @@ Ray::Ray(vec3 origin, vec3 endPoint)
 {
 	this->m_origin = origin;
 	vec3 dir = (endPoint-origin);
-	this->m_length = dir.length();
+	this->m_length = length(dir);
 	this->m_direction = normalize(dir);
 }
 

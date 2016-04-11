@@ -1,11 +1,14 @@
 #include "RigidBodySystem.h"
 
-RigidBodySystem::RigidBodySystem():
+RigidBodySystem::RigidBodySystem() :
 	m_timeStep(0.01f),
 	m_uniformFriction(0.05f),
-	m_gravity(vec3(0, -0, 0))
+	m_gravity(vec3(0, 0, 0)),
+	m_substeps(1)
 {
 	m_collisionProcessor = new CollisionProcessor();
+
+	m_timeStep /= sqrt(m_substeps);
 }
 
 
@@ -26,9 +29,12 @@ int RigidBodySystem::RegisterRigidBody(RigidBody &body)
 void RigidBodySystem::UpdateSystem()
 {
 	ApplyWorldForces();
-	GetNewStates();
-	m_collisionProcessor->ProcessCollisions();
-	UpdateStates();
+	for (int i = 0; i < m_substeps; i++)
+	{
+		GetNewStates();
+		m_collisionProcessor->ProcessCollisions();
+		UpdateStates();
+	}
 }
 
 void RigidBodySystem::UpdateStates()
@@ -59,6 +65,7 @@ void RigidBodySystem::GetNewStates()
 			body.m_nextState = new NextState();
 			body.m_invInertiaTensor = mat3(0);
 			body.m_invMassTensor = mat3(0);
+			body.ClearForces();
 		}
 	}
 }
