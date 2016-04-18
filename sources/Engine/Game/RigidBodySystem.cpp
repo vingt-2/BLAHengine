@@ -1,10 +1,12 @@
 #include "RigidBodySystem.h"
 
 RigidBodySystem::RigidBodySystem() :
-	m_timeStep(0.01f),
+	m_timeStep(0.001f),
 	m_uniformFriction(0.05f),
-	m_gravity(vec3(0, 0, 0)),
-	m_substeps(1)
+	m_gravity(vec3(0, -1, 0)),
+	m_substeps(2),
+	m_oldTime(-1),
+	m_isSimulating(false)
 {
 	m_collisionProcessor = new CollisionProcessor();
 
@@ -26,14 +28,35 @@ int RigidBodySystem::RegisterRigidBody(RigidBody &body)
 	return 0;
 }
 
+void RigidBodySystem::EnableSimulation()
+{
+	if (!m_isSimulating)
+	{
+		m_oldTime = glfwGetTime();
+		m_isSimulating = true;
+	}
+}
+
+void RigidBodySystem::DisableSimulation()
+{
+	m_isSimulating = false;
+}
+
 void RigidBodySystem::UpdateSystem()
 {
-	ApplyWorldForces();
-	for (int i = 0; i < m_substeps; i++)
+	if (m_isSimulating)
 	{
-		GetNewStates();
-		m_collisionProcessor->ProcessCollisions();
-		UpdateStates();
+		double time = glfwGetTime();
+		m_timeStep = (m_oldTime - time) / 2;
+		m_oldTime = time;
+
+		ApplyWorldForces();
+		for (int i = 0; i < m_substeps; i++)
+		{
+			GetNewStates();
+			m_collisionProcessor->ProcessCollisions();
+			UpdateStates();
+		}
 	}
 }
 
@@ -120,7 +143,7 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 		body.m_acceleration = body.m_nextState->m_acceleration;
 		body.m_angularAcceleration = body.m_nextState->m_angularAcceleration;
 		body.m_velocity = body.m_nextState->m_velocity + correctionL;
-		body.m_angularVelocity = body.m_nextState->m_angularVelocity + correctionA;
+		body.m_angularVelocity = body.m_nextState->m_angularVelocity +correctionA;
 		delete(body.m_nextState);
 		body.m_nextState = NULL;
 		body.ClearForces();

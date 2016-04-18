@@ -109,13 +109,15 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
 
 				std::pair<int, int> tri(m_iColTri1, m_iColTri2);
 				m_intersectedTriangles.push_back(tri);
-
-				Vector3D v = my_tri_tri_intersect(m_ColTri1, m_ColTri2);
+				int pointFromTri;
+				Vector3D v = my_tri_tri_intersect(m_ColTri1, m_ColTri2, pointFromTri);
 				v = Transform(v, m_Transform);
 
 				m_collisionPoints.push_back(v.x);
 				m_collisionPoints.push_back(v.y);
 				m_collisionPoints.push_back(v.z);
+
+				m_collidingFaces.push_back(pointFromTri);
 			  }
 			}
 		  }
@@ -377,12 +379,22 @@ bool CollisionModel3DImpl::getCollisionPoints(std::vector<float>* points)
 	return true;
 }
 
+bool CollisionModel3DImpl::getPointsFromTri(std::vector<int>* collidingFaces)
+{
+	for (int i = 0; i < m_collidingFaces.size(); i++)
+	{
+		collidingFaces->push_back(m_collidingFaces.at(i));
+	}
+	return true;
+}
+
 bool CollisionModel3DImpl::getCollisionPoint(float p[3], bool ModelSpace)
 {
   Vector3D& v=*((Vector3D*)p);
   switch (m_ColType) 
   {
-	case Models: v=my_tri_tri_intersect(m_ColTri1,m_ColTri2); break;
+	int a;
+	case Models: v=my_tri_tri_intersect(m_ColTri1,m_ColTri2, a); break;
 	case Sphere:
 	case Ray:    v=m_ColPoint; break;
 	default:     v=Vector3D::Zero;

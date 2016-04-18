@@ -147,6 +147,8 @@ public:
   virtual bool getCollisionPoint(float p[3], bool ModelSpace=true) = 0;
 
   virtual bool getCollisionPoints(std::vector<float>* points) = 0;
+
+  virtual bool getPointsFromTri(std::vector<int>* m_collidingFaces) = 0;
 };
 
 /** Timeout exception class.  Exception will be thrown if

@@ -4,23 +4,18 @@
 class Contact
 {
 public:
-	Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normal1W, vec3 normal2W, vec3 tangent1W, vec3 tangent2W);
+	Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normalW, vec3 tangentW, int face);
 	~Contact();
 
-	int m_contactIndex;
+	int m_faceFrom;
 	RigidBody* m_body1;
 	RigidBody* m_body2;
 
-	vec3 m_contactNormalBody1W;
-	vec3 m_contactNormalBody2W;
-	vec3 m_contactTangent1Body1W;
-	vec3 m_contactTangent1Body2W;
-	vec3 m_contactTangent2Body1W;
-	vec3 m_contactTangent2Body2W;
-	vec3 m_contactPositionW;
+	vec3 m_contactNormalW;
+	vec3 m_contactTangent1W;
+	vec3 m_contactTangent2W;
 
-	mat3 m_contactFrame1L;
-	mat3 m_contactFrame2L;
+	vec3 m_contactPositionW;
 
 	vector<vec3> m_normalJacobian;
 	vector<vec3> m_tangentJacobian1;
@@ -46,6 +41,7 @@ public:
 
 	void ProcessCollisions();
 private:
+
 	void ComputeT(vector<vector<vec3>>& T);
 	void GetDiagonalElements(vector<vector<vec3>> T, vector<float>& D);
 	void BroadPhaseDetection();

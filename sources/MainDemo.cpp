@@ -98,11 +98,11 @@ void SimpleControls(GameChar* object)
 
 	vec3 tangentForce = vec3(0);
 	vec3 movementForce = vec3(0);
-	float coeff = 0.2f;
+	float coeff = 1.f;
 
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
-		coeff = 1.f;
+		coeff = 2.f;
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS))
 		coeff = 0.25f;
@@ -119,7 +119,7 @@ void SimpleControls(GameChar* object)
 
 	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
-
+	cameraForce /= (0.1 * fps);
 	object->m_transform->m_position += cameraForce;
 
 
@@ -149,7 +149,7 @@ void SimpleControls(GameChar* object)
 		previousMouseInput->x = x;
 		previousMouseInput->y = y;
 
-		deltaRotation *= 0.05;
+		deltaRotation /= (0.4*fps);
 
 		cameraRotation += deltaRotation;
 
@@ -261,14 +261,16 @@ int main( void )
 	renderingManager->DebugSetupSphere(*debugSphere);
 
 	renderingManager->RequestRenderTicket(*object_1);
-	renderingManager->RequestRenderTicket(*object_2);
+	//renderingManager->RequestRenderTicket(*object_2);
 	renderingManager->RequestRenderTicket(*object_3);
 	mainScene->AddObject(object_1);
-	mainScene->AddObject(object_2);
+	//mainScene->AddObject(object_2);
 	mainScene->AddObject(object_3);
 
 	object_1->m_transform->m_position = (vec3(0, -5, 0));
 	object_2->m_transform->m_position = (vec3(-2.5, 0, 0));
+	
+	object_3->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -294,7 +296,7 @@ int main( void )
 	while(!terminationRequest)
 	{
 		object_1->m_rigidBody->m_isPinned = true;
-		Idle(&fps_frames,&fps_time,&fps);
+		Idle(&fps_frames,&fps_time,&fps); 
 
 		stringstream title;
 		title << "BLAengine: " << fps << " fps";
@@ -313,7 +315,8 @@ int main( void )
 		else
 			ObjectControl(currentObject);
 
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (frameCount-lastPress) > 60)
+		double time = glfwGetTime();
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time-lastPress) > 0.5)
 		{
 			if (mainScene->m_enableSimulation)
 			{
@@ -323,24 +326,7 @@ int main( void )
 			{
 				mainScene->m_enableSimulation = true;
 			}
-			lastPress = frameCount;
-		}
-
-		if( (glfwGetKey(mainRenderer->GetWindow(), 'J'  ) == GLFW_PRESS) )
-		{
-			light->GetTransform()->m_rotation += vec3(0.f,0.1f,0.f);
-		}
-		else if( (glfwGetKey(mainRenderer->GetWindow(), 'L'  ) == GLFW_PRESS) )
-		{
-			light->GetTransform()->m_rotation += vec3(0.f,-0.1f,0.f);
-		}
-		if( (glfwGetKey(mainRenderer->GetWindow(), 'I'  ) == GLFW_PRESS) )
-		{
-			light->GetTransform()->m_rotation += vec3(0.f,0.f,0.1f);
-		}
-		else if( (glfwGetKey(mainRenderer->GetWindow(), 'K'  ) == GLFW_PRESS) )
-		{
-			light->GetTransform()->m_rotation += vec3(0.f,0.f,-0.1f);
+			lastPress = time;
 		}
 
 		//cout << collider_1->CollidesWith(collider_2);
@@ -388,13 +374,10 @@ int main( void )
 			if (contact.m_contactPositionW != vec3(0, 0, 0))
 			{
 				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalBody2W, 1);
-				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1Body2W, 1);
-				//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2Body2W, 1);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
 			}
-
-			vec3 vrel = object_2->m_rigidBody->m_velocity - object_1->m_rigidBody->m_velocity;
-			float vrelN = dot(vrel,contact.m_contactNormalBody2W)/mainScene->GetContacts()->size();
 			//mainScene->m_enableSimulation = false;
 		}
 

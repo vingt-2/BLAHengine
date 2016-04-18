@@ -75,7 +75,7 @@ public:
 
   bool getCollidingTriangles(std::vector<std::pair<int, int>>* pairs);
   bool getCollisionPoints(std::vector<float>* points);
-
+  bool getPointsFromTri(std::vector<int>* pointFromTris);
 
   int getTriangleIndex(BoxedTriangle* bt)
   {
@@ -99,6 +99,7 @@ public:
 
   std::vector<std::pair<int, int>>     m_intersectedTriangles;
   std::vector<float>				   m_collisionPoints;
+  std::vector<int>					   m_collidingFaces;
 
   /** Type of the last collision test */
   enum { Models, Ray, Sphere }       

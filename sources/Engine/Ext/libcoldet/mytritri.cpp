@@ -26,7 +26,7 @@
 
 __CD__BEGIN
 
-Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2)
+Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2, int& face)
 {
   Plane p1(t1.v1,t1.v2,t1.v3);
   int other_side=0;
@@ -48,6 +48,7 @@ Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2)
   float t21=-(p1.d+p2.d+a2*n12)/((b2-a2)*n12);
   TriangleDesc td1(t1,p1);
   Vector3D P21(a2+t21*(b2-a2));
+  face = 1;
   if (td1.pointInTri(P21)) return P21;
   float t22=-(p1.d+p2.d+c2*n12)/((b2-c2)*n12);
   Vector3D P22(c2+t22*(b2-c2));
@@ -62,6 +63,7 @@ Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2)
     if (f12>0.0f && f23>0.0f) return Vector3D::Zero;
     other_side=(f12<0.0f?(f23<0.0f?1:0):2);
   }
+  face = 2;
   const Vector3D& a1=td1[other_side+1];
   const Vector3D& b1=td1[other_side];
   const Vector3D& c1=td1[other_side+2];

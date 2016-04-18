@@ -51,7 +51,14 @@ void Scene::AddDirectionalLight(DirectionalLight* light)
 void Scene::Update()
 {
 	if (m_enableSimulation)
-		m_rigidBodySystem->UpdateSystem();
+	{
+		m_rigidBodySystem->EnableSimulation();
+	}
+	else
+	{
+		m_rigidBodySystem->DisableSimulation();
+	}
+	m_rigidBodySystem->UpdateSystem();
 	m_camera->m_rigidBody->Update();
 
 	for(int i=0;i < m_sceneObjectsVector.size() ; i++)

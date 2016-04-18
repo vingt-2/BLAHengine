@@ -82,7 +82,7 @@ bool GL33Renderer::Update()
 	
 	glDisable(GL_BLEND);
 	
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 	
 	glfwSwapBuffers(glfwWindow);
 	glfwPollEvents();

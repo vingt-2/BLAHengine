@@ -16,11 +16,17 @@ public:
 	int RegisterRigidBody(RigidBody &body);
 	float GetTimeStep() { return m_timeStep; };
 
+	void EnableSimulation();
+	void DisableSimulation();
+
 	CollisionProcessor* m_collisionProcessor;
 
 private:
 	vector<RigidBody*> m_rigidBodyList;
+	
 	float m_timeStep;
+	double m_oldTime;
+	bool m_isSimulating;
 
 	void ApplyWorldForces();
 	void GetNewStates();
