@@ -6,7 +6,8 @@ RigidBodySystem::RigidBodySystem() :
 	m_gravity(vec3(0, -1, 0)),
 	m_substeps(2),
 	m_oldTime(-1),
-	m_isSimulating(false)
+	m_isSimulating(false),
+	m_enableGravity(true)
 {
 	m_collisionProcessor = new CollisionProcessor();
 
@@ -47,7 +48,7 @@ void RigidBodySystem::UpdateSystem()
 	if (m_isSimulating)
 	{
 		double time = glfwGetTime();
-		m_timeStep = (m_oldTime - time) / 2;
+		m_timeStep = (m_oldTime - time) / 1;
 		m_oldTime = time;
 
 		ApplyWorldForces();
@@ -143,7 +144,7 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 		body.m_acceleration = body.m_nextState->m_acceleration;
 		body.m_angularAcceleration = body.m_nextState->m_angularAcceleration;
 		body.m_velocity = body.m_nextState->m_velocity + correctionL;
-		body.m_angularVelocity = body.m_nextState->m_angularVelocity +correctionA;
+		body.m_angularVelocity = body.m_nextState->m_angularVelocity + transform->WorldDirectionToLocal(correctionA);
 		delete(body.m_nextState);
 		body.m_nextState = NULL;
 		body.ClearForces();
@@ -173,7 +174,7 @@ void RigidBodySystem::ApplyWorldForces()
 		vec3 angularFriction = -1.f * m_uniformFriction * body->m_angularVelocity;
 		body->AddLinearForce(linearFriction);
 		body->AddTorque(angularFriction);
-		if (body->m_applyGravity)
+		if (body->m_applyGravity && m_enableGravity)
 		{
 			body->AddLinearForce(m_gravity);
 		}

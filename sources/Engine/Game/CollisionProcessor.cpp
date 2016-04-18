@@ -2,7 +2,7 @@
 
 CollisionProcessor::CollisionProcessor():
 	m_flagInterpolateNormals(false),
-	m_maxIterations(100),
+	m_maxIterations(1000),
 	m_bounce(0.f),
 	m_friction(0)
 {
@@ -141,6 +141,9 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 				tangent = tangentBody2W;
 			}
 
+			if (isnan(normal.x) || isnan(normal.y) || isnan(normal.z))
+				continue;
+
 			Contact contact
 			(
 				body1, body2, 
@@ -159,7 +162,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 
 void CollisionProcessor::SolveContacts()
 {
-	float EPSILON = 0.001f;
+	float EPSILON = 0.000000001f;
 
 	vector<vec3> B;
 	for (auto contact : m_currentContacts)
@@ -175,7 +178,8 @@ void CollisionProcessor::SolveContacts()
 		vector<vec3> t1Jac = contact.m_tangentJacobian1;
 		vector<vec3> t2Jac = contact.m_tangentJacobian2;
 
-		float b_normal = (dot(nJac[0], vLUpdate1) + dot(nJac[1], vAUpdate1) + dot(nJac[2], vLpdate2) + dot(nJac[3], vAUpdate2));
+		float b_normal = dot(nJac[0], vLUpdate1) + dot(nJac[2], vLpdate2) + dot(nJac[1], vAUpdate1) + dot(nJac[3], vAUpdate2);
+		b_normal += m_bounce * ((dot(nJac[0],body1->m_velocity) + dot(nJac[2],body2->m_velocity)));
 
 		float b_tangent1 = dot(t1Jac[0], vLUpdate1) + dot(t1Jac[1], vAUpdate1) + dot(t1Jac[2], vLpdate2) + dot(t1Jac[3], vAUpdate2);
 
@@ -207,7 +211,7 @@ void CollisionProcessor::SolveContacts()
 	GetDiagonalElements(T, D);
 
 	float averageDistance = 1;
-	cout  << "\n\n\n";
+	//cout  << "\n\n\n";
 
 	while (iteration < m_maxIterations && averageDistance > EPSILON)
 	{
@@ -243,16 +247,15 @@ void CollisionProcessor::SolveContacts()
 				correction += dot(jacobianEntry[2], correctionLinearVelocity2);
 				correction += dot(jacobianEntry[3], correctionAngularVelocity2);
 				
-				if (i == 0)
+				/*if (i == 0)
 				{
 					cout << correction << "\n";
-				}
+				}*/
 				newLambdas[index][i] = lambdas[index][i] - (B[index][i] / D[3 * index + i]) - (correction / D[3 * index + i]);
 				
 				if (i == 0) // Normal direction 
 				{
 					newLambdas[index][0] = newLambdas[index][0] > 0 ? newLambdas[index][0] : 0;
-					//newLambdas[index][0] = newLambdas[index][0] < 1 ? newLambdas[index][0] : 1;
 				}
 				else if(i == 1)  // Tangential direction 1 
 				{
@@ -283,6 +286,8 @@ void CollisionProcessor::SolveContacts()
 			{
 				averageDistance += abs(lambdas[l][k] - newLambdas[l][k]);
 			}
+			if (length(lambdas[l]) > 100)
+				cout << "BNREAL";
 		}
 		averageDistance /= 3*lambdas.size();
 
@@ -381,9 +386,9 @@ void Contact::ComputeJacobian()
 	vec3 crossNormal2 = cross(radialBody2, m_contactNormalW);
 
 	m_normalJacobian[0] = sign * m_contactNormalW;
-	m_normalJacobian[1] = sign * crossNormal1;
+	m_normalJacobian[1] = -sign * (crossNormal1);
 	m_normalJacobian[2] = -sign * m_contactNormalW;
-	m_normalJacobian[3] = -sign * crossNormal2;
+	m_normalJacobian[3] = sign * (crossNormal2);
 
 	vec3 crossTangent11 = cross(radialBody1, m_contactTangent1W);
 	vec3 crossTangent12 = cross(radialBody2, m_contactTangent1W);

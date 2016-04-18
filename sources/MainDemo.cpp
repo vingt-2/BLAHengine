@@ -37,10 +37,11 @@ Renderer* mainRenderer;
 SharedResources* sharedResources;
 Debug* debug;
 Scene* mainScene;
-RigidBodySystem* rigidBodySystem;
 GameChar* currentObject = NULL;
 
 vec3 cameraRotation = vec3(0);
+
+double deltaTime = 0;
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -119,7 +120,7 @@ void SimpleControls(GameChar* object)
 
 	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
-	cameraForce /= (0.1 * fps);
+	cameraForce *= 5*deltaTime;
 	object->m_transform->m_position += cameraForce;
 
 
@@ -149,7 +150,7 @@ void SimpleControls(GameChar* object)
 		previousMouseInput->x = x;
 		previousMouseInput->y = y;
 
-		deltaRotation /= (0.4*fps);
+		deltaRotation *= 6*deltaTime;
 
 		cameraRotation += deltaRotation;
 
@@ -189,8 +190,7 @@ int main( void )
 	RenderingManager* debugRenderingManager = new RenderingManager(1, mainRenderer, RenderingManager::DebugGizmo);
 
 	debug = new Debug(debugRenderingManager);
-	rigidBodySystem = new RigidBodySystem();
-	
+
 	CursorPicker cursorPicker(gameSingleton);
 
 	bool terminationRequest = false;
@@ -237,7 +237,7 @@ int main( void )
 
 	GameChar* object_1 = new GameChar(&floor);
 	GameChar* object_2 = new GameChar(&cube);
-	GameChar* object_3 = new GameChar(&cube);
+	GameChar* object_3 = new GameChar(&sphere);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	
@@ -268,7 +268,7 @@ int main( void )
 	mainScene->AddObject(object_3);
 
 	object_1->m_transform->m_position = (vec3(0, -5, 0));
-	object_2->m_transform->m_position = (vec3(-2.5, 0, 0));
+	object_2->m_transform->m_position = (vec3(-3, 0, 0));
 	
 	object_3->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
 
@@ -292,9 +292,16 @@ int main( void )
 	int frameCount = 0;
 	vector<Ray> debugRays;
 	int lastPress = 0;
+	double oldTime = glfwGetTime();
+
+	mainScene->DisableGravity();
 
 	while(!terminationRequest)
 	{
+		double time = glfwGetTime();
+		deltaTime = time - oldTime;
+		oldTime = time;
+
 		object_1->m_rigidBody->m_isPinned = true;
 		Idle(&fps_frames,&fps_time,&fps); 
 
@@ -315,7 +322,6 @@ int main( void )
 		else
 			ObjectControl(currentObject);
 
-		double time = glfwGetTime();
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time-lastPress) > 0.5)
 		{
 			if (mainScene->m_enableSimulation)
@@ -326,6 +332,15 @@ int main( void )
 			{
 				mainScene->m_enableSimulation = true;
 			}
+			lastPress = time;
+		}
+
+		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPress) > 0.5)
+		{
+			if (mainScene->GetGravity())
+				mainScene->DisableGravity();
+			else
+				mainScene->EnableGravity();
 			lastPress = time;
 		}
 
@@ -377,14 +392,13 @@ int main( void )
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_normalJacobian[3], 1);
 			}
 			//mainScene->m_enableSimulation = false;
 		}
 
-		//if (object_2->m_rigidBody->m_debugCorrectionVelocity != vec3(0))
-			//debugRays.push_back(Ray(object_2->m_transform->m_position, object_2->m_rigidBody->m_debugCorrectionVelocity, 10));
-		
-		debug->DrawRay(object_2->m_transform->m_position, object_2->m_rigidBody->m_debugCorrectionVelocity, 10);
+		if (currentObject)
+			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),1);
 				
 		if (currentObject != NULL)
 		{

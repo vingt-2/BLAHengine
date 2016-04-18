@@ -8,6 +8,7 @@ public:
 	int m_substeps;
 	float m_uniformFriction;
 	vec3 m_gravity;
+	bool m_enableGravity;
 
 	RigidBodySystem();
 	~RigidBodySystem();

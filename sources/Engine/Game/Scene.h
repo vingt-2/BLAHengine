@@ -27,6 +27,10 @@ public:
 
 	bool m_enableSimulation;
 
+	void EnableGravity() { m_rigidBodySystem->m_enableGravity = true; }
+	void DisableGravity() { m_rigidBodySystem->m_enableGravity = false; }
+	bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
+
 private:
 
 	Camera* m_camera;
