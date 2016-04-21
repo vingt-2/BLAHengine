@@ -4,7 +4,7 @@ RigidBodySystem::RigidBodySystem() :
 	m_timeStep(0.001f),
 	m_uniformFriction(0.05f),
 	m_gravity(vec3(0, -1, 0)),
-	m_substeps(2),
+	m_substeps(1),
 	m_oldTime(-1),
 	m_isSimulating(false),
 	m_enableGravity(true)
@@ -103,7 +103,7 @@ void RigidBodySystem::UpdateAcceleration(RigidBody& body)
 
 	mat3 omegaHat = matrixCross(body.m_angularVelocity);
 
-	newState->m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));// -matrixCross(body.m_angularVelocity)*body.m_velocity;
+	newState->m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));
 	
 	vec3 inertia = omegaHat * body.m_inertiaTensor * body.m_angularVelocity;
 	newState->m_angularAcceleration = body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
@@ -135,16 +135,27 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 	
 	//	Update State, delete NextState entry;
 	{
-		// Debug
-		body.m_debugCorrectionVelocity = body.m_nextState->m_correctionLinearVelocity;
-
-		vec3 correctionL = body.m_nextState->m_correctionLinearVelocity;
-		vec3 correctionA = body.m_nextState->m_correctionAngularVelocity;
+		vec3 correctionL;
+		vec3 correctionA;
+		if (m_collisionProcessor->debug_stop)
+		{
+			correctionL = vec3(0);
+			correctionA = vec3(0);
+		}
+		else
+		{
+			correctionL = body.m_nextState->m_correctionLinearVelocity;
+			correctionA = body.m_nextState->m_correctionAngularVelocity;
+		}
 
 		body.m_acceleration = body.m_nextState->m_acceleration;
 		body.m_angularAcceleration = body.m_nextState->m_angularAcceleration;
 		body.m_velocity = body.m_nextState->m_velocity + correctionL;
+
 		body.m_angularVelocity = body.m_nextState->m_angularVelocity + transform->WorldDirectionToLocal(correctionA);
+
+		// Debug
+		body.m_debugCorrectionVelocity = correctionA;
 		delete(body.m_nextState);
 		body.m_nextState = NULL;
 		body.ClearForces();

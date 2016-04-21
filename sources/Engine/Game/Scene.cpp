@@ -58,6 +58,7 @@ void Scene::Update()
 	{
 		m_rigidBodySystem->DisableSimulation();
 	}
+
 	m_rigidBodySystem->UpdateSystem();
 	m_camera->m_rigidBody->Update();
 

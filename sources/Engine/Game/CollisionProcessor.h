@@ -11,15 +11,21 @@ public:
 	RigidBody* m_body1;
 	RigidBody* m_body2;
 
-	vec3 m_contactNormalW;
-	vec3 m_contactTangent1W;
-	vec3 m_contactTangent2W;
+	dvec3 m_contactNormalW;
+	dvec3 m_contactTangent1W;
+	dvec3 m_contactTangent2W;
 
-	vec3 m_contactPositionW;
+	dvec3 m_contactPositionW;
 
-	vector<vec3> m_normalJacobian;
-	vector<vec3> m_tangentJacobian1;
-	vector<vec3> m_tangentJacobian2;
+	dvec3 debug_radialBody1;
+	dvec3 debug_radialBody2;
+
+	dvec3 debug_position1;
+	dvec3 debug_position2;
+
+	vector<dvec3> m_normalJacobian;
+	vector<dvec3> m_tangentJacobian1;
+	vector<dvec3> m_tangentJacobian2;
 
 	void ComputeJacobian();
 private:
@@ -36,14 +42,16 @@ public:
 	float m_friction;
 	float m_bounce;
 
+	bool debug_stop;
+
 	vector<RigidBody*> m_bodiesList;
 	vector<Contact> m_currentContacts;
 
 	void ProcessCollisions();
 private:
 
-	void ComputeT(vector<vector<vec3>>& T);
-	void GetDiagonalElements(vector<vector<vec3>> T, vector<float>& D);
+	void ComputeT(vector<vector<dvec3>>& T);
+	void GetDiagonalElements(vector<vector<dvec3>> T, vector<float>& D);
 	void BroadPhaseDetection();
 	void NarrowPhaseDetection(RigidBody* body1, RigidBody* body2);
 	void SolveContacts();

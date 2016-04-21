@@ -12,8 +12,10 @@ public:
 	vec3 m_velocity;
 	vec3 m_angularAcceleration;
 	vec3 m_angularVelocity;
-	vec3 m_correctionLinearVelocity;
-	vec3 m_correctionAngularVelocity;
+
+	// Using dvec3 for LCP solver values
+	dvec3 m_correctionLinearVelocity;
+	dvec3 m_correctionAngularVelocity;
 };
 
 class RigidBody

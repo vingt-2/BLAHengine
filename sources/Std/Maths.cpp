@@ -9,3 +9,8 @@ mat3 matrixCross(vec3 v)
 		vec3(-v[1], v[0], 0)
 	);
 }
+
+void printVector(vec3 vec)
+{
+	std::cout << vec.x << ", " << vec.y << ", " << vec.z << "\n";
+}

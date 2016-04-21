@@ -30,12 +30,12 @@ public:
 	void EnableGravity() { m_rigidBodySystem->m_enableGravity = true; }
 	void DisableGravity() { m_rigidBodySystem->m_enableGravity = false; }
 	bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
+	RigidBodySystem* m_rigidBodySystem;
+
 
 private:
 
-	Camera* m_camera;
-	RigidBodySystem* m_rigidBodySystem;
-	vector<GameObject*>  m_sceneObjectsVector;
+	Camera* m_camera;	vector<GameObject*>  m_sceneObjectsVector;
 	vector<DirectionalLight*> m_directionalLights;
 	vector<PointLight*> m_pointLights;
 };

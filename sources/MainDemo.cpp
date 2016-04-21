@@ -118,6 +118,11 @@ void SimpleControls(GameChar* object)
 	if( (glfwGetKey(mainRenderer->GetWindow(), 'D'  ) == GLFW_PRESS) )
 		tangentForce.x = -1.f;
 
+	if ((glfwGetKey(mainRenderer->GetWindow(), 'Q') == GLFW_PRESS))
+		tangentForce.y = 1.f;
+	if ((glfwGetKey(mainRenderer->GetWindow(), 'E') == GLFW_PRESS))
+		tangentForce.y = -1.f;
+
 	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
 	cameraForce *= 5*deltaTime;
@@ -166,6 +171,16 @@ void Idle(int* fps_frames,GLfloat* fps_time,int* fps)
 {
 	GetFPS(fps_frames,fps_time, fps);
 	//LockFramerate(100.f); // Lock framerate 100 hz
+}
+
+void SetObject(GameChar* object)
+{
+	object->m_transform->m_position = (vec3(-10, 0, 0));
+
+	object->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
+
+	object->m_rigidBody->m_angularVelocity = vec3(0);
+	object->m_rigidBody->m_velocity = vec3(0);
 }
 
 
@@ -223,9 +238,9 @@ int main( void )
 	objImport.ImportMesh("./resources/models/cube.obj", &cube);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor);
 	objImport.ImportMesh("./resources/models/bla.obj", &sphere);
-	mat4 scaleMat(vec4(10, 0, 0, 0), 
-					vec4(0, 0.2, 0, 0), 
-					vec4(0, 0, 10, 0),
+	mat4 scaleMat(vec4(100, 0, 0, 0), 
+					vec4(0, 10, 0, 0), 
+					vec4(0, 0, 100, 0),
 					vec4(0, 0, 0, 1));
 	for (auto &v : floor.m_meshVertices){
 		vec4 hP = scaleMat * vec4(v,1);
@@ -237,13 +252,13 @@ int main( void )
 
 	GameChar* object_1 = new GameChar(&floor);
 	GameChar* object_2 = new GameChar(&cube);
-	GameChar* object_3 = new GameChar(&sphere);
+	GameChar* object_3 = new GameChar(&cube);
 
 	object_1->m_meshRenderer->AssignMaterial("defaultShader");
 	
 	object_1->m_meshRenderer->AssignTexture("testDiffuse","texture");
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
-	
+	//object_1->m_meshRenderer->m_renderType = 0x03;
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
 	object_2->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
@@ -267,10 +282,10 @@ int main( void )
 	//mainScene->AddObject(object_2);
 	mainScene->AddObject(object_3);
 
-	object_1->m_transform->m_position = (vec3(0, -5, 0));
-	object_2->m_transform->m_position = (vec3(-3, 0, 0));
+	object_1->m_transform->m_position = (vec3(0, -15, 0));
+	object_2->m_transform->m_position = (vec3(6, 0, 0));
 	
-	object_3->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
+	SetObject(object_3);
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -282,6 +297,9 @@ int main( void )
 	
 	Ray ray(vec3(0),vec3(0),0);
 
+
+	cout << "\n\n\n\nDone Loading, RigidBody Simulation: \n";
+
 	//
 	// Did you know ?
 	// There is a big ducking memory leak when you draw debug rays.
@@ -291,11 +309,15 @@ int main( void )
 
 	int frameCount = 0;
 	vector<Ray> debugRays;
-	int lastPress = 0;
+	double lastPressG = 0;
+	double lastPressS = 0;
+	double lastPressR = 0;
 	double oldTime = glfwGetTime();
 
 	mainScene->DisableGravity();
 
+	bool stoped = false;
+	int C = 0;
 	while(!terminationRequest)
 	{
 		double time = glfwGetTime();
@@ -310,38 +332,60 @@ int main( void )
 		title.str();
 		glfwSetWindowTitle(mainRenderer->GetWindow(),title.str().data());
 
-		//glfwSetWindowSizeCallback(OnResize);
+		//if (C != mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size())
+		//{
+		//	C = mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size();
+		//	cout << "Contacts: " <<C<< "\n";
+		//}
 
-//		object_1->m_rigidBody->AddTorque(vec3(0, 2, 0));
-//		object_2->m_rigidBody->AddTorque(vec3(0, -2, 0));
-
-		mainScene->Update();
+		//if (mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size() != 0 && (time - lastPressS) > 0.1)
+		//{
+		//	mainScene->m_enableSimulation = false;
+		//	stoped = true;
+		//}
 
 		if(currentObject == NULL)
 			ObjectControl(object_2);
 		else
 			ObjectControl(currentObject);
 
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time-lastPress) > 0.5)
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_R) == GLFW_PRESS) && (time - lastPressR) > 0.5)
 		{
+			SetObject(object_3);
+			lastPressR = time;
+		}
+
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time - lastPressS) > 0.5)
+		{
+			cout << "Simulation ";
 			if (mainScene->m_enableSimulation)
 			{
+				cout << "off\n";
 				mainScene->m_enableSimulation = false;
 			}
 			else
 			{
+				cout << "on\n";
 				mainScene->m_enableSimulation = true;
+				stoped = false;
 			}
-			lastPress = time;
+			lastPressS = time;
 		}
 
-		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPress) > 0.5)
+		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{
+			cout << "Gravity ";
 			if (mainScene->GetGravity())
+			{
 				mainScene->DisableGravity();
+				cout << "off\n";
+			}
 			else
+			{
+				cout << "on\n";
 				mainScene->EnableGravity();
-			lastPress = time;
+			}
+			lastPressG = time;
 		}
 
 		//cout << collider_1->CollidesWith(collider_2);
@@ -382,23 +426,33 @@ int main( void )
 			debug->DrawRay(r.m_origin, r.m_direction, r.m_length);
 		}
 		//cout << "Contacts Size: " << mainScene->GetContacts()->size() << ".\n";
-		for (int c = 0; c < mainScene->GetContacts()->size(); c+=2)
+		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
 		{
 			Contact contact = mainScene->GetContacts()->at(c);
 
-			if (contact.m_contactPositionW != vec3(0, 0, 0))
+			if (contact.m_contactPositionW != dvec3(0, 0, 0))
 			{
 				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
 				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-				//debug->DrawRay(contact.m_contactPositionW, contact.m_normalJacobian[3], 1);
+				//debug->DrawRay(contact.m_contactPositionW, contact.m_normalJacobian[3], 10);
+
+				//debug->DrawRay(contact.m_body2->m_transform->m_position, contact.debug_radialBody2, 1);
+				//debug->DrawRay(contact.m_body1->m_transform->m_position, contact.debug_radialBody1, 1);
+				//debug->DrawRay(contact.m_body2->m_transform->m_position, contact.m_body2->m_angularVelocity, 100);
 			}
-			//mainScene->m_enableSimulation = false;
+		}
+
+		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
+		{
+			cout << "LCP Solver unhappy, Simulation Halted\n";
+			mainScene->m_enableSimulation = false;
+			mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop = false;
 		}
 
 		if (currentObject)
-			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),1);
+			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
 				
 		if (currentObject != NULL)
 		{
@@ -409,6 +463,7 @@ int main( void )
 		
 		mainCamera->Update();
 		mainRenderer->Update();
+		mainScene->Update();
 
 		//debug->DrawGrid(10, vec4(1));
 
