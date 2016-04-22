@@ -2,7 +2,7 @@
 
 RigidBodySystem::RigidBodySystem() :
 	m_timeStep(0.001f),
-	m_uniformFriction(0.05f),
+	m_uniformFriction(1),
 	m_gravity(vec3(0, -1, 0)),
 	m_substeps(1),
 	m_oldTime(-1),
@@ -48,7 +48,7 @@ void RigidBodySystem::UpdateSystem()
 	if (m_isSimulating)
 	{
 		double time = glfwGetTime();
-		m_timeStep = (m_oldTime - time) / 1;
+		m_timeStep = 2*(m_oldTime - time) / 1;
 		m_oldTime = time;
 
 		ApplyWorldForces();
@@ -96,9 +96,6 @@ void RigidBodySystem::GetNewStates()
 
 void RigidBodySystem::UpdateAcceleration(RigidBody& body)
 {
-	vec3 linearFriction = m_uniformFriction * body.m_velocity;
-	vec3 angularFriction = m_uniformFriction * body.m_angularVelocity;
-
 	NextState* newState = new NextState();
 
 	mat3 omegaHat = matrixCross(body.m_angularVelocity);
@@ -181,8 +178,8 @@ void RigidBodySystem::ApplyWorldForces()
 {
 	for (auto body : m_rigidBodyList)
 	{
-		vec3 linearFriction = -1.f * m_uniformFriction * body->m_velocity;
-		vec3 angularFriction = -1.f * m_uniformFriction * body->m_angularVelocity;
+		vec3 linearFriction = 1.f * m_uniformFriction * body->m_velocity;
+		vec3 angularFriction = 1.f * m_uniformFriction * body->m_angularVelocity;
 		body->AddLinearForce(linearFriction);
 		body->AddTorque(angularFriction);
 		if (body->m_applyGravity && m_enableGravity)

@@ -41,6 +41,7 @@ public:
 	bool m_flagInterpolateNormals;
 	float m_friction;
 	float m_bounce;
+	double m_epsilon;
 
 	bool debug_stop;
 
@@ -51,7 +52,7 @@ public:
 private:
 
 	void ComputeT(vector<vector<dvec3>>& T);
-	void GetDiagonalElements(vector<vector<dvec3>> T, vector<float>& D);
+	void GetDiagonalElements(vector<vector<dvec3>> T, vector<double>& D);
 	void BroadPhaseDetection();
 	void NarrowPhaseDetection(RigidBody* body1, RigidBody* body2);
 	void SolveContacts();

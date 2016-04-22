@@ -181,6 +181,8 @@ void SetObject(GameChar* object)
 
 	object->m_rigidBody->m_angularVelocity = vec3(0);
 	object->m_rigidBody->m_velocity = vec3(0);
+
+	//object->m_transform->m_scale = vec3(0.1);
 }
 
 
@@ -286,6 +288,22 @@ int main( void )
 	object_2->m_transform->m_position = (vec3(6, 0, 0));
 	
 	SetObject(object_3);
+
+
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	GameChar* newObj = new GameChar(&sphere);
+	//	newObj->m_meshRenderer->AssignMaterial("defaultShader");
+	//	newObj->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+	//	newObj->m_meshRenderer->AssignTexture("earthNormals", "normals");
+	//	newObj->m_transform->m_position = (vec3(i, (15 +5*i), 0));
+	//	newObj->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
+	//	newObj->m_rigidBody->m_angularVelocity = vec3(0);
+	//	newObj->m_rigidBody->m_velocity = vec3(0);
+	//	newObj->m_transform->m_scale = vec3(0.1);
+	//	renderingManager->RequestRenderTicket(*newObj);
+	//	mainScene->AddObject(newObj);
+	//}
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
