@@ -236,7 +236,7 @@ int main( void )
 	MeshAsset sphere;
 	MeshAsset floor;
 	MeshAsset cube;
-	//objImport.ImportMesh("../resources/models/x-wing.obj", &xwing);
+	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing);
 	objImport.ImportMesh("./resources/models/cube.obj", &cube);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor);
 	objImport.ImportMesh("./resources/models/bla.obj", &sphere);
@@ -470,7 +470,7 @@ int main( void )
 		}
 
 		if (currentObject)
-			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
+			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_rigidBody->m_velocity,10);
 				
 		if (currentObject != NULL)
 		{

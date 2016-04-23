@@ -2,10 +2,10 @@
 
 CollisionProcessor::CollisionProcessor():
 	m_flagInterpolateNormals(false),
-	m_maxIterations(1000),
-	m_bounce(0.001),
-	m_friction(0.1f),
-	m_epsilon(0.01),
+	m_maxIterations(100),
+	m_bounce(0.01),
+	m_friction(0.f),
+	m_epsilon(0.001),
 	debug_stop(false)
 {
 	m_bodiesList = vector<RigidBody*>();
@@ -143,6 +143,16 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 				tangent = tangentBody2W;
 			}
 
+			bool cont = false;
+			for (auto contact : m_currentContacts)
+			{
+				if (length(contact.m_contactPositionW - (dvec3)collisionPoint) < 0.1)
+				{
+					cont = true;
+				}
+			}
+			if (cont)
+				continue;
 			if (isnan(normal.x) || isnan(normal.y) || isnan(normal.z))
 				continue;
 
@@ -248,15 +258,15 @@ void CollisionProcessor::SolveContacts()
 
 				newLambdas[index][i] = lambdas[index][i] - (B[index][i] / D[3 * index + i]) - (correction / D[3 * index + i]);
 
-				if (newLambdas[index][i] > 2)
-				{
+				//if (newLambdas[index][i] > 2)
+				//{
 
-					for (int d = 0; d < D.size(); d++)
-					{
-						cout << D[d] << ", ";
-					}
-					cout << "\n";
-				}
+				//	for (int d = 0; d < D.size(); d++)
+				//	{
+				//		cout << D[d] << ", ";
+				//	}
+				//	cout << "\n";
+				//}
 					
 
 				if (i == 0) // Normal direction 
@@ -305,9 +315,10 @@ void CollisionProcessor::SolveContacts()
 	if (iteration == m_maxIterations)
 	{
 		cout << "Did not converge with avgD "<< averageDistance << "... " << iteration << " iterations\n";
+		cout << m_currentContacts.size() << " collisions\n";
 		debug_stop = true;
 	}
-	else
+	else if(iteration > 10)
 	{
 		cout << "Converged with avgD=" << averageDistance << " in "<< iteration << " iterations \n";
 	}
@@ -403,10 +414,10 @@ void Contact::ComputeJacobian()
 	dvec3 crossNormal1 = cross(debug_radialBody1, m_contactNormalW);
 	dvec3 crossNormal2 = cross(debug_radialBody2, m_contactNormalW);
 
-	m_normalJacobian[0] = sign * m_contactNormalW;
-	m_normalJacobian[1] = -sign * crossNormal1;
-	m_normalJacobian[2] = -sign * m_contactNormalW;
-	m_normalJacobian[3] = sign * crossNormal2;
+	m_normalJacobian[0] = -sign * m_contactNormalW;
+	m_normalJacobian[1] = sign * crossNormal1;
+	m_normalJacobian[2] = sign * m_contactNormalW;
+	m_normalJacobian[3] = -sign * crossNormal2;
 
 	dvec3 crossTangent11 = cross(debug_radialBody1, m_contactTangent1W);
 	dvec3 crossTangent12 = cross(debug_radialBody2, m_contactTangent1W);
