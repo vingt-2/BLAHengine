@@ -2,10 +2,10 @@
 
 CollisionProcessor::CollisionProcessor():
 	m_flagInterpolateNormals(false),
-	m_maxIterations(100),
-	m_bounce(0.01),
-	m_friction(0.f),
-	m_epsilon(0.001),
+	m_maxIterations(300),
+	m_bounce(0.5),
+	m_friction(0.1),
+	m_epsilon(0.0001),
 	debug_stop(false)
 {
 	m_bodiesList = vector<RigidBody*>();
@@ -118,7 +118,6 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 			body1ContactTangent = normalize(tangent1Body1);
 			body2ContactTangent = normalize(tangent1Body2);
 
-
 			// Normals should point outwards
 			body1ContactNormal *= (dot(contactInBody1, body1ContactNormal) < 0 ? -1.f : 1.f);
 			body2ContactNormal *= (dot(contactInBody2, body2ContactNormal) < 0 ? -1.f : 1.f);
@@ -143,16 +142,6 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 				tangent = tangentBody2W;
 			}
 
-			bool cont = false;
-			for (auto contact : m_currentContacts)
-			{
-				if (length(contact.m_contactPositionW - (dvec3)collisionPoint) < 0.1)
-				{
-					cont = true;
-				}
-			}
-			if (cont)
-				continue;
 			if (isnan(normal.x) || isnan(normal.y) || isnan(normal.z))
 				continue;
 
@@ -226,7 +215,11 @@ void CollisionProcessor::SolveContacts()
 
 	while (iteration < m_maxIterations && averageDistance > m_epsilon)
 	{
-		vector<dvec3> newLambdas(lambdas);
+		vector<dvec3> newLambdas(m_currentContacts.size());
+		for (int i = 0; i < m_currentContacts.size(); i++)
+		{
+			newLambdas[i] = dvec3(0);
+		}
 
 		for (auto index : contactIndices)
 		{
@@ -250,24 +243,16 @@ void CollisionProcessor::SolveContacts()
 				dvec3 correctionAngularVelocity1 = body1->m_nextState->m_correctionAngularVelocity;
 				dvec3 correctionAngularVelocity2 = body2->m_nextState->m_correctionAngularVelocity;
 
-				double correction = 0;
-				correction += dot(jacobianEntry[0], correctionLinearVelocity1);
-				correction += dot(jacobianEntry[2], correctionLinearVelocity2);
-				correction += dot(jacobianEntry[1], correctionAngularVelocity1);
-				correction += dot(jacobianEntry[3], correctionAngularVelocity2);
+				double a = dot(jacobianEntry[0], correctionLinearVelocity1);
+				double b = dot(jacobianEntry[2], correctionLinearVelocity2);
+				double c = dot(jacobianEntry[1], correctionAngularVelocity1);
+				double d = dot(jacobianEntry[3], correctionAngularVelocity2);
 
-				newLambdas[index][i] = lambdas[index][i] - (B[index][i] / D[3 * index + i]) - (correction / D[3 * index + i]);
+				double correction = a+b+c+d;
 
-				//if (newLambdas[index][i] > 2)
-				//{
-
-				//	for (int d = 0; d < D.size(); d++)
-				//	{
-				//		cout << D[d] << ", ";
-				//	}
-				//	cout << "\n";
-				//}
-					
+				double Bd = (B[index][i] / D[3 * index + i]);
+				double Cd = (correction / D[3 * index + i]);
+				newLambdas[index][i] = lambdas[index][i] - Bd - Cd;
 
 				if (i == 0) // Normal direction 
 				{
@@ -275,22 +260,21 @@ void CollisionProcessor::SolveContacts()
 				}
 				else if (i == 1)  // Tangential direction 1 
 				{
-					float a = (-m_friction * newLambdas[index][0]) > newLambdas[index][1] ? (-m_friction * newLambdas[index][0]) : newLambdas[index][1];
-					newLambdas[index][1] = a < m_friction * newLambdas[index][0] ? a : m_friction * newLambdas[index][0];
+					float a = newLambdas[index][1] < (-m_friction * newLambdas[index][0]) ? (-m_friction * newLambdas[index][0]) : newLambdas[index][1];
+					newLambdas[index][1] = a > m_friction * newLambdas[index][0] ? m_friction * newLambdas[index][0] : a;
 				}
 				else if (i == 2)  // Tangential direction 2
 				{
-					float a = (-m_friction * newLambdas[index][0]) > newLambdas[index][2] ? (-m_friction * newLambdas[index][0]) : newLambdas[index][2];
-					newLambdas[index][2] = a < m_friction * newLambdas[index][0] ? a : m_friction * newLambdas[index][0];
+					float a = newLambdas[index][2] < (-m_friction * newLambdas[index][0]) ? (-m_friction * newLambdas[index][0]) : newLambdas[index][2];
+					newLambdas[index][2] = a > m_friction * newLambdas[index][0] ? m_friction * newLambdas[index][0] : a;
 				}
 
 				double deltaLambda = newLambdas[index][i] - lambdas[index][i];
 
-				body1->m_nextState->m_correctionLinearVelocity += deltaLambda * T[i][0];
-				body1->m_nextState->m_correctionAngularVelocity += deltaLambda * T[i][1];
-				body2->m_nextState->m_correctionLinearVelocity += deltaLambda * T[i][2];
-				body2->m_nextState->m_correctionAngularVelocity += deltaLambda * T[i][3];
-
+				body1->m_nextState->m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][0];
+				body1->m_nextState->m_correctionAngularVelocity += deltaLambda * T[3 * index + i][1];
+				body2->m_nextState->m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][2];
+				body2->m_nextState->m_correctionAngularVelocity += deltaLambda * T[3 * index + i][3];
 			}
 		}
 		averageDistance = 0;
@@ -300,7 +284,7 @@ void CollisionProcessor::SolveContacts()
 			{
 				averageDistance += abs(lambdas[l][k] - newLambdas[l][k]);
 			}
-			if (isnan(averageDistance))
+			if (isnan(averageDistance) || isnan(-averageDistance))
 			{
 				cout << "Lambdas blew up: " << iteration << " iterations\n";
 				debug_stop = true;
@@ -310,17 +294,6 @@ void CollisionProcessor::SolveContacts()
 
 		lambdas = newLambdas;
 		iteration++;
-	}
-
-	if (iteration == m_maxIterations)
-	{
-		cout << "Did not converge with avgD "<< averageDistance << "... " << iteration << " iterations\n";
-		cout << m_currentContacts.size() << " collisions\n";
-		debug_stop = true;
-	}
-	else if(iteration > 10)
-	{
-		cout << "Converged with avgD=" << averageDistance << " in "<< iteration << " iterations \n";
 	}
 }
 
@@ -379,9 +352,13 @@ void CollisionProcessor::GetDiagonalElements(vector<vector<dvec3>> T, vector<dou
 void CollisionProcessor::ProcessCollisions()
 {
 	m_currentContacts.clear();
+	double startTime = glfwGetTime();
 	BroadPhaseDetection();
+	cout << "Collision Detection time: " << (glfwGetTime() - startTime) << "\n";
+	startTime = glfwGetTime();
 	if(m_currentContacts.size() != 0)
 		SolveContacts();
+	cout << "Collision Processing time: " << (glfwGetTime() - startTime) << "\n";
 }
 
 Contact::Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normalW, vec3 tangentW, int face):
@@ -415,23 +392,23 @@ void Contact::ComputeJacobian()
 	dvec3 crossNormal2 = cross(debug_radialBody2, m_contactNormalW);
 
 	m_normalJacobian[0] = -sign * m_contactNormalW;
-	m_normalJacobian[1] = sign * crossNormal1;
+	m_normalJacobian[1] = -sign * crossNormal1;
 	m_normalJacobian[2] = sign * m_contactNormalW;
-	m_normalJacobian[3] = -sign * crossNormal2;
+	m_normalJacobian[3] = sign * crossNormal2;
 
 	dvec3 crossTangent11 = cross(debug_radialBody1, m_contactTangent1W);
 	dvec3 crossTangent12 = cross(debug_radialBody2, m_contactTangent1W);
 	
-	m_tangentJacobian1[0] = sign * m_contactTangent1W;
+	m_tangentJacobian1[0] = -sign * m_contactTangent1W;
 	m_tangentJacobian1[1] = -sign * crossTangent11;
-	m_tangentJacobian1[2] = -sign * m_contactTangent1W;
+	m_tangentJacobian1[2] = sign * m_contactTangent1W;
 	m_tangentJacobian1[3] = sign * crossTangent12;
 
 	dvec3 crossTangent21 = cross(debug_radialBody1, m_contactTangent2W);
 	dvec3 crossTangent22 = cross(debug_radialBody2, m_contactTangent2W);
 
-	m_tangentJacobian2[0] = sign * m_contactTangent2W;
+	m_tangentJacobian2[0] = -sign * m_contactTangent2W;
 	m_tangentJacobian2[1] = -sign * crossTangent21;
-	m_tangentJacobian2[2] = -sign * m_contactTangent2W;
+	m_tangentJacobian2[2] = sign * m_contactTangent2W;
 	m_tangentJacobian2[3] = sign * crossTangent22;
 }

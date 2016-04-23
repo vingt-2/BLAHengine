@@ -48,7 +48,10 @@ void RigidBodySystem::UpdateSystem()
 	if (m_isSimulating)
 	{
 		double time = glfwGetTime();
-		m_timeStep = 2*(time - m_oldTime) / 1;
+		double timeStep = 2*(time - m_oldTime) / 1;
+		if (timeStep < 0.1)
+			m_timeStep = timeStep;
+
 		m_oldTime = time;
 
 		ApplyWorldForces();
@@ -103,7 +106,7 @@ void RigidBodySystem::UpdateAcceleration(RigidBody& body)
 	newState->m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));
 	
 	vec3 inertia = omegaHat * body.m_inertiaTensor * body.m_angularVelocity;
-	newState->m_angularAcceleration = body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
+	newState->m_angularAcceleration = -body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
 	
 	body.m_nextState = newState;
 }
@@ -162,7 +165,7 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 	transform->m_position += m_timeStep * body.m_velocity;
 	
 	//	Evaluate Exponential Map
-	mat3 omegaHat = matrixCross(body.m_angularVelocity);
+	mat3 omegaHat = matrixCross(-body.m_angularVelocity);
 	mat3 deltaRot = mat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
 	mat3 newRotation = transform->m_rotation *= deltaRot;
 

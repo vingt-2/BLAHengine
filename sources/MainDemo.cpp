@@ -278,32 +278,32 @@ int main( void )
 	renderingManager->DebugSetupSphere(*debugSphere);
 
 	renderingManager->RequestRenderTicket(*object_1);
-	//renderingManager->RequestRenderTicket(*object_2);
+	renderingManager->RequestRenderTicket(*object_2);
 	renderingManager->RequestRenderTicket(*object_3);
 	mainScene->AddObject(object_1);
-	//mainScene->AddObject(object_2);
+	mainScene->AddObject(object_2);
 	mainScene->AddObject(object_3);
 
 	object_1->m_transform->m_position = (vec3(0, -15, 0));
-	object_2->m_transform->m_position = (vec3(6, 0, 0));
-	
+	//object_2->m_transform->m_position = (vec3(6, 0, 0));
+	object_2->m_rigidBody->m_applyGravity = false;
+
 	SetObject(object_3);
 
 
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	GameChar* newObj = new GameChar(&sphere);
-	//	newObj->m_meshRenderer->AssignMaterial("defaultShader");
-	//	newObj->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-	//	newObj->m_meshRenderer->AssignTexture("earthNormals", "normals");
-	//	newObj->m_transform->m_position = (vec3(i, (15 +5*i), 0));
-	//	newObj->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
-	//	newObj->m_rigidBody->m_angularVelocity = vec3(0);
-	//	newObj->m_rigidBody->m_velocity = vec3(0);
-	//	newObj->m_transform->m_scale = vec3(0.1);
-	//	renderingManager->RequestRenderTicket(*newObj);
-	//	mainScene->AddObject(newObj);
-	//}
+	for (int i = 0; i < 10; i++)
+	{
+		GameChar* newObj = new GameChar(&cube);
+		newObj->m_meshRenderer->AssignMaterial("defaultShader");
+		newObj->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+		newObj->m_meshRenderer->AssignTexture("earthNormals", "normals");
+		newObj->m_transform->m_position = (vec3(0,(15 +1.1*i), 0));
+		newObj->m_rigidBody->m_angularVelocity = vec3(0);
+		newObj->m_rigidBody->m_velocity = vec3(0);
+		newObj->m_transform->m_scale = vec3(0.5);
+		renderingManager->RequestRenderTicket(*newObj);
+		mainScene->AddObject(newObj);
+	}
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
@@ -447,19 +447,8 @@ int main( void )
 		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
 		{
 			Contact contact = mainScene->GetContacts()->at(c);
-
-			if (contact.m_contactPositionW != dvec3(0, 0, 0))
-			{
-				renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-				debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-				//debug->DrawRay(contact.m_contactPositionW, contact.m_normalJacobian[3], 10);
-
-				//debug->DrawRay(contact.m_body2->m_transform->m_position, contact.debug_radialBody2, 1);
-				//debug->DrawRay(contact.m_body1->m_transform->m_position, contact.debug_radialBody1, 1);
-				//debug->DrawRay(contact.m_body2->m_transform->m_position, contact.m_body2->m_angularVelocity, 100);
-			}
+			
+			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);	
 		}
 
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
@@ -470,7 +459,7 @@ int main( void )
 		}
 
 		if (currentObject)
-			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_rigidBody->m_velocity,10);
+			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
 				
 		if (currentObject != NULL)
 		{

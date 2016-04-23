@@ -185,9 +185,9 @@ int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
     }               
                 
     ///* test all edges of triangle 1 against the edges of triangle 2 */
-    //EDGE_AGAINST_TRI_EDGES(V0,V1,U0,U1,U2);
-    //EDGE_AGAINST_TRI_EDGES(V1,V2,U0,U1,U2);
-    //EDGE_AGAINST_TRI_EDGES(V2,V0,U0,U1,U2);
+    EDGE_AGAINST_TRI_EDGES(V0,V1,U0,U1,U2);
+    EDGE_AGAINST_TRI_EDGES(V1,V2,U0,U1,U2);
+    EDGE_AGAINST_TRI_EDGES(V2,V0,U0,U1,U2);
                 
     /* finally, test if tri1 is totally contained in tri2 or vice versa */
     POINT_IN_TRI(V0,U0,U1,U2);
