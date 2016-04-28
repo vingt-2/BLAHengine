@@ -9,7 +9,7 @@ class OBJImport
 public:
 	static bool OldImportMesh(char* filename);
 
-	bool ImportMesh(const string filename, MeshAsset *mesh);
+	bool ImportMesh(const string filename, MeshAsset *mesh, bool swapNormals);
 
 	OBJImport(void);
 	~OBJImport(void);

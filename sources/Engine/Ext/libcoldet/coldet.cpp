@@ -46,6 +46,7 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
 {
   m_intersectedTriangles.clear();
   m_collisionPoints.clear();
+  m_collidingFaces.clear();
   m_ColType=Models;
   CollisionModel3DImpl* o=static_cast<CollisionModel3DImpl*>(other);
   if (!m_Final) throw Inconsistency();
@@ -384,6 +385,15 @@ bool CollisionModel3DImpl::getPointsFromTri(std::vector<int>* collidingFaces)
 	for (int i = 0; i < m_collidingFaces.size(); i++)
 	{
 		collidingFaces->push_back(m_collidingFaces.at(i));
+	}
+	return true;
+}
+
+bool CollisionModel3DImpl::getColSizeForTri(std::vector<int>* colSizes)
+{
+	for (int i = 0; i < m_colSizes.size(); i++)
+	{
+		colSizes->push_back(m_colSizes.at(i));
 	}
 	return true;
 }

@@ -103,7 +103,7 @@ void SimpleControls(GameChar* object)
 
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
-		coeff = 2.f;
+		coeff = 8.f;
 
 	if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS))
 		coeff = 0.25f;
@@ -236,13 +236,15 @@ int main( void )
 	MeshAsset sphere;
 	MeshAsset floor;
 	MeshAsset cube;
+	MeshAsset rocket;
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing);
-	objImport.ImportMesh("./resources/models/cube.obj", &cube);
-	objImport.ImportMesh("./resources/models/cube.obj", &floor);
-	objImport.ImportMesh("./resources/models/bla.obj", &sphere);
-	mat4 scaleMat(vec4(100, 0, 0, 0), 
+	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
+	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
+	objImport.ImportMesh("./resources/models/bla.obj", &sphere, false);
+	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", &rocket, true);
+	mat4 scaleMat(vec4(1000, 0, 0, 0), 
 					vec4(0, 10, 0, 0), 
-					vec4(0, 0, 100, 0),
+					vec4(0, 0, 1000, 0),
 					vec4(0, 0, 0, 1));
 	for (auto &v : floor.m_meshVertices){
 		vec4 hP = scaleMat * vec4(v,1);
@@ -262,7 +264,7 @@ int main( void )
 	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
 	//object_1->m_meshRenderer->m_renderType = 0x03;
 	object_2->m_meshRenderer->AssignMaterial("defaultShader");
-	object_2->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	object_2->m_meshRenderer->AssignTexture("red", "texture");
 	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
 
 	object_3->m_meshRenderer->AssignMaterial("defaultShader");
@@ -278,31 +280,33 @@ int main( void )
 	renderingManager->DebugSetupSphere(*debugSphere);
 
 	renderingManager->RequestRenderTicket(*object_1);
-	renderingManager->RequestRenderTicket(*object_2);
-	renderingManager->RequestRenderTicket(*object_3);
+	//renderingManager->RequestRenderTicket(*object_2);
+	//renderingManager->RequestRenderTicket(*object_3);
 	mainScene->AddObject(object_1);
-	mainScene->AddObject(object_2);
-	mainScene->AddObject(object_3);
+	//mainScene->AddObject(object_2);
+	//mainScene->AddObject(object_3);
 
 	object_1->m_transform->m_position = (vec3(0, -15, 0));
-	//object_2->m_transform->m_position = (vec3(6, 0, 0));
-	object_2->m_rigidBody->m_applyGravity = false;
+	object_2->m_transform->m_position = (vec3(6, 5, 10));
+	
 
 	SetObject(object_3);
 
-
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 20; i++)
 	{
-		GameChar* newObj = new GameChar(&cube);
-		newObj->m_meshRenderer->AssignMaterial("defaultShader");
-		newObj->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-		newObj->m_meshRenderer->AssignTexture("earthNormals", "normals");
-		newObj->m_transform->m_position = (vec3(0,(15 +1.1*i), 0));
-		newObj->m_rigidBody->m_angularVelocity = vec3(0);
-		newObj->m_rigidBody->m_velocity = vec3(0);
-		newObj->m_transform->m_scale = vec3(0.5);
-		renderingManager->RequestRenderTicket(*newObj);
-		mainScene->AddObject(newObj);
+		for (int j = 0; j < 10; j++)
+		{
+			GameChar* newObj = new GameChar(&cube);
+			newObj->m_meshRenderer->AssignMaterial("defaultShader");
+			newObj->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+			newObj->m_meshRenderer->AssignTexture("earthNormals", "normals");
+			newObj->m_transform->m_position = vec3((1.1*i), 0, (1.1*j));
+			newObj->m_rigidBody->m_angularVelocity = vec3(0);
+			newObj->m_rigidBody->m_velocity = vec3(0);
+			newObj->m_transform->m_scale = vec3(0.5);
+			renderingManager->RequestRenderTicket(*newObj);
+			mainScene->AddObject(newObj);
+		}
 	}
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
@@ -320,7 +324,7 @@ int main( void )
 
 	//
 	// Did you know ?
-	// There is a big ducking memory leak when you draw debug rays.
+	// There is a big memory leak when you draw debug rays.
 	// So don't do it too much.
 	// Cheers
 	// 
@@ -336,8 +340,24 @@ int main( void )
 
 	bool stoped = false;
 	int C = 0;
+
+	vec3 currentRay(0);
+	vec3 currentPoint(0);
+
+	double averageDet = 0;
+	double averageProc = 0;
+
+	double iteration = 1;
+
+	int solvIt = 0;
 	while(!terminationRequest)
 	{
+
+		averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
+		averageProc += mainScene->m_rigidBodySystem->m_collisionProcessor->m_processingTime;
+
+		if(mainScene->m_enableSimulation)
+			iteration++;
 		double time = glfwGetTime();
 		deltaTime = time - oldTime;
 		oldTime = time;
@@ -346,9 +366,11 @@ int main( void )
 		Idle(&fps_frames,&fps_time,&fps); 
 
 		stringstream title;
-		title << "BLAengine: " << fps << " fps";
+		title << "BLAengine: " << fps << " fps, ";
+		title << " ColDetTime: " << (averageDet / iteration);
+		title << " ColProcTime: " << (averageProc / iteration);
 		title.str();
-		glfwSetWindowTitle(mainRenderer->GetWindow(),title.str().data());
+		glfwSetWindowTitle(mainRenderer->GetWindow(), title.str().data());
 
 		//if (C != mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size())
 		//{
@@ -367,13 +389,13 @@ int main( void )
 		else
 			ObjectControl(currentObject);
 
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_R) == GLFW_PRESS) && (time - lastPressR) > 0.5)
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_R) == GLFW_PRESS) && (time - lastPressR) > 2)
 		{
 			SetObject(object_3);
 			lastPressR = time;
 		}
 
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time - lastPressS) > 0.5)
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time - lastPressS) > 2)
 		{
 			cout << "Simulation ";
 			if (mainScene->m_enableSimulation)
@@ -422,7 +444,11 @@ int main( void )
 			else
 			{
 				renderingManager->DebugDrawRedSphere(colPoint);
-				object->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
+			}
+			if (currentObject != NULL)
+			{
+				currentRay = currentObject->m_transform->WorldDirectionToLocal(ray.m_direction);
+				currentPoint = currentObject->m_transform->WorldlPositionToLocal(colPoint);
 			}
 		}
 
@@ -439,6 +465,13 @@ int main( void )
 			}
 		}
 
+		if (currentObject != NULL && currentRay != vec3(0))
+		{
+			vec3 a = currentObject->m_transform->LocalPositionToWorld(currentPoint);
+			vec3 b = currentObject->m_transform->LocalDirectionToWorld(currentRay);
+			currentObject->m_rigidBody->PushForceWorld(a,0.5f*b);
+			debug->DrawRay(a, -b, 10);
+		}
 		for (auto r : debugRays)
 		{
 			debug->DrawRay(r.m_origin, r.m_direction, r.m_length);
@@ -447,9 +480,13 @@ int main( void )
 		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
 		{
 			Contact contact = mainScene->GetContacts()->at(c);
-			
-			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);	
+
+			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
 		}
+		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+		//}
 
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 		{
@@ -458,9 +495,9 @@ int main( void )
 			mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop = false;
 		}
 
-		if (currentObject)
-			debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
-				
+		//if (currentObject)
+		//	debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
+		//		
 		if (currentObject != NULL)
 		{
 			debug->DrawBasis(currentObject->m_transform, 1);
@@ -471,6 +508,11 @@ int main( void )
 		mainCamera->Update();
 		mainRenderer->Update();
 		mainScene->Update();
+
+		if(mainScene->m_enableSimulation)
+			solvIt += (mainScene->m_rigidBodySystem->m_collisionProcessor->m_iterationCount);
+
+		//cout << "Average Iteration Count" << solvIt / (float)(mainScene->m_rigidBodySystem->m_collisionProcessor->m_solveCount) << "\n";
 
 		//debug->DrawGrid(10, vec4(1));
 

@@ -1,5 +1,5 @@
 #pragma once
-#include"GameComponents\RigidBody.h"
+#include"..\GameComponents\RigidBody.h"
 
 class Contact
 {
@@ -17,12 +17,6 @@ public:
 
 	dvec3 m_contactPositionW;
 
-	dvec3 debug_radialBody1;
-	dvec3 debug_radialBody2;
-
-	dvec3 debug_position1;
-	dvec3 debug_position2;
-
 	vector<dvec3> m_normalJacobian;
 	vector<dvec3> m_tangentJacobian1;
 	vector<dvec3> m_tangentJacobian2;
@@ -34,7 +28,7 @@ private:
 class CollisionProcessor
 {
 public:
-	CollisionProcessor();
+	CollisionProcessor(float* timestepPtr);
 	~CollisionProcessor();
 
 	int m_maxIterations;
@@ -43,10 +37,20 @@ public:
 	float m_bounce;
 	double m_epsilon;
 
+	float* m_timeStepPointer;
+
 	bool debug_stop;
+
+	int m_iterationCount;
+	int m_solveCount;
 
 	vector<RigidBody*> m_bodiesList;
 	vector<Contact> m_currentContacts;
+
+
+	//Profiling
+	double m_detectionTime;
+	double m_processingTime;
 
 	void ProcessCollisions();
 private:
@@ -56,4 +60,18 @@ private:
 	void BroadPhaseDetection();
 	void NarrowPhaseDetection(RigidBody* body1, RigidBody* body2);
 	void SolveContacts();
+};
+
+class SpatialCoherence 
+{
+public:
+	SpatialCoherence(float granularity);
+	~SpatialCoherence();
+
+	void CreateSpatialTable();
+
+private:
+
+	float m_granularity;
+	vector<Contact*> m_spatialTable;
 };

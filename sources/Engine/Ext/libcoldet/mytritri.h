@@ -29,8 +29,9 @@
 __CD__BEGIN
 
 /** A slower triangle-triangle intersection test, that returns the
-    point of intersection. */
-Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2, int& face);
+	point of intersection. */
+	Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2, int& face);
+	void multiple_tri_tri_intersect(const Triangle& t1, const Triangle& t2, Vector3D* colPoints, int* faces, int& size);
 
 /** Triangle description class.  It is used to determine if a point
     on the triangle's plane is inside the triangle. */

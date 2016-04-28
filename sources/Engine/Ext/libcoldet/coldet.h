@@ -149,6 +149,8 @@ public:
   virtual bool getCollisionPoints(std::vector<float>* points) = 0;
 
   virtual bool getPointsFromTri(std::vector<int>* m_collidingFaces) = 0;
+
+  virtual bool getColSizeForTri(std::vector<int>* m_colSizes) = 0;
 };
 
 /** Timeout exception class.  Exception will be thrown if

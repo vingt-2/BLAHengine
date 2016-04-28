@@ -20,7 +20,7 @@
    else no check is done (which is less robust)
 */
 #define USE_EPSILON_TEST TRUE  
-#define EPSILON 0.000001
+#define EPSILON 0.00001
 
 
 /* some macros */
@@ -184,7 +184,7 @@ int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
       }
     }               
                 
-    ///* test all edges of triangle 1 against the edges of triangle 2 */
+    // test all edges of triangle 1 against the edges of triangle 2
     EDGE_AGAINST_TRI_EDGES(V0,V1,U0,U1,U2);
     EDGE_AGAINST_TRI_EDGES(V1,V2,U0,U1,U2);
     EDGE_AGAINST_TRI_EDGES(V2,V0,U0,U1,U2);

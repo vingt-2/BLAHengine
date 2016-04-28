@@ -15,4 +15,10 @@ public:
 	vector<uint32_t>* m_vertIndices;
 	vector<vec3>* m_triVertices;
 	vector<vec3>* m_triNormals;
+
+	float m_boundingRadius;
+
+private:
+	void GenerateBoundingRadius();
+	void GenerateCollisionModel();
 };

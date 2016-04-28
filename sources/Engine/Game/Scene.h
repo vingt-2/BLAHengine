@@ -5,7 +5,6 @@
 #include "../Game/GameObjects/Camera.h"
 #include "../Game/GameObjects/DirectionalLight.h"
 #include "../Game/GameObjects/PointLight.h"
-#include "CollisionProcessor.h"
 
 class Scene
 {

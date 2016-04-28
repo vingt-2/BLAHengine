@@ -2,14 +2,15 @@
 
 RigidBodySystem::RigidBodySystem() :
 	m_timeStep(0.001f),
-	m_uniformFriction(0.01),
+	m_uniformViscosity(0.01),
 	m_gravity(vec3(0, -1, 0)),
 	m_substeps(1),
 	m_oldTime(-1),
-	m_isSimulating(false),
-	m_enableGravity(true)
+	m_isSimulating(true),
+	m_enableGravity(true),
+	m_tieToTime(true)
 {
-	m_collisionProcessor = new CollisionProcessor();
+	m_collisionProcessor = new CollisionProcessor(&m_timeStep);
 
 	m_timeStep /= sqrt(m_substeps);
 }
@@ -48,10 +49,16 @@ void RigidBodySystem::UpdateSystem()
 	if (m_isSimulating)
 	{
 		double time = glfwGetTime();
-		double timeStep = 2*(time - m_oldTime) / 1;
-		if (timeStep < 0.1)
-			m_timeStep = timeStep;
+		if (m_tieToTime)
+		{
+			double timeStep = 2 * (time - m_oldTime) / 1;
+			if (timeStep < 0.1)
+				m_timeStep = timeStep;
+			
+			if (m_timeStep == 0)
+				m_timeStep = 0.001;
 
+		}
 		m_oldTime = time;
 
 		ApplyWorldForces();
@@ -86,6 +93,8 @@ void RigidBodySystem::GetNewStates()
 		{
 			UpdateAcceleration(body);
 			UpdateVelocity(body);
+
+			body.m_nextState->m_nextPos = body.m_transform->m_position + m_timeStep * body.m_velocity;
 		}
 		else
 		{
@@ -173,7 +182,6 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 	vec3 X = vec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
 	vec3 Y = vec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
 	vec3 Z = vec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
-	
 	transform->m_rotation = mat3(normalize(X), normalize(Y), normalize(Z));
 }
 
@@ -181,8 +189,8 @@ void RigidBodySystem::ApplyWorldForces()
 {
 	for (auto body : m_rigidBodyList)
 	{
-		vec3 linearFriction = -1.f * m_uniformFriction * body->m_velocity;
-		vec3 angularFriction = -1.f * m_uniformFriction * body->m_angularVelocity;
+		vec3 linearFriction = -1.f * m_uniformViscosity * body->m_velocity;
+		vec3 angularFriction = 1.f * m_uniformViscosity * body->m_angularVelocity;
 		body->AddLinearForce(linearFriction);
 		body->AddTorque(angularFriction);
 		if (body->m_applyGravity && m_enableGravity)

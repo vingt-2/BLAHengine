@@ -1,14 +1,15 @@
 #include "../../Std/std.h"
-#include "CollisionProcessor.h"
+#include "CollisionProcessing/CollisionProcessor.h"
 
 #pragma once
 class RigidBodySystem
 {
 public:
 	int m_substeps;
-	float m_uniformFriction;
+	float m_uniformViscosity;
 	vec3 m_gravity;
 	bool m_enableGravity;
+	bool m_tieToTime;
 
 	RigidBodySystem();
 	~RigidBodySystem();

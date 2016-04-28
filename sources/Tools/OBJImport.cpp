@@ -61,7 +61,7 @@ struct vertEntryHasher
 	}
 };
 
-bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
+bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNormals)
 {
 
 	m_currentMaxVertexPos = 0;
@@ -127,6 +127,10 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 								uvIndices.push_back(FindUVAtIndex(uvIndex[0])),uvIndices.push_back(FindUVAtIndex(uvIndex[1])),uvIndices.push_back(FindUVAtIndex(uvIndex[2]));
 								normalIndices.push_back(FindNormalAtIndex(normalIndex[0])),normalIndices.push_back(FindNormalAtIndex(normalIndex[1])),normalIndices.push_back(FindNormalAtIndex(normalIndex[2]));
 							}
+							else if (sscanf(lineInFile.data(), "%*s %d %d %d\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]) == 3)
+							{
+								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2]));
+							}
 							else if(sscanf(lineInFile.data(),"%*s %d//%d %d//%d %d//%d\n",&vertexIndex[0],&normalIndex[0]
 							,&vertexIndex[1],&normalIndex[1]
 							,&vertexIndex[2],&normalIndex[2]) == 6 )
@@ -166,16 +170,22 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 			vertEntry v1, v2, v3;
 
 			v1.vx = collectedVertices[vertexIndices[index]];
-			v1.vt = index < uvIndices.size() ? collectedUVs[uvIndices[index]] : vec2(0,0);
-			v1.vn = collectedNormals[normalIndices[index]];
-
 			v2.vx = collectedVertices[vertexIndices[index + 1]];
-			v2.vt = index + 1 < uvIndices.size() ? collectedUVs[uvIndices[index + 1]] : vec2(0, 0);
-			v2.vn = collectedNormals[normalIndices[index + 1]];
-
 			v3.vx = collectedVertices[vertexIndices[index + 2]];
-			v3.vt = index + 2 < uvIndices.size() ? collectedUVs[uvIndices[index + 2]] : vec2(0, 0);
-			v3.vn = collectedNormals[normalIndices[index + 2]];
+
+			if (uvIndices.size() != 0)
+			{
+				v1.vt = index < uvIndices.size() ? collectedUVs[uvIndices[index]] : vec2(0, 0);
+				v2.vt = index + 1 < uvIndices.size() ? collectedUVs[uvIndices[index + 1]] : vec2(0, 0);
+				v3.vt = index + 2 < uvIndices.size() ? collectedUVs[uvIndices[index + 2]] : vec2(0, 0);
+			}
+
+			if (normalIndices.size() != 0)
+			{
+				v1.vn = collectedNormals[normalIndices[index]];
+				v2.vn = collectedNormals[normalIndices[index + 1]];
+				v3.vn = collectedNormals[normalIndices[index + 2]];
+			}
 
 			if (storedTriplets.count(v1) == 0)
 			{
@@ -183,8 +193,8 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 				int endArrayIndex = meshVertices.size();
 
 				meshVertices.push_back(v1.vx);
-				meshNormals.push_back(v1.vn);
-				meshUVs.push_back(v1.vt);
+				if (normalIndices.size() != 0) meshNormals.push_back(v1.vn);
+				if (uvIndices.size() != 0) meshUVs.push_back(v1.vt);
 
 				storedTriplets[v1] = endArrayIndex;
 				meshTriangles.push_back(endArrayIndex);
@@ -202,8 +212,8 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 				int endArrayIndex = meshVertices.size();
 
 				meshVertices.push_back(v2.vx);
-				meshNormals.push_back(v2.vn);
-				meshUVs.push_back(v2.vt);
+				if (normalIndices.size() != 0) meshNormals.push_back(v2.vn);
+				if (uvIndices.size() != 0) meshUVs.push_back(v2.vt);
 
 				storedTriplets[v2] = endArrayIndex;
 				meshTriangles.push_back(endArrayIndex);
@@ -221,8 +231,8 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 				int endArrayIndex = meshVertices.size();
 
 				meshVertices.push_back(v3.vx);
-				meshNormals.push_back(v3.vn);
-				meshUVs.push_back(v3.vt);
+				if (normalIndices.size() != 0) meshNormals.push_back(v3.vn);
+				if (uvIndices.size() != 0) meshUVs.push_back(v3.vt);
 
 				storedTriplets[v3] = endArrayIndex;
 				meshTriangles.push_back(endArrayIndex);
@@ -236,12 +246,30 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh)
 
 		}
 
+		if (swapNormals)
+		{
+			for (int i = 0; i < meshTriangles.size(); i += 3)
+			{
+				unsigned int a, b, c;
+				a = meshTriangles[i+0];
+				b = meshTriangles[i+1];
+				c = meshTriangles[i+2];
+
+				meshTriangles[i + 2] = a;
+				meshTriangles[i + 1] = b;
+				meshTriangles[i + 0] = c;
+
+			}
+		}
+
 		mesh->m_meshTriangles = meshTriangles;
 		mesh->m_meshVertices  = meshVertices;
 		mesh->m_meshNormals	  = meshNormals;
 		mesh->m_meshUVs		  = meshUVs;
 
 		cout << "Imported: " << meshTriangles.size() << " triangles, " << meshVertices.size() << " triplets, " << collectedVertices.size() << " vertices, " << collectedNormals.size() << " normals, " << collectedUVs.size() << " UVs.\n";
+
+		mesh->NormalizeModelCoordinates();
 
 		return true;
 	}

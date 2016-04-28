@@ -17,5 +17,6 @@ public:
 	MeshAsset();
 	~MeshAsset();
 
+	void NormalizeModelCoordinates();
 	void ComputeTangents();
 };

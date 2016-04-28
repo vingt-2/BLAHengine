@@ -13,6 +13,8 @@ public:
 	vec3 m_angularAcceleration;
 	vec3 m_angularVelocity;
 
+	vec3 m_nextPos;
+
 	// Using dvec3 for LCP solver values
 	dvec3 m_correctionLinearVelocity;
 	dvec3 m_correctionAngularVelocity;
