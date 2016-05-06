@@ -3,15 +3,30 @@
 GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	Renderer(windowTitle, isFullScreen)
 {
-	glfwWindow = InitializeContext(windowTitle);
-	if(glfwWindow != NULL)
+	m_glfwWindow = InitializeContext(windowTitle);
+	if(m_glfwWindow != NULL)
 	{
-		isContextEnabled = true;
+		m_isContextEnabled = true;
 	}
+	Resize(m_renderSize);
 }
 
 GL33Renderer::~GL33Renderer()
 {
+}
+
+void GL33Renderer::Resize(ivec2 size)
+{
+	glfwSetWindowSize(m_glfwWindow, size.x, size.y);
+	m_renderSize = size;
+	m_mainRenderCamera.SetPerspective(m_renderSize);
+}
+
+vec2 GL33Renderer::GetCursorPosition()
+{
+	double x, y;
+	glfwGetCursorPos(m_glfwWindow, &x, &y);
+	return vec2(x, y);
 }
 
 GL33RenderObject::GL33RenderObject():
@@ -25,20 +40,24 @@ GL33RenderObject::~GL33RenderObject()
 
 bool GL33Renderer::Update()
 {
+	// Enable Z-Buffer test.
+	glEnable(GL_DEPTH_TEST);
+
+	RenderShadow();
+	// Render to the screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	m_mainRenderCamera.Update();
 	//Set OpenGL to this context.
-	glfwMakeContextCurrent(glfwWindow);
+	glfwMakeContextCurrent(m_glfwWindow);
 	
 	//Adjust Projection and ViewPort.
-	m_mainCamera->SetProjection(glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x, -0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 10000.0f));
-	glViewport(0,0,renderSize.x,renderSize.y);
+	glViewport(0,0, m_renderSize.x, m_renderSize.y);
 	
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//Render Scene Objects.
 	
-	// Enable Z-Buffer test.
-	glEnable(GL_DEPTH_TEST);
 	for (int i = 0; i < m_renderPool.size(); i++)
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
@@ -76,15 +95,64 @@ bool GL33Renderer::Update()
 		}
 	}
 	m_gizmoRenderPool.clear();
+
+	//////////////////////BLALAAAA
+	// The quad's FBO. Used only for visualizing the shadowmap.
+				static const GLfloat g_quad_vertex_buffer_data[] = {
+					-1.0f, -1.0f, 0.0f,
+					1.0f, -1.0f, 0.0f,
+					-1.0f,  1.0f, 0.0f,
+					-1.0f,  1.0f, 0.0f,
+					1.0f, -1.0f, 0.0f,
+					1.0f,  1.0f, 0.0f,
+				};
+				GLuint quad_vertexbuffer;
+				glGenBuffers(1, &quad_vertexbuffer);
+				glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+				// Optionally render the shadowmap (for debug only)
+				// Render only on a corner of the window (or we we won't see the real rendering...)
+				glViewport(0, 0, 512, 512);
+
+				// Use our shader
+				glUseProgram(simpleTex);
+				GLuint texID = glGetUniformLocation(simpleTex, "texture");
+				// Bind our texture in Texture Unit 0
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+				// Set our "renderedTexture" sampler to user Texture Unit 0
+				glUniform1i(texID, 0);
+
+				// 1rst attribute buffer : vertices
+				glEnableVertexAttribArray(0);
+				glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+				glVertexAttribPointer(
+					0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+					3,                  // size
+					GL_FLOAT,           // type
+					GL_FALSE,           // normalized?
+					0,                  // stride
+					(void*)0            // array buffer offset
+				);
+
+				// Draw the triangle !
+				// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+				glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+				glDisableVertexAttribArray(0);
+				glUseProgram(0);
+
+
+	///////////////////////////////
 	
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+
 	glDisable(GL_BLEND);
-	
+
 	glfwSwapInterval(0);
 	
-	glfwSwapBuffers(glfwWindow);
+	glfwSwapBuffers(m_glfwWindow);
 	glfwPollEvents();
 	
 	return true;
@@ -136,17 +204,108 @@ bool GL33Renderer::CancelRender(const MeshRenderer& object)
 	return true;
 }
 
+bool GL33Renderer::SetupShadowBuffer()
+{
+	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+	m_shadowBuffer = 0;
+	glGenFramebuffers(1, &m_shadowBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowBuffer);
+
+	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
+	m_depthTexture;
+	glGenTextures(1, &m_depthTexture);
+	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
+
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+
+						   // Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		return false;
+}
+
+bool GL33Renderer::RenderShadow()
+{
+	// Render to our framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowBuffer);
+	glViewport(0, 0, 1024, 1024); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
+
+	// Clear Screen Buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//Render Scene Objects.
+
+	// Enable Z-Buffer test.
+	glEnable(GL_DEPTH_TEST);
+	for (int i = 0; i < m_renderPool.size(); i++)
+	{
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
+		{
+			this->DrawShadow(*renderObject, shadowCamera);
+		}
+	}
+
+
+
+	return true;
+}
+
+bool GL33Renderer::DrawShadow(GL33RenderObject& object, PerspectiveCamera &ortho)
+{
+	shadowCamera.Update();
+	glUseProgram(m_shadowPrgmID);
+
+	mat4 MVP = ortho.m_ViewProjection * (object.m_modelTransform->m_transformMatrix);
+
+	glBindVertexArray(object.m_vertexArrayID);
+
+	// Draw VAO
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object.m_elementBufferId); // Index buffer
+	glDrawElements(object.m_renderType, object.m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0);
+
+	glBindVertexArray(0);
+
+	glUseProgram(0);
+
+	for (uint vboIndex = 0; vboIndex < object.m_vboIDVector.size(); vboIndex++)
+	{
+		glDisableVertexAttribArray(vboIndex);
+	}
+	return true;
+}
+
 bool GL33Renderer::Draw(GL33RenderObject& object)
 {
 	glUseProgram(object.m_programID);
 
-	
-	mat4 MVP = this->m_mainCamera->m_projection * this->m_mainCamera->m_viewTransform.m_transformMatrix * (object.m_modelTransform->m_transformMatrix);
+	mat4 MVP = m_mainRenderCamera.m_ViewProjection * (object.m_modelTransform->m_transformMatrix);
 	glUniformMatrix4fv(object.m_matrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	//send modelTransform to shader <<--- HARDCODED
+	mat4 modelView = shadowCamera.m_attachedCamera->m_viewTransform.m_transformMatrix * (object.m_modelTransform->m_transformMatrix);
+	GLuint shadowMVID = glGetUniformLocation(object.m_programID, "modelView");
+	glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &modelView[0][0]);
+
 	GLuint transformID = glGetUniformLocation(object.m_programID, "modelTransform");
 	glUniformMatrix4fv(transformID, 1, GL_FALSE, &(object.m_modelTransform->m_transformMatrix)[0][0]);
+
+
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+
+	mat4 shadowMVP = biasMatrix * shadowCamera.m_ViewProjection *  (object.m_modelTransform->m_transformMatrix);
+	GLuint shadowTID = glGetUniformLocation(object.m_programID, "shadowMVP");
+	glUniformMatrix4fv(shadowTID, 1, GL_FALSE, &shadowMVP[0][0]);
 
 	//send Light to shader <<--- HARDCODED
 	GLuint lightID = glGetUniformLocation(object.m_programID, "directionalLight");
@@ -160,6 +319,14 @@ bool GL33Renderer::Draw(GL33RenderObject& object)
 
 		glUniform1i(object.m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
 	}
+
+	GLuint shadowmapHandle = glGetUniformLocation(object.m_programID, "shadowMap");
+
+	int sIndx = object.m_textureSamplersVector.size();
+	glActiveTexture(GL_TEXTURE0 + sIndx);
+	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+
+	glUniform1i(shadowmapHandle, sIndx);
 
 	glBindVertexArray(object.m_vertexArrayID);
 
@@ -356,14 +523,14 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 	
 	GLFWmonitor* monitor = NULL;
 
-	if(isFullScreen)
+	if(m_isFullScreen)
 	{
 		monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
-		renderSize = vec2(videoMode->width,videoMode->height);
+		m_renderSize = ivec2(videoMode->width,videoMode->height);
 	}
 	
-	window = glfwCreateWindow(renderSize.x, renderSize.y,windowTitle, monitor,NULL);
+	window = glfwCreateWindow(m_renderSize.x, m_renderSize.y,windowTitle, monitor,NULL);
 	
 	
 	glfwMakeContextCurrent(window);
@@ -379,13 +546,12 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 		//Debug::OutputToDebug("Failed to initialize GLEW\n");
 		return NULL;
 	}
-
 	
 	glfwSetWindowTitle( window,windowTitle );
 	
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window,GLFW_STICKY_KEYS,GL_TRUE);
-	glfwSetCursorPos(window,renderSize.x/2, renderSize.y/2);
+	glfwSetCursorPos(window, m_renderSize.x/2, m_renderSize.y/2);
 	
 	//Neat grey background
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -395,6 +561,8 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 	
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
+
+	SetupShadowBuffer();
 	
 	return window;
 }

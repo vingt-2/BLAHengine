@@ -14,15 +14,20 @@ flat out  vec3 tangent;
 flat out  vec3 biTangent;
 out vec3 lightVector;
 out mat4 inverseTransform;
+out vec3 shadowPos;
 
 // Values that stay constant for the whole mesh.
 uniform mat4 MVP;
 uniform mat4 modelTransform;
 uniform vec3 directionalLight;
+uniform mat4 modelView;
+uniform mat4 shadowMVP;
 
 void main()
-{	
-
+{
+    vec4 worldPos = modelView * vec4(vertexPosition_modelspace,1);
+    shadowPos = (shadowMVP * worldPos).xyz;
+    
 	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
 
 	UVs = vertexUV;

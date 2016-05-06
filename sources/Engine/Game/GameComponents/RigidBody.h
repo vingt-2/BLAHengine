@@ -48,7 +48,7 @@ public:
 
 	void Update();
 
-	void PushForceWorld(vec3 pushAt, vec3 forceInWorld);
+	void PushForceWorld(vec3 pushAtW, vec3 forceW);
 
 	void AddLinearForce(vec3 force);
 	void AddTorque(vec3 vector);

@@ -9,17 +9,16 @@ Ray CursorPicker::ScreenToRay(float length)
 {
 	vec2 renderSize = m_gameSingleton->renderer->GetRenderSize();
 	
-	double x,y ;
-	
-	glfwGetCursorPos(m_gameSingleton->renderer->GetWindow(), &x, &y);
-	
+	vec2 cursor = m_gameSingleton->renderer->GetCursorPosition();
+	float x = cursor.x;
+	float y = cursor.y;
 	
 	vec3 rayDirection = vec3(1.f);
-	rayDirection.x = ( ( ( 2.0f * (renderSize.x - x)) / renderSize.x ) -1 ) / m_gameSingleton->renderer->m_mainCamera->m_projection[0][0];
+	rayDirection.x = (((2.0f * (renderSize.x - x)) / renderSize.x) - 1) / m_gameSingleton->renderer->m_mainRenderCamera.m_perspectiveProjection[0][0];
 	
-	rayDirection.y = - ( ( ( 2.0f * (renderSize.y - (y))) / renderSize.y ) -1 ) / m_gameSingleton->renderer->m_mainCamera->m_projection[1][1];
+	rayDirection.y = - ( ( ( 2.0f * (renderSize.y - (y))) / renderSize.y ) -1 ) / m_gameSingleton->renderer->m_mainRenderCamera.m_perspectiveProjection[1][1];
 
-	mat4 inverseView = inverse(m_gameSingleton->renderer->m_mainCamera->m_viewTransform.m_transformMatrix);
+	mat4 inverseView = inverse(m_gameSingleton->renderer->m_mainRenderCamera.m_attachedCamera->m_viewTransform.m_transformMatrix);
 	
 	vec4 direction = (inverseView * vec4(rayDirection,0));
 	rayDirection = normalize(vec3(direction.x,direction.y,direction.z));

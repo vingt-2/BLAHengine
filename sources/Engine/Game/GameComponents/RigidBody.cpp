@@ -33,15 +33,15 @@ RigidBody::~RigidBody(void)
 void RigidBody::Update()
 {}
 
-void RigidBody::PushForceWorld(vec3 pushAt, vec3 forceInWorld)
+void RigidBody::PushForceWorld(vec3 pushAtW, vec3 forceW)
 {
-	vec3 contactInBody = pushAt - m_transform->m_position;
+	vec3 contactInBody = pushAtW - m_transform->m_position;
 
-	vec3 torque = cross(forceInWorld, contactInBody);
+	vec3 torque = cross(forceW, contactInBody);
 	torque = m_transform->WorldDirectionToLocal(torque);
 
 	AddTorque(torque);
-	AddLinearForce(forceInWorld / length(torque));
+	AddLinearForce(forceW / length(torque));
 }
 
 void RigidBody::AddLinearForce(vec3 force)

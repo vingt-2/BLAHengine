@@ -1,29 +1,27 @@
 #include "Renderer.h"
 
 
+void Renderer::SetCamera(Camera * camera)
+{
+	m_mainRenderCamera.AttachCamera(camera);
+}
+
 Renderer::Renderer(char* windowTitle,bool isFullScreen)
 {
-	isContextEnabled = false;
-	this->renderSize = vec2(1024,780);
-	this->isFullScreen = isFullScreen;
+	m_isContextEnabled = false;
+	this->m_renderSize = ivec2(1024,780);
+	this->m_isFullScreen = isFullScreen;
 	this->m_directionalLight = vec3(1, 0, 0);
 }
 
 Renderer::Renderer(char* windowTitle, bool isFullScreen, vec2 screenSize)
 {
-	isContextEnabled = false;
-	this->renderSize = screenSize;
-	this->isFullScreen = isFullScreen;
+	m_isContextEnabled = false;
+	this->m_renderSize = screenSize;
+	this->m_isFullScreen = isFullScreen;
 }
 
 
 Renderer::~Renderer(void)
 {
-}
-
-void Renderer::Resize(int xRes,int yRes)
-{
-	 glfwSetWindowSize(glfwWindow,xRes,yRes);
-	 renderSize.x = xRes;
-	 renderSize.y = yRes;
 }

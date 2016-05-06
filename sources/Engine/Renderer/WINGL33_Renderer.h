@@ -43,13 +43,24 @@ class GL33Renderer : public Renderer
 {
 public:
 	bool Update();
-	
-	GL33Renderer(char* windowTitle,bool isFullScreen);
-	GL33Renderer(char* windowTitle,bool isFullScreen, vec2 renderSize);
-	~GL33Renderer();
 
 	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
 	bool		  CancelRender(const MeshRenderer& object);
+
+	bool RenderShadow();
+	void SetShadowID(GLuint shadowId) { m_shadowPrgmID = shadowId; }
+
+	GLFWwindow* GetWindow() const { return m_glfwWindow; }
+	void		Resize(ivec2 size);
+	vec2		GetCursorPosition();
+
+	GL33Renderer(char* windowTitle, bool isFullScreen);
+	GL33Renderer(char* windowTitle, bool isFullScreen, vec2 renderSize);
+	~GL33Renderer();
+
+	PerspectiveCamera shadowCamera;
+
+	GLuint simpleTex;
 
 protected:
 	GLFWwindow* InitializeContext(char* windowTitle);
@@ -68,4 +79,12 @@ protected:
 	void DestroyVertexArrayID(GL33RenderObject& object);
 
 	bool Draw(GL33RenderObject& object);
+
+	bool DrawShadow(GL33RenderObject& object, PerspectiveCamera &ortho);
+	bool SetupShadowBuffer();
+
+	//Shadows related
+	GLuint m_depthTexture;
+	GLuint m_shadowPrgmID;
+	GLuint m_shadowBuffer;
 };

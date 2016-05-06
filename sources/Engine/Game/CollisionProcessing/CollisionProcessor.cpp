@@ -2,9 +2,9 @@
 
 CollisionProcessor::CollisionProcessor(float* timestepPtr) :
 	m_flagInterpolateNormals(false),
-	m_maxIterations(100),
-	m_bounce(0.000),
-	m_friction(0.001),
+	m_maxIterations(500),
+	m_bounce(0.001),
+	m_friction(0),
 	m_epsilon(0.0001),
 	debug_stop(false),
 	m_iterationCount(0),
@@ -77,7 +77,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 		body1->m_collider->m_collisionMesh->getCollidingTriangles(&collidingTriangles);
 		body1->m_collider->m_collisionMesh->getPointsFromTri(&collidingFaces);
 
-		for (int col = 1; col < collidingTriangles.size(); col++)
+		for (int col = 0; col < collidingTriangles.size(); col++)
 		{
 			int triIndexBody1 = collidingTriangles.at(col).first;
 			int triIndexBody2 = collidingTriangles.at(col).second;

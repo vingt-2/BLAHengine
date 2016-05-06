@@ -5,10 +5,10 @@
 class GameSingleton
 {
 public:
-    const Renderer* renderer;
-    const SharedResources* resources;
+    Renderer* renderer;
+    SharedResources* resources;
 
-    GameSingleton(const Renderer* renderer,const SharedResources* resources)
+    GameSingleton(Renderer* renderer,SharedResources* resources)
     {
         this->renderer = renderer;
         this->resources = resources;

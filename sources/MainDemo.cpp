@@ -33,7 +33,7 @@ int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
 
 GameSingleton* gameSingleton;
-Renderer* mainRenderer;
+GL33Renderer* mainRenderer;
 SharedResources* sharedResources;
 Debug* debug;
 Scene* mainScene;
@@ -42,6 +42,7 @@ GameChar* currentObject = NULL;
 vec3 cameraRotation = vec3(0);
 
 double deltaTime = 0;
+
 
 void GetFPS(int* fps_frames,GLfloat* fps_time,int* fps)
 {
@@ -200,6 +201,8 @@ int main( void )
 	mainCamera->m_transform->m_position = vec3(0, -10, -15);
 	mainCamera->m_transform->SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
 	mainCamera->m_isControlEnabled = true;
+
+	mainRenderer->SetCamera(mainCamera);
 	
 	mainScene = new Scene(mainCamera);
 
@@ -221,7 +224,13 @@ int main( void )
 
 	// NOW WE CAN LOAD SOME RESSOURCES
 	sharedResources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
-	sharedResources->LoadMaterial("debugShader","./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
+	sharedResources->LoadMaterial("debugShader", "./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
+	sharedResources->LoadMaterial("shadowmapShader", "./resources/shaders/Vert_Shadow.glsl", "./resources/shaders/Frag_Shadow.glsl");
+	sharedResources->LoadMaterial("simpletex", "./resources/shaders/b.glsl", "./resources/shaders/a.glsl");
+
+	mainRenderer->SetShadowID(sharedResources->GetMaterial("shadowmapShader"));
+
+	mainRenderer->simpleTex = sharedResources->GetMaterial("simpletex");
 	
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blank.bmp");
@@ -237,14 +246,14 @@ int main( void )
 	MeshAsset floor;
 	MeshAsset cube;
 	MeshAsset rocket;
-	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing);
+	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
 	objImport.ImportMesh("./resources/models/bla.obj", &sphere, false);
 	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", &rocket, true);
-	mat4 scaleMat(vec4(1000, 0, 0, 0), 
+	mat4 scaleMat(vec4(100, 0, 0, 0), 
 					vec4(0, 10, 0, 0), 
-					vec4(0, 0, 1000, 0),
+					vec4(0, 0, 100, 0),
 					vec4(0, 0, 0, 1));
 	for (auto &v : floor.m_meshVertices){
 		vec4 hP = scaleMat * vec4(v,1);
@@ -254,22 +263,12 @@ int main( void )
 		v = mat2(100) * v;
 	}
 
-	GameChar* object_1 = new GameChar(&floor);
-	GameChar* object_2 = new GameChar(&cube);
-	GameChar* object_3 = new GameChar(&cube);
+	GameChar* floor_obj = new GameChar(&floor);
 
-	object_1->m_meshRenderer->AssignMaterial("defaultShader");
+	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
 	
-	object_1->m_meshRenderer->AssignTexture("testDiffuse","texture");
-	object_1->m_meshRenderer->AssignTexture("earthNormals","normals");
-	//object_1->m_meshRenderer->m_renderType = 0x03;
-	object_2->m_meshRenderer->AssignMaterial("defaultShader");
-	object_2->m_meshRenderer->AssignTexture("red", "texture");
-	object_2->m_meshRenderer->AssignTexture("earthNormals", "normals");
-
-	object_3->m_meshRenderer->AssignMaterial("defaultShader");
-	object_3->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-	object_3->m_meshRenderer->AssignTexture("earthNormals", "normals");
+	floor_obj->m_meshRenderer->AssignTexture("testDiffuse","texture");
+	floor_obj->m_meshRenderer->AssignTexture("earthNormals","normals");
 
 	GameChar* debugSphere = new GameChar(&cube);
 	debugSphere->m_meshRenderer->AssignMaterial("defaultShader");
@@ -279,40 +278,40 @@ int main( void )
 	debugSphere->m_transform->m_scale = vec3(0.1);
 	renderingManager->DebugSetupSphere(*debugSphere);
 
-	renderingManager->RequestRenderTicket(*object_1);
-	//renderingManager->RequestRenderTicket(*object_2);
-	//renderingManager->RequestRenderTicket(*object_3);
-	mainScene->AddObject(object_1);
-	//mainScene->AddObject(object_2);
-	//mainScene->AddObject(object_3);
+	//renderingManager->RequestRenderTicket(*floor_obj);
+	mainScene->AddObject(floor_obj);
+	floor_obj->m_transform->m_position = (vec3(0, -15, 0));
+	floor_obj->m_rigidBody->m_isPinned = true;
 
-	object_1->m_transform->m_position = (vec3(0, -15, 0));
-	object_2->m_transform->m_position = (vec3(6, 5, 10));
-	
+	GameChar* lightObj = new GameChar(&cube);
+	lightObj->m_meshRenderer->AssignMaterial("defaultShader");
+	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	lightObj->m_transform->m_position = vec3(0,5,0);
+	mainScene->AddObject(lightObj);
+	renderingManager->RequestRenderTicket(*lightObj);
 
-	SetObject(object_3);
+	Camera* cameraLight = new Camera();
+	cameraLight->m_transform = lightObj->m_transform;
 
-	for (int i = 0; i < 20; i++)
+	mainRenderer->shadowCamera.AttachCamera(cameraLight);
+	mainRenderer->shadowCamera.SetPerspective(vec2(1024, 1024));
+
+
+
+	for (int i = 0; i < 10; i++)
 	{
-		for (int j = 0; j < 10; j++)
-		{
-			GameChar* newObj = new GameChar(&cube);
-			newObj->m_meshRenderer->AssignMaterial("defaultShader");
-			newObj->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-			newObj->m_meshRenderer->AssignTexture("earthNormals", "normals");
-			newObj->m_transform->m_position = vec3((1.1*i), 0, (1.1*j));
-			newObj->m_rigidBody->m_angularVelocity = vec3(0);
-			newObj->m_rigidBody->m_velocity = vec3(0);
-			newObj->m_transform->m_scale = vec3(0.5);
-			renderingManager->RequestRenderTicket(*newObj);
-			mainScene->AddObject(newObj);
-		}
+		GameChar* object = new GameChar(&cube);
+		object->m_meshRenderer->AssignMaterial("defaultShader");
+		object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
+		object->m_transform->m_position = vec3(0, 0, 5 * i);
+		mainScene->AddObject(object);
+		renderingManager->RequestRenderTicket(*object);
 	}
 
 	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
 	mainScene->AddDirectionalLight(light);
-
-	mainRenderer->m_mainCamera = mainCamera;
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
@@ -361,8 +360,6 @@ int main( void )
 		double time = glfwGetTime();
 		deltaTime = time - oldTime;
 		oldTime = time;
-
-		object_1->m_rigidBody->m_isPinned = true;
 		Idle(&fps_frames,&fps_time,&fps); 
 
 		stringstream title;
@@ -383,17 +380,6 @@ int main( void )
 		//	mainScene->m_enableSimulation = false;
 		//	stoped = true;
 		//}
-
-		if(currentObject == NULL)
-			ObjectControl(object_2);
-		else
-			ObjectControl(currentObject);
-
-		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_R) == GLFW_PRESS) && (time - lastPressR) > 2)
-		{
-			SetObject(object_3);
-			lastPressR = time;
-		}
 
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time - lastPressS) > 2)
 		{
@@ -430,7 +416,7 @@ int main( void )
 
 		//cout << collider_1->CollidesWith(collider_2);
 		
-		if(glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 0))
+		if(glfwGetMouseButton(mainRenderer->GetWindow(), 0))
 		{
 			ray = cursorPicker.ScreenToRay(1000);
 			//debugRays.push_back(ray);
@@ -444,15 +430,21 @@ int main( void )
 			else
 			{
 				renderingManager->DebugDrawRedSphere(colPoint);
-			}
-			if (currentObject != NULL)
-			{
-				currentRay = currentObject->m_transform->WorldDirectionToLocal(ray.m_direction);
-				currentPoint = currentObject->m_transform->WorldlPositionToLocal(colPoint);
+				currentObject->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
 			}
 		}
 
-		if (glfwGetMouseButton(gameSingleton->renderer->GetWindow(), 2))
+		//auto contacts = mainScene->GetContacts();
+		//for (auto contact : *contacts)
+		//{
+		//	debugRenderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+
+		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+		//}
+
+		if (glfwGetMouseButton(mainRenderer->GetWindow(), 2))
 		{
 			ray = cursorPicker.ScreenToRay(1000);
 			//debugRays.push_back(ray);
@@ -470,23 +462,9 @@ int main( void )
 			vec3 a = currentObject->m_transform->LocalPositionToWorld(currentPoint);
 			vec3 b = currentObject->m_transform->LocalDirectionToWorld(currentRay);
 			currentObject->m_rigidBody->PushForceWorld(a,0.5f*b);
-			debug->DrawRay(a, -b, 10);
 		}
-		for (auto r : debugRays)
-		{
-			debug->DrawRay(r.m_origin, r.m_direction, r.m_length);
-		}
-		//cout << "Contacts Size: " << mainScene->GetContacts()->size() << ".\n";
-		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
-		{
-			Contact contact = mainScene->GetContacts()->at(c);
 
-			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-		}
-		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-		//}
+		//cout << "Contacts Size: " << mainScene->GetContacts()->size() << ".\n";
 
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 		{
@@ -498,10 +476,12 @@ int main( void )
 		//if (currentObject)
 		//	debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
 		//		
-		if (currentObject != NULL)
-		{
-			debug->DrawBasis(currentObject->m_transform, 1);
-		}
+		//if (currentObject != NULL)
+		//{
+		//	debug->DrawBasis(currentObject->m_transform, 1);
+		//}
+
+//		debug->DrawRay(lightObj->m_transform->m_position,lightObj->m_transform->LocalDirectionToWorld(vec3(1,0,0)),1);
 
 		SimpleControls(mainCamera);
 		
@@ -521,6 +501,8 @@ int main( void )
 		{
 			terminationRequest = true;
 		}
+
+		cameraLight->UpdateView();
 	}
 
 
