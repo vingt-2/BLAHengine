@@ -278,7 +278,7 @@ int main( void )
 	debugSphere->m_transform->m_scale = vec3(0.1);
 	renderingManager->DebugSetupSphere(*debugSphere);
 
-	//renderingManager->RequestRenderTicket(*floor_obj);
+	renderingManager->RequestRenderTicket(*floor_obj);
 	mainScene->AddObject(floor_obj);
 	floor_obj->m_transform->m_position = (vec3(0, -15, 0));
 	floor_obj->m_rigidBody->m_isPinned = true;
@@ -288,12 +288,13 @@ int main( void )
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
 	lightObj->m_transform->m_position = vec3(0,5,0);
-	mainScene->AddObject(lightObj);
-	renderingManager->RequestRenderTicket(*lightObj);
+	lightObj->m_transform->SetRotationUsingEuler(vec3(-1, 0, 0));
+	//mainScene->AddObject(lightObj);
+	//renderingManager->RequestRenderTicket(*lightObj);
 
 	Camera* cameraLight = new Camera();
-	cameraLight->m_transform = lightObj->m_transform;
-
+	//cameraLight->m_transform = lightObj->m_transform;
+	cameraLight->m_transform = mainCamera->m_transform;
 	mainRenderer->shadowCamera.AttachCamera(cameraLight);
 	mainRenderer->shadowCamera.SetPerspective(vec2(1024, 1024));
 
@@ -301,16 +302,17 @@ int main( void )
 
 	for (int i = 0; i < 10; i++)
 	{
-		GameChar* object = new GameChar(&cube);
+		GameChar* object = new GameChar(&sphere);
 		object->m_meshRenderer->AssignMaterial("defaultShader");
 		object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
 		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-		object->m_transform->m_position = vec3(0, 0, 5 * i);
+		object->m_transform->m_scale = vec3(0.3, 0.3, 0.3);
+		object->m_transform->m_position = vec3( 0.5*i, 2.5*i, 0);
 		mainScene->AddObject(object);
 		renderingManager->RequestRenderTicket(*object);
 	}
 
-	DirectionalLight* light = new DirectionalLight(vec3(1,0,0));
+	DirectionalLight* light = new DirectionalLight(vec3(0,-1,0));
 	mainScene->AddDirectionalLight(light);
 
 	int fps_frames=0;

@@ -40,6 +40,9 @@ GL33RenderObject::~GL33RenderObject()
 
 bool GL33Renderer::Update()
 {
+	//Set OpenGL to this context.
+	glfwMakeContextCurrent(m_glfwWindow);
+
 	// Enable Z-Buffer test.
 	glEnable(GL_DEPTH_TEST);
 
@@ -47,9 +50,7 @@ bool GL33Renderer::Update()
 	// Render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_mainRenderCamera.Update();
-	//Set OpenGL to this context.
-	glfwMakeContextCurrent(m_glfwWindow);
-	
+
 	//Adjust Projection and ViewPort.
 	glViewport(0,0, m_renderSize.x, m_renderSize.y);
 	
@@ -112,7 +113,9 @@ bool GL33Renderer::Update()
 				glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 				// Optionally render the shadowmap (for debug only)
 				// Render only on a corner of the window (or we we won't see the real rendering...)
-				glViewport(0, 0, 512, 512);
+				glViewport(0, 0, 100, 100);
+
+				//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				// Use our shader
 				glUseProgram(simpleTex);
@@ -124,6 +127,9 @@ bool GL33Renderer::Update()
 				glUniform1i(texID, 0);
 
 				// 1rst attribute buffer : vertices
+				GLuint vao;
+				glGenVertexArrays(1, &vao);
+				glBindVertexArray(vao);
 				glEnableVertexAttribArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
 				glVertexAttribPointer(
@@ -137,6 +143,7 @@ bool GL33Renderer::Update()
 
 				// Draw the triangle !
 				// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+				
 				glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 				glDisableVertexAttribArray(0);
 				glUseProgram(0);
@@ -147,9 +154,9 @@ bool GL33Renderer::Update()
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glDisable(GL_BLEND);
 
+	
 	glfwSwapInterval(0);
 	
 	glfwSwapBuffers(m_glfwWindow);
@@ -215,17 +222,20 @@ bool GL33Renderer::SetupShadowBuffer()
 	m_depthTexture;
 	glGenTextures(1, &m_depthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 1024, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_depthTexture, 0);
 
-	glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+	//glDrawBuffer(GL_NONE); // No color buffer is drawn to.
 
-						   // Always check that our framebuffer is ok
+	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, DrawBuffers);
+
+	// Always check that our framebuffer is ok
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		return false;
 }

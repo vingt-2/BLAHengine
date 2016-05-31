@@ -2,10 +2,10 @@
 
 CollisionProcessor::CollisionProcessor(float* timestepPtr) :
 	m_flagInterpolateNormals(false),
-	m_maxIterations(500),
-	m_bounce(0.001),
-	m_friction(0),
-	m_epsilon(0.0001),
+	m_maxIterations(100),
+	m_bounce(0.7),
+	m_friction(0.1),
+	m_epsilon(0.001),
 	debug_stop(false),
 	m_iterationCount(0),
 	m_solveCount(0)
