@@ -25,8 +25,10 @@ uniform mat4 shadowMVP;
 
 void main()
 {
-    vec4 worldPos = modelView * vec4(vertexPosition_modelspace,1);
-    shadowPos = (shadowMVP * worldPos).xyz;
+	
+	vec4 shadowC = shadowMVP * vec4(vertexPosition_modelspace,1);
+	
+    shadowPos = vec3(shadowC.xy, shadowC.z / shadowC.w);
     
 	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
 

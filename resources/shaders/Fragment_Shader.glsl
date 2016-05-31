@@ -20,11 +20,23 @@ void main()
 {
 	vec3 diffuse = texture2D( texture, UVs ).rgb;
 	vec3 nrms = texture2D( normals, UVs ).rgb;
-    float depth = texture2D( shadowMap, shadowPos.xy ).z;
+	vec2 shadowUV = (shadowPos.xy);
+    float closestObjDepth = texture2D( shadowMap, shadowUV ).z;
     
-    float vis = 1.0;
-    if(depth < shadowPos.z){
-        vis = 0.5; 
-    }
-	color =  vis * diffuse;
+	
+	
+	float vis = 1.0;
+	
+	if( shadowUV.x < 0.0 || shadowUV.x > 50.0  )
+	{
+		vis = 0.0;
+	}
+	else if (shadowUV.y < 0.0 || shadowUV.y > 50.0  )
+	{
+		vis = 0.0;
+	}
+	else if(shadowPos.z - closestObjDepth >  0.00001){
+		vis = 0.1;
+	}
+	color = vis * diffuse;
 }

@@ -60,7 +60,7 @@ public:
 
 	PerspectiveCamera shadowCamera;
 
-	GLuint simpleTex;
+	GLuint depthBufDebugPrgm;
 
 protected:
 	GLFWwindow* InitializeContext(char* windowTitle);

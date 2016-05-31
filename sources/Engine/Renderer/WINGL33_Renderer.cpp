@@ -118,8 +118,8 @@ bool GL33Renderer::Update()
 				//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				// Use our shader
-				glUseProgram(simpleTex);
-				GLuint texID = glGetUniformLocation(simpleTex, "texture");
+				glUseProgram(depthBufDebugPrgm);
+				GLuint texID = glGetUniformLocation(depthBufDebugPrgm, "texture");
 				// Bind our texture in Texture Unit 0
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, m_depthTexture);
@@ -143,7 +143,7 @@ bool GL33Renderer::Update()
 
 				// Draw the triangle !
 				// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-				
+				glDisable(GL_COMPARE_R_TO_TEXTURE);
 				glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 				glDisableVertexAttribArray(0);
 				glUseProgram(0);
@@ -222,18 +222,16 @@ bool GL33Renderer::SetupShadowBuffer()
 	m_depthTexture;
 	glGenTextures(1, &m_depthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 1024, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_depthTexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
 
-	//glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to.
 
-	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, DrawBuffers);
 
 	// Always check that our framebuffer is ok
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -273,6 +271,9 @@ bool GL33Renderer::DrawShadow(GL33RenderObject& object, PerspectiveCamera &ortho
 
 	mat4 MVP = ortho.m_ViewProjection * (object.m_modelTransform->m_transformMatrix);
 
+	GLuint shadowMVID = glGetUniformLocation(m_shadowPrgmID, "depthMVP");
+	glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
+
 	glBindVertexArray(object.m_vertexArrayID);
 
 	// Draw VAO
@@ -298,10 +299,6 @@ bool GL33Renderer::Draw(GL33RenderObject& object)
 	glUniformMatrix4fv(object.m_matrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	//send modelTransform to shader <<--- HARDCODED
-	mat4 modelView = shadowCamera.m_attachedCamera->m_viewTransform.m_transformMatrix * (object.m_modelTransform->m_transformMatrix);
-	GLuint shadowMVID = glGetUniformLocation(object.m_programID, "modelView");
-	glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &modelView[0][0]);
-
 	GLuint transformID = glGetUniformLocation(object.m_programID, "modelTransform");
 	glUniformMatrix4fv(transformID, 1, GL_FALSE, &(object.m_modelTransform->m_transformMatrix)[0][0]);
 

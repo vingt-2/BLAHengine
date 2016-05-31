@@ -4,7 +4,7 @@ It's not part of the final architecture but is merely there to test the new feat
 Hence the name "MainDemo.cpp".
 */
 
-#define FULLSCREEN_SETTING 0
+#define FULLSCREEN_SETTING 1
 
 // Include standard headers
 #include "./Std/std.h"
@@ -226,11 +226,11 @@ int main( void )
 	sharedResources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
 	sharedResources->LoadMaterial("debugShader", "./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
 	sharedResources->LoadMaterial("shadowmapShader", "./resources/shaders/Vert_Shadow.glsl", "./resources/shaders/Frag_Shadow.glsl");
-	sharedResources->LoadMaterial("simpletex", "./resources/shaders/b.glsl", "./resources/shaders/a.glsl");
+	sharedResources->LoadMaterial("depthBufDebug", "./resources/shaders/depthBuffDebug_vert.glsl", "./resources/shaders/depthBuffDebug_frag.glsl");
 
 	mainRenderer->SetShadowID(sharedResources->GetMaterial("shadowmapShader"));
 
-	mainRenderer->simpleTex = sharedResources->GetMaterial("simpletex");
+	mainRenderer->depthBufDebugPrgm = sharedResources->GetMaterial("depthBufDebug");
 	
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blank.bmp");
@@ -287,27 +287,27 @@ int main( void )
 	lightObj->m_meshRenderer->AssignMaterial("defaultShader");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	lightObj->m_transform->m_position = vec3(0,5,0);
+	lightObj->m_transform->m_position = vec3(-10,5,0);
 	lightObj->m_transform->SetRotationUsingEuler(vec3(-1, 0, 0));
-	//mainScene->AddObject(lightObj);
-	//renderingManager->RequestRenderTicket(*lightObj);
 
 	Camera* cameraLight = new Camera();
-	//cameraLight->m_transform = lightObj->m_transform;
-	cameraLight->m_transform = mainCamera->m_transform;
+	cameraLight->m_transform = lightObj->m_transform;
+	//cameraLight->m_transform = mainCamera->m_transform;
+	lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
+	lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
+
 	mainRenderer->shadowCamera.AttachCamera(cameraLight);
 	mainRenderer->shadowCamera.SetPerspective(vec2(1024, 1024));
 
 
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 11; i++)
 	{
 		GameChar* object = new GameChar(&sphere);
 		object->m_meshRenderer->AssignMaterial("defaultShader");
 		object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
 		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-		object->m_transform->m_scale = vec3(0.3, 0.3, 0.3);
-		object->m_transform->m_position = vec3( 0.5*i, 2.5*i, 0);
+		object->m_transform->m_position = vec3( 8*i, 0, 0);
 		mainScene->AddObject(object);
 		renderingManager->RequestRenderTicket(*object);
 	}
@@ -400,6 +400,12 @@ int main( void )
 			lastPressS = time;
 		}
 
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) && (time - lastPressS) > 2)
+		{
+			lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
+			lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
+		}
+
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{
 			cout << "Gravity ";
@@ -482,7 +488,7 @@ int main( void )
 		//{
 		//	debug->DrawBasis(currentObject->m_transform, 1);
 		//}
-
+		debug->DrawBasis(lightObj->m_transform, 1);
 //		debug->DrawRay(lightObj->m_transform->m_position,lightObj->m_transform->LocalDirectionToWorld(vec3(1,0,0)),1);
 
 		SimpleControls(mainCamera);
