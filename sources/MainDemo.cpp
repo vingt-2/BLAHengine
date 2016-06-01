@@ -4,7 +4,7 @@ It's not part of the final architecture but is merely there to test the new feat
 Hence the name "MainDemo.cpp".
 */
 
-#define FULLSCREEN_SETTING 1
+#define FULLSCREEN_SETTING 0
 
 // Include standard headers
 #include "./Std/std.h"
@@ -297,7 +297,7 @@ int main( void )
 	lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
 
 	mainRenderer->shadowCamera.AttachCamera(cameraLight);
-	mainRenderer->shadowCamera.SetPerspective(vec2(1024, 1024));
+	mainRenderer->shadowCamera.SetOrthography();
 
 
 
@@ -307,7 +307,7 @@ int main( void )
 		object->m_meshRenderer->AssignMaterial("defaultShader");
 		object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
 		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-		object->m_transform->m_position = vec3( 8*i, 0, 0);
+		object->m_transform->m_position = vec3( 3*glm::cos(0.1*i), 8*i, 0);
 		mainScene->AddObject(object);
 		renderingManager->RequestRenderTicket(*object);
 	}
@@ -488,7 +488,7 @@ int main( void )
 		//{
 		//	debug->DrawBasis(currentObject->m_transform, 1);
 		//}
-		debug->DrawBasis(lightObj->m_transform, 1);
+		//debug->DrawBasis(lightObj->m_transform, 1);
 //		debug->DrawRay(lightObj->m_transform->m_position,lightObj->m_transform->LocalDirectionToWorld(vec3(1,0,0)),1);
 
 		SimpleControls(mainCamera);

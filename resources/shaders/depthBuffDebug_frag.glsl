@@ -9,6 +9,6 @@ in vec2 UV;
 
 void main(){
 	float depthColor = texture2D(texture, UV).r;
-	depthColor = 100 * (1 - depthColor);
+	depthColor =  10 * (depthColor);
 	color = vec4(depthColor,depthColor,depthColor,1);
 }

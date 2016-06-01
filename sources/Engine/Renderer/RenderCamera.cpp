@@ -25,7 +25,7 @@ RenderCamera::RenderCamera()
 
 void OrthographicCamera::SetOrthography()
 {
-	m_orthographicProjection = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+	m_orthographicProjection = glm::ortho<float>(-100, 100, -100, 100, 0, 10000);
 }
 
 void OrthographicCamera::Update()

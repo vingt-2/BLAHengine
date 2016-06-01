@@ -58,7 +58,7 @@ public:
 	GL33Renderer(char* windowTitle, bool isFullScreen, vec2 renderSize);
 	~GL33Renderer();
 
-	PerspectiveCamera shadowCamera;
+	OrthographicCamera shadowCamera;
 
 	GLuint depthBufDebugPrgm;
 
@@ -80,7 +80,7 @@ protected:
 
 	bool Draw(GL33RenderObject& object);
 
-	bool DrawShadow(GL33RenderObject& object, PerspectiveCamera &ortho);
+	bool DrawShadow(GL33RenderObject& object, OrthographicCamera &ortho);
 	bool SetupShadowBuffer();
 
 	//Shadows related
