@@ -246,7 +246,9 @@ int main( void )
 	MeshAsset floor;
 	MeshAsset cube;
 	MeshAsset rocket;
-	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
+	MeshAsset sponza;
+	objImport.ImportMesh("./resources/models/sponza.obj", &xwing, false);
+	//objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
 	objImport.ImportMesh("./resources/models/bla.obj", &sphere, false);
@@ -278,15 +280,16 @@ int main( void )
 	debugSphere->m_transform->m_scale = vec3(0.1);
 	renderingManager->DebugSetupSphere(*debugSphere);
 
-	renderingManager->RequestRenderTicket(*floor_obj);
-	mainScene->AddObject(floor_obj);
-	floor_obj->m_transform->m_position = (vec3(0, -15, 0));
-	floor_obj->m_rigidBody->m_isPinned = true;
+	//renderingManager->RequestRenderTicket(*floor_obj);
+	//mainScene->AddObject(floor_obj);
+	//floor_obj->m_transform->m_position = (vec3(0, -15, 0));
+	//floor_obj->m_rigidBody->m_isPinned = true;
 
-	GameChar* x_wing = new GameChar(&cube);
+	GameChar* x_wing = new GameChar(&xwing);
 	x_wing->m_meshRenderer->AssignMaterial("defaultShader");
 	x_wing->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	x_wing->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	x_wing->m_transform->m_scale = vec3(0.1);
 	renderingManager->RequestRenderTicket(*x_wing);
 	mainScene->AddObject(x_wing);
 

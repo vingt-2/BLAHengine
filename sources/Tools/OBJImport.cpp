@@ -78,6 +78,11 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 	vector<vec3> collectedNormals;
 	vector<int> vertexIndices, uvIndices, normalIndices;
 
+	int quadsCount = 0;
+	int missedFaces = 0;
+	int triCount = 0;
+
+	int outOfRangeExceptionsCount = 0;
 
 	if(fileStream.good())
 	{
@@ -118,27 +123,59 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 					{
 						if(lineInFile.at(1) == ' ')
 						{
-							int vertexIndex[3], uvIndex[3], normalIndex[3];
-							if(sscanf(lineInFile.data(),"%*s %d/%d/%d %d/%d/%d %d/%d/%d\n",&vertexIndex[0],&uvIndex[0],&normalIndex[0]
-							,&vertexIndex[1],&uvIndex[1],&normalIndex[1]
-							,&vertexIndex[2],&uvIndex[2],&normalIndex[2]) == 9 )
+							int vertexIndex[4], uvIndex[4], normalIndex[4];
+
+							/*
+								Starting off with the case where a face is defined as a quad.
+								Simple triangulation is done.
+							*/
+							if (sscanf(lineInFile.data(), "%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d%*s\n",
+								&vertexIndex[0], &uvIndex[0], &normalIndex[0]
+								, &vertexIndex[1], &uvIndex[1], &normalIndex[1]
+								, &vertexIndex[2], &uvIndex[2], &normalIndex[2]
+								, &vertexIndex[3], &uvIndex[3], &normalIndex[3]) == 12)
+							{
+								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[3]));
+								uvIndices.push_back(FindUVAtIndex(uvIndex[0])), uvIndices.push_back(FindUVAtIndex(uvIndex[1])), uvIndices.push_back(FindUVAtIndex(uvIndex[3]));
+								normalIndices.push_back(FindNormalAtIndex(normalIndex[0])), normalIndices.push_back(FindNormalAtIndex(normalIndex[1])), normalIndices.push_back(FindNormalAtIndex(normalIndex[3]));
+
+								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[3]));
+								uvIndices.push_back(FindUVAtIndex(uvIndex[1])), uvIndices.push_back(FindUVAtIndex(uvIndex[2])), uvIndices.push_back(FindUVAtIndex(uvIndex[3]));
+								normalIndices.push_back(FindNormalAtIndex(normalIndex[1])), normalIndices.push_back(FindNormalAtIndex(normalIndex[2])), normalIndices.push_back(FindNormalAtIndex(normalIndex[3]));
+
+								quadsCount++;
+							}
+							else if(sscanf(lineInFile.data(),"%*s %d/%d/%d %d/%d/%d %d/%d/%d%*s\n",
+								&vertexIndex[0],&uvIndex[0],&normalIndex[0]
+								,&vertexIndex[1],&uvIndex[1],&normalIndex[1]
+								,&vertexIndex[2],&uvIndex[2],&normalIndex[2]) == 9 )
 							{
 								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])),vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])),vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2]));
 								uvIndices.push_back(FindUVAtIndex(uvIndex[0])),uvIndices.push_back(FindUVAtIndex(uvIndex[1])),uvIndices.push_back(FindUVAtIndex(uvIndex[2]));
 								normalIndices.push_back(FindNormalAtIndex(normalIndex[0])),normalIndices.push_back(FindNormalAtIndex(normalIndex[1])),normalIndices.push_back(FindNormalAtIndex(normalIndex[2]));
+							
+								triCount++;
 							}
-							else if (sscanf(lineInFile.data(), "%*s %d %d %d\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]) == 3)
+							else if (sscanf(lineInFile.data(), "%*s %d %d %d%*s\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]) == 3)
 							{
 								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2]));
+								
+								triCount++;
 							}
-							else if(sscanf(lineInFile.data(),"%*s %d//%d %d//%d %d//%d\n",&vertexIndex[0],&normalIndex[0]
-							,&vertexIndex[1],&normalIndex[1]
-							,&vertexIndex[2],&normalIndex[2]) == 6 )
+							else if(sscanf(lineInFile.data(),"%*s %d//%d %d//%d %d//%d%*s\n",
+								&vertexIndex[0],&normalIndex[0]
+								,&vertexIndex[1],&normalIndex[1]
+								,&vertexIndex[2],&normalIndex[2]) == 6 )
 							{
 								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])),vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])),vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2]));
 								normalIndices.push_back(FindUVAtIndex(normalIndex[0])),normalIndices.push_back(FindUVAtIndex(normalIndex[1])),normalIndices.push_back(FindUVAtIndex(normalIndex[2]));
+							
+								triCount++;
 							}
-
+							else 
+							{
+								missedFaces ++; 
+							}
 						}
 					}
 				}
@@ -147,7 +184,10 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 					uselessLines++;
 				}
 			}
-			catch (out_of_range& outOfRangeException){}
+			catch (out_of_range& outOfRangeException)
+			{
+				outOfRangeExceptionsCount++;
+			}
 		}
 		fileStream.close();
 
@@ -155,7 +195,6 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 		int uvInd = 0;
 		int normalInd = 0;
 
-		
 		vector<vec3> meshVertices;
 		vector<vec3> meshNormals;
 		vector<vec2> meshUVs;

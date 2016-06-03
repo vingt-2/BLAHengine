@@ -173,7 +173,7 @@ bool GL33Renderer::SetupShadowBuffer()
 	m_depthTexture;
 	glGenTextures(1, &m_depthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 16384, 16384, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 8192, 8192, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -193,7 +193,7 @@ bool GL33Renderer::RenderShadow()
 {
 	// Render to our framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowBuffer);
-	glViewport(0, 0, 16384, 16384); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
+	glViewport(0, 0, 8192, 8192); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
 
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -516,7 +516,7 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 	
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
-
+	
 	SetupShadowBuffer();
 	
 	return window;
