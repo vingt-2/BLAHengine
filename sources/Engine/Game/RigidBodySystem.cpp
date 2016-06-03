@@ -2,8 +2,8 @@
 
 RigidBodySystem::RigidBodySystem() :
 	m_timeStep(0.001f),
-	m_uniformViscosity(0.01),
-	m_gravity(vec3(0, -1, 0)),
+	m_uniformViscosity(0.001),
+	m_gravity(vec3(0, -9.8, 0)),
 	m_substeps(1),
 	m_oldTime(-1),
 	m_isSimulating(true),

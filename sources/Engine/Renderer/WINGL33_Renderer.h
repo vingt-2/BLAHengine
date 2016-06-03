@@ -51,7 +51,8 @@ public:
 	void SetShadowID(GLuint shadowId) { m_shadowPrgmID = shadowId; }
 
 	GLFWwindow* GetWindow() const { return m_glfwWindow; }
-	void		Resize(ivec2 size);
+	void		Resize(ivec2 renderSize);
+	void		WindowResize(GLFWwindow* window, int width, int height);
 	vec2		GetCursorPosition();
 
 	GL33Renderer(char* windowTitle, bool isFullScreen);

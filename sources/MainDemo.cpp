@@ -267,8 +267,8 @@ int main( void )
 
 	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
 	
-	floor_obj->m_meshRenderer->AssignTexture("testDiffuse","texture");
-	floor_obj->m_meshRenderer->AssignTexture("earthNormals","normals");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse","texture");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse","normals");
 
 	GameChar* debugSphere = new GameChar(&cube);
 	debugSphere->m_meshRenderer->AssignMaterial("defaultShader");
@@ -282,6 +282,13 @@ int main( void )
 	mainScene->AddObject(floor_obj);
 	floor_obj->m_transform->m_position = (vec3(0, -15, 0));
 	floor_obj->m_rigidBody->m_isPinned = true;
+
+	GameChar* x_wing = new GameChar(&cube);
+	x_wing->m_meshRenderer->AssignMaterial("defaultShader");
+	x_wing->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	x_wing->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	renderingManager->RequestRenderTicket(*x_wing);
+	mainScene->AddObject(x_wing);
 
 	GameChar* lightObj = new GameChar(&cube);
 	lightObj->m_meshRenderer->AssignMaterial("defaultShader");
@@ -301,16 +308,16 @@ int main( void )
 
 
 
-	for (int i = 0; i < 11; i++)
-	{
-		GameChar* object = new GameChar(&sphere);
-		object->m_meshRenderer->AssignMaterial("defaultShader");
-		object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-		object->m_transform->m_position = vec3( 3*glm::cos(0.1*i), 8*i, 0);
-		mainScene->AddObject(object);
-		renderingManager->RequestRenderTicket(*object);
-	}
+	//for (int i = 0; i < 11; i++)
+	//{
+	//	GameChar* object = new GameChar(&cube);
+	//	object->m_meshRenderer->AssignMaterial("defaultShader");
+	//	object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
+	//	object->m_meshRenderer->AssignTexture("earthNormals", "normals");
+	//	object->m_transform->m_position = vec3( 3*glm::cos(0.1*i), 2.5*i, 0);
+	//	mainScene->AddObject(object);
+	//	renderingManager->RequestRenderTicket(*object);
+	//}
 
 	DirectionalLight* light = new DirectionalLight(vec3(0,-1,0));
 	mainScene->AddDirectionalLight(light);
@@ -404,7 +411,10 @@ int main( void )
 		{
 			lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
 			lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
+			mainRenderer->m_directionalLight = mainCamera->m_transform->LocalDirectionToWorld(vec3(0, 0, 1));
 		}
+
+		debug->DrawRay(vec3(0), mainRenderer->m_directionalLight, 100);
 
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{

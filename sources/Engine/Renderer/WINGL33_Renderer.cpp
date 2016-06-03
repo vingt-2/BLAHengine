@@ -8,17 +8,22 @@ GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	{
 		m_isContextEnabled = true;
 	}
-	Resize(m_renderSize);
+	WindowResize(m_glfwWindow, m_renderSize.x, m_renderSize.y);
 }
 
 GL33Renderer::~GL33Renderer()
 {
 }
 
-void GL33Renderer::Resize(ivec2 size)
+void GL33Renderer::Resize(ivec2 renderSize)
 {
-	glfwSetWindowSize(m_glfwWindow, size.x, size.y);
-	m_renderSize = size;
+	m_renderSize = renderSize;
+	m_mainRenderCamera.SetPerspective(m_renderSize);
+}
+
+void GL33Renderer::WindowResize(GLFWwindow* window, int width, int height)
+{
+	m_renderSize = ivec2(width, height);
 	m_mainRenderCamera.SetPerspective(m_renderSize);
 }
 
@@ -40,6 +45,12 @@ GL33RenderObject::~GL33RenderObject()
 
 bool GL33Renderer::Update()
 {
+	int width, height;
+	glfwGetWindowSize(m_glfwWindow, &width, &height);
+	
+	if(width != m_renderSize.x || height != m_renderSize.y)
+		WindowResize(m_glfwWindow, width, height);
+
 	//Set OpenGL to this context.
 	glfwMakeContextCurrent(m_glfwWindow);
 
@@ -58,7 +69,6 @@ bool GL33Renderer::Update()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//Render Scene Objects.
-	
 	for (int i = 0; i < m_renderPool.size(); i++)
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
@@ -97,66 +107,7 @@ bool GL33Renderer::Update()
 	}
 	m_gizmoRenderPool.clear();
 
-	//////////////////////BLALAAAA
-	// The quad's FBO. Used only for visualizing the shadowmap.
-				static const GLfloat g_quad_vertex_buffer_data[] = {
-					-1.0f, -1.0f, 0.0f,
-					1.0f, -1.0f, 0.0f,
-					-1.0f,  1.0f, 0.0f,
-					-1.0f,  1.0f, 0.0f,
-					1.0f, -1.0f, 0.0f,
-					1.0f,  1.0f, 0.0f,
-				};
-				GLuint quad_vertexbuffer;
-				glGenBuffers(1, &quad_vertexbuffer);
-				glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-				// Optionally render the shadowmap (for debug only)
-				// Render only on a corner of the window (or we we won't see the real rendering...)
-				glViewport(0, 0, 100, 100);
 
-				//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-				// Use our shader
-				glUseProgram(depthBufDebugPrgm);
-				GLuint texID = glGetUniformLocation(depthBufDebugPrgm, "texture");
-				// Bind our texture in Texture Unit 0
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-				// Set our "renderedTexture" sampler to user Texture Unit 0
-				glUniform1i(texID, 0);
-
-				// 1rst attribute buffer : vertices
-				GLuint vao;
-				glGenVertexArrays(1, &vao);
-				glBindVertexArray(vao);
-				glEnableVertexAttribArray(0);
-				glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-				glVertexAttribPointer(
-					0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-					3,                  // size
-					GL_FLOAT,           // type
-					GL_FALSE,           // normalized?
-					0,                  // stride
-					(void*)0            // array buffer offset
-				);
-
-				// Draw the triangle !
-				// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-				glDisable(GL_COMPARE_R_TO_TEXTURE);
-				glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-				glDisableVertexAttribArray(0);
-				glUseProgram(0);
-
-
-	///////////////////////////////
-	
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_BLEND);
-
-	
 	glfwSwapInterval(0);
 	
 	glfwSwapBuffers(m_glfwWindow);
@@ -222,9 +173,9 @@ bool GL33Renderer::SetupShadowBuffer()
 	m_depthTexture;
 	glGenTextures(1, &m_depthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 4096, 4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 16384, 16384, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -242,12 +193,12 @@ bool GL33Renderer::RenderShadow()
 {
 	// Render to our framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowBuffer);
-	glViewport(0, 0, 4096, 4096); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
+	glViewport(0, 0, 16384, 16384); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
 
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Render Scene Objects.
+	// Render Scene Objects.
 
 	// Enable Z-Buffer test.
 	glEnable(GL_DEPTH_TEST);
@@ -535,8 +486,7 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 		m_renderSize = ivec2(videoMode->width,videoMode->height);
 	}
 	
-	window = glfwCreateWindow(m_renderSize.x, m_renderSize.y,windowTitle, monitor,NULL);
-	
+	window = glfwCreateWindow(m_renderSize.x, m_renderSize.y, windowTitle, monitor,NULL);
 	
 	glfwMakeContextCurrent(window);
 	
@@ -571,3 +521,57 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 	
 	return window;
 }
+
+//////////////////////BLALAAAA
+// The quad's FBO. Used only for visualizing the shadowmap.
+//static const GLfloat g_quad_vertex_buffer_data[] = {
+//	-1.0f, -1.0f, 0.0f,
+//	1.0f, -1.0f, 0.0f,
+//	-1.0f,  1.0f, 0.0f,
+//	-1.0f,  1.0f, 0.0f,
+//	1.0f, -1.0f, 0.0f,
+//	1.0f,  1.0f, 0.0f,
+//};
+//GLuint quad_vertexbuffer;
+//glGenBuffers(1, &quad_vertexbuffer);
+//glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+//glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+//// Optionally render the shadowmap (for debug only)
+//// Render only on a corner of the window (or we we won't see the real rendering...)
+//glViewport(0, 0, 100, 100);
+
+////glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//// Use our shader
+//glUseProgram(depthBufDebugPrgm);
+//GLuint texID = glGetUniformLocation(depthBufDebugPrgm, "texture");
+//// Bind our texture in Texture Unit 0
+//glActiveTexture(GL_TEXTURE0);
+//glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+//// Set our "renderedTexture" sampler to user Texture Unit 0
+//glUniform1i(texID, 0);
+
+//// 1rst attribute buffer : vertices
+//GLuint vao;
+//glGenVertexArrays(1, &vao);
+//glBindVertexArray(vao);
+//glEnableVertexAttribArray(0);
+//glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+//glVertexAttribPointer(
+//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+//	3,                  // size
+//	GL_FLOAT,           // type
+//	GL_FALSE,           // normalized?
+//	0,                  // stride
+//	(void*)0            // array buffer offset
+//);
+
+//// Draw the triangle !
+//// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+//glDisable(GL_COMPARE_R_TO_TEXTURE);
+//glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+//glDisableVertexAttribArray(0);
+//glUseProgram(0);
+
+
+///////////////////////////////
