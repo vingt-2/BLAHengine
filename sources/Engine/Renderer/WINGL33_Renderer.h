@@ -104,7 +104,9 @@ protected:
 
 	void RenderDebug();
 
-	void DrawBufferOnScreen(GLuint textureTarget);
+	void DrawBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
+
+	void DrawDirectionalLight(vec3 lightDirection);
 
 	bool RenderShadows(ShadowRender& shadowRender);
 	bool SetupShadowBuffer(ShadowRender& shadowRender);

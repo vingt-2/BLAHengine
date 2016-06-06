@@ -229,6 +229,7 @@ int main( void )
 	sharedResources->LoadMaterial("depthBufDebug", "./resources/shaders/depthBuffDebug_vert.glsl", "./resources/shaders/depthBuffDebug_frag.glsl");
 	sharedResources->LoadMaterial("SimpleTexture", "./resources/shaders/SimpleTexture_vert.glsl", "./resources/shaders/SimpleTexture_frag.glsl");
 	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomVS.glsl", "./resources/shaders/Engine/GeomFS.glsl");
+	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Engine/DirectLightVS.glsl", "./resources/shaders/Engine/DirectLightFS.glsl");
 
 	//mainRenderer->SetShadowID(sharedResources->GetMaterial("shadowmapShader"));
 
@@ -251,11 +252,11 @@ int main( void )
 	MeshAsset rocket;
 	MeshAsset sponza;
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
-	objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
-	for (auto &v : sponza.m_meshVertices) {
-		vec4 hP = 0.1f * vec4(v, 1);
-		v = vec3(hP.x, hP.y, hP.z);
-	}
+	//objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
+	//for (auto &v : sponza.m_meshVertices) {
+	//	vec4 hP = 0.1f * vec4(v, 1);
+	//	v = vec3(hP.x, hP.y, hP.z);
+	//}
 
 
 	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
@@ -285,23 +286,23 @@ int main( void )
 	renderingManager->DebugSetupSphere(*debugSphere);
 
 
-	//GameChar* floor_obj = new GameChar(&floor);
-	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
-	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	//renderingManager->RequestRenderTicket(*floor_obj);
-	//mainScene->AddObject(floor_obj);
-	//floor_obj->m_transform->m_position = (vec3(0, -15, 0));
-	//floor_obj->m_rigidBody->m_isPinned = true;
+	GameChar* floor_obj = new GameChar(&floor);
+	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	renderingManager->RequestRenderTicket(*floor_obj);
+	mainScene->AddObject(floor_obj);
+	floor_obj->m_transform->m_position = (vec3(0, 0, 0));
+	floor_obj->m_rigidBody->m_isPinned = true;
 
-	GameChar* sceneMesh = new GameChar(&sponza);
-	sceneMesh->m_meshRenderer->AssignMaterial("defaultShader");
-	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
-	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	//sceneMesh->m_transform->m_scale = vec3(0.1);
-	renderingManager->RequestRenderTicket(*sceneMesh);
-	mainScene->AddObject(sceneMesh);
-	sceneMesh->m_rigidBody->m_isPinned = true;
+	//GameChar* sceneMesh = new GameChar(&sponza);
+	//sceneMesh->m_meshRenderer->AssignMaterial("defaultShader");
+	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
+	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	////sceneMesh->m_transform->m_scale = vec3(0.1);
+	//renderingManager->RequestRenderTicket(*sceneMesh);
+	//mainScene->AddObject(sceneMesh);
+	//sceneMesh->m_rigidBody->m_isPinned = true;
 
 	GameChar* lightObj = new GameChar(&cube);
 	lightObj->m_meshRenderer->AssignMaterial("defaultShader");

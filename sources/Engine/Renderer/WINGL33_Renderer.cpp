@@ -110,7 +110,16 @@ bool GL33Renderer::Update()
 
 	RenderGBuffer();
 
-	DrawBufferOnScreen(m_GBuffer.m_diffuseTextureTarget);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	/*DrawBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
+	DrawBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
+	DrawBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+	DrawBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+*/
+
+	DrawDirectionalLight(vec3(0, -1, 0));
 
 	glfwSwapInterval(0);
 	
@@ -195,7 +204,7 @@ bool GL33Renderer::SetupShadowBuffer(ShadowRender& shadowRender)
 	return true;
 }
 
-void GL33Renderer::DrawBufferOnScreen(GLuint textureTarget)
+void GL33Renderer::DrawBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
 {
 	static const GLfloat g_quad_vertex_buffer_data[] = {
 		-1.0f, -1.0f, 0.0f,
@@ -212,11 +221,8 @@ void GL33Renderer::DrawBufferOnScreen(GLuint textureTarget)
 	glGenBuffers(1, &quad_vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-	// Optionally render the shadowmap (for debug only)
-	// Render only on a corner of the window (or we we won't see the real rendering...)
-	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(topLeft.x, topLeft.y, bottomRight.x-topLeft.x, bottomRight.y-topLeft.y);
 
 	// Use our shader
 	glUseProgram(depthBufDebugPrgm);
@@ -244,7 +250,81 @@ void GL33Renderer::DrawBufferOnScreen(GLuint textureTarget)
 
 	// Draw the triangle !
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-	//glDisable(GL_COMPARE_R_TO_TEXTURE);
+	glDisable(GL_COMPARE_R_TO_TEXTURE);
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
+
+void GL33Renderer::DrawDirectionalLight(vec3 lightDirection)
+{
+	static const GLfloat g_quad_vertex_buffer_data[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+	};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	GLuint quad_vertexbuffer;
+	glGenBuffers(1, &quad_vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
+
+	// Use our shader
+	glUseProgram(depthBufDebugPrgm);
+	GLuint diffuseMapID = glGetUniformLocation(depthBufDebugPrgm, "diffuseMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(diffuseMapID, 0);
+
+	GLuint normalMapID = glGetUniformLocation(depthBufDebugPrgm, "normalMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(normalMapID, 0);
+
+	GLuint worldPosMapID = glGetUniformLocation(depthBufDebugPrgm, "worldPosMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(worldPosMapID, 0);
+
+	GLuint texCoordMapID = glGetUniformLocation(depthBufDebugPrgm, "texCoordMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(texCoordMapID, 0);
+
+	// 1rst attribute buffer : vertices
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	// Draw the triangle !
+	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+	glDisable(GL_COMPARE_R_TO_TEXTURE);
 	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
