@@ -30,6 +30,7 @@ class OrthographicCamera: public RenderCamera
 public:
 	mat4 m_orthographicProjection;
 
-	void SetOrthography();
+	void SetOrthographicProj(float left, float right, float bottom, float top);
 	void Update();
 };
+

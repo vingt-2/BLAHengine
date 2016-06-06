@@ -24,7 +24,7 @@ typedef struct vertEntry{
 
 	bool operator==(const vertEntry& other) const
 	{
-		float epsilon = 0.00000000000001;
+		float epsilon = 0.000001;
 
 		if (glm::distance(vx, other.vx) > epsilon)
 		{
@@ -145,6 +145,20 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 
 								quadsCount++;
 							}
+							else if (sscanf(lineInFile.data(), "%*s %d/%d %d/%d %d/%d %d/%d%*s\n",
+								&vertexIndex[0], &uvIndex[0]
+								, &vertexIndex[1], &uvIndex[1]
+								, &vertexIndex[2], &uvIndex[2]
+								, &vertexIndex[3], &uvIndex[3]) == 8)
+							{
+								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[3]));
+								uvIndices.push_back(FindUVAtIndex(uvIndex[0])), uvIndices.push_back(FindUVAtIndex(uvIndex[1])), uvIndices.push_back(FindUVAtIndex(uvIndex[3]));
+
+								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[3]));
+								uvIndices.push_back(FindUVAtIndex(uvIndex[1])), uvIndices.push_back(FindUVAtIndex(uvIndex[2])), uvIndices.push_back(FindUVAtIndex(uvIndex[3]));
+
+								quadsCount++;
+							}
 							else if(sscanf(lineInFile.data(),"%*s %d/%d/%d %d/%d/%d %d/%d/%d%*s\n",
 								&vertexIndex[0],&uvIndex[0],&normalIndex[0]
 								,&vertexIndex[1],&uvIndex[1],&normalIndex[1]
@@ -170,6 +184,16 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])),vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])),vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2]));
 								normalIndices.push_back(FindUVAtIndex(normalIndex[0])),normalIndices.push_back(FindUVAtIndex(normalIndex[1])),normalIndices.push_back(FindUVAtIndex(normalIndex[2]));
 							
+								triCount++;
+							}
+							else if (sscanf(lineInFile.data(), "%*s %d/%d %d/%d %d/%d%*s\n",
+								&vertexIndex[0], &uvIndex[0]
+								, &vertexIndex[1], &uvIndex[1]
+								, &vertexIndex[2], &uvIndex[2]) == 6)
+							{
+								vertexIndices.push_back(FindVertexAtIndex(vertexIndex[0])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[1])), vertexIndices.push_back(FindVertexAtIndex(vertexIndex[2]));
+								uvIndices.push_back(FindUVAtIndex(uvIndex[0])), uvIndices.push_back(FindUVAtIndex(uvIndex[1])), uvIndices.push_back(FindUVAtIndex(uvIndex[2]));
+
 								triCount++;
 							}
 							else 

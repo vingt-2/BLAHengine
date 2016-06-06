@@ -2,7 +2,7 @@
 #include "../../Std/std.h"
 #include "../../Tools/OBJImport.h"
 #include "../Game/GameObjects/Camera.h"
-#include "RenderCamera.h"
+#include "ShadowRender.h"
 
 class RenderObject
 {
@@ -40,7 +40,6 @@ public:
 	virtual bool		  CancelRender(const MeshRenderer& object) = 0;
 
 	// Windowing Related
-	virtual void Resize(ivec2 size) = 0;
 	virtual vec2 GetCursorPosition() = 0;
 	
 	bool GetStatus()        const   {	return m_isContextEnabled;	}

@@ -2,6 +2,27 @@
 #include "Renderer.h"
 #include "../Game/GameComponents/MeshRenderer.h"
 
+class GBuffer
+{
+public:
+
+	ivec2 m_GbufferSize;
+
+	GLuint m_frameBufferObject;
+
+	GLuint m_diffuseTextureTarget;
+	GLuint m_normalsTextureTarget;
+	GLuint m_worldPosTextureTarget;
+	GLuint m_texCoordsTextureTarget;
+	GLuint m_depthTextureTarget;
+
+	GLuint m_geometryPassPrgmID;
+
+	bool InitializeGBuffer();
+	void SetupGeomPassMaterials(GLuint prgrmId);
+	void DeleteGBufferResources();
+};
+
 class GL33RenderObject : public RenderObject
 {
 public:
@@ -24,6 +45,7 @@ public:
 	GLuint m_elementBufferId;
 	GLuint m_vertexArrayID;
 	GLuint m_sizeOfVertexArray;
+
 	// Keeps track of the VBOs we've generated and added to our VAO
 	vector<pair<GLuint, pair<GLuint, GLuint> > > m_vboIDVector;
 
@@ -47,21 +69,18 @@ public:
 	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
 	bool		  CancelRender(const MeshRenderer& object);
 
-	bool RenderShadow();
-	void SetShadowID(GLuint shadowId) { m_shadowPrgmID = shadowId; }
-
 	GLFWwindow* GetWindow() const { return m_glfwWindow; }
-	void		Resize(ivec2 renderSize);
 	void		WindowResize(GLFWwindow* window, int width, int height);
 	vec2		GetCursorPosition();
 
 	GL33Renderer(char* windowTitle, bool isFullScreen);
-	GL33Renderer(char* windowTitle, bool isFullScreen, vec2 renderSize);
 	~GL33Renderer();
 
-	OrthographicCamera shadowCamera;
-
+	// Debug Vignette;
 	GLuint depthBufDebugPrgm;
+	//
+
+	GBuffer m_GBuffer;
 
 protected:
 	GLFWwindow* InitializeContext(char* windowTitle);
@@ -79,13 +98,15 @@ protected:
 	bool LoadTextureSample(GL33RenderObject& object, string textureName, string sampleName);
 	void DestroyVertexArrayID(GL33RenderObject& object);
 
-	bool Draw(GL33RenderObject& object);
+	void RenderGBuffer();
 
-	bool DrawShadow(GL33RenderObject& object, OrthographicCamera &ortho);
-	bool SetupShadowBuffer();
+	void RenderDefferedLights();
 
-	//Shadows related
-	GLuint m_depthTexture;
-	GLuint m_shadowPrgmID;
-	GLuint m_shadowBuffer;
+	void RenderDebug();
+
+	void DrawBufferOnScreen(GLuint textureTarget);
+
+	bool RenderShadows(ShadowRender& shadowRender);
+	bool SetupShadowBuffer(ShadowRender& shadowRender);
+
 };

@@ -198,7 +198,7 @@ int main( void )
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 
 	Camera* mainCamera = new Camera();
-	mainCamera->m_transform->m_position = vec3(0, -10, -15);
+	mainCamera->m_transform->m_position = vec3(10, 10, -15);
 	mainCamera->m_transform->SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
 	mainCamera->m_isControlEnabled = true;
 
@@ -227,11 +227,14 @@ int main( void )
 	sharedResources->LoadMaterial("debugShader", "./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
 	sharedResources->LoadMaterial("shadowmapShader", "./resources/shaders/Vert_Shadow.glsl", "./resources/shaders/Frag_Shadow.glsl");
 	sharedResources->LoadMaterial("depthBufDebug", "./resources/shaders/depthBuffDebug_vert.glsl", "./resources/shaders/depthBuffDebug_frag.glsl");
+	sharedResources->LoadMaterial("SimpleTexture", "./resources/shaders/SimpleTexture_vert.glsl", "./resources/shaders/SimpleTexture_frag.glsl");
+	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomVS.glsl", "./resources/shaders/Engine/GeomFS.glsl");
 
-	mainRenderer->SetShadowID(sharedResources->GetMaterial("shadowmapShader"));
+	//mainRenderer->SetShadowID(sharedResources->GetMaterial("shadowmapShader"));
 
-	mainRenderer->depthBufDebugPrgm = sharedResources->GetMaterial("depthBufDebug");
-	
+	mainRenderer->depthBufDebugPrgm = sharedResources->GetMaterial("SimpleTexture");
+	mainRenderer->m_GBuffer.m_geometryPassPrgmID = sharedResources->GetMaterial("GeomPass");
+
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blank.bmp");
 	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
@@ -247,8 +250,14 @@ int main( void )
 	MeshAsset cube;
 	MeshAsset rocket;
 	MeshAsset sponza;
-	objImport.ImportMesh("./resources/models/sponza.obj", &xwing, false);
-	//objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
+	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
+	objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
+	for (auto &v : sponza.m_meshVertices) {
+		vec4 hP = 0.1f * vec4(v, 1);
+		v = vec3(hP.x, hP.y, hP.z);
+	}
+
+
 	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
 	objImport.ImportMesh("./resources/models/bla.obj", &sphere, false);
@@ -265,37 +274,38 @@ int main( void )
 		v = mat2(100) * v;
 	}
 
-	GameChar* floor_obj = new GameChar(&floor);
 
-	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
-	
-	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse","texture");
-	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse","normals");
 
 	GameChar* debugSphere = new GameChar(&cube);
 	debugSphere->m_meshRenderer->AssignMaterial("defaultShader");
-	debugSphere->m_meshRenderer->AssignTexture("red", "texture");
+	debugSphere->m_meshRenderer->AssignTexture("red", "diffuseMap");
 	debugSphere->m_meshRenderer->AssignTexture("earthNormals", "normals");
 	debugSphere->m_meshRenderer->m_renderType = 0x003;
 	debugSphere->m_transform->m_scale = vec3(0.1);
 	renderingManager->DebugSetupSphere(*debugSphere);
 
+
+	//GameChar* floor_obj = new GameChar(&floor);
+	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
+	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
 	//renderingManager->RequestRenderTicket(*floor_obj);
 	//mainScene->AddObject(floor_obj);
 	//floor_obj->m_transform->m_position = (vec3(0, -15, 0));
 	//floor_obj->m_rigidBody->m_isPinned = true;
 
-	GameChar* x_wing = new GameChar(&xwing);
-	x_wing->m_meshRenderer->AssignMaterial("defaultShader");
-	x_wing->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	x_wing->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	x_wing->m_transform->m_scale = vec3(0.1);
-	renderingManager->RequestRenderTicket(*x_wing);
-	mainScene->AddObject(x_wing);
+	GameChar* sceneMesh = new GameChar(&sponza);
+	sceneMesh->m_meshRenderer->AssignMaterial("defaultShader");
+	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
+	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	//sceneMesh->m_transform->m_scale = vec3(0.1);
+	renderingManager->RequestRenderTicket(*sceneMesh);
+	mainScene->AddObject(sceneMesh);
+	sceneMesh->m_rigidBody->m_isPinned = true;
 
 	GameChar* lightObj = new GameChar(&cube);
 	lightObj->m_meshRenderer->AssignMaterial("defaultShader");
-	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
 	lightObj->m_transform->m_position = vec3(-10,5,0);
 	lightObj->m_transform->SetRotationUsingEuler(vec3(-1, 0, 0));
@@ -306,21 +316,21 @@ int main( void )
 	lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
 	lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
 
-	mainRenderer->shadowCamera.AttachCamera(cameraLight);
-	mainRenderer->shadowCamera.SetOrthography();
+	//mainRenderer->shadowCamera.AttachCamera(cameraLight);
+	//mainRenderer->shadowCamera.SetOrthographicProj(-100, 100, -100, 100);
 
 
 
-	//for (int i = 0; i < 11; i++)
-	//{
-	//	GameChar* object = new GameChar(&cube);
-	//	object->m_meshRenderer->AssignMaterial("defaultShader");
-	//	object->m_meshRenderer->AssignTexture("earthDiffuse", "texture");
-	//	object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-	//	object->m_transform->m_position = vec3( 3*glm::cos(0.1*i), 2.5*i, 0);
-	//	mainScene->AddObject(object);
-	//	renderingManager->RequestRenderTicket(*object);
-	//}
+	for (int i = 0; i < 1; i++)
+	{
+		GameChar* object = new GameChar(&cube);
+		object->m_meshRenderer->AssignMaterial("defaultShader");
+		object->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
+		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
+		object->m_transform->m_position = vec3( 5 ,30 + 2.5*i, 0);
+		mainScene->AddObject(object);
+		renderingManager->RequestRenderTicket(*object);
+	}
 
 	DirectionalLight* light = new DirectionalLight(vec3(0,-1,0));
 	mainScene->AddDirectionalLight(light);
@@ -381,18 +391,6 @@ int main( void )
 		title.str();
 		glfwSetWindowTitle(mainRenderer->GetWindow(), title.str().data());
 
-		//if (C != mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size())
-		//{
-		//	C = mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size();
-		//	cout << "Contacts: " <<C<< "\n";
-		//}
-
-		//if (mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size() != 0 && (time - lastPressS) > 0.1)
-		//{
-		//	mainScene->m_enableSimulation = false;
-		//	stoped = true;
-		//}
-
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) && (time - lastPressS) > 2)
 		{
 			cout << "Simulation ";
@@ -416,8 +414,6 @@ int main( void )
 			lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
 			mainRenderer->m_directionalLight = mainCamera->m_transform->LocalDirectionToWorld(vec3(0, 0, 1));
 		}
-
-		debug->DrawRay(vec3(0), mainRenderer->m_directionalLight, 100);
 
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{
@@ -455,15 +451,6 @@ int main( void )
 			}
 		}
 
-		//auto contacts = mainScene->GetContacts();
-		//for (auto contact : *contacts)
-		//{
-		//	debugRenderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-
-		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-		//	debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-		//}
 
 		if (glfwGetMouseButton(mainRenderer->GetWindow(), 2))
 		{
@@ -485,7 +472,17 @@ int main( void )
 			currentObject->m_rigidBody->PushForceWorld(a,0.5f*b);
 		}
 
-		//cout << "Contacts Size: " << mainScene->GetContacts()->size() << ".\n";
+		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
+		{
+			Contact contact = mainScene->GetContacts()->at(c);
+
+			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+
+//			mainScene->m_enableSimulation = false;
+		}
 
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 		{
@@ -494,15 +491,6 @@ int main( void )
 			mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop = false;
 		}
 
-		//if (currentObject)
-		//	debug->DrawRay(currentObject->m_transform->m_position, currentObject->m_transform->LocalDirectionToWorld(currentObject->m_rigidBody->m_angularVelocity),10);
-		//		
-		//if (currentObject != NULL)
-		//{
-		//	debug->DrawBasis(currentObject->m_transform, 1);
-		//}
-		//debug->DrawBasis(lightObj->m_transform, 1);
-//		debug->DrawRay(lightObj->m_transform->m_position,lightObj->m_transform->LocalDirectionToWorld(vec3(1,0,0)),1);
 
 		SimpleControls(mainCamera);
 		
@@ -513,9 +501,7 @@ int main( void )
 		if(mainScene->m_enableSimulation)
 			solvIt += (mainScene->m_rigidBodySystem->m_collisionProcessor->m_iterationCount);
 
-		//cout << "Average Iteration Count" << solvIt / (float)(mainScene->m_rigidBodySystem->m_collisionProcessor->m_solveCount) << "\n";
 
-		//debug->DrawGrid(10, vec4(1));
 
 		frameCount++;
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )

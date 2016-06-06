@@ -7,6 +7,7 @@ void RenderCamera::AttachCamera(Camera* camera)
 
 void PerspectiveCamera::SetPerspective(vec2 renderSize)
 {
+	//m_perspectiveProjection = glm::perspective(fovY, aspect, 0.01f, 10000.f);
 	m_perspectiveProjection = glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x, -0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 10000.0f);
 }
 
@@ -23,9 +24,9 @@ RenderCamera::RenderCamera()
 	this->m_attachedCamera = NULL;
 }
 
-void OrthographicCamera::SetOrthography()
+void OrthographicCamera::SetOrthographicProj(float left, float right, float bottom, float top)
 {
-	m_orthographicProjection = glm::ortho<float>(-100, 100, -100, 100, -100, 10000);
+	m_orthographicProjection = glm::ortho<float>(left, right, bottom, top, -100, 10000);
 }
 
 void OrthographicCamera::Update()

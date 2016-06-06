@@ -4,7 +4,7 @@ CollisionProcessor::CollisionProcessor(float* timestepPtr) :
 	m_flagInterpolateNormals(false),
 	m_maxIterations(20),
 	m_bounce(0.01),
-	m_friction(0.1),
+	m_friction(0.0),
 	m_epsilon(0.001),
 	debug_stop(false),
 	m_iterationCount(0),
@@ -145,11 +145,21 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 			if (collidingFace == 1)
 			{
 				normal = normalBody1W;
+
+				vec3 body1to2 = body2->m_transform->m_position - collisionPoint;
+				if (dot(normal, body1to2) < 0)
+					normal = -normal;
+
 				tangent = tangentBody1W;
 			}
 			else if (collidingFace == 2)
 			{
 				normal = normalBody2W;
+
+				vec3 body2to1 = body1->m_transform->m_position - collisionPoint;
+				if (dot(normal, body2to1) < 0)
+					normal = -normal;
+
 				tangent = tangentBody2W;
 			}
 

@@ -10,8 +10,8 @@ layout(location = 4) in vec3 vertexBiTangent;
 // Output data ; will be interpolated for each fragment.
 out vec2 UVs;
 out vec3 normal;
-flat out  vec3 tangent;
-flat out  vec3 biTangent;
+flat out vec3 tangent;
+flat out vec3 biTangent;
 out vec3 lightVector;
 out mat4 inverseTransform;
 out vec3 shadowPos;

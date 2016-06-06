@@ -23,9 +23,9 @@ void main()
 	vec2 shadowUV = (shadowPos.xy);
     float closestObjDepth = texture2D( shadowMap, shadowUV ).r;
 
-    float ambientComp = 0.2;
+    float ambientComp = 0.5;
     
-    float vis = max(1 - (10*shadowPos.z),ambientComp);
+    float vis = max(1 - (3*shadowPos.z),ambientComp);
 
     if(shadowUV.x < 0.0 || shadowUV.x > 1.0){
         vis = ambientComp;

@@ -11,20 +11,18 @@ GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	WindowResize(m_glfwWindow, m_renderSize.x, m_renderSize.y);
 }
 
-GL33Renderer::~GL33Renderer()
-{
-}
-
-void GL33Renderer::Resize(ivec2 renderSize)
-{
-	m_renderSize = renderSize;
-	m_mainRenderCamera.SetPerspective(m_renderSize);
-}
+GL33Renderer::~GL33Renderer() {}
 
 void GL33Renderer::WindowResize(GLFWwindow* window, int width, int height)
 {
 	m_renderSize = ivec2(width, height);
+
+	float aspectRatio = m_renderSize.x / m_renderSize.y;
 	m_mainRenderCamera.SetPerspective(m_renderSize);
+
+	m_GBuffer.DeleteGBufferResources();
+	m_GBuffer.m_GbufferSize = m_renderSize;
+	m_GBuffer.InitializeGBuffer();
 }
 
 vec2 GL33Renderer::GetCursorPosition()
@@ -39,8 +37,62 @@ GL33RenderObject::GL33RenderObject():
 	m_textureSamplersVector(vector<pair<GLuint, GLuint> >())
 {}
 
-GL33RenderObject::~GL33RenderObject()
+GL33RenderObject::~GL33RenderObject() {}
+
+void GL33Renderer::RenderGBuffer()
 {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
+
+	glViewport(0, 0, m_GBuffer.m_GbufferSize.x, m_GBuffer.m_GbufferSize.y);
+
+	// Clear Frame Buffer.
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(m_GBuffer.m_geometryPassPrgmID);
+
+	for (int i = 0; i < m_renderPool.size(); i++)
+	{
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
+		{
+			mat4 MVP = m_mainRenderCamera.m_ViewProjection  * (renderObject->m_modelTransform->m_transformMatrix);
+
+			GLuint MVPid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "MVP");
+			glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
+
+			//send modelTransform to shader <<--- HARDCODED
+			GLuint transformID = glGetUniformLocation(renderObject->m_programID, "modelTransform");
+			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(renderObject->m_modelTransform->m_transformMatrix)[0][0]);
+
+			// Send textureSamplers to shader
+			for (int samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
+			{
+				glActiveTexture(GL_TEXTURE0 + samplerIndex);
+				glBindTexture(GL_TEXTURE_2D, renderObject->m_textureSamplersVector.at(samplerIndex).second);
+
+				glUniform1i(renderObject->m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
+			}
+
+			glBindVertexArray(renderObject->m_vertexArrayID);
+
+			// Draw VAO
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderObject->m_elementBufferId); // Index buffer
+			glDrawElements(renderObject->m_renderType, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+
+			glBindVertexArray(0);
+
+			for (uint vboIndex = 0; vboIndex < renderObject->m_vboIDVector.size(); vboIndex++)
+			{
+				glDisableVertexAttribArray(vboIndex);
+			}
+		}
+	}
+	glUseProgram(0);
+
 }
 
 bool GL33Renderer::Update()
@@ -54,59 +106,11 @@ bool GL33Renderer::Update()
 	//Set OpenGL to this context.
 	glfwMakeContextCurrent(m_glfwWindow);
 
-	// Enable Z-Buffer test.
-	glEnable(GL_DEPTH_TEST);
-
-	RenderShadow();
-	// Render to the screen
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_mainRenderCamera.Update();
 
-	//Adjust Projection and ViewPort.
-	glViewport(0,0, m_renderSize.x, m_renderSize.y);
-	
-	// Clear Screen Buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//Render Scene Objects.
-	for (int i = 0; i < m_renderPool.size(); i++)
-	{
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
-		{
-			this->Draw(*renderObject);
-		}
-	}
+	RenderGBuffer();
 
-	// Render Debug gizmos (on top of frame)
-	// Disable Z-Buffer test so that it draws on top of scene.
-	glDisable(GL_DEPTH_TEST);
-	for (int i = 0; i < m_gizmoRenderPool.size(); i++)
-	{
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_gizmoRenderPool[i]))
-		{
-			this->Draw(*renderObject);
-		}
-	}
-	for (auto p : debug_sphere_requests)
-	{
-		//cout << "rendering sphere";
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(debug_sphere))
-		{
-			renderObject->m_modelTransform->m_position = p;
-			renderObject->m_modelTransform->UpdateTransform();
-			this->Draw(*renderObject);
-		}
-	}
-	debug_sphere_requests.clear();
-	for (int i = 0; i < m_gizmoRenderPool.size(); i++)
-	{
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_gizmoRenderPool[i]))
-		{
-			CleanUp(*renderObject);
-		}
-	}
-	m_gizmoRenderPool.clear();
-
+	DrawBufferOnScreen(m_GBuffer.m_diffuseTextureTarget);
 
 	glfwSwapInterval(0);
 	
@@ -162,24 +166,22 @@ bool GL33Renderer::CancelRender(const MeshRenderer& object)
 	return true;
 }
 
-bool GL33Renderer::SetupShadowBuffer()
+bool GL33Renderer::SetupShadowBuffer(ShadowRender& shadowRender)
 {
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-	m_shadowBuffer = 0;
-	glGenFramebuffers(1, &m_shadowBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowBuffer);
+	glGenFramebuffers(1, &(shadowRender.m_shadowBuffer));
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowRender.m_shadowBuffer);
 
 	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
-	m_depthTexture;
-	glGenTextures(1, &m_depthTexture);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 8192, 8192, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glGenTextures(1, &(shadowRender.m_depthTexture));
+	glBindTexture(GL_TEXTURE_2D, shadowRender.m_depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, shadowRender.m_bufferSize, shadowRender.m_bufferSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowRender.m_depthTexture, 0);
 
 	glDrawBuffer(GL_NONE); // No color buffer is drawn to.
 
@@ -187,18 +189,82 @@ bool GL33Renderer::SetupShadowBuffer()
 	// Always check that our framebuffer is ok
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		return false;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return true;
 }
 
-bool GL33Renderer::RenderShadow()
+void GL33Renderer::DrawBufferOnScreen(GLuint textureTarget)
 {
+	static const GLfloat g_quad_vertex_buffer_data[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f,  1.0f, 0.0f,
+	};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	GLuint quad_vertexbuffer;
+	glGenBuffers(1, &quad_vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+	// Optionally render the shadowmap (for debug only)
+	// Render only on a corner of the window (or we we won't see the real rendering...)
+	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Use our shader
+	glUseProgram(depthBufDebugPrgm);
+	GLuint texID = glGetUniformLocation(depthBufDebugPrgm, "colormap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(texID, 0);
+
+	// 1rst attribute buffer : vertices
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// Draw the triangle !
+	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+	//glDisable(GL_COMPARE_R_TO_TEXTURE);
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
+
+bool GL33Renderer::RenderShadows(ShadowRender& shadowRender)
+{
+	shadowRender.Update();
+
 	// Render to our framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowRender.m_shadowBuffer);
 	glViewport(0, 0, 8192, 8192); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
 
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Render Scene Objects.
+	/*
+		Render Scene Objects...
+	*/
+	glUseProgram(shadowRender.m_shadowPrgmID);
 
 	// Enable Z-Buffer test.
 	glEnable(GL_DEPTH_TEST);
@@ -206,100 +272,21 @@ bool GL33Renderer::RenderShadow()
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
 		{
-			this->DrawShadow(*renderObject, shadowCamera);
+			mat4 MVP = shadowRender.getShadowViewProjection() * (renderObject->m_modelTransform->m_transformMatrix);
+
+			GLuint shadowMVID = glGetUniformLocation(shadowRender.m_shadowPrgmID, "depthMVP");
+			glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
+
+			glBindVertexArray(renderObject->m_vertexArrayID);
+
+			// Draw VAO
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderObject->m_elementBufferId); // Index buffer
+			glDrawElements(GL_TRIANGLES, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0);
+
+			glBindVertexArray(0);
 		}
 	}
 
-	return true;
-}
-
-bool GL33Renderer::DrawShadow(GL33RenderObject& object, OrthographicCamera &ortho)
-{
-	shadowCamera.Update();
-	glUseProgram(m_shadowPrgmID);
-
-	mat4 MVP = ortho.m_ViewProjection * (object.m_modelTransform->m_transformMatrix);
-
-	GLuint shadowMVID = glGetUniformLocation(m_shadowPrgmID, "depthMVP");
-	glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
-
-	glBindVertexArray(object.m_vertexArrayID);
-
-	// Draw VAO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object.m_elementBufferId); // Index buffer
-	glDrawElements(object.m_renderType, object.m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0);
-
-	glBindVertexArray(0);
-
-	glUseProgram(0);
-
-	for (uint vboIndex = 0; vboIndex < object.m_vboIDVector.size(); vboIndex++)
-	{
-		glDisableVertexAttribArray(vboIndex);
-	}
-	return true;
-}
-
-bool GL33Renderer::Draw(GL33RenderObject& object)
-{
-	glUseProgram(object.m_programID);
-
-	mat4 MVP = m_mainRenderCamera.m_ViewProjection * (object.m_modelTransform->m_transformMatrix);
-	glUniformMatrix4fv(object.m_matrixID, 1, GL_FALSE, &MVP[0][0]);
-
-	//send modelTransform to shader <<--- HARDCODED
-	GLuint transformID = glGetUniformLocation(object.m_programID, "modelTransform");
-	glUniformMatrix4fv(transformID, 1, GL_FALSE, &(object.m_modelTransform->m_transformMatrix)[0][0]);
-
-
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	);
-
-	mat4 shadowMVP = biasMatrix * shadowCamera.m_ViewProjection *  (object.m_modelTransform->m_transformMatrix);
-	GLuint shadowTID = glGetUniformLocation(object.m_programID, "shadowMVP");
-	glUniformMatrix4fv(shadowTID, 1, GL_FALSE, &shadowMVP[0][0]);
-
-	//send Light to shader <<--- HARDCODED
-	GLuint lightID = glGetUniformLocation(object.m_programID, "directionalLight");
-	glUniform3f(lightID, this->m_directionalLight.x, this->m_directionalLight.y, this->m_directionalLight.z);
-
-	// Send textureSamplers to shader
-	for (int samplerIndex = 0; samplerIndex < object.m_textureSamplersVector.size(); samplerIndex++)
-	{
-		glActiveTexture(GL_TEXTURE0 + samplerIndex);
-		glBindTexture(GL_TEXTURE_2D, object.m_textureSamplersVector.at(samplerIndex).second);
-
-		glUniform1i(object.m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
-	}
-
-	GLuint shadowmapHandle = glGetUniformLocation(object.m_programID, "shadowMap");
-
-	int sIndx = object.m_textureSamplersVector.size();
-	glActiveTexture(GL_TEXTURE0 + sIndx);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-
-	glUniform1i(shadowmapHandle, sIndx);
-
-	glBindVertexArray(object.m_vertexArrayID);
-
-	// Draw VAO
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object.m_elementBufferId); // Index buffer
-	glDrawElements(object.m_renderType, object.m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0 ); // Draw Triangles
-	//glDrawArrays(object.m_renderType, 0, (GLint)object.m_toMeshVertices->size());
-
-	glBindVertexArray(0);
-
-	glUseProgram(0);
-
-	for (uint vboIndex = 0; vboIndex < object.m_vboIDVector.size(); vboIndex++)
-	{
-		glDisableVertexAttribArray(vboIndex);
-	}
 	return true;
 }
 
@@ -331,13 +318,13 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 		layoutIndex++;
 	}
 
-	if (!object.m_toMeshNormals->empty())
+	if (!object.m_toMeshTangents->empty())
 	{
 		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshTangents->size() * sizeof(vec3), 3, layoutIndex);
 		layoutIndex++;
 	}
 
-	if (!object.m_toMeshNormals->empty())
+	if (!object.m_toMeshBiTangents->empty())
 	{
 		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshBiTangents->size() * sizeof(vec3), 3, layoutIndex);
 		layoutIndex++;
@@ -509,69 +496,109 @@ GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
 	glfwSetCursorPos(window, m_renderSize.x/2, m_renderSize.y/2);
 	
 	//Neat grey background
-	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+	glClearColor(0.f, 0.f, 0.f, 0.0f);
 	
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
 	
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
-	
-	SetupShadowBuffer();
-	
+
+	m_GBuffer.m_GbufferSize = m_renderSize;
+	m_GBuffer.InitializeGBuffer();
+		
 	return window;
 }
 
-//////////////////////BLALAAAA
-// The quad's FBO. Used only for visualizing the shadowmap.
-//static const GLfloat g_quad_vertex_buffer_data[] = {
-//	-1.0f, -1.0f, 0.0f,
-//	1.0f, -1.0f, 0.0f,
-//	-1.0f,  1.0f, 0.0f,
-//	-1.0f,  1.0f, 0.0f,
-//	1.0f, -1.0f, 0.0f,
-//	1.0f,  1.0f, 0.0f,
-//};
-//GLuint quad_vertexbuffer;
-//glGenBuffers(1, &quad_vertexbuffer);
-//glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-//glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-//// Optionally render the shadowmap (for debug only)
-//// Render only on a corner of the window (or we we won't see the real rendering...)
-//glViewport(0, 0, 100, 100);
+bool GBuffer::InitializeGBuffer()
+{
+	// Create the FBO
+	glGenFramebuffers(1, &m_frameBufferObject);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_frameBufferObject);
 
-////glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Create the gbuffer textures
+	glGenTextures(1, &m_diffuseTextureTarget);
+	glGenTextures(1, &m_normalsTextureTarget);
+	glGenTextures(1, &m_worldPosTextureTarget);
+	glGenTextures(1, &m_texCoordsTextureTarget);
+	glGenTextures(1, &m_depthTextureTarget);
 
-//// Use our shader
-//glUseProgram(depthBufDebugPrgm);
-//GLuint texID = glGetUniformLocation(depthBufDebugPrgm, "texture");
-//// Bind our texture in Texture Unit 0
-//glActiveTexture(GL_TEXTURE0);
-//glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-//// Set our "renderedTexture" sampler to user Texture Unit 0
-//glUniform1i(texID, 0);
+	// Bind Diffuse Texture
+	glBindTexture(GL_TEXTURE_2D, m_diffuseTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_diffuseTextureTarget, 0);
 
-//// 1rst attribute buffer : vertices
-//GLuint vao;
-//glGenVertexArrays(1, &vao);
-//glBindVertexArray(vao);
-//glEnableVertexAttribArray(0);
-//glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-//glVertexAttribPointer(
-//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-//	3,                  // size
-//	GL_FLOAT,           // type
-//	GL_FALSE,           // normalized?
-//	0,                  // stride
-//	(void*)0            // array buffer offset
-//);
+	// Bind Normals Texture
+	glBindTexture(GL_TEXTURE_2D, m_normalsTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_normalsTextureTarget, 0);
+	
+	// Bind WorldPos Texture
+	glBindTexture(GL_TEXTURE_2D, m_worldPosTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_worldPosTextureTarget, 0);
 
-//// Draw the triangle !
-//// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-//glDisable(GL_COMPARE_R_TO_TEXTURE);
-//glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-//glDisableVertexAttribArray(0);
-//glUseProgram(0);
+	// Bind TexCoords Texture
+	glBindTexture(GL_TEXTURE_2D, m_texCoordsTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_texCoordsTextureTarget, 0);
 
+	// depth
+	glBindTexture(GL_TEXTURE_2D, m_depthTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTextureTarget, 0);
 
-///////////////////////////////
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+	glDrawBuffers(4, DrawBuffers);
+
+	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (Status != GL_FRAMEBUFFER_COMPLETE) {
+		printf("FB error, status: 0x%x\n", Status);
+		return false;
+	}
+
+	// restore default FBO
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	return true;
+}
+
+void GBuffer::SetupGeomPassMaterials(GLuint prgrmId)
+{
+	m_geometryPassPrgmID = prgrmId;
+}
+
+void GBuffer::DeleteGBufferResources()
+{
+	//Delete resources
+	glDeleteTextures(1, &m_diffuseTextureTarget);
+	glDeleteTextures(1, &m_normalsTextureTarget);
+	glDeleteTextures(1, &m_worldPosTextureTarget);
+	glDeleteTextures(1, &m_texCoordsTextureTarget);
+	glDeleteTextures(1, &m_depthTextureTarget);
+
+	//Bind 0, which means render to back buffer, as a result, fb is unbound
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glDeleteFramebuffersEXT(1, &m_frameBufferObject);
+}
