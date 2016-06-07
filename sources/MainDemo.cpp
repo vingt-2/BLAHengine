@@ -247,21 +247,23 @@ int main( void )
 
 	MeshAsset xwing;
 	MeshAsset sphere;
+	MeshAsset invertedSphere;
 	MeshAsset floor;
 	MeshAsset cube;
 	MeshAsset rocket;
 	MeshAsset sponza;
-	objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
-	//objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
-	//for (auto &v : sponza.m_meshVertices) {
-	//	vec4 hP = 0.1f * vec4(v, 1);
-	//	v = vec3(hP.x, hP.y, hP.z);
-	//}
+	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
+	objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
+	for (auto &v : sponza.m_meshVertices) {
+		vec4 hP = 0.1f * vec4(v, 1);
+		v = vec3(hP.x, hP.y, hP.z);
+	}
 
 
 	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
 	objImport.ImportMesh("./resources/models/bla.obj", &sphere, false);
+	objImport.ImportMesh("./resources/models/bla.obj", &invertedSphere, true);
 	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", &rocket, true);
 	mat4 scaleMat(vec4(100, 0, 0, 0), 
 					vec4(0, 10, 0, 0), 
@@ -286,23 +288,33 @@ int main( void )
 	renderingManager->DebugSetupSphere(*debugSphere);
 
 
-	GameChar* floor_obj = new GameChar(&floor);
-	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
-	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	renderingManager->RequestRenderTicket(*floor_obj);
-	mainScene->AddObject(floor_obj);
-	floor_obj->m_transform->m_position = (vec3(0, 0, 0));
-	floor_obj->m_rigidBody->m_isPinned = true;
+	//GameChar* floor_obj = new GameChar(&floor);
+	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
+	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	//renderingManager->RequestRenderTicket(*floor_obj);
+	//mainScene->AddObject(floor_obj);
+	//floor_obj->m_transform->m_position = (vec3(0, 0, 0));
+	//floor_obj->m_rigidBody->m_isPinned = true;
 
-	//GameChar* sceneMesh = new GameChar(&sponza);
-	//sceneMesh->m_meshRenderer->AssignMaterial("defaultShader");
-	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
-	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	////sceneMesh->m_transform->m_scale = vec3(0.1);
-	//renderingManager->RequestRenderTicket(*sceneMesh);
-	//mainScene->AddObject(sceneMesh);
-	//sceneMesh->m_rigidBody->m_isPinned = true;
+	GameChar* skySphere = new GameChar(&invertedSphere);
+	skySphere->m_meshRenderer->AssignMaterial("defaultShader");
+	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	renderingManager->RequestRenderTicket(*skySphere);
+	mainScene->AddObject(skySphere);
+	skySphere->m_transform->m_position = (vec3(0, 0, 0));
+	skySphere->m_transform->m_scale = vec3(1000);
+	skySphere->m_rigidBody->m_isPinned = true;
+
+	GameChar* sceneMesh = new GameChar(&sponza);
+	sceneMesh->m_meshRenderer->AssignMaterial("defaultShader");
+	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
+	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	//sceneMesh->m_transform->m_scale = vec3(0.1);
+	renderingManager->RequestRenderTicket(*sceneMesh);
+	mainScene->AddObject(sceneMesh);
+	sceneMesh->m_rigidBody->m_isPinned = true;
 
 	GameChar* lightObj = new GameChar(&cube);
 	lightObj->m_meshRenderer->AssignMaterial("defaultShader");
@@ -322,9 +334,9 @@ int main( void )
 
 
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 0; i++)
 	{
-		GameChar* object = new GameChar(&xwing);
+		GameChar* object = new GameChar(&cube);
 		object->m_meshRenderer->AssignMaterial("defaultShader");
 		object->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
 		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
@@ -337,7 +349,6 @@ int main( void )
 	mainScene->AddDirectionalLight(light);
 
 	DirectionalLightRender lr;
-	lr.m_lightDirection = vec3(0, 1, 0);
 	lr.m_lightRenderPrgmID = sharedResources->GetMaterial("DirLightPass");
 	lr.m_shadowRender.m_shadowPrgmID = sharedResources->GetMaterial("shadowmapShader");
 	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);

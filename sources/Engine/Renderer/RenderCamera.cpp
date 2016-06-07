@@ -13,6 +13,8 @@ void PerspectiveCamera::SetPerspective(vec2 renderSize)
 
 void PerspectiveCamera::Update()
 {
+	this->m_attachedCamera->Update();
+
 	if (m_attachedCamera != NULL)
 		m_ViewProjection = m_perspectiveProjection * m_attachedCamera->m_viewTransform.m_transformMatrix;
 	else
@@ -31,6 +33,8 @@ void OrthographicCamera::SetOrthographicProj(float left, float right, float bott
 
 void OrthographicCamera::Update()
 {
+	this->m_attachedCamera->Update();
+
 	if (m_attachedCamera != NULL)
 		m_ViewProjection = m_orthographicProjection * m_attachedCamera->m_viewTransform.m_transformMatrix;
 	else

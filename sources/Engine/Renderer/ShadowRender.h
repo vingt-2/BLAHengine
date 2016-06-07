@@ -11,6 +11,7 @@ class DirectionalShadowRender : ShadowRender
 {
 public:
 	bool m_isSetup;
+	vec3 m_shadowDirection;
 
 	//OpenGL
 	GLuint m_depthTexture;
@@ -29,6 +30,7 @@ class PerspectiveShadowRender : ShadowRender
 {
 public:
 	bool m_isSetup;
+	vec3 m_shadowDirection;
 
 	//OpenGL
 	GLuint m_depthTexture;

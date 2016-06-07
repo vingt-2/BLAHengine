@@ -113,10 +113,10 @@ bool GL33Renderer::Update()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*DrawBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
-	DrawBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
-	DrawBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
-	DrawBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+	/*DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
+	DrawColorBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
+	DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+	DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
 	*/
 
 	for (DirectionalLightRender directLight : m_directionalLightsVector)
@@ -370,7 +370,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	GLuint shadowTID = glGetUniformLocation(prgmID, "shadowMV");
 	glUniformMatrix4fv(shadowTID, 1, GL_FALSE, &shadowMV[0][0]);
 
-	vec3 lightDirection = directionalLight.m_lightDirection;
+	vec3 lightDirection = directionalLight.m_shadowRender.m_shadowDirection;
 
 	GLuint lightID = glGetUniformLocation(prgmID, "lightDirection");
 	glUniform3f(lightID, lightDirection.x, lightDirection.y, lightDirection.z);

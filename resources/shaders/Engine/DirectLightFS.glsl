@@ -23,9 +23,16 @@ void main(){
     
     float closestObjDepth = texture2D(shadowMap, shadowUV).r;
     
-    if(length(diffuse) < 0.01)
+    if(length(worldPos) > 1000)
     {
-        color = vec3(0.4,0.5,0.7);
+        float altitude = clamp(0.2 + dot(normalize(worldPos),vec3(0.0,1.0,0.0)),0.0,1.0);
+        color = vec3(0.4,0.4,0.3 + (0.6 * altitude));
+        
+        float sunAligned = clamp(dot(normalize(worldPos),lightDirection),0.0,1.0);
+        
+        vec3 sunColor = clamp(pow(sunAligned,30),0,1) * vec3(1.0,0.8,0.5);
+        
+        color = color + sunColor;
     }
     else
     {
