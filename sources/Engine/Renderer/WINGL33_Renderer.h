@@ -77,10 +77,16 @@ public:
 	~GL33Renderer();
 
 	// Debug Vignette;
-	GLuint depthBufDebugPrgm;
+	GLuint DrawColorBufferPrgmID;
+	GLuint DrawDepthBufferPrgmID;
 	//
 
+	vector<DirectionalLightRender> m_directionalLightsVector;
 	GBuffer m_GBuffer;
+
+
+	// MOVE?
+	bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
 
 protected:
 	GLFWwindow* InitializeContext(char* windowTitle);
@@ -104,11 +110,11 @@ protected:
 
 	void RenderDebug();
 
-	void DrawBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
+	void DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
+	void DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
 
-	void DrawDirectionalLight(vec3 lightDirection);
+	void DrawDirectionalLight(DirectionalLightRender directionalLight);
 
-	bool RenderShadows(ShadowRender& shadowRender);
-	bool SetupShadowBuffer(ShadowRender& shadowRender);
+	bool RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender);
 
 };

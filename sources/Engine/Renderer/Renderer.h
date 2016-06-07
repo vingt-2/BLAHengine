@@ -2,7 +2,7 @@
 #include "../../Std/std.h"
 #include "../../Tools/OBJImport.h"
 #include "../Game/GameObjects/Camera.h"
-#include "ShadowRender.h"
+#include "LightRender.h"
 
 class RenderObject
 {
@@ -27,12 +27,6 @@ public:
 	vector<RenderObject*> m_gizmoRenderPool;
 	RenderObject* debug_sphere;
 	vector<vec3> debug_sphere_requests;
-
-	//////
-	//
-	//HardCode
-	//////
-	vec3 m_directionalLight;
 
 	// Rendering Related
 	virtual bool Update() = 0;

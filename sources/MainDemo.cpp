@@ -225,15 +225,15 @@ int main( void )
 	// NOW WE CAN LOAD SOME RESSOURCES
 	sharedResources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
 	sharedResources->LoadMaterial("debugShader", "./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
-	sharedResources->LoadMaterial("shadowmapShader", "./resources/shaders/Vert_Shadow.glsl", "./resources/shaders/Frag_Shadow.glsl");
+	sharedResources->LoadMaterial("shadowmapShader", "./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
 	sharedResources->LoadMaterial("depthBufDebug", "./resources/shaders/depthBuffDebug_vert.glsl", "./resources/shaders/depthBuffDebug_frag.glsl");
 	sharedResources->LoadMaterial("SimpleTexture", "./resources/shaders/SimpleTexture_vert.glsl", "./resources/shaders/SimpleTexture_frag.glsl");
-	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomVS.glsl", "./resources/shaders/Engine/GeomFS.glsl");
+	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
 	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Engine/DirectLightVS.glsl", "./resources/shaders/Engine/DirectLightFS.glsl");
 
-	//mainRenderer->SetShadowID(sharedResources->GetMaterial("shadowmapShader"));
+	mainRenderer->DrawColorBufferPrgmID = sharedResources->GetMaterial("SimpleTexture");
+	mainRenderer->DrawDepthBufferPrgmID = sharedResources->GetMaterial("depthBufDebug");
 
-	mainRenderer->depthBufDebugPrgm = sharedResources->GetMaterial("SimpleTexture");
 	mainRenderer->m_GBuffer.m_geometryPassPrgmID = sharedResources->GetMaterial("GeomPass");
 
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
@@ -251,7 +251,7 @@ int main( void )
 	MeshAsset cube;
 	MeshAsset rocket;
 	MeshAsset sponza;
-	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
+	objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
 	//objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
 	//for (auto &v : sponza.m_meshVertices) {
 	//	vec4 hP = 0.1f * vec4(v, 1);
@@ -324,7 +324,7 @@ int main( void )
 
 	for (int i = 0; i < 1; i++)
 	{
-		GameChar* object = new GameChar(&cube);
+		GameChar* object = new GameChar(&xwing);
 		object->m_meshRenderer->AssignMaterial("defaultShader");
 		object->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
 		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
@@ -335,6 +335,16 @@ int main( void )
 
 	DirectionalLight* light = new DirectionalLight(vec3(0,-1,0));
 	mainScene->AddDirectionalLight(light);
+
+	DirectionalLightRender lr;
+	lr.m_lightDirection = vec3(0, 1, 0);
+	lr.m_lightRenderPrgmID = sharedResources->GetMaterial("DirLightPass");
+	lr.m_shadowRender.m_shadowPrgmID = sharedResources->GetMaterial("shadowmapShader");
+	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
+	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-100, 100, -100, 100);
+	lr.m_shadowRender.m_bufferSize = 4096;
+	cout << "setuping buffer " << mainRenderer->SetupDirectionalShadowBuffer(lr.m_shadowRender) << "\n";;
+	mainRenderer->m_directionalLightsVector.push_back(lr);
 
 	int fps_frames=0;
 	GLfloat fps_time = glfwGetTime();
@@ -413,7 +423,6 @@ int main( void )
 		{
 			lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
 			lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
-			mainRenderer->m_directionalLight = mainCamera->m_transform->LocalDirectionToWorld(vec3(0, 0, 1));
 		}
 
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
@@ -473,17 +482,17 @@ int main( void )
 			currentObject->m_rigidBody->PushForceWorld(a,0.5f*b);
 		}
 
-		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
-		{
-			Contact contact = mainScene->GetContacts()->at(c);
-
-			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-
-//			mainScene->m_enableSimulation = false;
-		}
+//		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
+//		{
+//			Contact contact = mainScene->GetContacts()->at(c);
+//
+//			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+//			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+//			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+//			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+//
+////			mainScene->m_enableSimulation = false;
+//		}
 
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 		{

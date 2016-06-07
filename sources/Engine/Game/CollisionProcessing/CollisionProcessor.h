@@ -72,6 +72,6 @@ public:
 
 private:
 
-	float m_granularity;
+	float m_resolution;
 	vector<Contact*> m_spatialTable;
 };

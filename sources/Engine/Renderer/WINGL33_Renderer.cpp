@@ -63,7 +63,7 @@ void GL33Renderer::RenderGBuffer()
 			GLuint MVPid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "MVP");
 			glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
-			//send modelTransform to shader <<--- HARDCODED
+			//send modelTransform to shader
 			GLuint transformID = glGetUniformLocation(renderObject->m_programID, "modelTransform");
 			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(renderObject->m_modelTransform->m_transformMatrix)[0][0]);
 
@@ -117,9 +117,13 @@ bool GL33Renderer::Update()
 	DrawBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
 	DrawBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
 	DrawBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
-*/
+	*/
 
-	DrawDirectionalLight(vec3(0, -1, 0));
+	for (DirectionalLightRender directLight : m_directionalLightsVector)
+	{
+		RenderDirectionalShadowMap(directLight.m_shadowRender);
+		DrawDirectionalLight(directLight);
+	}
 
 	glfwSwapInterval(0);
 	
@@ -175,7 +179,7 @@ bool GL33Renderer::CancelRender(const MeshRenderer& object)
 	return true;
 }
 
-bool GL33Renderer::SetupShadowBuffer(ShadowRender& shadowRender)
+bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender)
 {
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	glGenFramebuffers(1, &(shadowRender.m_shadowBuffer));
@@ -204,7 +208,7 @@ bool GL33Renderer::SetupShadowBuffer(ShadowRender& shadowRender)
 	return true;
 }
 
-void GL33Renderer::DrawBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
+void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
 {
 	static const GLfloat g_quad_vertex_buffer_data[] = {
 		-1.0f, -1.0f, 0.0f,
@@ -225,8 +229,8 @@ void GL33Renderer::DrawBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint t
 	glViewport(topLeft.x, topLeft.y, bottomRight.x-topLeft.x, bottomRight.y-topLeft.y);
 
 	// Use our shader
-	glUseProgram(depthBufDebugPrgm);
-	GLuint texID = glGetUniformLocation(depthBufDebugPrgm, "colormap");
+	glUseProgram(DrawColorBufferPrgmID);
+	GLuint texID = glGetUniformLocation(DrawColorBufferPrgmID, "colorTexture");
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureTarget);
@@ -256,8 +260,62 @@ void GL33Renderer::DrawBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint t
 	glUseProgram(0);
 }
 
-void GL33Renderer::DrawDirectionalLight(vec3 lightDirection)
+void GL33Renderer::DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
 {
+	static const GLfloat g_quad_vertex_buffer_data[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f,  1.0f, 0.0f,
+	};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	GLuint quad_vertexbuffer;
+	glGenBuffers(1, &quad_vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+	glViewport(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+
+	// Use our shader
+	glUseProgram(DrawDepthBufferPrgmID);
+	GLuint texID = glGetUniformLocation(DrawDepthBufferPrgmID, "depthTexture");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(texID, 0);
+
+	// 1rst attribute buffer : vertices
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// Draw the triangle !
+	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+	glDisable(GL_COMPARE_R_TO_TEXTURE);
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
+
+void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
+{
+	OrthographicCamera* shadowCamera = &(directionalLight.m_shadowRender.m_shadowCamera);
+	// Memory leak here <-- !!
 	static const GLfloat g_quad_vertex_buffer_data[] = {
 		-1.0f, -1.0f, 0.0f,
 		1.0f, -1.0f, 0.0f,
@@ -278,34 +336,51 @@ void GL33Renderer::DrawDirectionalLight(vec3 lightDirection)
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
 	// Use our shader
-	glUseProgram(depthBufDebugPrgm);
-	GLuint diffuseMapID = glGetUniformLocation(depthBufDebugPrgm, "diffuseMap");
+	GLuint prgmID = directionalLight.m_lightRenderPrgmID;
+	glUseProgram(prgmID);
+	GLuint diffuseMapID = glGetUniformLocation(prgmID, "diffuseMap");
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
 	// Set our "renderedTexture" sampler to user Texture Unit 0
 	glUniform1i(diffuseMapID, 0);
 
-	GLuint normalMapID = glGetUniformLocation(depthBufDebugPrgm, "normalMap");
+	GLuint normalMapID = glGetUniformLocation(prgmID, "normalMap");
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_normalsTextureTarget);
 	// Set our "renderedTexture" sampler to user Texture Unit 0
-	glUniform1i(normalMapID, 0);
+	glUniform1i(normalMapID, 1);
 
-	GLuint worldPosMapID = glGetUniformLocation(depthBufDebugPrgm, "worldPosMap");
+	GLuint worldPosMapID = glGetUniformLocation(prgmID, "worldPosMap");
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_worldPosTextureTarget);
 	// Set our "renderedTexture" sampler to user Texture Unit 0
-	glUniform1i(worldPosMapID, 0);
+	glUniform1i(worldPosMapID, 2);
 
-	GLuint texCoordMapID = glGetUniformLocation(depthBufDebugPrgm, "texCoordMap");
-	// Bind our texture in Texture Unit 0
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+
+	mat4 shadowMV = biasMatrix * shadowCamera->m_ViewProjection;
+	GLuint shadowTID = glGetUniformLocation(prgmID, "shadowMV");
+	glUniformMatrix4fv(shadowTID, 1, GL_FALSE, &shadowMV[0][0]);
+
+	vec3 lightDirection = directionalLight.m_lightDirection;
+
+	GLuint lightID = glGetUniformLocation(prgmID, "lightDirection");
+	glUniform3f(lightID, lightDirection.x, lightDirection.y, lightDirection.z);
+
+	GLuint shadowmapHandle = glGetUniformLocation(prgmID, "shadowMap");
+
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
-	// Set our "renderedTexture" sampler to user Texture Unit 0
-	glUniform1i(texCoordMapID, 0);
+	glBindTexture(GL_TEXTURE_2D, directionalLight.m_shadowRender.m_depthTexture);
+
+	glUniform1i(shadowmapHandle, 3);
 
 	// 1rst attribute buffer : vertices
 	GLuint vao;
@@ -330,13 +405,13 @@ void GL33Renderer::DrawDirectionalLight(vec3 lightDirection)
 	glUseProgram(0);
 }
 
-bool GL33Renderer::RenderShadows(ShadowRender& shadowRender)
+bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender)
 {
 	shadowRender.Update();
 
 	// Render to our framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowRender.m_shadowBuffer);
-	glViewport(0, 0, 8192, 8192); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
+	glViewport(0, 0, shadowRender.m_bufferSize, shadowRender.m_bufferSize); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
 
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -366,7 +441,7 @@ bool GL33Renderer::RenderShadows(ShadowRender& shadowRender)
 			glBindVertexArray(0);
 		}
 	}
-
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return true;
 }
 

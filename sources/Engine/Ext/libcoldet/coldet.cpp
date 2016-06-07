@@ -47,6 +47,8 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
   m_intersectedTriangles.clear();
   m_collisionPoints.clear();
   m_collidingFaces.clear();
+  m_colSizes.clear();
+
   m_ColType=Models;
   CollisionModel3DImpl* o=static_cast<CollisionModel3DImpl*>(other);
   if (!m_Final) throw Inconsistency();
