@@ -1,3 +1,4 @@
+
 #version 330 core
 
 // Ouput data
@@ -23,17 +24,22 @@ void main(){
     
     float closestObjDepth = texture2D(shadowMap, shadowUV).r;
     
+    float sunOrientation = 1 - clamp(dot(vec3(0,1,0),lightDirection),0,1);
+    sunOrientation *= sunOrientation;
+    
+    vec3 overalSunColor = vec3(sunOrientation, sunOrientation*0.5, sunOrientation*0.2);
+    
     if(length(worldPos) > 1000)
     {
-        float altitude = clamp(0.2 + dot(normalize(worldPos),vec3(0.0,1.0,0.0)),0.0,1.0);
+        float altitude = abs(0.4 + dot(normalize(worldPos),vec3(0.0,1.0,0.0)));
         
-        color = vec3(0.4,0.4,0.3 + (0.6 * altitude));
+        vec3 skyColor = vec3(0.3 + (0.2 * altitude + 1.3*sunOrientation) ,0.3 + (0.5 * altitude + 0.6*sunOrientation) ,0.4 + (0.5 * altitude));
         
         float sunAligned = clamp(dot(normalize(worldPos),lightDirection),0.0,1.0);
         
-        vec3 sunColor = clamp(pow(sunAligned,30),0,1) * vec3(1.0,0.8,0.5);
+        vec3 sunColor = clamp(pow(sunAligned,100),0,1) * vec3(3.0,0.8,0.5);
         
-        color = color + sunColor;
+        color = (1-sunOrientation) * (skyColor + (1-sunOrientation) * (sunColor * (1+overalSunColor)));
     }
     else
     {
@@ -51,6 +57,6 @@ void main(){
             vis = ambientComp;
         }
 
-        color = diffuse * (0.3 + vis * (max(dot(normal, lightDirection),0) ));
+        color = diffuse * (0.3 + vis * (max(dot(normal, lightDirection),0) ) * (1-sunOrientation)*(1+overalSunColor));
     }
 }

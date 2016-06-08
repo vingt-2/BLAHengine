@@ -324,8 +324,8 @@ int main( void )
 	lr.m_lightRenderPrgmID = sharedResources->GetMaterial("DirLightPass");
 	lr.m_shadowRender.m_shadowPrgmID = sharedResources->GetMaterial("ShadowmapPass");
 	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
-	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-100, 100, -100, 100);
-	lr.m_shadowRender.m_bufferSize = 4096;
+	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
+	lr.m_shadowRender.m_bufferSize = 8192;
 
 	cout << "setuping buffer " << mainRenderer->SetupDirectionalShadowBuffer(lr.m_shadowRender) << "\n";;
 	mainRenderer->m_directionalLightsVector.push_back(lr);
@@ -366,9 +366,10 @@ int main( void )
 	double iteration = 1;
 
 	int solvIt = 0;
+	float lightRotation = 0;
 	while(!terminationRequest)
 	{
-
+		lightRotation++;
 		averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
 		averageProc += mainScene->m_rigidBodySystem->m_collisionProcessor->m_processingTime;
 
@@ -408,6 +409,8 @@ int main( void )
 			lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
 			lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
 		}
+
+		lightObj->m_transform->SetRotationUsingEuler(vec3(0.0001 * lightRotation, 0, 0));
 
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{
