@@ -1,7 +1,7 @@
 BLAengine - Stuff does things
 ===================================
 
-![alt tag](https://raw.github.com/vingt-2/BLAengine/master/DemoGif.gif)
+![alt tag](https://raw.github.com/vingt-2/BLAengine/master/illustration.bmp)
 =====
 
 The demo application "MainDemo" of the engine is a model viewer with the controls:
