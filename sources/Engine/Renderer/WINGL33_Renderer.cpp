@@ -64,7 +64,7 @@ void GL33Renderer::RenderGBuffer()
 			glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
 			//send modelTransform to shader
-			GLuint transformID = glGetUniformLocation(renderObject->m_programID, "modelTransform");
+			GLuint transformID = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "modelTransform");
 			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(renderObject->m_modelTransform->m_transformMatrix)[0][0]);
 
 			// Send textureSamplers to shader

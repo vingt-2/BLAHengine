@@ -223,16 +223,15 @@ int main( void )
 	}
 
 	// NOW WE CAN LOAD SOME RESSOURCES
-	sharedResources->LoadMaterial("defaultShader","./resources/shaders/Vertex_Shader.glsl", "./resources/shaders/Fragment_Shader.glsl");
-	sharedResources->LoadMaterial("debugShader", "./resources/shaders/Debug_Vertex.glsl", "./resources/shaders/Debug_Fragment.glsl");
-	sharedResources->LoadMaterial("shadowmapShader", "./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
-	sharedResources->LoadMaterial("depthBufDebug", "./resources/shaders/depthBuffDebug_vert.glsl", "./resources/shaders/depthBuffDebug_frag.glsl");
-	sharedResources->LoadMaterial("SimpleTexture", "./resources/shaders/SimpleTexture_vert.glsl", "./resources/shaders/SimpleTexture_frag.glsl");
+	sharedResources->LoadMaterial("ShadowmapPass", "./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
 	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
-	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Engine/DirectLightVS.glsl", "./resources/shaders/Engine/DirectLightFS.glsl");
+	sharedResources->LoadMaterial("DrawDepthTexture", "./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
+	sharedResources->LoadMaterial("DrawColorTexture", "./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
 
-	mainRenderer->DrawColorBufferPrgmID = sharedResources->GetMaterial("SimpleTexture");
-	mainRenderer->DrawDepthBufferPrgmID = sharedResources->GetMaterial("depthBufDebug");
+	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
+
+	mainRenderer->DrawColorBufferPrgmID = sharedResources->GetMaterial("DrawColorTexture");
+	mainRenderer->DrawDepthBufferPrgmID = sharedResources->GetMaterial("DrawDepthTexture");
 
 	mainRenderer->m_GBuffer.m_geometryPassPrgmID = sharedResources->GetMaterial("GeomPass");
 
@@ -277,17 +276,6 @@ int main( void )
 		v = mat2(100) * v;
 	}
 
-
-
-	GameChar* debugSphere = new GameChar(&cube);
-	debugSphere->m_meshRenderer->AssignMaterial("defaultShader");
-	debugSphere->m_meshRenderer->AssignTexture("red", "diffuseMap");
-	debugSphere->m_meshRenderer->AssignTexture("earthNormals", "normals");
-	debugSphere->m_meshRenderer->m_renderType = 0x003;
-	debugSphere->m_transform->m_scale = vec3(0.1);
-	renderingManager->DebugSetupSphere(*debugSphere);
-
-
 	//GameChar* floor_obj = new GameChar(&floor);
 	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
 	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
@@ -298,7 +286,7 @@ int main( void )
 	//floor_obj->m_rigidBody->m_isPinned = true;
 
 	GameChar* skySphere = new GameChar(&invertedSphere);
-	skySphere->m_meshRenderer->AssignMaterial("defaultShader");
+	skySphere->m_meshRenderer->AssignMaterial("DirLightPass");
 	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
 	renderingManager->RequestRenderTicket(*skySphere);
@@ -308,7 +296,7 @@ int main( void )
 	skySphere->m_rigidBody->m_isPinned = true;
 
 	GameChar* sceneMesh = new GameChar(&sponza);
-	sceneMesh->m_meshRenderer->AssignMaterial("defaultShader");
+	sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
 	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
 	//sceneMesh->m_transform->m_scale = vec3(0.1);
@@ -317,7 +305,7 @@ int main( void )
 	sceneMesh->m_rigidBody->m_isPinned = true;
 
 	GameChar* lightObj = new GameChar(&cube);
-	lightObj->m_meshRenderer->AssignMaterial("defaultShader");
+	lightObj->m_meshRenderer->AssignMaterial("DirLightPass");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
 	lightObj->m_transform->m_position = vec3(-10,5,0);
@@ -325,35 +313,20 @@ int main( void )
 
 	Camera* cameraLight = new Camera();
 	cameraLight->m_transform = lightObj->m_transform;
-	//cameraLight->m_transform = mainCamera->m_transform;
 	lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
 	lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
 
-	//mainRenderer->shadowCamera.AttachCamera(cameraLight);
-	//mainRenderer->shadowCamera.SetOrthographicProj(-100, 100, -100, 100);
-
-
-
-	for (int i = 0; i < 0; i++)
-	{
-		GameChar* object = new GameChar(&cube);
-		object->m_meshRenderer->AssignMaterial("defaultShader");
-		object->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
-		object->m_meshRenderer->AssignTexture("earthNormals", "normals");
-		object->m_transform->m_position = vec3( 5 ,30 + 2.5*i, 0);
-		mainScene->AddObject(object);
-		renderingManager->RequestRenderTicket(*object);
-	}
 
 	DirectionalLight* light = new DirectionalLight(vec3(0,-1,0));
 	mainScene->AddDirectionalLight(light);
 
 	DirectionalLightRender lr;
 	lr.m_lightRenderPrgmID = sharedResources->GetMaterial("DirLightPass");
-	lr.m_shadowRender.m_shadowPrgmID = sharedResources->GetMaterial("shadowmapShader");
+	lr.m_shadowRender.m_shadowPrgmID = sharedResources->GetMaterial("ShadowmapPass");
 	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
 	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-100, 100, -100, 100);
 	lr.m_shadowRender.m_bufferSize = 4096;
+
 	cout << "setuping buffer " << mainRenderer->SetupDirectionalShadowBuffer(lr.m_shadowRender) << "\n";;
 	mainRenderer->m_directionalLightsVector.push_back(lr);
 

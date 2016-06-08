@@ -26,6 +26,7 @@ void main(){
     if(length(worldPos) > 1000)
     {
         float altitude = clamp(0.2 + dot(normalize(worldPos),vec3(0.0,1.0,0.0)),0.0,1.0);
+        
         color = vec3(0.4,0.4,0.3 + (0.6 * altitude));
         
         float sunAligned = clamp(dot(normalize(worldPos),lightDirection),0.0,1.0);
