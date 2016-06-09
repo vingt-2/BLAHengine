@@ -1,4 +1,4 @@
-BLAengine - Stuff does things
+BLAHengine - Stuff does things
 ===================================
 
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/illustration.bmp)
