@@ -367,9 +367,9 @@ int main( void )
 
 	int solvIt = 0;
 	float lightRotation = 0;
+	bool moveLight = false;
 	while(!terminationRequest)
 	{
-		lightRotation++;
 		averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
 		averageProc += mainScene->m_rigidBodySystem->m_collisionProcessor->m_processingTime;
 
@@ -408,9 +408,15 @@ int main( void )
 		{
 			lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
 			lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
+			moveLight = !moveLight;
+			lastPressS = time;
 		}
 
-		lightObj->m_transform->SetRotationUsingEuler(vec3(0.0001 * lightRotation, 0, 0));
+		if (moveLight)
+		{
+			lightObj->m_transform->SetRotationUsingEuler(vec3(lightRotation, 0, 0));
+			lightRotation += 0.1*deltaTime;
+		}
 
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{
