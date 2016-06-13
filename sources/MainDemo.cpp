@@ -412,11 +412,23 @@ int main( void )
 			lastPressS = time;
 		}
 
-		if (moveLight)
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
 		{
-			lightObj->m_transform->SetRotationUsingEuler(vec3(lightRotation, 0, 0));
 			lightRotation += 0.1*deltaTime;
 		}
+
+		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
+		{
+			lightRotation -= 0.1*deltaTime;
+		}
+
+		if (moveLight)
+		{
+			lightRotation += 0.1*deltaTime;
+		}
+
+		lightObj->m_transform->SetRotationUsingEuler(vec3(lightRotation, 0, 0));
+
 
 		if (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_BACKSPACE) == GLFW_PRESS && (time - lastPressG) > 0.5)
 		{

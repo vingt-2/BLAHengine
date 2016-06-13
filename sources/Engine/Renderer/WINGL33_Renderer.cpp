@@ -113,11 +113,11 @@ bool GL33Renderer::Update()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
-	DrawColorBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
-	DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
-	DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
-	*/
+	//DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
+	//DrawColorBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
+	//DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+	//DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+	
 
 	for (DirectionalLightRender directLight : m_directionalLightsVector)
 	{
@@ -349,15 +349,22 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_normalsTextureTarget);
-	// Set our "renderedTexture" sampler to user Texture Unit 0
+	// Set our "renderedTexture" sampler to user Texture Unit 1
 	glUniform1i(normalMapID, 1);
 
 	GLuint worldPosMapID = glGetUniformLocation(prgmID, "worldPosMap");
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_worldPosTextureTarget);
-	// Set our "renderedTexture" sampler to user Texture Unit 0
+	// Set our "renderedTexture" sampler to user Texture Unit 2
 	glUniform1i(worldPosMapID, 2);
+
+	GLuint depthMapID = glGetUniformLocation(prgmID, "depthMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_depthTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 3
+	glUniform1i(depthMapID, 3);
 
 	glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
@@ -377,10 +384,10 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 
 	GLuint shadowmapHandle = glGetUniformLocation(prgmID, "shadowMap");
 
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, directionalLight.m_shadowRender.m_depthTexture);
 
-	glUniform1i(shadowmapHandle, 3);
+	glUniform1i(shadowmapHandle, 4);
 
 	// 1rst attribute buffer : vertices
 	GLuint vao;
