@@ -1,11 +1,7 @@
-/*Author: Vingt-2
-BLAengine
-*/
-
 #include "OBJImport.h"
 
 
-OBJImport::OBJImport(void):
+OBJImport::OBJImport(void) :
 	m_currentMaxVertexPos(0),
 	m_currentMaxUVPos(0),
 	m_currentMaxNormalPos(0)
@@ -24,23 +20,13 @@ typedef struct vertEntry{
 
 	bool operator==(const vertEntry& other) const
 	{
-		float epsilon = 0.000001;
+		float epsilon = 0.0001;
 
 		if (glm::distance(vx, other.vx) > epsilon)
 		{
 			return false;
 		}
-
-		if (glm::distance(vn, other.vn) > epsilon)
-		{
-			return false;
-		}
-
-		if (glm::distance(vt, other.vt) > epsilon)
-		{
-			return false;
-		}
-
+		
 		return true;
 	}
 } ve_t;
@@ -49,19 +35,23 @@ struct vertEntryHasher
 {
 	std::size_t operator()(const vertEntry& v) const
 	{
+		float hashResolution = 0.0001;
+
+		long celPosX = (long)(v.vx.x / hashResolution);
+		long celPosY = (long)(v.vx.y / hashResolution);
+		long celPosZ = (long)(v.vx.z / hashResolution);
+
 		int p1 = 73856093;
 		int p2 = 19349663;
 		int p3 = 83492791;
 
 		int hashVx = (int)(100 * v.vx.x)*p1 ^ (int)(100 * v.vx.y)*p2 ^ (int)(100 * v.vx.z)*p3;
-		int hashVn = (int)(100 * v.vn.x)*p1 ^ (int)(100 * v.vn.y)*p2 ^ (int)(100 * v.vn.z)*p3;
-		int hashVt = (int)(100 * v.vt.x)*p1 ^ (int)(100 * v.vt.y)*p2;
 
-		return hashVx + hashVn + hashVt;
+		return hashVx;
 	}
 };
 
-bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNormals)
+bool OBJImport::ImportMesh(const string filename, PolygonalMesh *mesh, bool swapNormals)
 {
 
 	m_currentMaxVertexPos = 0;
@@ -326,13 +316,18 @@ bool OBJImport::ImportMesh(const string filename, MeshAsset *mesh, bool swapNorm
 		}
 
 		mesh->m_meshTriangles = meshTriangles;
-		mesh->m_meshVertices  = meshVertices;
-		mesh->m_meshNormals	  = meshNormals;
-		mesh->m_meshUVs		  = meshUVs;
+		mesh->m_vertexPos	  = meshVertices;
+		mesh->m_vertexNormals = meshNormals;
+		mesh->m_vertexUVs	  = meshUVs;
 
 		cout << "Imported: " << meshTriangles.size() << " triangles, " << meshVertices.size() << " triplets, " << collectedVertices.size() << " vertices, " << collectedNormals.size() << " normals, " << collectedUVs.size() << " UVs.\n";
 
 		mesh->NormalizeModelCoordinates();
+		cout << "Normalized Model Coordinates \n";
+
+		cout << "Building Half-Edge DataStructure ...";
+		mesh->BuildHalfEdgeDS();
+		cout << " Built\n";
 
 		return true;
 	}

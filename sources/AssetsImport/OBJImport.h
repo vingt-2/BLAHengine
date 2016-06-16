@@ -1,11 +1,11 @@
 #pragma once
 #include "../Common/std.h"
-#include "../Engine/AssetsManager/MeshAsset.h"
+#include "../Engine/AssetsManager/PolygonalMesh.h"
 
 class OBJImport
 {
 public:
-	bool ImportMesh(const string filename, MeshAsset *mesh, bool swapNormals);
+	bool ImportMesh(const string filename, PolygonalMesh *mesh, bool swapNormals);
 
 	OBJImport(void);
 	~OBJImport(void);

@@ -13,7 +13,7 @@ Hence the name "MainDemo.cpp".
 
 #include "./Engine/Renderer/WINGL33_Renderer.h"
 
-#include "Assets\OBJImport.h"
+#include "AssetsImport\OBJImport.h"
 #include "Engine\Game\RenderingManager.h"
 #include "Engine\Game\Debug.h"
 #include "./Engine/Game/Scene.h"
@@ -21,7 +21,6 @@ Hence the name "MainDemo.cpp".
 #include "./Engine/Game/GameSingleton.h"
 #include "./Engine/Game/GameComponents/Collider.h"
 #include "./Engine/Game/RigidBodySystem.h"
-#include "./Engine/AssetsManager/MeshAsset.h"
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
@@ -237,19 +236,18 @@ int main( void )
 
 	//mainRenderer->m_debug = debug;
 	OBJImport objImport;
+	PolygonalMesh xwing;
+	PolygonalMesh sphere;
+	PolygonalMesh invertedSphere;
+	PolygonalMesh floor;
+	PolygonalMesh cube;
+	PolygonalMesh rocket;
+	PolygonalMesh sponza;
+	PolygonalMesh arrow;
 
-	MeshAsset xwing;
-	MeshAsset sphere;
-	MeshAsset invertedSphere;
-	MeshAsset floor;
-	MeshAsset cube;
-	MeshAsset rocket;
-	MeshAsset sponza;
-	MeshAsset arrow;
-	objImport.ImportMesh("./resources/models/sponza.obj", &arrow, false);
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
 	objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
-	for (auto &v : sponza.m_meshVertices) {
+	for (auto &v : sponza.m_vertexPos) {
 		vec4 hP = 0.1f * vec4(v, 1);
 		v = vec3(hP.x, hP.y, hP.z);
 	}
@@ -257,29 +255,29 @@ int main( void )
 
 	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
-	objImport.ImportMesh("./resources/models/bla.obj", &sphere, false);
-	objImport.ImportMesh("./resources/models/bla.obj", &invertedSphere, true);
+	objImport.ImportMesh("./resources/models/sphere.obj", &sphere, false);
+	objImport.ImportMesh("./resources/models/sphere.obj", &invertedSphere, true);
 	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", &rocket, true);
 	mat4 scaleMat(vec4(100, 0, 0, 0), 
 					vec4(0, 10, 0, 0), 
 					vec4(0, 0, 100, 0),
 					vec4(0, 0, 0, 1));
-	for (auto &v : floor.m_meshVertices){
+	for (auto &v : floor.m_vertexPos){
 		vec4 hP = scaleMat * vec4(v,1);
 		v = vec3(hP.x, hP.y, hP.z);
 	}
-	for (auto &v : floor.m_meshUVs){
+	for (auto &v : floor.m_vertexUVs){
 		v = mat2(100) * v;
 	}
 
-	GameChar* floor_obj = new GameChar(&floor);
-	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
-	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	renderingManager->RequestRenderTicket(*floor_obj);
-	mainScene->AddObject(floor_obj);
-	floor_obj->m_transform->m_position = (vec3(0, 0, 0));
-	floor_obj->m_rigidBody->m_isPinned = true;
+	//GameChar* floor_obj = new GameChar(&floor);
+	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
+	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	//renderingManager->RequestRenderTicket(*floor_obj);
+	//mainScene->AddObject(floor_obj);
+	//floor_obj->m_transform->m_position = (vec3(0, 0, 0));
+	//floor_obj->m_rigidBody->m_isPinned = true;
 
 	GameChar* skySphere = new GameChar(&invertedSphere);
 	skySphere->m_meshRenderer->AssignMaterial("DirLightPass");
@@ -296,7 +294,7 @@ int main( void )
 	sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
 	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	//sceneMesh->m_transform->m_scale = vec3(0.1);
+	sceneMesh->m_transform->m_scale = vec3(0.1);
 	renderingManager->RequestRenderTicket(*sceneMesh);
 	mainScene->AddObject(sceneMesh);
 	sceneMesh->m_rigidBody->m_isPinned = true;

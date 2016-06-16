@@ -59,7 +59,7 @@ public:
 	vec3 GetTorquesAccu() { return m_torquesAccu; };
 	void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
 
-	RigidBody(Transform* transform, MeshRenderer* mesh);
+	RigidBody(Transform* transform, PolygonalMesh* mesh);
 	~RigidBody(void);
 
 private:

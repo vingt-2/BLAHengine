@@ -1,6 +1,6 @@
 #pragma once
-#include "../Common/Maths.h"
-#include "../Common/std.h"
+#include "../../Common/Maths.h"
+#include "../../Common/std.h"
 
 
 class PolygonalMesh
@@ -37,8 +37,8 @@ public:
 	vector<HE_edge> m_halfEdges; // The list of all half edges (should be 2*E)
 
 	vector<uint32_t> m_vertEmanatingHE; // a list of one HE index (from m_halfEdges) emanating from each vertex (should be size of m_vertexPos)
-	vector<uint32_t> m_triangleHalfEdge; // a list of one HE index (from m_halfEdges) bordering each triangle (should be size of m_meshTriangles)
-	
+	vector<uint32_t> m_triangleHE; // a list of one HE index (from m_halfEdges) bordering each triangle (should be size of m_meshTriangles)
+	int m_manifoldViolationEdges = -1;
 
 	void BuildHalfEdgeDS();
 
@@ -48,5 +48,14 @@ public:
 	void NormalizeModelCoordinates();
 	void ComputeTangents();
 
+	bool IsMeshValid() // TODO FOR REAL
+	{
+		bool check = true;
+		if (m_vertexPos.empty())
+		{
+			check = false;
+		}
 
+		return check;
+	}
 };

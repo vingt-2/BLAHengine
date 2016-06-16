@@ -1,10 +1,10 @@
 #include "Collider.h"
 
-Collider::Collider(MeshRenderer* mesh)
+Collider::Collider(PolygonalMesh* mesh)
 {
 	m_vertIndices = &(mesh->m_meshTriangles);
-	m_triVertices = &(mesh->m_meshVertices);
-	m_triNormals = &(mesh->m_meshNormals);
+	m_triVertices = &(mesh->m_vertexPos);
+	m_triNormals = &(mesh->m_vertexNormals);
 
 	GenerateBoundingRadius();
 	GenerateCollisionModel();

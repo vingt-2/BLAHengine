@@ -148,12 +148,12 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 	GL33RenderObject* object = new GL33RenderObject();
 	this->GenerateVertexArrayID(*object);
 
-	object->m_toMeshTriangles = &(meshRenderer.m_meshTriangles);
-	object->m_toMeshVertices = &(meshRenderer.m_meshVertices);
-	object->m_toMeshNormals = &(meshRenderer.m_meshNormals);
-	object->m_toMeshTangents = &(meshRenderer.m_meshTangents);
-	object->m_toMeshBiTangents = &(meshRenderer.m_meshBiTangents);
-	object->m_toMeshUVs = &(meshRenderer.m_meshUVs);
+	object->m_toMeshTriangles = &(meshRenderer.m_mesh->m_meshTriangles);
+	object->m_toMeshVertices = &(meshRenderer.m_mesh->m_vertexPos);
+	object->m_toMeshNormals = &(meshRenderer.m_mesh->m_vertexNormals);
+	object->m_toMeshTangents = &(meshRenderer.m_mesh->m_vertexTangents);
+	object->m_toMeshBiTangents = &(meshRenderer.m_mesh->m_vertexBiTangents);
+	object->m_toMeshUVs = &(meshRenderer.m_mesh->m_vertexUVs);
 
 	object->m_modelTransform = meshRenderer.m_modelTransform;
 

@@ -1,7 +1,7 @@
 #include "RigidBody.h"
 
 
-RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
+RigidBody::RigidBody(Transform* transform, PolygonalMesh* mesh) :
 	m_forcesAccu(vec3(0)),
 	m_torquesAccu(vec3(0)),
 	m_acceleration(vec3(0)),
