@@ -48,14 +48,11 @@ public:
 	void NormalizeModelCoordinates();
 	void ComputeTangents();
 
-	bool IsMeshValid() // TODO FOR REAL
-	{
-		bool check = true;
-		if (m_vertexPos.empty())
-		{
-			check = false;
-		}
+	bool IsMeshValid();
 
-		return check;
-	}
+	void GetHEvertices(uint32 halfEdge, pair<uint32, uint32>* vertexPair);
+	void GetHETriangle(uint32 halfEdge, uint32* triangle);
+	void GetSurroundingVertices(uint32 vertexIndx, vector<vec3>* surroundingVertices);
+	void GetTriangleEdges(int triangle, uint32* edge0, uint32* edge1, uint32* edge2);
+
 };

@@ -121,3 +121,14 @@ void PolygonalMesh::BuildHalfEdgeDS()
 	}
 	m_manifoldViolationEdges = problematicEdges;
 }
+
+bool PolygonalMesh::IsMeshValid()
+{
+	bool check = true;
+	if (m_vertexPos.empty())
+	{
+		check = false;
+	}
+
+	return check;
+}
