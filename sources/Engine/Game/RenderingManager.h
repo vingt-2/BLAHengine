@@ -1,6 +1,6 @@
 #pragma once
 #include "../Game/GameObjects/GameObject.h"
-#include "../../Std/std.h"
+#include "../../Common/std.h"
 #include "../Renderer/Renderer.h"
 
 typedef int RenderTicket;

@@ -1,6 +1,6 @@
 #pragma once
-#include "../../../Std/Maths.h"
-#include "../../../Std/std.h"
+#include "../../../Common/Maths.h"
+#include "../../../Common/std.h"
 #include "Collider.h"
 
 class NextState 
@@ -42,6 +42,7 @@ public:
 
 	bool m_isPinned;
 	bool m_applyGravity;
+	bool m_enableCollision;
 
 	Transform* m_transform;
 	Collider* m_collider;

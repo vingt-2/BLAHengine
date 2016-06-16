@@ -7,19 +7,13 @@ Hence the name "MainDemo.cpp".
 #define FULLSCREEN_SETTING 0
 
 // Include standard headers
-#include "./Std/std.h"
-#include "./std/Graphics.h"
+#include "./Common/std.h"
+#include "./Common/Graphics.h"
+#include "./Common/Maths.h"
 
-#ifdef USE_OSXGL32_RENDERER
-#include "./Engine/OSXGL32_Renderer.h"
-#define RENDERER 0
-#endif
-
-#ifdef USE_WINGL33_RENDERER
 #include "./Engine/Renderer/WINGL33_Renderer.h"
-#define RENDERER 1
-#endif
 
+#include "Assets\OBJImport.h"
 #include "Engine\Game\RenderingManager.h"
 #include "Engine\Game\Debug.h"
 #include "./Engine/Game/Scene.h"
@@ -251,6 +245,8 @@ int main( void )
 	MeshAsset cube;
 	MeshAsset rocket;
 	MeshAsset sponza;
+	MeshAsset arrow;
+	objImport.ImportMesh("./resources/models/sponza.obj", &arrow, false);
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
 	objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
 	for (auto &v : sponza.m_meshVertices) {
@@ -276,14 +272,14 @@ int main( void )
 		v = mat2(100) * v;
 	}
 
-	//GameChar* floor_obj = new GameChar(&floor);
-	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
-	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	//renderingManager->RequestRenderTicket(*floor_obj);
-	//mainScene->AddObject(floor_obj);
-	//floor_obj->m_transform->m_position = (vec3(0, 0, 0));
-	//floor_obj->m_rigidBody->m_isPinned = true;
+	GameChar* floor_obj = new GameChar(&floor);
+	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	renderingManager->RequestRenderTicket(*floor_obj);
+	mainScene->AddObject(floor_obj);
+	floor_obj->m_transform->m_position = (vec3(0, 0, 0));
+	floor_obj->m_rigidBody->m_isPinned = true;
 
 	GameChar* skySphere = new GameChar(&invertedSphere);
 	skySphere->m_meshRenderer->AssignMaterial("DirLightPass");
@@ -294,6 +290,7 @@ int main( void )
 	skySphere->m_transform->m_position = (vec3(0, 0, 0));
 	skySphere->m_transform->m_scale = vec3(1000);
 	skySphere->m_rigidBody->m_isPinned = true;
+	skySphere->m_rigidBody->m_enableCollision = false;
 
 	GameChar* sceneMesh = new GameChar(&sponza);
 	sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
@@ -487,17 +484,17 @@ int main( void )
 			currentObject->m_rigidBody->PushForceWorld(a,0.5f*b);
 		}
 
-//		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
-//		{
-//			Contact contact = mainScene->GetContacts()->at(c);
-//
-//			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-//			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-//			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-//			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-//
-////			mainScene->m_enableSimulation = false;
-//		}
+		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
+		{
+			Contact contact = mainScene->GetContacts()->at(c);
+
+			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+
+//			mainScene->m_enableSimulation = false;
+		}
 
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 		{

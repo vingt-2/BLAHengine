@@ -1,5 +1,5 @@
-#include "../../Std/std.h"
-#include "CollisionProcessing/CollisionProcessor.h"
+#include "../../Common/std.h"
+#include "./CollisionProcessing/CollisionProcessor.h"
 
 #pragma once
 class RigidBodySystem

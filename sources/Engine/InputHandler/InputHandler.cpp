@@ -6,10 +6,12 @@ InputHandler::InputHandler(GLFWwindow* const window):
 
 InputHandler::~InputHandler(){};
 
-bool InputHandler::reportControls(char keyPressed)
+bool InputHandler::isPressed(char keyPressed)
 {
 	if ((glfwGetKey(m_glfwWindow, keyPressed) == GLFW_PRESS))
 	{
 		return true;
 	}
+
+	return false;
 }

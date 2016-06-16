@@ -1,6 +1,7 @@
 #pragma once
-#include "../../Std/std.h"
-#include "RigidBodySystem.h"
+#include "../../Common/std.h"
+
+#include "./RigidBodySystem.h"
 #include "../Game/GameObjects/GameManager.h"
 #include "../Game/GameObjects/Camera.h"
 #include "../Game/GameObjects/DirectionalLight.h"

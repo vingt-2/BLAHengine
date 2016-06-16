@@ -13,7 +13,8 @@ RigidBody::RigidBody(Transform* transform, MeshRenderer* mesh) :
 	m_applyGravity(true),
 	m_impulseAccu(0),
 	m_massTensor(mat3(1)),
-	m_inertiaTensor(mat3(1))
+	m_inertiaTensor(mat3(1)),
+	m_enableCollision(true)
 {
 	m_transform = transform;
 

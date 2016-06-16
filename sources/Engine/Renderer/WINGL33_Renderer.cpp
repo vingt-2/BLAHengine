@@ -1,9 +1,13 @@
 #include "WINGL33_Renderer.h"
 
+///
+///
+/// Constructor / Destructor
+///
 GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	Renderer(windowTitle, isFullScreen)
 {
-	m_glfwWindow = InitializeContext(windowTitle);
+	m_glfwWindow = InitializeWindowAndContext(windowTitle);
 	if(m_glfwWindow != NULL)
 	{
 		m_isContextEnabled = true;
@@ -38,6 +42,50 @@ GL33RenderObject::GL33RenderObject():
 {}
 
 GL33RenderObject::~GL33RenderObject() {}
+ 
+
+/*
+	Rendering code below
+*/
+
+bool GL33Renderer::Update()
+{
+	int width, height;
+	glfwGetWindowSize(m_glfwWindow, &width, &height);
+
+	if (width != m_renderSize.x || height != m_renderSize.y)
+		WindowResize(m_glfwWindow, width, height);
+
+	//Set OpenGL to this context.
+	glfwMakeContextCurrent(m_glfwWindow);
+
+	m_mainRenderCamera.Update();
+
+	RenderGBuffer();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Draw vignettes with buffer results (from Gbuffer pass)
+	//DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
+	//DrawColorBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
+	//DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+	//DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+
+
+	for (DirectionalLightRender directLight : m_directionalLightsVector)
+	{
+		RenderDirectionalShadowMap(directLight.m_shadowRender);
+		DrawDirectionalLight(directLight);
+	}
+
+	glfwSwapInterval(0);
+
+	glfwSwapBuffers(m_glfwWindow);
+	glfwPollEvents();
+
+	return true;
+}
 
 void GL33Renderer::RenderGBuffer()
 {
@@ -93,44 +141,6 @@ void GL33Renderer::RenderGBuffer()
 	}
 	glUseProgram(0);
 
-}
-
-bool GL33Renderer::Update()
-{
-	int width, height;
-	glfwGetWindowSize(m_glfwWindow, &width, &height);
-	
-	if(width != m_renderSize.x || height != m_renderSize.y)
-		WindowResize(m_glfwWindow, width, height);
-
-	//Set OpenGL to this context.
-	glfwMakeContextCurrent(m_glfwWindow);
-
-	m_mainRenderCamera.Update();
-
-	RenderGBuffer();
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
-	//DrawColorBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
-	//DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
-	//DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
-	
-
-	for (DirectionalLightRender directLight : m_directionalLightsVector)
-	{
-		RenderDirectionalShadowMap(directLight.m_shadowRender);
-		DrawDirectionalLight(directLight);
-	}
-
-	glfwSwapInterval(0);
-	
-	glfwSwapBuffers(m_glfwWindow);
-	glfwPollEvents();
-	
-	return true;
 }
 
 RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, int type)
@@ -606,9 +616,8 @@ void GL33Renderer::DestroyVertexArrayID(GL33RenderObject& object)
 	glDeleteVertexArrays(1, &object.m_vertexArrayID);
 }
 
-GLFWwindow* GL33Renderer::InitializeContext(char* windowTitle)
+GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
 {
-	
 	GLFWwindow* window;
 	// Initialise GLFW
 	if( !glfwInit() )

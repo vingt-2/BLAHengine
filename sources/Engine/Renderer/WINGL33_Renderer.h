@@ -89,7 +89,7 @@ public:
 	bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
 
 protected:
-	GLFWwindow* InitializeContext(char* windowTitle);
+	GLFWwindow* InitializeWindowAndContext(char* windowTitle);
 	bool GenerateArrays(GL33RenderObject& object);
 	void GenerateVertexArrayID(GL33RenderObject& object);
 

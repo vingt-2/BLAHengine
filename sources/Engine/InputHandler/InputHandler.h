@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Std/Graphics.h"
+#include "../../Common/Graphics.h"
 
 class InputHandler
 {
@@ -8,7 +8,7 @@ public:
 	InputHandler(GLFWwindow* const windows);
 	~InputHandler();
 	
-	bool reportControls(char keyPressed);
+	bool isPressed(char keyPressed);
 
 private:
 

@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Std/std.h"
-#include "../../Tools/OBJImport.h"
+#include "../../Common/std.h"
+#include "../../Common/Graphics.h"
 #include "../Game/GameObjects/Camera.h"
 #include "LightRender.h"
 
@@ -53,6 +53,6 @@ protected:
 	bool m_isContextEnabled;
 	bool m_isFullScreen;
 	
-	virtual GLFWwindow* InitializeContext(char* windowTitle) = 0;
+	virtual GLFWwindow* InitializeWindowAndContext(char* windowTitle) = 0;
 };
 
