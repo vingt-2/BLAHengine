@@ -1,8 +1,8 @@
 #include "Collider.h"
 
-Collider::Collider(PolygonalMesh* mesh)
+Collider::Collider(TriangleMesh* mesh)
 {
-	m_vertIndices = &(mesh->m_meshTriangles);
+	m_vertIndices = mesh->GenerateTopoTriangleIndices();
 	m_triVertices = &(mesh->m_vertexPos);
 	m_triNormals = &(mesh->m_vertexNormals);
 
@@ -13,6 +13,8 @@ Collider::Collider(PolygonalMesh* mesh)
 Collider::~Collider()
 {
 	m_collisionMesh->~CollisionModel3D();
+	m_vertIndices->clear();
+	m_vertIndices->~vector();
 }
 
 void Collider::GenerateBoundingRadius()

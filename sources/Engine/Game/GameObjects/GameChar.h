@@ -9,7 +9,9 @@ public:
 
 	void Update();
 
-	GameChar(PolygonalMesh* mesh);
+	void SetTriangleMesh(TriangleMesh* mesh);
+
+	GameChar();
 	~GameChar(void);
 };
 

@@ -67,16 +67,20 @@ bool GL33Renderer::Update()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw vignettes with buffer results (from Gbuffer pass)
-	//DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
-	//DrawColorBufferOnScreen(ivec2(m_renderSize.x/2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
-	//DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
-	//DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
-
-
-	for (DirectionalLightRender directLight : m_directionalLightsVector)
+	if (debug_renderGBuffer)
 	{
-		RenderDirectionalShadowMap(directLight.m_shadowRender);
-		DrawDirectionalLight(directLight);
+		DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
+		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
+		DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+	}
+	else
+	{
+		for (DirectionalLightRender directLight : m_directionalLightsVector)
+		{
+			RenderDirectionalShadowMap(directLight.m_shadowRender);
+			DrawDirectionalLight(directLight);
+		}
 	}
 
 	glfwSwapInterval(0);
@@ -148,12 +152,12 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 	GL33RenderObject* object = new GL33RenderObject();
 	this->GenerateVertexArrayID(*object);
 
-	object->m_toMeshTriangles = &(meshRenderer.m_mesh->m_meshTriangles);
-	object->m_toMeshVertices = &(meshRenderer.m_mesh->m_vertexPos);
-	object->m_toMeshNormals = &(meshRenderer.m_mesh->m_vertexNormals);
-	object->m_toMeshTangents = &(meshRenderer.m_mesh->m_vertexTangents);
-	object->m_toMeshBiTangents = &(meshRenderer.m_mesh->m_vertexBiTangents);
-	object->m_toMeshUVs = &(meshRenderer.m_mesh->m_vertexUVs);
+	object->m_toMeshTriangles = &(meshRenderer.m_renderData->m_triangleIndices);
+	object->m_toMeshVertices = &(meshRenderer.m_renderData->m_vertPos);
+	object->m_toMeshNormals = &(meshRenderer.m_renderData->m_vertNormal);
+	object->m_toMeshTangents = &(meshRenderer.m_renderData->m_vertTangent);
+	object->m_toMeshBiTangents = &(meshRenderer.m_renderData->m_vertBiTangent);
+	object->m_toMeshUVs = &(meshRenderer.m_renderData->m_vertUVs);
 
 	object->m_modelTransform = meshRenderer.m_modelTransform;
 

@@ -1,9 +1,9 @@
 #include "PolygonalMesh.h"
 
-PolygonalMesh::PolygonalMesh() {}
-PolygonalMesh::~PolygonalMesh() {}
+TriangleMesh::TriangleMesh() {}
+TriangleMesh::~TriangleMesh() {}
 
-void PolygonalMesh::NormalizeModelCoordinates()
+void TriangleMesh::NormalizeModelCoordinates()
 {
 	float minX = this->m_vertexPos[0].x;
 	float maxX = this->m_vertexPos[0].x;
@@ -41,88 +41,79 @@ void PolygonalMesh::NormalizeModelCoordinates()
 	}
 }
 
-struct uintPairHash
+RenderData * TriangleMesh::GenerateRenderData()
 {
-	long operator()(const pair<uint32_t, uint32_t> &key) const
+	RenderData* renderData = new RenderData();
+
+	unordered_map<RenderVertEntry, uint32_t, vertEntryHasher> vertexMap;
+
+	for (uint32_t triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
 	{
-		return (key.first * 0x1f1f1f1f) ^ key.second;
-	}
-};
+		HalfEdge edge0 = m_halfEdges[m_meshTriangles[triIndx].firstEdge];
+		HalfEdge edge1 = m_halfEdges[edge0.nextHE];
+		HalfEdge edge2 = m_halfEdges[edge1.nextHE];
 
-void PolygonalMesh::BuildHalfEdgeDS()
-{
-	/*
-		Alright, Here we scroll through every face collected in the Mesh import.
-		For each face, we extract all half-edges bordering the face.
-		We keep a map of pairs <vertexIndx, vertexIndx> to accelerate the query
-		of existing Half-edges.
-
-	*/
-	
-	for (uint32_t i = 0; i < m_vertexPos.size(); i++)
-	{
-		m_vertEmanatingHE.push_back(-1); // -1 value to be populated later
-	}
-
-	unordered_map<pair<uint32_t, uint32_t>, uint32_t, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
-	vector<pair<uint32_t, uint32_t>> hePairs;
-
-	for (uint32_t i = 0; i < m_meshTriangles.size(); i += 3)
-	{
-		uint32_t currentTriangle = i / 3;
-
-		uint32_t v0 = m_meshTriangles.at(i);
-		uint32_t v1 = m_meshTriangles.at(i + 1);
-		uint32_t v2 = m_meshTriangles.at(i + 2);
-
-		HE_edge he0 = { currentTriangle, v1, i + 1, -1 }; // the -1 value is to be populated later
-		HE_edge he1 = { currentTriangle, v2, i + 2, -1 };
-		HE_edge he2 = { currentTriangle, v0, i, -1 };
-
-		m_halfEdges.push_back(he0);
-		m_halfEdges.push_back(he1);
-		m_halfEdges.push_back(he2);
-
-		// Populating map and list to easily find opposite edges afterwards.
-		halfEdgesIndices[pair<uint32_t, uint32_t>(v0, v1)] = i;
-		halfEdgesIndices[pair<uint32_t, uint32_t>(v1, v2)] = i + 1;
-		halfEdgesIndices[pair<uint32_t, uint32_t>(v2, v0)] = i + 2;
-		hePairs.push_back(pair<uint32_t, uint32_t>(v0, v1));
-		hePairs.push_back(pair<uint32_t, uint32_t>(v1, v2));
-		hePairs.push_back(pair<uint32_t, uint32_t>(v2, v0));
-
-		// Populates m_vertEmanatingHE
-		m_vertEmanatingHE[v0] = i;
-		m_vertEmanatingHE[v1] = i + 1;
-		m_vertEmanatingHE[v2] = i + 2;
-
-		// Populates m_triangleHE
-		m_triangleHE.push_back(i);
-	}
-
-	int problematicEdges = 0;
-
-	for (uint32_t i = 0; i < m_halfEdges.size(); i++)
-	{
-		HE_edge* edge = &(m_halfEdges.at(i));
-
-		pair<uint32_t, uint32_t> vertPair = hePairs[i];
-
-
-		try
+		for (uint32_t i = 0; i < 3; i++)
 		{
-			edge->oppositeHE = halfEdgesIndices.at(pair<uint32_t, uint32_t>(vertPair.second, vertPair.first));
-		}
-		catch (const out_of_range& e)
-		{
-			edge->oppositeHE = 0xFFFFFFFF;
-			problematicEdges++;
+			HalfEdge edge;
+
+			if (i == 0) edge = edge2;
+			if (i == 1) edge = edge0;
+			if (i == 2) edge = edge1;
+
+			RenderVertEntry vert;
+
+			vert.vx = m_vertexPos[edge.destVertex];
+			vert.vn = m_vertexNormals[edge.destVertexNormal];
+			vert.vt = m_vertexUVs[edge.destVertexUV];
+
+			if (vertexMap.count(vert) == 0)
+			{
+				renderData->m_vertPos.push_back(vert.vx);
+				renderData->m_vertNormal.push_back(vert.vn);
+				renderData->m_vertUVs.push_back(vert.vt);
+
+				vertexMap[vert] = renderData->m_vertPos.size() - 1;
+
+				renderData->m_triangleIndices.push_back(renderData->m_vertPos.size() - 1);
+
+			}
+			else
+			{
+				renderData->m_triangleIndices.push_back(vertexMap[vert]);
+			}
 		}
 	}
-	m_manifoldViolationEdges = problematicEdges;
+
+	return renderData;
 }
 
-bool PolygonalMesh::IsMeshValid()
+vector<uint32_t> * TriangleMesh::GenerateTopoTriangleIndices()
+{
+	vector<uint32_t>* indices = new vector<uint32>();
+
+	for (int triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
+	{
+		HalfEdge edge0 = m_halfEdges[m_meshTriangles[triIndx].firstEdge];
+		HalfEdge edge1 = m_halfEdges[edge0.nextHE];
+		HalfEdge edge2 = m_halfEdges[edge1.nextHE];
+
+		for (int i = 0; i < 3; i++)
+		{
+			HalfEdge edge;
+
+			if (i == 0) edge = edge2;
+			if (i == 1) edge = edge0;
+			if (i == 2) edge = edge1;
+
+			indices->push_back(edge.destVertex);
+		}
+	}
+
+	return indices;
+}
+
+bool TriangleMesh::IsMeshValid()
 {
 	bool check = true;
 	if (m_vertexPos.empty())
@@ -131,4 +122,87 @@ bool PolygonalMesh::IsMeshValid()
 	}
 
 	return check;
+}
+
+void TriangleMesh::ReverseEdgesOrder()
+{
+	// TODO: IMPLEMENT DAH
+	//for (auto face : m_meshTriangles)
+	//{
+	//	//uint32_t temp;
+
+	//	//HalfEdge edge0 = m_halfEdges[face.firstEdge];
+	//	//edge0.
+	//	//HalfEdge edge1 = m_halfEdges[edge0.nextHE];
+	//	//HalfEdge edge2 = m_halfEdges[edge1.nextHE];
+	//}
+}
+
+void TriangleMesh::GetHEvertices(heIndx halfEdge, pair<uint32, uint32>* vertexPair)
+{
+	HalfEdge edge = m_halfEdges[halfEdge];
+	vertexPair->first = edge.destVertex;
+	
+	if (edge.oppositeHE != 0xFFFFFFFF)
+	{
+		vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex;
+	}
+	else
+	{
+		// If no opposite HE exists, go around the existing face.
+		heIndx findEdgeIndx = edge.nextHE;
+		HalfEdge findEdge = m_halfEdges[findEdgeIndx];
+		do
+		{
+			findEdgeIndx = findEdge.nextHE;
+		} while (m_halfEdges[findEdgeIndx].nextHE != halfEdge);
+
+		vertexPair->second = m_halfEdges[findEdgeIndx].destVertex;
+	}
+}
+
+void TriangleMesh::GetHETriangle(heIndx halfEdge, faceIndx* triangle)
+{
+	*triangle = m_halfEdges[halfEdge].borderingFace;
+}
+
+void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<uint32>* surroundingVertices)
+{
+	heIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
+	heIndx currentEdgeIndx = startEdgeIndx;
+
+	uint32 failCount = 0;
+
+	HalfEdge edge;
+	do
+	{
+		edge = m_halfEdges[startEdgeIndx];
+		surroundingVertices->push_back(edge.destVertex);
+
+		if (edge.oppositeHE != 0xFFFFFFFF)
+		{
+			currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
+		}
+		else
+		{
+			failCount++;
+
+			// Find inward edge along the same face (that we know exists), then take it's opposite so it's out of the vertex
+			heIndx findEdgeIndx = edge.nextHE;
+			HalfEdge findEdge = m_halfEdges[findEdgeIndx];
+			do
+			{
+				findEdgeIndx = findEdge.nextHE;
+			} while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
+
+			currentEdgeIndx = m_halfEdges[findEdgeIndx].oppositeHE;
+		}
+	} while (currentEdgeIndx != startEdgeIndx && failCount < 2);
+}
+
+void TriangleMesh::GetTriangleEdges(int triangle, heIndx* edge0, heIndx* edge1, heIndx* edge2)
+{
+	*edge0 = m_meshTriangles[triangle].firstEdge;
+	*edge1 = m_halfEdges[*edge0].nextHE;
+	*edge2 = m_halfEdges[*edge1].nextHE;
 }

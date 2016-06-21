@@ -41,7 +41,7 @@ GameChar* CursorPicker::PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &
 	for (auto obj : objects)
 	{
 		GameChar* gameChar = dynamic_cast<GameChar*>(obj);
-		if (gameChar != NULL)
+		if (gameChar != NULL && gameChar->m_rigidBody->m_collider)
 		{
 			gameChar->m_rigidBody->m_collider->m_collisionMesh->setTransform(&(gameChar->m_transform->m_transformMatrix[0][0]));
 

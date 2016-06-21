@@ -1,6 +1,5 @@
 #include "OBJImport.h"
 
-
 OBJImport::OBJImport(void) :
 	m_currentMaxVertexPos(0),
 	m_currentMaxUVPos(0),
@@ -13,45 +12,7 @@ OBJImport::~OBJImport(void)
 {
 } 
 
-typedef struct vertEntry{
-	vec3 vx;
-	vec3 vn;
-	vec2 vt;
-
-	bool operator==(const vertEntry& other) const
-	{
-		float epsilon = 0.0001;
-
-		if (glm::distance(vx, other.vx) > epsilon)
-		{
-			return false;
-		}
-		
-		return true;
-	}
-} ve_t;
-
-struct vertEntryHasher
-{
-	std::size_t operator()(const vertEntry& v) const
-	{
-		float hashResolution = 0.0001;
-
-		long celPosX = (long)(v.vx.x / hashResolution);
-		long celPosY = (long)(v.vx.y / hashResolution);
-		long celPosZ = (long)(v.vx.z / hashResolution);
-
-		int p1 = 73856093;
-		int p2 = 19349663;
-		int p3 = 83492791;
-
-		int hashVx = (int)(100 * v.vx.x)*p1 ^ (int)(100 * v.vx.y)*p2 ^ (int)(100 * v.vx.z)*p3;
-
-		return hashVx;
-	}
-};
-
-bool OBJImport::ImportMesh(const string filename, PolygonalMesh *mesh, bool swapNormals)
+bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals)
 {
 
 	m_currentMaxVertexPos = 0;
@@ -61,11 +22,6 @@ bool OBJImport::ImportMesh(const string filename, PolygonalMesh *mesh, bool swap
 	ifstream fileStream (filename,ifstream::in);
 	string lineInFile = " ";
 
-	vector<unsigned int> meshTriangles;
-
-	vector<vec3> collectedVertices;
-	vector<vec2> collectedUVs;
-	vector<vec3> collectedNormals;
 	vector<int> vertexIndices, uvIndices, normalIndices;
 
 	int quadsCount = 0;
@@ -91,22 +47,21 @@ bool OBJImport::ImportMesh(const string filename, PolygonalMesh *mesh, bool swap
 							m_currentMaxVertexPos ++;
 							vec3 currentVertice;
 							sscanf(lineInFile.data(),"%*s %f %f %f",&currentVertice.x,&currentVertice.y,&currentVertice.z);
-							collectedVertices.push_back(currentVertice);
+							mesh.m_vertexPos.push_back(currentVertice);
 						}
 						else if(lineInFile.at(1) == 't')
 						{
 							m_currentMaxUVPos ++;
 							vec2 currentTexCoord;
 							sscanf(lineInFile.data(),"%*s %f %f",&currentTexCoord.x,&currentTexCoord.y);
-							collectedUVs.push_back(currentTexCoord);
+							mesh.m_vertexUVs.push_back(currentTexCoord);
 						}
 						else if(lineInFile.at(1) == 'n')
 						{
 							m_currentMaxNormalPos ++;
 							vec3 currentNormal;
 							sscanf(lineInFile.data(), "%*s %f %f %f\n", &currentNormal.x, &currentNormal.y, &currentNormal.z );
-							collectedNormals.push_back(currentNormal);
-
+							mesh.m_vertexNormals.push_back(currentNormal);
 						}
 					}
 					else if(lineInFile.at(0) == 'f')
@@ -209,125 +164,120 @@ bool OBJImport::ImportMesh(const string filename, PolygonalMesh *mesh, bool swap
 		int uvInd = 0;
 		int normalInd = 0;
 
-		vector<vec3> meshVertices;
-		vector<vec3> meshNormals;
-		vector<vec2> meshUVs;
+		unordered_map<pair<uint32_t, uint32_t>, uint32_t, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
+		vector<pair<uint32_t, uint32_t>> hePairs;
 
-		unordered_map<vertEntry, int, vertEntryHasher> storedTriplets;
+		mesh.m_heEmanatingFromVert.resize(vertexIndices.size());
 
-		int cacheMiss = 0;
-		int cacheHit = 0;
-
-		for (int index = 0; index < vertexIndices.size(); index += 3)
+		for (uint32_t i = 0; i < vertexIndices.size(); i += 3) // For each triangle
 		{
-			vertEntry v1, v2, v3;
+			uint32_t currentTriangle = i / 3;
 
-			v1.vx = collectedVertices[vertexIndices[index]];
-			v2.vx = collectedVertices[vertexIndices[index + 1]];
-			v3.vx = collectedVertices[vertexIndices[index + 2]];
+			uint32_t vindx0, vindx1, vindx2;
+			uint32_t nindx0, nindx1, nindx2;
+			uint32_t uvIndx0, uvIndx1, uvIndx2;
 
-			if (uvIndices.size() != 0)
+			if (swapNormals)
 			{
-				v1.vt = index < uvIndices.size() ? collectedUVs[uvIndices[index]] : vec2(0, 0);
-				v2.vt = index + 1 < uvIndices.size() ? collectedUVs[uvIndices[index + 1]] : vec2(0, 0);
-				v3.vt = index + 2 < uvIndices.size() ? collectedUVs[uvIndices[index + 2]] : vec2(0, 0);
-			}
-
-			if (normalIndices.size() != 0)
-			{
-				v1.vn = collectedNormals[normalIndices[index]];
-				v2.vn = collectedNormals[normalIndices[index + 1]];
-				v3.vn = collectedNormals[normalIndices[index + 2]];
-			}
-
-			if (storedTriplets.count(v1) == 0)
-			{
-				cacheMiss++;
-				int endArrayIndex = meshVertices.size();
-
-				meshVertices.push_back(v1.vx);
-				if (normalIndices.size() != 0) meshNormals.push_back(v1.vn);
-				if (uvIndices.size() != 0) meshUVs.push_back(v1.vt);
-
-				storedTriplets[v1] = endArrayIndex;
-				meshTriangles.push_back(endArrayIndex);
+				vindx0 = vertexIndices[i + 2];
+				vindx1 = vertexIndices[i + 1];
+				vindx2 = vertexIndices[i + 0];
 			}
 			else
 			{
-
-				cacheHit++;
-				meshTriangles.push_back(storedTriplets[v1]);
+				vindx0 = vertexIndices[i + 1];
+				vindx1 = vertexIndices[i + 2];
+				vindx2 = vertexIndices[i + 0];
 			}
 
-			if (storedTriplets.count(v2) == 0)
+			if (normalIndices.empty())
 			{
-				cacheMiss++;
-				int endArrayIndex = meshVertices.size();
-
-				meshVertices.push_back(v2.vx);
-				if (normalIndices.size() != 0) meshNormals.push_back(v2.vn);
-				if (uvIndices.size() != 0) meshUVs.push_back(v2.vt);
-
-				storedTriplets[v2] = endArrayIndex;
-				meshTriangles.push_back(endArrayIndex);
+				nindx0 = -1;
+				nindx1 = -1;
+				nindx2 = -1;
 			}
 			else
 			{
-
-				cacheHit++;
-				meshTriangles.push_back(storedTriplets[v2]);
+				nindx0 = normalIndices[i + 1];
+				nindx1 = normalIndices[i + 2];
+				nindx2 = normalIndices[i + 0];
 			}
 
-			if (storedTriplets.count(v3) == 0)
+			if (uvIndices.empty())
 			{
-				cacheMiss++;
-				int endArrayIndex = meshVertices.size();
-
-				meshVertices.push_back(v3.vx);
-				if (normalIndices.size() != 0) meshNormals.push_back(v3.vn);
-				if (uvIndices.size() != 0) meshUVs.push_back(v3.vt);
-
-				storedTriplets[v3] = endArrayIndex;
-				meshTriangles.push_back(endArrayIndex);
+				uvIndx0 = -1;
+				uvIndx1 = -1;
+				uvIndx2 = -1;
 			}
 			else
 			{
-
-				cacheHit++;
-				meshTriangles.push_back(storedTriplets[v3]);
+				uvIndx0 = uvIndices[i + 1];
+				uvIndx1 = uvIndices[i + 2];
+				uvIndx2 = uvIndices[i + 0];
 			}
 
+			TriangleMesh::HalfEdge he0 = { vindx0, nindx0, uvIndx0, currentTriangle, i + 1, -1 }; // the -1 value is to be populated later
+			TriangleMesh::HalfEdge he1 = { vindx1, nindx1, uvIndx1, currentTriangle, i + 2, -1 };
+			TriangleMesh::HalfEdge he2 = { vindx2, nindx2, uvIndx2, currentTriangle, i + 0, -1 };
+
+			mesh.m_halfEdges.push_back(he0);
+			mesh.m_halfEdges.push_back(he1);
+			mesh.m_halfEdges.push_back(he2);
+
+
+
+			// Populating map and list to easily find opposite edges afterwards.
+			uint32_t v0 = vertexIndices.at(i);
+			uint32_t v1 = vertexIndices.at(i + 1);
+			uint32_t v2 = vertexIndices.at(i + 2);
+			halfEdgesIndices[pair<uint32_t, uint32_t>(v0, v1)] = i;
+			halfEdgesIndices[pair<uint32_t, uint32_t>(v1, v2)] = i + 1;
+			halfEdgesIndices[pair<uint32_t, uint32_t>(v2, v0)] = i + 2;
+			hePairs.push_back(pair<uint32_t, uint32_t>(v0, v1));
+			hePairs.push_back(pair<uint32_t, uint32_t>(v1, v2));
+			hePairs.push_back(pair<uint32_t, uint32_t>(v2, v0));
+
+			// Populates m_vertEmanatingHE
+			mesh.m_heEmanatingFromVert[v0] = i;
+			mesh.m_heEmanatingFromVert[v1] = i + 1;
+			mesh.m_heEmanatingFromVert[v2] = i + 2;
+
+			// Populates m_triangleHE
+			TriangleMesh::face face = { i };
+			mesh.m_meshTriangles.push_back(face);
+		}
+
+		for (uint32_t i = 0; i < mesh.m_halfEdges.size(); i++)
+		{
+			TriangleMesh::HalfEdge* edge = &(mesh.m_halfEdges.at(i));
+
+			pair<uint32_t, uint32_t> vertPair = hePairs[i];
+
+			try
+			{
+				edge->oppositeHE = halfEdgesIndices.at(pair<uint32_t, uint32_t>(vertPair.second, vertPair.first));
+			}
+			catch (const out_of_range& e)
+			{
+				edge->oppositeHE = 0xFFFFFFFF;
+				mesh.m_manifoldViolationEdges++;
+			}
 		}
 
 		if (swapNormals)
 		{
-			for (int i = 0; i < meshTriangles.size(); i += 3)
+			for (int i = 0; i < mesh.m_meshTriangles.size(); i += 3)
 			{
-				unsigned int a, b, c;
-				a = meshTriangles[i+0];
-				b = meshTriangles[i+1];
-				c = meshTriangles[i+2];
-
-				meshTriangles[i + 2] = a;
-				meshTriangles[i + 1] = b;
-				meshTriangles[i + 0] = c;
-
+				// TODO, reverse opposite edges
 			}
 		}
 
-		mesh->m_meshTriangles = meshTriangles;
-		mesh->m_vertexPos	  = meshVertices;
-		mesh->m_vertexNormals = meshNormals;
-		mesh->m_vertexUVs	  = meshUVs;
+		cout << "Imported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices. \n";
 
-		cout << "Imported: " << meshTriangles.size() << " triangles, " << meshVertices.size() << " triplets, " << collectedVertices.size() << " vertices, " << collectedNormals.size() << " normals, " << collectedUVs.size() << " UVs.\n";
-
-		mesh->NormalizeModelCoordinates();
+		mesh.NormalizeModelCoordinates();
 		cout << "Normalized Model Coordinates \n";
 
-		cout << "Building Half-Edge DataStructure ...";
-		mesh->BuildHalfEdgeDS();
-		cout << " Built\n";
+		cout << " Built, improper edges: " << mesh.m_manifoldViolationEdges << "\n";
 
 		return true;
 	}

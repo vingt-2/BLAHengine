@@ -52,15 +52,15 @@ void Debug::DrawGrid(int size,const vec4 color)
 void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const vec4* colorBuffer)
 {
 	Transform* transform = new Transform();
-	PolygonalMesh* ray = new PolygonalMesh();
+	TriangleMesh* ray = new TriangleMesh();
 	ray->m_vertexPos.push_back(origin);
 	ray->m_vertexPos.push_back(destination);
-	ray->m_meshTriangles.push_back(0);
-	ray->m_meshTriangles.push_back(1);
-	MeshRenderer* rayRenderer = new MeshRenderer(transform, ray);
+	//ray->m_meshTriangles.push_back(0);
+	//ray->m_meshTriangles.push_back(1);
+	MeshRenderer* rayRenderer = new MeshRenderer(transform);
 	rayRenderer->AssignMaterial("debugShader");
 	rayRenderer->m_renderType = GL_LINES;
-	GameChar* lineMesh = new GameChar(NULL);
+	GameChar* lineMesh = new GameChar();
 	lineMesh->m_meshRenderer = rayRenderer;
 	lineMesh->m_transform = transform;
 

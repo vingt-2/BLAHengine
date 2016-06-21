@@ -236,28 +236,28 @@ int main( void )
 
 	//mainRenderer->m_debug = debug;
 	OBJImport objImport;
-	PolygonalMesh xwing;
-	PolygonalMesh sphere;
-	PolygonalMesh invertedSphere;
-	PolygonalMesh floor;
-	PolygonalMesh cube;
-	PolygonalMesh rocket;
-	PolygonalMesh sponza;
-	PolygonalMesh arrow;
+	TriangleMesh xwing;
+	TriangleMesh sphere;
+	TriangleMesh invertedSphere;
+	TriangleMesh floor;
+	TriangleMesh cube;
+	TriangleMesh rocket;
+	TriangleMesh sponza;
+	TriangleMesh arrow;
 
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
-	objImport.ImportMesh("./resources/models/sponza.obj", &sponza, false);
+	objImport.ImportMesh("./resources/models/sponza.obj", sponza, false);
 	for (auto &v : sponza.m_vertexPos) {
 		vec4 hP = 0.1f * vec4(v, 1);
 		v = vec3(hP.x, hP.y, hP.z);
 	}
 
 
-	objImport.ImportMesh("./resources/models/cube.obj", &cube, false);
-	objImport.ImportMesh("./resources/models/cube.obj", &floor, false);
-	objImport.ImportMesh("./resources/models/sphere.obj", &sphere, false);
-	objImport.ImportMesh("./resources/models/sphere.obj", &invertedSphere, true);
-	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", &rocket, true);
+	objImport.ImportMesh("./resources/models/cube.obj", cube, false);
+	objImport.ImportMesh("./resources/models/cube.obj", floor, false);
+	objImport.ImportMesh("./resources/models/sphere.obj", sphere, false);
+	objImport.ImportMesh("./resources/models/sphere.obj", invertedSphere, true);
+	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", rocket, true);
 	mat4 scaleMat(vec4(100, 0, 0, 0), 
 					vec4(0, 10, 0, 0), 
 					vec4(0, 0, 100, 0),
@@ -270,7 +270,8 @@ int main( void )
 		v = mat2(100) * v;
 	}
 
-	//GameChar* floor_obj = new GameChar(&floor);
+	//GameChar* floor_obj = new GameChar();
+	//floor_obj->SetTriangleMesh(&floor);
 	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
 	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
@@ -279,7 +280,8 @@ int main( void )
 	//floor_obj->m_transform->m_position = (vec3(0, 0, 0));
 	//floor_obj->m_rigidBody->m_isPinned = true;
 
-	GameChar* skySphere = new GameChar(&invertedSphere);
+	GameChar* skySphere = new GameChar();
+	skySphere->SetTriangleMesh(&invertedSphere);
 	skySphere->m_meshRenderer->AssignMaterial("DirLightPass");
 	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
 	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
@@ -290,7 +292,8 @@ int main( void )
 	skySphere->m_rigidBody->m_isPinned = true;
 	skySphere->m_rigidBody->m_enableCollision = false;
 
-	GameChar* sceneMesh = new GameChar(&sponza);
+	GameChar* sceneMesh = new GameChar();
+	sceneMesh->SetTriangleMesh(&sponza);
 	sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
 	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
@@ -299,7 +302,8 @@ int main( void )
 	mainScene->AddObject(sceneMesh);
 	sceneMesh->m_rigidBody->m_isPinned = true;
 
-	GameChar* lightObj = new GameChar(&cube);
+	GameChar* lightObj = new GameChar();
+	lightObj->SetTriangleMesh(&cube);
 	lightObj->m_meshRenderer->AssignMaterial("DirLightPass");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");

@@ -8,7 +8,7 @@
 class Collider
 {
 public:
-	Collider(PolygonalMesh* mesh);
+	Collider(TriangleMesh* mesh);
 	~Collider();
 	
 	CollisionModel3D* m_collisionMesh;

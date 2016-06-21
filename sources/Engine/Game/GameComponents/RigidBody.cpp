@@ -1,7 +1,7 @@
 #include "RigidBody.h"
 
 
-RigidBody::RigidBody(Transform* transform, PolygonalMesh* mesh) :
+RigidBody::RigidBody(Transform* transform) :
 	m_forcesAccu(vec3(0)),
 	m_torquesAccu(vec3(0)),
 	m_acceleration(vec3(0)),
@@ -18,10 +18,7 @@ RigidBody::RigidBody(Transform* transform, PolygonalMesh* mesh) :
 {
 	m_transform = transform;
 
-	if (mesh == NULL) 
-		m_collider = NULL;
-	else 
-		m_collider = new Collider(mesh);
+	m_collider = NULL;
 
 	m_invMassTensor = inverse(m_massTensor);
 	m_invInertiaTensor = inverse(m_inertiaTensor);

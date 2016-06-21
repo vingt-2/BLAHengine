@@ -47,6 +47,9 @@ public:
 	Transform* m_transform;
 	Collider* m_collider;
 
+	void SetCollider(Collider* collider) { m_collider = collider; }
+	void SetMeshCollider(TriangleMesh* mesh) { m_collider = new Collider(mesh); }
+
 	void Update();
 
 	void PushForceWorld(vec3 pushAtW, vec3 forceW);
@@ -59,7 +62,7 @@ public:
 	vec3 GetTorquesAccu() { return m_torquesAccu; };
 	void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
 
-	RigidBody(Transform* transform, PolygonalMesh* mesh);
+	RigidBody(Transform* transform);
 	~RigidBody(void);
 
 private:

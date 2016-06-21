@@ -1,21 +1,31 @@
 #include "MeshRenderer.h"
 
-MeshRenderer::MeshRenderer(Transform* modelTransform, PolygonalMesh* mesh):
+MeshRenderer::MeshRenderer(Transform* modelTransform):
 	m_renderType    (GL_TRIANGLES),
 	m_renderTicket  (0)
 {
-	this->m_mesh = mesh;
+	this->m_mesh = NULL;
+	this->m_renderData = NULL;
 	this->m_modelTransform = modelTransform;
 } 
 
 MeshRenderer::~MeshRenderer(void)
 {
 	//CleanUp();
+	m_renderData->~RenderData();
 }
 
 string MeshRenderer::ToString()
 {
 	return "MeshRenderer ToString PLACEHOLDER";
+}
+
+bool MeshRenderer::AssignTriangleMesh(TriangleMesh* mesh)
+{
+	m_mesh = mesh;
+	m_renderData = m_mesh->GenerateRenderData();
+
+	return true;
 }
 
 bool MeshRenderer::AssignMaterial(const char* materialName)

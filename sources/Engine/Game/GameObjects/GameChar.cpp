@@ -1,13 +1,11 @@
 #include "GameChar.h"
 
 
-GameChar::GameChar(PolygonalMesh* mesh)
+GameChar::GameChar()
 {
-	m_meshRenderer = new MeshRenderer(m_transform, mesh);
+	m_meshRenderer = new MeshRenderer(m_transform);
 
-	m_meshRenderer->m_mesh = mesh;
-
-	m_rigidBody = new RigidBody(m_transform, mesh);
+	m_rigidBody = new RigidBody(m_transform);
 }
 
 
@@ -22,4 +20,10 @@ void GameChar::Update()
 {
 	this->UpdateTransform();
 	m_rigidBody->Update();
+}
+
+void GameChar::SetTriangleMesh(TriangleMesh * mesh)
+{
+	m_meshRenderer->AssignTriangleMesh(mesh);
+
 }

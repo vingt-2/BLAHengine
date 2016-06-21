@@ -83,7 +83,7 @@ public:
 
 	vector<DirectionalLightRender> m_directionalLightsVector;
 	GBuffer m_GBuffer;
-
+	bool debug_renderGBuffer = false;
 
 	// MOVE?
 	bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);

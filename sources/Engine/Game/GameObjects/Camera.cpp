@@ -2,10 +2,10 @@
 
 
 Camera::Camera():
-	GameChar(NULL),
+	GameChar(),
 	m_fovSize(vec2(1,1))
 {
-	m_rigidBody = new RigidBody(m_transform, NULL);
+	m_rigidBody = new RigidBody(m_transform);
 	UpdateView();
 
 	m_isControlEnabled = false;

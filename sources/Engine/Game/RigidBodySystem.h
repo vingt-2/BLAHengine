@@ -15,7 +15,7 @@ public:
 	~RigidBodySystem();
 
 	void UpdateSystem();
-	int RegisterRigidBody(RigidBody &body);
+	bool RegisterRigidBody(RigidBody &body);
 	float GetTimeStep() { return m_timeStep; };
 
 	void EnableSimulation();

@@ -20,14 +20,19 @@ RigidBodySystem::~RigidBodySystem()
 {
 }
 
-int RigidBodySystem::RegisterRigidBody(RigidBody &body)
+bool RigidBodySystem::RegisterRigidBody(RigidBody &body)
 {
 	m_rigidBodyList.push_back(&body);
 	
 	if (body.m_collider)
+	{
 		m_collisionProcessor->m_bodiesList.push_back(&body);
-
-	return 0;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void RigidBodySystem::EnableSimulation()
