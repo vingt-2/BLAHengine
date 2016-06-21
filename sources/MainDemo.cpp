@@ -241,35 +241,19 @@ int main( void )
 	TriangleMesh invertedSphere;
 	TriangleMesh floor;
 	TriangleMesh cube;
-	TriangleMesh rocket;
 	TriangleMesh sponza;
 	TriangleMesh arrow;
 
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
 	objImport.ImportMesh("./resources/models/sponza.obj", sponza, false);
-	for (auto &v : sponza.m_vertexPos) {
-		vec4 hP = 0.1f * vec4(v, 1);
-		v = vec3(hP.x, hP.y, hP.z);
-	}
-
-
 	objImport.ImportMesh("./resources/models/cube.obj", cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", floor, false);
 	objImport.ImportMesh("./resources/models/sphere.obj", sphere, false);
 	objImport.ImportMesh("./resources/models/sphere.obj", invertedSphere, true);
-	objImport.ImportMesh("./resources/models/Y8490_Rocket.obj", rocket, true);
-	mat4 scaleMat(vec4(100, 0, 0, 0), 
-					vec4(0, 10, 0, 0), 
-					vec4(0, 0, 100, 0),
-					vec4(0, 0, 0, 1));
-	for (auto &v : floor.m_vertexPos){
-		vec4 hP = scaleMat * vec4(v,1);
-		v = vec3(hP.x, hP.y, hP.z);
-	}
-	for (auto &v : floor.m_vertexUVs){
-		v = mat2(100) * v;
-	}
-
+	sponza.ApplyGeomScaling(vec3(0.1f));
+	floor.ApplyGeomScaling(vec3(100, 10, 100));
+	floor.ApplyUVScaling(vec2(100));
+	
 	//GameChar* floor_obj = new GameChar();
 	//floor_obj->SetTriangleMesh(&floor);
 	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");

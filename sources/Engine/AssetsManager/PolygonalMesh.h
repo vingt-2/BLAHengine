@@ -28,15 +28,22 @@ public:
 class TriangleMesh
 {
 public:
-	typedef uint32 heIndx;
-	typedef uint32 faceIndx;
+	typedef uint32 HeIndx;
+	typedef uint32 FaceIndx;
 
 	typedef struct face_t
 	{
-		heIndx firstEdge;
-	} face;
+		HeIndx firstEdge;
+	} Face;
 
-	vector<face> m_meshTriangles;
+	typedef struct destVert_t
+	{
+		uint32_t pos; // Vertex the HE points to.
+		uint32_t normal; // Normals at the destination Vertex (may be unique to this face)
+		uint32_t UV; // UV at the destination Vertex (may be unique to this face)
+	} DestVertex;
+
+	vector<Face> m_meshTriangles;
 	
 	/*
 		Now for Vertex specific data. Separate lists to simplify loading geometry data for rendering.
@@ -46,21 +53,24 @@ public:
 	vector<vec2> m_vertexUVs;
 
 	/*
+		Tangent and Bitangent Basis information for each face:
+	*/
+	vector<vec3> m_faceTangent;
+
+	/*
 		Now we introduce Half-Edge specific mapping to fasten up adjacency queries
 	*/
 	typedef struct HE_edge_t 
 	{
-		uint32_t destVertex; // Vertex the HE points to.
-		uint32_t destVertexNormal; // Normals at the destination Vertex (may be unique to this face)
-		uint32_t destVertexUV; // UV at the destination Vertex (may be unique to this face)
-		faceIndx borderingFace; // Triangle to the left of the half-edge 
-		heIndx nextHE; // next half-edge around that face.
-		heIndx oppositeHE; // opposite Half-Edge
+		DestVertex destVertex;
+		FaceIndx borderingFace; // Triangle to the left of the half-edge 
+		HeIndx nextHE; // next half-edge around that face.
+		HeIndx oppositeHE; // opposite Half-Edge
 	} HalfEdge;
 
 	vector<HalfEdge> m_halfEdges; // The list of all half edges (should be 2*E)
 
-	vector<heIndx> m_heEmanatingFromVert; // a list of one HE index (from m_halfEdges) emanating from each vertex Position (should be size of m_vertexPos)
+	vector<HeIndx> m_heEmanatingFromVert; // a list of one HE index (from m_halfEdges) emanating from each vertex Position (should be size of m_vertexPos)
 
 	int m_manifoldViolationEdges = 0;
 
@@ -74,19 +84,26 @@ public:
 		bool swapNormals);
 
 	void NormalizeModelCoordinates();
+	void ComputeFaceTangents();
+	void ApplyGeomScaling(vec3 scaling);
+	void ApplyUVScaling(vec2 scaling);
+
 	RenderData* GenerateRenderData();
 	vector<uint32_t>* GenerateTopoTriangleIndices();
 
 	bool IsMeshValid();
 
 	void ReverseEdgesOrder();
-	void GetHEvertices(heIndx halfEdge, pair<uint32, uint32>* vertexPair);
-	void GetHETriangle(heIndx halfEdge, faceIndx* triangle);
-	void GetSurroundingVertices(uint32 vertexIndx, vector<uint32>* surroundingVertices);
-	void GetTriangleEdges(int triangle, heIndx* edge0, heIndx* edge1, heIndx* edge2);
+	void GetHEvertices(HeIndx halfEdge, pair<uint32, uint32>* vertexPair);
+	void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
+	void GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> &surroundingVertices);
+	void GetSurroundingTriangles(uint32 vertexIndx, vector<FaceIndx> &surroundingFaces);
+	void GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &edges);
+	void GetTriangleEdges(uint32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
 };
 
-typedef struct RenderVertEntry_t {
+typedef struct RenderVertEntry_t 
+{
 	vec3 vx;
 	vec3 vn;
 	vec2 vt;
@@ -112,7 +129,8 @@ typedef struct RenderVertEntry_t {
 	}
 } RenderVertEntry;
 
-typedef struct TopoVertEntry_t {
+typedef struct TopoVertEntry_t 
+{
 	vec3 vx;
 	vec3 vn;
 	vec2 vt;
@@ -169,7 +187,6 @@ struct vertEntryHasher
 		return hashVx;
 	}
 };
-
 
 struct uintPairHash
 {

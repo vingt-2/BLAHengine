@@ -61,9 +61,9 @@ void TriangleMesh::BuildMeshTopo(
 			uvIndx2 = vertUVsIndices[i + 0];
 		}
 
-		HalfEdge he0 = { vindx0, nindx0, uvIndx0, currentTriangle, i + 1, -1 }; // the -1 value is to be populated later
-		HalfEdge he1 = { vindx1, nindx1, uvIndx1, currentTriangle, i + 2, -1 };
-		HalfEdge he2 = { vindx2, nindx2, uvIndx2, currentTriangle, i + 0, -1 };
+		HalfEdge he0 = { { vindx0, nindx0, uvIndx0 }, currentTriangle, i + 1, -1 }; // the -1 value is to be populated later
+		HalfEdge he1 = { { vindx1, nindx1, uvIndx1 }, currentTriangle, i + 2, -1 };
+		HalfEdge he2 = { { vindx2, nindx2, uvIndx2 }, currentTriangle, i + 0, -1 };
 
 		m_halfEdges.push_back(he0);
 		m_halfEdges.push_back(he1);
@@ -87,13 +87,13 @@ void TriangleMesh::BuildMeshTopo(
 		m_heEmanatingFromVert[v2] = i + 2;
 
 		// Populates m_triangleHE
-		TriangleMesh::face face = { i };
+		Face face = { i };
 		m_meshTriangles.push_back(face);
 	}
 
 	for (uint32_t i = 0; i < m_halfEdges.size(); i++)
 	{
-		TriangleMesh::HalfEdge* edge = &(m_halfEdges.at(i));
+		HalfEdge* edge = &(m_halfEdges.at(i));
 
 		pair<uint32_t, uint32_t> vertPair = hePairs[i];
 
@@ -147,6 +147,54 @@ void TriangleMesh::NormalizeModelCoordinates()
 	}
 }
 
+void TriangleMesh::ComputeFaceTangents()
+{
+	for (auto face : m_meshTriangles)
+	{
+		HalfEdge edge0 = m_halfEdges[face.firstEdge];
+		HalfEdge edge1 = m_halfEdges[edge0.nextHE];
+		HalfEdge edge2 = m_halfEdges[edge1.nextHE];
+
+		DestVertex v0 = edge2.destVertex;
+		DestVertex v1 = edge0.destVertex;
+		DestVertex v2 = edge1.destVertex;
+
+		vec3 q1 = m_vertexPos[v1.pos] - m_vertexPos[v0.pos];
+		vec3 q2 = m_vertexPos[v2.pos] - m_vertexPos[v0.pos];
+
+		vec2 st1 = m_vertexUVs[v1.UV] - m_vertexUVs[v0.UV];
+		vec2 st2 = m_vertexUVs[v2.UV] - m_vertexUVs[v0.UV];
+
+		float invScale = 1 / (st1.s*st2.t - st2.s*st1.t);
+
+		vec3 T = invScale * mat2x3(q1, q2) * vec2(st2.t, -st1.t);
+		//vec3 B = invScale * mat2x3(q1, q2) * vec2(-st2.s, st1.s);
+
+		m_faceTangent.push_back(T);
+	}
+}
+
+void TriangleMesh::ApplyGeomScaling(vec3 scaling)
+{
+	mat3 scaleMat(
+		vec3(scaling.x, 0, 0),
+		vec3(0, scaling.y, 0),
+		vec3(0, 0, scaling.z));
+
+	for (auto &v : m_vertexPos) {
+		v = scaleMat * v;
+	}
+}
+
+void TriangleMesh::ApplyUVScaling(vec2 scaling)
+{
+	mat2 scaleMat(vec2(scaling.x, 0), vec2(0, scaling.y));
+
+	for (auto &v : m_vertexUVs) {
+		v = scaleMat * v;
+	}
+}
+
 RenderData * TriangleMesh::GenerateRenderData()
 {
 	RenderData* renderData = new RenderData();
@@ -169,15 +217,28 @@ RenderData * TriangleMesh::GenerateRenderData()
 
 			RenderVertEntry vert;
 
-			vert.vx = m_vertexPos[edge.destVertex];
-			vert.vn = m_vertexNormals[edge.destVertexNormal];
-			vert.vt = m_vertexUVs[edge.destVertexUV];
+			vert.vx = m_vertexPos[edge.destVertex.pos];
+			vert.vn = m_vertexNormals[edge.destVertex.normal];
+			vert.vt = m_vertexUVs[edge.destVertex.UV];
+
+			vector<FaceIndx> surroundingFaces;
+			GetSurroundingTriangles(edge.destVertex.pos, surroundingFaces);
+
+			vec3 tangent = vec3(0);
+
+			for (auto face : surroundingFaces)
+			{
+				tangent += m_faceTangent[face];
+			}
+			tangent = tangent - (vert.vn * dot(tangent, vert.vn));
+			tangent = normalize(tangent);
 
 			if (vertexMap.count(vert) == 0)
 			{
 				renderData->m_vertPos.push_back(vert.vx);
 				renderData->m_vertNormal.push_back(vert.vn);
 				renderData->m_vertUVs.push_back(vert.vt);
+				renderData->m_vertTangent.push_back(tangent);
 
 				vertexMap[vert] = renderData->m_vertPos.size() - 1;
 
@@ -212,7 +273,7 @@ vector<uint32_t> * TriangleMesh::GenerateTopoTriangleIndices()
 			if (i == 1) edge = edge0;
 			if (i == 2) edge = edge1;
 
-			indices->push_back(edge.destVertex);
+			indices->push_back(edge.destVertex.pos);
 		}
 	}
 
@@ -244,38 +305,38 @@ void TriangleMesh::ReverseEdgesOrder()
 	//}
 }
 
-void TriangleMesh::GetHEvertices(heIndx halfEdge, pair<uint32, uint32>* vertexPair)
+void TriangleMesh::GetHEvertices(HeIndx halfEdge, pair<uint32, uint32>* vertexPair)
 {
 	HalfEdge edge = m_halfEdges[halfEdge];
-	vertexPair->first = edge.destVertex;
+	vertexPair->first = edge.destVertex.pos;
 	
 	if (edge.oppositeHE != 0xFFFFFFFF)
 	{
-		vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex;
+		vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex.pos;
 	}
 	else
 	{
 		// If no opposite HE exists, go around the existing face.
-		heIndx findEdgeIndx = edge.nextHE;
+		HeIndx findEdgeIndx = edge.nextHE;
 		HalfEdge findEdge = m_halfEdges[findEdgeIndx];
 		do
 		{
 			findEdgeIndx = findEdge.nextHE;
 		} while (m_halfEdges[findEdgeIndx].nextHE != halfEdge);
 
-		vertexPair->second = m_halfEdges[findEdgeIndx].destVertex;
+		vertexPair->second = m_halfEdges[findEdgeIndx].destVertex.pos;
 	}
 }
 
-void TriangleMesh::GetHETriangle(heIndx halfEdge, faceIndx* triangle)
+void TriangleMesh::GetHETriangle(HeIndx halfEdge, FaceIndx* triangle)
 {
 	*triangle = m_halfEdges[halfEdge].borderingFace;
 }
 
-void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<uint32>* surroundingVertices)
+void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> &surroundingVertices)
 {
-	heIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
-	heIndx currentEdgeIndx = startEdgeIndx;
+	HeIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
+	HeIndx currentEdgeIndx = startEdgeIndx;
 
 	uint32 failCount = 0;
 
@@ -283,7 +344,7 @@ void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<uint32>* sur
 	do
 	{
 		edge = m_halfEdges[startEdgeIndx];
-		surroundingVertices->push_back(edge.destVertex);
+		surroundingVertices.push_back(edge.destVertex);
 
 		if (edge.oppositeHE != 0xFFFFFFFF)
 		{
@@ -294,19 +355,78 @@ void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<uint32>* sur
 			failCount++;
 
 			// Find inward edge along the same face (that we know exists), then take it's opposite so it's out of the vertex
-			heIndx findEdgeIndx = edge.nextHE;
+			HeIndx findEdgeIndx = edge.nextHE;
 			HalfEdge findEdge = m_halfEdges[findEdgeIndx];
 			do
 			{
 				findEdgeIndx = findEdge.nextHE;
 			} while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
 
-			currentEdgeIndx = m_halfEdges[findEdgeIndx].oppositeHE;
+			HeIndx emanatingFromOriginalVertex = m_halfEdges[findEdgeIndx].oppositeHE;
+			if (emanatingFromOriginalVertex == 0xFFFFFFFF)
+			{
+				// In that case the triangle is alone starting on that vertex.
+				// Very degenerate case, just drop the query, it's worthless
+				return;
+			}
+			currentEdgeIndx = emanatingFromOriginalVertex;
 		}
 	} while (currentEdgeIndx != startEdgeIndx && failCount < 2);
 }
 
-void TriangleMesh::GetTriangleEdges(int triangle, heIndx* edge0, heIndx* edge1, heIndx* edge2)
+void TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &surroundingEdges)
+{
+	HeIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
+	HeIndx currentEdgeIndx = startEdgeIndx;
+
+	uint32 failCount = 0;
+
+	HalfEdge edge;
+	do
+	{
+		edge = m_halfEdges[startEdgeIndx];
+		surroundingEdges.push_back(edge);
+
+		if (edge.oppositeHE != 0xFFFFFFFF)
+		{
+			currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
+		}
+		else
+		{
+			failCount++;
+
+			// Find inward edge along the same face (that we know exists), then take it's opposite so it's out of the vertex
+			HeIndx findEdgeIndx = edge.nextHE;
+			HalfEdge findEdge = m_halfEdges[findEdgeIndx];
+			do
+			{
+				findEdgeIndx = findEdge.nextHE;
+			} while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
+
+			HeIndx emanatingFromOriginalVertex = m_halfEdges[findEdgeIndx].oppositeHE;
+			if (emanatingFromOriginalVertex == 0xFFFFFFFF)
+			{
+				// In that case the triangle is alone starting on that vertex.
+				// Very degenerate case, just drop the query, it's worthless
+				return;
+			}
+			currentEdgeIndx = emanatingFromOriginalVertex;
+		}
+	} while (currentEdgeIndx != startEdgeIndx && failCount < 2);
+}
+
+void TriangleMesh::GetSurroundingTriangles(uint32 vertexIndx, vector<FaceIndx> &surroundingFaces)
+{
+	vector<HalfEdge> emanatingEdges;
+	GetEmanatingHalfEdges(vertexIndx, emanatingEdges);
+
+	for (auto edge : emanatingEdges)
+	{
+		surroundingFaces.push_back(edge.borderingFace);
+	}
+}
+
+void TriangleMesh::GetTriangleEdges(uint32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2)
 {
 	*edge0 = m_meshTriangles[triangle].firstEdge;
 	*edge1 = m_halfEdges[*edge0].nextHE;

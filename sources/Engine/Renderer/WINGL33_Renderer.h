@@ -32,7 +32,7 @@ public:
 
 	Transform* m_modelTransform;
 
-	const vector<unsigned int>* m_toMeshTriangles;
+	const vector<uint32>* m_toMeshTriangles;
 	const vector<vec3>* m_toMeshVertices;
 	const vector<vec3>* m_toMeshNormals;
 	const vector<vec3>* m_toMeshTangents;
