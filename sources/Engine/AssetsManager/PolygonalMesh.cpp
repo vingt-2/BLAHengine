@@ -3,6 +3,112 @@
 TriangleMesh::TriangleMesh() {}
 TriangleMesh::~TriangleMesh() {}
 
+void TriangleMesh::BuildMeshTopo(
+	vector<uint32> vertPosIndices,
+	vector<uint32> vertNormalIndices,
+	vector<uint32> vertUVsIndices,
+	bool swapNormals)
+{
+	unordered_map<pair<uint32_t, uint32_t>, uint32_t, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
+	vector<pair<uint32_t, uint32_t>> hePairs;
+
+	m_heEmanatingFromVert.resize(vertPosIndices.size());
+
+	for (uint32_t i = 0; i < vertPosIndices.size(); i += 3) // For each triangle
+	{
+		uint32_t currentTriangle = i / 3;
+
+		uint32_t vindx0, vindx1, vindx2;
+		uint32_t nindx0, nindx1, nindx2;
+		uint32_t uvIndx0, uvIndx1, uvIndx2;
+
+		if (swapNormals)
+		{
+			vindx0 = vertPosIndices[i + 2];
+			vindx1 = vertPosIndices[i + 1];
+			vindx2 = vertPosIndices[i + 0];
+		}
+		else
+		{
+			vindx0 = vertPosIndices[i + 1];
+			vindx1 = vertPosIndices[i + 2];
+			vindx2 = vertPosIndices[i + 0];
+		}
+
+		if (vertNormalIndices.empty())
+		{
+			nindx0 = -1;
+			nindx1 = -1;
+			nindx2 = -1;
+		}
+		else
+		{
+			nindx0 = vertNormalIndices[i + 1];
+			nindx1 = vertNormalIndices[i + 2];
+			nindx2 = vertNormalIndices[i + 0];
+		}
+
+		if (vertUVsIndices.empty())
+		{
+			uvIndx0 = -1;
+			uvIndx1 = -1;
+			uvIndx2 = -1;
+		}
+		else
+		{
+			uvIndx0 = vertUVsIndices[i + 1];
+			uvIndx1 = vertUVsIndices[i + 2];
+			uvIndx2 = vertUVsIndices[i + 0];
+		}
+
+		HalfEdge he0 = { vindx0, nindx0, uvIndx0, currentTriangle, i + 1, -1 }; // the -1 value is to be populated later
+		HalfEdge he1 = { vindx1, nindx1, uvIndx1, currentTriangle, i + 2, -1 };
+		HalfEdge he2 = { vindx2, nindx2, uvIndx2, currentTriangle, i + 0, -1 };
+
+		m_halfEdges.push_back(he0);
+		m_halfEdges.push_back(he1);
+		m_halfEdges.push_back(he2);
+
+
+		// Populating map and list to easily find opposite edges afterwards.
+		uint32_t v0 = vertPosIndices.at(i);
+		uint32_t v1 = vertPosIndices.at(i + 1);
+		uint32_t v2 = vertPosIndices.at(i + 2);
+		halfEdgesIndices[pair<uint32_t, uint32_t>(v0, v1)] = i;
+		halfEdgesIndices[pair<uint32_t, uint32_t>(v1, v2)] = i + 1;
+		halfEdgesIndices[pair<uint32_t, uint32_t>(v2, v0)] = i + 2;
+		hePairs.push_back(pair<uint32_t, uint32_t>(v0, v1));
+		hePairs.push_back(pair<uint32_t, uint32_t>(v1, v2));
+		hePairs.push_back(pair<uint32_t, uint32_t>(v2, v0));
+
+		// Populates m_vertEmanatingHE
+		m_heEmanatingFromVert[v0] = i;
+		m_heEmanatingFromVert[v1] = i + 1;
+		m_heEmanatingFromVert[v2] = i + 2;
+
+		// Populates m_triangleHE
+		TriangleMesh::face face = { i };
+		m_meshTriangles.push_back(face);
+	}
+
+	for (uint32_t i = 0; i < m_halfEdges.size(); i++)
+	{
+		TriangleMesh::HalfEdge* edge = &(m_halfEdges.at(i));
+
+		pair<uint32_t, uint32_t> vertPair = hePairs[i];
+
+		try
+		{
+			edge->oppositeHE = halfEdgesIndices.at(pair<uint32_t, uint32_t>(vertPair.second, vertPair.first));
+		}
+		catch (const out_of_range& e)
+		{
+			edge->oppositeHE = 0xFFFFFFFF;
+			m_manifoldViolationEdges++;
+		}
+	}
+}
+
 void TriangleMesh::NormalizeModelCoordinates()
 {
 	float minX = this->m_vertexPos[0].x;

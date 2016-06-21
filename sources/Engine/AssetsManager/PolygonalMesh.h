@@ -67,6 +67,12 @@ public:
 	TriangleMesh();
 	~TriangleMesh();
 
+	void BuildMeshTopo(
+		vector<uint32> vertPosIndices,
+		vector<uint32> vertNormalIndices,
+		vector<uint32> vertUVsIndices,
+		bool swapNormals);
+
 	void NormalizeModelCoordinates();
 	RenderData* GenerateRenderData();
 	vector<uint32_t>* GenerateTopoTriangleIndices();
