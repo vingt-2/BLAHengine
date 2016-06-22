@@ -23,6 +23,15 @@ public:
 	void DeleteGBufferResources();
 };
 
+class ScreenSpaceQuad
+{
+public:
+
+	bool m_isInit = false;
+	GLuint m_geomBuffer;
+	GLuint m_vao;
+};
+
 class GL33RenderObject : public RenderObject
 {
 public:
@@ -83,7 +92,11 @@ public:
 
 	vector<DirectionalLightRender> m_directionalLightsVector;
 	GBuffer m_GBuffer;
+	ScreenSpaceQuad m_screenSpaceQuad;
+
 	bool debug_renderGBuffer = false;
+	vector<pair<Ray,vec3>> m_debugRaysQueue;
+	GLuint m_debugRayPgrmID;
 
 	// MOVE?
 	bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
@@ -92,10 +105,8 @@ protected:
 	GLFWwindow* InitializeWindowAndContext(char* windowTitle);
 	bool GenerateArrays(GL33RenderObject& object);
 	void GenerateVertexArrayID(GL33RenderObject& object);
-
 	template<typename objectType>
 	void GenerateBufferObject(GL33RenderObject& object, const objectType* buffer, GLuint bufferSize, GLuint elementsPerObject, GLuint attributeNumber);
-
 	void GenerateElementBuffer(GL33RenderObject& object, GLuint elementBufferId);
 
 	bool CleanUp(GL33RenderObject& object);
@@ -108,7 +119,11 @@ protected:
 
 	void RenderDefferedLights();
 
-	void RenderDebug();
+	void RenderDebugRays();
+	void RenderDebug()
+	{
+		RenderDebugRays();
+	}
 
 	void DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
 	void DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
@@ -117,4 +132,5 @@ protected:
 
 	bool RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender);
 
+	void SetupScreenSpaceRenderQuad();
 };

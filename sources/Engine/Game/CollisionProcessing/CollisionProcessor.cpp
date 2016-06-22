@@ -3,8 +3,8 @@
 CollisionProcessor::CollisionProcessor(float* timestepPtr) :
 	m_flagInterpolateNormals(false),
 	m_maxIterations(20),
-	m_bounce(0.01),
-	m_friction(0.0),
+	m_bounce(0.1),
+	m_friction(0.1),
 	m_epsilon(0.001),
 	debug_stop(false),
 	m_iterationCount(0),

@@ -81,6 +81,8 @@ bool GL33Renderer::Update()
 			RenderDirectionalShadowMap(directLight.m_shadowRender);
 			DrawDirectionalLight(directLight);
 		}
+
+		RenderDebug();
 	}
 
 	glfwSwapInterval(0);
@@ -137,6 +139,13 @@ void GL33Renderer::RenderGBuffer()
 			glDrawElements(renderObject->m_renderType, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
 			glBindVertexArray(0);
+			// Send textureSamplers to shader
+			for (uint16 samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
+			{
+				glActiveTexture(GL_TEXTURE0 + samplerIndex);
+
+				glDisable(GL_TEXTURE_2D);
+			}
 
 			for (uint vboIndex = 0; vboIndex < renderObject->m_vboIDVector.size(); vboIndex++)
 			{
@@ -225,21 +234,10 @@ bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowR
 
 void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
 {
-	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		1.0f,  1.0f, 0.0f,
-	};
+	if (!m_screenSpaceQuad.m_isInit)
+		SetupScreenSpaceRenderQuad();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	GLuint quad_vertexbuffer;
-	glGenBuffers(1, &quad_vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 
 	glViewport(topLeft.x, topLeft.y, bottomRight.x-topLeft.x, bottomRight.y-topLeft.y);
 
@@ -253,20 +251,9 @@ void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
 	glUniform1i(texID, 0);
 
 	// 1rst attribute buffer : vertices
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glBindVertexArray(m_screenSpaceQuad.m_vao);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-
+	
 	// Draw the triangle !
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
 	glDisable(GL_COMPARE_R_TO_TEXTURE);
@@ -277,21 +264,10 @@ void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
 
 void GL33Renderer::DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
 {
-	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		1.0f,  1.0f, 0.0f,
-	};
+	if (!m_screenSpaceQuad.m_isInit)
+		SetupScreenSpaceRenderQuad();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	GLuint quad_vertexbuffer;
-	glGenBuffers(1, &quad_vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 
 	glViewport(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
 
@@ -304,21 +280,9 @@ void GL33Renderer::DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
 	// Set our "renderedTexture" sampler to user Texture Unit 0
 	glUniform1i(texID, 0);
 
-	// 1rst attribute buffer : vertices
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glBindVertexArray(m_screenSpaceQuad.m_vao);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-
+	
 	// Draw the triangle !
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
 	glDisable(GL_COMPARE_R_TO_TEXTURE);
@@ -329,24 +293,13 @@ void GL33Renderer::DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
 
 void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 {
-	OrthographicCamera* shadowCamera = &(directionalLight.m_shadowRender.m_shadowCamera);
-	// Memory leak here <-- !!
-	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-	};
+	if (!m_screenSpaceQuad.m_isInit)
+		SetupScreenSpaceRenderQuad();
 
+	OrthographicCamera* shadowCamera = &(directionalLight.m_shadowRender.m_shadowCamera);
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	GLuint quad_vertexbuffer;
-	glGenBuffers(1, &quad_vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
@@ -404,20 +357,8 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 
 	glUniform1i(shadowmapHandle, 4);
 
-	// 1rst attribute buffer : vertices
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glBindVertexArray(m_screenSpaceQuad.m_vao);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
 
 	// Draw the triangle !
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
@@ -770,4 +711,126 @@ void GBuffer::DeleteGBufferResources()
 	//Bind 0, which means render to back buffer, as a result, fb is unbound
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	glDeleteFramebuffersEXT(1, &m_frameBufferObject);
+}
+
+void GL33Renderer::SetupScreenSpaceRenderQuad()
+{
+	static const GLfloat g_quad_vertex_buffer_data[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+	};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenBuffers(1, &(m_screenSpaceQuad.m_geomBuffer));
+	glBindBuffer(GL_ARRAY_BUFFER, m_screenSpaceQuad.m_geomBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+	// 1rst attribute buffer : vertices
+	glGenVertexArrays(1, &(m_screenSpaceQuad.m_vao));
+	glBindVertexArray(m_screenSpaceQuad.m_vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_screenSpaceQuad.m_geomBuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	m_screenSpaceQuad.m_isInit = true;
+}
+
+void GL33Renderer::RenderDebugRays()
+{
+	if (m_debugRaysQueue.empty())
+	{
+		return;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
+
+	vector<vec3> debugLinesMeshVerts;
+	vector<vec3> debugLinesMeshColors;
+
+	for (auto coloredRay : m_debugRaysQueue)
+	{
+		Ray ray = coloredRay.first;
+		vec3 color = coloredRay.second;
+
+		vec3 dest = ray.m_origin + ray.m_length * ray.m_direction;
+		debugLinesMeshVerts.push_back(ray.m_origin);
+		debugLinesMeshVerts.push_back(dest);
+
+		debugLinesMeshColors.push_back(color);
+		debugLinesMeshColors.push_back(color);
+	}
+
+	GLuint raysBuffer;
+	glGenBuffers(1, &raysBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, raysBuffer);
+	glBufferData(GL_ARRAY_BUFFER, debugLinesMeshVerts.size() * sizeof(vec3), &(debugLinesMeshVerts[0]), GL_STATIC_DRAW);
+
+	GLuint colorBuffer;
+	glGenBuffers(1, &colorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, debugLinesMeshColors.size() * sizeof(vec3), &(debugLinesMeshColors[0]), GL_STATIC_DRAW);
+
+	// 1rst attribute buffer : vertices
+	GLuint raysVao;
+	glGenVertexArrays(1, &raysVao);
+	glBindVertexArray(raysVao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, raysBuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+	glVertexAttribPointer(
+		1,                  // attribute 1. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+	
+	glDisable(GL_DEPTH_TEST);
+
+	glUseProgram(m_debugRayPgrmID);
+
+	mat4 MVP = m_mainRenderCamera.m_ViewProjection;
+
+	GLuint MVPid = glGetUniformLocation(m_debugRayPgrmID, "MVP");
+	glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
+	
+	glDrawArrays(0x0001, 0, debugLinesMeshVerts.size());
+	
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+
+	glDeleteBuffers(1, &raysBuffer);
+	glDeleteBuffers(1, &colorBuffer);
+	glDeleteVertexArrays(1, &raysVao);
+
+	m_debugRaysQueue.clear();
 }

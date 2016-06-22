@@ -220,17 +220,18 @@ int main( void )
 	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
 	sharedResources->LoadMaterial("DrawDepthTexture", "./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
 	sharedResources->LoadMaterial("DrawColorTexture", "./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
+	sharedResources->LoadMaterial("forwardVColor", "./resources/shaders/Engine/ForwardVertexColorVS.glsl", "./resources/shaders/Engine/ForwardVertexColorFS.glsl");
 
 	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
 
 	mainRenderer->DrawColorBufferPrgmID = sharedResources->GetMaterial("DrawColorTexture");
 	mainRenderer->DrawDepthBufferPrgmID = sharedResources->GetMaterial("DrawDepthTexture");
-
 	mainRenderer->m_GBuffer.m_geometryPassPrgmID = sharedResources->GetMaterial("GeomPass");
+	mainRenderer->m_debugRayPgrmID = sharedResources->GetMaterial("forwardVColor");
 
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
-	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blank.bmp");
-	sharedResources->loadBMP_custom("blankNormal", "./resources/textures/blank_normal.bmp");
+	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blankDiffuse.bmp");
+	sharedResources->loadBMP_custom("blankNormal", "./resources/textures/blankNormal.bmp");
 	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
 	sharedResources->loadBMP_custom("red", "./resources/textures/red.bmp");
@@ -291,12 +292,12 @@ int main( void )
 	for (int i = 0; i < 10; i++)
 	{
 		GameChar* Ball = new GameChar();
-		Ball->SetTriangleMesh(&sphere);
+		Ball->SetTriangleMesh(&cube);
 		Ball->m_meshRenderer->AssignMaterial("DirLightPass");
 		Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
 		Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
 		renderingManager->RequestRenderTicket(*Ball);
-		Ball->m_rigidBody->SetCollider(new Collider(&sphere));
+		Ball->m_rigidBody->SetCollider(new Collider(&cube));
 		mainScene->AddObject(Ball);
 		Ball->m_rigidBody->m_isPinned = false;
 		Ball->m_transform->m_position = vec3(5.5 * i, 5.5 * i, 0);
@@ -361,6 +362,7 @@ int main( void )
 
 	double averageDet = 0;
 	double averageProc = 0;
+	float averageContact = 0;
 
 	double iteration = 1;
 
@@ -371,6 +373,15 @@ int main( void )
 	{
 		averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
 		averageProc += mainScene->m_rigidBodySystem->m_collisionProcessor->m_processingTime;
+		averageContact += mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size();
+
+		if (iteration > 10)
+		{
+			averageDet = 0;
+			averageProc = 0;
+			averageContact = 0;
+			iteration = 0;
+		}
 
 		if(mainScene->m_enableSimulation)
 			iteration++;
@@ -383,6 +394,7 @@ int main( void )
 		title << "BLAengine: " << fps << " fps, ";
 		title << " ColDetTime: " << (averageDet / iteration);
 		title << " ColProcTime: " << (averageProc / iteration);
+		title << " ColProcTime: " << (averageContact / iteration);
 		title.str();
 		glfwSetWindowTitle(mainRenderer->GetWindow(), title.str().data());
 
@@ -486,23 +498,22 @@ int main( void )
 			currentObject->m_rigidBody->PushForceWorld(a,0.5f*b);
 		}
 
-		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
-		{
-			Contact contact = mainScene->GetContacts()->at(c);
-
-			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-			//debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-			//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-			//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
-
-//			mainScene->m_enableSimulation = false;
-		}
-
 		if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 		{
 			cout << "LCP Solver unhappy, Simulation Halted\n";
 			mainScene->m_enableSimulation = false;
 			mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop = false;
+		}
+
+		for (int c = 0; c < mainScene->GetContacts()->size(); c++)
+		{
+			Contact contact = mainScene->GetContacts()->at(c);
+
+			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactNormalW, 1), vec3(1, 0, 0)));
+			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent1W, 1), vec3(1, 0, 0)));
+			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent2W, 1), vec3(1, 0, 0)));
+
+			//mainScene->m_enableSimulation = false;
 		}
 
 
