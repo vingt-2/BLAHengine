@@ -71,9 +71,21 @@ void TriangleMesh::BuildMeshTopo(
 
 
 		// Populating map and list to easily find opposite edges afterwards.
-		uint32_t v0 = vertPosIndices.at(i);
-		uint32_t v1 = vertPosIndices.at(i + 1);
-		uint32_t v2 = vertPosIndices.at(i + 2);
+		uint32_t v0, v1, v2;
+
+		if (swapNormals)
+		{
+			v0 = vertPosIndices.at(i + 2);
+			v1 = vertPosIndices.at(i + 1);
+			v2 = vertPosIndices.at(i + 0);
+		}
+		else
+		{
+			v0 = vertPosIndices.at(i);
+			v1 = vertPosIndices.at(i + 1);
+			v2 = vertPosIndices.at(i + 2);
+		}
+
 		halfEdgesIndices[pair<uint32_t, uint32_t>(v0, v1)] = i;
 		halfEdgesIndices[pair<uint32_t, uint32_t>(v1, v2)] = i + 1;
 		halfEdgesIndices[pair<uint32_t, uint32_t>(v2, v0)] = i + 2;
@@ -343,7 +355,7 @@ void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> 
 	HalfEdge edge;
 	do
 	{
-		edge = m_halfEdges[startEdgeIndx];
+		edge = m_halfEdges[currentEdgeIndx];
 		surroundingVertices.push_back(edge.destVertex);
 
 		if (edge.oppositeHE != 0xFFFFFFFF)
@@ -384,7 +396,7 @@ void TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &su
 	HalfEdge edge;
 	do
 	{
-		edge = m_halfEdges[startEdgeIndx];
+		edge = m_halfEdges[currentEdgeIndx];
 		surroundingEdges.push_back(edge);
 
 		if (edge.oppositeHE != 0xFFFFFFFF)

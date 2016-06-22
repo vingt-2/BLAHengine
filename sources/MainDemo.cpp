@@ -276,15 +276,24 @@ int main( void )
 	skySphere->m_rigidBody->m_isPinned = true;
 	skySphere->m_rigidBody->m_enableCollision = false;
 
-	GameChar* sceneMesh = new GameChar();
-	sceneMesh->SetTriangleMesh(&sponza);
-	sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
-	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
-	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	sceneMesh->m_transform->m_scale = vec3(0.1);
-	renderingManager->RequestRenderTicket(*sceneMesh);
-	mainScene->AddObject(sceneMesh);
-	sceneMesh->m_rigidBody->m_isPinned = true;
+	//GameChar* sceneMesh = new GameChar();
+	//sceneMesh->SetTriangleMesh(&sponza);
+	//sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
+	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
+	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	//sceneMesh->m_transform->m_scale = vec3(0.1);
+	//renderingManager->RequestRenderTicket(*sceneMesh);
+	//mainScene->AddObject(sceneMesh);
+	//sceneMesh->m_rigidBody->m_isPinned = true;
+
+	GameChar* Ball = new GameChar();
+	Ball->SetTriangleMesh(&sphere);
+	Ball->m_meshRenderer->AssignMaterial("DirLightPass");
+	Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
+	Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
+	renderingManager->RequestRenderTicket(*Ball);
+	mainScene->AddObject(Ball);
+	Ball->m_rigidBody->m_isPinned = true;
 
 	GameChar* lightObj = new GameChar();
 	lightObj->SetTriangleMesh(&cube);

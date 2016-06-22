@@ -120,9 +120,10 @@ void GL33Renderer::RenderGBuffer()
 			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(renderObject->m_modelTransform->m_transformMatrix)[0][0]);
 
 			// Send textureSamplers to shader
-			for (int samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
+			for (uint16 samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
 			{
 				glActiveTexture(GL_TEXTURE0 + samplerIndex);
+
 				glBindTexture(GL_TEXTURE_2D, renderObject->m_textureSamplersVector.at(samplerIndex).second);
 
 				glUniform1i(renderObject->m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
@@ -475,7 +476,6 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 	//layout(location = 1) in vec2 vertexUV;
 	//layout(location = 2) in vec3 vertexNormals;
 	//layout(location = 3) in vec3 vertexTangent;
-	//layout(location = 4) in vec3 vertexBiTangent;
 	bool success = false;
 
 	int layoutIndex = 0;
@@ -496,13 +496,7 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 
 	if (!object.m_toMeshTangents->empty())
 	{
-		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshTangents->size() * sizeof(vec3), 3, layoutIndex);
-		layoutIndex++;
-	}
-
-	if (!object.m_toMeshBiTangents->empty())
-	{
-		GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshBiTangents->size() * sizeof(vec3), 3, layoutIndex);
+		GenerateBufferObject<vec3>(object, &((*object.m_toMeshTangents)[0]), object.m_toMeshTangents->size() * sizeof(vec3), 3, layoutIndex);
 		layoutIndex++;
 	}
 
@@ -577,7 +571,7 @@ bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, string textureNam
 	extern SharedResources* sharedResources;
 	if (object.m_programID != 0)
 	{
-		GLuint textureID = glGetUniformLocation(object.m_programID, sampleName.data());
+		GLuint textureID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
 		GLuint textureRessource = sharedResources->GetTexture(textureName.data());
 		object.m_textureSamplersVector.push_back(pair<GLuint, GLuint>(textureID, textureRessource));
 
