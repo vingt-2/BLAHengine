@@ -386,7 +386,7 @@ void TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> 
 	} while (currentEdgeIndx != startEdgeIndx && failCount < 2);
 }
 
-void TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &surroundingEdges)
+void TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HeIndx> &surroundingEdges)
 {
 	HeIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
 	HeIndx currentEdgeIndx = startEdgeIndx;
@@ -397,8 +397,17 @@ void TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &su
 	do
 	{
 		edge = m_halfEdges[currentEdgeIndx];
-		surroundingEdges.push_back(edge);
 
+		if (find(surroundingEdges.begin(), surroundingEdges.end(), currentEdgeIndx) != surroundingEdges.end())
+		{
+			// Cycle detected ...
+			return;
+		}
+		else
+		{
+			surroundingEdges.push_back(currentEdgeIndx);
+		}
+		
 		if (edge.oppositeHE != 0xFFFFFFFF)
 		{
 			currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
@@ -429,11 +438,12 @@ void TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &su
 
 void TriangleMesh::GetSurroundingTriangles(uint32 vertexIndx, vector<FaceIndx> &surroundingFaces)
 {
-	vector<HalfEdge> emanatingEdges;
+	vector<HeIndx> emanatingEdges;
 	GetEmanatingHalfEdges(vertexIndx, emanatingEdges);
 
-	for (auto edge : emanatingEdges)
+	for (auto edgeIndx : emanatingEdges)
 	{
+		HalfEdge edge = m_halfEdges[edgeIndx];
 		surroundingFaces.push_back(edge.borderingFace);
 	}
 }

@@ -98,7 +98,7 @@ public:
 	void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
 	void GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> &surroundingVertices);
 	void GetSurroundingTriangles(uint32 vertexIndx, vector<FaceIndx> &surroundingFaces);
-	void GetEmanatingHalfEdges(uint32 vertexIndx, vector<HalfEdge> &edges);
+	void GetEmanatingHalfEdges(uint32 vertexIndx, vector<HeIndx> &edges);
 	void GetTriangleEdges(uint32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
 };
 

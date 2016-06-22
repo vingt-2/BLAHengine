@@ -1,10 +1,7 @@
 #version 330
 
 in vec2 TexCoord0;
-in vec3 Normal0;
 in vec3 WorldPos0;
-in vec3 Tangent0;
-in vec3 BiTangent0;
 in mat3 TangentSpace0;
 
 layout (location = 0) out vec3 DiffuseOut;
@@ -18,12 +15,12 @@ uniform sampler2D normalMap;
 void main()
 {
     WorldPosOut = WorldPos0;
+	
     DiffuseOut = texture(diffuseMap, TexCoord0).rgb;
 	
 	vec3 normalMapSample = texture(normalMap, TexCoord0).rgb;
 	normalMapSample = normalize(2*normalMapSample - 1.0);
     NormalOut = TangentSpace0 * normalMapSample;
 	
-    //NormalOut = Normal0;
 	TexCoordOut = vec3(TexCoord0, 0.0);
 } 

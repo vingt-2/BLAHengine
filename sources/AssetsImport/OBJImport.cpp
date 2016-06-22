@@ -14,7 +14,6 @@ OBJImport::~OBJImport(void)
 
 bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals)
 {
-
 	m_currentMaxVertexPos = 0;
 	m_currentMaxUVPos = 0;
 	m_currentMaxNormalPos = 0;
@@ -69,6 +68,8 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
 					m_currentMaxNormalPos++;
 					vec3 currentNormal;
 					sscanf(lineInFile.data(), "%*s %f %f %f\n", &currentNormal.x, &currentNormal.y, &currentNormal.z);
+					if (swapNormals)
+						currentNormal *= -1.f;
 					mesh.m_vertexNormals.push_back(currentNormal);
 				}
 			}
