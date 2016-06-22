@@ -46,7 +46,7 @@ void CollisionProcessor::BroadPhaseDetection()
 			RigidBody* body1 = m_bodiesList[i];
 			RigidBody* body2 = m_bodiesList[j];
 
-			if (!(body1 == body2) && !body1->m_enableCollision && !body2->m_enableCollision)
+			if (!(body1 == body2) && body1->m_enableCollision && body2->m_enableCollision)
 			{
 				vec3* nxtPos1 = &(body1->m_nextState->m_nextPos);
 				vec3* nxtPos2 = &(body2->m_nextState->m_nextPos);

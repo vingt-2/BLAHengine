@@ -230,6 +230,7 @@ int main( void )
 
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blank.bmp");
+	sharedResources->loadBMP_custom("blankNormal", "./resources/textures/blank_normal.bmp");
 	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
 	sharedResources->loadBMP_custom("red", "./resources/textures/red.bmp");
@@ -245,30 +246,31 @@ int main( void )
 	TriangleMesh arrow;
 
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
-	objImport.ImportMesh("./resources/models/sponza.obj", sponza, false);
+	//objImport.ImportMesh("./resources/models/sponza.obj", sponza, false);
 	objImport.ImportMesh("./resources/models/cube.obj", cube, false);
 	objImport.ImportMesh("./resources/models/cube.obj", floor, false);
 	objImport.ImportMesh("./resources/models/sphere.obj", sphere, false);
 	objImport.ImportMesh("./resources/models/sphere.obj", invertedSphere, true);
-	sponza.ApplyGeomScaling(vec3(0.1f));
+	//sponza.ApplyGeomScaling(vec3(0.1f));
 	floor.ApplyGeomScaling(vec3(100, 10, 100));
 	floor.ApplyUVScaling(vec2(100));
 	
-	//GameChar* floor_obj = new GameChar();
-	//floor_obj->SetTriangleMesh(&floor);
-	//floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
-	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	//floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	//renderingManager->RequestRenderTicket(*floor_obj);
-	//mainScene->AddObject(floor_obj);
-	//floor_obj->m_transform->m_position = (vec3(0, 0, 0));
-	//floor_obj->m_rigidBody->m_isPinned = true;
+	GameChar* floor_obj = new GameChar();
+	floor_obj->SetTriangleMesh(&floor);
+	floor_obj->m_meshRenderer->AssignMaterial("defaultShader");
+	floor_obj->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
+	floor_obj->m_meshRenderer->AssignTexture("blankNormal", "normals");
+	renderingManager->RequestRenderTicket(*floor_obj);
+	floor_obj->m_rigidBody->SetCollider(new Collider(&floor));
+	mainScene->AddObject(floor_obj);
+	floor_obj->m_transform->m_position = (vec3(0, -15, 0));
+	floor_obj->m_rigidBody->m_isPinned = true;
 
 	GameChar* skySphere = new GameChar();
 	skySphere->SetTriangleMesh(&invertedSphere);
 	skySphere->m_meshRenderer->AssignMaterial("DirLightPass");
 	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "texture");
-	skySphere->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	skySphere->m_meshRenderer->AssignTexture("blankNormal", "normals");
 	renderingManager->RequestRenderTicket(*skySphere);
 	mainScene->AddObject(skySphere);
 	skySphere->m_transform->m_position = (vec3(0, 0, 0));
@@ -276,24 +278,29 @@ int main( void )
 	skySphere->m_rigidBody->m_isPinned = true;
 	skySphere->m_rigidBody->m_enableCollision = false;
 
-	GameChar* sceneMesh = new GameChar();
-	sceneMesh->SetTriangleMesh(&sponza);
-	sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
-	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
-	sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	sceneMesh->m_transform->m_scale = vec3(0.1);
-	renderingManager->RequestRenderTicket(*sceneMesh);
-	mainScene->AddObject(sceneMesh);
-	sceneMesh->m_rigidBody->m_isPinned = true;
+	//GameChar* sceneMesh = new GameChar();
+	//sceneMesh->SetTriangleMesh(&sponza);
+	//sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
+	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
+	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
+	//sceneMesh->m_transform->m_scale = vec3(0.1);
+	//renderingManager->RequestRenderTicket(*sceneMesh);
+	//mainScene->AddObject(sceneMesh);
+	//sceneMesh->m_rigidBody->m_isPinned = true;
 
-	GameChar* Ball = new GameChar();
-	Ball->SetTriangleMesh(&sphere);
-	Ball->m_meshRenderer->AssignMaterial("DirLightPass");
-	Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
-	Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
-	renderingManager->RequestRenderTicket(*Ball);
-	mainScene->AddObject(Ball);
-	Ball->m_rigidBody->m_isPinned = false;
+	for (int i = 0; i < 10; i++)
+	{
+		GameChar* Ball = new GameChar();
+		Ball->SetTriangleMesh(&sphere);
+		Ball->m_meshRenderer->AssignMaterial("DirLightPass");
+		Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
+		Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
+		renderingManager->RequestRenderTicket(*Ball);
+		Ball->m_rigidBody->SetCollider(new Collider(&sphere));
+		mainScene->AddObject(Ball);
+		Ball->m_rigidBody->m_isPinned = false;
+		Ball->m_transform->m_position = vec3(5.5 * i, 5.5 * i, 0);
+	}
 
 	GameChar* lightObj = new GameChar();
 	lightObj->SetTriangleMesh(&cube);
@@ -484,9 +491,9 @@ int main( void )
 			Contact contact = mainScene->GetContacts()->at(c);
 
 			renderingManager->DebugDrawRedSphere(contact.m_contactPositionW);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
-			debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
+			//debug->DrawRay(contact.m_contactPositionW, contact.m_contactNormalW, 1);
+			//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent1W, 1);
+			//debug->DrawRay(contact.m_contactPositionW, contact.m_contactTangent2W, 1);
 
 //			mainScene->m_enableSimulation = false;
 		}

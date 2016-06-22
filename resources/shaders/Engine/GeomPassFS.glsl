@@ -20,7 +20,7 @@ void main()
 	
 	vec3 normalMapSample = texture(normalMap, TexCoord0).rgb;
 	normalMapSample = normalize(2*normalMapSample - 1.0);
-    NormalOut = TangentSpace0 * normalMapSample;
+	NormalOut = TangentSpace0 * normalMapSample;
 	
 	TexCoordOut = vec3(TexCoord0, 0.0);
 } 
