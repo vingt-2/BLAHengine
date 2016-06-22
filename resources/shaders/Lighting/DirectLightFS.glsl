@@ -48,6 +48,9 @@ void main(){
         float ambientComp = 0.1;
     
         float vis = max(1.5 - (3*shadowPos.z), ambientComp);
+		
+		float bias = 0.0001*tan(acos(dot(normal, lightVector))); // cosTheta is dot( n,l ), clamped between 0 and 1
+		bias = clamp(bias, 0,0.01);
 
         if(shadowUV.x < 0.0 || shadowUV.x > 1.0){
             vis = ambientComp;
@@ -55,7 +58,7 @@ void main(){
         if(shadowUV.y < 0.0 || shadowUV.y > 1.0){
             vis = ambientComp;
         }
-        if(shadowPos.z - 0.0001 > closestObjDepth ) {
+        if(shadowPos.z - bias > closestObjDepth ) {
             vis = ambientComp;
         }
 
