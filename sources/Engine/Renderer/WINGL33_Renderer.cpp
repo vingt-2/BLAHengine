@@ -1,9 +1,5 @@
 #include "WINGL33_Renderer.h"
 
-///
-///
-/// Constructor / Destructor
-///
 GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	Renderer(windowTitle, isFullScreen)
 {
@@ -27,6 +23,10 @@ void GL33Renderer::WindowResize(GLFWwindow* window, int width, int height)
 	m_GBuffer.DeleteGBufferResources();
 	m_GBuffer.m_GbufferSize = m_renderSize;
 	m_GBuffer.InitializeGBuffer();
+
+	m_DBuffer.DeleteDisplayBufferResources();
+	m_DBuffer.m_DBufferSize = m_renderSize;
+	m_DBuffer.InitializeDisplayBuffer();
 }
 
 vec2 GL33Renderer::GetCursorPosition()
@@ -67,7 +67,7 @@ bool GL33Renderer::Update()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw vignettes with buffer results (from Gbuffer pass)
-	if (debug_renderGBuffer)
+	if (false)
 	{
 		DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
 		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
@@ -82,6 +82,7 @@ bool GL33Renderer::Update()
 			DrawDirectionalLight(directLight);
 		}
 
+		DrawDisplayBuffer();
 		RenderDebug();
 	}
 
@@ -155,6 +156,11 @@ void GL33Renderer::RenderGBuffer()
 	}
 	glUseProgram(0);
 
+}
+
+void GL33Renderer::DrawDisplayBuffer()
+{
+	DrawColorBufferOnScreen(ivec2(0,0), m_renderSize, m_DBuffer.m_displayTextureTarget);
 }
 
 RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, int type)
@@ -298,7 +304,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 
 	OrthographicCamera* shadowCamera = &(directionalLight.m_shadowRender.m_shadowCamera);
 	
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_DBuffer.m_frameBufferObject);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
@@ -364,8 +370,11 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
 	glDisable(GL_COMPARE_R_TO_TEXTURE);
 	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+	
+	
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender)
@@ -606,7 +615,7 @@ GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
 	glfwSetCursorPos(window, m_renderSize.x/2, m_renderSize.y/2);
 	
 	//Neat grey background
-	glClearColor(0.f, 0.f, 0.f, 0.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 	
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
@@ -616,7 +625,10 @@ GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
 
 	m_GBuffer.m_GbufferSize = m_renderSize;
 	m_GBuffer.InitializeGBuffer();
-		
+
+	m_DBuffer.m_DBufferSize = m_renderSize;
+	m_DBuffer.InitializeDisplayBuffer();
+
 	return window;
 }
 
@@ -820,7 +832,21 @@ void GL33Renderer::RenderDebugRays()
 
 	GLuint MVPid = glGetUniformLocation(m_debugRayPgrmID, "MVP");
 	glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
-	
+
+	GLuint depthMapID = glGetUniformLocation(m_debugRayPgrmID, "depthMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_depthTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(depthMapID, 0);
+
+	GLuint displayBufferID = glGetUniformLocation(m_debugRayPgrmID, "displayBuffer");
+	// Bind our texture in Texture Unit 1
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_DBuffer.m_displayTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 1
+	glUniform1i(displayBufferID, 1);
+
 	glDrawArrays(0x0001, 0, debugLinesMeshVerts.size());
 	
 	glBindVertexArray(0);
@@ -833,4 +859,53 @@ void GL33Renderer::RenderDebugRays()
 	glDeleteVertexArrays(1, &raysVao);
 
 	m_debugRaysQueue.clear();
+}
+
+bool DisplayBuffer::InitializeDisplayBuffer()
+{
+	// Create the FBO
+	glGenFramebuffers(1, &m_frameBufferObject);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_frameBufferObject);
+
+	// Create the gbuffer textures
+	glGenTextures(1, &m_displayTextureTarget);
+
+	// Bind Diffuse Texture
+	glBindTexture(GL_TEXTURE_2D, m_displayTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_DBufferSize.x, m_DBufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_displayTextureTarget, 0);
+
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, DrawBuffers);
+
+	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (Status != GL_FRAMEBUFFER_COMPLETE) {
+		printf("FB error, status: 0x%x\n", Status);
+		return false;
+	}
+
+	// restore default FBO
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	return true;
+}
+
+void DisplayBuffer::SetupPassthroughMaterials(GLuint prgrmId)
+{
+	m_passthroughPrgmId = prgrmId;
+}
+
+void DisplayBuffer::DeleteDisplayBufferResources()
+{
+	//Delete resources
+	glDeleteTextures(1, &m_displayTextureTarget);
+
+	//Bind 0, which means render to back buffer, as a result, fb is unbound
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glDeleteFramebuffersEXT(1, &m_frameBufferObject);
 }

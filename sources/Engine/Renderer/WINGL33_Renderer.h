@@ -23,6 +23,22 @@ public:
 	void DeleteGBufferResources();
 };
 
+class DisplayBuffer
+{
+public:
+	ivec2 m_DBufferSize;
+
+	GLuint m_frameBufferObject;
+
+	GLuint m_displayTextureTarget;
+
+	GLuint m_passthroughPrgmId;
+
+	bool InitializeDisplayBuffer();
+	void SetupPassthroughMaterials(GLuint prgrmId);
+	void DeleteDisplayBufferResources();
+};
+
 class ScreenSpaceQuad
 {
 public:
@@ -91,7 +107,9 @@ public:
 	//
 
 	vector<DirectionalLightRender> m_directionalLightsVector;
+
 	GBuffer m_GBuffer;
+	DisplayBuffer m_DBuffer;
 	ScreenSpaceQuad m_screenSpaceQuad;
 
 	bool debug_renderGBuffer = false;
@@ -116,6 +134,8 @@ protected:
 	void DestroyVertexArrayID(GL33RenderObject& object);
 
 	void RenderGBuffer();
+	
+	void DrawDisplayBuffer();
 
 	void RenderDefferedLights();
 

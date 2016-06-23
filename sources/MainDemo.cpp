@@ -220,14 +220,14 @@ int main( void )
 	sharedResources->LoadMaterial("GeomPass", "./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
 	sharedResources->LoadMaterial("DrawDepthTexture", "./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
 	sharedResources->LoadMaterial("DrawColorTexture", "./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
-	sharedResources->LoadMaterial("forwardVColor", "./resources/shaders/Engine/ForwardVertexColorVS.glsl", "./resources/shaders/Engine/ForwardVertexColorFS.glsl");
+	sharedResources->LoadMaterial("DebugRaysForward", "./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
 
 	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
 
 	mainRenderer->DrawColorBufferPrgmID = sharedResources->GetMaterial("DrawColorTexture");
 	mainRenderer->DrawDepthBufferPrgmID = sharedResources->GetMaterial("DrawDepthTexture");
 	mainRenderer->m_GBuffer.m_geometryPassPrgmID = sharedResources->GetMaterial("GeomPass");
-	mainRenderer->m_debugRayPgrmID = sharedResources->GetMaterial("forwardVColor");
+	mainRenderer->m_debugRayPgrmID = sharedResources->GetMaterial("DebugRaysForward");
 
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blankDiffuse.bmp");
@@ -292,12 +292,12 @@ int main( void )
 	for (int i = 0; i < 10; i++)
 	{
 		GameChar* Ball = new GameChar();
-		Ball->SetTriangleMesh(&cube);
+		Ball->SetTriangleMesh(&sphere);
 		Ball->m_meshRenderer->AssignMaterial("DirLightPass");
 		Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
 		Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
 		renderingManager->RequestRenderTicket(*Ball);
-		Ball->m_rigidBody->SetCollider(new Collider(&cube));
+		Ball->m_rigidBody->SetCollider(new Collider(&sphere));
 		mainScene->AddObject(Ball);
 		Ball->m_rigidBody->m_isPinned = false;
 		Ball->m_transform->m_position = vec3(5.5 * i, 5.5 * i, 0);
@@ -308,8 +308,8 @@ int main( void )
 	lightObj->m_meshRenderer->AssignMaterial("DirLightPass");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
 	lightObj->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	lightObj->m_transform->m_position = vec3(-10,5,0);
-	lightObj->m_transform->SetRotationUsingEuler(vec3(-1, 0, 0));
+	lightObj->m_transform->m_position = vec3(-10,30,0);
+	lightObj->m_transform->SetRotationUsingEuler(vec3(-1, -1, 0));
 
 	Camera* cameraLight = new Camera();
 	cameraLight->m_transform = lightObj->m_transform;
@@ -337,13 +337,6 @@ int main( void )
 
 
 	cout << "\n\n\n\nDone Loading, RigidBody Simulation: \n";
-
-	//
-	// Did you know ?
-	// There is a big memory leak when you draw debug rays.
-	// So don't do it too much.
-	// Cheers
-	// 
 
 	int frameCount = 0;
 	vector<Ray> debugRays;
@@ -509,9 +502,9 @@ int main( void )
 		{
 			Contact contact = mainScene->GetContacts()->at(c);
 
-			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactNormalW, 1), vec3(1, 0, 0)));
-			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent1W, 1), vec3(1, 0, 0)));
-			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent2W, 1), vec3(1, 0, 0)));
+			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactNormalW, 10), vec3(0, 1, 0)));
+			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent1W, 10), vec3(1, 0, 0)));
+			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent2W, 10), vec3(0, 0, 1)));
 
 			//mainScene->m_enableSimulation = false;
 		}
