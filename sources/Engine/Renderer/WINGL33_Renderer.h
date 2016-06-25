@@ -92,7 +92,8 @@ public:
 	bool Update();
 
 	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
-	bool		  CancelRender(const MeshRenderer& object);
+	bool	CancelRender(const MeshRenderer& object);
+	bool	LoadDebugLines(pair<vector<vec3>, vector<vec3>>& debugLinesMesh);
 
 	GLFWwindow* GetWindow() const { return m_glfwWindow; }
 	void		WindowResize(GLFWwindow* window, int width, int height);
@@ -112,8 +113,16 @@ public:
 	DisplayBuffer m_DBuffer;
 	ScreenSpaceQuad m_screenSpaceQuad;
 
-	bool debug_renderGBuffer = false;
-	vector<pair<Ray,vec3>> m_debugRaysQueue;
+	bool debug_renderGBuffer;
+
+	struct debugLinesInfo
+	{
+		GLuint vertBuffer;
+		GLuint colorBuffer;
+		GLuint vao;
+		GLuint size;
+	} m_debugLinesInfo;
+
 	GLuint m_debugRayPgrmID;
 
 	// MOVE?
@@ -139,10 +148,10 @@ protected:
 
 	void RenderDefferedLights();
 
-	void RenderDebugRays();
+	void RenderDebugLines();
 	void RenderDebug()
 	{
-		RenderDebugRays();
+		RenderDebugLines();
 	}
 
 	void DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);

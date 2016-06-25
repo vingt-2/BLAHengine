@@ -29,7 +29,7 @@ void main()
     float depth = texture(depthMap, screenToUV(p.xy)).r;
     vec3 backPixelColor = texture(displayBuffer, screenToUV(p.xy)).rgb;
     
-    float alphablend = gl_FragCoord.z > depth ? 0.3f : 1.0f; 
+    float alphablend = gl_FragCoord.z > depth ? 0.1f : 1.0f; 
 
     color = vec4((alphablend) * vertexColor + (1-alphablend) * backPixelColor, 1);
 }

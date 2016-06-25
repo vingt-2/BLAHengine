@@ -1,7 +1,7 @@
 #include "./Debug.h"
 
 
-Debug::Debug(RenderingManager* manager)
+Debug::Debug(DebugRenderingManager* manager)
 {
 	this->m_debugRenderManager = manager;
 }
@@ -11,67 +11,60 @@ Debug::~Debug(void)
 {
 }
 
+void Debug::Update()
+{
+	m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);
+
+	m_lineMeshVertsAndColor.first.clear();
+	m_lineMeshVertsAndColor.second.clear();
+}
+
 void Debug::DrawLine(const vec3 origin,const vec3 destination)
 {
-	vec4 colorBuffer[2] = {vec4(origin,1.f),vec4(destination,1.f)};
-	GenerateLineMesh(origin,destination,colorBuffer);
+	m_lineMeshVertsAndColor.first.push_back(origin); 
+	m_lineMeshVertsAndColor.first.push_back(destination);
+	m_lineMeshVertsAndColor.second.push_back(vec3(0));
+	m_lineMeshVertsAndColor.second.push_back(vec3(0));
 }
 
-void Debug::DrawLine(const vec3 origin,const vec3 destination,const vec4 color)
+void Debug::DrawLine(const vec3 origin,const vec3 destination,const vec3 color)
 {
-	vec4 colorBuffer[2] = {color,color};
-	GenerateLineMesh(origin,destination,colorBuffer);
+	m_lineMeshVertsAndColor.first.push_back(origin);
+	m_lineMeshVertsAndColor.first.push_back(destination);
+	m_lineMeshVertsAndColor.second.push_back(color);
+	m_lineMeshVertsAndColor.second.push_back(color);
 }
 
-void Debug::DrawRay(const vec3 origin,const vec3 direction,const GLfloat length,const vec4 color)
+void Debug::DrawRay(Ray ray,const vec3 color)
 {
-	vec3 destination = origin + length* direction;
-	vec4 colorBuffer[2] = {color,color};
-	GenerateLineMesh(origin,destination,colorBuffer);
+	vec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
+
+	DrawLine(ray.m_origin, destination, color);
 }
 
-void Debug::DrawRay(const vec3 origin,const vec3 direction,const GLfloat length)
+void Debug::DrawRay(Ray ray)
 {
-	vec3 destination = origin + length* direction;
-	vec4 colorBuffer[2] = {vec4(origin,1.f),vec4(destination,1.f)};
-	GenerateLineMesh(origin,destination,colorBuffer);
+	vec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
+
+	DrawLine(ray.m_origin, destination, vec3(0));
 }
 
-void Debug::DrawGrid(int size,const vec4 color)
+void Debug::DrawGrid(int size, float spacing, const vec3 color)
 {
 	for (int i=-size/2; i<=size/2; i++)
 	{
-		DrawLine(vec3(size/2,0,i),vec3(-size/2,0,i),color);
-	}
-	for (int i=-size/2; i<=size/2; i++)
-	{
-		DrawLine(vec3(i,0,size/2),vec3(i,0,-size/2),color);
+		float iSpacing = i*spacing;
+		float sizeSpacing = size*spacing;
+		DrawLine(vec3(sizeSpacing /2, 0, iSpacing),vec3(-sizeSpacing /2, 0, iSpacing), color);
+		DrawLine(vec3(iSpacing, 0, sizeSpacing /2),vec3(iSpacing, 0, -sizeSpacing /2), color);
 	}
 }
 
-void Debug::GenerateLineMesh(const vec3 origin, const vec3 destination, const vec4* colorBuffer)
+void Debug::DrawBasis(Transform* transform, float opacity)
 {
-	Transform* transform = new Transform();
-	TriangleMesh* ray = new TriangleMesh();
-	ray->m_vertexPos.push_back(origin);
-	ray->m_vertexPos.push_back(destination);
-	//ray->m_meshTriangles.push_back(0);
-	//ray->m_meshTriangles.push_back(1);
-	MeshRenderer* rayRenderer = new MeshRenderer(transform);
-	rayRenderer->AssignMaterial("debugShader");
-	rayRenderer->m_renderType = GL_LINES;
-	GameChar* lineMesh = new GameChar();
-	lineMesh->m_meshRenderer = rayRenderer;
-	lineMesh->m_transform = transform;
-
-	m_debugRenderManager->RequestRenderTicket(*lineMesh);
-}
-
-void Debug::DrawBasis(Transform* transform,GLfloat opacity)
-{
-	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(1,0,0)))),1,vec4(1,0,0,opacity));
-	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(0,1,0)))),1,vec4(0,1,0,opacity));
-	DrawRay((transform->LocalPositionToWorld(vec3(0,0,0))),normalize((transform->LocalDirectionToWorld(vec3(0,0,1)))),1,vec4(0,0,1,opacity));
+	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(1, 0, 0))))), vec3(1, 0, 0));
+	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 1, 0))))), vec3(0, 1, 0));
+	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 0, 1))))), vec3(0, 0, 1));
 }
 
 void Debug::OutputToDebug(char* m_debug)

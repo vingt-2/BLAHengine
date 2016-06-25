@@ -191,7 +191,7 @@ int main( void )
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 
 	Camera* mainCamera = new Camera();
-	mainCamera->m_transform->m_position = vec3(10, 10, -15);
+	mainCamera->m_transform->m_position = vec3(10, 0, -15);
 	mainCamera->m_transform->SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
 	mainCamera->m_isControlEnabled = true;
 
@@ -199,8 +199,8 @@ int main( void )
 	
 	mainScene = new Scene(mainCamera);
 
-	RenderingManager* renderingManager = new RenderingManager(1, mainRenderer, RenderingManager::Game);
-	RenderingManager* debugRenderingManager = new RenderingManager(1, mainRenderer, RenderingManager::DebugGizmo);
+	RenderingManager* renderingManager = new RenderingManager(mainRenderer, RenderingManager::Game);
+	DebugRenderingManager* debugRenderingManager = new DebugRenderingManager(mainRenderer);
 
 	debug = new Debug(debugRenderingManager);
 
@@ -264,7 +264,7 @@ int main( void )
 	renderingManager->RequestRenderTicket(*floor_obj);
 	floor_obj->m_rigidBody->SetCollider(new Collider(&floor));
 	mainScene->AddObject(floor_obj);
-	floor_obj->m_transform->m_position = (vec3(0, -15, 0));
+	floor_obj->m_transform->m_position = (vec3(0, -5, 0));
 	floor_obj->m_rigidBody->m_isPinned = true;
 
 	GameChar* skySphere = new GameChar();
@@ -289,7 +289,7 @@ int main( void )
 	//mainScene->AddObject(sceneMesh);
 	//sceneMesh->m_rigidBody->m_isPinned = true;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 2; i < 12; i++)
 	{
 		GameChar* Ball = new GameChar();
 		Ball->SetTriangleMesh(&sphere);
@@ -465,11 +465,9 @@ int main( void )
 			}
 			else
 			{
-				renderingManager->DebugDrawRedSphere(colPoint);
 				currentObject->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
 			}
 		}
-
 
 		if (glfwGetMouseButton(mainRenderer->GetWindow(), 2))
 		{
@@ -502,16 +500,18 @@ int main( void )
 		{
 			Contact contact = mainScene->GetContacts()->at(c);
 
-			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactNormalW, 10), vec3(0, 1, 0)));
-			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent1W, 10), vec3(1, 0, 0)));
-			mainRenderer->m_debugRaysQueue.push_back(pair<Ray, vec3>(Ray(contact.m_contactPositionW, contact.m_contactTangent2W, 10), vec3(0, 0, 1)));
+			debug->DrawRay(Ray(contact.m_contactPositionW, contact.m_contactNormalW, 1), vec3(0, 1, 0));
+			debug->DrawRay(Ray(contact.m_contactPositionW, contact.m_contactTangent1W, 1), vec3(1, 0, 0));
+			debug->DrawRay(Ray(contact.m_contactPositionW, contact.m_contactTangent2W, 1), vec3(0, 0, 1));
 
 			//mainScene->m_enableSimulation = false;
 		}
 
+		debug->DrawGrid(1000, 10, vec3(0.4));
 
 		SimpleControls(mainCamera);
 		
+		debug->Update();
 		mainCamera->Update();
 		mainRenderer->Update();
 		mainScene->Update();

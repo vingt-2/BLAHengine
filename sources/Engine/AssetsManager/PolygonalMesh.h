@@ -53,7 +53,7 @@ public:
 	vector<vec2> m_vertexUVs;
 
 	/*
-		Tangent and Bitangent Basis information for each face:
+		Tangent information for each face:
 	*/
 	vector<vec3> m_faceTangent;
 

@@ -12,6 +12,14 @@ private:
 
 };
 
+class DebugRenderObject
+{
+public:
+	virtual ~DebugRenderObject() {};
+private:
+
+};
+
 class Renderer
 {
 public:
@@ -25,13 +33,13 @@ public:
 
 	vector<RenderObject*> m_renderPool;
 	vector<RenderObject*> m_gizmoRenderPool;
-	RenderObject* debug_sphere;
-	vector<vec3> debug_sphere_requests;
+
 
 	// Rendering Related
 	virtual bool Update() = 0;
 	virtual RenderObject* LoadRenderObject(const MeshRenderer& object,int type) = 0;
-	virtual bool		  CancelRender(const MeshRenderer& object) = 0;
+	virtual bool	CancelRender(const MeshRenderer& object) = 0;
+	virtual bool	LoadDebugLines(pair<vector<vec3>, vector<vec3>>& lineMesh) = 0;
 
 	// Windowing Related
 	virtual vec2 GetCursorPosition() = 0;

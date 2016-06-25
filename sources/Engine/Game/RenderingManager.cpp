@@ -1,7 +1,7 @@
 #include "RenderingManager.h"
 
 
-RenderingManager::RenderingManager(int managerId,Renderer* renderer, RenderManagerType type)
+RenderingManager::RenderingManager(Renderer* renderer, RenderManagerType type)
 {
 	this->currentTicket = 1;
 	this->m_renderer = renderer;
@@ -62,31 +62,13 @@ void RenderingManager::LoadObject(GameObject& object)
 	
 }
 
-bool RenderingManager::DebugSetupSphere(const GameObject& sphere)
+DebugRenderingManager::DebugRenderingManager(Renderer* renderer)
 {
-	if (const GameChar* meshObject = dynamic_cast<const GameChar*> (&sphere))
-	{
-		//m_renderer->m_renderPool.push_back(renderObject->m_meshRenderer);
-		//CHANGE THIS 
-		int renderTicket = ++(this->currentTicket);
-		this->m_ticketedObjects[renderTicket] = meshObject;
-
-		if (RenderObject* renderObject = this->m_renderer->LoadRenderObject(*(meshObject->m_meshRenderer), 2))
-		{
-			this->m_renderObjects[renderTicket] = renderObject;
-		}
-		meshObject->m_meshRenderer->m_renderTicket = this->currentTicket;
-		return this->currentTicket;
-	}
-	else
-	{
-		printf("Rendering Manager Received non renderable object \n");
-		return -1;
-	}
+	m_renderer = renderer;
 }
 
-bool RenderingManager::DebugDrawRedSphere(vec3 position)
+void DebugRenderingManager::LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh)
 {
-	this->m_renderer->debug_sphere_requests.push_back(position);
-	return true;
+	m_renderer->LoadDebugLines(lineMesh);
 }
+

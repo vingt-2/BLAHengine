@@ -1,7 +1,8 @@
 #include "WINGL33_Renderer.h"
 
 GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
-	Renderer(windowTitle, isFullScreen)
+	Renderer(windowTitle, isFullScreen),
+	debug_renderGBuffer(false)
 {
 	m_glfwWindow = InitializeWindowAndContext(windowTitle);
 	if(m_glfwWindow != NULL)
@@ -67,7 +68,7 @@ bool GL33Renderer::Update()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw vignettes with buffer results (from Gbuffer pass)
-	if (false)
+	if (debug_renderGBuffer)
 	{
 		DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
 		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
@@ -198,14 +199,57 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 		m_renderPool.push_back(object);
 	else if (type == 1)
 		m_gizmoRenderPool.push_back(object);
-	else if (type == 2)
-		debug_sphere = object;
 
 	return object;
 }
 
 bool GL33Renderer::CancelRender(const MeshRenderer& object)
 {
+	return true;
+}
+
+bool GL33Renderer::LoadDebugLines(pair<vector<vec3>, vector<vec3>>& debugLinesMesh)
+{
+	if (debugLinesMesh.first.size() == 0 || debugLinesMesh.second.size() != debugLinesMesh.first.size())
+	{
+		m_debugLinesInfo = { 0, 0, 0, 0 };
+		return false;
+	}
+
+	m_debugLinesInfo.size = debugLinesMesh.first.size();
+
+	glGenBuffers(1, &(m_debugLinesInfo.vertBuffer));
+	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.first[0]), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &(m_debugLinesInfo.colorBuffer));
+	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.second[0]), GL_STATIC_DRAW);
+
+	// 1rst attribute buffer : vertices
+	glGenVertexArrays(1, &(m_debugLinesInfo.vao));
+	glBindVertexArray(m_debugLinesInfo.vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
+	glVertexAttribPointer(
+		1,                  // attribute 1. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
 	return true;
 }
 
@@ -762,9 +806,9 @@ void GL33Renderer::SetupScreenSpaceRenderQuad()
 	m_screenSpaceQuad.m_isInit = true;
 }
 
-void GL33Renderer::RenderDebugRays()
+void GL33Renderer::RenderDebugLines()
 {
-	if (m_debugRaysQueue.empty())
+	if (m_debugLinesInfo.size == 0)
 	{
 		return;
 	}
@@ -772,59 +816,10 @@ void GL33Renderer::RenderDebugRays()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
-
-	vector<vec3> debugLinesMeshVerts;
-	vector<vec3> debugLinesMeshColors;
-
-	for (auto coloredRay : m_debugRaysQueue)
-	{
-		Ray ray = coloredRay.first;
-		vec3 color = coloredRay.second;
-
-		vec3 dest = ray.m_origin + ray.m_length * ray.m_direction;
-		debugLinesMeshVerts.push_back(ray.m_origin);
-		debugLinesMeshVerts.push_back(dest);
-
-		debugLinesMeshColors.push_back(color);
-		debugLinesMeshColors.push_back(color);
-	}
-
-	GLuint raysBuffer;
-	glGenBuffers(1, &raysBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, raysBuffer);
-	glBufferData(GL_ARRAY_BUFFER, debugLinesMeshVerts.size() * sizeof(vec3), &(debugLinesMeshVerts[0]), GL_STATIC_DRAW);
-
-	GLuint colorBuffer;
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, debugLinesMeshColors.size() * sizeof(vec3), &(debugLinesMeshColors[0]), GL_STATIC_DRAW);
-
-	// 1rst attribute buffer : vertices
-	GLuint raysVao;
-	glGenVertexArrays(1, &raysVao);
-	glBindVertexArray(raysVao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, raysBuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	glVertexAttribPointer(
-		1,                  // attribute 1. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
 	
 	glDisable(GL_DEPTH_TEST);
+
+	glBindVertexArray(m_debugLinesInfo.vao);
 
 	glUseProgram(m_debugRayPgrmID);
 
@@ -847,18 +842,16 @@ void GL33Renderer::RenderDebugRays()
 	// Set our "renderedTexture" sampler to user Texture Unit 1
 	glUniform1i(displayBufferID, 1);
 
-	glDrawArrays(0x0001, 0, debugLinesMeshVerts.size());
+	glDrawArrays(0x0001, 0, m_debugLinesInfo.size);
 	
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
 
-	glDeleteBuffers(1, &raysBuffer);
-	glDeleteBuffers(1, &colorBuffer);
-	glDeleteVertexArrays(1, &raysVao);
-
-	m_debugRaysQueue.clear();
+	glDeleteBuffers(1, &(m_debugLinesInfo.vertBuffer));
+	glDeleteBuffers(1, &(m_debugLinesInfo.colorBuffer));
+	glDeleteVertexArrays(1, &(m_debugLinesInfo.vao));
 }
 
 bool DisplayBuffer::InitializeDisplayBuffer()
