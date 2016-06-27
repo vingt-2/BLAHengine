@@ -16,27 +16,15 @@ public:
 	GLuint m_texCoordsTextureTarget;
 	GLuint m_depthTextureTarget;
 
+	GLuint m_displayTextureTarget;
+
 	GLuint m_geometryPassPrgmID;
+	GLuint m_passthroughPrgmId;
+	GLuint m_drawSphereStencilPgrmID;
 
 	bool InitializeGBuffer();
 	void SetupGeomPassMaterials(GLuint prgrmId);
 	void DeleteGBufferResources();
-};
-
-class DisplayBuffer
-{
-public:
-	ivec2 m_DBufferSize;
-
-	GLuint m_frameBufferObject;
-
-	GLuint m_displayTextureTarget;
-
-	GLuint m_passthroughPrgmId;
-
-	bool InitializeDisplayBuffer();
-	void SetupPassthroughMaterials(GLuint prgrmId);
-	void DeleteDisplayBufferResources();
 };
 
 class ScreenSpaceQuad
@@ -46,6 +34,18 @@ public:
 	bool m_isInit = false;
 	GLuint m_geomBuffer;
 	GLuint m_vao;
+};
+
+class PointLightSphere
+{
+public:
+
+	bool m_isInit = false;
+	GLuint m_geomBuffer;
+	GLuint m_elementBuffer;
+	GLuint m_vao;
+
+	GLuint m_size;
 };
 
 class GL33RenderObject : public RenderObject
@@ -108,12 +108,15 @@ public:
 	//
 
 	vector<DirectionalLightRender> m_directionalLightsVector;
+	vector<PointLightRender> m_pointLightsVector;
 
 	GBuffer m_GBuffer;
-	DisplayBuffer m_DBuffer;
 	ScreenSpaceQuad m_screenSpaceQuad;
+	PointLightSphere m_pointLightSphereMesh;
 
 	bool debug_renderGBuffer;
+
+	bool m_renderDebug;
 
 	struct debugLinesInfo
 	{
@@ -127,6 +130,7 @@ public:
 
 	// MOVE?
 	bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
+	void SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, vector<GLuint> indices);
 
 protected:
 	GLFWwindow* InitializeWindowAndContext(char* windowTitle);
@@ -141,6 +145,7 @@ protected:
 	bool AssignMaterial(GL33RenderObject& object, string materialName);
 	bool LoadTextureSample(GL33RenderObject& object, string textureName, string sampleName);
 	void DestroyVertexArrayID(GL33RenderObject& object);
+	void CleanUpFrameDebug();
 
 	void RenderGBuffer();
 	
@@ -151,13 +156,18 @@ protected:
 	void RenderDebugLines();
 	void RenderDebug()
 	{
-		RenderDebugLines();
+		if (m_renderDebug)
+		{
+			RenderDebugLines();
+		}
 	}
 
 	void DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
 	void DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
 
 	void DrawDirectionalLight(DirectionalLightRender directionalLight);
+
+	void DrawPointLight(PointLightRender pointLight);
 
 	bool RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender);
 

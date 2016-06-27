@@ -20,7 +20,6 @@ public:
 	float m_length;
 
 	Ray(vec3 origin, vec3 direction, float length);
-	Ray(vec3 origin, vec3 endPoint);
 
 	RaycastHit RayToPlaneIntersection(vec3 planeOrigin, vec3 planeVec1, vec3 planeVec2);
 

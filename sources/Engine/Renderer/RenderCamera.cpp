@@ -8,7 +8,7 @@ void RenderCamera::AttachCamera(Camera* camera)
 void PerspectiveCamera::SetPerspective(vec2 renderSize)
 {
 	//m_perspectiveProjection = glm::perspective(fovY, aspect, 0.01f, 10000.f);
-	m_perspectiveProjection = glm::frustum(-0.0001f*renderSize.x, 0.0001f*renderSize.x, -0.0001f*renderSize.y, 0.0001f*renderSize.y, 0.1f, 10000.0f);
+	m_perspectiveProjection = glm::frustum(-0.001f*renderSize.x, 0.001f*renderSize.x, -0.001f*renderSize.y, 0.001f*renderSize.y, 1.f, 10000.0f);
 }
 
 void PerspectiveCamera::Update()

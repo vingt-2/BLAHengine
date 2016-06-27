@@ -2,7 +2,8 @@
 
 GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	Renderer(windowTitle, isFullScreen),
-	debug_renderGBuffer(false)
+	debug_renderGBuffer(false),
+	m_renderDebug(true)
 {
 	m_glfwWindow = InitializeWindowAndContext(windowTitle);
 	if(m_glfwWindow != NULL)
@@ -24,10 +25,6 @@ void GL33Renderer::WindowResize(GLFWwindow* window, int width, int height)
 	m_GBuffer.DeleteGBufferResources();
 	m_GBuffer.m_GbufferSize = m_renderSize;
 	m_GBuffer.InitializeGBuffer();
-
-	m_DBuffer.DeleteDisplayBufferResources();
-	m_DBuffer.m_DBufferSize = m_renderSize;
-	m_DBuffer.InitializeDisplayBuffer();
 }
 
 vec2 GL33Renderer::GetCursorPosition()
@@ -44,7 +41,6 @@ GL33RenderObject::GL33RenderObject():
 
 GL33RenderObject::~GL33RenderObject() {}
  
-
 /*
 	Rendering code below
 */
@@ -64,12 +60,12 @@ bool GL33Renderer::Update()
 
 	RenderGBuffer();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	// Draw vignettes with buffer results (from Gbuffer pass)
 	if (debug_renderGBuffer)
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
 		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
 		DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
@@ -77,6 +73,18 @@ bool GL33Renderer::Update()
 	}
 	else
 	{
+
+		glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
+		GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT4 };
+		glDrawBuffers(1, DrawBuffers);
+		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+		for (PointLightRender pointLight : m_pointLightsVector)
+		{
+			DrawPointLight(pointLight);
+		}
+
+
 		for (DirectionalLightRender directLight : m_directionalLightsVector)
 		{
 			RenderDirectionalShadowMap(directLight.m_shadowRender);
@@ -85,7 +93,10 @@ bool GL33Renderer::Update()
 
 		DrawDisplayBuffer();
 		RenderDebug();
+
 	}
+
+	CleanUpFrameDebug();
 
 	glfwSwapInterval(0);
 
@@ -97,10 +108,13 @@ bool GL33Renderer::Update()
 
 void GL33Renderer::RenderGBuffer()
 {
-	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
+
+	// Multiple render targets code. This represent the output buffers of the fragment shading
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+	glDrawBuffers(4, DrawBuffers);
 
 	glViewport(0, 0, m_GBuffer.m_GbufferSize.x, m_GBuffer.m_GbufferSize.y);
 
@@ -136,8 +150,6 @@ void GL33Renderer::RenderGBuffer()
 			glBindVertexArray(renderObject->m_vertexArrayID);
 
 			// Draw VAO
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderObject->m_elementBufferId); // Index buffer
 			glDrawElements(renderObject->m_renderType, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
 			glBindVertexArray(0);
@@ -145,8 +157,6 @@ void GL33Renderer::RenderGBuffer()
 			for (uint16 samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
 			{
 				glActiveTexture(GL_TEXTURE0 + samplerIndex);
-
-				glDisable(GL_TEXTURE_2D);
 			}
 
 			for (uint vboIndex = 0; vboIndex < renderObject->m_vboIDVector.size(); vboIndex++)
@@ -161,7 +171,10 @@ void GL33Renderer::RenderGBuffer()
 
 void GL33Renderer::DrawDisplayBuffer()
 {
-	DrawColorBufferOnScreen(ivec2(0,0), m_renderSize, m_DBuffer.m_displayTextureTarget);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	DrawColorBufferOnScreen(ivec2(0,0), m_renderSize, m_GBuffer.m_displayTextureTarget);
 }
 
 RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, int type)
@@ -265,6 +278,8 @@ bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowR
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, shadowRender.m_bufferSize, shadowRender.m_bufferSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -287,7 +302,13 @@ void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
 	if (!m_screenSpaceQuad.m_isInit)
 		SetupScreenSpaceRenderQuad();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_BLEND);
+
+	//glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	glDisable(GL_DEPTH_TEST);
+
+	glEnable(GL_CULL_FACE);
 
 	glViewport(topLeft.x, topLeft.y, bottomRight.x-topLeft.x, bottomRight.y-topLeft.y);
 
@@ -306,7 +327,6 @@ void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
 	
 	// Draw the triangle !
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-	glDisable(GL_COMPARE_R_TO_TEXTURE);
 	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
@@ -348,8 +368,15 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 
 	OrthographicCamera* shadowCamera = &(directionalLight.m_shadowRender.m_shadowCamera);
 	
-	glBindFramebuffer(GL_FRAMEBUFFER, m_DBuffer.m_frameBufferObject);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
+
+	glDisable(GL_DEPTH_TEST);
+
+	// Multiple render targets code. This represent the output buffers of the fragment shading
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(1, DrawBuffers);
+
+	//glClear(GL_COLOR_BUFFER_BIT);
 
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
@@ -412,13 +439,117 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 
 	// Draw the triangle !
 	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-	glDisable(GL_COMPARE_R_TO_TEXTURE);
 	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 	
 	
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GL33Renderer::DrawPointLight(PointLightRender pointLight)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
+
+	glDrawBuffer(GL_NONE);
+
+	glDepthMask(GL_FALSE);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+
+	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	
+	glClear(GL_STENCIL_BUFFER_BIT);
+
+	// We need the stencil test to be enabled but we want it
+	// to succeed always. Only the depth test matters.
+	glStencilFunc(GL_ALWAYS, 0, 0);
+
+	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
+	glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
+
+	glUseProgram(m_GBuffer.m_drawSphereStencilPgrmID);
+
+	mat4 MVP = m_mainRenderCamera.m_ViewProjection * pointLight.m_transform->m_transformMatrix;
+
+	GLuint MVPid = glGetUniformLocation(m_GBuffer.m_drawSphereStencilPgrmID, "MVP");
+	glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
+
+	glBindVertexArray(m_pointLightSphereMesh.m_vao);
+
+	// Draw VAO
+	glDrawElements(GL_TRIANGLES, m_pointLightSphereMesh.m_size, GL_UNSIGNED_INT, (void*) 0); // Draw Triangles
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+	glDisable(GL_DEPTH_TEST);
+
+	// Multiple render targets code. This represent the output buffers of the fragment shading
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(1, DrawBuffers);
+
+	glStencilFunc(GL_NOTEQUAL, 0, 0XFF);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glUseProgram(pointLight.m_pointLightPrgmID);
+
+	MVPid = glGetUniformLocation(pointLight.m_pointLightPrgmID, "MVP");
+	glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
+
+	GLuint lightPrId = glGetUniformLocation(pointLight.m_pointLightPrgmID, "lightPR");
+	vec4 lightPr = vec4(pointLight.m_transform->m_position, length(pointLight.m_transform->m_scale)/2);
+	glUniform4fv(lightPrId, 1, &(lightPr[0]));
+
+	// Use our shader
+	GLuint prgmID = pointLight.m_pointLightPrgmID;
+	glUseProgram(prgmID);
+	GLuint diffuseMapID = glGetUniformLocation(prgmID, "diffuseMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_diffuseTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(diffuseMapID, 0);
+
+	GLuint normalMapID = glGetUniformLocation(prgmID, "normalMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_normalsTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 1
+	glUniform1i(normalMapID, 1);
+
+	GLuint worldPosMapID = glGetUniformLocation(prgmID, "worldPosMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_worldPosTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 2
+	glUniform1i(worldPosMapID, 2);
+
+	GLuint depthMapID = glGetUniformLocation(prgmID, "depthMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_depthTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 3
+	glUniform1i(depthMapID, 3);
+
+	glBindVertexArray(m_pointLightSphereMesh.m_vao);
+
+	// Draw VAO
+	glDrawElements(GL_TRIANGLES, m_pointLightSphereMesh.m_size, GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+	glStencilFunc(GL_NEVER, 0, 0);
+	glCullFace(GL_BACK);
+	glDisable(GL_STENCIL_TEST);
+	glDepthMask(GL_TRUE);
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender)
@@ -451,7 +582,6 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 			glBindVertexArray(renderObject->m_vertexArrayID);
 
 			// Draw VAO
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderObject->m_elementBufferId); // Index buffer
 			glDrawElements(GL_TRIANGLES, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0);
 
 			glBindVertexArray(0);
@@ -608,6 +738,13 @@ void GL33Renderer::DestroyVertexArrayID(GL33RenderObject& object)
 	glDeleteVertexArrays(1, &object.m_vertexArrayID);
 }
 
+void GL33Renderer::CleanUpFrameDebug()
+{
+	glDeleteBuffers(1, &(m_debugLinesInfo.vertBuffer));
+	glDeleteBuffers(1, &(m_debugLinesInfo.colorBuffer));
+	glDeleteVertexArrays(1, &(m_debugLinesInfo.vao));
+}
+
 GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
 {
 	GLFWwindow* window;
@@ -670,9 +807,6 @@ GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
 	m_GBuffer.m_GbufferSize = m_renderSize;
 	m_GBuffer.InitializeGBuffer();
 
-	m_DBuffer.m_DBufferSize = m_renderSize;
-	m_DBuffer.InitializeDisplayBuffer();
-
 	return window;
 }
 
@@ -688,6 +822,7 @@ bool GBuffer::InitializeGBuffer()
 	glGenTextures(1, &m_worldPosTextureTarget);
 	glGenTextures(1, &m_texCoordsTextureTarget);
 	glGenTextures(1, &m_depthTextureTarget);
+	glGenTextures(1, &m_displayTextureTarget);
 
 	// Bind Diffuse Texture
 	glBindTexture(GL_TEXTURE_2D, m_diffuseTextureTarget);
@@ -725,15 +860,25 @@ bool GBuffer::InitializeGBuffer()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_texCoordsTextureTarget, 0);
 
-	// depth
-	glBindTexture(GL_TEXTURE_2D, m_depthTextureTarget);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	// Bind Final Compositing Display Texture
+	glBindTexture(GL_TEXTURE_2D, m_displayTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_GbufferSize.x, m_GbufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTextureTarget, 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_displayTextureTarget, 0);
 
+	// depth
+	glBindTexture(GL_TEXTURE_2D, m_depthTextureTarget);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, m_GbufferSize.x, m_GbufferSize.y, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_depthTextureTarget, 0);
+
+	// Multiple render targets code. This represent the output buffers of the fragment shading
 	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 	glDrawBuffers(4, DrawBuffers);
 
@@ -763,6 +908,7 @@ void GBuffer::DeleteGBufferResources()
 	glDeleteTextures(1, &m_worldPosTextureTarget);
 	glDeleteTextures(1, &m_texCoordsTextureTarget);
 	glDeleteTextures(1, &m_depthTextureTarget);
+	glDeleteTextures(1, &m_displayTextureTarget);
 
 	//Bind 0, which means render to back buffer, as a result, fb is unbound
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -806,6 +952,47 @@ void GL33Renderer::SetupScreenSpaceRenderQuad()
 	m_screenSpaceQuad.m_isInit = true;
 }
 
+void GL33Renderer::SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, vector<GLuint> indices)
+{
+	if (sphereMeshVertices.empty())
+	{
+		return;
+	}
+
+	m_pointLightSphereMesh.m_size = indices.size();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenBuffers(1, &(m_pointLightSphereMesh.m_geomBuffer));
+	glBindBuffer(GL_ARRAY_BUFFER, m_pointLightSphereMesh.m_geomBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sphereMeshVertices.size() * sizeof(vec3), &(sphereMeshVertices[0]), GL_STATIC_DRAW);
+
+	// 1rst attribute buffer : vertices
+	glGenVertexArrays(1, &(m_pointLightSphereMesh.m_vao));
+	glBindVertexArray(m_pointLightSphereMesh.m_vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_pointLightSphereMesh.m_geomBuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	glGenBuffers(1, &(m_pointLightSphereMesh.m_elementBuffer));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pointLightSphereMesh.m_elementBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &(indices[0]), GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	m_pointLightSphereMesh.m_isInit = true;
+}
+
 void GL33Renderer::RenderDebugLines()
 {
 	if (m_debugLinesInfo.size == 0)
@@ -838,7 +1025,7 @@ void GL33Renderer::RenderDebugLines()
 	GLuint displayBufferID = glGetUniformLocation(m_debugRayPgrmID, "displayBuffer");
 	// Bind our texture in Texture Unit 1
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_DBuffer.m_displayTextureTarget);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_displayTextureTarget);
 	// Set our "renderedTexture" sampler to user Texture Unit 1
 	glUniform1i(displayBufferID, 1);
 
@@ -848,57 +1035,4 @@ void GL33Renderer::RenderDebugLines()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
-
-	glDeleteBuffers(1, &(m_debugLinesInfo.vertBuffer));
-	glDeleteBuffers(1, &(m_debugLinesInfo.colorBuffer));
-	glDeleteVertexArrays(1, &(m_debugLinesInfo.vao));
-}
-
-bool DisplayBuffer::InitializeDisplayBuffer()
-{
-	// Create the FBO
-	glGenFramebuffers(1, &m_frameBufferObject);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_frameBufferObject);
-
-	// Create the gbuffer textures
-	glGenTextures(1, &m_displayTextureTarget);
-
-	// Bind Diffuse Texture
-	glBindTexture(GL_TEXTURE_2D, m_displayTextureTarget);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_DBufferSize.x, m_DBufferSize.y, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_displayTextureTarget, 0);
-
-	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, DrawBuffers);
-
-	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		printf("FB error, status: 0x%x\n", Status);
-		return false;
-	}
-
-	// restore default FBO
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-	return true;
-}
-
-void DisplayBuffer::SetupPassthroughMaterials(GLuint prgrmId)
-{
-	m_passthroughPrgmId = prgrmId;
-}
-
-void DisplayBuffer::DeleteDisplayBufferResources()
-{
-	//Delete resources
-	glDeleteTextures(1, &m_displayTextureTarget);
-
-	//Bind 0, which means render to back buffer, as a result, fb is unbound
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	glDeleteFramebuffersEXT(1, &m_frameBufferObject);
 }

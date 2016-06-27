@@ -5,7 +5,7 @@
 class OBJImport
 {
 public:
-	bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals);
+	bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
 
 	OBJImport(void);
 	~OBJImport(void);

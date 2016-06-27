@@ -83,7 +83,7 @@ public:
 		vector<uint32> vertUVsIndices,
 		bool swapNormals);
 
-	void NormalizeModelCoordinates();
+	void NormalizeModelCoordinates(bool normalizeScale);
 	void ComputeFaceTangents();
 	void ApplyGeomScaling(vec3 scaling);
 	void ApplyUVScaling(vec2 scaling);
@@ -96,9 +96,9 @@ public:
 	void ReverseEdgesOrder();
 	void GetHEvertices(HeIndx halfEdge, pair<uint32, uint32>* vertexPair);
 	void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
-	void GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> &surroundingVertices);
-	void GetSurroundingTriangles(uint32 vertexIndx, vector<FaceIndx> &surroundingFaces);
-	void GetEmanatingHalfEdges(uint32 vertexIndx, vector<HeIndx> &edges);
+	bool GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> &surroundingVertices);
+	bool GetSurroundingTriangles(uint32 vertexIndx, vector<FaceIndx> &surroundingFaces);
+	bool GetEmanatingHalfEdges(uint32 vertexIndx, vector<HeIndx> &edges);
 	void GetTriangleEdges(uint32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
 };
 

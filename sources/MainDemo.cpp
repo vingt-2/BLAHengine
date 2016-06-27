@@ -191,7 +191,7 @@ int main( void )
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 
 	Camera* mainCamera = new Camera();
-	mainCamera->m_transform->m_position = vec3(10, 0, -15);
+	mainCamera->m_transform->m_position = vec3(10, -5, -15);
 	mainCamera->m_transform->SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
 	mainCamera->m_isControlEnabled = true;
 
@@ -221,13 +221,16 @@ int main( void )
 	sharedResources->LoadMaterial("DrawDepthTexture", "./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
 	sharedResources->LoadMaterial("DrawColorTexture", "./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
 	sharedResources->LoadMaterial("DebugRaysForward", "./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
-
+	sharedResources->LoadMaterial("PointLightStencil", "./resources/shaders/Engine/PointLightStencilVS.glsl", "./resources/shaders/Engine/PointLightStencilFS.glsl");
 	sharedResources->LoadMaterial("DirLightPass", "./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
+	sharedResources->LoadMaterial("PointLightPass", "./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
 
 	mainRenderer->DrawColorBufferPrgmID = sharedResources->GetMaterial("DrawColorTexture");
 	mainRenderer->DrawDepthBufferPrgmID = sharedResources->GetMaterial("DrawDepthTexture");
 	mainRenderer->m_GBuffer.m_geometryPassPrgmID = sharedResources->GetMaterial("GeomPass");
+	mainRenderer->m_GBuffer.m_drawSphereStencilPgrmID = sharedResources->GetMaterial("PointLightStencil");
 	mainRenderer->m_debugRayPgrmID = sharedResources->GetMaterial("DebugRaysForward");
+
 
 	sharedResources->loadBMP_custom("testDiffuse","./resources/textures/damier.bmp");
 	sharedResources->loadBMP_custom("blankDiffuse", "./resources/textures/blankDiffuse.bmp");
@@ -246,13 +249,13 @@ int main( void )
 	TriangleMesh sponza;
 	TriangleMesh arrow;
 
-	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false);
-	//objImport.ImportMesh("./resources/models/sponza.obj", sponza, false);
-	objImport.ImportMesh("./resources/models/cube.obj", cube, false);
-	objImport.ImportMesh("./resources/models/cube.obj", floor, false);
-	objImport.ImportMesh("./resources/models/sphere.obj", sphere, false);
-	objImport.ImportMesh("./resources/models/sphere.obj", invertedSphere, true);
-	//sponza.ApplyGeomScaling(vec3(0.1f));
+	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false, false);
+	//objImport.ImportMesh("./resources/models/sponza.obj", sponza, false, false);
+	objImport.ImportMesh("./resources/models/cube.obj", cube, false, false);
+	objImport.ImportMesh("./resources/models/cube.obj", floor, false, false);
+	objImport.ImportMesh("./resources/models/sphere.obj", sphere, false, true);
+	objImport.ImportMesh("./resources/models/sphere.obj", invertedSphere, true, false);
+	//sponza.ApplyGeomScaling(vec3(0.1));
 	floor.ApplyGeomScaling(vec3(100, 10, 100));
 	floor.ApplyUVScaling(vec2(100));
 	
@@ -263,6 +266,7 @@ int main( void )
 	floor_obj->m_meshRenderer->AssignTexture("blankNormal", "normals");
 	renderingManager->RequestRenderTicket(*floor_obj);
 	floor_obj->m_rigidBody->SetCollider(new Collider(&floor));
+	floor_obj->m_transform->m_scale = vec3(1);
 	mainScene->AddObject(floor_obj);
 	floor_obj->m_transform->m_position = (vec3(0, -5, 0));
 	floor_obj->m_rigidBody->m_isPinned = true;
@@ -283,24 +287,23 @@ int main( void )
 	//sceneMesh->SetTriangleMesh(&sponza);
 	//sceneMesh->m_meshRenderer->AssignMaterial("DirLightPass");
 	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "diffuseMap");
-	//sceneMesh->m_meshRenderer->AssignTexture("blankDiffuse", "normals");
-	//sceneMesh->m_transform->m_scale = vec3(0.1);
+	//sceneMesh->m_meshRenderer->AssignTexture("blankNormal", "normals");
 	//renderingManager->RequestRenderTicket(*sceneMesh);
 	//mainScene->AddObject(sceneMesh);
 	//sceneMesh->m_rigidBody->m_isPinned = true;
 
-	for (int i = 2; i < 12; i++)
+	for (int i = 2; i < 10; i++)
 	{
 		GameChar* Ball = new GameChar();
-		Ball->SetTriangleMesh(&sphere);
+		Ball->SetTriangleMesh(&cube);
 		Ball->m_meshRenderer->AssignMaterial("DirLightPass");
 		Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
 		Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
 		renderingManager->RequestRenderTicket(*Ball);
-		Ball->m_rigidBody->SetCollider(new Collider(&sphere));
+		Ball->m_rigidBody->SetCollider(new Collider(&cube));
 		mainScene->AddObject(Ball);
 		Ball->m_rigidBody->m_isPinned = false;
-		Ball->m_transform->m_position = vec3(5.5 * i, 5.5 * i, 0);
+		Ball->m_transform->m_position = vec3(0,1 + 3 * i, 0);
 	}
 
 	GameChar* lightObj = new GameChar();
@@ -326,6 +329,9 @@ int main( void )
 	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
 	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
 	lr.m_shadowRender.m_bufferSize = 8192;
+
+	RenderData* sphereRenderData = sphere.GenerateRenderData();
+	mainRenderer->SetupPointLightRenderSphere(sphereRenderData->m_vertPos, sphereRenderData->m_triangleIndices);
 
 	cout << "setuping buffer " << mainRenderer->SetupDirectionalShadowBuffer(lr.m_shadowRender) << "\n";;
 	mainRenderer->m_directionalLightsVector.push_back(lr);
@@ -360,8 +366,24 @@ int main( void )
 	double iteration = 1;
 
 	int solvIt = 0;
-	float lightRotation = 0;
+	float lightRotation = 1;
 	bool moveLight = false;
+
+
+	for (int i = 0; i < 0; i++)
+	{
+		PointLightRender pointLight;
+		pointLight.m_transform = new Transform();
+		pointLight.m_transform->m_scale = vec3(20);
+		pointLight.m_transform->m_position = vec3(i*5,10+(2*i),0);
+		pointLight.m_transform->UpdateTransform();
+		pointLight.m_pointLightPrgmID = sharedResources->GetMaterial("PointLightPass");
+		mainRenderer->m_pointLightsVector.push_back(pointLight);
+		debugRays.push_back(Ray(pointLight.m_transform->m_position, pointLight.m_transform->LocalDirectionToWorld(vec3(1, 0, 0)), 1));
+		debugRays.push_back(Ray(pointLight.m_transform->m_position, pointLight.m_transform->LocalDirectionToWorld(vec3(0, 0, 1)), 1));
+		debugRays.push_back(Ray(pointLight.m_transform->m_position, pointLight.m_transform->LocalDirectionToWorld(vec3(0, 1, 0)), 1));
+	}
+	
 	while(!terminationRequest)
 	{
 		averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
@@ -418,12 +440,12 @@ int main( void )
 
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_LEFT) == GLFW_PRESS))
 		{
-			lightRotation += 0.1*deltaTime;
+			lightRotation += 0.5*deltaTime;
 		}
 
 		if ((glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS))
 		{
-			lightRotation -= 0.1*deltaTime;
+			lightRotation -= 0.5*deltaTime;
 		}
 
 		if (moveLight)
@@ -519,7 +541,10 @@ int main( void )
 		if(mainScene->m_enableSimulation)
 			solvIt += (mainScene->m_rigidBodySystem->m_collisionProcessor->m_iterationCount);
 
-
+		for (auto r : debugRays)
+		{
+			debug->DrawRay(r);
+		}
 
 		frameCount++;
 		if( (glfwGetKey(mainRenderer->GetWindow(), GLFW_KEY_ESCAPE ) == GLFW_PRESS)  |  glfwWindowShouldClose(mainRenderer->GetWindow()) )

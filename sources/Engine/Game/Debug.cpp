@@ -46,7 +46,7 @@ void Debug::DrawRay(Ray ray)
 {
 	vec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
 
-	DrawLine(ray.m_origin, destination, vec3(0));
+	DrawLine(ray.m_origin, destination, vec3(1));
 }
 
 void Debug::DrawGrid(int size, float spacing, const vec3 color)
@@ -62,9 +62,9 @@ void Debug::DrawGrid(int size, float spacing, const vec3 color)
 
 void Debug::DrawBasis(Transform* transform, float opacity)
 {
-	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(1, 0, 0))))), vec3(1, 0, 0));
-	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 1, 0))))), vec3(0, 1, 0));
-	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 0, 1))))), vec3(0, 0, 1));
+	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(1, 0, 0)))), 1), vec3(1, 0, 0));
+	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 1, 0)))), 1), vec3(0, 1, 0));
+	DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 0, 1)))), 1), vec3(0, 0, 1));
 }
 
 void Debug::OutputToDebug(char* m_debug)

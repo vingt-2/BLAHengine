@@ -12,7 +12,7 @@ OBJImport::~OBJImport(void)
 {
 } 
 
-bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals)
+bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalScale)
 {
 	m_currentMaxVertexPos = 0;
 	m_currentMaxUVPos = 0;
@@ -170,7 +170,7 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
 	cout << "Built, Computing Tangent Spaces...";
 	mesh.ComputeFaceTangents();
 	cout << "Done.\nImported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices, " << mesh.m_manifoldViolationEdges << " non-manifold edges\n";
-	mesh.NormalizeModelCoordinates();
+	mesh.NormalizeModelCoordinates(normalScale);
 	cout << "Normalized Model Coordinates \n";
 
 	return true;
