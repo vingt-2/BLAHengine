@@ -44,33 +44,33 @@ void main(){
     }
     else
     {
-        float ambientComp = 0.1;
+        float ambientLight = 0.3;
 		
         vec4 shadowPos = shadowMV * vec4(worldPos, 1.0);
-        shadowPos /= shadowPos.w;
+        //shadowPos /= shadowPos.w;
         vec2 shadowUV = shadowPos.xy;
 		float xOffset = 1.0f/8192;
         float yOffset = 1.0f/8192;
         
         float factor = 0.0;
         
-        float bias = 0.000001*tan(acos(dot(normal, lightDirection)));
+        float bias = 0.0001*tan(acos(dot(normal, lightDirection)));
 		//bias = clamp(bias, 0,0.01);
         
-        for (int y = -2 ; y <= 2 ; y++) 
+        for (int y = -1 ; y <= 1 ; y++) 
         {
-            for (int x = -2 ; x <= 2 ; x++) 
+            for (int x = -1 ; x <= 1 ; x++) 
             {
                 vec2 Offsets = vec2(x * xOffset, y * yOffset);
-                vec3 UVC = vec3(shadowUV + Offsets, shadowPos.z);
+                vec3 UVC = vec3(shadowUV + Offsets, shadowPos.z - bias);
                 factor += texture(shadowMap, UVC);
             }
         }
 
-        factor = (0.5+(factor / 200));
+        float vis = ambientLight + (factor / 18.0f);
 
-		vec3 fogColor = (depth/0.99) * vec3(1,1,1);
+		//vec3 fogColor = (depth/0.99) * vec3(1,1,1);
 		
-        color = diffuse * (0.1 + 2 * factor * max(dot(normal, lightDirection),0) * (1-sunOrientation) * ((0.8-sunOrientation) + overalSunColor));
+        color = diffuse * (2 * vis * max(dot(normal, lightDirection),0) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor));
     }
 }
