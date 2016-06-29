@@ -3,6 +3,7 @@
 
 Debug::Debug(DebugRenderingManager* manager)
 {
+	m_drawDebugRays = true;
 	this->m_debugRenderManager = manager;
 }
 
@@ -13,8 +14,10 @@ Debug::~Debug(void)
 
 void Debug::Update()
 {
-	m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);
-
+	if (m_drawDebugRays)
+	{
+		m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);
+	}
 	m_lineMeshVertsAndColor.first.clear();
 	m_lineMeshVertsAndColor.second.clear();
 }

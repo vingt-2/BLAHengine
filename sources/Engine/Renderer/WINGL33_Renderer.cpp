@@ -427,6 +427,10 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	GLuint lightID = glGetUniformLocation(prgmID, "lightDirection");
 	glUniform3f(lightID, lightDirection.x, lightDirection.y, lightDirection.z);
 
+	GLuint eyeID = glGetUniformLocation(prgmID, "eyePosition");
+	vec3 eye = m_mainRenderCamera.m_attachedCamera->m_transform->m_position;
+	glUniform3f(eyeID, eye.x, eye.y, eye.z);
+
 	GLuint shadowmapHandle = glGetUniformLocation(prgmID, "shadowMap");
 
 	glActiveTexture(GL_TEXTURE4);
@@ -558,7 +562,9 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 
 	// Render to our framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowRender.m_shadowBuffer);
-	glViewport(0, 0, shadowRender.m_bufferSize, shadowRender.m_bufferSize); // Render on the whole framebuffer, complete from the lower left corner to the upper righ
+
+	// Render on the whole framebuffer, complete from the lower left corner to the upper right
+	glViewport(0, 0, shadowRender.m_bufferSize, shadowRender.m_bufferSize); 
 
 	// Clear Screen Buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -647,7 +653,7 @@ void GL33Renderer::GenerateBufferObject(GL33RenderObject& object, const objectTy
 	glBindBuffer(GL_ARRAY_BUFFER, bufferObjectID);
 	glVertexAttribPointer
 		(
-		attributeNumber,			// attribute
+		attributeNumber,			// attribute #
 		elementsPerObject,			// size
 		GL_FLOAT,					// type
 		GL_FALSE,					// normalized?
@@ -740,9 +746,12 @@ void GL33Renderer::DestroyVertexArrayID(GL33RenderObject& object)
 
 void GL33Renderer::CleanUpFrameDebug()
 {
-	glDeleteBuffers(1, &(m_debugLinesInfo.vertBuffer));
-	glDeleteBuffers(1, &(m_debugLinesInfo.colorBuffer));
-	glDeleteVertexArrays(1, &(m_debugLinesInfo.vao));
+	if (m_debugLinesInfo.size != 0)
+	{
+		glDeleteBuffers(1, &(m_debugLinesInfo.vertBuffer));
+		glDeleteBuffers(1, &(m_debugLinesInfo.colorBuffer));
+		glDeleteVertexArrays(1, &(m_debugLinesInfo.vao));
+	}
 }
 
 GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
@@ -917,7 +926,8 @@ void GBuffer::DeleteGBufferResources()
 
 void GL33Renderer::SetupScreenSpaceRenderQuad()
 {
-	static const GLfloat g_quad_vertex_buffer_data[] = {
+	static const GLfloat g_quad_vertex_buffer_data[] =
+	{
 		-1.0f, -1.0f, 0.0f,
 		1.0f, -1.0f, 0.0f,
 		-1.0f, 1.0f, 0.0f,
@@ -938,10 +948,10 @@ void GL33Renderer::SetupScreenSpaceRenderQuad()
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, m_screenSpaceQuad.m_geomBuffer);
 	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		0,                  // Attribute #
 		3,                  // size
 		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
+		GL_FALSE,           // ?normalized
 		0,                  // stride
 		(void*)0            // array buffer offset
 		);
@@ -973,7 +983,7 @@ void GL33Renderer::SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, m_pointLightSphereMesh.m_geomBuffer);
 	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		0,                  // attribute#
 		3,                  // size
 		GL_FLOAT,           // type
 		GL_FALSE,           // normalized?

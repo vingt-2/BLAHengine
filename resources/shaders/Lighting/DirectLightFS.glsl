@@ -12,6 +12,7 @@ uniform sampler2D depthMap;
 
 uniform mat4 shadowMV;
 uniform vec3 lightDirection;
+uniform vec3 eyePosition;
 
 in vec2 UV;
 
@@ -38,13 +39,13 @@ void main(){
         
         float sunAligned = clamp(dot(normalize(worldPos),lightDirection),0.0,1.0);
         
-        vec3 sunColor = clamp(pow(sunAligned,500),0,1) * vec3(3.2,0.8,0.5);
+        vec3 sunColor = ((2-sunOrientation) * clamp(pow(sunAligned,700),0,1)) * vec3(3.2,0.8,0.5) +  (0.1f * clamp(pow(sunAligned,2),0,1) * vec3(1));
         
-        color = (1-sunOrientation) * (skyColor + (1-sunOrientation) * (sunColor * (1+overalSunColor)));
+        color = clamp((1-sunOrientation),0,1) * (skyColor + (1-sunOrientation) * (sunColor * (1+overalSunColor))) + clamp((sunOrientation),0,1) * vec3(0,0,0.1);
     }
     else
     {
-        float ambientLight = 0.3;
+        float ambientLight = 1;
 		
         vec4 shadowPos = shadowMV * vec4(worldPos, 1.0);
         //shadowPos /= shadowPos.w;
@@ -55,11 +56,11 @@ void main(){
         float factor = 0.0;
         
         float bias = 0.0001*tan(acos(dot(normal, lightDirection)));
-		//bias = clamp(bias, 0,0.01);
+		bias = clamp(bias, 0,0.0002);
         
-        for (int y = -1 ; y <= 1 ; y++) 
+        for (int y = -2 ; y <= 2 ; y++) 
         {
-            for (int x = -1 ; x <= 1 ; x++) 
+            for (int x = -2 ; x <= 2 ; x++) 
             {
                 vec2 Offsets = vec2(x * xOffset, y * yOffset);
                 vec3 UVC = vec3(shadowUV + Offsets, shadowPos.z - bias);
@@ -67,10 +68,10 @@ void main(){
             }
         }
 
-        float vis = ambientLight + (factor / 18.0f);
+        float vis = ambientLight + (factor / 50.0f);
 
 		//vec3 fogColor = (depth/0.99) * vec3(1,1,1);
 		
-        color = diffuse * (2 * vis * max(dot(normal, lightDirection),0) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor));
+        color = diffuse * (3 * vis * max(dot(normal, lightDirection),0) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor));
     }
 }

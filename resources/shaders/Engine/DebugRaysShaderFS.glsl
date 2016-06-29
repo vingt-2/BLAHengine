@@ -26,7 +26,7 @@ void main()
     float depth = texture(depthMap, screenToUV(p.xy)).r;
     vec3 backPixelColor = texture(displayBuffer, screenToUV(p.xy)).rgb;
     
-    float alphablend = gl_FragCoord.z > depth ? 0.1f : 1.f; 
+    float alphablend = gl_FragCoord.z > depth ? 0.2f : 1.f; 
     
     alphablend *= 1 - pow(gl_FragCoord.z,50);
 

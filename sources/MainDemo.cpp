@@ -248,12 +248,14 @@ int main( void )
 	TriangleMesh cube;
 	TriangleMesh sponza;
 	TriangleMesh arrow;
+	TriangleMesh ball;
 
 	//objImport.ImportMesh("./resources/models/x-wing.obj", &xwing, false, false);
 	//objImport.ImportMesh("./resources/models/sponza.obj", sponza, false, false);
 	objImport.ImportMesh("./resources/models/cube.obj", cube, false, false);
 	objImport.ImportMesh("./resources/models/cube.obj", floor, false, false);
 	objImport.ImportMesh("./resources/models/sphere.obj", sphere, false, true);
+	objImport.ImportMesh("./resources/models/sphere.obj", ball, false, false);
 	objImport.ImportMesh("./resources/models/sphere.obj", invertedSphere, true, false);
 	//sponza.ApplyGeomScaling(vec3(0.1));
 	floor.ApplyGeomScaling(vec3(100, 10, 100));
@@ -295,15 +297,15 @@ int main( void )
 	for (int i = 2; i < 10; i++)
 	{
 		GameChar* Ball = new GameChar();
-		Ball->SetTriangleMesh(&cube);
+		Ball->SetTriangleMesh(&ball);
 		Ball->m_meshRenderer->AssignMaterial("DirLightPass");
 		Ball->m_meshRenderer->AssignTexture("earthDiffuse", "diffuseMap");
 		Ball->m_meshRenderer->AssignTexture("earthNormals", "normalMap");
 		renderingManager->RequestRenderTicket(*Ball);
-		Ball->m_rigidBody->SetCollider(new Collider(&cube));
+		Ball->m_rigidBody->SetCollider(new Collider(&ball));
 		mainScene->AddObject(Ball);
 		Ball->m_rigidBody->m_isPinned = false;
-		Ball->m_transform->m_position = vec3(0,1 + 3 * i, 0);
+		Ball->m_transform->m_position = vec3(0,3 + 20 * i, 0);
 	}
 
 	GameChar* lightObj = new GameChar();
@@ -369,6 +371,7 @@ int main( void )
 	float lightRotation = 1;
 	bool moveLight = false;
 
+	debug->m_drawDebugRays = true;
 
 	for (int i = 0; i < 0; i++)
 	{

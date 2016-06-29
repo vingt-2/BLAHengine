@@ -16,6 +16,8 @@ public:
 
 	DebugRenderingManager* m_debugRenderManager;
 
+	bool m_drawDebugRays;
+
 	void Update();
 
 	//Render m_debug:
