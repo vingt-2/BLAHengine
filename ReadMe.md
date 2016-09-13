@@ -4,12 +4,15 @@ BLAHengine - Stuff does things
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/illustration.bmp)
 =====
 
-The demo application "MainDemo" of the engine is a model viewer with the controls:
+The demo application "MainDemo" populates a scene with objects and let you interact with it
 
 * W,A,S,D to move the camera around.
 * Right-Click + mouse to rotate the camera.
-* F to apply a torque to the model.
-* G to rotate the directionnal light in the scene.
+* Left-Click on object: Push a force on a rigidbody
+* Space: Enable/Disable Rigidbodies simulation
+* Backspace: Enable/Disable gravity
+* Left/Right: Move Sun left and right
+* CTRL: Move sun auto
 
 ====
 Installation:
