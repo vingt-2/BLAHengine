@@ -4,18 +4,11 @@ GL33Renderer::GL33Renderer(char* windowTitle,bool isFullScreen):
 	Renderer(windowTitle, isFullScreen),
 	debug_renderGBuffer(false),
 	m_renderDebug(true)
-{
-	m_glfwWindow = InitializeWindowAndContext(windowTitle);
-	if(m_glfwWindow != NULL)
-	{
-		m_isContextEnabled = true;
-	}
-	WindowResize(m_glfwWindow, m_renderSize.x, m_renderSize.y);
-}
+{}
 
 GL33Renderer::~GL33Renderer() {}
 
-void GL33Renderer::WindowResize(GLFWwindow* window, int width, int height)
+void GL33Renderer::WindowResize(int width, int height)
 {
 	m_renderSize = ivec2(width, height);
 
@@ -29,10 +22,15 @@ void GL33Renderer::WindowResize(GLFWwindow* window, int width, int height)
 
 vec2 GL33Renderer::GetCursorPosition()
 {
-	double x, y;
-	glfwGetCursorPos(m_glfwWindow, &x, &y);
-	return vec2(x, y);
+	return vec2();
 }
+
+//vec2 GL33Renderer::GetCursorPosition()
+//{
+//	double x, y;
+//	glfwGetCursorPos(m_glfwWindow, &x, &y);
+//	return vec2(x, y);
+//}
 
 GL33RenderObject::GL33RenderObject():
 	m_vboIDVector(vector<pair<GLuint, pair<GLuint, GLuint> > >()),
@@ -48,14 +46,16 @@ GL33RenderObject::~GL33RenderObject() {}
 bool GL33Renderer::Update()
 {
 	int width, height;
-	glfwGetWindowSize(m_glfwWindow, &width, &height);
+	m_renderWindow->GetSize(width, height);
 
 	if (width != m_renderSize.x || height != m_renderSize.y)
-		WindowResize(m_glfwWindow, width, height);
-
+	{
+		WindowResize(width, height);
+	}
+		
 	//Set OpenGL to this context.
-	glfwMakeContextCurrent(m_glfwWindow);
-
+	m_renderWindow->MakeGLContextCurrent();
+	
 	m_mainRenderCamera.Update();
 
 	RenderGBuffer();
@@ -98,10 +98,7 @@ bool GL33Renderer::Update()
 
 	CleanUpFrameDebug();
 
-	glfwSwapInterval(0);
-
-	glfwSwapBuffers(m_glfwWindow);
-	glfwPollEvents();
+	m_renderWindow->UpdateWindowAndBuffers();
 
 	return true;
 }
@@ -686,7 +683,7 @@ void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
 
 bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
 {
-	extern SharedResources* sharedResources;
+	BLACORE_API extern SharedResources* sharedResources;
 	object.m_programID = sharedResources->GetMaterial(name.data());
 	if (object.m_programID != 0)
 	{
@@ -698,7 +695,7 @@ bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
 
 bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, string textureName, string sampleName)
 {
-	extern SharedResources* sharedResources;
+	BLACORE_API extern SharedResources* sharedResources;
 	if (object.m_programID != 0)
 	{
 		GLuint textureID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
@@ -754,69 +751,31 @@ void GL33Renderer::CleanUpFrameDebug()
 	}
 }
 
-GLFWwindow* GL33Renderer::InitializeWindowAndContext(char* windowTitle)
+void GL33Renderer::InitializeRenderer(RenderWindow* window, char* windowTitle)
 {
-	GLFWwindow* window;
-	// Initialise GLFW
-	if( !glfwInit() )
+	if (GLFWRenderWindow* render = (GLFWRenderWindow*) window)
 	{
-		printf("Failed to initialize GLFW\n");
-		//Debug::OutputToDebug("Failed to initialize GLFW\n" );
-		return NULL;
-	}
-	
-	//glfwWindowHint(GLFW_SAMPLES , 16 );
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR , 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR , 2);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-	
-	// Open a window and create its OpenGL context
-	
-	GLFWmonitor* monitor = NULL;
+		// window-> IMPLEMENT CHECK WINDOW STATUS
 
-	if(m_isFullScreen)
+		//Neat grey background
+		glClearColor(0.f, 0.f, 0.f, 1.0f);
+
+		// Accept fragment if it closer to the camera than the former one
+		glDepthFunc(GL_LESS);
+
+		// Cull triangles which normal is not towards the camera
+		glEnable(GL_CULL_FACE);
+
+		m_GBuffer.m_GbufferSize = m_renderSize;
+		m_GBuffer.InitializeGBuffer();
+
+		this->m_isContextEnabled = true;
+		m_renderWindow = window;
+	}
+	else
 	{
-		monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
-		m_renderSize = ivec2(videoMode->width,videoMode->height);
+		std::cout << "No valid window handle provided to the Renderer\n";
 	}
-	
-	window = glfwCreateWindow(m_renderSize.x, m_renderSize.y, windowTitle, monitor,NULL);
-	
-	glfwMakeContextCurrent(window);
-	
-	// Initialize GLEW
-	
-	glewExperimental = true; // Needed for core profile
-	
-	
-	if (glewInit() != GLEW_OK)
-	{
-		printf("Failed to initialize GLEW\n");
-		//Debug::OutputToDebug("Failed to initialize GLEW\n");
-		return NULL;
-	}
-	
-	glfwSetWindowTitle( window,windowTitle );
-	
-	// Ensure we can capture the escape key being pressed below
-	glfwSetInputMode(window,GLFW_STICKY_KEYS,GL_TRUE);
-	glfwSetCursorPos(window, m_renderSize.x/2, m_renderSize.y/2);
-	
-	//Neat grey background
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-	
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-	
-	// Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
-
-	m_GBuffer.m_GbufferSize = m_renderSize;
-	m_GBuffer.InitializeGBuffer();
-
-	return window;
 }
 
 bool GBuffer::InitializeGBuffer()

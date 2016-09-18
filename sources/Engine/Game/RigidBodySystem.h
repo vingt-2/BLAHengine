@@ -1,8 +1,8 @@
-#include "../../Common/std.h"
+#pragma once
+#include "../../Common/StdInclude.h"
 #include "./CollisionProcessing/CollisionProcessor.h"
 
-#pragma once
-class RigidBodySystem
+class BLACORE_API RigidBodySystem
 {
 public:
 	int m_substeps;
@@ -11,7 +11,7 @@ public:
 	bool m_enableGravity;
 	bool m_tieToTime;
 
-	RigidBodySystem();
+	RigidBodySystem(Time* time);
 	~RigidBodySystem();
 
 	void UpdateSystem();
@@ -25,7 +25,8 @@ public:
 
 private:
 	vector<RigidBody*> m_rigidBodyList;
-	
+	Time* m_time;
+
 	float m_timeStep;
 	double m_oldTime;
 	bool m_isSimulating;

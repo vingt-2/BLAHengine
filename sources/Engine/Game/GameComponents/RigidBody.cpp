@@ -1,6 +1,5 @@
 #include "RigidBody.h"
 
-
 RigidBody::RigidBody(Transform* transform) :
 	m_forcesAccu(vec3(0)),
 	m_torquesAccu(vec3(0)),

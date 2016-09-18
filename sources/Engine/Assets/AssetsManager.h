@@ -1,13 +1,12 @@
 #pragma once
-#include "../../Common/std.h"
-#include "../../Common/Graphics.h"
-//#include <fileapi.h>
+#include "../../Common/StdInclude.h"
+#include "../../Common/System.h"
 
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
-class SharedResources
+class BLACORE_API SharedResources
 {
 public:
 	SharedResources(void);

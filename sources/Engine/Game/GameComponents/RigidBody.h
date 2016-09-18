@@ -1,9 +1,10 @@
 #pragma once
 #include "../../../Common/Maths.h"
-#include "../../../Common/std.h"
+#include "../../../Common/StdInclude.h"
 #include "Collider.h"
+#include "Transform.h"
 
-class NextState 
+class BLACORE_API NextState
 {
 public:
 	NextState();
@@ -20,7 +21,7 @@ public:
 	dvec3 m_correctionAngularVelocity;
 };
 
-class RigidBody
+class BLACORE_API RigidBody
 {
 public:
 	vec3 m_previousPosition;

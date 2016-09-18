@@ -1,7 +1,9 @@
 #pragma once
-#include"..\GameComponents\RigidBody.h"
+#include "..\GameComponents\RigidBody.h"
+#include "..\..\..\Common\StdInclude.h"
+#include "..\Time.h"
 
-class Contact
+class BLACORE_API Contact
 {
 public:
 	Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normalW, vec3 tangentW, int face);
@@ -25,10 +27,10 @@ public:
 private:
 };
 
-class CollisionProcessor
+class BLACORE_API CollisionProcessor
 {
 public:
-	CollisionProcessor(float* timestepPtr);
+	CollisionProcessor(Time* time, float* timestepPtr);
 	~CollisionProcessor();
 
 	int m_maxIterations;
@@ -54,6 +56,7 @@ public:
 
 	void ProcessCollisions();
 private:
+	Time* m_time;
 
 	void ComputeT(vector<vector<dvec3>>& T);
 	void GetDiagonalElements(vector<vector<dvec3>> T, vector<double>& D);
@@ -62,7 +65,7 @@ private:
 	void SolveContacts();
 };
 
-class SpatialCoherence 
+class BLACORE_API SpatialCoherence
 {
 public:
 	SpatialCoherence(float granularity);

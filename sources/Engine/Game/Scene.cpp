@@ -1,10 +1,11 @@
 #include "Scene.h"
 
-Scene::Scene(Camera* camera)
+
+Scene::Scene(Time* time, Camera* camera)
 {
 	this->m_enableSimulation = false;
 	this->m_camera = camera;
-	this->m_rigidBodySystem = new RigidBodySystem();
+	this->m_rigidBodySystem = new RigidBodySystem(time);
 	this->m_directionalLights = vector<DirectionalLight*>();
 	this->m_sceneObjectsVector = vector<GameObject*>();
 	//m_rigidBodySystem->RegisterRigidBody(*(camera->m_rigidBody));

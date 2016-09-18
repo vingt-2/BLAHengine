@@ -1,7 +1,9 @@
 #pragma once
 #include "../GameComponents/MeshRenderer.h"
 #include "../GameComponents/RigidBody.h"
-class GameObject
+#include "..\..\..\Common\StdInclude.h"
+
+class BLACORE_API GameObject
 {
 public:
 	Transform* m_transform;

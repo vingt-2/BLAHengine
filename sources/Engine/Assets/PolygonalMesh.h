@@ -1,8 +1,8 @@
 #pragma once
 #include "../../Common/Maths.h"
-#include "../../Common/std.h"
+#include "../../Common/StdInclude.h"
 
-class RenderData
+class BLACORE_API RenderData
 {
 public:
 
@@ -25,7 +25,7 @@ public:
 	}
 };
 
-class TriangleMesh
+class BLACORE_API TriangleMesh
 {
 public:
 	typedef uint32 HeIndx;

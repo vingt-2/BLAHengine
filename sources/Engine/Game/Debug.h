@@ -1,13 +1,15 @@
 #pragma once
 #include "../Game/GameObjects/GameChar.h"
 #include "../Game/RenderingManager.h"
+#include "..\..\Common\StdInclude.h"
+
 /*
  TODO: 
 	SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
 	And Common m_debug asserts
 */
 
-class Debug
+class BLACORE_API Debug
 {
 public:
 

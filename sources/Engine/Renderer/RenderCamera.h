@@ -1,6 +1,6 @@
 #include "../Game/GameObjects/Camera.h"
 
-class RenderCamera
+class BLACORE_API RenderCamera
 {
 public:
 	// Hold the View Projection matrix (updated each frame)
@@ -16,7 +16,7 @@ public:
 
 };
 
-class PerspectiveCamera : public RenderCamera
+class BLACORE_API PerspectiveCamera : public RenderCamera
 {
 public:
 	mat4 m_perspectiveProjection;
@@ -25,7 +25,7 @@ public:
 	void Update();
 };
 
-class OrthographicCamera: public RenderCamera
+class BLACORE_API OrthographicCamera: public RenderCamera
 {
 public:
 	mat4 m_orthographicProjection;

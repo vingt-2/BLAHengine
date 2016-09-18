@@ -1,6 +1,6 @@
 #include "RigidBodySystem.h"
 
-RigidBodySystem::RigidBodySystem() :
+RigidBodySystem::RigidBodySystem(Time* time) :
 	m_timeStep(0.001f),
 	m_uniformViscosity(0.001),
 	m_gravity(vec3(0, -5, 0)),
@@ -10,14 +10,15 @@ RigidBodySystem::RigidBodySystem() :
 	m_enableGravity(true),
 	m_tieToTime(true)
 {
-	m_collisionProcessor = new CollisionProcessor(&m_timeStep);
-
+	m_collisionProcessor = new CollisionProcessor(time, &m_timeStep);
+	m_time = time;
 	m_timeStep /= sqrt(m_substeps);
 }
 
 
 RigidBodySystem::~RigidBodySystem()
 {
+
 }
 
 bool RigidBodySystem::RegisterRigidBody(RigidBody &body)
@@ -39,7 +40,7 @@ void RigidBodySystem::EnableSimulation()
 {
 	if (!m_isSimulating)
 	{
-		m_oldTime = glfwGetTime();
+		m_oldTime = m_time->GetTime();
 		m_isSimulating = true;
 	}
 }
@@ -53,7 +54,7 @@ void RigidBodySystem::UpdateSystem()
 {
 	if (m_isSimulating)
 	{
-		double time = glfwGetTime();
+		double time = m_time->GetTime();
 		if (m_tieToTime)
 		{
 			double timeStep = 2 * (time - m_oldTime) / 1;

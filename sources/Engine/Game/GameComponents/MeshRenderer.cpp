@@ -30,7 +30,7 @@ bool MeshRenderer::AssignTriangleMesh(TriangleMesh* mesh)
 
 bool MeshRenderer::AssignMaterial(const char* materialName)
 {
-	extern SharedResources* sharedResources;
+	BLACORE_API extern SharedResources* sharedResources;
 
 	string material = string(materialName);
 	if (!sharedResources->GetMaterial(material.data()))
@@ -44,7 +44,7 @@ bool MeshRenderer::AssignMaterial(const char* materialName)
 
 bool MeshRenderer::AssignTexture(const char* textureName, const char* handleName)
 {
-	extern SharedResources* sharedResources;
+	BLACORE_API extern SharedResources* sharedResources;
 
 	string texture = string(textureName);
 	string handle = string(handleName);

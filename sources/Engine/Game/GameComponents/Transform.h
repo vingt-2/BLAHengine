@@ -1,7 +1,7 @@
 #pragma once
 #include "../../../Common/Maths.h"
-#include  "../../../Common/std.h"
-class Transform
+#include  "../../../Common/StdInclude.h"
+class BLACORE_API Transform
 {
 public:
 	vec3 m_position;

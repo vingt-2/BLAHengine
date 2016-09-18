@@ -1,7 +1,7 @@
 #pragma once
 #include "ShadowRender.h"
 
-class DirectionalLightRender
+class BLACORE_API DirectionalLightRender
 {
 public:
 	GLuint m_lightRenderPrgmID;
@@ -9,7 +9,7 @@ public:
 	DirectionalShadowRender m_shadowRender;
 };
 
-class PointLightRender
+class BLACORE_API PointLightRender
 {
 public:
 

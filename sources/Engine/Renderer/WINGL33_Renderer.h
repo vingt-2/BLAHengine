@@ -1,8 +1,9 @@
 #pragma once
+#include "../../Common/StdInclude.h"
 #include "Renderer.h"
 #include "../Game/GameComponents/MeshRenderer.h"
 
-class GBuffer
+class BLACORE_API GBuffer
 {
 public:
 
@@ -27,7 +28,7 @@ public:
 	void DeleteGBufferResources();
 };
 
-class ScreenSpaceQuad
+class BLACORE_API ScreenSpaceQuad
 {
 public:
 
@@ -36,7 +37,7 @@ public:
 	GLuint m_vao;
 };
 
-class PointLightSphere
+class BLACORE_API PointLightSphere
 {
 public:
 
@@ -48,7 +49,7 @@ public:
 	GLuint m_size;
 };
 
-class GL33RenderObject : public RenderObject
+class BLACORE_API GL33RenderObject : public RenderObject
 {
 public:
 
@@ -86,17 +87,19 @@ public:
 private:
 };
 
-class GL33Renderer : public Renderer
+class BLACORE_API GL33Renderer : public Renderer
 {
 public:
+
+	void InitializeRenderer(RenderWindow* window, char* windowTitle);
 	bool Update();
 
 	RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
 	bool	CancelRender(const MeshRenderer& object);
 	bool	LoadDebugLines(pair<vector<vec3>, vector<vec3>>& debugLinesMesh);
 
-	GLFWwindow* GetWindow() const { return m_glfwWindow; }
-	void		WindowResize(GLFWwindow* window, int width, int height);
+	RenderWindow* GetWindow() const { return m_renderWindow; }
+	void		WindowResize(int width, int height);
 	vec2		GetCursorPosition();
 
 	GL33Renderer(char* windowTitle, bool isFullScreen);
@@ -133,7 +136,7 @@ public:
 	void SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, vector<GLuint> indices);
 
 protected:
-	GLFWwindow* InitializeWindowAndContext(char* windowTitle);
+
 	bool GenerateArrays(GL33RenderObject& object);
 	void GenerateVertexArrayID(GL33RenderObject& object);
 	template<typename objectType>

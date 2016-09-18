@@ -1,5 +1,7 @@
 #include "PolygonalMesh.h"
 
+#define INVALID_HE 0xDEADBEEF
+
 TriangleMesh::TriangleMesh() {}
 TriangleMesh::~TriangleMesh() {}
 
@@ -321,7 +323,7 @@ void TriangleMesh::GetHEvertices(HeIndx halfEdge, pair<uint32, uint32>* vertexPa
 	HalfEdge edge = m_halfEdges[halfEdge];
 	vertexPair->first = edge.destVertex.pos;
 	
-	if (edge.oppositeHE != 0xFFFFFFFF)
+	if (edge.oppositeHE != INVALID_HE)
 	{
 		vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex.pos;
 	}
@@ -357,7 +359,7 @@ bool TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> 
 		edge = m_halfEdges[currentEdgeIndx];
 		surroundingVertices.push_back(edge.destVertex);
 
-		if (edge.oppositeHE != 0xFFFFFFFF)
+		if (edge.oppositeHE != INVALID_HE)
 		{
 			currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
 		}
@@ -374,7 +376,7 @@ bool TriangleMesh::GetSurroundingVertices(uint32 vertexIndx, vector<DestVertex> 
 			} while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
 
 			HeIndx emanatingFromOriginalVertex = m_halfEdges[findEdgeIndx].oppositeHE;
-			if (emanatingFromOriginalVertex == 0xFFFFFFFF)
+			if (emanatingFromOriginalVertex == INVALID_HE)
 			{
 				// In that case the triangle is alone starting on that vertex.
 				// Very degenerate case, just drop the query, it's worthless
@@ -409,7 +411,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HeIndx> &surr
 			surroundingEdges.push_back(currentEdgeIndx);
 		}
 		
-		if (edge.oppositeHE != 0xFFFFFFFF)
+		if (edge.oppositeHE != INVALID_HE)
 		{
 			currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
 		}
@@ -426,7 +428,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(uint32 vertexIndx, vector<HeIndx> &surr
 			} while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
 
 			HeIndx emanatingFromOriginalVertex = m_halfEdges[findEdgeIndx].oppositeHE;
-			if (emanatingFromOriginalVertex == 0xFFFFFFFF)
+			if (emanatingFromOriginalVertex == INVALID_HE)
 			{
 				// In that case the triangle is alone starting on that vertex.
 				// Very degenerate case, just drop the query, it's worthless

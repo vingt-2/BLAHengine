@@ -1,8 +1,8 @@
 #pragma once
-#include "../Common/std.h"
-#include "../Engine/AssetsManager/PolygonalMesh.h"
+#include "../Common/StdInclude.h"
+#include "../Engine/Assets/PolygonalMesh.h"
 
-class OBJImport
+class BLACORE_API OBJImport
 {
 public:
 	bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);

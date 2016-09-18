@@ -1,10 +1,10 @@
 #pragma once
-#include "../../Common/std.h"
-#include "../../Common/Graphics.h"
+#include "../../Common/StdInclude.h"
+#include "../System/RenderWindow.h"
 #include "../Game/GameObjects/Camera.h"
 #include "LightRender.h"
 
-class RenderObject
+class BLACORE_API  RenderObject
 {
 public:
 	virtual ~RenderObject(){};
@@ -12,7 +12,7 @@ private:
 
 };
 
-class DebugRenderObject
+class BLACORE_API DebugRenderObject
 {
 public:
 	virtual ~DebugRenderObject() {};
@@ -20,15 +20,9 @@ private:
 
 };
 
-class Renderer
+class BLACORE_API Renderer
 {
 public:
-	enum RendererType
-	{
-		WIN_GL_33,
-		OSX_GL_32
-	};
-
 	PerspectiveCamera m_mainRenderCamera;
 
 	vector<RenderObject*> m_renderPool;
@@ -36,6 +30,7 @@ public:
 
 
 	// Rendering Related
+	virtual void InitializeRenderer(RenderWindow* renderWindow, char* windowTitle) = 0;
 	virtual bool Update() = 0;
 	virtual RenderObject* LoadRenderObject(const MeshRenderer& object,int type) = 0;
 	virtual bool	CancelRender(const MeshRenderer& object) = 0;
@@ -55,12 +50,10 @@ public:
 
 protected:
 
-	GLFWwindow* m_glfwWindow;
+	RenderWindow* m_renderWindow;
 	
 	ivec2 m_renderSize;
 	bool m_isContextEnabled;
 	bool m_isFullScreen;
-	
-	virtual GLFWwindow* InitializeWindowAndContext(char* windowTitle) = 0;
 };
 

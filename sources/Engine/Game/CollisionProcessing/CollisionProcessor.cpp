@@ -1,6 +1,6 @@
 #include "CollisionProcessor.h"
 
-CollisionProcessor::CollisionProcessor(float* timestepPtr) :
+CollisionProcessor::CollisionProcessor(Time* time, float* timestepPtr) :
 	m_flagInterpolateNormals(false),
 	m_maxIterations(500),
 	m_bounce(0.5),
@@ -12,7 +12,7 @@ CollisionProcessor::CollisionProcessor(float* timestepPtr) :
 {
 	m_bodiesList = vector<RigidBody*>();
 	m_timeStepPointer = timestepPtr;
-
+	m_time = time;
 
 	m_processingTime = 0;
 	m_detectionTime = 0;
@@ -360,14 +360,14 @@ void CollisionProcessor::ProcessCollisions()
 {
 	m_currentContacts.clear();
 
-	double startTime = glfwGetTime();
+	double startTime = m_time->GetTime();
 	BroadPhaseDetection();
-	m_detectionTime = glfwGetTime() - startTime;
+	m_detectionTime = m_time->GetTime() - startTime;
 
-	startTime = glfwGetTime();
+	startTime = m_time->GetTime();
 	if(m_currentContacts.size() != 0)
 		SolveContacts();
-	m_processingTime = glfwGetTime() - startTime;
+	m_processingTime = m_time->GetTime() - startTime;
 }
 
 Contact::Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normalW, vec3 tangentW, int face):

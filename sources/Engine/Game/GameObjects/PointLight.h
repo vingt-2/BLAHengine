@@ -1,8 +1,8 @@
 #pragma once
 #include "GameObject.h"
+#include "..\..\..\Common\StdInclude.h"
 
-
-class PointLight : GameObject
+class BLACORE_API PointLight : GameObject
 {
 public:
 	

@@ -1,16 +1,15 @@
 #pragma once
-#include "../../Common/std.h"
-
 #include "./RigidBodySystem.h"
+#include "../../Common/StdInclude.h"
 #include "../Game/GameObjects/GameManager.h"
 #include "../Game/GameObjects/Camera.h"
 #include "../Game/GameObjects/DirectionalLight.h"
 #include "../Game/GameObjects/PointLight.h"
 
-class Scene
+class BLACORE_API Scene
 {
 public:
-	Scene(Camera* camera);
+	Scene(Time* time, Camera* camera);
 	~Scene();
 
 	void Update();

@@ -1,6 +1,8 @@
 #pragma once
 #include "gameobject.h"
-class GameVisible : public GameObject
+#include "..\..\..\Common\StdInclude.h"
+
+class BLACORE_API GameVisible : public GameObject
 {
 public:
 	MeshRenderer* m_meshRenderer;

@@ -1,10 +1,12 @@
 #pragma once
+#include "..\..\..\Common\StdInclude.h"
 #include "./Transform.h"
-#include "../../AssetsManager/SharedResources.h"
-#include "../../AssetsManager/PolygonalMesh.h"
+#include "../../Assets/AssetsManager.h"
+#include "../../Assets/PolygonalMesh.h"
+
 #define BLA_LINE_RENDER 0x0003
 
-class MeshRenderer
+class BLACORE_API MeshRenderer
 {
 public:
 

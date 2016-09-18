@@ -1,8 +1,9 @@
 #pragma once
 #include "../Renderer/Renderer.h"
-#include "../AssetsManager/SharedResources.h"
+#include "../Assets/AssetsManager.h"
+#include "..\..\Common\StdInclude.h"
 
-class GameSingleton
+class BLACORE_API GameSingleton
 {
 public:
     Renderer* renderer;

@@ -1,4 +1,4 @@
-#include "SharedResources.h"
+#include "AssetsManager.h"
 
 
 SharedResources::SharedResources(void):

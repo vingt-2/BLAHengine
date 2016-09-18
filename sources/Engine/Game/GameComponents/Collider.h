@@ -1,11 +1,13 @@
 #pragma once
-#include "MeshRenderer.h"
+#include "..\..\..\Common\StdInclude.h"
+#include "..\..\Assets\PolygonalMesh.h"
 #include "../GameAlgebra/Ray.h"
 
+// Collision detection Library !
 #include "../../Ext/libcoldet/coldet.h"
 
 
-class Collider
+class BLACORE_API Collider
 {
 public:
 	Collider(TriangleMesh* mesh);

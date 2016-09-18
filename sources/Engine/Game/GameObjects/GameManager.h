@@ -1,8 +1,9 @@
 #pragma once
 #include "GameObject.h"
 #include "GameManager.h"
+#include "..\..\..\Common\StdInclude.h"
 
-class GameManager : public GameObject
+class BLACORE_API GameManager : public GameObject
 {
 public:
 

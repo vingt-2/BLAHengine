@@ -1,7 +1,9 @@
 #pragma once
 #include "RenderingManager.h"
 #include "../Renderer/Renderer.h"
-class GameInstance
+#include "..\..\Common\StdInclude.h"
+
+class BLACORE_API GameInstance
 {
 public:
 

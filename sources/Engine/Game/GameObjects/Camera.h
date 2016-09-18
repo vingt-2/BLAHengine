@@ -1,6 +1,8 @@
 #pragma once
 #include "GameChar.h"
-class Camera : public GameChar
+#include "..\..\..\Common\StdInclude.h"
+
+class BLACORE_API Camera : public GameChar
 {
 public:
 	// Members

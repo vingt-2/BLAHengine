@@ -1,13 +1,13 @@
 #include "RenderCamera.h"
 
-class ShadowRender
+class BLACORE_API ShadowRender
 {
 public:
 	virtual mat4 getShadowViewProjection() = 0;
 	virtual void Update() = 0;  // <-- m_shadowCamera.Update();
 };
 
-class DirectionalShadowRender : ShadowRender
+class BLACORE_API DirectionalShadowRender : ShadowRender
 {
 public:
 	bool m_isSetup;
@@ -26,7 +26,7 @@ public:
 	OrthographicCamera m_shadowCamera;
 };
 
-class PerspectiveShadowRender : ShadowRender
+class BLACORE_API PerspectiveShadowRender : ShadowRender
 {
 public:
 	bool m_isSetup;

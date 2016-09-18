@@ -1,12 +1,12 @@
 #pragma once
 #include "../Game/GameObjects/GameObject.h"
-#include "../../Common/std.h"
+#include "../../Common/StdInclude.h"
 #include "../Renderer/Renderer.h"
 #include "./GameAlgebra/Ray.h"
 
-typedef int RenderTicket;
+BLACORE_API typedef int RenderTicket;
 
-class RenderingManager
+class BLACORE_API RenderingManager
 {
 public:
 	enum RenderManagerType{ Game = 0, EditorGizmos = 1 };
@@ -33,7 +33,7 @@ private:
 	void LoadObject(GameObject& object);
 };
 
-class DebugRenderingManager
+class BLACORE_API DebugRenderingManager
 {
 public:
 

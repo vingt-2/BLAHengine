@@ -2,8 +2,9 @@
 #include "./GameAlgebra/Ray.h"
 #include "./GameSingleton.h"
 #include "./Scene.h"
+#include "..\..\Common\StdInclude.h"
 
-class CursorPicker
+class BLACORE_API CursorPicker
 {
 public:
 
