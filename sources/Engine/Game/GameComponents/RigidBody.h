@@ -4,74 +4,79 @@
 #include "Collider.h"
 #include "Transform.h"
 
-class BLACORE_API NextState
+namespace BLAengine
 {
-public:
-	NextState();
 
-	vec3 m_acceleration;
-	vec3 m_velocity;
-	vec3 m_angularAcceleration;
-	vec3 m_angularVelocity;
+	class BLACORE_API NextState
+	{
+	public:
+		NextState();
 
-	vec3 m_nextPos;
+		vec3 m_acceleration;
+		vec3 m_velocity;
+		vec3 m_angularAcceleration;
+		vec3 m_angularVelocity;
 
-	// Using dvec3 for LCP solver values
-	dvec3 m_correctionLinearVelocity;
-	dvec3 m_correctionAngularVelocity;
-};
+		vec3 m_nextPos;
 
-class BLACORE_API RigidBody
-{
-public:
-	vec3 m_previousPosition;
-	vec3 m_previousRotation;
-	vec3 m_acceleration;
-	vec3 m_velocity;
-	vec3 m_angularAcceleration;
-	vec3 m_angularVelocity;
+		// Using dvec3 for LCP solver values
+		dvec3 m_correctionLinearVelocity;
+		dvec3 m_correctionAngularVelocity;
+	};
 
-	vec3 m_debugCorrectionVelocity;
+	class BLACORE_API RigidBody
+	{
+	public:
+		vec3 m_previousPosition;
+		vec3 m_previousRotation;
+		vec3 m_acceleration;
+		vec3 m_velocity;
+		vec3 m_angularAcceleration;
+		vec3 m_angularVelocity;
 
-	// Pack the next state if needed to avoid recomputing
-	NextState* m_nextState;
+		vec3 m_debugCorrectionVelocity;
 
-	mat3 m_massTensor;
-	mat3 m_invMassTensor;
-	mat3 m_inertiaTensor;
-	mat3 m_invInertiaTensor;
+		// Pack the next state if needed to avoid recomputing
+		NextState* m_nextState;
 
-	bool m_isPinned;
-	bool m_applyGravity;
-	bool m_enableCollision;
+		mat3 m_massTensor;
+		mat3 m_invMassTensor;
+		mat3 m_inertiaTensor;
+		mat3 m_invInertiaTensor;
 
-	Transform* m_transform;
-	Collider* m_collider;
+		bool m_isPinned;
+		bool m_applyGravity;
+		bool m_enableCollision;
 
-	void SetCollider(Collider* collider) { m_collider = collider; }
-	void SetMeshCollider(TriangleMesh* mesh) { m_collider = new Collider(mesh); }
+		Transform* m_transform;
+		Collider* m_collider;
 
-	void Update();
+		void SetCollider(Collider* collider) { m_collider = collider; }
+		void SetMeshCollider(TriangleMesh* mesh) { m_collider = new Collider(mesh); }
 
-	void PushForceWorld(vec3 pushAtW, vec3 forceW);
+		void Update();
 
-	void AddLinearForce(vec3 force);
-	void AddTorque(vec3 vector);
-	void AddImpulse(vec3 impulse);
+		void PushForceWorld(vec3 pushAtW, vec3 forceW);
 
-	vec3 GetForcesAccu() { return m_forcesAccu; };
-	vec3 GetTorquesAccu() { return m_torquesAccu; };
-	void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
+		void AddLinearForce(vec3 force);
+		void AddTorque(vec3 vector);
+		void AddImpulse(vec3 impulse);
 
-	RigidBody(Transform* transform);
-	~RigidBody(void);
+		vec3 GetForcesAccu() { return m_forcesAccu; };
+		vec3 GetTorquesAccu() { return m_torquesAccu; };
+		void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
 
-private:
+		RigidBody(Transform* transform);
+		~RigidBody(void);
 
-	vec3 m_forcesAccu;
-	vec3 m_torquesAccu;
-	vec3 m_impulseAccu;
+	private:
 
-	vec3 m_linearImpulseAccu;
-	vec3 m_angularImpulseAccu;
-};
+		vec3 m_forcesAccu;
+		vec3 m_torquesAccu;
+		vec3 m_impulseAccu;
+
+		vec3 m_linearImpulseAccu;
+		vec3 m_angularImpulseAccu;
+	};
+
+}

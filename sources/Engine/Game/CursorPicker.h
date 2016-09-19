@@ -4,14 +4,17 @@
 #include "./Scene.h"
 #include "..\..\Common\StdInclude.h"
 
-class BLACORE_API CursorPicker
+namespace BLAengine
 {
-public:
+	class BLACORE_API CursorPicker
+	{
+	public:
 
-	const GameSingleton* m_gameSingleton;
-	
-	CursorPicker(const GameSingleton* singleton);
+		const GameSingleton* m_gameSingleton;
 
-	Ray ScreenToRay(float length);
-	GameChar* PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &hitInWorld);
-};
+		CursorPicker(const GameSingleton* singleton);
+
+		Ray ScreenToRay(float length);
+		GameChar* PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &hitInWorld);
+	};
+}

@@ -1,4 +1,5 @@
 #include "Collider.h"
+using namespace BLAengine;
 
 Collider::Collider(TriangleMesh* mesh)
 {

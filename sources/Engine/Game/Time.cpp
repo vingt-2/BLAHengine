@@ -1,4 +1,5 @@
 #include "Time.h"
+using namespace BLAengine;
 
 Time::Time(uint8_t timeBufferSize)
 {

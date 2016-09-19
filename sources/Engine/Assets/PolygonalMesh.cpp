@@ -1,4 +1,5 @@
 #include "PolygonalMesh.h"
+using namespace BLAengine;
 
 #define INVALID_HE 0xDEADBEEF
 

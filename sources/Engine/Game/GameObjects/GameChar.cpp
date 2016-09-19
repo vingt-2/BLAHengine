@@ -1,5 +1,5 @@
 #include "GameChar.h"
-
+using namespace BLAengine;
 
 GameChar::GameChar()
 {

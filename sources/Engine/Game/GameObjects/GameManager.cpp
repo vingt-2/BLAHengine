@@ -1,4 +1,5 @@
 #include "GameManager.h"
+using namespace BLAengine;
 
 
 GameManager::GameManager(void)

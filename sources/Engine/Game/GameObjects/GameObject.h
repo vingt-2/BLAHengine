@@ -3,17 +3,20 @@
 #include "../GameComponents/RigidBody.h"
 #include "..\..\..\Common\StdInclude.h"
 
-class BLACORE_API GameObject
+namespace BLAengine
 {
-public:
-	Transform* m_transform;
-	string m_objectName;
+	class BLACORE_API GameObject
+	{
+	public:
+		Transform* m_transform;
+		string m_objectName;
 
-	virtual void Update() = 0;
+		virtual void Update() = 0;
 
-	void UpdateTransform();
+		void UpdateTransform();
 
 
-	GameObject(void);
-	~GameObject(void);
-};
+		GameObject(void);
+		~GameObject(void);
+	};
+}

@@ -1,4 +1,5 @@
 #include "ShadowRender.h"
+using namespace BLAengine;
 
 mat4 DirectionalShadowRender::getShadowViewProjection()
 {

@@ -1,4 +1,5 @@
 #include "OBJImport.h"
+using namespace BLAengine;
 
 OBJImport::OBJImport(void) :
 	m_currentMaxVertexPos(0),

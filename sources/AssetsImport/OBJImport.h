@@ -2,22 +2,26 @@
 #include "../Common/StdInclude.h"
 #include "../Engine/Assets/PolygonalMesh.h"
 
-class BLACORE_API OBJImport
+namespace BLAengine
 {
-public:
-	bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
+	class BLACORE_API OBJImport
+	{
+	public:
+		bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
 
-	OBJImport(void);
-	~OBJImport(void);
+		OBJImport(void);
+		~OBJImport(void);
 
-private: 
+	private:
 
-	long m_currentMaxVertexPos;
-	long m_currentMaxUVPos;
-	long m_currentMaxNormalPos;
+		long m_currentMaxVertexPos;
+		long m_currentMaxUVPos;
+		long m_currentMaxNormalPos;
 
-	long FindVertexAtIndex(long index);
-	long FindUVAtIndex(long index);
-	long FindNormalAtIndex(long index);
-};
+		long FindVertexAtIndex(long index);
+		long FindUVAtIndex(long index);
+		long FindNormalAtIndex(long index);
+	};
 
+
+}

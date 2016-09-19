@@ -1,4 +1,5 @@
 #include "./Debug.h"
+using namespace BLAengine;
 
 
 Debug::Debug(DebugRenderingManager* manager)

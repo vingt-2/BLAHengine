@@ -1,4 +1,5 @@
 #include "RenderingManager.h"
+using namespace BLAengine;
 
 
 RenderingManager::RenderingManager(Renderer* renderer, RenderManagerType type)

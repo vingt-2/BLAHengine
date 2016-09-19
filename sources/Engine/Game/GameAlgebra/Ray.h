@@ -2,29 +2,32 @@
 #include "../../../Common/Maths.h"
 #include "..\..\..\Common\StdInclude.h"
 
-class BLACORE_API RaycastHit
+namespace BLAengine
 {
-public:
-	vec3 hitPosition;
-
-	RaycastHit(vec3 hit)
+	class BLACORE_API RaycastHit
 	{
-		hitPosition = hit;
-	}
-};
+	public:
+		vec3 hitPosition;
 
-class BLACORE_API Ray
-{
-public:
-	vec3 m_origin;
-	vec3 m_direction;
-	float m_length;
+		RaycastHit(vec3 hit)
+		{
+			hitPosition = hit;
+		}
+	};
 
-	Ray(vec3 origin, vec3 direction, float length);
+	class BLACORE_API Ray
+	{
+	public:
+		vec3 m_origin;
+		vec3 m_direction;
+		float m_length;
 
-	RaycastHit RayToPlaneIntersection(vec3 planeOrigin, vec3 planeVec1, vec3 planeVec2);
+		Ray(vec3 origin, vec3 direction, float length);
 
-private:
-	vec3 GaussSolver(mat3 inMat, vec3 equal);
-};
+		RaycastHit RayToPlaneIntersection(vec3 planeOrigin, vec3 planeVec1, vec3 planeVec2);
 
+	private:
+		vec3 GaussSolver(mat3 inMat, vec3 equal);
+	};
+
+}

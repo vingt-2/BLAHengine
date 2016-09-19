@@ -3,13 +3,17 @@
 #include "GameManager.h"
 #include "..\..\..\Common\StdInclude.h"
 
-class BLACORE_API GameManager : public GameObject
+namespace BLAengine
 {
-public:
+	class BLACORE_API GameManager : public GameObject
+	{
+	public:
 
-	GameManager(void);
-	~GameManager(void);
+		GameManager(void);
+		~GameManager(void);
 
-	void Update();
-};
+		void Update();
+	};
 
+
+}

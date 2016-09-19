@@ -1,4 +1,5 @@
 #include "Scene.h"
+using namespace BLAengine;
 
 
 Scene::Scene(Time* time, Camera* camera)

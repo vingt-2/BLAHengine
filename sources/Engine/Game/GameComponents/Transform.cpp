@@ -1,5 +1,6 @@
 #include "Transform.h"
 
+using namespace BLAengine;
 
 Transform::Transform(void):
 	m_position(vec3(0)), m_rotation(mat3(1)), m_scale(vec3(1))

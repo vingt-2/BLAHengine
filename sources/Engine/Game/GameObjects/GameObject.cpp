@@ -1,5 +1,6 @@
 #include "GameObject.h"
 
+using namespace BLAengine;
 
 GameObject::GameObject(void)
 {

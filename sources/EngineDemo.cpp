@@ -13,7 +13,7 @@ Hence the name "MainDemo.cpp".
 
 #include "./Common/Maths.h"
 
-#include "./Engine/Renderer/WINGL33_Renderer.h"
+#include "./Engine/Renderer/GL33Renderer.h"
 
 #include "AssetsImport\OBJImport.h"
 #include "Engine\Game\RenderingManager.h"
@@ -26,6 +26,8 @@ Hence the name "MainDemo.cpp".
 
 int fps = 60;
 vec2* previousMouseInput = new vec2(0,0);
+
+using namespace BLAengine;
 
 GameSingleton* gameSingleton;
 GL33Renderer* mainRenderer;
@@ -127,11 +129,11 @@ int main( void )
 	int mainRenderFullScreen    = FULLSCREEN_SETTING;
 
 	renderWindow = new GLFWRenderWindow();
-	renderWindow->CreateWindow(100, 100, mainRenderFullScreen);
+	renderWindow->CreateWindow("BLAengine", 100, 100, mainRenderFullScreen);
 
-	mainRenderer = new GL33Renderer((char*)"BLAengine - MainDemo",mainRenderFullScreen);
+	mainRenderer = new GL33Renderer();
 
-	mainRenderer->InitializeRenderer((RenderWindow*) renderWindow, (char*)"BLAengine - MainDemo");
+	mainRenderer->InitializeRenderer((RenderWindow*) renderWindow);
 
 	gameSingleton               = new GameSingleton(mainRenderer,sharedResources);
 
@@ -185,6 +187,8 @@ int main( void )
 	sharedResources->loadBMP_custom("earthDiffuse","./resources/textures/earth.bmp");
 	sharedResources->loadBMP_custom("earthNormals","./resources/textures/earth_NRM.bmp");
 	sharedResources->loadBMP_custom("red", "./resources/textures/red.bmp");
+
+	mainRenderer->m_sharedResources = sharedResources;
 
 	//mainRenderer->m_debug = debug;
 	OBJImport objImport;
@@ -315,11 +319,11 @@ int main( void )
 
 	debug->m_drawDebugRays = true;
 
-	for (int i = 0; i < 0; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		PointLightRender pointLight;
 		pointLight.m_transform = new Transform();
-		pointLight.m_transform->m_scale = vec3(20);
+		pointLight.m_transform->m_scale = vec3(30);
 		pointLight.m_transform->m_position = vec3(i*5,10+(2*i),0);
 		pointLight.m_transform->UpdateTransform();
 		pointLight.m_pointLightPrgmID = sharedResources->GetMaterial("PointLightPass");

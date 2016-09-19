@@ -3,15 +3,19 @@
 #include "../Renderer/Renderer.h"
 #include "..\..\Common\StdInclude.h"
 
-class BLACORE_API GameInstance
+namespace BLAengine
 {
-public:
+	class BLACORE_API GameInstance
+	{
+	public:
 
-	RenderingManager* m_renderingManager;
+		RenderingManager* m_renderingManager;
 
-	Renderer* m_renderer;
+		Renderer* m_renderer;
 
-	GameInstance();
-	~GameInstance();
-};
+		GameInstance();
+		~GameInstance();
+	};
 
+
+}

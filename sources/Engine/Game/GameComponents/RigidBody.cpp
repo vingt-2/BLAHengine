@@ -1,4 +1,5 @@
 #include "RigidBody.h"
+using namespace BLAengine;
 
 RigidBody::RigidBody(Transform* transform) :
 	m_forcesAccu(vec3(0)),

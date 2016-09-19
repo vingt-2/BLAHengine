@@ -1,4 +1,5 @@
 #include "GameInstance.h"
+using namespace BLAengine;
 
 
 GameInstance::GameInstance()

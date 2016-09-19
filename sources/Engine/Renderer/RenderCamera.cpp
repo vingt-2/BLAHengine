@@ -1,5 +1,7 @@
 #include "RenderCamera.h"
 
+using namespace BLAengine;
+
 void RenderCamera::AttachCamera(Camera* camera)
 {
 	this->m_attachedCamera = camera;

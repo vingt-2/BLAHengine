@@ -4,48 +4,52 @@
 #include "../Renderer/Renderer.h"
 #include "./GameAlgebra/Ray.h"
 
-BLACORE_API typedef int RenderTicket;
-
-class BLACORE_API RenderingManager
+namespace BLAengine
 {
-public:
-	enum RenderManagerType{ Game = 0, EditorGizmos = 1 };
+	BLACORE_API typedef int RenderTicket;
 
-	RenderingManager(Renderer* renderer, RenderManagerType type);
-	~RenderingManager();
+	class BLACORE_API RenderingManager
+	{
+	public:
+		enum RenderManagerType{ Game = 0, EditorGizmos = 1 };
 
-	RenderTicket RequestRenderTicket(const GameObject& object);
-	bool		 CancelRenderTicket(const GameObject& object);
+		RenderingManager(Renderer* renderer, RenderManagerType type);
+		~RenderingManager();
 
-	void Update();
+		RenderTicket RequestRenderTicket(const GameObject& object);
+		bool		 CancelRenderTicket(const GameObject& object);
 
-
-private:
-
-	Renderer* m_renderer;
-	RenderManagerType m_renderManagerType;
-
-	std::map<RenderTicket,const GameObject* > m_ticketedObjects;
-	std::map<RenderTicket,const RenderObject* >  m_renderObjects;
-	
-	int currentTicket;
-
-	void LoadObject(GameObject& object);
-};
-
-class BLACORE_API DebugRenderingManager
-{
-public:
-
-	DebugRenderingManager(Renderer* renderer);
-	~DebugRenderingManager();
-
-	Renderer* m_renderer;
-
-	void LoadDebugLineMesh(pair<vector<vec3>,vector<vec3>>& lineMesh);
-
-	void Update();
-};
+		void Update();
 
 
+	private:
 
+		Renderer* m_renderer;
+		RenderManagerType m_renderManagerType;
+
+		std::map<RenderTicket, const GameObject* > m_ticketedObjects;
+		std::map<RenderTicket, const RenderObject* >  m_renderObjects;
+
+		int currentTicket;
+
+		void LoadObject(GameObject& object);
+	};
+
+	class BLACORE_API DebugRenderingManager
+	{
+	public:
+
+		DebugRenderingManager(Renderer* renderer);
+		~DebugRenderingManager();
+
+		Renderer* m_renderer;
+
+		void LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh);
+
+		void Update();
+	};
+
+
+
+
+}

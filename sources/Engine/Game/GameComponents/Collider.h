@@ -6,21 +6,23 @@
 // Collision detection Library !
 #include "../../Ext/libcoldet/coldet.h"
 
-
-class BLACORE_API Collider
+namespace BLAengine
 {
-public:
-	Collider(TriangleMesh* mesh);
-	~Collider();
-	
-	CollisionModel3D* m_collisionMesh;
-	vector<uint32_t>* m_vertIndices;
-	vector<vec3>* m_triVertices;
-	vector<vec3>* m_triNormals;
+	class BLACORE_API Collider
+	{
+	public:
+		Collider(TriangleMesh* mesh);
+		~Collider();
 
-	float m_boundingRadius;
+		CollisionModel3D* m_collisionMesh;
+		vector<uint32_t>* m_vertIndices;
+		vector<vec3>* m_triVertices;
+		vector<vec3>* m_triNormals;
 
-private:
-	void GenerateBoundingRadius();
-	void GenerateCollisionModel();
-};
+		float m_boundingRadius;
+
+	private:
+		void GenerateBoundingRadius();
+		void GenerateCollisionModel();
+	};
+}

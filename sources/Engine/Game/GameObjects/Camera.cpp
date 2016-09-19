@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+using namespace BLAengine;
 
 Camera::Camera():
 	GameChar(),

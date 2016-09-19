@@ -1,4 +1,5 @@
 #include "RigidBodySystem.h"
+using namespace BLAengine;
 
 RigidBodySystem::RigidBodySystem(Time* time) :
 	m_timeStep(0.001f),

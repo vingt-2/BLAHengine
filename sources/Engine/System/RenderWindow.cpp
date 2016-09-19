@@ -1,8 +1,9 @@
 #include "RenderWindow.h"
+using namespace BLAengine;
 
 #define GLFW_DEFAULT_WINDOW_NAME "glfwWindow"
 
-void GLFWRenderWindow::CreateWindow(int sizeX, int sizeY, bool isFullScreen)
+void GLFWRenderWindow::CreateWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
 	GLFWwindow* window;
 	// Initialise GLFW
@@ -12,7 +13,7 @@ void GLFWRenderWindow::CreateWindow(int sizeX, int sizeY, bool isFullScreen)
 		//Debug::OutputToDebug("Failed to initialize GLFW\n" );
 		return;
 	}
-
+	m_isFullscreen = false;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -127,4 +128,21 @@ bool GLFWRenderWindow::GetKeyPressed(int key)
 bool GLFWRenderWindow::GetMousePressed(int button)
 {
 	return (glfwGetMouseButton(m_glfwWindow, button) == GLFW_PRESS);
+}
+
+GLFWRenderWindow::GLFWRenderWindow()
+{
+	m_isFullscreen = false;
+	m_width = 0;
+	m_height = 0;
+	m_glfwWindow = NULL;
+}
+
+GLFWRenderWindow::~GLFWRenderWindow()
+{
+	m_isFullscreen = false;
+	m_width = 0;
+	m_height = 0;
+	m_glfwWindow = NULL;
+	glfwTerminate();
 }

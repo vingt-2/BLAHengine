@@ -1,4 +1,5 @@
 #include "CursorPicker.h"
+using namespace BLAengine;
 
 CursorPicker::CursorPicker(const GameSingleton* singleton)
 {
@@ -9,7 +10,8 @@ Ray CursorPicker::ScreenToRay(float length)
 {
 	vec2 renderSize = m_gameSingleton->renderer->GetRenderSize();
 	
-	vec2 cursor = m_gameSingleton->renderer->GetCursorPosition();
+	//TODO: FIX THAT SHEET
+	vec2 cursor(0,0); // Was get cursor on renderer, but that's long gone, renderer should *not* and doesnt know about this anymore... So ... How to handle this ?
 	float x = cursor.x;
 	float y = cursor.y;
 	

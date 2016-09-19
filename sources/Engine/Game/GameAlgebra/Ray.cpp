@@ -1,4 +1,5 @@
 #include "Ray.h"
+using namespace BLAengine;
 
 Ray::Ray(vec3 origin, vec3 direction, float length)
 {

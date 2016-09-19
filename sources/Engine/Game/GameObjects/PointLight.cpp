@@ -1,4 +1,5 @@
 #include "PointLight.h"
+using namespace BLAengine;
 
 PointLight::PointLight():
     m_lightPosition(vec3(0)),m_lightIntensity(1.f),m_lightRadius(1.f)

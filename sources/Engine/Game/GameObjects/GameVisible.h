@@ -2,13 +2,17 @@
 #include "gameobject.h"
 #include "..\..\..\Common\StdInclude.h"
 
-class BLACORE_API GameVisible : public GameObject
+namespace BLAengine
 {
-public:
-	MeshRenderer* m_meshRenderer;
+	class BLACORE_API GameVisible : public GameObject
+	{
+	public:
+		MeshRenderer* m_meshRenderer;
 
-	void Update();
+		void Update();
 
-	GameVisible(void);
-	~GameVisible(void);
-};
+		GameVisible(void);
+		~GameVisible(void);
+	};
+
+}

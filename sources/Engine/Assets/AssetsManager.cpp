@@ -1,4 +1,5 @@
 #include "AssetsManager.h"
+using namespace BLAengine;
 
 
 SharedResources::SharedResources(void):

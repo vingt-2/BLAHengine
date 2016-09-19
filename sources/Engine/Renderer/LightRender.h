@@ -1,21 +1,24 @@
 #pragma once
 #include "ShadowRender.h"
 
-class BLACORE_API DirectionalLightRender
+namespace BLAengine
 {
-public:
-	GLuint m_lightRenderPrgmID;
+	class BLACORE_API DirectionalLightRender
+	{
+	public:
+		GLuint m_lightRenderPrgmID;
 
-	DirectionalShadowRender m_shadowRender;
-};
+		DirectionalShadowRender m_shadowRender;
+	};
 
-class BLACORE_API PointLightRender
-{
-public:
+	class BLACORE_API PointLightRender
+	{
+	public:
 
-	GLuint m_pointLightPrgmID;
+		GLuint m_pointLightPrgmID;
 
-	Transform* m_transform;
+		Transform* m_transform;
 
-	vector<vec3> m_sphereMesh;
-};
+		vector<vec3> m_sphereMesh;
+	};
+}
