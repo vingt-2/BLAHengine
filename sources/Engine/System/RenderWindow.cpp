@@ -1,9 +1,9 @@
 #include "RenderWindow.h"
 using namespace BLAengine;
 
+#ifdef GLFW_INTERFACE
 #define GLFW_DEFAULT_WINDOW_NAME "glfwWindow"
-
-void GLFWRenderWindow::CreateWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
 	GLFWwindow* window;
 	// Initialise GLFW
@@ -20,7 +20,7 @@ void GLFWRenderWindow::CreateWindow(string windowTitle, int sizeX, int sizeY, bo
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
 	// Open a window and create its OpenGL context
-	GLFWmonitor* monitor = NULL;
+	GLFWmonitor* monitor = nullptr;
 
 	if (isFullScreen)
 	{
@@ -63,12 +63,9 @@ void GLFWRenderWindow::CreateWindow(string windowTitle, int sizeX, int sizeY, bo
 	m_glfwWindow = window;
 }
 
-void GLFWRenderWindow::CreateOpenGLContext()
+string GLFWRenderWindow::GetMaxGLVersion()
 {
-}
-
-void GLFWRenderWindow::GetMaxGLVersion()
-{
+	return string("");
 }
 
 void GLFWRenderWindow::MakeGLContextCurrent()
@@ -135,7 +132,7 @@ GLFWRenderWindow::GLFWRenderWindow()
 	m_isFullscreen = false;
 	m_width = 0;
 	m_height = 0;
-	m_glfwWindow = NULL;
+	m_glfwWindow = nullptr;
 }
 
 GLFWRenderWindow::~GLFWRenderWindow()
@@ -143,6 +140,85 @@ GLFWRenderWindow::~GLFWRenderWindow()
 	m_isFullscreen = false;
 	m_width = 0;
 	m_height = 0;
-	m_glfwWindow = NULL;
+	m_glfwWindow = nullptr;
 	glfwTerminate();
+}
+
+#endif
+
+WPFRenderWindow::WPFRenderWindow():
+	m_glVersion(string("NONE")),
+	m_makeGLCurrentRequest(true),
+	m_updateWindowRequest(false),
+	m_width(0), m_height(0),
+	m_mousePosX(0), m_mousePosY(0),
+	m_mouseDownState(0x00)
+{}
+
+void WPFRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
+{
+	m_width = sizeX;
+	m_height = sizeY;
+
+	glewExperimental = GL_TRUE;
+	glewInit();
+
+	m_glVersion = string((char*)glGetString(GL_VERSION));
+}
+
+void WPFRenderWindow::UpdateWindowAndBuffers()
+{
+	m_updateWindowRequest = true;
+}
+
+void WPFRenderWindow::MakeGLContextCurrent()
+{
+	m_makeGLCurrentRequest = true;
+}
+
+void WPFRenderWindow::WriteSize(int x, int y)
+{
+	m_width = x;
+	m_height = y;
+}
+
+void WPFRenderWindow::WriteMousePos(int x, int y)
+{
+	m_mousePosX = x;
+	m_mousePosY = y;
+}
+
+void WPFRenderWindow::SetMouseXY() {}
+
+bool WPFRenderWindow::GetKeyPressed(int key) { return false; }
+bool WPFRenderWindow::GetMousePressed(int button)
+{ 
+	int mask = (unsigned char) (0x01 << button);
+
+	return (mask & m_mouseDownState) != 0x00;
+}
+
+string WPFRenderWindow::GetMaxGLVersion() { return m_glVersion; }
+
+bool WPFRenderWindow::isFullScreen() { return false; }
+
+void WPFRenderWindow::SetWindowTitle(string title) { }
+string WPFRenderWindow::GetWindowTitle() { return ""; }
+
+bool WPFRenderWindow::ShouldUpdateWindow() { return m_updateWindowRequest; }
+void WPFRenderWindow::SetWindowUpdated() { m_updateWindowRequest = false; }
+
+bool WPFRenderWindow::ShouldMakeGLCurrent() { return m_makeGLCurrentRequest; }
+void WPFRenderWindow::SetMadeGLCurrent() { m_makeGLCurrentRequest = false; }
+
+void WPFRenderWindow::GetSize(int &width, int &height)
+{
+	width = m_width;
+	height = m_height;
+}
+
+void WPFRenderWindow::GetMouse(double &x, double &y)
+{
+	x = m_mousePosX;
+	y = m_mousePosY;
 }

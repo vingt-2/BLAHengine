@@ -2,8 +2,21 @@
 #include "../../Common/StdInclude.h"
 #include "Renderer.h"
 #include "../Game/GameComponents/MeshRenderer.h"
+
 namespace BLAengine 
 {
+	class BLACORE_API GL33Resources
+	{
+	public:
+		//TODO: Add filtering options
+		bool GLLoadTexture(std::string resourcePath, Texture2D texture);
+		bool GLLoadShaderProgram(std::string resourcePath, std::string fragmentShader, std::string vertexShader);
+
+		std::map<std::string, GLuint> m_glLoadedTextureIds;
+		std::map<std::string, GLuint> m_glLoadedProgramsIds;
+	};
+
+
 	class BLACORE_API GBuffer
 	{
 	public:
@@ -117,8 +130,11 @@ namespace BLAengine
 		ScreenSpaceQuad m_screenSpaceQuad;
 		PointLightSphere m_pointLightSphereMesh;
 
-		SharedResources* m_sharedResources;
+		GL33Resources m_glResources;
 
+		// External References 
+		AssetManager* m_assetManager;
+		
 		bool debug_renderGBuffer;
 
 		bool m_renderDebug;
@@ -156,7 +172,7 @@ namespace BLAengine
 
 		void DrawDisplayBuffer();
 
-		void RenderDefferedLights();
+		//void RenderDefferedLights();
 
 		void RenderDebugLines();
 		void RenderDebug()

@@ -1,4 +1,5 @@
 #pragma once
+#include "Asset.h"
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
 #include "../../Common/Maths.h"
@@ -7,27 +8,24 @@ namespace BLAengine
 {
 
 
-	class BLACORE_API Texture2D
+	class BLACORE_API Texture2D : public Asset
 	{
 	public:
 
 		//TODO: Support mipmapping 
-
-		Texture2D(void);
-		Texture2D(string name, uint8_t dim, uint8_t* data, uint32_t width, uint32_t height);
+		Texture2D(string name, uint8_t dim, vector<uint8_t> data, uint32_t width, uint32_t height);
 		~Texture2D(void);
 
 		uint8_t m_nComponents;
 		uint32_t m_dataSize;
-		uint8_t * m_data;
 		uint32_t m_width, m_height;
 
-		string m_name;
+		std::vector<uint8_t> m_data;
 
 	private:
 	};
 
-	class BLACORE_API TextureLoader
+	class BLACORE_API TextureImport
 	{
 	public:
 

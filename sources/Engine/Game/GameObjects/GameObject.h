@@ -14,9 +14,15 @@ namespace BLAengine
 		virtual void Update() = 0;
 
 		void UpdateTransform();
+		void SetParent(GameObject* parent) { m_parent = parent; }
+		GameObject* GetParent() { return m_parent; }
 
 
 		GameObject(void);
 		~GameObject(void);
+	
+	private:
+
+		GameObject* m_parent;
 	};
 }

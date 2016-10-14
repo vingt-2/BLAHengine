@@ -17,7 +17,7 @@ void PerspectiveCamera::Update()
 {
 	this->m_attachedCamera->Update();
 
-	if (m_attachedCamera != NULL)
+	if (m_attachedCamera != nullptr)
 		m_ViewProjection = m_perspectiveProjection * m_attachedCamera->m_viewTransform.m_transformMatrix;
 	else
 		m_ViewProjection = mat4(1);
@@ -25,7 +25,7 @@ void PerspectiveCamera::Update()
 
 RenderCamera::RenderCamera()
 {
-	this->m_attachedCamera = NULL;
+	this->m_attachedCamera = nullptr;
 }
 
 void OrthographicCamera::SetOrthographicProj(float left, float right, float bottom, float top)
@@ -37,7 +37,7 @@ void OrthographicCamera::Update()
 {
 	this->m_attachedCamera->Update();
 
-	if (m_attachedCamera != NULL)
+	if (m_attachedCamera != nullptr)
 		m_ViewProjection = m_orthographicProjection * m_attachedCamera->m_viewTransform.m_transformMatrix;
 	else
 		m_ViewProjection = mat4(1);

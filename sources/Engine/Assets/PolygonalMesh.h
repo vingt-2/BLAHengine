@@ -1,4 +1,5 @@
 #pragma once
+#include "Asset.h"
 #include "../../Common/Maths.h"
 #include "../../Common/StdInclude.h"
 
@@ -27,7 +28,7 @@ namespace BLAengine
 		}
 	};
 
-	class BLACORE_API TriangleMesh
+	class BLACORE_API TriangleMesh : public Asset
 	{
 	public:
 		typedef uint32 HeIndx;
@@ -76,7 +77,9 @@ namespace BLAengine
 
 		int m_manifoldViolationEdges = 0;
 
-		TriangleMesh();
+		RenderData m_renderData;
+
+		TriangleMesh(string name);
 		~TriangleMesh();
 
 		void BuildMeshTopo(
@@ -90,8 +93,8 @@ namespace BLAengine
 		void ApplyGeomScaling(vec3 scaling);
 		void ApplyUVScaling(vec2 scaling);
 
-		RenderData* GenerateRenderData();
-		vector<uint32_t>* GenerateTopoTriangleIndices();
+		void GenerateRenderData();
+		void GenerateTopoTriangleIndices(vector<uint32_t> &indices);
 
 		bool IsMeshValid();
 

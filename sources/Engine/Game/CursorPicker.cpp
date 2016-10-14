@@ -39,15 +39,15 @@ GameChar* CursorPicker::PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &
 {
 	vector<GameObject*> objects = pickedScene.GetObjects();
 	float minDistance = INFINITY;
-	GameChar* pickedObject = NULL;
+	GameChar* pickedObject = nullptr;
 	for (auto obj : objects)
 	{
 		GameChar* gameChar = dynamic_cast<GameChar*>(obj);
-		if (gameChar != NULL && gameChar->m_rigidBody->m_collider)
+		if (gameChar != nullptr && gameChar->m_rigidBody->m_collider)
 		{
 			gameChar->m_rigidBody->m_collider->m_collisionMesh->setTransform(&(gameChar->m_transform->m_transformMatrix[0][0]));
 
-			bool closestPoint = &hitInWorld != NULL;
+			bool closestPoint = &hitInWorld != nullptr;
 
 			bool collision = gameChar->m_rigidBody->m_collider->m_collisionMesh->rayCollision(&(ray.m_origin.x), &(ray.m_direction.x), closestPoint,0,ray.m_length);
 			
@@ -63,7 +63,7 @@ GameChar* CursorPicker::PickGameCharInScene(Scene &pickedScene, Ray &ray, vec3 &
 				minDistance = distance;
 				pickedObject = gameChar;
 			}
-			if (&hitInWorld != NULL)
+			if (&hitInWorld != nullptr)
 			{
 				hitInWorld = collisionPoint;
 			}

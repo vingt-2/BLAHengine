@@ -21,7 +21,7 @@ void Scene::AddObject(GameChar* objectPtr)
 {
 	m_sceneObjectsVector.push_back(objectPtr);
 
-	if (objectPtr->m_rigidBody->m_collider != NULL)
+	if (objectPtr->m_rigidBody->m_collider != nullptr)
 		m_rigidBodySystem->RegisterRigidBody(*(objectPtr->m_rigidBody));
 }
 void Scene::AddObject(GameManager* managerPtr)

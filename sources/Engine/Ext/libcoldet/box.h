@@ -180,7 +180,7 @@ public:
   {
     if (which==0) return m_First;
     if (which==1) return m_Second;
-    return NULL;
+    return nullptr;
   }
 
   BoxTreeNode*                m_First;
@@ -198,12 +198,12 @@ public:
   BoxedTriangle(const Vector3D& _1, const Vector3D& _2, const Vector3D& _3);
   virtual bool isLeaf() const { return true; }
   int getSonsNumber() { return 0; }
-  BoxTreeNode* getSon(int which) { return NULL; }
+  BoxTreeNode* getSon(int which) { return nullptr; }
   int getTrianglesNumber() { return 1; }
   BoxedTriangle* getTriangle(int which)
   {
     if (which==0) return this;
-    return NULL;
+    return nullptr;
   }
 
 };

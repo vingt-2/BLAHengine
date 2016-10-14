@@ -85,7 +85,7 @@ void RigidBodySystem::UpdateStates()
 		RigidBody& body = *bodyPtr;
 		if (!body.m_isPinned)
 		{
-			if (body.m_nextState == NULL) cout << "Empty state for body, check your calls!\n";
+			if (body.m_nextState== nullptr) cout << "Empty state for body, check your calls!\n";
 			else UpdateTransform(body);
 		}
 	}
@@ -132,7 +132,7 @@ void RigidBodySystem::UpdateAcceleration(RigidBody& body)
 */
 void RigidBodySystem::UpdateVelocity(RigidBody& body)
 {
-	if (body.m_nextState == NULL) 
+	if (body.m_nextState== nullptr) 
 	{
 		cout << "Next State not available, creating it, but you should call UpdateAcceleration First.\n";
 		UpdateAcceleration(body);
@@ -173,7 +173,7 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 		// Debug
 		body.m_debugCorrectionVelocity = correctionA;
 		delete(body.m_nextState);
-		body.m_nextState = NULL;
+		body.m_nextState = nullptr;
 		body.ClearForces();
 	}
 

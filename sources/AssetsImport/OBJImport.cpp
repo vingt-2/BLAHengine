@@ -171,8 +171,10 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
 	cout << "Built, Computing Tangent Spaces...";
 	mesh.ComputeFaceTangents();
 	cout << "Done.\nImported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices, " << mesh.m_manifoldViolationEdges << " non-manifold edges\n";
+	cout << "Normalizing Model Coordinates \n";
 	mesh.NormalizeModelCoordinates(normalScale);
-	cout << "Normalized Model Coordinates \n";
+	cout << "Generating Render Data\n";
+	mesh.GenerateRenderData();
 
 	return true;
 }

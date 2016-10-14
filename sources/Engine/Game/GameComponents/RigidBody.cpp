@@ -18,7 +18,7 @@ RigidBody::RigidBody(Transform* transform) :
 {
 	m_transform = transform;
 
-	m_collider = NULL;
+	m_collider = nullptr;
 
 	m_invMassTensor = inverse(m_massTensor);
 	m_invInertiaTensor = inverse(m_inertiaTensor);

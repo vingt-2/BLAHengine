@@ -36,7 +36,7 @@ int BoxTreeInnerNode::getTrianglesNumber()
 
 BoxedTriangle* BoxTreeInnerNode::getTriangle(int which)
 {
-  if (which<0 || which>=getTrianglesNumber()) return NULL;
+  if (which<0 || which>=getTrianglesNumber()) return nullptr;
   return m_Boxes[which];
 }
 

@@ -1,9 +1,9 @@
 #include "PolygonalMesh.h"
 using namespace BLAengine;
 
-#define INVALID_HE 0xDEADBEEF
+#define INVALID_HE 0xFFFFFFFF
 
-TriangleMesh::TriangleMesh() {}
+TriangleMesh::TriangleMesh(std::string name): Asset(name) {}
 TriangleMesh::~TriangleMesh() {}
 
 void TriangleMesh::BuildMeshTopo(
@@ -118,7 +118,7 @@ void TriangleMesh::BuildMeshTopo(
 		}
 		catch (const out_of_range& e)
 		{
-			edge->oppositeHE = 0xFFFFFFFF;
+			edge->oppositeHE = INVALID_HE;
 			m_manifoldViolationEdges++;
 		}
 	}
@@ -205,11 +205,11 @@ void TriangleMesh::ApplyUVScaling(vec2 scaling)
 	}
 }
 
-RenderData * TriangleMesh::GenerateRenderData()
+void TriangleMesh::GenerateRenderData()
 {
-	RenderData* renderData = new RenderData();
-
 	unordered_map<RenderVertEntry, uint32_t, vertEntryHasher> vertexMap;
+	
+	m_renderData.m_triangleIndices.resize(3*this->m_meshTriangles.size());
 
 	for (uint32_t triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
 	{
@@ -249,30 +249,26 @@ RenderData * TriangleMesh::GenerateRenderData()
 
 			if (vertexMap.count(vert) == 0)
 			{
-				renderData->m_vertPos.push_back(vert.vx);
-				renderData->m_vertNormal.push_back(vert.vn);
-				renderData->m_vertUVs.push_back(vert.vt);
-				renderData->m_vertTangent.push_back(tangent);
+				m_renderData.m_vertPos.push_back(vert.vx);
+				m_renderData.m_vertNormal.push_back(vert.vn);
+				m_renderData.m_vertUVs.push_back(vert.vt);
+				m_renderData.m_vertTangent.push_back(tangent);
 
-				vertexMap[vert] = renderData->m_vertPos.size() - 1;
+				vertexMap[vert] = m_renderData.m_vertPos.size() - 1;
 
-				renderData->m_triangleIndices.push_back(renderData->m_vertPos.size() - 1);
+				m_renderData.m_triangleIndices[3*triIndx + i] = m_renderData.m_vertPos.size() - 1;
 
 			}
 			else
 			{
-				renderData->m_triangleIndices.push_back(vertexMap[vert]);
+				m_renderData.m_triangleIndices[3 * triIndx + i] = vertexMap[vert];
 			}
 		}
 	}
-
-	return renderData;
 }
 
-vector<uint32_t> * TriangleMesh::GenerateTopoTriangleIndices()
+void TriangleMesh::GenerateTopoTriangleIndices(vector<uint32_t> &indices)
 {
-	vector<uint32_t>* indices = new vector<uint32>();
-
 	for (int triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
 	{
 		HalfEdge edge0 = m_halfEdges[m_meshTriangles[triIndx].firstEdge];
@@ -287,11 +283,9 @@ vector<uint32_t> * TriangleMesh::GenerateTopoTriangleIndices()
 			if (i == 1) edge = edge0;
 			if (i == 2) edge = edge1;
 
-			indices->push_back(edge.destVertex.pos);
+			indices.push_back(edge.destVertex.pos);
 		}
 	}
-
-	return indices;
 }
 
 bool TriangleMesh::IsMeshValid()

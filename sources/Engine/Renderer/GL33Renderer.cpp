@@ -166,29 +166,31 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 {
 	GL33RenderObject* object = new GL33RenderObject();
 	this->GenerateVertexArrayID(*object);
-
-	object->m_toMeshTriangles = &(meshRenderer.m_renderData->m_triangleIndices);
-	object->m_toMeshVertices = &(meshRenderer.m_renderData->m_vertPos);
-	object->m_toMeshNormals = &(meshRenderer.m_renderData->m_vertNormal);
-	object->m_toMeshTangents = &(meshRenderer.m_renderData->m_vertTangent);
-	object->m_toMeshBiTangents = &(meshRenderer.m_renderData->m_vertBiTangent);
-	object->m_toMeshUVs = &(meshRenderer.m_renderData->m_vertUVs);
+	RenderData* renderData = &(meshRenderer.m_mesh->m_renderData);
+	object->m_toMeshTriangles = &(renderData->m_triangleIndices);
+	object->m_toMeshVertices = &(renderData->m_vertPos);
+	object->m_toMeshNormals = &(renderData->m_vertNormal);
+	object->m_toMeshTangents = &(renderData->m_vertTangent);
+	object->m_toMeshBiTangents = &(renderData->m_vertBiTangent);
+	object->m_toMeshUVs = &(renderData->m_vertUVs);
 
 	object->m_modelTransform = meshRenderer.m_modelTransform;
 
 	if (!this->GenerateArrays(*object))
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	for (int i = 0; i < meshRenderer.m_materials.size(); i++)
 	{
-		AssignMaterial(*object, meshRenderer.m_materials[i]);
-	}
+		Material* mat = meshRenderer.m_materials[i];
 
-	for (int i = 0; i < meshRenderer.m_textures.size(); i++)
-	{
-		LoadTextureSample(*object, meshRenderer.m_textures[i].first, meshRenderer.m_textures[i].second);
+		AssignMaterial(*object, mat->GetName());
+
+		for (int j = 0; j < mat->m_textureSamplerAttributes.size(); j++)
+		{
+			LoadTextureSample(*object, mat->m_textureSamplerAttributes[j].first, mat->m_textureSamplerAttributes[j].second);
+		}
 	}
 
 	object->m_renderType = meshRenderer.m_renderType;
@@ -671,11 +673,33 @@ void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
 
 bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
 {
-	object.m_programID = m_sharedResources->GetMaterial(name.data());
-	if (object.m_programID != 0)
+	if (m_glResources.m_glLoadedProgramsIds.count(name))
 	{
-		object.m_matrixID = glGetUniformLocation(object.m_programID, "MVP");
-		return true;
+		object.m_programID = m_glResources.m_glLoadedProgramsIds[name];
+		if (object.m_programID != 0)
+		{
+			object.m_matrixID = glGetUniformLocation(object.m_programID, "MVP");
+			return true;
+		}
+	}
+	else
+	{
+		AssetManager::AssetType type;
+		Asset* matAsset = m_assetManager->GetAsset(name, type);
+
+		if (matAsset != nullptr && type == AssetManager::AssetType::MaterialAsset)
+		{
+			if (Material* material = (Material*) matAsset)
+			{
+				m_glResources.GLLoadShaderProgram(name, material->m_fragmentShader, material->m_vertexShader);
+
+				cout << "Material " << name << " loaded into GL \n";
+
+				return this->AssignMaterial(object, name);
+			}
+		}
+
+		cout << "Could not find shader loaded shader pgrm: " << name << "\n";
 	}
 	return false;
 }
@@ -684,11 +708,15 @@ bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, string textureNam
 {
 	if (object.m_programID != 0)
 	{
-		GLuint textureID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
-		GLuint textureRessource = m_sharedResources->GetTexture(textureName.data());
-		object.m_textureSamplersVector.push_back(pair<GLuint, GLuint>(textureID, textureRessource));
+		if (m_glResources.m_glLoadedTextureIds.count(textureName))
+		{
+			GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[textureName];
+			GLuint textureHandleID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
 
-		return true;
+			object.m_textureSamplersVector.push_back(pair<GLuint, GLuint>(textureHandleID, glResourceTextureId));
+
+			return true;
+		}
 	}
 	return false;
 }
@@ -739,7 +767,9 @@ void GL33Renderer::CleanUpFrameDebug()
 
 void GL33Renderer::InitializeRenderer(RenderWindow* window)
 {
-	if (GLFWRenderWindow* render = (GLFWRenderWindow*) window)
+	bool initialized = false;
+#ifdef GLFW_INTERFACE
+	if (GLFWRenderWindow* render = dynamic_cast<GLFWRenderWindow*>(window))
 	{
 		// window-> IMPLEMENT CHECK WINDOW STATUS
 
@@ -757,8 +787,40 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window)
 
 		this->m_isContextEnabled = true;
 		m_renderWindow = window;
+
+		initialized = true;
 	}
-	else
+#endif
+	if (WPFRenderWindow* render = dynamic_cast<WPFRenderWindow*>(window))
+	{
+		if (!initialized)
+		{
+			//Check for context validity:
+
+			// window-> IMPLEMENT CHECK WINDOW STATUS
+			int x, y;
+			render->GetSize(x, y);
+			m_renderSize = ivec2(100, 100);
+
+			//Neat grey background
+			glClearColor(1.f, 0.f, 0.f, 1.0f);
+
+			// Accept fragment if it closer to the camera than the former one
+			glDepthFunc(GL_LESS);
+
+			// Cull triangles which normal is not towards the camera
+			glEnable(GL_CULL_FACE);
+
+			m_GBuffer.m_GbufferSize = m_renderSize;
+			m_GBuffer.InitializeGBuffer();
+
+			this->m_isContextEnabled = true;
+			m_renderWindow = window;
+
+			initialized = true;
+		}
+	}
+	if(!initialized)
 	{
 		std::cout << "No valid window handle provided to the Renderer\n";
 	}
@@ -990,4 +1052,128 @@ void GL33Renderer::RenderDebugLines()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
+}
+
+bool BLAengine::GL33Resources::GLLoadTexture(std::string resourcePath, Texture2D texture)
+{
+	// Create one OpenGL texture
+	GLuint texID;
+	glGenTextures(1, &texID);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.m_width, texture.m_height, 0, GL_BGR, GL_UNSIGNED_BYTE, texture.m_data.data());
+
+	// Poor filtering, or ...
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	// ... nice trilinear filtering.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// Return the ID of the texture we just created
+	m_glLoadedTextureIds[resourcePath] = texID;
+
+	return true;
+}
+
+bool BLAengine::GL33Resources::GLLoadShaderProgram(std::string name, std::string fragmentShader, std::string vertexShader)
+{
+	// Create the shaders
+	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	// Read the Vertex Shader code from the file
+	std::string VertexShaderCode;
+	std::ifstream VertexShaderStream(vertexShader, std::ios::in);
+	if (VertexShaderStream.is_open())
+	{
+		std::string Line = "";
+		while (getline(VertexShaderStream, Line))
+			VertexShaderCode += "\n" + Line;
+		VertexShaderStream.close();
+	}
+	else {
+		printf("%s could not be opened.\n", vertexShader);
+		return false;
+	}
+
+	// Read the Fragment Shader code from the file
+	std::string FragmentShaderCode;
+	std::ifstream FragmentShaderStream(fragmentShader, std::ios::in);
+	if (FragmentShaderStream.is_open())
+	{
+
+		std::string Line = "";
+		while (getline(FragmentShaderStream, Line))
+			FragmentShaderCode += "\n" + Line;
+		FragmentShaderStream.close();
+	}
+
+	GLint Result = GL_FALSE;
+	int InfoLogLength;
+
+	printf("[SHADER]: \"%s\"\n", name);
+
+	// Compile Vertex Shader
+	printf("[SHADER] Compiling shader : \"%s\"\n", vertexShader);
+	char const * VertexSourcePointer = VertexShaderCode.c_str();
+	glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
+	glCompileShader(VertexShaderID);
+
+	// Check Vertex Shader
+	glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
+	glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	if (InfoLogLength > 0)
+	{
+		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
+		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
+		printf("%s\n", &VertexShaderErrorMessage[0]);
+	}
+
+	// Compile Fragment Shader
+	printf("[SHADER] Compiling shader : %s\n", fragmentShader);
+	char const * FragmentSourcePointer = FragmentShaderCode.c_str();
+	glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
+	glCompileShader(FragmentShaderID);
+
+	// Check Fragment Shader
+	glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
+	glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	if (InfoLogLength > 0)
+	{
+		std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
+		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
+		printf("%s\n", &FragmentShaderErrorMessage[0]);
+	}
+
+
+	// Link the program
+	printf("[SHADER] Linking program \"%s\"\n", name);
+	GLuint ProgramID = glCreateProgram();
+	glAttachShader(ProgramID, VertexShaderID);
+	glAttachShader(ProgramID, FragmentShaderID);
+	glLinkProgram(ProgramID);
+
+	// Check the program
+	glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
+	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	if (InfoLogLength > 0) {
+		std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
+		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+		printf("%s\n", &ProgramErrorMessage[0]);
+	}
+
+	glDeleteShader(VertexShaderID);
+	glDeleteShader(FragmentShaderID);
+
+	m_glLoadedProgramsIds[name] = ProgramID;
+
+	return true;
 }

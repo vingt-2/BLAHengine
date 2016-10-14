@@ -3,7 +3,8 @@ using namespace BLAengine;
 
 Collider::Collider(TriangleMesh* mesh)
 {
-	m_vertIndices = mesh->GenerateTopoTriangleIndices();
+	m_vertIndices = new vector<uint32_t>;
+	mesh->GenerateTopoTriangleIndices(*m_vertIndices);
 	m_triVertices = &(mesh->m_vertexPos);
 	m_triNormals = &(mesh->m_vertexNormals);
 

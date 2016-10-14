@@ -1,36 +1,47 @@
 #pragma once
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
+#include "../../AssetsImport/MeshSerializer.h"
+#include "Material.h"
+#include "Texture.h"
 
 namespace BLAengine
 {
-#define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII
-#define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
-#define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
-
-	class BLACORE_API SharedResources
+	class BLACORE_API AssetManager
 	{
 	public:
-		SharedResources(void);
-		~SharedResources(void);
 
-		GLuint LoadMaterial(const char * name, const char * vertexShaderPath, const char * fragmentShaderPath);
-		bool loadBMP_custom(const char * name, const char * imagepath);
-		bool loadTGA_glfw(const char * name, const char * imagepath);
-		bool loadDDS(const char * name, const char * imagepath);
-
-		GLuint GetMaterial(const char * name);
-		GLuint GetTexture(const char * name);
-
-		map<std::string, GLuint> GetTable()
+		enum AssetType
 		{
-			return ressourceTable;
-		}
+			TriangleMeshAsset,
+			TextureAsset,
+			MaterialAsset,
+			InvalidAsset
+		};
+
+		AssetManager(void);
+		~AssetManager(void);
+
+		Asset* GetAsset(std::string filepath, AssetType &type);
+
+		bool LoadAsset(std::string filepath, AssetType type);
+		bool SaveAsset(std::string filepath, AssetType type);
 
 	private:
 
-		map<std::string, GLuint> ressourceTable;
+		bool LoadTriangleMesh(std::string filepath);
+		bool LoadTexture(std::string filepath);
+		bool loadMaterial(std::string filepath);
 
+		bool SaveMaterial(std::string filepath, Material* mat);
+		bool SaveTexture(std::string filepath, Texture2D* mesh);
+		bool SaveTriangleMesh(std::string filepath, TriangleMesh* mesh);
+
+		map<std::string, std::pair<AssetType, uint32_t>> m_resourceMap;
+
+		vector<TriangleMesh*> m_triangleMeshesInMemory;
+		vector<Material*> m_materialsInMemory;
+		vector<Texture2D*> m_textures2DInMemory;
 	};
 
 }

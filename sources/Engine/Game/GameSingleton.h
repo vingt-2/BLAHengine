@@ -9,9 +9,9 @@ namespace BLAengine
 	{
 	public:
 		Renderer* renderer;
-		SharedResources* resources;
+		AssetManager* resources;
 
-		GameSingleton(Renderer* renderer, SharedResources* resources)
+		GameSingleton(Renderer* renderer, AssetManager* resources)
 		{
 			this->renderer = renderer;
 			this->resources = resources;

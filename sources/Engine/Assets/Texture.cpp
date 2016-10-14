@@ -5,21 +5,8 @@ using namespace BLAengine;
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
-#define INVALID_TEXTURE_NAME "INVALID"
-
-Texture2D::Texture2D()
+Texture2D::Texture2D(string name, uint8_t dim, vector<uint8_t> data, uint32_t width, uint32_t height) : Asset(name)
 {
-	this->m_name = string(INVALID_TEXTURE_NAME);
-	this->m_data = NULL;
-	this->m_nComponents = 0;
-	this->m_dataSize = 0;
-	this->m_height = 0;
-	this->m_width = 0;
-}
-
-Texture2D::Texture2D(string name, uint8_t dim, uint8_t* data, uint32_t width, uint32_t height)
-{
-	this->m_name = name;
 	this->m_data = data;
 	this->m_width = width;
 	this->m_height = height;
@@ -29,13 +16,10 @@ Texture2D::Texture2D(string name, uint8_t dim, uint8_t* data, uint32_t width, ui
 }
 
 Texture2D::~Texture2D()
-{
-	// Free memory allocated to texture
-	free(m_data);
-}
+{}
 
 //TODO: Support nComponent texture
-Texture2D* TextureLoader::LoadBMP(string name, string filePath)
+Texture2D* TextureImport::LoadBMP(string name, string filePath)
 {
 	printf("Reading image %s\n", filePath.data());
 
@@ -45,15 +29,12 @@ Texture2D* TextureLoader::LoadBMP(string name, string filePath)
 	uint32_t imageSize;
 	uint32_t width, height;
 
-	// Actual RGB data
-	uint8_t * data;
-
 	// Open the file
 	FILE * file = fopen(filePath.data(), "rb");
 	if (!file)
 	{
 		printf("%s could not be opened.\n", filePath.data());
-		return new Texture2D();
+		return nullptr;
 	}
 
 	// Read the header, i.e. the 54 first bytes
@@ -62,17 +43,17 @@ Texture2D* TextureLoader::LoadBMP(string name, string filePath)
 	if (fread(header, 1, 54, file) != 54) 
 	{
 		printf("Not a correct BMP file\n");
-		return new Texture2D();
+		return nullptr;
 	}
 	// A BMP files always begins with "BM"
 	if (header[0] != 'B' || header[1] != 'M')
 	{
 		printf("Not a correct BMP file\n");
-		return new Texture2D();
+		return nullptr;
 	}
 	// Make sure this is a 24bpp file
-	if (*(int*)&(header[0x1E]) != 0) { printf("Not a correct BMP file\n");    return new Texture2D(); }
-	if (*(int*)&(header[0x1C]) != 24) { printf("Not a correct BMP file\n");    return new Texture2D(); }
+	if (*(int*)&(header[0x1E]) != 0) { printf("Not a correct BMP file\n");    return nullptr; }
+	if (*(int*)&(header[0x1C]) != 24) { printf("Not a correct BMP file\n");    return nullptr; }
 
 	// Read the information about the image
 	dataPos = *(int*)&(header[0x0A]);
@@ -84,11 +65,11 @@ Texture2D* TextureLoader::LoadBMP(string name, string filePath)
 	if (imageSize == 0)    imageSize = width*height * 3; // 3 : one byte for each Red, Green and Blue component
 	if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
 	
-	// Create a buffer
-	data = new uint8_t[imageSize];
-
+	// Create a buffer Actual RGB data
+	vector<uint8_t> data = vector<uint8_t>(imageSize);
+	
 	// Read the actual data from the file into the buffer
-	fread(data, 1, imageSize, file);
+	fread(data.data(), 1, imageSize, file);
 
 	// Everything is in memory now, the file wan be closed
 	fclose(file);
@@ -96,15 +77,18 @@ Texture2D* TextureLoader::LoadBMP(string name, string filePath)
 	return new Texture2D(name, 3, data, width, height);
 }
 
-Texture2D * TextureLoader::LoadDDS(string name, string imagepath)
+Texture2D * TextureImport::LoadDDS(string name, string imagepath)
 {
+
+	cout << "UNEMPLEMENTED !!! \n";
+
 	unsigned char header[124];
 
 	FILE *fp;
 
 	/* try to open the file */
 	fp = fopen(imagepath.data(), "rb");
-	if (fp == NULL)
+	if (fp== nullptr)
 		return 0;
 
 	/* verify the type of file */
