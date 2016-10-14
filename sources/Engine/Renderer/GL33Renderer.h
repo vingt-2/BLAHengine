@@ -1,7 +1,8 @@
 #pragma once
 #include "../../Common/StdInclude.h"
-#include "Renderer.h"
+#include "../Assets/AssetsManager.h"
 #include "../Game/GameComponents/MeshRenderer.h"
+#include "Renderer.h"
 
 namespace BLAengine 
 {

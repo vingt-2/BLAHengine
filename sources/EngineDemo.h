@@ -7,9 +7,8 @@
 #include "AssetsImport\OBJImport.h"
 #include "Engine\Game\RenderingManager.h"
 #include "Engine\Game\Debug.h"
-#include "./Engine/Game/Scene.h"
+//#include "./Engine/Game/Scene.h"
 #include "./Engine/Game/CursorPicker.h"
-#include "./Engine/Game/GameSingleton.h"
 #include "./Engine/Game/GameComponents/Collider.h"
 #include "./Engine/Game/RigidBodySystem.h"
 

@@ -127,6 +127,21 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 		return false;
 	}
 
+	TriangleMesh floor(string("floor"));
+
+	GameChar* floor_obj = new GameChar();
+	floor_obj->SetTriangleMesh(&floor);
+	//renderingManager->RequestRenderTicket(*floor_obj);
+	floor_obj->m_rigidBody->SetCollider(new Collider(&floor));
+	floor_obj->m_transform->m_scale = vec3(1);
+	mainScene->AddObject(floor_obj);
+	floor_obj->m_transform->m_position = (vec3(0, -5, 0));
+	floor_obj->m_rigidBody->m_isPinned = true;
+
+	DirectionalLight* dirLight = new DirectionalLight(vec3(1, 1, 1));
+	mainScene->AddDirectionalLight(dirLight);
+	sharedResources->SaveScene(mainScene);
+
 	return true;
 }
 
@@ -177,25 +192,8 @@ void EngineDemo::UpdateDemo()
 
 	if (renderWindow->GetKeyPressed(GLFW_KEY_LEFT_CONTROL) && (time - lastPressS) > 2)
 	{
-		lightObj->m_transform->m_position = mainCamera->m_transform->m_position;
-		lightObj->m_transform->m_rotation = mainCamera->m_transform->m_rotation;
 		moveLight = !moveLight;
 		lastPressS = time;
-	}
-
-	if (renderWindow->GetKeyPressed(GLFW_KEY_LEFT))
-	{
-		lightRotation += 0.5*deltaTime;
-	}
-
-	if (renderWindow->GetKeyPressed(GLFW_KEY_RIGHT))
-	{
-		lightRotation -= 0.5*deltaTime;
-	}
-
-	if (moveLight)
-	{
-		lightRotation += 0.1*deltaTime;
 	}
 
 	if (renderWindow->GetKeyPressed(GLFW_KEY_BACKSPACE) && (time - lastPressG) > 0.5)
@@ -214,12 +212,6 @@ void EngineDemo::UpdateDemo()
 		lastPressG = time;
 	}
 #endif
-
-
-	lightRotation += 0.0001;
-
-	lightObj->m_transform->SetRotationUsingEuler(vec3(lightRotation, 0, 0));
-	//cout << collider_1->CollidesWith(collider_2);
 
 	if (renderWindow->GetMousePressed(0))
 	{
@@ -299,7 +291,6 @@ void EngineDemo::UpdateDemo()
 		terminationRequest = true;
 	}
 #endif
-	cameraLight->UpdateView();
 }
 	
 void EngineDemo::TerminateDemo()

@@ -4,7 +4,7 @@
 
 namespace BLAengine
 {
-	class BLACORE_API PointLight : GameObject
+	class BLACORE_API PointLight : public GameObject
 	{
 	public:
 

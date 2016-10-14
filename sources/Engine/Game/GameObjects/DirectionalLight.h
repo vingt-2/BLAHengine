@@ -4,7 +4,7 @@
 
 namespace BLAengine
 {
-	class BLACORE_API DirectionalLight : GameObject
+	class BLACORE_API DirectionalLight : public GameObject
 	{
 	public:
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "..\..\..\Common\StdInclude.h"
 #include "./Transform.h"
-#include "../../Assets/AssetsManager.h"
+#include "../../Assets/PolygonalMesh.h"
 #include "../../Assets/Material.h"
 
 #define BLA_LINE_RENDER 0x0003

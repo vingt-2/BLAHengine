@@ -59,6 +59,29 @@ Asset* BLAengine::AssetManager::GetAsset(std::string filepath, AssetType& type)
 
 }
 
+bool BLAengine::AssetManager::SaveScene(Scene* scene)
+{
+	SceneSerializer sceneSerializer;
+
+	sceneSerializer.FromScene(scene);
+
+	cout << "Scene obj vector " << scene->GetObjects().size() << "\n";
+
+	std::ofstream fs;
+	fs.open(string("test_scene.xml"));
+
+	if (!fs.is_open())
+	{
+		cout << "Could not Write on file " << "Test_scene " << "\n";
+	}
+
+	cereal::XMLOutputArchive output(fs);
+
+	output(cereal::make_nvp("Scene", sceneSerializer));
+
+	return true;
+}
+
 bool AssetManager::LoadTriangleMesh(std::string filepath)
 {
 	if (m_resourceMap.count(filepath))
@@ -83,8 +106,6 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 
 	input(meshSerializer);
 
-	fs.close();
-
 	TriangleMesh* triangleMesh = meshSerializer.BuildMesh();
 	m_triangleMeshesInMemory.push_back(triangleMesh);
 
@@ -95,31 +116,23 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 	return true;
 }
 
-bool AssetManager::SaveTriangleMesh(std::string filepath, TriangleMesh* mesh)
+bool AssetManager::SaveTriangleMesh(TriangleMesh* mesh)
 {
-	if (!m_resourceMap.count(filepath))
-	{
-		cout << "There does not exist a file named: " << filepath << "in memory \n";
-		return false;
-	}
-
 	TriangleMeshSerializer meshSerializer;
 
 	meshSerializer.BuildFromMesh(mesh);
 
 	std::fstream fs;
-	fs.open(filepath, std::fstream::out | std::fstream::binary);
+	fs.open(mesh->GetName(), std::fstream::out | std::fstream::binary);
 	
 	if (!fs.is_open())
 	{
-		cout << "Could not Write on file " << filepath << "\n";
+		cout << "Could not Write on file " << mesh->GetName() << "\n";
 	}
 	
 	cereal::BinaryOutputArchive output(fs);
 	
 	output(meshSerializer);
-	
-	fs.close();
 	
 	return true;
 }
