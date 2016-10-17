@@ -25,6 +25,8 @@ namespace BLAengine
 
 		CollisionProcessor* m_collisionProcessor;
 
+		void SetTimeObject(Time* time);
+
 	private:
 		vector<RigidBody*> m_rigidBodyList;
 		Time* m_time;

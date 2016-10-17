@@ -7,10 +7,9 @@
 #include "AssetsImport\OBJImport.h"
 #include "Engine\Game\RenderingManager.h"
 #include "Engine\Game\Debug.h"
-//#include "./Engine/Game/Scene.h"
+#include "./Engine/Assets/SceneManager.h"
 #include "./Engine/Game/CursorPicker.h"
 #include "./Engine/Game/GameComponents/Collider.h"
-#include "./Engine/Game/RigidBodySystem.h"
 
 namespace BLAengine
 {
@@ -42,6 +41,7 @@ namespace BLAengine
 		GameSingleton* gameSingleton;
 		GL33Renderer* mainRenderer;
 		AssetManager* sharedResources;
+		SceneManager* sceneManager;
 		Debug* debug;
 		Scene* mainScene;
 		RenderWindow* renderWindow;

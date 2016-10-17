@@ -1,11 +1,11 @@
 #pragma once
 #include "../Engine/Game/Scene.h"
-
+#include "MathSerializer.h"
 #include <cereal\cereal.hpp>
 #include <cereal\types\polymorphic.hpp>
 #include <cereal\types\vector.hpp>
 #include <cereal\types\string.hpp>
-#include <cereal\archives\xml.hpp>
+#include <cereal\archives\json.hpp>
 
 class TransformSerializer
 {
@@ -86,6 +86,7 @@ public:
 	virtual void FromGameObject(BLAengine::GameObject* gobject)
 	{
 		m_transform.FromTransform(gobject->m_transform);
+
 		m_objectName = gobject->m_objectName;
 	}
 	virtual void ToGameObject(BLAengine::GameObject* gobject)
@@ -215,15 +216,27 @@ public:
 				GameCharSerializer dirLightSerial;
 				dirLightSerial.FromGameObject(gameCharPtr);
 
-				gObjSerializer = std::make_shared<GameCharSerializer>();
+				gObjSerializer = std::make_shared<GameCharSerializer>(dirLightSerial);
 			}
 
-			m_objectsVector.push_back(gObjSerializer);
+			if(gObjSerializer.get())
+				m_objectsVector.push_back(gObjSerializer);
 		}
 	}
-	void ToGameObject(BLAengine::GameObject* gobject)
+
+	BLAengine::Scene* BuildScene()
 	{
-		// Todo: Implement!
+		for (int i = 0; i < m_objectsVector.size(); i++)
+		{
+			GameObjectSerializer* obj = m_objectsVector[i].get();
+
+			if (GameCharSerializer* gameCharPtr = dynamic_cast<GameCharSerializer*>(obj))
+			{
+				cout << gameCharPtr->m_objectName << "\n";
+			}
+		}
+
+		return nullptr;
 	}
 
 private:

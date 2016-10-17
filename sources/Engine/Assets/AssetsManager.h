@@ -2,7 +2,7 @@
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
 #include "../../AssetsImport/MeshSerializer.h"
-#include "../../AssetsImport/SceneSerializer.h"
+#include "../../AssetsImport/TextureSerializer.h"
 #include "Material.h"
 #include "Texture.h"
 
@@ -25,13 +25,6 @@ namespace BLAengine
 
 		Asset* GetAsset(std::string filepath, AssetType &type);
 
-		bool LoadAsset(std::string filepath, AssetType type);
-		bool SaveAsset(std::string filepath, AssetType type);
-
-		bool SaveScene(Scene* scene);
-
-	private:
-
 		bool LoadTriangleMesh(std::string filepath);
 		bool LoadTexture(std::string filepath);
 		bool loadMaterial(std::string filepath);
@@ -39,6 +32,8 @@ namespace BLAengine
 		bool SaveMaterial(Material* mat);
 		bool SaveTexture(Texture2D* mesh);
 		bool SaveTriangleMesh(TriangleMesh* mesh);
+
+	private:
 
 		map<std::string, std::pair<AssetType, uint32_t>> m_resourceMap;
 

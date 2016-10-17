@@ -51,6 +51,12 @@ void RigidBodySystem::DisableSimulation()
 	m_isSimulating = false;
 }
 
+void BLAengine::RigidBodySystem::SetTimeObject(Time * time)
+{
+	m_time = time;
+	m_oldTime = m_time->GetTime();
+}
+
 void RigidBodySystem::UpdateSystem()
 {
 	if (m_isSimulating)

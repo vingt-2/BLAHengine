@@ -109,7 +109,13 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	timer = new Time(10);
 
-	mainScene = new Scene(timer, mainCamera);
+	mainScene = new Scene();
+
+	mainScene->SetTimeObject(timer);
+
+	mainScene->AddObject(mainCamera);
+
+	sceneManager = new SceneManager();
 
 	renderingManager = new RenderingManager(mainRenderer, RenderingManager::Game);
 	debugRenderingManager = new DebugRenderingManager(mainRenderer);
@@ -127,12 +133,13 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 		return false;
 	}
 
-	TriangleMesh floor(string("floor"));
+	TriangleMesh* floor = new TriangleMesh(string("floor"));
 
 	GameChar* floor_obj = new GameChar();
-	floor_obj->SetTriangleMesh(&floor);
+	floor_obj->m_objectName = string("Jean-Robert");
+	floor_obj->SetTriangleMesh(floor);
 	//renderingManager->RequestRenderTicket(*floor_obj);
-	floor_obj->m_rigidBody->SetCollider(new Collider(&floor));
+	floor_obj->m_rigidBody->SetCollider(new Collider(floor));
 	floor_obj->m_transform->m_scale = vec3(1);
 	mainScene->AddObject(floor_obj);
 	floor_obj->m_transform->m_position = (vec3(0, -5, 0));
@@ -140,8 +147,8 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	DirectionalLight* dirLight = new DirectionalLight(vec3(1, 1, 1));
 	mainScene->AddDirectionalLight(dirLight);
-	sharedResources->SaveScene(mainScene);
-
+	sceneManager->SaveScene("myScene",mainScene);
+	sceneManager->LoadScene("myScene");
 	return true;
 }
 
@@ -271,7 +278,7 @@ void EngineDemo::UpdateDemo()
 	debug->DrawGrid(1000, 10, vec3(0.4));
 
 	debug->Update();
-	SimpleControls(mainCamera, this->renderWindow);
+	//SimpleControls(mainCamera, this->renderWindow);
 	mainCamera->Update();
 	mainRenderer->Update();
 	mainScene->Update();

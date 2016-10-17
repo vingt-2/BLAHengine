@@ -6,14 +6,12 @@
 
 namespace BLAengine
 {
-
-
 	class BLACORE_API Texture2D : public Asset
 	{
 	public:
 
 		//TODO: Support mipmapping 
-		Texture2D(string name, uint8_t dim, vector<uint8_t> data, uint32_t width, uint32_t height);
+		Texture2D(string name, uint8_t nComponents, vector<uint8_t> data, uint32_t width, uint32_t height);
 		~Texture2D(void);
 
 		uint8_t m_nComponents;

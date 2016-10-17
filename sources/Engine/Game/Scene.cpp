@@ -2,27 +2,30 @@
 using namespace BLAengine;
 
 
-Scene::Scene(Time* time, Camera* camera)
+Scene::Scene()
 {
 	this->m_enableSimulation = false;
-	this->m_camera = camera;
-	this->m_rigidBodySystem = new RigidBodySystem(time);
+	this->m_rigidBodySystem = new RigidBodySystem(new Time(200));
 	this->m_directionalLights = vector<DirectionalLight*>();
 	this->m_sceneObjectsVector = vector<GameObject*>();
-	//m_rigidBodySystem->RegisterRigidBody(*(camera->m_rigidBody));
+	this->m_camera = nullptr;
 }
 
 Scene::~Scene()
 {
-
+	// TODO: DO SOME STUFF. YO
 }
 
-void Scene::AddObject(GameChar* objectPtr)
+void Scene::AddObject(GameObject* objectPtr)
 {
 	m_sceneObjectsVector.push_back(objectPtr);
 
-	if (objectPtr->m_rigidBody->m_collider != nullptr)
-		m_rigidBodySystem->RegisterRigidBody(*(objectPtr->m_rigidBody));
+	if (GameChar* gameCharPtr = dynamic_cast<GameChar*>(objectPtr))
+	{
+		if (gameCharPtr->m_rigidBody->m_collider != nullptr)
+			m_rigidBodySystem->RegisterRigidBody(*(gameCharPtr->m_rigidBody));
+	}
+
 }
 void Scene::AddObject(GameManager* managerPtr)
 {
@@ -45,6 +48,11 @@ int Scene::CountChar()
 	return count;
 }
 
+void BLAengine::Scene::SetTimeObject(Time * time)
+{
+	m_rigidBodySystem->SetTimeObject(time);
+}
+
 void Scene::AddDirectionalLight(DirectionalLight* light)
 {
 	m_directionalLights.push_back(light);
@@ -62,7 +70,7 @@ void Scene::Update()
 	}
 
 	m_rigidBodySystem->UpdateSystem();
-	m_camera->m_rigidBody->Update();
+	//m_camera->m_rigidBody->Update();
 
 	for(int i=0;i < m_sceneObjectsVector.size() ; i++)
 	{

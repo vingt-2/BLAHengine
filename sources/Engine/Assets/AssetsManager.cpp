@@ -20,7 +20,7 @@ Asset* BLAengine::AssetManager::GetAsset(std::string filepath, AssetType& type)
 {
 	if (m_resourceMap.count(filepath))
 	{
-		//type = InvalidAsset;
+		type = InvalidAsset;
 		return nullptr;
 	}
 
@@ -59,29 +59,6 @@ Asset* BLAengine::AssetManager::GetAsset(std::string filepath, AssetType& type)
 
 }
 
-bool BLAengine::AssetManager::SaveScene(Scene* scene)
-{
-	SceneSerializer sceneSerializer;
-
-	sceneSerializer.FromScene(scene);
-
-	cout << "Scene obj vector " << scene->GetObjects().size() << "\n";
-
-	std::ofstream fs;
-	fs.open(string("test_scene.xml"));
-
-	if (!fs.is_open())
-	{
-		cout << "Could not Write on file " << "Test_scene " << "\n";
-	}
-
-	cereal::XMLOutputArchive output(fs);
-
-	output(cereal::make_nvp("Scene", sceneSerializer));
-
-	return true;
-}
-
 bool AssetManager::LoadTriangleMesh(std::string filepath)
 {
 	if (m_resourceMap.count(filepath))
@@ -116,6 +93,62 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 	return true;
 }
 
+bool AssetManager::LoadTexture(std::string filepath)
+{
+	if (m_resourceMap.count(filepath))
+	{
+		cout << "There already exists a file named: " << filepath << "\n";
+		return false;
+	}
+
+	Texture2DSerializer texture2DSerializer;
+
+	std::fstream fs;
+	fs.open(filepath, std::fstream::in | std::fstream::binary);
+
+	if (!fs.is_open())
+	{
+		cout << "Could not load Texture file: " << filepath << "\n";
+		return false;
+	}
+
+	cereal::BinaryInputArchive input(fs);
+
+	input(texture2DSerializer);
+
+	Texture2D* texture2D = texture2DSerializer.BuildTexture();
+
+	m_textures2DInMemory.push_back(texture2D);
+
+	uint32_t indx = m_textures2DInMemory.size() - 1;
+
+	m_resourceMap[filepath] = std::pair<AssetType, uint32_t>(AssetType::TextureAsset, indx);
+
+	return true;
+}
+
+bool BLAengine::AssetManager::SaveTexture(Texture2D * tex)
+{
+	Texture2DSerializer texture2DSerializer;
+
+	texture2DSerializer.FromTexture(tex);
+
+	std::fstream fs;
+	fs.open(tex->GetName(), std::fstream::out | std::fstream::binary);
+
+	if (!fs.is_open())
+	{
+		cout << "Could not Write on file " << tex->GetName() << "\n";
+		return false;
+	}
+
+	cereal::BinaryOutputArchive output(fs);
+
+	output(texture2DSerializer);
+
+	return true;
+}
+
 bool AssetManager::SaveTriangleMesh(TriangleMesh* mesh)
 {
 	TriangleMeshSerializer meshSerializer;
@@ -128,6 +161,7 @@ bool AssetManager::SaveTriangleMesh(TriangleMesh* mesh)
 	if (!fs.is_open())
 	{
 		cout << "Could not Write on file " << mesh->GetName() << "\n";
+		return false;
 	}
 	
 	cereal::BinaryOutputArchive output(fs);

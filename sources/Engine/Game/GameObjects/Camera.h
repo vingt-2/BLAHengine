@@ -4,7 +4,7 @@
 
 namespace BLAengine
 {
-	class BLACORE_API Camera : public GameChar
+	class BLACORE_API Camera : public GameObject
 	{
 	public:
 		// Members

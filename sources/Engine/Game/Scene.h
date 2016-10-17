@@ -11,12 +11,13 @@ namespace BLAengine
 	class BLACORE_API Scene
 	{
 	public:
-		Scene(Time* time, Camera* camera);
-		~Scene();
+		Scene();
+		~Scene(); // TODO: IMPLEMENT!
 
+		void Initialize(); // TODO: IMPLEMENT! Find camera object and so on
 		void Update();
 
-		void AddObject(GameChar* object);
+		void AddObject(GameObject* object);
 		void AddObject(GameManager* object);
 
 		void AddDirectionalLight(DirectionalLight* directionalLight);
@@ -33,10 +34,12 @@ namespace BLAengine
 		bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
 		RigidBodySystem* m_rigidBodySystem;
 
+		void SetTimeObject(Time* time); //TODO: Implement !
 
 	private:
 
-		Camera* m_camera;	vector<GameObject*>  m_sceneObjectsVector;
+		Camera* m_camera; //TODO: Find in object scene !
+		vector<GameObject*>  m_sceneObjectsVector;
 		vector<DirectionalLight*> m_directionalLights;
 		vector<PointLight*> m_pointLights;
 	};

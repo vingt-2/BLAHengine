@@ -3,10 +3,9 @@
 using namespace BLAengine;
 
 Camera::Camera():
-	GameChar(),
+	GameObject(),
 	m_fovSize(vec2(1,1))
 {
-	m_rigidBody = new RigidBody(m_transform);
 	UpdateView();
 
 	m_isControlEnabled = false;
@@ -15,7 +14,6 @@ Camera::Camera():
 Camera::~Camera(void)
 {
 	GameObject::~GameObject();
-	m_rigidBody->~RigidBody();
 }
 
 
@@ -30,6 +28,6 @@ void Camera::UpdateView()
 void Camera::Update()
 {
 	// Regular updates
-	GameChar::Update(); // Parent class update
+	this->UpdateTransform();
 	UpdateView(); // View Transform update
 }
