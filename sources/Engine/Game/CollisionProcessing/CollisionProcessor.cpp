@@ -60,10 +60,10 @@ void CollisionProcessor::BroadPhaseDetection()
 
 void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2)
 {
-	mat4 t1 = body1->m_transform->m_transformMatrix;
+	mat4 t1 = body1->GetObjectTransform().m_transformMatrix;
 	body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
 
-	mat4 t2 = body2->m_transform->m_transformMatrix;
+	mat4 t2 = body2->GetObjectTransform().m_transformMatrix;
 	body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
 
 	vector<pair<int, int>> collidingTriangles;
@@ -115,8 +115,8 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 				if (body2->m_collider->m_triNormals->size() != 0) body2ContactNormals[k] = body2->m_collider->m_triNormals->at((int)vertIndexK2);
 			}
 
-			vec3 contactInBody1 = body1->m_transform->WorldlPositionToLocal(collisionPoint);
-			vec3 contactInBody2 = body2->m_transform->WorldlPositionToLocal(collisionPoint);	
+			vec3 contactInBody1 = body1->GetObjectTransform().WorldPositionToLocal(collisionPoint);
+			vec3 contactInBody2 = body2->GetObjectTransform().WorldPositionToLocal(collisionPoint);
 
 			vec3 tangent1Body1 = body1ContactVertices[1] - body1ContactVertices[0];
 			vec3 tangent2Body1 = body1ContactVertices[2] - body1ContactVertices[0];
@@ -134,12 +134,12 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 			body1ContactNormal *= (dot(contactInBody1, body1ContactNormal) < 0 ? -1.f : 1.f);
 			body2ContactNormal *= (dot(contactInBody2, body2ContactNormal) < 0 ? -1.f : 1.f);
 
-			vec3 normalBody1W = body1->m_transform->LocalDirectionToWorld(body1ContactNormal);
-			vec3 normalBody2W = body2->m_transform->LocalDirectionToWorld(body2ContactNormal);
+			vec3 normalBody1W = body1->GetObjectTransform().LocalDirectionToWorld(body1ContactNormal);
+			vec3 normalBody2W = body2->GetObjectTransform().LocalDirectionToWorld(body2ContactNormal);
 
 
-			vec3 tangentBody1W = body1->m_transform->LocalDirectionToWorld(body1ContactTangent);
-			vec3 tangentBody2W = body2->m_transform->LocalDirectionToWorld(body2ContactTangent);
+			vec3 tangentBody1W = body1->GetObjectTransform().LocalDirectionToWorld(body1ContactTangent);
+			vec3 tangentBody2W = body2->GetObjectTransform().LocalDirectionToWorld(body2ContactTangent);
 
 			vec3 normal, tangent;
 
@@ -147,7 +147,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 			{
 				normal = normalBody1W;
 
-				vec3 body1to2 = body2->m_transform->m_position - collisionPoint;
+				vec3 body1to2 = body2->GetObjectTransform().m_position - collisionPoint;
 				if (dot(normal, body1to2) < 0)
 					normal = -normal;
 
@@ -157,7 +157,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2
 			{
 				normal = normalBody2W;
 
-				vec3 body2to1 = body1->m_transform->m_position - collisionPoint;
+				vec3 body2to1 = body1->GetObjectTransform().m_position - collisionPoint;
 				if (dot(normal, body2to1) < 0)
 					normal = -normal;
 
@@ -198,10 +198,10 @@ void CollisionProcessor::SolveContacts()
 
 		RigidBody* body1 = contact.m_body1;
 		dvec3 vLUpdate1 = (dvec3) body1->m_nextState->m_velocity;
-		dvec3 vAUpdate1 = (dvec3) body1->m_transform->LocalDirectionToWorld(body1->m_nextState->m_angularVelocity);
+		dvec3 vAUpdate1 = (dvec3) body1->GetObjectTransform().LocalDirectionToWorld(body1->m_nextState->m_angularVelocity);
 		RigidBody* body2 = contact.m_body2;
 		dvec3 vLUpdate2 = (dvec3) body2->m_nextState->m_velocity;
-		dvec3 vAUpdate2 = (dvec3) body2->m_transform->LocalDirectionToWorld(body2->m_nextState->m_angularVelocity);
+		dvec3 vAUpdate2 = (dvec3) body2->GetObjectTransform().LocalDirectionToWorld(body2->m_nextState->m_angularVelocity);
 
 		vector<dvec3> nJac = contact.m_normalJacobian;
 		vector<dvec3> t1Jac = contact.m_tangentJacobian1;
@@ -392,8 +392,8 @@ void Contact::ComputeJacobian()
 {
 	double sign = m_faceFrom == 1 ? 1 : -1;
 
-	dvec3 radialBody1 = m_contactPositionW - (dvec3) m_body1->m_transform->m_position;
-	dvec3 radialBody2 = m_contactPositionW - (dvec3) m_body2->m_transform->m_position;
+	dvec3 radialBody1 = m_contactPositionW - (dvec3) m_body1->GetObjectTransform().m_position;
+	dvec3 radialBody2 = m_contactPositionW - (dvec3) m_body2->GetObjectTransform().m_position;
 
 	dvec3 crossNormal1 = cross(radialBody1, m_contactNormalW);
 	dvec3 crossNormal2 = cross(radialBody2, m_contactNormalW);

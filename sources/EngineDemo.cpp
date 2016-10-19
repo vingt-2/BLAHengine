@@ -4,19 +4,25 @@ using namespace BLAengine;
 vec2 previousMouseInput;
 vec3 cameraRotation;
 
-void SetObject(GameChar* object)
+void SetObject(GameObject* object)
 {
-	object->m_transform->m_position = (vec3(-10, 0, 0));
+	Transform transform;
 
-	object->m_transform->SetRotationUsingEuler(vec3(1, 1, 1));
+	transform.m_position = (vec3(-10, 0, 0));
 
-	object->m_rigidBody->m_angularVelocity = vec3(0);
-	object->m_rigidBody->m_velocity = vec3(0);
+	transform.SetRotationUsingEuler(vec3(1, 1, 1));
 
-	//object->m_transform->m_scale = vec3(0.1);
+	object->SetTransform(transform);
+
+
+	if (RigidBody* rgbdy = object->GetComponent<RigidBody>())
+	{
+		rgbdy->m_angularVelocity = vec3(0);
+		rgbdy->m_velocity= vec3(0);
+	}
 }
 
-void SimpleControls(GameChar* object, RenderWindow* renderWindow)
+void SimpleControls(RigidBody* rgbdy, RenderWindow* renderWindow)
 {
 
 	vec3 tangentForce = vec3(0);
@@ -45,10 +51,10 @@ void SimpleControls(GameChar* object, RenderWindow* renderWindow)
 	if (renderWindow->GetKeyPressed('E'))
 		tangentForce.y = -1.f;
 
-	vec3 cameraForce = object->m_transform->LocalDirectionToWorld(tangentForce);
+	vec3 cameraForce = rgbdy->GetObjectTransform().LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
 	cameraForce *= 10 * 0.01f;
-	object->m_transform->m_position += cameraForce;
+	//object->m_transform->m_position += cameraForce;
 
 
 	if (renderWindow->GetMousePressed(1))
@@ -81,7 +87,7 @@ void SimpleControls(GameChar* object, RenderWindow* renderWindow)
 
 		cameraRotation += deltaRotation;
 
-		object->m_transform->SetRotationUsingEuler(cameraRotation);
+		//object->m_transform->SetRotationUsingEuler(cameraRotation);
 	}
 	else
 	{
@@ -98,12 +104,20 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	mainRenderer->InitializeRenderer(this->renderWindow);
 
-	gameSingleton = new GameSingleton(mainRenderer, sharedResources);
+	mainScene = new Scene();
 
 	mainCamera = new Camera();
-	mainCamera->m_transform->m_position = vec3(10, -10, -15);
-	mainCamera->m_transform->SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
-	mainCamera->m_isControlEnabled = true;
+	{
+		Transform camTransform;
+		camTransform.m_position = vec3(10, -10, -15);
+		camTransform.SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
+		mainCamera->m_isControlEnabled = true;
+	}
+
+	GameObject* cameraObject = new GameObject("Camera");
+	cameraObject->AddComponent(mainCamera);
+
+	mainScene->AddObject(cameraObject);
 
 	mainRenderer->SetCamera(mainCamera);
 
@@ -113,7 +127,7 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	mainScene->SetTimeObject(timer);
 
-	mainScene->AddObject(mainCamera);
+	mainScene->AddObject(cameraObject);
 
 	sceneManager = new SceneManager();
 
@@ -121,8 +135,6 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 	debugRenderingManager = new DebugRenderingManager(mainRenderer);
 
 	debug = new Debug(debugRenderingManager);
-
-	cursorPicker = new CursorPicker(gameSingleton);
 
 	bool terminationRequest = false;
 
@@ -135,18 +147,14 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	TriangleMesh* floor = new TriangleMesh(string("floor"));
 
-	GameChar* floor_obj = new GameChar();
-	floor_obj->m_objectName = string("Jean-Robert");
-	floor_obj->SetTriangleMesh(floor);
-	//renderingManager->RequestRenderTicket(*floor_obj);
-	floor_obj->m_rigidBody->SetCollider(new Collider(floor));
-	floor_obj->m_transform->m_scale = vec3(1);
-	mainScene->AddObject(floor_obj);
-	floor_obj->m_transform->m_position = (vec3(0, -5, 0));
-	floor_obj->m_rigidBody->m_isPinned = true;
+	GameObject* floor_obj = new GameObject("Jean-Robert");
 
-	DirectionalLight* dirLight = new DirectionalLight(vec3(1, 1, 1));
-	mainScene->AddDirectionalLight(dirLight);
+	MeshRenderer* meshRender = new MeshRenderer();
+	floor_obj->AddComponent(meshRender);
+	meshRender->AssignTriangleMesh(floor);
+	//renderingManager->RequestRenderTicket(*floor_obj);
+	mainScene->AddObject(floor_obj);
+
 	sceneManager->SaveScene("myScene",mainScene);
 	sceneManager->LoadScene("myScene");
 	return true;
@@ -222,10 +230,10 @@ void EngineDemo::UpdateDemo()
 
 	if (renderWindow->GetMousePressed(0))
 	{
-		ray = cursorPicker->ScreenToRay(1000);
+		//ray = mainScene->ScreenToRay(1000);
 		//debugRays.push_back(ray);
 		vec3 colPoint(0);
-		GameChar* object = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
+		GameObject* object;// = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
 
 		if (currentObject== nullptr || currentObject != object)
 		{
@@ -233,29 +241,29 @@ void EngineDemo::UpdateDemo()
 		}
 		else
 		{
-			currentObject->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
+		//	currentObject->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
 		}
 	}
 
-	if (renderWindow->GetMousePressed(2))
-	{
-		ray = cursorPicker->ScreenToRay(1000);
-		//debugRays.push_back(ray);
-		vec3 colPoint(0);
-		GameChar* object = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
-		if (object != nullptr)
-		{
-			object->m_rigidBody->m_velocity = vec3(0);
-			object->m_rigidBody->m_angularVelocity = vec3(0);
-		}
-	}
+	//if (renderWindow->GetMousePressed(2))
+	//{
+	//	ray = cursorPicker->ScreenToRay(1000);
+	//	//debugRays.push_back(ray);
+	//	vec3 colPoint(0);
+	//	GameChar* object = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
+	//	if (object != nullptr)
+	//	{
+	//		object->m_rigidBody->m_velocity = vec3(0);
+	//		object->m_rigidBody->m_angularVelocity = vec3(0);
+	//	}
+	//}
 
-	if (currentObject != nullptr && currentRay != vec3(0))
-	{
-		vec3 a = currentObject->m_transform->LocalPositionToWorld(currentPoint);
-		vec3 b = currentObject->m_transform->LocalDirectionToWorld(currentRay);
-		currentObject->m_rigidBody->PushForceWorld(a, 0.5f*b);
-	}
+	//if (currentObject != nullptr && currentRay != vec3(0))
+	//{
+	//	vec3 a = currentObject->m_transform->LocalPositionToWorld(currentPoint);
+	//	vec3 b = currentObject->m_transform->LocalDirectionToWorld(currentRay);
+	//	currentObject->m_rigidBody->PushForceWorld(a, 0.5f*b);
+	//}
 
 	if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 	{

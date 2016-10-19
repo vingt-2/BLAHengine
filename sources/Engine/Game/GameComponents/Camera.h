@@ -1,10 +1,11 @@
 #pragma once
-#include "GameChar.h"
 #include "..\..\..\Common\StdInclude.h"
+#include "../../../Common/Maths.h"
+#include "GameComponent.h"
 
 namespace BLAengine
 {
-	class BLACORE_API Camera : public GameObject
+	class BLACORE_API Camera : public GameComponent
 	{
 	public:
 		// Members

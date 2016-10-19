@@ -1,7 +1,9 @@
 #include "RigidBody.h"
+#include "../GameObject.h"
+
 using namespace BLAengine;
 
-RigidBody::RigidBody(Transform* transform) :
+RigidBody::RigidBody(const Transform& transform) :
 	m_forcesAccu(vec3(0)),
 	m_torquesAccu(vec3(0)),
 	m_acceleration(vec3(0)),
@@ -14,10 +16,9 @@ RigidBody::RigidBody(Transform* transform) :
 	m_impulseAccu(0),
 	m_massTensor(mat3(1)),
 	m_inertiaTensor(mat3(1)),
-	m_enableCollision(true)
+	m_enableCollision(true),
+	m_transform(transform)
 {
-	m_transform = transform;
-
 	m_collider = nullptr;
 
 	m_invMassTensor = inverse(m_massTensor);
@@ -29,14 +30,17 @@ RigidBody::~RigidBody(void)
 {}
 
 void RigidBody::Update()
-{}
+{
+// TODO ? Eventually do some stuff here.
+}
 
 void RigidBody::PushForceWorld(vec3 pushAtW, vec3 forceW)
 {
-	vec3 contactInBody = pushAtW - m_transform->m_position;
+	Transform transform = m_parentObject->GetTransform();
+	vec3 contactInBody = pushAtW - transform.m_position;
 
 	vec3 torque = cross(forceW, contactInBody);
-	torque = m_transform->WorldDirectionToLocal(torque);
+	torque = transform.WorldDirectionToLocal(torque);
 
 	AddTorque(torque);
 	AddLinearForce(forceW / length(torque));

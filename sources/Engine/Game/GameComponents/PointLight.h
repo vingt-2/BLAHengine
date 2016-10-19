@@ -1,10 +1,11 @@
 #pragma once
-#include "GameObject.h"
 #include "..\..\..\Common\StdInclude.h"
+#include "..\..\..\Common\Maths.h"
+#include "GameComponent.h"
 
 namespace BLAengine
 {
-	class BLACORE_API PointLight : public GameObject
+	class BLACORE_API PointLight : public GameComponent
 	{
 	public:
 
@@ -15,7 +16,6 @@ namespace BLAengine
 		float   GetLightRadius()        { return m_lightRadius; };
 		float   GetLightIntensity()     { return m_lightIntensity; };
 
-		Transform* GetTransform() { return m_transform; };
 		void Update();
 
 		PointLight();

@@ -107,7 +107,7 @@ void RigidBodySystem::GetNewStates()
 			UpdateAcceleration(body);
 			UpdateVelocity(body);
 
-			body.m_nextState->m_nextPos = body.m_transform->m_position + m_timeStep * body.m_velocity;
+			body.m_nextState->m_nextPos = body.m_transform.m_position + m_timeStep * body.m_velocity;
 		}
 		else
 		{
@@ -153,7 +153,7 @@ void RigidBodySystem::UpdateVelocity(RigidBody& body)
 */
 void RigidBodySystem::UpdateTransform(RigidBody& body)
 {
-	Transform* transform = body.m_transform;
+	Transform transform = body.m_transform;
 	
 	//	Update State, delete NextState entry;
 	{
@@ -174,7 +174,7 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 		body.m_angularAcceleration = body.m_nextState->m_angularAcceleration;
 		body.m_velocity = body.m_nextState->m_velocity + correctionL;
 
-		body.m_angularVelocity = body.m_nextState->m_angularVelocity + transform->WorldDirectionToLocal(correctionA);
+		body.m_angularVelocity = body.m_nextState->m_angularVelocity + transform.WorldDirectionToLocal(correctionA);
 
 		// Debug
 		body.m_debugCorrectionVelocity = correctionA;
@@ -184,18 +184,18 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
 	}
 
 	//	Evaluate new Position;
-	transform->m_position += m_timeStep * body.m_velocity;
+	transform.m_position += m_timeStep * body.m_velocity;
 	
 	//	Evaluate Exponential Map
 	mat3 omegaHat = matrixCross(-body.m_angularVelocity);
 	mat3 deltaRot = mat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
-	mat3 newRotation = transform->m_rotation *= deltaRot;
+	mat3 newRotation = transform.m_rotation *= deltaRot;
 
 	//	Normalize each axis of rotation to avoid scale drift 
 	vec3 X = vec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
 	vec3 Y = vec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
 	vec3 Z = vec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
-	transform->m_rotation = mat3(normalize(X), normalize(Y), normalize(Z));
+	transform.m_rotation = mat3(normalize(X), normalize(Y), normalize(Z));
 }
 
 void RigidBodySystem::ApplyWorldForces()

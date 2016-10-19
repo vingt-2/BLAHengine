@@ -1,4 +1,5 @@
-#include "../Game/GameObjects/Camera.h"
+#pragma once
+#include "../Game/GameComponents/Camera.h"
 
 namespace BLAengine
 {

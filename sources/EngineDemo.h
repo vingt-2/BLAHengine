@@ -8,7 +8,6 @@
 #include "Engine\Game\RenderingManager.h"
 #include "Engine\Game\Debug.h"
 #include "./Engine/Assets/SceneManager.h"
-#include "./Engine/Game/CursorPicker.h"
 #include "./Engine/Game/GameComponents/Collider.h"
 
 namespace BLAengine
@@ -38,7 +37,6 @@ namespace BLAengine
 	private:
 
 		// Required Engine Modules
-		GameSingleton* gameSingleton;
 		GL33Renderer* mainRenderer;
 		AssetManager* sharedResources;
 		SceneManager* sceneManager;
@@ -47,7 +45,6 @@ namespace BLAengine
 		RenderWindow* renderWindow;
 		Camera* mainCamera;
 		Time* timer;
-		CursorPicker* cursorPicker;
 		RenderingManager* renderingManager;
 		DebugRenderingManager* debugRenderingManager;
 
@@ -57,8 +54,7 @@ namespace BLAengine
 		// HardCoded game/world entities
 		
 			Camera* cameraLight;
-			GameChar* lightObj;
-			GameChar* currentObject = nullptr;
+			GameObject* currentObject = nullptr;
 			vec2* previousMouseInput = new vec2(0, 0);
 			vec3 cameraRotation = vec3(0);
 			Ray ray;

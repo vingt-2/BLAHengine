@@ -1,4 +1,5 @@
 #include "DirectionalLight.h"
+#include "../GameObject.h"
 using namespace BLAengine;
 
 DirectionalLight::DirectionalLight(vec3 direction)
@@ -13,7 +14,6 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::Update()
 {
-	this->UpdateTransform();
 }
 
 void DirectionalLight::SetDirection(vec3 direction)
@@ -23,5 +23,6 @@ void DirectionalLight::SetDirection(vec3 direction)
 
 vec3 DirectionalLight::GetDirection()
 {
-	return m_transform->LocalDirectionToWorld(m_lightDirection);
+	const Transform& t = m_parentObject->GetTransform();
+	return t.LocalDirectionToWorld(m_lightDirection);
 }

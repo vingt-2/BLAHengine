@@ -1,7 +1,8 @@
 #pragma once
 #include "../../Common/StdInclude.h"
 #include "../System/RenderWindow.h"
-#include "../Game/GameObjects/Camera.h"
+#include "../Game/GameComponents/Camera.h"
+#include "../Game/GameComponents/MeshRenderer.h"
 #include "LightRender.h"
 
 namespace BLAengine

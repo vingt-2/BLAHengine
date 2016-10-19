@@ -2,7 +2,6 @@
 #include "../../../Common/Maths.h"
 #include "../../../Common/StdInclude.h"
 #include "Collider.h"
-#include "Transform.h"
 
 namespace BLAengine
 {
@@ -24,7 +23,7 @@ namespace BLAengine
 		dvec3 m_correctionAngularVelocity;
 	};
 
-	class BLACORE_API RigidBody
+	class BLACORE_API RigidBody : public GameComponent
 	{
 	public:
 		vec3 m_previousPosition;
@@ -48,7 +47,8 @@ namespace BLAengine
 		bool m_applyGravity;
 		bool m_enableCollision;
 
-		Transform* m_transform;
+		const Transform& m_transform;
+
 		Collider* m_collider;
 
 		void SetCollider(Collider* collider) { m_collider = collider; }
@@ -66,7 +66,7 @@ namespace BLAengine
 		vec3 GetTorquesAccu() { return m_torquesAccu; };
 		void ClearForces() { m_forcesAccu = vec3(0); m_torquesAccu = vec3(0); }
 
-		RigidBody(Transform* transform);
+		RigidBody(const Transform& transform);
 		~RigidBody(void);
 
 	private:

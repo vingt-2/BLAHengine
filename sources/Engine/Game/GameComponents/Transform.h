@@ -18,10 +18,10 @@ namespace BLAengine
 		void UpdateTransform();
 		void SetRotationUsingEuler(vec3 eulerAngles);
 
-		vec3 LocalDirectionToWorld(vec3 direction);
-		vec3 LocalPositionToWorld(vec3 position);
-		vec3 WorldDirectionToLocal(vec3 direction);
-		vec3 WorldlPositionToLocal(vec3 position);
+		vec3 LocalDirectionToWorld(vec3 direction) const;
+		vec3 LocalPositionToWorld(vec3 position) const;
+		vec3 WorldDirectionToLocal(vec3 direction) const;
+		vec3 WorldPositionToLocal(vec3 position) const;
 
 
 		Transform(void);

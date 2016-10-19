@@ -14,12 +14,12 @@ mat4 PerspectiveShadowRender::getShadowViewProjection()
 void DirectionalShadowRender::Update()
 {
 	m_shadowCamera.Update();
-	m_shadowDirection = m_shadowCamera.m_attachedCamera->m_transform->LocalDirectionToWorld(vec3(0, 0, 1.f));
+	m_shadowDirection = m_shadowCamera.m_attachedCamera->GetObjectTransform().LocalDirectionToWorld(vec3(0, 0, 1.f));
 }
 
 void PerspectiveShadowRender::Update()
 {
 	m_shadowCamera.Update();
 
-	m_shadowDirection = m_shadowCamera.m_attachedCamera->m_transform->LocalDirectionToWorld(vec3(0, 0, 1.f));
+	m_shadowDirection = m_shadowCamera.m_attachedCamera->GetObjectTransform().LocalDirectionToWorld(vec3(0, 0, 1.f));
 }

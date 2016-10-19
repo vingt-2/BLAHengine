@@ -1,5 +1,5 @@
 #pragma once
-#include "../Game/GameObjects/GameObject.h"
+#include "../Game/GameComponents/MeshRenderer.h"
 #include "../../Common/StdInclude.h"
 #include "../Renderer/Renderer.h"
 #include "./GameAlgebra/Ray.h"
@@ -16,8 +16,8 @@ namespace BLAengine
 		RenderingManager(Renderer* renderer, RenderManagerType type);
 		~RenderingManager();
 
-		RenderTicket RequestRenderTicket(const GameObject& object);
-		bool		 CancelRenderTicket(const GameObject& object);
+		RenderTicket RequestRenderTicket(MeshRenderer* object);
+		bool		 CancelRenderTicket(MeshRenderer* object);
 
 		void Update();
 
@@ -27,7 +27,7 @@ namespace BLAengine
 		Renderer* m_renderer;
 		RenderManagerType m_renderManagerType;
 
-		std::map<RenderTicket, const GameObject* > m_ticketedObjects;
+		std::map<RenderTicket, MeshRenderer* > m_ticketedObjects;
 		std::map<RenderTicket, const RenderObject* >  m_renderObjects;
 
 		int currentTicket;

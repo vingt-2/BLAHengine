@@ -1,5 +1,4 @@
 #pragma once
-#include "../Game/GameObjects/GameChar.h"
 #include "../Game/RenderingManager.h"
 #include "..\..\Common\StdInclude.h"
 

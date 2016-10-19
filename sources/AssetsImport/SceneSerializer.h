@@ -1,11 +1,34 @@
 #pragma once
 #include "../Engine/Game/Scene.h"
 #include "MathSerializer.h"
+
+/*Serialization Includes: */
 #include <cereal\cereal.hpp>
 #include <cereal\types\polymorphic.hpp>
 #include <cereal\types\vector.hpp>
 #include <cereal\types\string.hpp>
 #include <cereal\archives\json.hpp>
+
+class GameComponentSerializer
+{
+public:
+
+	GameComponentSerializer() = default;
+
+	virtual void FromGameComponent(BLAengine::GameComponent* comp)
+	{}
+	virtual void ToGameComponent(BLAengine::GameComponent* comp)
+	{}
+
+	friend class cereal::access;
+
+	template <class Archive>
+	void serialize(Archive & archive)
+	{
+		cout << "blaaa" << "\n";
+		archive(string("name"));
+	}
+};
 
 class TransformSerializer
 {
@@ -45,19 +68,28 @@ private:
 	}
 };
 
-class MeshRendererSerializer
+class MeshRendererSerializer : public GameComponentSerializer
 {
 public:
 
 	MeshRendererSerializer() = default;
 
-	void FromGameObject(BLAengine::MeshRenderer* meshRender)
+	void FromGameComponent(BLAengine::GameComponent* comp)
 	{
-		m_triangleMeshName = meshRender->m_mesh->GetName();
+		GameComponentSerializer::FromGameComponent(comp);
+		if (BLAengine::MeshRenderer* meshRender = dynamic_cast<BLAengine::MeshRenderer*>(comp))
+		{
+			m_triangleMeshName = meshRender->m_mesh->GetName();
+			cout << "mmm ? " << m_triangleMeshName << "\n";
+		}
 	}
-	void ToGameObject(BLAengine::MeshRenderer* meshRender)
+	void ToGameComponent(BLAengine::GameComponent* comp)
 	{
-		//m_triangleMeshName = meshRender->m_mesh->GetName();
+		GameComponentSerializer::ToGameComponent(comp);
+		if (BLAengine::MeshRenderer* meshRender = dynamic_cast<BLAengine::MeshRenderer*>(comp))
+		{
+			//		m_triangleMeshName = meshRender->m_mesh->GetName();
+		}
 	}
 
 private:
@@ -69,100 +101,34 @@ private:
 	template <class Archive>
 	void serialize(Archive & archive)
 	{
+		cout << "TriangleMesh: " << m_triangleMeshName << "\n";
 		archive
 		(
-			cereal::make_nvp("triangleMesh", m_triangleMeshName),
-			cereal::make_nvp("material", m_materialNames)
+			cereal::make_nvp("TriangleMesh", m_triangleMeshName),
+			cereal::make_nvp("Material", m_materialNames),
+			cereal::make_nvp("GameComponent", cereal::base_class<GameComponentSerializer>(this))
 		);
 	}
 };
 
-class GameObjectSerializer
-{
-public:
-
-	GameObjectSerializer() = default;
-
-	virtual void FromGameObject(BLAengine::GameObject* gobject)
-	{
-		m_transform.FromTransform(gobject->m_transform);
-
-		m_objectName = gobject->m_objectName;
-	}
-	virtual void ToGameObject(BLAengine::GameObject* gobject)
-	{
-		m_transform.ToTransform(gobject->m_transform);
-		m_objectName = gobject->m_objectName;
-	}
-
-	string m_objectName;
-	TransformSerializer m_transform;
-
-
-	friend class cereal::access;
-
-	template <class Archive>
-	void serialize(Archive & archive)
-	{
-		archive
-		(
-			cereal::make_nvp("name", m_objectName),
-			cereal::make_nvp("transform", m_transform)
-		);
-	}
-
-};
-
-class GameCharSerializer : public GameObjectSerializer
-{
-public:
-
-	GameCharSerializer() = default;
-
-	void FromGameObject(BLAengine::GameChar* gobject)
-	{
-		GameObjectSerializer::FromGameObject(gobject);
-		m_meshRendererSerializer.FromGameObject(gobject->m_meshRenderer);
-	}
-	void ToGameObject(BLAengine::GameChar* gobject)
-	{
-		GameObjectSerializer::ToGameObject(gobject);
-		m_meshRendererSerializer.ToGameObject(gobject->m_meshRenderer);
-	}
-
-private:
-	friend class cereal::access;
-
-	MeshRendererSerializer m_meshRendererSerializer;
-
-	template <class Archive>
-	void serialize(Archive & archive)
-	{
-		archive
-		(
-			cereal::make_nvp("gameObject", cereal::base_class<GameObjectSerializer>(this)),
-			cereal::make_nvp("meshRenderer", m_meshRendererSerializer)
-		);
-	}
-};
-
-class DirectionalLightSerializer : public GameObjectSerializer
+class DirectionalLightSerializer : public GameComponentSerializer
 {
 public:
 
 	DirectionalLightSerializer() = default;
 
-	void FromGameObject(BLAengine::DirectionalLight* gobject)
+	void FromGameComponent(BLAengine::GameComponent* comp)
 	{
-		GameObjectSerializer::FromGameObject(gobject);
-		m_lightDirection.FillData(gobject->GetDirection());
+		if(BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp))
+			m_lightDirection.FillData(dirLight->GetDirection());
 	}
-	void ToGameObject(BLAengine::DirectionalLight* gobject)
+	void ToGameComponent(BLAengine::GameComponent* comp)
 	{
-		GameObjectSerializer::ToGameObject(gobject);
 		vec3 dir;
 		m_lightDirection.LoadData(dir);
-		gobject->SetDirection(dir);
+
+		if (BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp))
+			dirLight->SetDirection(dir);
 	}
 
 private:
@@ -175,17 +141,131 @@ private:
 	{
 		archive
 		(
-			cereal::make_nvp("gameObject", cereal::base_class<GameObjectSerializer>(this)),
+			//cereal::make_nvp("gameObject", cereal::base_class<GameObjectSerializer>(this)),
 			cereal::make_nvp("lightDirection", m_lightDirection)
 		);
 	}
 };
 
-CEREAL_REGISTER_TYPE(GameCharSerializer)
-CEREAL_REGISTER_TYPE(DirectionalLightSerializer)
+class RigidBodySerializer : public GameComponentSerializer
+{
+public:
 
-CEREAL_REGISTER_POLYMORPHIC_RELATION(GameObjectSerializer, GameCharSerializer)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(GameObjectSerializer, DirectionalLightSerializer)
+	RigidBodySerializer() = default;
+
+	void FromGameComponent(BLAengine::GameComponent* comp)
+	{
+		if (BLAengine::RigidBody* rgb = dynamic_cast<BLAengine::RigidBody*>(comp))
+			m_mass.FillData(rgb->m_massTensor);
+	}
+	void ToGameComponent(BLAengine::GameComponent* comp)
+	{
+		if (BLAengine::RigidBody* rgb = dynamic_cast<BLAengine::RigidBody*>(comp))
+			m_mass.LoadData(rgb->m_massTensor);
+	}
+
+private:
+	friend class cereal::access;
+
+	mat3serializer m_mass;
+
+	template <class Archive>
+	void serialize(Archive & archive)
+	{
+		archive
+		(
+			cereal::make_nvp("MassTensor", m_mass)
+		);
+	}
+};
+
+CEREAL_REGISTER_TYPE(MeshRendererSerializer)
+CEREAL_REGISTER_TYPE(DirectionalLightSerializer)
+CEREAL_REGISTER_TYPE(RigidBodySerializer)
+
+CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, MeshRendererSerializer)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, DirectionalLightSerializer)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, RigidBodySerializer)
+
+class GameObjectSerializer
+{
+public:
+
+	GameObjectSerializer() = default;
+
+	virtual void FromGameObject(BLAengine::GameObject* gobject)
+	{
+		BLAengine::Transform transform = gobject->GetTransform();
+		m_transform.FromTransform(&transform);
+
+		m_objectName = gobject->m_objectName;
+
+		vector<BLAengine::MeshRenderer*> meshRenderers = gobject->GetComponents<BLAengine::MeshRenderer>();
+		for (int i = 0; i < meshRenderers.size(); i++)
+		{
+			BLAengine::MeshRenderer* mrenderer = meshRenderers[i];
+			MeshRendererSerializer serializer;
+			serializer.FromGameComponent(mrenderer);
+
+			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<GameComponentSerializer>(serializer);
+			m_componentsVector.push_back(gCompSerializer);
+		}
+
+		vector<BLAengine::DirectionalLight*> dirLights = gobject->GetComponents<BLAengine::DirectionalLight>();
+		for (int i = 0; i < dirLights.size(); i++)
+		{
+			BLAengine::DirectionalLight* mrenderer = dirLights[i];
+			DirectionalLightSerializer serializer;
+			serializer.FromGameComponent(mrenderer);
+
+			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<GameComponentSerializer>(serializer);
+			m_componentsVector.push_back(gCompSerializer);
+		}
+
+		vector<BLAengine::RigidBody*> rgbs = gobject->GetComponents<BLAengine::RigidBody>();
+		for (int i = 0; i < rgbs.size(); i++)
+		{
+			BLAengine::RigidBody* mrenderer = rgbs[i];
+			RigidBodySerializer serializer;
+			serializer.FromGameComponent(mrenderer);
+
+			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<GameComponentSerializer>(serializer);
+			m_componentsVector.push_back(gCompSerializer);
+		}
+	}
+	virtual void ToGameObject(BLAengine::GameObject* gobject)
+	{
+		BLAengine::Transform transform;
+		m_transform.ToTransform(&transform);
+		gobject->SetTransform(transform);
+		m_objectName = gobject->m_objectName;
+	
+		/*
+			FILL IN THE COMPONENTS MAYBE? ACTUALLY ... Not maybe. DO IT
+		*/
+	}
+
+private:
+
+	string m_objectName;
+	TransformSerializer m_transform;
+
+	std::vector<std::shared_ptr<GameComponentSerializer>> m_componentsVector;
+
+	friend class cereal::access;
+
+	template <class Archive>
+	void serialize(Archive & archive)
+	{
+		archive
+		(
+			cereal::make_nvp("Name", m_objectName),
+			cereal::make_nvp("Transform", m_transform),
+			cereal::make_nvp("Components", m_componentsVector)
+		);
+	}
+
+};
 
 class SceneSerializer
 {
@@ -201,26 +281,11 @@ public:
 		{
 			BLAengine::GameObject* obj = objVec[i];
 
-			std::shared_ptr<GameObjectSerializer> gObjSerializer;
+			GameObjectSerializer gObjSerializer;
 
-			if (BLAengine::DirectionalLight* dirLightPtr = dynamic_cast<BLAengine::DirectionalLight*>(obj))
-			{
-				DirectionalLightSerializer dirLightSerial;
-				dirLightSerial.FromGameObject(dirLightPtr);
+			gObjSerializer.FromGameObject(obj);
 
-				gObjSerializer = std::make_shared<DirectionalLightSerializer>();
-			}
-
-			if (BLAengine::GameChar* gameCharPtr = dynamic_cast<BLAengine::GameChar*>(obj))
-			{
-				GameCharSerializer dirLightSerial;
-				dirLightSerial.FromGameObject(gameCharPtr);
-
-				gObjSerializer = std::make_shared<GameCharSerializer>(dirLightSerial);
-			}
-
-			if(gObjSerializer.get())
-				m_objectsVector.push_back(gObjSerializer);
+			m_objectsVector.push_back(gObjSerializer);
 		}
 	}
 
@@ -228,12 +293,15 @@ public:
 	{
 		for (int i = 0; i < m_objectsVector.size(); i++)
 		{
-			GameObjectSerializer* obj = m_objectsVector[i].get();
+			//GameObjectSerializer objSerial = m_objectsVector[i];
 
-			if (GameCharSerializer* gameCharPtr = dynamic_cast<GameCharSerializer*>(obj))
-			{
-				cout << gameCharPtr->m_objectName << "\n";
-			}
+			//GameObject* obj = new GameObject();
+			//objSerial.ToGameObject...
+
+			//if (GameCharSerializer* gameCharPtr = dynamic_cast<GameCharSerializer*>(obj))
+			//{
+			//	cout << gameCharPtr->m_objectName << "\n";
+			//}
 		}
 
 		return nullptr;
@@ -242,7 +310,7 @@ public:
 private:
 	friend class cereal::access;
 
-	std::vector<std::shared_ptr<GameObjectSerializer>> m_objectsVector;
+	std::vector<GameObjectSerializer> m_objectsVector;
 	std::string sceneName;
 
 	template <class Archive>
@@ -250,7 +318,7 @@ private:
 	{
 		archive
 		(
-			cereal::make_nvp("objects", m_objectsVector)
+			cereal::make_nvp("Objects", m_objectsVector)
 		);
 	}
 };

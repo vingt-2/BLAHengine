@@ -1,10 +1,13 @@
 #pragma once
 #include "./RigidBodySystem.h"
 #include "../../Common/StdInclude.h"
-#include "../Game/GameObjects/GameManager.h"
-#include "../Game/GameObjects/Camera.h"
-#include "../Game/GameObjects/DirectionalLight.h"
-#include "../Game/GameObjects/PointLight.h"
+#include "./GameComponents/RigidBody.h"
+#include "./GameComponents/Camera.h"
+#include "./GameComponents/Collider.h"
+#include "./GameComponents/DirectionalLight.h"
+#include "./GameComponents/MeshRenderer.h"
+#include "./GameComponents/PointLight.h"
+#include "GameObject.h"
 
 namespace BLAengine
 {
@@ -18,14 +21,9 @@ namespace BLAengine
 		void Update();
 
 		void AddObject(GameObject* object);
-		void AddObject(GameManager* object);
-
-		void AddDirectionalLight(DirectionalLight* directionalLight);
 
 		vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
 		vector<Contact>* GetContacts();
-
-		int CountChar();
 
 		bool m_enableSimulation;
 
@@ -35,6 +33,9 @@ namespace BLAengine
 		RigidBodySystem* m_rigidBodySystem;
 
 		void SetTimeObject(Time* time); //TODO: Implement !
+
+		Ray ScreenToRay(vec2 renderSize, vec2 cursor, float length);
+		GameObject* PickGameObjectInScene(Ray ray, vec3 &hitInWorld);
 
 	private:
 

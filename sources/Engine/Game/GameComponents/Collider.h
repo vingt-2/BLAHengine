@@ -6,9 +6,11 @@
 // Collision detection Library !
 #include "../../Ext/libcoldet/coldet.h"
 
+#include "GameComponent.h"
+
 namespace BLAengine
 {
-	class BLACORE_API Collider
+	class BLACORE_API Collider : public GameComponent
 	{
 	public:
 		Collider(TriangleMesh* mesh);
@@ -20,6 +22,8 @@ namespace BLAengine
 		vector<vec3>* m_triNormals;
 
 		float m_boundingRadius;
+
+		void Update() {};
 
 	private:
 		void GenerateBoundingRadius();

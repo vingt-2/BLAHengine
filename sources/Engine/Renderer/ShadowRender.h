@@ -1,3 +1,5 @@
+#pragma once
+#include "../../Common/System.h"
 #include "RenderCamera.h"
 namespace BLAengine
 {

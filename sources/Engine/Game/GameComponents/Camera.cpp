@@ -1,10 +1,10 @@
 #include "Camera.h"
-
+#include "../GameObject.h"
 using namespace BLAengine;
 
 Camera::Camera():
-	GameObject(),
-	m_fovSize(vec2(1,1))
+	m_fovSize(vec2(1,1)),
+	GameComponent()
 {
 	UpdateView();
 
@@ -13,14 +13,17 @@ Camera::Camera():
 
 Camera::~Camera(void)
 {
-	GameObject::~GameObject();
+
 }
 
 
 void Camera::UpdateView()
 {
-	m_viewTransform.m_position = -m_transform->m_position;
-	m_viewTransform.m_rotation = 1.f * m_transform->m_rotation;
+	if (!m_parentObject)
+		return;
+
+	m_viewTransform.m_position = -1.f * m_parentObject->GetTransform().m_position;
+	m_viewTransform.m_rotation = 1.f *  m_parentObject->GetTransform().m_rotation;
 	m_viewTransform.UpdateTransform();
 	m_viewTransform.m_transformMatrix = inverse(m_viewTransform.m_transformMatrix);
 }
@@ -28,6 +31,5 @@ void Camera::UpdateView()
 void Camera::Update()
 {
 	// Regular updates
-	this->UpdateTransform();
 	UpdateView(); // View Transform update
 }

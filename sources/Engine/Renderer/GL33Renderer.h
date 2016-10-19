@@ -71,7 +71,7 @@ namespace BLAengine
 		GL33RenderObject();
 		~GL33RenderObject();
 
-		Transform* m_modelTransform;
+		mat4* m_modelTransform;
 
 		const vector<uint32>* m_toMeshTriangles;
 		const vector<vec3>* m_toMeshVertices;

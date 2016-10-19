@@ -37,4 +37,6 @@ Scene* SceneManager::LoadScene(std::string filepath)
 	input(sceneSerializer);
 
 	Scene* scene = sceneSerializer.BuildScene();
+
+	return scene;
 }

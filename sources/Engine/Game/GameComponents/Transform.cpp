@@ -47,28 +47,28 @@ void Transform::SetRotationUsingEuler(vec3 eulerAngles)
 	);
 }
 
-vec3 Transform::LocalDirectionToWorld(vec3 direction)
+vec3 Transform::LocalDirectionToWorld(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,0.f);
 	hDirection = m_transformMatrix * hDirection;
 	return vec3(hDirection.x,hDirection.y,hDirection.z);
 }
 
-vec3 Transform::LocalPositionToWorld(vec3 direction)
+vec3 Transform::LocalPositionToWorld(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,1.f);
 	hDirection = m_transformMatrix * hDirection;
 	return vec3(hDirection.x,hDirection.y,hDirection.z);
 }
 
-vec3 Transform::WorldDirectionToLocal(vec3 direction)
+vec3 Transform::WorldDirectionToLocal(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,0.f);
 	hDirection = inverse(m_transformMatrix) * hDirection;
 	return vec3(hDirection.x,hDirection.y,hDirection.z);
 }
 
-vec3 Transform::WorldlPositionToLocal(vec3 direction)
+vec3 Transform::WorldPositionToLocal(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,1.f);
 	hDirection = inverse(m_transformMatrix) * hDirection;

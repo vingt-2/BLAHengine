@@ -113,14 +113,14 @@ void GL33Renderer::RenderGBuffer()
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
 		{
-			mat4 MVP = m_mainRenderCamera.m_ViewProjection  * (renderObject->m_modelTransform->m_transformMatrix);
+			mat4 MVP = m_mainRenderCamera.m_ViewProjection  * (*(renderObject->m_modelTransform));
 
 			GLuint MVPid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "MVP");
 			glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
 			//send modelTransform to shader
 			GLuint transformID = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "modelTransform");
-			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(renderObject->m_modelTransform->m_transformMatrix)[0][0]);
+			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(renderObject->m_modelTransform))[0][0]);
 
 			// Send textureSamplers to shader
 			for (uint16 samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
@@ -174,7 +174,7 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 	object->m_toMeshBiTangents = &(renderData->m_vertBiTangent);
 	object->m_toMeshUVs = &(renderData->m_vertUVs);
 
-	object->m_modelTransform = meshRenderer.m_modelTransform;
+	object->m_modelTransform = meshRenderer.GetTransformMatrix();
 
 	if (!this->GenerateArrays(*object))
 	{
@@ -415,7 +415,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	glUniform3f(lightID, lightDirection.x, lightDirection.y, lightDirection.z);
 
 	GLuint eyeID = glGetUniformLocation(prgmID, "eyePosition");
-	vec3 eye = m_mainRenderCamera.m_attachedCamera->m_transform->m_position;
+	vec3 eye = m_mainRenderCamera.m_attachedCamera->GetObjectTransform().m_position;
 	glUniform3f(eyeID, eye.x, eye.y, eye.z);
 
 	GLuint shadowmapHandle = glGetUniformLocation(prgmID, "shadowMap");
@@ -567,7 +567,7 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 	{
 		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
 		{
-			mat4 MVP = shadowRender.getShadowViewProjection() * (renderObject->m_modelTransform->m_transformMatrix);
+			mat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelTransform));
 
 			GLuint shadowMVID = glGetUniformLocation(shadowRender.m_shadowPrgmID, "depthMVP");
 			glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
