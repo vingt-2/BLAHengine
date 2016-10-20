@@ -9,27 +9,6 @@
 #include <cereal\types\string.hpp>
 #include <cereal\archives\json.hpp>
 
-class GameComponentSerializer
-{
-public:
-
-	GameComponentSerializer() = default;
-
-	virtual void FromGameComponent(BLAengine::GameComponent* comp)
-	{}
-	virtual void ToGameComponent(BLAengine::GameComponent* comp)
-	{}
-
-	friend class cereal::access;
-
-	template <class Archive>
-	void serialize(Archive & archive)
-	{
-		cout << "blaaa" << "\n";
-		archive(string("name"));
-	}
-};
-
 class TransformSerializer
 {
 public:
@@ -68,6 +47,24 @@ private:
 	}
 };
 
+class GameComponentSerializer
+{
+public:
+
+	GameComponentSerializer() = default;
+
+	virtual void FromGameComponent(BLAengine::GameComponent* comp)
+	{}
+	virtual void ToGameComponent(BLAengine::GameComponent* comp)
+	{}
+
+	friend class cereal::access;
+
+	template <class Archive>
+	void serialize(Archive & archive)
+	{}
+};
+
 class MeshRendererSerializer : public GameComponentSerializer
 {
 public:
@@ -80,7 +77,6 @@ public:
 		if (BLAengine::MeshRenderer* meshRender = dynamic_cast<BLAengine::MeshRenderer*>(comp))
 		{
 			m_triangleMeshName = meshRender->m_mesh->GetName();
-			cout << "mmm ? " << m_triangleMeshName << "\n";
 		}
 	}
 	void ToGameComponent(BLAengine::GameComponent* comp)
@@ -101,12 +97,10 @@ private:
 	template <class Archive>
 	void serialize(Archive & archive)
 	{
-		cout << "TriangleMesh: " << m_triangleMeshName << "\n";
 		archive
 		(
 			cereal::make_nvp("TriangleMesh", m_triangleMeshName),
-			cereal::make_nvp("Material", m_materialNames),
-			cereal::make_nvp("GameComponent", cereal::base_class<GameComponentSerializer>(this))
+			cereal::make_nvp("Material", m_materialNames)
 		);
 	}
 };
@@ -179,14 +173,6 @@ private:
 	}
 };
 
-CEREAL_REGISTER_TYPE(MeshRendererSerializer)
-CEREAL_REGISTER_TYPE(DirectionalLightSerializer)
-CEREAL_REGISTER_TYPE(RigidBodySerializer)
-
-CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, MeshRendererSerializer)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, DirectionalLightSerializer)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, RigidBodySerializer)
-
 class GameObjectSerializer
 {
 public:
@@ -207,7 +193,7 @@ public:
 			MeshRendererSerializer serializer;
 			serializer.FromGameComponent(mrenderer);
 
-			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<GameComponentSerializer>(serializer);
+			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<MeshRendererSerializer>(serializer);
 			m_componentsVector.push_back(gCompSerializer);
 		}
 
@@ -218,7 +204,7 @@ public:
 			DirectionalLightSerializer serializer;
 			serializer.FromGameComponent(mrenderer);
 
-			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<GameComponentSerializer>(serializer);
+			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<DirectionalLightSerializer>(serializer);
 			m_componentsVector.push_back(gCompSerializer);
 		}
 
@@ -229,7 +215,7 @@ public:
 			RigidBodySerializer serializer;
 			serializer.FromGameComponent(mrenderer);
 
-			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<GameComponentSerializer>(serializer);
+			std::shared_ptr<GameComponentSerializer> gCompSerializer = std::make_shared<RigidBodySerializer>(serializer);
 			m_componentsVector.push_back(gCompSerializer);
 		}
 	}
@@ -322,3 +308,11 @@ private:
 		);
 	}
 };
+
+CEREAL_REGISTER_TYPE(MeshRendererSerializer)
+CEREAL_REGISTER_TYPE(DirectionalLightSerializer)
+CEREAL_REGISTER_TYPE(RigidBodySerializer)
+
+CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, MeshRendererSerializer)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, DirectionalLightSerializer)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(GameComponentSerializer, RigidBodySerializer)
