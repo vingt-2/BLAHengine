@@ -3,6 +3,7 @@
 #include "../Assets/AssetsManager.h"
 #include "../Game/GameComponents/MeshRenderer.h"
 #include "Renderer.h"
+#include "GL33Shader.h"
 
 namespace BLAengine 
 {
@@ -35,7 +36,6 @@ namespace BLAengine
 		GLuint m_displayTextureTarget;
 
 		GLuint m_geometryPassPrgmID;
-		GLuint m_passthroughPrgmId;
 		GLuint m_drawSphereStencilPgrmID;
 
 		bool InitializeGBuffer();

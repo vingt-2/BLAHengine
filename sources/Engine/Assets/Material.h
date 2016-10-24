@@ -20,10 +20,4 @@ namespace BLAengine
 
 		std::vector<pair<std::string, std::string>> m_textureSamplerAttributes;
 	};
-
-	class BLACORE_API MaterialImport
-	{
-	public:
-		Material* LoadShaderCode(string name, string frag, string vert);
-	};
 }
