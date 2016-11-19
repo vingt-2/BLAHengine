@@ -9,14 +9,10 @@ namespace BLAengine
 	class BLACORE_API Material : public Asset
 	{
 	public:
-
 		Material(std::string name) : Asset(name)
 		{};
 
 		bool AssignTexture(std::string textureName, std::string handleName);
-
-		std::string m_vertexShader;
-		std::string m_fragmentShader;
 
 		std::vector<pair<std::string, std::string>> m_textureSamplerAttributes;
 	};

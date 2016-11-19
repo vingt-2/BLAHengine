@@ -12,10 +12,13 @@ namespace BLAengine
 	public:
 		//TODO: Add filtering options
 		bool GLLoadTexture(std::string resourcePath, Texture2D texture);
-		bool GLLoadShaderProgram(std::string resourcePath, std::string fragmentShader, std::string vertexShader);
+		bool GLLoadShaderProgram(GL33Shader& shader);
+		bool GLLoadSystemShaders();
+
+		GL33SystemShaders m_systemShaders;
 
 		std::map<std::string, GLuint> m_glLoadedTextureIds;
-		std::map<std::string, GLuint> m_glLoadedProgramsIds;
+		std::map<std::string, GL33Shader> m_glLoadedProgramsIds;
 	};
 
 

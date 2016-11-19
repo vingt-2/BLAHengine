@@ -19,7 +19,7 @@ Texture2D::~Texture2D()
 {}
 
 //TODO: Support nComponent texture
-Texture2D* TextureImport::LoadBMP(string name, string filePath)
+Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
 {
 	printf("Reading image %s\n", filePath.data());
 
@@ -74,7 +74,7 @@ Texture2D* TextureImport::LoadBMP(string name, string filePath)
 	// Everything is in memory now, the file wan be closed
 	fclose(file);
 
-	return new Texture2D(name, 3, data, width, height);
+	return new Texture2D(resourceName, 3, data, width, height);
 }
 
 Texture2D * TextureImport::LoadDDS(string name, string imagepath)

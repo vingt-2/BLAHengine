@@ -12,6 +12,7 @@ public:
 
 	void FromTexture(BLAengine::Texture2D* texture) 
 	{
+		m_name = texture->GetName();
 		m_nComponents = texture->m_nComponents;
 		m_dataSize = texture->m_dataSize;
 		m_width = texture->m_width;
@@ -38,7 +39,7 @@ private:
 	{
 		archive
 		(
-			m_nComponents, m_dataSize, m_width, m_height, m_data
+			m_name, m_nComponents, m_dataSize, m_width, m_height, m_data
 		);
 	}
 };

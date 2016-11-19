@@ -30,7 +30,6 @@ GL33RenderObject::~GL33RenderObject() {}
 /*
 	Rendering code below
 */
-
 bool GL33Renderer::Update()
 {
 	int width, height;
@@ -368,7 +367,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
 	// Use our shader
-	GLuint prgmID = directionalLight.m_lightRenderPrgmID;
+	GLuint prgmID = m_glResources.m_glLoadedProgramsIds["DirectionalLight"].m_loaded_id;
 	glUseProgram(prgmID);
 	GLuint diffuseMapID = glGetUniformLocation(prgmID, "diffuseMap");
 	// Bind our texture in Texture Unit 0
@@ -547,6 +546,8 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 {
 	shadowRender.Update();
 
+	GLuint programId = m_glResources.m_glLoadedProgramsIds["ShadowMap"].m_loaded_id;
+
 	// Render to our framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowRender.m_shadowBuffer);
 
@@ -559,7 +560,7 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 	/*
 		Render Scene Objects...
 	*/
-	glUseProgram(shadowRender.m_shadowPrgmID);
+	glUseProgram(programId);
 
 	// Enable Z-Buffer test.
 	glEnable(GL_DEPTH_TEST);
@@ -569,7 +570,7 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 		{
 			mat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelTransform));
 
-			GLuint shadowMVID = glGetUniformLocation(shadowRender.m_shadowPrgmID, "depthMVP");
+			GLuint shadowMVID = glGetUniformLocation(programId, "depthMVP");
 			glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
 
 			glBindVertexArray(renderObject->m_vertexArrayID);
@@ -671,11 +672,19 @@ void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
 	glGenVertexArrays(1, &(object.m_vertexArrayID));
 }
 
+///// WRONG WRONG WRONG WRONG WRONG
+///// WRONG WRONG WRONG WRONG WRONG
+///// WRONG WRONG WRONG WRONG WRONG
+///// WRONG WRONG WRONG WRONG WRONG			NEEDS REDESIGN
+///// WRONG WRONG WRONG WRONG WRONG
+///// WRONG WRONG WRONG WRONG WRONG
+///// WRONG WRONG WRONG WRONG WRONG
 bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
 {
+
 	if (m_glResources.m_glLoadedProgramsIds.count(name))
 	{
-		object.m_programID = m_glResources.m_glLoadedProgramsIds[name];
+		object.m_programID = m_glResources.m_glLoadedProgramsIds[name].m_loaded_id;
 		if (object.m_programID != 0)
 		{
 			object.m_matrixID = glGetUniformLocation(object.m_programID, "MVP");
@@ -684,18 +693,23 @@ bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
 	}
 	else
 	{
-		AssetManager::AssetType type;
-		Asset* matAsset = m_assetManager->GetAsset(name, type);
+		Asset* matAsset;
+		AssetManager::AssetType type = m_assetManager->GetAsset(name, matAsset);
 
 		if (matAsset != nullptr && type == AssetManager::AssetType::MaterialAsset)
 		{
 			if (Material* material = (Material*) matAsset)
 			{
-				m_glResources.GLLoadShaderProgram(name, material->m_fragmentShader, material->m_vertexShader);
-
-				cout << "Material " << name << " loaded into GL \n";
-
-				return this->AssignMaterial(object, name);
+				for (auto texture : material->m_textureSamplerAttributes)
+				{
+					Asset* texAsset;
+					AssetManager::AssetType type = m_assetManager->GetAsset(texture.first, texAsset);
+					if (type == AssetManager::AssetType::TextureAsset)
+					{
+						Texture2D* texture = (Texture2D*) texAsset;
+						m_glResources.GLLoadTexture(texture->GetName(), *texture);
+					}
+				}
 			}
 		}
 
@@ -789,6 +803,26 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window)
 		m_renderWindow = window;
 
 		initialized = true;
+
+		this->m_glResources.m_systemShaders.LoadGeometryPassProgram("./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
+		this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
+		this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
+		this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
+		this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
+		this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
+
+		this->m_glResources.GLLoadSystemShaders();
+
+		m_GBuffer.m_drawSphereStencilPgrmID = this->m_glResources.m_systemShaders.m_drawSphereStencilPgrm.m_loaded_id;
+		m_GBuffer.m_geometryPassPrgmID = this->m_glResources.m_systemShaders.m_geometryPassPrgm.m_loaded_id;
+		DrawColorBufferPrgmID = this->m_glResources.m_systemShaders.m_drawColorBufferPrgm.m_loaded_id;
+		m_debugRayPgrmID = this->m_glResources.m_systemShaders.m_debugRayPgrm.m_loaded_id;
+	
+		GL33Shader dirLightShader = GL33Shader("DirectionalLight");
+		dirLightShader.LoadShaderCode("./resources/shaders/Lighting/DirectLightVS.glsl","./resources/shaders/Lighting/DirectLightFS.glsl");
+
+		m_glResources.GLLoadShaderProgram(dirLightShader);
+		
 	}
 #endif
 	if (WPFRenderWindow* render = dynamic_cast<WPFRenderWindow*>(window))
@@ -823,7 +857,10 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window)
 	if(!initialized)
 	{
 		std::cout << "No valid window handle provided to the Renderer\n";
+		return;
 	}
+
+	// Hardcode system shaders loading
 }
 
 bool GBuffer::InitializeGBuffer()
@@ -1083,47 +1120,20 @@ bool BLAengine::GL33Resources::GLLoadTexture(std::string resourcePath, Texture2D
 	return true;
 }
 
-bool BLAengine::GL33Resources::GLLoadShaderProgram(std::string name, std::string fragmentShader, std::string vertexShader)
+bool BLAengine::GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
 {
 	// Create the shaders
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
-	// Read the Vertex Shader code from the file
-	std::string VertexShaderCode;
-	std::ifstream VertexShaderStream(vertexShader, std::ios::in);
-	if (VertexShaderStream.is_open())
-	{
-		std::string Line = "";
-		while (getline(VertexShaderStream, Line))
-			VertexShaderCode += "\n" + Line;
-		VertexShaderStream.close();
-	}
-	else {
-		printf("%s could not be opened.\n", vertexShader);
-		return false;
-	}
-
-	// Read the Fragment Shader code from the file
-	std::string FragmentShaderCode;
-	std::ifstream FragmentShaderStream(fragmentShader, std::ios::in);
-	if (FragmentShaderStream.is_open())
-	{
-
-		std::string Line = "";
-		while (getline(FragmentShaderStream, Line))
-			FragmentShaderCode += "\n" + Line;
-		FragmentShaderStream.close();
-	}
-
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 
-	printf("[SHADER]: \"%s\"\n", name);
+	std::cout << "[SHADER]  Compiling shader: " << shader.m_name << ".\n";
 
 	// Compile Vertex Shader
-	printf("[SHADER] Compiling shader : \"%s\"\n", vertexShader);
-	char const * VertexSourcePointer = VertexShaderCode.c_str();
+	//printf("[SHADER] Compiling shader : \"%s\"\n", vertexShader);
+	char const * VertexSourcePointer = shader.m_vertexShader.c_str();
 	glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
 	glCompileShader(VertexShaderID);
 
@@ -1137,9 +1147,7 @@ bool BLAengine::GL33Resources::GLLoadShaderProgram(std::string name, std::string
 		printf("%s\n", &VertexShaderErrorMessage[0]);
 	}
 
-	// Compile Fragment Shader
-	printf("[SHADER] Compiling shader : %s\n", fragmentShader);
-	char const * FragmentSourcePointer = FragmentShaderCode.c_str();
+	char const * FragmentSourcePointer = shader.m_fragmentShader.c_str();
 	glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
 	glCompileShader(FragmentShaderID);
 
@@ -1155,7 +1163,7 @@ bool BLAengine::GL33Resources::GLLoadShaderProgram(std::string name, std::string
 
 
 	// Link the program
-	printf("[SHADER] Linking program \"%s\"\n", name);
+	std::cout << "[SHADER]  Linking Program: " << shader.m_name << ".\n";
 	GLuint ProgramID = glCreateProgram();
 	glAttachShader(ProgramID, VertexShaderID);
 	glAttachShader(ProgramID, FragmentShaderID);
@@ -1173,7 +1181,21 @@ bool BLAengine::GL33Resources::GLLoadShaderProgram(std::string name, std::string
 	glDeleteShader(VertexShaderID);
 	glDeleteShader(FragmentShaderID);
 
-	m_glLoadedProgramsIds[name] = ProgramID;
+	shader.m_loaded_id = ProgramID;
+
+	m_glLoadedProgramsIds[shader.m_name] = shader;
+
+	return true;
+}
+
+bool BLAengine::GL33Resources::GLLoadSystemShaders()
+{
+	this->GLLoadShaderProgram(this->m_systemShaders.m_drawColorBufferPrgm);
+	this->GLLoadShaderProgram(this->m_systemShaders.m_drawDepthBufferPrgm);
+	this->GLLoadShaderProgram(this->m_systemShaders.m_geometryPassPrgm);
+	this->GLLoadShaderProgram(this->m_systemShaders.m_drawSphereStencilPgrm);
+	this->GLLoadShaderProgram(this->m_systemShaders.m_debugRayPgrm);
+	this->GLLoadShaderProgram(this->m_systemShaders.m_shadowMapPgrm);
 
 	return true;
 }

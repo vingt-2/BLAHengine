@@ -16,12 +16,13 @@ AssetManager::~AssetManager(void)
 {
 }
 
-Asset* BLAengine::AssetManager::GetAsset(std::string filepath, AssetType& type)
+AssetManager::AssetType BLAengine::AssetManager::GetAsset(std::string filepath, Asset* &assetPtr)
 {
-	if (m_resourceMap.count(filepath))
+	AssetType type;
+	if (!m_resourceMap.count(filepath))
 	{
 		type = InvalidAsset;
-		return nullptr;
+		return type;
 	}
 
 	std::pair<AssetType, uint32_t> asset = m_resourceMap[filepath];
@@ -34,29 +35,30 @@ Asset* BLAengine::AssetManager::GetAsset(std::string filepath, AssetType& type)
 		case AssetType::TriangleMeshAsset:
 		{
 			TriangleMesh* meshPtr = m_triangleMeshesInMemory.at(assetIndx);
-			if (Asset* assetPtr = (Asset*) dynamic_cast<Asset*>(meshPtr))
+			if (assetPtr = (Asset*) dynamic_cast<Asset*>(meshPtr))
 			{
-				return assetPtr;
+				return TriangleMeshAsset;
 			}
 		}
 		case AssetType::TextureAsset:
 		{
 			Texture2D* texturePtr = m_textures2DInMemory.at(assetIndx);
-			if (Asset* assetPtr = (Asset*) dynamic_cast<Asset*>(texturePtr))
+			if (assetPtr = (Asset*) dynamic_cast<Asset*>(texturePtr))
 			{
-				return assetPtr;
+				return TextureAsset;
 			}
 		}
 		case AssetType::MaterialAsset:
 		{
 			Material* matPtr = m_materialsInMemory.at(assetIndx);
-			if (Asset* assetPtr = (Asset*) dynamic_cast<Asset*>(matPtr))
+			if (assetPtr = (Asset*) dynamic_cast<Asset*>(matPtr))
 			{
-				return assetPtr;
+				return MaterialAsset;
 			}
 		}
 	}
 
+	return type;
 }
 
 bool AssetManager::LoadTriangleMesh(std::string filepath)
@@ -123,6 +125,62 @@ bool AssetManager::LoadTexture(std::string filepath)
 	uint32_t indx = m_textures2DInMemory.size() - 1;
 
 	m_resourceMap[filepath] = std::pair<AssetType, uint32_t>(AssetType::TextureAsset, indx);
+
+	return true;
+}
+
+bool AssetManager::LoadMaterial(std::string filepath)
+{
+	if (m_resourceMap.count(filepath))
+	{
+		cout << "There already exists a file named: " << filepath << "\n";
+		return false;
+	}
+
+	MaterialSerializer matSerializer;
+
+	std::fstream fs;
+	fs.open(filepath, std::fstream::in | std::fstream::binary);
+
+	if (!fs.is_open())
+	{
+		cout << "Could not load Texture file: " << filepath << "\n";
+		return false;
+	}
+
+	cereal::BinaryInputArchive input(fs);
+
+	input(matSerializer);
+
+	Material* material = matSerializer.BuildMaterial();
+
+	m_materialsInMemory.push_back(material);
+
+	uint32_t indx = m_materialsInMemory.size() - 1;
+
+	m_resourceMap[filepath] = std::pair<AssetType, uint32_t>(AssetType::MaterialAsset, indx);
+
+	return true;
+}
+
+bool BLAengine::AssetManager::SaveMaterial(Material * mat)
+{
+	MaterialSerializer matSerializer;
+
+	matSerializer.FromMaterial(mat);
+
+	std::fstream fs;
+	fs.open(mat->GetName(), std::fstream::out | std::fstream::binary);
+
+	if (!fs.is_open())
+	{
+		cout << "Could not Write on file " << mat->GetName() << "\n";
+		return false;
+	}
+
+	cereal::BinaryOutputArchive output(fs);
+
+	output(matSerializer);
 
 	return true;
 }

@@ -22,6 +22,8 @@ namespace BLAengine
 
 		void AddObject(GameObject* object);
 
+		GameObject* FindNameInScene(std::string name);
+
 		vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
 		vector<Contact>* GetContacts();
 

@@ -22,8 +22,10 @@ void SetObject(GameObject* object)
 	}
 }
 
-void SimpleControls(RigidBody* rgbdy, RenderWindow* renderWindow)
+void SimpleControls(GameObject* object, RenderWindow* renderWindow)
 {
+
+	Transform transform = object->GetTransform();
 
 	vec3 tangentForce = vec3(0);
 	vec3 movementForce = vec3(0);
@@ -51,10 +53,9 @@ void SimpleControls(RigidBody* rgbdy, RenderWindow* renderWindow)
 	if (renderWindow->GetKeyPressed('E'))
 		tangentForce.y = -1.f;
 
-	vec3 cameraForce = rgbdy->GetObjectTransform().LocalDirectionToWorld(tangentForce);
+	vec3 cameraForce = object->GetTransform().LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;
-	cameraForce *= 10 * 0.01f;
-	//object->m_transform->m_position += cameraForce;
+	transform.m_position += cameraForce;
 
 
 	if (renderWindow->GetMousePressed(1))
@@ -87,12 +88,10 @@ void SimpleControls(RigidBody* rgbdy, RenderWindow* renderWindow)
 
 		cameraRotation += deltaRotation;
 
-		//object->m_transform->SetRotationUsingEuler(cameraRotation);
+		transform.SetRotationUsingEuler(cameraRotation);
 	}
-	else
-	{
-
-	}
+	
+	object->SetTransform(transform);
 }
 
 bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
@@ -103,7 +102,7 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 	mainRenderer = new GL33Renderer();
 
 	mainRenderer->InitializeRenderer(this->renderWindow);
-
+	mainRenderer->m_assetManager = sharedResources;
 	mainScene = new Scene();
 
 	mainCamera = new Camera();
@@ -145,18 +144,70 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 		return false;
 	}
 
-	TriangleMesh* floor = new TriangleMesh(string("floor"));
+	Texture2D* blankDiff = TextureImport::LoadBMP("BlankTexture", "./resources/textures/blankDiffuse.bmp");
+	this->sharedResources->SaveTexture(blankDiff);
+	this->sharedResources->LoadTexture("BlankTexture");
 
-	GameObject* floor_obj = new GameObject("Jean-Robert");
+	Texture2D* blankNorm = TextureImport::LoadBMP("BlankNormal", "./resources/textures/blankNormal.bmp");
+	this->sharedResources->SaveTexture(blankNorm);
+	this->sharedResources->LoadTexture("BlankNormal");
 
+	Material* blankDiffusMat = new Material("BlankDiffuseMat");
+	blankDiffusMat->AssignTexture("BlankTexture", "diffuseMap");
+	blankDiffusMat->AssignTexture("BlankNormal", "normalMap");
+
+	this->sharedResources->SaveMaterial(blankDiffusMat);
+	this->sharedResources->LoadMaterial("BlankDiffuseMat");
+
+	OBJImport obj;
+	TriangleMesh skyMesh("SkyMesh");
+	obj.ImportMesh("./resources/models/sphere.obj", skyMesh, true, true);
+	this->sharedResources->SaveTriangleMesh(&skyMesh);
+	this->sharedResources->LoadTriangleMesh("SkyMesh");
+
+	this->sharedResources->LoadTriangleMesh("sponzamesh.dat");
+	Asset* floorAsset = nullptr;
+	this->sharedResources->GetAsset("sponzamesh.dat", floorAsset);
+
+	this->sharedResources->LoadTriangleMesh("sponzamesh.dat");
+	Asset* skyMeshAsset = nullptr;
+	this->sharedResources->GetAsset("SkyMesh", skyMeshAsset);
+
+	TriangleMesh* floor = (TriangleMesh*)floorAsset;
+	TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
+
+	GameObject* floor_obj = new GameObject("Sponza");
 	MeshRenderer* meshRender = new MeshRenderer();
 	floor_obj->AddComponent(meshRender);
 	meshRender->AssignTriangleMesh(floor);
-	//renderingManager->RequestRenderTicket(*floor_obj);
+	meshRender->AssignMaterial(blankDiffusMat, 0);
+	renderingManager->RequestRenderTicket(meshRender);
 	mainScene->AddObject(floor_obj);
 
-	sceneManager->SaveScene("myScene",mainScene);
-	sceneManager->LoadScene("myScene");
+	GameObject* ball_obj = new GameObject("sky");
+	Transform t = ball_obj->GetTransform();
+	t.m_scale = vec3(5000, 5000, 5000);
+	ball_obj->SetTransform(t);
+	meshRender = new MeshRenderer();
+	ball_obj->AddComponent(meshRender);
+	meshRender->AssignTriangleMesh(sky);
+	meshRender->AssignMaterial(blankDiffusMat, 0);
+	renderingManager->RequestRenderTicket(meshRender);
+	mainScene->AddObject(ball_obj);
+	
+	DirectionalLightRender lr;
+	cameraLight = new Camera();
+	GameObject* bla = new GameObject("ShadowCamera");
+	
+	t = bla->GetTransform();
+	t.SetRotationUsingEuler(vec3(1, 0, 0));
+	bla->SetTransform(t);
+
+	bla->AddComponent(cameraLight);
+	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
+	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
+	lr.m_shadowRender.m_bufferSize = 8192;
+	mainRenderer->m_directionalLightsVector.push_back(lr);
 	return true;
 }
 
@@ -234,36 +285,7 @@ void EngineDemo::UpdateDemo()
 		//debugRays.push_back(ray);
 		vec3 colPoint(0);
 		GameObject* object;// = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
-
-		if (currentObject== nullptr || currentObject != object)
-		{
-			currentObject = object;
-		}
-		else
-		{
-		//	currentObject->m_rigidBody->PushForceWorld(colPoint, ray.m_direction);
-		}
 	}
-
-	//if (renderWindow->GetMousePressed(2))
-	//{
-	//	ray = cursorPicker->ScreenToRay(1000);
-	//	//debugRays.push_back(ray);
-	//	vec3 colPoint(0);
-	//	GameChar* object = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
-	//	if (object != nullptr)
-	//	{
-	//		object->m_rigidBody->m_velocity = vec3(0);
-	//		object->m_rigidBody->m_angularVelocity = vec3(0);
-	//	}
-	//}
-
-	//if (currentObject != nullptr && currentRay != vec3(0))
-	//{
-	//	vec3 a = currentObject->m_transform->LocalPositionToWorld(currentPoint);
-	//	vec3 b = currentObject->m_transform->LocalDirectionToWorld(currentRay);
-	//	currentObject->m_rigidBody->PushForceWorld(a, 0.5f*b);
-	//}
 
 	if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
 	{
@@ -286,8 +308,13 @@ void EngineDemo::UpdateDemo()
 	debug->DrawGrid(1000, 10, vec3(0.4));
 
 	debug->Update();
-	//SimpleControls(mainCamera, this->renderWindow);
-	mainCamera->Update();
+
+	if (GameObject* mainCamera = mainScene->FindNameInScene("Camera"))
+	{
+		SimpleControls(mainCamera, this->renderWindow);
+		mainCamera->Update();
+	}
+
 	mainRenderer->Update();
 	mainScene->Update();
 

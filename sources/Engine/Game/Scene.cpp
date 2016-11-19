@@ -29,6 +29,19 @@ void Scene::AddObject(GameObject* objectPtr)
 	}
 }
 
+GameObject * BLAengine::Scene::FindNameInScene(std::string name)
+{
+	for (int i = 0; i < m_sceneObjectsVector.size(); i++)
+	{
+		GameObject* object = m_sceneObjectsVector[i];
+		if (object->m_objectName.compare(name) == 0)
+		{
+			return object;
+		}
+	}
+	return nullptr;
+}
+
 void BLAengine::Scene::SetTimeObject(Time * time)
 {
 	m_rigidBodySystem->SetTimeObject(time);

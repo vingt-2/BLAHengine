@@ -29,7 +29,7 @@ void main(){
     
     vec3 overalSunColor = vec3(sunOrientation, sunOrientation*0.5, sunOrientation*0.2);
     
-    if(length(worldPos) > 1000)
+    if(length(worldPos) > 3000)
     {
         float altitude = abs(dot(normalize(worldPos),vec3(0.0,1.0,0.0)));
         

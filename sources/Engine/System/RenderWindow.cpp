@@ -39,7 +39,7 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
 		m_height = sizeY;
 	}
 
-	window = glfwCreateWindow(m_width, m_height, GLFW_DEFAULT_WINDOW_NAME, monitor, NULL);
+	window = glfwCreateWindow(m_width, m_height, windowTitle.c_str(), monitor, NULL);
 
 	glfwMakeContextCurrent(window);
 
@@ -54,7 +54,7 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
 		return;
 	}
 
-	glfwSetWindowTitle(window, GLFW_DEFAULT_WINDOW_NAME);
+	glfwSetWindowTitle(window, windowTitle.c_str());
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);

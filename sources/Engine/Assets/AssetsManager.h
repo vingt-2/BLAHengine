@@ -3,6 +3,7 @@
 #include "../../Common/System.h"
 #include "../../AssetsImport/MeshSerializer.h"
 #include "../../AssetsImport/TextureSerializer.h"
+#include "../../AssetsImport/MaterialSerializer.h"
 #include "Material.h"
 #include "Texture.h"
 
@@ -23,11 +24,11 @@ namespace BLAengine
 		AssetManager(void);
 		~AssetManager(void);
 
-		Asset* GetAsset(std::string filepath, AssetType &type);
+		AssetType GetAsset(std::string filepath, Asset* &assetPtr);
 
 		bool LoadTriangleMesh(std::string filepath);
 		bool LoadTexture(std::string filepath);
-		bool loadMaterial(std::string filepath);
+		bool LoadMaterial(std::string filepath);
 
 		bool SaveMaterial(Material* mat);
 		bool SaveTexture(Texture2D* mesh);
