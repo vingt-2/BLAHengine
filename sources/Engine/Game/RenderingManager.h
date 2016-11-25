@@ -1,8 +1,9 @@
 #pragma once
-#include "../Game/GameComponents/MeshRenderer.h"
+#include "./GameComponents/Camera.h"
+#include "./GameComponents/DirectionalLight.h"
+#include "./GameComponents/MeshRenderer.h"
+#include "./GameComponents/PointLight.h"
 #include "../../Common/StdInclude.h"
-#include "../Renderer/Renderer.h"
-#include "./GameAlgebra/Ray.h"
 
 namespace BLAengine
 {
@@ -13,36 +14,39 @@ namespace BLAengine
 	public:
 		enum RenderManagerType{ Game = 0, EditorGizmos = 1 };
 
-		RenderingManager(Renderer* renderer, RenderManagerType type);
+		RenderingManager(RenderManagerType type);
 		~RenderingManager();
 
-		RenderTicket RequestRenderTicket(MeshRenderer* object);
-		bool		 CancelRenderTicket(MeshRenderer* object);
+		RenderTicket RegisterMeshRenderer(MeshRenderer* object);
+		bool		 CancelMeshRendererTicket(MeshRenderer* object);
+
+		RenderTicket RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera);
+		RenderTicket CancelDirectionalLightTicket(DirectionalLight* dirLight);
+
+		std::unordered_map<RenderTicket, MeshRenderer*>* GetTicketedMeshRenderers();
+		std::unordered_map<RenderTicket, std::pair<DirectionalLight*, Camera*>>* GetTicketedDirectionalLights();
 
 		void Update();
 
 
 	private:
 
-		Renderer* m_renderer;
 		RenderManagerType m_renderManagerType;
 
-		std::map<RenderTicket, MeshRenderer* > m_ticketedObjects;
-		std::map<RenderTicket, const RenderObject* >  m_renderObjects;
+		std::unordered_map<RenderTicket, MeshRenderer*> m_ticketedMeshRenderers;
+		std::unordered_map<RenderTicket, pair<DirectionalLight*, Camera*>> m_ticketedDirLights;
 
 		int currentTicket;
 
-		void LoadObject(GameObject& object);
 	};
 
 	class BLACORE_API DebugRenderingManager
 	{
 	public:
 
-		DebugRenderingManager(Renderer* renderer);
-		~DebugRenderingManager();
+		DebugRenderingManager() {};
+		~DebugRenderingManager() {};
 
-		Renderer* m_renderer;
 
 		void LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh);
 

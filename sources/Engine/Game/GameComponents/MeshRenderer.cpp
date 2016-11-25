@@ -12,7 +12,7 @@ MeshRenderer::MeshRenderer():
 
 MeshRenderer::~MeshRenderer(void)
 {
-	//CleanUp();
+	free(m_modelTransformMatrix);
 }
 
 string MeshRenderer::ToString()
@@ -43,7 +43,7 @@ mat4* MeshRenderer::GetTransformMatrix() const
 void MeshRenderer::Update()
 {
 	if (!m_parentObject)
-		* m_modelTransformMatrix = mat4(0);
+		*m_modelTransformMatrix = mat4(0);
 	else
-		* m_modelTransformMatrix = m_parentObject->GetTransform().m_transformMatrix;
+		*m_modelTransformMatrix = m_parentObject->GetTransform().m_transformMatrix;
 }

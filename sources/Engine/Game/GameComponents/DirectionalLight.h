@@ -14,8 +14,10 @@ namespace BLAengine
 
 		void SetDirection(vec3 direction);
 		vec3 GetDirection();
-		const Transform& GetTransform();
+
 		void Update();
+
+		uint m_renderTicket;
 
 	private:
 		vec3 m_lightDirection;

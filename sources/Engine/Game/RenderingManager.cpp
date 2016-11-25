@@ -2,10 +2,9 @@
 
 using namespace BLAengine;
 
-RenderingManager::RenderingManager(Renderer* renderer, RenderManagerType type)
+RenderingManager::RenderingManager(RenderManagerType type)
 {
 	this->currentTicket = 1;
-	this->m_renderer = renderer;
 	this->m_renderManagerType = type;
 }
 
@@ -15,46 +14,58 @@ RenderingManager::~RenderingManager()
 
 }
 
-RenderTicket RenderingManager::RequestRenderTicket(MeshRenderer* meshRender)
+RenderTicket RenderingManager::RegisterMeshRenderer(MeshRenderer* meshRender)
 {
-	//m_renderer->m_renderPool.push_back(renderObject->m_meshRenderer);
-	//CHANGE THIS 
+	//CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
 	int renderTicket = ++(this->currentTicket);
-	this->m_ticketedObjects[renderTicket] = meshRender;
+	this->m_ticketedMeshRenderers[renderTicket] = meshRender;
 
-	if (RenderObject* renderObject = this->m_renderer->LoadRenderObject(*meshRender, m_renderManagerType))
-	{
-		this->m_renderObjects[renderTicket] = renderObject;
-	}
 	meshRender->m_renderTicket = this->currentTicket;
 	return this->currentTicket;
 }
 
-bool RenderingManager::CancelRenderTicket(MeshRenderer* meshRender)
+bool RenderingManager::CancelMeshRendererTicket(MeshRenderer* meshRender)
 {
 	int renderTicket = meshRender->m_renderTicket;
-	auto itTicket = m_ticketedObjects.find(renderTicket);
-	this->m_ticketedObjects.erase(itTicket);
+	auto itTicket = m_ticketedMeshRenderers.find(renderTicket);
+	this->m_ticketedMeshRenderers.erase(itTicket);
 	return true;
+}
+
+RenderTicket BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera)
+{
+	//CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
+	int renderTicket = ++(this->currentTicket);
+	this->m_ticketedDirLights[renderTicket] = std::pair<DirectionalLight*, Camera*>(dirLight, shadowCamera);
+
+	dirLight->m_renderTicket = this->currentTicket;
+	return this->currentTicket;
+}
+
+RenderTicket BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
+{
+	int renderTicket = dirLight->m_renderTicket;
+	auto itTicket = m_ticketedDirLights.find(renderTicket);
+	this->m_ticketedDirLights.erase(itTicket);
+	return true;
+}
+
+std::unordered_map<RenderTicket, MeshRenderer*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
+{
+	return &(m_ticketedMeshRenderers);
+}
+
+std::unordered_map<RenderTicket, std::pair<DirectionalLight*,Camera*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
+{
+	return &(m_ticketedDirLights);
 }
 
 void RenderingManager::Update()
 {
-	m_renderer->Update();
-}
-
-void RenderingManager::LoadObject(GameObject& object)
-{
-	
-}
-
-DebugRenderingManager::DebugRenderingManager(Renderer* renderer)
-{
-	m_renderer = renderer;
 }
 
 void DebugRenderingManager::LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh)
 {
-	m_renderer->LoadDebugLines(lineMesh);
+	//m_renderer->LoadDebugLines(lineMesh);
 }
 

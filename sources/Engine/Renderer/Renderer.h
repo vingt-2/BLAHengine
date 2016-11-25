@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Common/StdInclude.h"
+#include "../Game/RenderingManager.h"
 #include "../System/RenderWindow.h"
 #include "../Game/GameComponents/Camera.h"
 #include "../Game/GameComponents/MeshRenderer.h"
@@ -29,12 +30,16 @@ namespace BLAengine
 	public:
 		PerspectiveCamera m_mainRenderCamera;
 
-		vector<RenderObject*> m_renderPool;
-		vector<RenderObject*> m_gizmoRenderPool;
+		std::unordered_map<uint, RenderObject*> m_meshRenderPool;
+		std::unordered_map<uint, RenderObject*> m_gizmoRenderPool;
+
+		std::unordered_map<uint, DirectionalLightRender*> m_directionalLightPool;
 
 		// Rendering Related
-		virtual void InitializeRenderer(RenderWindow* renderWindow) = 0;
+		virtual void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager) = 0;
+		virtual void SwitchRenderingManager(RenderingManager* renderingManager) = 0;
 		virtual bool Update() = 0;
+		virtual int SynchWithRenderManager() = 0;
 		virtual RenderObject* LoadRenderObject(const MeshRenderer& object, int type) = 0;
 		virtual bool	CancelRender(const MeshRenderer& object) = 0;
 		virtual bool	LoadDebugLines(pair<vector<vec3>, vector<vec3>>& lineMesh) = 0;
@@ -48,8 +53,8 @@ namespace BLAengine
 		~Renderer(void);
 
 	protected:
-
 		RenderWindow* m_renderWindow;
+		RenderingManager* m_renderingManager;
 
 		ivec2 m_renderSize;
 		bool m_isContextEnabled;

@@ -28,15 +28,7 @@ namespace BLAengine
 
 		bool LoadWorkingScene(std::string filePath);
 
-		std::vector<string> GetSceneObjects()
-		{
-			std::vector<string> objs;
-			for (auto go : m_workingScene->GetObjects())
-			{
-				objs.push_back(go->m_objectName);
-			}
-			return objs;
-		}
+		std::vector<string> GetSceneObjects();
 	private:
 
 		// Required Engine Modules
@@ -45,8 +37,8 @@ namespace BLAengine
 		SceneManager* m_sceneManager;
 		Debug* m_debug;
 		Scene* m_workingScene;
+		Scene* m_editorScene;
 		RenderWindow* m_renderWindow;
-		Camera* m_editorCamera;
 		Time* m_timer;
 		RenderingManager* m_renderingManager;
 		DebugRenderingManager* m_debugRenderingManager;

@@ -6,17 +6,22 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 	this->m_renderWindow = _renderWindow;
 	m_assetManager = new AssetManager();
 
+	m_renderingManager = new RenderingManager(RenderingManager::Game);
+	m_debugRenderingManager = new DebugRenderingManager();
+
 	m_editorRenderer = new GL33Renderer();
 
-	m_editorRenderer->InitializeRenderer(this->m_renderWindow);
+	m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager);
 	m_editorRenderer->m_assetManager = m_assetManager;
 
 	m_workingScene = new Scene();
 
-	m_editorCamera = new Camera();
-	GameObject* cameraObject = m_workingScene->CreateObject("Caamera");
-	cameraObject->AddComponent(m_editorCamera);
-	m_editorRenderer->SetCamera(m_editorCamera);
+	m_editorScene = new Scene();
+
+	GameObject* cameraObject = m_editorScene->CreateObject("EditorCamera");
+	Camera* cameraComp = new Camera();
+	cameraObject->AddComponent(cameraComp);
+	m_editorRenderer->SetCamera(cameraComp);
 
 	m_timer = new Time(10);
 
@@ -26,12 +31,12 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 
 	m_sceneManager = new SceneManager(m_assetManager);
 
-	m_renderingManager = new RenderingManager(m_editorRenderer, RenderingManager::Game);
-	m_debugRenderingManager = new DebugRenderingManager(m_editorRenderer);
-
 	m_debug = new Debug(m_debugRenderingManager);
 
 	bool terminationRequest = false;
+
+
+	m_workingScene->Initialize(m_renderingManager);
 
 	// OPENGL CONTEXT UP AND RUNNING
 	if (!m_editorRenderer->GetStatus())
@@ -40,19 +45,8 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 		return false;
 	}
 
-	m_assetManager->LoadCookedAssets();
 
-	DirectionalLightRender lr;
-	Camera* cameraLight = new Camera();
-	GameObject* bla = m_workingScene->CreateObject("ShadowCamera");
-	Transform t = bla->GetTransform();
-	t.SetRotationUsingEuler(vec3(1, 0, 0));
-	bla->SetTransform(t);
-	bla->AddComponent(cameraLight);
-	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
-	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
-	lr.m_shadowRender.m_bufferSize = 8192;
-	m_editorRenderer->m_directionalLightsVector.push_back(lr);
+	m_assetManager->LoadCookedAssets();
 
 	return true;
 }
@@ -71,15 +65,24 @@ void EditorSession::TerminateEditor()
 
 bool BLAengine::EditorSession::LoadWorkingScene(std::string filepath)
 {
+	m_renderingManager->~RenderingManager();
+	m_workingScene->~Scene();
 	Scene* scenePtr = m_sceneManager->LoadScene(filepath);
 	m_workingScene = scenePtr;
-	for (auto obj : m_workingScene->GetObjects())
-	{
-		for (auto meshRenderer : obj->GetComponents<MeshRenderer>())
-		{
-			std::cout << meshRenderer->m_mesh->GetName() << "\n";
-			m_renderingManager->RequestRenderTicket(meshRenderer);
-		}
-	}
+
+	m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
+	m_workingScene->Initialize(m_renderingManager);
+	m_editorRenderer->SwitchRenderingManager(m_renderingManager);
+
 	return true;
+}
+
+std::vector<string> BLAengine::EditorSession::GetSceneObjects()
+{
+	std::vector<string> objs;
+	for (auto go : m_workingScene->GetObjects())
+	{
+		objs.push_back(go->GetName());
+	}
+	return objs;
 }

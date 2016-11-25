@@ -6,9 +6,9 @@ Scene::Scene()
 {
 	this->m_enableSimulation = false;
 	this->m_rigidBodySystem = new RigidBodySystem(new Time(200));
-	this->m_directionalLights = vector<DirectionalLight*>();
 	this->m_sceneObjectsVector = vector<GameObject*>();
 	this->m_camera = nullptr;
+	this->m_renderingManager = nullptr;
 }
 
 Scene::~Scene()
@@ -43,7 +43,7 @@ GameObject* Scene::FindNameInScene(std::string name)
 	for (int i = 0; i < m_sceneObjectsVector.size(); i++)
 	{
 		GameObject* object = m_sceneObjectsVector[i];
-		if (object->m_objectName.compare(name) == 0)
+		if (object->GetName().compare(name) == 0)
 		{
 			return object;
 		}
@@ -56,13 +56,20 @@ void BLAengine::Scene::SetTimeObject(Time * time)
 	m_rigidBodySystem->SetTimeObject(time);
 }
 
-//void Scene::AddDirectionalLight(DirectionalLight* light)
-//{
-//	m_directionalLights.push_back(light);
-//}
+
+void BLAengine::Scene::Initialize(RenderingManager* renderingManager)
+{
+	this->m_renderingManager = renderingManager;
+}
 
 void Scene::Update()
 {
+	if (!m_renderingManager) 
+	{
+		std::cout << "Scene object not initialized !\n";
+		return;
+	}
+
 	if (m_enableSimulation)
 	{
 		m_rigidBodySystem->EnableSimulation();
@@ -80,11 +87,23 @@ void Scene::Update()
 		GameObject* object = m_sceneObjectsVector[i];
 
 		object->Update();
-	}
 
-	if (!m_directionalLights.empty())
-	{
-		m_directionalLights.at(0)->Update();
+		for (auto meshRenderer : object->GetComponents<MeshRenderer>())
+		{
+			if (meshRenderer->m_renderTicket == 0)
+			{
+				m_renderingManager->RegisterMeshRenderer(meshRenderer);
+			}
+		}
+
+		for (auto dirLightComp : object->GetComponents<DirectionalLight>())
+		{
+			Camera* shadowCamera = dirLightComp->m_parentObject->GetComponent<Camera>();
+			if (dirLightComp->m_renderTicket == 0 && shadowCamera != nullptr)
+			{
+				m_renderingManager->RegisterDirectionalLight(dirLightComp, shadowCamera);
+			}
+		}
 	}
 }
 

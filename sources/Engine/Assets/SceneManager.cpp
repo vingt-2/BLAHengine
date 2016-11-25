@@ -57,7 +57,6 @@ Scene* SceneManager::LoadScene(std::string filepath)
 		{
 			if (std::shared_ptr<MeshRendererSerializer> meshRenderSer = std::dynamic_pointer_cast<MeshRendererSerializer>(compSer))
 			{
-				std::cout << meshRenderSer->GetMaterialNames()[0];
 				MeshRenderer* meshRenderer = new MeshRenderer();
 
 				Asset* triMeshAsset = nullptr;

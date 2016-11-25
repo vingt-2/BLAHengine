@@ -39,7 +39,7 @@ namespace BLAengine
 			std::vector<string> objs;
 			for (auto go : mainScene->GetObjects())
 			{
-				objs.push_back(go->m_objectName);
+				objs.push_back(go->GetName());
 			}
 			return objs;
 		}

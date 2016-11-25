@@ -1,7 +1,6 @@
 #pragma once
 #include "../../Common/StdInclude.h"
 #include "../Assets/AssetsManager.h"
-#include "../Game/GameComponents/MeshRenderer.h"
 #include "Renderer.h"
 #include "GL33Shader.h"
 
@@ -109,7 +108,8 @@ namespace BLAengine
 	{
 	public:
 
-		void InitializeRenderer(RenderWindow* window);
+		void InitializeRenderer(RenderWindow* window, RenderingManager* renderingManager);
+		void SwitchRenderingManager(RenderingManager* renderingManager);
 		bool Update();
 
 		RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
@@ -129,7 +129,6 @@ namespace BLAengine
 
 		vec3 m_defaultColor;
 
-		vector<DirectionalLightRender> m_directionalLightsVector;
 		vector<PointLightRender> m_pointLightsVector;
 
 		GBuffer m_GBuffer;
@@ -160,6 +159,8 @@ namespace BLAengine
 		void SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, vector<GLuint> indices);
 
 	protected:
+
+		int SynchWithRenderManager();
 
 		bool GenerateArrays(GL33RenderObject& object);
 		void GenerateVertexArrayID(GL33RenderObject& object);

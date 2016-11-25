@@ -99,9 +99,12 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 	this->renderWindow = _renderWindow;
 	sharedResources = new AssetManager();
 
+	renderingManager = new RenderingManager(RenderingManager::Game);
+	debugRenderingManager = new DebugRenderingManager();
+
 	mainRenderer = new GL33Renderer();
 
-	mainRenderer->InitializeRenderer(this->renderWindow);
+	mainRenderer->InitializeRenderer(this->renderWindow, renderingManager);
 	mainRenderer->m_assetManager = sharedResources;
 	mainScene = new Scene();
 
@@ -127,9 +130,6 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	sceneManager = new SceneManager(sharedResources);
 
-	renderingManager = new RenderingManager(mainRenderer, RenderingManager::Game);
-	debugRenderingManager = new DebugRenderingManager(mainRenderer);
-
 	debug = new Debug(debugRenderingManager);
 
 	bool terminationRequest = false;
@@ -140,6 +140,8 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 		printf("Failed to initiate Context!");
 		return false;
 	}
+
+	mainScene->Initialize(renderingManager);
 
 	Texture2D* blankDiff = TextureImport::LoadBMP("BlankTexture", "./resources/textures/blankDiffuse.bmp");
 	this->sharedResources->SaveTexture(blankDiff);
@@ -175,7 +177,7 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 	ball_obj->AddComponent(meshRender);
 	meshRender->AssignTriangleMesh(sky);
 	meshRender->AssignMaterial(blankDiffusMat, 0);
-	renderingManager->RequestRenderTicket(meshRender);
+	renderingManager->RegisterMeshRenderer(meshRender);
 	
 	DirectionalLightRender lr;
 	cameraLight = new Camera();
@@ -187,7 +189,7 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
 	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
 	lr.m_shadowRender.m_bufferSize = 8192;
-	mainRenderer->m_directionalLightsVector.push_back(lr);
+	//mainRenderer->m_directionalLightsVector.push_back(lr);
 	return true;
 }
 

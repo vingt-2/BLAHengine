@@ -1,10 +1,12 @@
 #include "DirectionalLight.h"
+#include "Camera.h"
 #include "../GameObject.h"
 using namespace BLAengine;
 
 DirectionalLight::DirectionalLight(vec3 direction)
 {
 	m_lightDirection = direction;
+	m_renderTicket = 0;
 }
 
 DirectionalLight::~DirectionalLight()
@@ -14,6 +16,13 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::Update()
 {
+	vector<Camera*> cameras = m_parentObject->GetComponents<Camera>();
+	if (!cameras.size())
+	{
+		Camera* shadowCamera = new Camera();
+		
+		m_parentObject->AddComponent(shadowCamera);
+	}
 }
 
 void DirectionalLight::SetDirection(vec3 direction)

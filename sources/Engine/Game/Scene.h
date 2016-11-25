@@ -4,9 +4,7 @@
 #include "./GameComponents/RigidBody.h"
 #include "./GameComponents/Camera.h"
 #include "./GameComponents/Collider.h"
-#include "./GameComponents/DirectionalLight.h"
-#include "./GameComponents/MeshRenderer.h"
-#include "./GameComponents/PointLight.h"
+#include "./RenderingManager.h"
 #include "GameObject.h"
 
 namespace BLAengine
@@ -17,7 +15,7 @@ namespace BLAengine
 		Scene();
 		~Scene(); // TODO: IMPLEMENT!
 
-		void Initialize(); // TODO: IMPLEMENT! Find camera object and so on
+		void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
 		void Update();
 
 		GameObject* CreateObject(std::string name);
@@ -42,9 +40,8 @@ namespace BLAengine
 	private:
 
 		Camera* m_camera; //TODO: Find in object scene !
+		RenderingManager* m_renderingManager;
 		vector<GameObject*>  m_sceneObjectsVector;
-		vector<DirectionalLight*> m_directionalLights;
-		vector<PointLight*> m_pointLights;
 	};
 
 }

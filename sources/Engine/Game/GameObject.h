@@ -8,7 +8,6 @@ namespace BLAengine
 	class BLACORE_API GameObject
 	{
 	public:
-		const string m_objectName;
 
 		void Update();
 
@@ -20,6 +19,9 @@ namespace BLAengine
 
 		GameObject(string name);
 		~GameObject(void);
+
+		void SetName(std::string name) { m_objectName = name; }
+		std::string GetName() { return m_objectName; }
 
 		void AddComponent(GameComponent* component);
 
@@ -39,6 +41,7 @@ namespace BLAengine
 
 	private:
 
+		string m_objectName;
 		GameObject* m_parent;
 		Transform* m_transform;
 

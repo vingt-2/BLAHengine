@@ -40,10 +40,12 @@ bool GL33Renderer::Update()
 
 	if (width != m_renderSize.x || height != m_renderSize.y)
 	{
-		std::cout << "width: " << width << "height: " << height << "\n";
+		std::cout << "Resizing Viewport: " << width << "x" << height << "\n";
 
 		ViewportResize(width, height);
 	}
+
+	SynchWithRenderManager();
 		
 	//Set OpenGL to this context.
 	m_renderWindow->MakeGLContextCurrent();
@@ -77,10 +79,11 @@ bool GL33Renderer::Update()
 		}
 
 
-		for (DirectionalLightRender directLight : m_directionalLightsVector)
+		for (auto ticketedDirLightRender : m_directionalLightPool)
 		{
-			RenderDirectionalShadowMap(directLight.m_shadowRender);
-			DrawDirectionalLight(directLight);
+			DirectionalLightRender* dirLightRender = ticketedDirLightRender.second;
+			RenderDirectionalShadowMap(dirLightRender->m_shadowRender);
+			DrawDirectionalLight(*dirLightRender);
 		}
 
 		DrawDisplayBuffer();
@@ -113,42 +116,43 @@ void GL33Renderer::RenderGBuffer()
 
 	glUseProgram(m_GBuffer.m_geometryPassPrgmID);
 
-	for (int i = 0; i < m_renderPool.size(); i++)
+	for (auto loadedRenderObject : m_meshRenderPool)
 	{
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
+		RenderObject* renderObject = loadedRenderObject.second;
+		if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
 		{
-			mat4 MVP = m_mainRenderCamera.m_ViewProjection  * (*(renderObject->m_modelTransform));
+			mat4 MVP = m_mainRenderCamera.m_ViewProjection  * (*(gl33RenderObject->m_modelTransform));
 
 			GLuint MVPid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "MVP");
 			glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
 			//send modelTransform to shader
 			GLuint transformID = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "modelTransform");
-			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(renderObject->m_modelTransform))[0][0]);
+			glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(gl33RenderObject->m_modelTransform))[0][0]);
 
 			// Send textureSamplers to shader
-			for (uint16 samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
+			for (uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
 			{
 				glActiveTexture(GL_TEXTURE0 + samplerIndex);
 
-				glBindTexture(GL_TEXTURE_2D, renderObject->m_textureSamplersVector.at(samplerIndex).second);
+				glBindTexture(GL_TEXTURE_2D, gl33RenderObject->m_textureSamplersVector.at(samplerIndex).second);
 
-				glUniform1i(renderObject->m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
+				glUniform1i(gl33RenderObject->m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
 			}
 
-			glBindVertexArray(renderObject->m_vertexArrayID);
+			glBindVertexArray(gl33RenderObject->m_vertexArrayID);
 
 			// Draw VAO
-			glDrawElements(renderObject->m_renderType, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+			glDrawElements(gl33RenderObject->m_renderType, gl33RenderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
 			glBindVertexArray(0);
 			// Send textureSamplers to shader
-			for (uint16 samplerIndex = 0; samplerIndex < renderObject->m_textureSamplersVector.size(); samplerIndex++)
+			for (uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
 			{
 				glActiveTexture(GL_TEXTURE0 + samplerIndex);
 			}
 
-			for (uint vboIndex = 0; vboIndex < renderObject->m_vboIDVector.size(); vboIndex++)
+			for (uint vboIndex = 0; vboIndex < gl33RenderObject->m_vboIDVector.size(); vboIndex++)
 			{
 				glDisableVertexAttribArray(vboIndex);
 			}
@@ -199,10 +203,10 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
 
 	object->m_renderType = meshRenderer.m_renderType;
 
-	if (type == 0)
-		m_renderPool.push_back(object);
-	else if (type == 1)
-		m_gizmoRenderPool.push_back(object);
+	//if (type == 0)
+	//	m_meshRenderPool.push_back(object);
+	//else if (type == 1)
+	//	m_gizmoRenderPool.push_back(object);
 
 	return object;
 }
@@ -571,9 +575,9 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 
 	// Enable Z-Buffer test.
 	glEnable(GL_DEPTH_TEST);
-	for (int i = 0; i < m_renderPool.size(); i++)
+	for (int i = 0; i < m_meshRenderPool.size(); i++)
 	{
-		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_renderPool[i]))
+		if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_meshRenderPool[i]))
 		{
 			mat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelTransform));
 
@@ -590,6 +594,50 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return true;
+}
+
+int BLAengine::GL33Renderer::SynchWithRenderManager()
+{
+	if (!m_renderingManager)
+		return 0;
+
+	int addedObjectsOnCall = 0;
+
+	for (auto ticketedObject : *(m_renderingManager->GetTicketedMeshRenderers()))
+	{
+		if (m_meshRenderPool.count(ticketedObject.first) == 0)
+		{
+			MeshRenderer* meshRenderer = ticketedObject.second;
+
+			RenderObject* renderObject = this->LoadRenderObject(*meshRenderer, 0);
+
+			m_meshRenderPool[ticketedObject.first] = renderObject;
+			
+			addedObjectsOnCall++;
+		}
+	}
+
+	for (auto ticketedObject : *(m_renderingManager->GetTicketedDirectionalLights()))
+	{
+		if (m_directionalLightPool.count(ticketedObject.first) == 0)
+		{
+			std::pair<DirectionalLight*,Camera*> dirLightAndCamera = ticketedObject.second;
+
+			DirectionalLightRender* dirLightRender = new DirectionalLightRender();
+			dirLightRender->m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);
+			dirLightRender->m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
+			dirLightRender->m_shadowRender.m_bufferSize = 8192;
+			m_directionalLightPool[ticketedObject.first] = dirLightRender;
+
+			addedObjectsOnCall++;
+		}
+	}
+
+	//if (type == 0)
+	//	m_meshRenderPool.push_back(object);
+	//else if (type == 1)
+	//	m_gizmoRenderPool.push_back(object);
+	return addedObjectsOnCall;
 }
 
 bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
@@ -786,8 +834,10 @@ void GL33Renderer::CleanUpFrameDebug()
 	}
 }
 
-void GL33Renderer::InitializeRenderer(RenderWindow* window)
+void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* renderManager)
 {
+	m_renderingManager = renderManager;
+
 	bool initialized = false;
 #ifdef GLFW_INTERFACE
 	if (GLFWRenderWindow* render = dynamic_cast<GLFWRenderWindow*>(window))
@@ -866,6 +916,31 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window)
 	dirLightShader.LoadShaderCode("./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
 
 	m_glResources.GLLoadShaderProgram(dirLightShader);
+}
+
+void BLAengine::GL33Renderer::SwitchRenderingManager(RenderingManager * renderingManager)
+{
+	for (auto entry : m_meshRenderPool)
+	{
+		RenderObject* renderObject = entry.second;
+		if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
+		{
+			this->CleanUp(*gl33RenderObject);
+		}
+	}
+	m_meshRenderPool.clear();
+
+	for (auto entry : m_gizmoRenderPool)
+	{
+		RenderObject* renderObject = entry.second;
+		if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
+		{
+			this->CleanUp(*gl33RenderObject);
+		}
+	}
+	m_gizmoRenderPool.clear();
+
+	m_renderingManager = renderingManager;
 }
 
 bool GBuffer::InitializeGBuffer()

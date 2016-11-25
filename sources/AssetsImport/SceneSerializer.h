@@ -186,7 +186,7 @@ public:
 		BLAengine::Transform transform = gobject->GetTransform();
 		m_transform.FromTransform(&transform);
 
-		m_objectName = gobject->m_objectName;
+		m_objectName = gobject->GetName();
 
 		vector<BLAengine::MeshRenderer*> meshRenderers = gobject->GetComponents<BLAengine::MeshRenderer>();
 		for (int i = 0; i < meshRenderers.size(); i++)

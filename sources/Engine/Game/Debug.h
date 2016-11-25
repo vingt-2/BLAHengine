@@ -1,5 +1,6 @@
 #pragma once
 #include "../Game/RenderingManager.h"
+#include "GameAlgebra\Ray.h"
 #include "..\..\Common\StdInclude.h"
 
 /*
