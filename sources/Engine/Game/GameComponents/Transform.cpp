@@ -47,6 +47,12 @@ void Transform::SetRotationUsingEuler(vec3 eulerAngles)
 	);
 }
 
+vec3 Transform::GetEulerRotation() const
+{
+	//TODO: Implement.
+	return vec3(0);
+}
+
 vec3 Transform::LocalDirectionToWorld(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,0.f);

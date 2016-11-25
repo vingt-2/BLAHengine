@@ -20,7 +20,7 @@ namespace BLAengine
 		void Initialize(); // TODO: IMPLEMENT! Find camera object and so on
 		void Update();
 
-		void AddObject(GameObject* object);
+		GameObject* CreateObject(std::string name);
 
 		GameObject* FindNameInScene(std::string name);
 

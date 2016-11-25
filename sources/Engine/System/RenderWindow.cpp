@@ -178,6 +178,7 @@ void WPFRenderWindow::MakeGLContextCurrent()
 
 void WPFRenderWindow::WriteSize(int x, int y)
 {
+	//std::cout << "Writing size: " << x << ", " << y << "\n";
 	m_width = x;
 	m_height = y;
 }

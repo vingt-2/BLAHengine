@@ -1,11 +1,13 @@
 #pragma once
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
-#include "../../AssetsImport/MeshSerializer.h"
-#include "../../AssetsImport/TextureSerializer.h"
-#include "../../AssetsImport/MaterialSerializer.h"
+#include "PolygonalMesh.h"
 #include "Material.h"
 #include "Texture.h"
+
+#define TRIANGLE_MESH_SUBPATH "./Cooked/TriangleMeshs/"
+#define TEXTURE_SUBPATH "./Cooked/Textures/"
+#define MATERIAL_SUBPATH "./Cooked/Materials/"
 
 namespace BLAengine
 {
@@ -23,6 +25,8 @@ namespace BLAengine
 
 		AssetManager(void);
 		~AssetManager(void);
+
+		int LoadCookedAssets();
 
 		AssetType GetAsset(std::string filepath, Asset* &assetPtr);
 

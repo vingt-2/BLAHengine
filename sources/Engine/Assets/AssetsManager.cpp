@@ -1,4 +1,8 @@
 #include "AssetsManager.h"
+#include "../../AssetsImport/MeshSerializer.h"
+#include "../../AssetsImport/TextureSerializer.h"
+#include "../../AssetsImport/MaterialSerializer.h"
+#include "../../Common/dirent.h"
 
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
@@ -14,6 +18,51 @@ AssetManager::AssetManager(void)
 
 AssetManager::~AssetManager(void)
 {
+}
+
+static std::vector<string> FilesInDir(string dirname)
+{
+	vector<string> result;
+	DIR *dir;
+	struct dirent *ent;
+
+	dir = opendir(dirname.data());
+	if (dir != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL) 
+		{
+			switch (ent->d_type) 
+			{
+			case DT_REG:
+				result.push_back(ent->d_name);
+				break;
+			}
+		}
+	}
+	closedir(dir);
+	return result;
+}
+
+int BLAengine::AssetManager::LoadCookedAssets()
+{
+	std::vector<string> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
+	std::vector<string> matNames	 = FilesInDir(MATERIAL_SUBPATH);
+	std::vector<string> textureNames = FilesInDir(TEXTURE_SUBPATH);
+
+	for (auto n : triMeshNames)
+	{
+		this->LoadTriangleMesh(n);
+	}
+	for (auto n : matNames)
+	{
+		this->LoadMaterial(n);
+	}
+	for (auto n : textureNames)
+	{
+		this->LoadTexture(n);
+	}
+
+	return triMeshNames.size() + matNames.size() + textureNames.size();
 }
 
 AssetManager::AssetType BLAengine::AssetManager::GetAsset(std::string filepath, Asset* &assetPtr)
@@ -73,11 +122,11 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 
 
 	std::fstream fs;
-	fs.open(filepath, std::fstream::in | std::fstream::binary);
+	fs.open(std::string(TRIANGLE_MESH_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
 
 	if (!fs.is_open())
 	{
-		cout << "Could not load mesh: " << filepath << "\n";
+		cout << "Could not load mesh: " << std::string(TRIANGLE_MESH_SUBPATH) + filepath << "\n";
 		return false;
 	}
 
@@ -106,11 +155,11 @@ bool AssetManager::LoadTexture(std::string filepath)
 	Texture2DSerializer texture2DSerializer;
 
 	std::fstream fs;
-	fs.open(filepath, std::fstream::in | std::fstream::binary);
+	fs.open(std::string(TEXTURE_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
 
 	if (!fs.is_open())
 	{
-		cout << "Could not load Texture file: " << filepath << "\n";
+		cout << "Could not load Texture file: " << std::string(TEXTURE_SUBPATH) + filepath << "\n";
 		return false;
 	}
 
@@ -140,11 +189,11 @@ bool AssetManager::LoadMaterial(std::string filepath)
 	MaterialSerializer matSerializer;
 
 	std::fstream fs;
-	fs.open(filepath, std::fstream::in | std::fstream::binary);
+	fs.open(std::string(MATERIAL_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
 
 	if (!fs.is_open())
 	{
-		cout << "Could not load Texture file: " << filepath << "\n";
+		cout << "Could not load Texture file: " << std::string(MATERIAL_SUBPATH) + filepath << "\n";
 		return false;
 	}
 
@@ -170,11 +219,11 @@ bool BLAengine::AssetManager::SaveMaterial(Material * mat)
 	matSerializer.FromMaterial(mat);
 
 	std::fstream fs;
-	fs.open(mat->GetName(), std::fstream::out | std::fstream::binary);
+	fs.open(std::string(MATERIAL_SUBPATH) + mat->GetName(), std::fstream::out | std::fstream::binary);
 
 	if (!fs.is_open())
 	{
-		cout << "Could not Write on file " << mat->GetName() << "\n";
+		cout << "Could not Write on file " << std::string(MATERIAL_SUBPATH) + mat->GetName() << "\n";
 		return false;
 	}
 
@@ -192,11 +241,11 @@ bool BLAengine::AssetManager::SaveTexture(Texture2D * tex)
 	texture2DSerializer.FromTexture(tex);
 
 	std::fstream fs;
-	fs.open(tex->GetName(), std::fstream::out | std::fstream::binary);
+	fs.open(std::string(TEXTURE_SUBPATH) + tex->GetName(), std::fstream::out | std::fstream::binary);
 
 	if (!fs.is_open())
 	{
-		cout << "Could not Write on file " << tex->GetName() << "\n";
+		cout << "Could not Write on file " << std::string(TEXTURE_SUBPATH) + tex->GetName() << "\n";
 		return false;
 	}
 
@@ -214,11 +263,11 @@ bool AssetManager::SaveTriangleMesh(TriangleMesh* mesh)
 	meshSerializer.BuildFromMesh(mesh);
 
 	std::fstream fs;
-	fs.open(mesh->GetName(), std::fstream::out | std::fstream::binary);
+	fs.open(std::string(TRIANGLE_MESH_SUBPATH) + mesh->GetName(), std::fstream::out | std::fstream::binary);
 	
 	if (!fs.is_open())
 	{
-		cout << "Could not Write on file " << mesh->GetName() << "\n";
+		cout << "Could not Write on file " << std::string(TRIANGLE_MESH_SUBPATH) + mesh->GetName() << "\n";
 		return false;
 	}
 	

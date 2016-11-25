@@ -14,8 +14,8 @@
 
 using namespace std;
 
-#define BLA_NO_DLL
-//#define EXPORT_DLL
+//#define BLA_NO_DLL
+#define EXPORT_DLL
 
 #ifndef BLA_NO_DLL
 #ifdef EXPORT_DLL

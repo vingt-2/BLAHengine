@@ -3,7 +3,8 @@ using namespace BLAengine;
 
 GL33Renderer::GL33Renderer():
 	debug_renderGBuffer(false),
-	m_renderDebug(true)
+	m_renderDebug(true),
+	m_defaultColor(0.3,0.3,0.3)
 {}
 
 GL33Renderer::~GL33Renderer() {}
@@ -35,8 +36,12 @@ bool GL33Renderer::Update()
 	int width, height;
 	m_renderWindow->GetSize(width, height);
 
+	//std::cout << "width: " << width << "height: " << height << "\n";
+
 	if (width != m_renderSize.x || height != m_renderSize.y)
 	{
+		std::cout << "width: " << width << "height: " << height << "\n";
+
 		ViewportResize(width, height);
 	}
 		
@@ -362,7 +367,9 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
 	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT4 };
 	glDrawBuffers(1, DrawBuffers);
 
-	//glClear(GL_COLOR_BUFFER_BIT);
+	// Clear Frame Buffer.
+	glClearColor(m_defaultColor.x, m_defaultColor.y, m_defaultColor.z, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
@@ -713,7 +720,7 @@ bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
 			}
 		}
 
-		cout << "Could not find shader loaded shader pgrm: " << name << "\n";
+		//cout << "Could not find shader loaded shader pgrm: " << name << "\n";
 	}
 	return false;
 }
@@ -802,27 +809,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window)
 		this->m_isContextEnabled = true;
 		m_renderWindow = window;
 
-		initialized = true;
-
-		this->m_glResources.m_systemShaders.LoadGeometryPassProgram("./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
-		this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
-		this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
-		this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
-		this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
-		this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
-
-		this->m_glResources.GLLoadSystemShaders();
-
-		m_GBuffer.m_drawSphereStencilPgrmID = this->m_glResources.m_systemShaders.m_drawSphereStencilPgrm.m_loaded_id;
-		m_GBuffer.m_geometryPassPrgmID = this->m_glResources.m_systemShaders.m_geometryPassPrgm.m_loaded_id;
-		DrawColorBufferPrgmID = this->m_glResources.m_systemShaders.m_drawColorBufferPrgm.m_loaded_id;
-		m_debugRayPgrmID = this->m_glResources.m_systemShaders.m_debugRayPgrm.m_loaded_id;
-	
-		GL33Shader dirLightShader = GL33Shader("DirectionalLight");
-		dirLightShader.LoadShaderCode("./resources/shaders/Lighting/DirectLightVS.glsl","./resources/shaders/Lighting/DirectLightFS.glsl");
-
-		m_glResources.GLLoadShaderProgram(dirLightShader);
-		
+		initialized = true;		
 	}
 #endif
 	if (WPFRenderWindow* render = dynamic_cast<WPFRenderWindow*>(window))
@@ -861,6 +848,24 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window)
 	}
 
 	// Hardcode system shaders loading
+	this->m_glResources.m_systemShaders.LoadGeometryPassProgram("./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
+	this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
+	this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
+	this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
+	this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
+	this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
+
+	this->m_glResources.GLLoadSystemShaders();
+
+	m_GBuffer.m_drawSphereStencilPgrmID = this->m_glResources.m_systemShaders.m_drawSphereStencilPgrm.m_loaded_id;
+	m_GBuffer.m_geometryPassPrgmID = this->m_glResources.m_systemShaders.m_geometryPassPrgm.m_loaded_id;
+	DrawColorBufferPrgmID = this->m_glResources.m_systemShaders.m_drawColorBufferPrgm.m_loaded_id;
+	m_debugRayPgrmID = this->m_glResources.m_systemShaders.m_debugRayPgrm.m_loaded_id;
+
+	GL33Shader dirLightShader = GL33Shader("DirectionalLight");
+	dirLightShader.LoadShaderCode("./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
+
+	m_glResources.GLLoadShaderProgram(dirLightShader);
 }
 
 bool GBuffer::InitializeGBuffer()

@@ -58,6 +58,7 @@ public:
 	virtual void ToGameComponent(BLAengine::GameComponent* comp)
 	{}
 
+private:
 	friend class cereal::access;
 
 	template <class Archive>
@@ -77,16 +78,17 @@ public:
 		if (BLAengine::MeshRenderer* meshRender = dynamic_cast<BLAengine::MeshRenderer*>(comp))
 		{
 			m_triangleMeshName = meshRender->m_mesh->GetName();
+
+			for (auto material : meshRender->m_materials)
+			{
+				m_materialNames.push_back(material->GetName());
+			}
 		}
 	}
-	void ToGameComponent(BLAengine::GameComponent* comp)
-	{
-		GameComponentSerializer::ToGameComponent(comp);
-		if (BLAengine::MeshRenderer* meshRender = dynamic_cast<BLAengine::MeshRenderer*>(comp))
-		{
-			//		m_triangleMeshName = meshRender->m_mesh->GetName();
-		}
-	}
+	
+	std::string GetMeshName() { return m_triangleMeshName; }
+	
+	vector<std::string> GetMaterialNames() { return m_materialNames; }
 
 private:
 	friend class cereal::access;
@@ -179,7 +181,7 @@ public:
 
 	GameObjectSerializer() = default;
 
-	virtual void FromGameObject(BLAengine::GameObject* gobject)
+	void FromGameObject(BLAengine::GameObject* gobject)
 	{
 		BLAengine::Transform transform = gobject->GetTransform();
 		m_transform.FromTransform(&transform);
@@ -219,17 +221,17 @@ public:
 			m_componentsVector.push_back(gCompSerializer);
 		}
 	}
-	virtual void ToGameObject(BLAengine::GameObject* gobject)
-	{
-		BLAengine::Transform transform;
-		m_transform.ToTransform(&transform);
-		gobject->SetTransform(transform);
-		m_objectName = gobject->m_objectName;
 	
-		/*
-			FILL IN THE COMPONENTS MAYBE? ACTUALLY ... Not maybe. DO IT
-		*/
+	BLAengine::Transform GetTransform()
+	{
+		BLAengine::Transform t;
+		m_transform.ToTransform(&t);
+		return t;
 	}
+
+	std::vector<std::shared_ptr<GameComponentSerializer>> GetComponentVector() { return m_componentsVector; }
+
+	std::string GetName() { return m_objectName; }
 
 private:
 
@@ -275,29 +277,13 @@ public:
 		}
 	}
 
-	BLAengine::Scene* BuildScene()
-	{
-		for (int i = 0; i < m_objectsVector.size(); i++)
-		{
-			//GameObjectSerializer objSerial = m_objectsVector[i];
-
-			//GameObject* obj = new GameObject();
-			//objSerial.ToGameObject...
-
-			//if (GameCharSerializer* gameCharPtr = dynamic_cast<GameCharSerializer*>(obj))
-			//{
-			//	cout << gameCharPtr->m_objectName << "\n";
-			//}
-		}
-
-		return nullptr;
-	}
-
+	std::vector<GameObjectSerializer> GetGameObjectVector() { return m_objectsVector; }
+	std::string GetName() { return m_sceneName; }
 private:
 	friend class cereal::access;
 
 	std::vector<GameObjectSerializer> m_objectsVector;
-	std::string sceneName;
+	std::string m_sceneName;
 
 	template <class Archive>
 	void serialize(Archive & archive)

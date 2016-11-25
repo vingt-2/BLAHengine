@@ -17,7 +17,7 @@ namespace BLAengine
 
 		void UpdateTransform();
 		void SetRotationUsingEuler(vec3 eulerAngles);
-
+		vec3 GetEulerRotation() const;
 		vec3 LocalDirectionToWorld(vec3 direction) const;
 		vec3 LocalPositionToWorld(vec3 position) const;
 		vec3 WorldDirectionToLocal(vec3 direction) const;

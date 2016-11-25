@@ -127,6 +127,8 @@ namespace BLAengine
 		GLuint DrawDepthBufferPrgmID;
 		//
 
+		vec3 m_defaultColor;
+
 		vector<DirectionalLightRender> m_directionalLightsVector;
 		vector<PointLightRender> m_pointLightsVector;
 

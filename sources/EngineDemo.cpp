@@ -113,10 +113,6 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 		mainCamera->m_isControlEnabled = true;
 	}
 
-	GameObject* cameraObject = new GameObject("Camera");
-	cameraObject->AddComponent(mainCamera);
-
-	mainScene->AddObject(cameraObject);
 
 	mainRenderer->SetCamera(mainCamera);
 
@@ -124,11 +120,12 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 	mainScene = new Scene();
 
+	GameObject* cameraObject = mainScene->CreateObject("Camera");
+	cameraObject->AddComponent(mainCamera);
+
 	mainScene->SetTimeObject(timer);
 
-	mainScene->AddObject(cameraObject);
-
-	sceneManager = new SceneManager();
+	sceneManager = new SceneManager(sharedResources);
 
 	renderingManager = new RenderingManager(mainRenderer, RenderingManager::Game);
 	debugRenderingManager = new DebugRenderingManager(mainRenderer);
@@ -165,44 +162,27 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 	this->sharedResources->SaveTriangleMesh(&skyMesh);
 	this->sharedResources->LoadTriangleMesh("SkyMesh");
 
-	this->sharedResources->LoadTriangleMesh("sponzamesh.dat");
-	Asset* floorAsset = nullptr;
-	this->sharedResources->GetAsset("sponzamesh.dat", floorAsset);
-
-	this->sharedResources->LoadTriangleMesh("sponzamesh.dat");
 	Asset* skyMeshAsset = nullptr;
 	this->sharedResources->GetAsset("SkyMesh", skyMeshAsset);
 
-	TriangleMesh* floor = (TriangleMesh*)floorAsset;
 	TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
 
-	GameObject* floor_obj = new GameObject("Sponza");
-	MeshRenderer* meshRender = new MeshRenderer();
-	floor_obj->AddComponent(meshRender);
-	meshRender->AssignTriangleMesh(floor);
-	meshRender->AssignMaterial(blankDiffusMat, 0);
-	renderingManager->RequestRenderTicket(meshRender);
-	mainScene->AddObject(floor_obj);
-
-	GameObject* ball_obj = new GameObject("sky");
+	GameObject* ball_obj = mainScene->CreateObject("sky");
 	Transform t = ball_obj->GetTransform();
 	t.m_scale = vec3(5000, 5000, 5000);
 	ball_obj->SetTransform(t);
-	meshRender = new MeshRenderer();
+	MeshRenderer* meshRender = new MeshRenderer();
 	ball_obj->AddComponent(meshRender);
 	meshRender->AssignTriangleMesh(sky);
 	meshRender->AssignMaterial(blankDiffusMat, 0);
 	renderingManager->RequestRenderTicket(meshRender);
-	mainScene->AddObject(ball_obj);
 	
 	DirectionalLightRender lr;
 	cameraLight = new Camera();
-	GameObject* bla = new GameObject("ShadowCamera");
-	
+	GameObject* bla = mainScene->CreateObject("ShadowCamera");
 	t = bla->GetTransform();
 	t.SetRotationUsingEuler(vec3(1, 0, 0));
 	bla->SetTransform(t);
-
 	bla->AddComponent(cameraLight);
 	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
 	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
@@ -213,6 +193,7 @@ bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
 
 void EngineDemo::UpdateDemo()
 {
+	t += 0.0003;
 	timer->Update();
 	averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
 	averageProc += mainScene->m_rigidBodySystem->m_collisionProcessor->m_processingTime;
@@ -261,6 +242,14 @@ void EngineDemo::UpdateDemo()
 		moveLight = !moveLight;
 		lastPressS = time;
 	}
+
+	GameObject* lightCam = mainScene->FindNameInScene("ShadowCamera");
+
+	Transform lightT = lightCam->GetTransform();
+
+	lightT.SetRotationUsingEuler(vec3(2*t, 0, 0));
+
+	lightCam->SetTransform(lightT);
 
 	if (renderWindow->GetKeyPressed(GLFW_KEY_BACKSPACE) && (time - lastPressG) > 0.5)
 	{
@@ -331,6 +320,8 @@ void EngineDemo::UpdateDemo()
 	if (renderWindow->GetKeyPressed(GLFW_KEY_ESCAPE))
 	{
 		terminationRequest = true;
+
+		sceneManager->SaveScene("Test",mainScene);
 	}
 #endif
 }

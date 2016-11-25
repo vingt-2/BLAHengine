@@ -3,11 +3,10 @@
 #include "./Common/Maths.h"
 
 #include "./Engine/Renderer/GL33Renderer.h"
-
-#include "AssetsImport\OBJImport.h"
 #include "Engine\Game\RenderingManager.h"
 #include "Engine\Game\Debug.h"
 #include "./Engine/Assets/SceneManager.h"
+#include "AssetsImport\OBJImport.h"
 #include "./Engine/Game/GameComponents/Collider.h"
 
 namespace BLAengine
@@ -34,6 +33,16 @@ namespace BLAengine
 		void TerminateDemo();
 
 		bool ShouldTerminate() { return terminationRequest; };
+
+		std::vector<string> GetSceneObjects()
+		{
+			std::vector<string> objs;
+			for (auto go : mainScene->GetObjects())
+			{
+				objs.push_back(go->m_objectName);
+			}
+			return objs;
+		}
 	private:
 
 		// Required Engine Modules
@@ -74,5 +83,6 @@ namespace BLAengine
 			int solvIt = 0;
 			float lightRotation = 0;
 			bool moveLight = true;
+			float t = 0;
 	};
 }

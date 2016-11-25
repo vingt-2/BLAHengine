@@ -16,20 +16,29 @@ Scene::~Scene()
 	// TODO: DO SOME STUFF. YO
 }
 
-void Scene::AddObject(GameObject* objectPtr)
-{
-	m_sceneObjectsVector.push_back(objectPtr);
+//void Scene::AddObject(GameObject* objectPtr)
+//{
+//	m_sceneObjectsVector.push_back(objectPtr);
+//
+//	if (RigidBody* rgbdy = objectPtr->GetComponent<RigidBody>())
+//	{
+//		if (Collider* collider = objectPtr->GetComponent<Collider>())
+//		{
+//			m_rigidBodySystem->RegisterRigidBody(*rgbdy);
+//		}
+//	}
+//}
 
-	if (RigidBody* rgbdy = objectPtr->GetComponent<RigidBody>())
-	{
-		if (Collider* collider = objectPtr->GetComponent<Collider>())
-		{
-			m_rigidBodySystem->RegisterRigidBody(*rgbdy);
-		}
-	}
+GameObject* Scene::CreateObject(std::string name)
+{
+	GameObject* newObject = new GameObject(name);
+
+	m_sceneObjectsVector.push_back(newObject);
+
+	return newObject;
 }
 
-GameObject * BLAengine::Scene::FindNameInScene(std::string name)
+GameObject* Scene::FindNameInScene(std::string name)
 {
 	for (int i = 0; i < m_sceneObjectsVector.size(); i++)
 	{
