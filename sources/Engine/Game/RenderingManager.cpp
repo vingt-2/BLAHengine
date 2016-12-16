@@ -14,7 +14,7 @@ RenderingManager::~RenderingManager()
 
 }
 
-RenderTicket RenderingManager::RegisterMeshRenderer(MeshRenderer* meshRender)
+uint RenderingManager::RegisterMeshRenderer(MeshRenderer* meshRender)
 {
 	//CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
 	int renderTicket = ++(this->currentTicket);
@@ -32,7 +32,7 @@ bool RenderingManager::CancelMeshRendererTicket(MeshRenderer* meshRender)
 	return true;
 }
 
-RenderTicket BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera)
+uint BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera)
 {
 	//CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
 	int renderTicket = ++(this->currentTicket);
@@ -42,7 +42,7 @@ RenderTicket BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLi
 	return this->currentTicket;
 }
 
-RenderTicket BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
+uint BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
 {
 	int renderTicket = dirLight->m_renderTicket;
 	auto itTicket = m_ticketedDirLights.find(renderTicket);
@@ -50,12 +50,12 @@ RenderTicket BLAengine::RenderingManager::CancelDirectionalLightTicket(Direction
 	return true;
 }
 
-std::unordered_map<RenderTicket, MeshRenderer*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
+std::unordered_map<uint, MeshRenderer*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
 {
 	return &(m_ticketedMeshRenderers);
 }
 
-std::unordered_map<RenderTicket, std::pair<DirectionalLight*,Camera*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
+std::unordered_map<uint, std::pair<DirectionalLight*,Camera*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
 {
 	return &(m_ticketedDirLights);
 }
@@ -66,6 +66,9 @@ void RenderingManager::Update()
 
 void DebugRenderingManager::LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh)
 {
-	//m_renderer->LoadDebugLines(lineMesh);
+	m_lineMeshes.push_back(lineMesh);
 }
 
+void DebugRenderingManager::Update()
+{
+}

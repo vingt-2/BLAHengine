@@ -57,6 +57,9 @@ vec3 Transform::LocalDirectionToWorld(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,0.f);
 	hDirection = m_transformMatrix * hDirection;
+	hDirection.x /= m_scale.x;
+	hDirection.y /= m_scale.y;
+	hDirection.z /= m_scale.z;
 	return vec3(hDirection.x,hDirection.y,hDirection.z);
 }
 
@@ -71,6 +74,9 @@ vec3 Transform::WorldDirectionToLocal(vec3 direction) const
 {
 	vec4 hDirection = vec4(direction.x,direction.y,direction.z,0.f);
 	hDirection = inverse(m_transformMatrix) * hDirection;
+	hDirection.x *= m_scale.x;
+	hDirection.y *= m_scale.y;
+	hDirection.z *= m_scale.z;
 	return vec3(hDirection.x,hDirection.y,hDirection.z);
 }
 

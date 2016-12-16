@@ -3,7 +3,6 @@
 #include "../../Common/StdInclude.h"
 #include "./GameComponents/RigidBody.h"
 #include "./GameComponents/Camera.h"
-#include "./GameComponents/Collider.h"
 #include "./RenderingManager.h"
 #include "GameObject.h"
 
@@ -19,10 +18,11 @@ namespace BLAengine
 		void Update();
 
 		GameObject* CreateObject(std::string name);
-
+		bool DeleteObject(std::string name);
 		GameObject* FindNameInScene(std::string name);
 
 		vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
+		Camera* GetMainCamera();
 		vector<Contact>* GetContacts();
 
 		bool m_enableSimulation;
@@ -34,8 +34,7 @@ namespace BLAengine
 
 		void SetTimeObject(Time* time); //TODO: Implement !
 
-		Ray ScreenToRay(vec2 renderSize, vec2 cursor, float length);
-		GameObject* PickGameObjectInScene(Ray ray, vec3 &hitInWorld);
+		std::pair<GameObject*, Collider::RayCollision> PickGameObjectInScene(Ray ray);
 
 	private:
 

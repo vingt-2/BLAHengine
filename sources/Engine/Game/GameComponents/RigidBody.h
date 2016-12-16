@@ -52,7 +52,7 @@ namespace BLAengine
 		Collider* m_collider;
 
 		void SetCollider(Collider* collider) { m_collider = collider; }
-		void SetMeshCollider(TriangleMesh* mesh) { m_collider = new Collider(mesh); }
+		void SetMeshCollider(TriangleMesh* mesh) { m_collider = new MeshCollider(mesh); }
 
 		void Update();
 

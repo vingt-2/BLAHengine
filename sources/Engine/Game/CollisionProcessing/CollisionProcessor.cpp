@@ -51,7 +51,7 @@ void CollisionProcessor::BroadPhaseDetection()
 			{
 				vec3* nxtPos1 = &(body1->m_nextState->m_nextPos);
 				vec3* nxtPos2 = &(body2->m_nextState->m_nextPos);
-				if (length(*nxtPos1 - *nxtPos2) < (body1->m_collider->m_boundingRadius + body2->m_collider->m_boundingRadius))
+				if (length(*nxtPos1 - *nxtPos2) < (body1->m_collider->GetBoundingRadius() + body2->m_collider->GetBoundingRadius()))
 					NarrowPhaseDetection(body1, body2);
 			}
 		}
@@ -60,127 +60,127 @@ void CollisionProcessor::BroadPhaseDetection()
 
 void CollisionProcessor::NarrowPhaseDetection(RigidBody* body1, RigidBody* body2)
 {
-	mat4 t1 = body1->GetObjectTransform().m_transformMatrix;
-	body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
+	//mat4 t1 = body1->GetObjectTransform().m_transformMatrix;
+	//body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
 
-	mat4 t2 = body2->GetObjectTransform().m_transformMatrix;
-	body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
+	//mat4 t2 = body2->GetObjectTransform().m_transformMatrix;
+	//body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
 
-	vector<pair<int, int>> collidingTriangles;
-	vector<float> collisionPoints;
-	vector<int> collidingFaces;
-	vector<int> colSizes;
-	bool collision = body1->m_collider->m_collisionMesh->collision(body2->m_collider->m_collisionMesh);
+	//vector<pair<int, int>> collidingTriangles;
+	//vector<float> collisionPoints;
+	//vector<int> collidingFaces;
+	//vector<int> colSizes;
+	//bool collision = body1->m_collider->m_collisionMesh->collision(body2->m_collider->m_collisionMesh);
 
-	if (collision)
-	{
-		body1->m_collider->m_collisionMesh->getCollisionPoints(&collisionPoints);
-		body1->m_collider->m_collisionMesh->getCollidingTriangles(&collidingTriangles);
-		body1->m_collider->m_collisionMesh->getPointsFromTri(&collidingFaces);
+	//if (collision)
+	//{
+	//	body1->m_collider->m_collisionMesh->getCollisionPoints(&collisionPoints);
+	//	body1->m_collider->m_collisionMesh->getCollidingTriangles(&collidingTriangles);
+	//	body1->m_collider->m_collisionMesh->getPointsFromTri(&collidingFaces);
 
-		for (int col = 0; col < collidingTriangles.size(); col++)
-		{
-			int triIndexBody1 = collidingTriangles.at(col).first;
-			int triIndexBody2 = collidingTriangles.at(col).second;
+	//	for (int col = 0; col < collidingTriangles.size(); col++)
+	//	{
+	//		int triIndexBody1 = collidingTriangles.at(col).first;
+	//		int triIndexBody2 = collidingTriangles.at(col).second;
 
-			vec3 collisionPoint(collisionPoints[3 * col], collisionPoints[3 * col + 1], collisionPoints[3 * col + 2]);
+	//		vec3 collisionPoint(collisionPoints[3 * col], collisionPoints[3 * col + 1], collisionPoints[3 * col + 2]);
 
-			int collidingFace = collidingFaces[col];
+	//		int collidingFace = collidingFaces[col];
 
-			//Degenerate collision cases may be detected
-			if (length(collisionPoint) < 0.01)
-				continue;
+	//		//Degenerate collision cases may be detected
+	//		if (length(collisionPoint) < 0.01)
+	//			continue;
 
-			vec3 body1ContactNormal(0);
-			vec3 body2ContactNormal(0);
-			vec3 body1ContactTangent(0);
-			vec3 body2ContactTangent(0);
+	//		vec3 body1ContactNormal(0);
+	//		vec3 body2ContactNormal(0);
+	//		vec3 body1ContactTangent(0);
+	//		vec3 body2ContactTangent(0);
 
-			vec3 body1ContactNormals[3] = { vec3(0), vec3(0), vec3(0) };
-			vec3 body1ContactVertices[3] = { vec3(0), vec3(0), vec3(0) };
+	//		vec3 body1ContactNormals[3] = { vec3(0), vec3(0), vec3(0) };
+	//		vec3 body1ContactVertices[3] = { vec3(0), vec3(0), vec3(0) };
 
-			vec3 body2ContactNormals[3] = { vec3(0), vec3(0), vec3(0) };
-			vec3 body2ContactVertices[3] = { vec3(0), vec3(0), vec3(0) };
+	//		vec3 body2ContactNormals[3] = { vec3(0), vec3(0), vec3(0) };
+	//		vec3 body2ContactVertices[3] = { vec3(0), vec3(0), vec3(0) };
 
-			for (int k = 0; k < 3; k++)
-			{
-				uint32_t vertIndexK1 = body1->m_collider->m_vertIndices->at(3 * triIndexBody1 + k);
+	//		for (int k = 0; k < 3; k++)
+	//		{
+	//			uint32_t vertIndexK1 = body1->m_collider->m_vertIndices->at(3 * triIndexBody1 + k);
 
-				body1ContactVertices[k] = body1->m_collider->m_triVertices->at((int)vertIndexK1);
-				if (body1->m_collider->m_triNormals->size() != 0) body1ContactNormals[k] = body1->m_collider->m_triNormals->at((int)vertIndexK1);
+	//			body1ContactVertices[k] = body1->m_collider->m_triVertices->at((int)vertIndexK1);
+	//			if (body1->m_collider->m_triNormals->size() != 0) body1ContactNormals[k] = body1->m_collider->m_triNormals->at((int)vertIndexK1);
 
-				uint32_t vertIndexK2 = body2->m_collider->m_vertIndices->at(3 * triIndexBody2 + k);
+	//			uint32_t vertIndexK2 = body2->m_collider->m_vertIndices->at(3 * triIndexBody2 + k);
 
-				body2ContactVertices[k] = body2->m_collider->m_triVertices->at((int)vertIndexK2);
-				if (body2->m_collider->m_triNormals->size() != 0) body2ContactNormals[k] = body2->m_collider->m_triNormals->at((int)vertIndexK2);
-			}
+	//			body2ContactVertices[k] = body2->m_collider->m_triVertices->at((int)vertIndexK2);
+	//			if (body2->m_collider->m_triNormals->size() != 0) body2ContactNormals[k] = body2->m_collider->m_triNormals->at((int)vertIndexK2);
+	//		}
 
-			vec3 contactInBody1 = body1->GetObjectTransform().WorldPositionToLocal(collisionPoint);
-			vec3 contactInBody2 = body2->GetObjectTransform().WorldPositionToLocal(collisionPoint);
+	//		vec3 contactInBody1 = body1->GetObjectTransform().WorldPositionToLocal(collisionPoint);
+	//		vec3 contactInBody2 = body2->GetObjectTransform().WorldPositionToLocal(collisionPoint);
 
-			vec3 tangent1Body1 = body1ContactVertices[1] - body1ContactVertices[0];
-			vec3 tangent2Body1 = body1ContactVertices[2] - body1ContactVertices[0];
+	//		vec3 tangent1Body1 = body1ContactVertices[1] - body1ContactVertices[0];
+	//		vec3 tangent2Body1 = body1ContactVertices[2] - body1ContactVertices[0];
 
-			vec3 tangent1Body2 = body2ContactVertices[1] - body2ContactVertices[0];
-			vec3 tangent2Body2 = body2ContactVertices[2] - body2ContactVertices[0];
+	//		vec3 tangent1Body2 = body2ContactVertices[1] - body2ContactVertices[0];
+	//		vec3 tangent2Body2 = body2ContactVertices[2] - body2ContactVertices[0];
 
-			body1ContactNormal = normalize(cross(tangent1Body1, tangent2Body1));
-			body2ContactNormal = normalize(cross(tangent1Body2, tangent2Body2));
+	//		body1ContactNormal = normalize(cross(tangent1Body1, tangent2Body1));
+	//		body2ContactNormal = normalize(cross(tangent1Body2, tangent2Body2));
 
-			body1ContactTangent = normalize(tangent1Body1);
-			body2ContactTangent = normalize(tangent1Body2);
+	//		body1ContactTangent = normalize(tangent1Body1);
+	//		body2ContactTangent = normalize(tangent1Body2);
 
-			// Normals should point outwards
-			body1ContactNormal *= (dot(contactInBody1, body1ContactNormal) < 0 ? -1.f : 1.f);
-			body2ContactNormal *= (dot(contactInBody2, body2ContactNormal) < 0 ? -1.f : 1.f);
+	//		// Normals should point outwards
+	//		body1ContactNormal *= (dot(contactInBody1, body1ContactNormal) < 0 ? -1.f : 1.f);
+	//		body2ContactNormal *= (dot(contactInBody2, body2ContactNormal) < 0 ? -1.f : 1.f);
 
-			vec3 normalBody1W = body1->GetObjectTransform().LocalDirectionToWorld(body1ContactNormal);
-			vec3 normalBody2W = body2->GetObjectTransform().LocalDirectionToWorld(body2ContactNormal);
+	//		vec3 normalBody1W = body1->GetObjectTransform().LocalDirectionToWorld(body1ContactNormal);
+	//		vec3 normalBody2W = body2->GetObjectTransform().LocalDirectionToWorld(body2ContactNormal);
 
 
-			vec3 tangentBody1W = body1->GetObjectTransform().LocalDirectionToWorld(body1ContactTangent);
-			vec3 tangentBody2W = body2->GetObjectTransform().LocalDirectionToWorld(body2ContactTangent);
+	//		vec3 tangentBody1W = body1->GetObjectTransform().LocalDirectionToWorld(body1ContactTangent);
+	//		vec3 tangentBody2W = body2->GetObjectTransform().LocalDirectionToWorld(body2ContactTangent);
 
-			vec3 normal, tangent;
+	//		vec3 normal, tangent;
 
-			if (collidingFace == 1)
-			{
-				normal = normalBody1W;
+	//		if (collidingFace == 1)
+	//		{
+	//			normal = normalBody1W;
 
-				vec3 body1to2 = body2->GetObjectTransform().m_position - collisionPoint;
-				if (dot(normal, body1to2) < 0)
-					normal = -normal;
+	//			vec3 body1to2 = body2->GetObjectTransform().m_position - collisionPoint;
+	//			if (dot(normal, body1to2) < 0)
+	//				normal = -normal;
 
-				tangent = tangentBody1W;
-			}
-			else if (collidingFace == 2)
-			{
-				normal = normalBody2W;
+	//			tangent = tangentBody1W;
+	//		}
+	//		else if (collidingFace == 2)
+	//		{
+	//			normal = normalBody2W;
 
-				vec3 body2to1 = body1->GetObjectTransform().m_position - collisionPoint;
-				if (dot(normal, body2to1) < 0)
-					normal = -normal;
+	//			vec3 body2to1 = body1->GetObjectTransform().m_position - collisionPoint;
+	//			if (dot(normal, body2to1) < 0)
+	//				normal = -normal;
 
-				tangent = tangentBody2W;
-			}
+	//			tangent = tangentBody2W;
+	//		}
 
-			if (isnan(normal.x) || isnan(normal.y) || isnan(normal.z))
-				continue;
+	//		if (isnan(normal.x) || isnan(normal.y) || isnan(normal.z))
+	//			continue;
 
-			Contact contact
-			(
-				body1, body2, 
-				collisionPoint, 
-				normal,
-				tangent,
-				collidingFace
-			);
+	//		Contact contact
+	//		(
+	//			body1, body2, 
+	//			collisionPoint, 
+	//			normal,
+	//			tangent,
+	//			collidingFace
+	//		);
 
-			contact.ComputeJacobian();
+	//		contact.ComputeJacobian();
 
-			m_currentContacts.push_back(contact);
-		}
-	}
+	//		m_currentContacts.push_back(contact);
+	//	}
+	//}
 }
 
 void CollisionProcessor::SolveContacts()

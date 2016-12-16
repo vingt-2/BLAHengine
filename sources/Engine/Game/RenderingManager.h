@@ -7,8 +7,6 @@
 
 namespace BLAengine
 {
-	BLACORE_API typedef int RenderTicket;
-
 	class BLACORE_API RenderingManager
 	{
 	public:
@@ -17,14 +15,14 @@ namespace BLAengine
 		RenderingManager(RenderManagerType type);
 		~RenderingManager();
 
-		RenderTicket RegisterMeshRenderer(MeshRenderer* object);
+		uint RegisterMeshRenderer(MeshRenderer* object);
 		bool		 CancelMeshRendererTicket(MeshRenderer* object);
 
-		RenderTicket RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera);
-		RenderTicket CancelDirectionalLightTicket(DirectionalLight* dirLight);
+		uint RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera);
+		uint CancelDirectionalLightTicket(DirectionalLight* dirLight);
 
-		std::unordered_map<RenderTicket, MeshRenderer*>* GetTicketedMeshRenderers();
-		std::unordered_map<RenderTicket, std::pair<DirectionalLight*, Camera*>>* GetTicketedDirectionalLights();
+		std::unordered_map<uint, MeshRenderer*>* GetTicketedMeshRenderers();
+		std::unordered_map<uint, std::pair<DirectionalLight*, Camera*>>* GetTicketedDirectionalLights();
 
 		void Update();
 
@@ -33,8 +31,8 @@ namespace BLAengine
 
 		RenderManagerType m_renderManagerType;
 
-		std::unordered_map<RenderTicket, MeshRenderer*> m_ticketedMeshRenderers;
-		std::unordered_map<RenderTicket, pair<DirectionalLight*, Camera*>> m_ticketedDirLights;
+		std::unordered_map<uint, MeshRenderer*> m_ticketedMeshRenderers;
+		std::unordered_map<uint, pair<DirectionalLight*, Camera*>> m_ticketedDirLights;
 
 		int currentTicket;
 
@@ -47,6 +45,7 @@ namespace BLAengine
 		DebugRenderingManager() {};
 		~DebugRenderingManager() {};
 
+		vector<pair<vector<vec3>, vector<vec3>>> m_lineMeshes;
 
 		void LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh);
 

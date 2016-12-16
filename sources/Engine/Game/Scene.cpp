@@ -1,4 +1,6 @@
 #include "Scene.h"
+#include "PBRendering\PBRRenderer.h"
+
 using namespace BLAengine;
 
 
@@ -16,19 +18,6 @@ Scene::~Scene()
 	// TODO: DO SOME STUFF. YO
 }
 
-//void Scene::AddObject(GameObject* objectPtr)
-//{
-//	m_sceneObjectsVector.push_back(objectPtr);
-//
-//	if (RigidBody* rgbdy = objectPtr->GetComponent<RigidBody>())
-//	{
-//		if (Collider* collider = objectPtr->GetComponent<Collider>())
-//		{
-//			m_rigidBodySystem->RegisterRigidBody(*rgbdy);
-//		}
-//	}
-//}
-
 GameObject* Scene::CreateObject(std::string name)
 {
 	GameObject* newObject = new GameObject(name);
@@ -36,6 +25,18 @@ GameObject* Scene::CreateObject(std::string name)
 	m_sceneObjectsVector.push_back(newObject);
 
 	return newObject;
+}
+
+bool BLAengine::Scene::DeleteObject(std::string name)
+{
+	GameObject* object = this->FindNameInScene(name);
+	if (!object)
+		return false;
+
+	for (auto meshRenderer : object->GetComponents<MeshRenderer>())
+	{
+		m_renderingManager->CancelMeshRendererTicket(meshRenderer);
+	}
 }
 
 GameObject* Scene::FindNameInScene(std::string name)
@@ -82,7 +83,7 @@ void Scene::Update()
 	m_rigidBodySystem->UpdateSystem();
 	//m_camera->m_rigidBody->Update();
 
-	for(int i = 0;i < m_sceneObjectsVector.size() ; i++)
+	for(int i = 0; i < m_sceneObjectsVector.size(); i++)
 	{
 		GameObject* object = m_sceneObjectsVector[i];
 
@@ -104,7 +105,36 @@ void Scene::Update()
 				m_renderingManager->RegisterDirectionalLight(dirLightComp, shadowCamera);
 			}
 		}
+
+		for (auto pbrenderer : object->GetComponents<PBRCamera>())
+		{
+			if (!pbrenderer->m_shouldRender)
+				continue;
+			for (auto object : m_sceneObjectsVector)
+			{
+				if (PBRSurface* obj = object->GetComponent<PBRSurface>())
+				{
+					pbrenderer->AddObject(obj);
+				}
+			}
+			pbrenderer->Render();
+		}
 	}
+}
+
+Camera* BLAengine::Scene::GetMainCamera()
+{
+	if (m_camera == nullptr)
+	{
+		for (auto object : m_sceneObjectsVector)
+		{
+			Camera* camera = object->GetComponent<Camera>();
+			if (camera != nullptr)
+				m_camera = camera;
+				break;
+		}
+	}
+	return m_camera;
 }
 
 vector<Contact>* Scene::GetContacts()
@@ -112,63 +142,34 @@ vector<Contact>* Scene::GetContacts()
 	return &(this->m_rigidBodySystem->m_collisionProcessor->m_currentContacts);
 }
 
-Ray Scene::ScreenToRay(vec2 renderSize, vec2 cursor, float length)
-{
-	////TODO: FIX THAT SHEET
-	//vec2 cursor(0, 0); // Was get cursor on renderer, but that's long gone, renderer should *not* and doesnt know about this anymore... So ... How to handle this ?
-	//float x = cursor.x;
-	//float y = cursor.y;
-
-	//vec3 rayDirection = vec3(1.f);
-	//rayDirection.x = (((2.0f * (renderSize.x - x)) / renderSize.x) - 1) / m_gameSingleton->renderer->m_mainRenderCamera.m_perspectiveProjection[0][0];
-
-	//rayDirection.y = -(((2.0f * (renderSize.y - (y))) / renderSize.y) - 1) / m_gameSingleton->renderer->m_mainRenderCamera.m_perspectiveProjection[1][1];
-
-	//mat4 inverseView = inverse(m_gameSingleton->renderer->m_mainRenderCamera.m_attachedCamera->m_viewTransform.m_transformMatrix);
-
-	//vec4 direction = (inverseView * vec4(rayDirection, 0));
-	//rayDirection = normalize(vec3(direction.x, direction.y, direction.z));
-
-	//vec3 rayOrigin = vec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
-
-	//return Ray(rayOrigin, -1.f * rayDirection, length);
-	return Ray(vec3(0), vec3(0), 0);
-}
-
-GameObject* Scene::PickGameObjectInScene(Ray ray, vec3 &hitInWorld)
+std::pair<GameObject*, Collider::RayCollision>  Scene::PickGameObjectInScene(Ray ray)
 {
 	vector<GameObject*> objects = m_sceneObjectsVector;
 
 	float minDistance = INFINITY;
 	GameObject* pickedObject = nullptr;
+	Collider::RayCollision closestContact;
 	for (auto obj : objects)
 	{
 		Collider* collider = obj->GetComponent<Collider>();
-		Transform transform = obj->GetTransform();
 
-		collider->m_collisionMesh->setTransform(&(transform.m_transformMatrix[0][0]));
+		if (collider == nullptr)
+			continue;
 
-		bool closestPoint = &hitInWorld != 0;
+		Collider::RayCollision contactPoint = collider->CollideWithRay(ray);
 
-		bool collision = collider->m_collisionMesh->rayCollision(&(ray.m_origin.x), &(ray.m_direction.x), closestPoint, 0, ray.m_length);
+		if (!contactPoint.m_isValid)
+			continue;
 
-		if (!collision) continue;
-
-		vec3 collisionPoint;
-		collider->m_collisionMesh->getCollisionPoint(&(collisionPoint.x), false);
-
-		float distance = dot(collisionPoint - ray.m_origin, ray.m_direction);
+		float distance = dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
 
 		if (distance > 0 && distance < minDistance)
 		{
 			minDistance = distance;
 			pickedObject = obj;
-		}
-		if (&hitInWorld != nullptr)
-		{
-			hitInWorld = collisionPoint;
+			closestContact = contactPoint;
 		}
 	}
 
-	return pickedObject;
+	return std::pair<GameObject*, Collider::RayCollision>(pickedObject, closestContact);
 }

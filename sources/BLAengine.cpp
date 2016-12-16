@@ -4,21 +4,18 @@ using namespace BLAengine;
 
 int main()
 {
-	EngineDemo demo(true, false);
+	Raytracer demo(true, false);
 
-	GLFWRenderWindow* renderWindow = new GLFWRenderWindow();
-	renderWindow->CreateRenderWindow("BLAengineDemo", 100, 100, false); // Add arguments
-
-	demo.InitializeDemo(renderWindow);
+	demo.InitializeEngine();
 
 	while (!demo.ShouldTerminate())
 	{
-		demo.UpdateDemo();
+		demo.UpdateEditor();
 	}
 
-	demo.TerminateDemo();
+	demo.TerminateEditor();
 
-	demo.~EngineDemo();
+	demo.~Raytracer();
 }
 
 #endif

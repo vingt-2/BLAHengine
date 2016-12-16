@@ -1,334 +1,180 @@
 #include "EngineDemo.h"
+#include "./Engine/Game/PBRendering/PBRRenderer.h"
+
 using namespace BLAengine;
 
-vec2 previousMouseInput;
-vec3 cameraRotation;
-
-void SetObject(GameObject* object)
+bool Raytracer::InitializeEngine()
 {
-	Transform transform;
+	m_assetManager = new AssetManager();
 
-	transform.m_position = (vec3(-10, 0, 0));
+	m_renderingManager = new RenderingManager(RenderingManager::Game);
+	m_debugRenderingManager = new DebugRenderingManager();
 
-	transform.SetRotationUsingEuler(vec3(1, 1, 1));
+	m_editorRenderer = new GL33Renderer();
 
-	object->SetTransform(transform);
+	//m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
+	//m_editorRenderer->m_assetManager = m_assetManager;
 
+	m_workingScene = new Scene();
 
-	if (RigidBody* rgbdy = object->GetComponent<RigidBody>())
-	{
-		rgbdy->m_angularVelocity = vec3(0);
-		rgbdy->m_velocity= vec3(0);
-	}
-}
+	m_editorScene = new Scene();
 
-void SimpleControls(GameObject* object, RenderWindow* renderWindow)
-{
+	GameObject* cameraObject = m_editorScene->CreateObject("EditorCamera");
+	Camera* cameraComp = new Camera();
+	cameraObject->AddComponent(cameraComp);
+	//m_editorRenderer->SetCamera(cameraComp);
 
-	Transform transform = object->GetTransform();
+	m_timer = new Time(10);
 
-	vec3 tangentForce = vec3(0);
-	vec3 movementForce = vec3(0);
-	float coeff = 1.f;
+	m_workingScene = new Scene();
 
-	
-	/*if (renderWindow->GetKeyPressed(GLFW_KEY_LEFT_SHIFT))
-		coeff = 8.f;
+	m_workingScene->SetTimeObject(m_timer);
 
-	if (renderWindow->GetKeyPressed(GLFW_KEY_LEFT_CONTROL))
-		coeff = 0.25f;*/
+	m_sceneManager = new SceneManager(m_assetManager);
 
-	if (renderWindow->GetKeyPressed('W'))
-		tangentForce.z = 1.f;
-	if (renderWindow->GetKeyPressed('S'))
-		tangentForce.z = -1.f;
-
-	if (renderWindow->GetKeyPressed('A'))
-		tangentForce.x = 1.f;
-	if (renderWindow->GetKeyPressed('D'))
-		tangentForce.x = -1.f;
-
-	if (renderWindow->GetKeyPressed('Q'))
-		tangentForce.y = 1.f;
-	if (renderWindow->GetKeyPressed('E'))
-		tangentForce.y = -1.f;
-
-	vec3 cameraForce = object->GetTransform().LocalDirectionToWorld(tangentForce);
-	cameraForce *= coeff;
-	transform.m_position += cameraForce;
-
-
-	if (renderWindow->GetMousePressed(1))
-	{
-		double x, y;
-		renderWindow->GetMouse(x ,y);
-
-		vec3 deltaRotation = vec3(0);
-
-		if (x - previousMouseInput.x > 0)
-		{
-			deltaRotation.y = 1.f;
-		}
-		else if (x - previousMouseInput.x < 0)
-		{
-			deltaRotation.y = -1.f;
-		}
-		if (y - previousMouseInput.y > 0)
-		{
-			deltaRotation.x = 1.f;
-		}
-		else if (y - previousMouseInput.y < 0)
-		{
-			deltaRotation.x = -1.f;
-		}
-		previousMouseInput.x = x;
-		previousMouseInput.y = y;
-
-		deltaRotation *= 6 * 0.01f;
-
-		cameraRotation += deltaRotation;
-
-		transform.SetRotationUsingEuler(cameraRotation);
-	}
-	
-	object->SetTransform(transform);
-}
-
-bool EngineDemo::InitializeDemo(RenderWindow* _renderWindow)
-{
-	this->renderWindow = _renderWindow;
-	sharedResources = new AssetManager();
-
-	renderingManager = new RenderingManager(RenderingManager::Game);
-	debugRenderingManager = new DebugRenderingManager();
-
-	mainRenderer = new GL33Renderer();
-
-	mainRenderer->InitializeRenderer(this->renderWindow, renderingManager);
-	mainRenderer->m_assetManager = sharedResources;
-	mainScene = new Scene();
-
-	mainCamera = new Camera();
-	{
-		Transform camTransform;
-		camTransform.m_position = vec3(10, -10, -15);
-		camTransform.SetRotationUsingEuler(vec3(3.14 / 9, 0, 0));
-		mainCamera->m_isControlEnabled = true;
-	}
-
-
-	mainRenderer->SetCamera(mainCamera);
-
-	timer = new Time(10);
-
-	mainScene = new Scene();
-
-	GameObject* cameraObject = mainScene->CreateObject("Camera");
-	cameraObject->AddComponent(mainCamera);
-
-	mainScene->SetTimeObject(timer);
-
-	sceneManager = new SceneManager(sharedResources);
-
-	debug = new Debug(debugRenderingManager);
+	m_debug = new Debug(m_debugRenderingManager);
 
 	bool terminationRequest = false;
 
-	// OPENGL CONTEXT UP AND RUNNING
-	if (!mainRenderer->GetStatus())
-	{
-		printf("Failed to initiate Context!");
-		return false;
-	}
+	m_workingScene->Initialize(m_renderingManager);
 
-	mainScene->Initialize(renderingManager);
+	m_assetManager->LoadCookedAssets();
 
-	Texture2D* blankDiff = TextureImport::LoadBMP("BlankTexture", "./resources/textures/blankDiffuse.bmp");
-	this->sharedResources->SaveTexture(blankDiff);
-	this->sharedResources->LoadTexture("BlankTexture");
+	LoadWorkingScene(string("C:/Users/Vingt-2/Desktop/BLASoftware/BLAengine/Scenes/test_scene"));
 
-	Texture2D* blankNorm = TextureImport::LoadBMP("BlankNormal", "./resources/textures/blankNormal.bmp");
-	this->sharedResources->SaveTexture(blankNorm);
-	this->sharedResources->LoadTexture("BlankNormal");
-
-	Material* blankDiffusMat = new Material("BlankDiffuseMat");
-	blankDiffusMat->AssignTexture("BlankTexture", "diffuseMap");
-	blankDiffusMat->AssignTexture("BlankNormal", "normalMap");
-
-	this->sharedResources->SaveMaterial(blankDiffusMat);
-	this->sharedResources->LoadMaterial("BlankDiffuseMat");
-
-	OBJImport obj;
-	TriangleMesh skyMesh("SkyMesh");
-	obj.ImportMesh("./resources/models/sphere.obj", skyMesh, true, true);
-	this->sharedResources->SaveTriangleMesh(&skyMesh);
-	this->sharedResources->LoadTriangleMesh("SkyMesh");
-
-	Asset* skyMeshAsset = nullptr;
-	this->sharedResources->GetAsset("SkyMesh", skyMeshAsset);
-
-	TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
-
-	GameObject* ball_obj = mainScene->CreateObject("sky");
-	Transform t = ball_obj->GetTransform();
-	t.m_scale = vec3(5000, 5000, 5000);
-	ball_obj->SetTransform(t);
-	MeshRenderer* meshRender = new MeshRenderer();
-	ball_obj->AddComponent(meshRender);
-	meshRender->AssignTriangleMesh(sky);
-	meshRender->AssignMaterial(blankDiffusMat, 0);
-	renderingManager->RegisterMeshRenderer(meshRender);
-	
-	DirectionalLightRender lr;
-	cameraLight = new Camera();
-	GameObject* bla = mainScene->CreateObject("ShadowCamera");
-	t = bla->GetTransform();
-	t.SetRotationUsingEuler(vec3(1, 0, 0));
-	bla->SetTransform(t);
-	bla->AddComponent(cameraLight);
-	lr.m_shadowRender.m_shadowCamera.AttachCamera(cameraLight);
-	lr.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
-	lr.m_shadowRender.m_bufferSize = 8192;
-	//mainRenderer->m_directionalLightsVector.push_back(lr);
 	return true;
 }
 
-void EngineDemo::UpdateDemo()
+void Raytracer::UpdateEditor()
 {
-	t += 0.0003;
-	timer->Update();
-	averageDet += mainScene->m_rigidBodySystem->m_collisionProcessor->m_detectionTime;
-	averageProc += mainScene->m_rigidBodySystem->m_collisionProcessor->m_processingTime;
-	averageContact += mainScene->m_rigidBodySystem->m_collisionProcessor->m_currentContacts.size();
+	m_debug->DrawRay(debugRay, vec3(0, 1, 0));
+	m_debug->DrawGrid(1000, 10, vec3(0.4));
+	m_debug->Update();
 
-	if (iteration > 10)
+
+	//m_timer->Update();
+	m_workingScene->Update();
+	//m_editorRenderer->Update();
+
+	GameObject* pbrenderObject = m_workingScene->FindNameInScene("PBRCamera");
+	int i = 0;
+	vector<Ray> debugRays;
+	if (pbrenderObject)
 	{
-		averageDet = 0;
-		averageProc = 0;
-		averageContact = 0;
-		iteration = 0;
-	}
-
-	if (mainScene->m_enableSimulation)
-		iteration++;
-	double time = timer->GetTime();
-	double deltaTime = timer->GetDelta();
-
-	stringstream title;
-	title << "BLAengine: " << timer->GetFramerate() << " fps, ";
-	title << " ColDetTime: " << (averageDet / iteration);
-	title << " ColProcTime: " << (averageProc / iteration);
-	title << " ColProcTime: " << (averageContact / iteration);
-	title.str();
-
-#ifdef GLFW_INTERFACE
-	if (renderWindow->GetKeyPressed(GLFW_KEY_SPACE) && (time - lastPressS) > 2)
-	{
-		cout << "Simulation ";
-		if (mainScene->m_enableSimulation)
+		if (PBRCamera* renderer = pbrenderObject->GetComponent<PBRCamera>())
 		{
-			cout << "off\n";
-			mainScene->m_enableSimulation = false;
+			if (m_pbr_render_requested && !renderer->m_shouldRender)
+				TerminateEditor();
+			else
+			{
+				renderer->m_shouldRender = true;
+				m_pbr_render_requested = true;
+			}
 		}
-		else
-		{
-			cout << "on\n";
-			mainScene->m_enableSimulation = true;
-			stoped = false;
-		}
-		lastPressS = time;
 	}
-
-	if (renderWindow->GetKeyPressed(GLFW_KEY_LEFT_CONTROL) && (time - lastPressS) > 2)
-	{
-		moveLight = !moveLight;
-		lastPressS = time;
-	}
-
-	GameObject* lightCam = mainScene->FindNameInScene("ShadowCamera");
-
-	Transform lightT = lightCam->GetTransform();
-
-	lightT.SetRotationUsingEuler(vec3(2*t, 0, 0));
-
-	lightCam->SetTransform(lightT);
-
-	if (renderWindow->GetKeyPressed(GLFW_KEY_BACKSPACE) && (time - lastPressG) > 0.5)
-	{
-		cout << "Gravity ";
-		if (mainScene->GetGravity())
-		{
-			mainScene->DisableGravity();
-			cout << "off\n";
-		}
-		else
-		{
-			cout << "on\n";
-			mainScene->EnableGravity();
-		}
-		lastPressG = time;
-	}
-#endif
-
-	if (renderWindow->GetMousePressed(0))
-	{
-		//ray = mainScene->ScreenToRay(1000);
-		//debugRays.push_back(ray);
-		vec3 colPoint(0);
-		GameObject* object;// = cursorPicker->PickGameCharInScene(*mainScene, ray, colPoint);
-	}
-
-	if (mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop)
-	{
-		cout << "LCP Solver unhappy, Simulation Halted\n";
-		mainScene->m_enableSimulation = false;
-		mainScene->m_rigidBodySystem->m_collisionProcessor->debug_stop = false;
-	}
-
-	for (int c = 0; c < mainScene->GetContacts()->size(); c++)
-	{
-		Contact contact = mainScene->GetContacts()->at(c);
-
-		debug->DrawRay(Ray(contact.m_contactPositionW, contact.m_contactNormalW, 1), vec3(0, 1, 0));
-		debug->DrawRay(Ray(contact.m_contactPositionW, contact.m_contactTangent1W, 1), vec3(1, 0, 0));
-		debug->DrawRay(Ray(contact.m_contactPositionW, contact.m_contactTangent2W, 1), vec3(0, 0, 1));
-
-		//mainScene->m_enableSimulation = false;
-	}
-
-	debug->DrawGrid(1000, 10, vec3(0.4));
-
-	debug->Update();
-
-	if (GameObject* mainCamera = mainScene->FindNameInScene("Camera"))
-	{
-		SimpleControls(mainCamera, this->renderWindow);
-		mainCamera->Update();
-	}
-
-	mainRenderer->Update();
-	mainScene->Update();
-
-	if (mainScene->m_enableSimulation)
-		solvIt += (mainScene->m_rigidBodySystem->m_collisionProcessor->m_iterationCount);
-
-	for (auto r : debugRays)
-	{
-		debug->DrawRay(r);
-	}
-
-	frameCount++;
-#ifdef GLFW_INTERFACE
-	if (renderWindow->GetKeyPressed(GLFW_KEY_ESCAPE))
-	{
-		terminationRequest = true;
-
-		sceneManager->SaveScene("Test",mainScene);
-	}
-#endif
 }
-	
-void EngineDemo::TerminateDemo()
+
+void Raytracer::TerminateEditor()
 {
-	//renderWindow->~GLFWRenderWindow();
+	m_isTerminationRequested = true;
+}
+
+bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
+{
+	m_renderingManager->~RenderingManager();
+	m_workingScene->~Scene();
+	Scene* scenePtr = m_sceneManager->LoadScene(filepath);
+	m_workingScene = scenePtr;
+
+	m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
+	m_workingScene->Initialize(m_renderingManager);
+	m_editorRenderer->SwitchRenderingManager(m_renderingManager);
+
+	GameObject* light = m_workingScene->CreateObject("DirLight");
+	DirectionalLight* dirLight = new DirectionalLight(vec3(0, -1, 0));
+	light->AddComponent(dirLight);
+	Transform lightT = light->GetTransform();
+	lightT.SetRotationUsingEuler(vec3(1.07, 0, 0));
+	light->SetTransform(lightT);
+
+	GameObject* pbrender = m_workingScene->CreateObject("PBRCamera");
+	Transform t1;
+	/*t1.m_position = vec3(5, 1, 3);
+	t1.SetRotationUsingEuler(vec3(0.2, -0.75, 0));*/
+	t1.m_position = vec3(0, 0.5, 5);
+	t1.SetRotationUsingEuler(vec3(0, 0, 0));
+	pbrender->SetTransform(t1);
+	pbrender->AddComponent(new PBRCamera());
+
+	GameObject* pblight = m_workingScene->CreateObject("Light");
+	Transform t;
+	t.m_position = vec3(0, 5, -3);
+	//t.m_position = vec3(2, -3, -8);
+	//t.m_position = vec3(0, 10, -8);
+	pblight->SetTransform(t);
+	PBRSurface* surface = new PBRSphere(0.5);
+	surface->m_material.m_emissivePower = vec3(1000, 1000, 1000);
+	pblight->AddComponent(surface);
+	pblight->AddComponent(new SphereCollider(0.5));
+
+	for (auto gobject : m_workingScene->GetObjects())
+	{
+		if (MeshRenderer* mRender = gobject->GetComponent<MeshRenderer>())
+		{
+			if (!gobject->GetComponent<PBRSurface>())
+			{
+				if (gobject->GetName() == "sky")
+				{
+					PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
+					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
+					//pbmRender->m_material.m_emissivePower = vec3(100000000, 100000000, 100000000);
+
+					gobject->AddComponent(pbmRender);
+				}
+				else if(gobject->GetName() == "cube")
+				{
+					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
+					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
+					pbmRender->m_material.m_brdf = new PBRMaterial::MirrorBRDF();
+					pbmRender->m_material.m_color = vec3(0.2, 0.2, 1);
+					//pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
+					gobject->AddComponent(pbmRender);
+				}
+				else if (gobject->GetName() == "cube2")
+				{
+					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
+					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
+					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
+					pbmRender->m_material.m_color = vec3(3, 0.1, 0.1);
+					//pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
+					gobject->AddComponent(pbmRender);
+				}
+				else
+				{
+					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
+					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
+					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
+					pbmRender->m_material.m_color = vec3(1, 1, 1);
+					gobject->AddComponent(pbmRender);
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool BLAengine::Raytracer::SaveWorkingScene(std::string filepath)
+{
+	return m_sceneManager->SaveScene(filepath, m_workingScene);
+}
+
+std::vector<string> BLAengine::Raytracer::GetSceneObjects()
+{
+	std::vector<string> objs;
+	for (auto go : m_workingScene->GetObjects())
+	{
+		objs.push_back(go->GetName());
+	}
+	return objs;
 }

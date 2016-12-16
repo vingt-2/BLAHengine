@@ -1,5 +1,4 @@
 #pragma once
-#include "../Common/StdInclude.h"
 #include "../Engine/Assets/PolygonalMesh.h"
 
 namespace BLAengine

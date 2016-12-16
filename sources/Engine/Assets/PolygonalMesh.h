@@ -94,7 +94,7 @@ namespace BLAengine
 		void ApplyUVScaling(vec2 scaling);
 
 		void GenerateRenderData();
-		void GenerateTopoTriangleIndices(vector<uint32_t> &indices);
+		void GenerateTopoTriangleIndices(vector<uint32_t> &posIndices, vector<uint32_t> &normalIndices);
 
 		bool IsMeshValid();
 

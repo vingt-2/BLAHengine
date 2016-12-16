@@ -14,14 +14,14 @@ bool SceneManager::SaveScene(string filepath, Scene* scene)
 
 	sceneSerializer.FromScene(scene);
 
-	cout << "Scene obj vector " << scene->GetObjects().size() << "\n";
+	//cout << "Scene obj vector " << scene->GetObjects().size() << "\n";
 
 	std::ofstream fs;
-	fs.open(std::string(SCENE_SUBPATH) + filepath);
+	fs.open(filepath);
 
 	if (!fs.is_open())
 	{
-		cout << "Could not Write on file " << std::string(SCENE_SUBPATH) + filepath << "\n";
+		cout << "Could not Write on file " << filepath << "\n";
 	}
 
 	cereal::JSONOutputArchive output(fs);
@@ -66,7 +66,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
 				}
 				else
 				{
-					cout << "Couldn't find TriangleMesh: " << meshRenderSer->GetMeshName() << "in AssetManager.\n";
+					cout << "Couldn't find TriangleMesh: " << meshRenderSer->GetMeshName() << " in AssetManager.\n";
 				}
 
 				int matIndex = 0;

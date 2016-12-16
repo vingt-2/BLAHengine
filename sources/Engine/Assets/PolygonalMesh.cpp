@@ -111,12 +111,12 @@ void TriangleMesh::BuildMeshTopo(
 		HalfEdge* edge = &(m_halfEdges.at(i));
 
 		pair<uint32_t, uint32_t> vertPair = hePairs[i];
-
-		try
+		pair<uint32_t, uint32_t> invertVertPair = pair<uint32_t, uint32_t>(vertPair.second, vertPair.first);
+		if (halfEdgesIndices.count(invertVertPair))
 		{
-			edge->oppositeHE = halfEdgesIndices.at(pair<uint32_t, uint32_t>(vertPair.second, vertPair.first));
+			edge->oppositeHE = halfEdgesIndices[invertVertPair];
 		}
-		catch (const out_of_range& e)
+		else
 		{
 			edge->oppositeHE = INVALID_HE;
 			m_manifoldViolationEdges++;
@@ -267,7 +267,7 @@ void TriangleMesh::GenerateRenderData()
 	}
 }
 
-void TriangleMesh::GenerateTopoTriangleIndices(vector<uint32_t> &indices)
+void TriangleMesh::GenerateTopoTriangleIndices(vector<uint32_t> &posIndices, vector<uint32_t> &normalIndices)
 {
 	for (int triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
 	{
@@ -283,7 +283,8 @@ void TriangleMesh::GenerateTopoTriangleIndices(vector<uint32_t> &indices)
 			if (i == 1) edge = edge0;
 			if (i == 2) edge = edge1;
 
-			indices.push_back(edge.destVertex.pos);
+			posIndices.push_back(edge.destVertex.pos);
+			normalIndices.push_back(edge.destVertex.normal);
 		}
 	}
 }

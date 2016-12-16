@@ -17,6 +17,7 @@ void Debug::Update()
 {
 	if (m_drawDebugRays)
 	{
+		m_debugRenderManager->m_lineMeshes.clear();
 		m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);
 	}
 	m_lineMeshVertsAndColor.first.clear();

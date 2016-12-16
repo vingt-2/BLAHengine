@@ -67,6 +67,7 @@ public:
 
   bool rayCollision(const float origin[3], const float direction[3], bool closest,
 					float segmin, float segmax);
+  bool threadSafeClosestRayCollision(const float origin[3], const float direction[3], int & triIndex, float & colT, float colPointLocal[3], float segmin, float segmax);
   bool sphereCollision(const float origin[3], float radius);
 
   bool getCollidingTriangles(float t1[9], float t2[9], bool ModelSpace);

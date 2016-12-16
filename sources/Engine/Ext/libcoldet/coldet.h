@@ -34,6 +34,8 @@
 #define EXPORT
 #endif
 
+
+
 #include <vector>
 #include <utility>
 
@@ -110,6 +112,14 @@ public:
 							bool closest=false,
 							float segmin=0.0f,
 							float segmax=3.4e+38F) = 0;
+
+  virtual bool threadSafeClosestRayCollision(const float origin[3],
+					  const float direction[3],
+					  int &triIndex,
+					  float &colT,
+					  float colPointLocal[3],
+					  float segmin = 0.0f,
+					  float segmax = 3.4e+38F) = 0;
 
   /** Returns true if the given sphere collides with the model.
 	  getCollidingTriangles() and getCollisionPoint() can be

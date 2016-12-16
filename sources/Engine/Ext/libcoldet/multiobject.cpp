@@ -21,6 +21,7 @@
  *
  * Or visit the home page: http://sourceforge.net/projects/coldet/
  */
+
 #include <memory>
 #include "multi_impl.h"
 

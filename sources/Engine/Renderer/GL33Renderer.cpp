@@ -2,7 +2,7 @@
 using namespace BLAengine;
 
 GL33Renderer::GL33Renderer():
-	debug_renderGBuffer(false),
+	debug_renderGBuffer(true),
 	m_renderDebug(true),
 	m_defaultColor(0.3,0.3,0.3)
 {}
@@ -19,6 +19,26 @@ void GL33Renderer::ViewportResize(int width, int height)
 	m_GBuffer.DeleteGBufferResources();
 	m_GBuffer.m_GbufferSize = m_renderSize;
 	m_GBuffer.InitializeGBuffer();
+}
+
+Ray BLAengine::GL33Renderer::ScreenToRay()
+{
+	double x, y;
+	m_renderWindow->GetMouse(x, y);
+
+	vec3 rayDirection = vec3(1.f);
+	rayDirection.x = (((2.0f * (m_renderSize.x - x)) / m_renderSize.x) - 1) / this->m_mainRenderCamera.m_perspectiveProjection[0][0];
+
+	rayDirection.y = -(((2.0f * (m_renderSize.y - (y))) / m_renderSize.y) - 1) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
+
+	mat4 inverseView = inverse(this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.m_transformMatrix);
+
+	vec4 direction = (inverseView * vec4(rayDirection, 0));
+	rayDirection = normalize(vec3(direction.x, direction.y, direction.z));
+
+	vec3 rayOrigin = vec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
+
+	return Ray(rayOrigin, -1.f * rayDirection, 0xFFFFFFFF);
 }
 
 GL33RenderObject::GL33RenderObject():
@@ -216,47 +236,50 @@ bool GL33Renderer::CancelRender(const MeshRenderer& object)
 	return true;
 }
 
-bool GL33Renderer::LoadDebugLines(pair<vector<vec3>, vector<vec3>>& debugLinesMesh)
+bool GL33Renderer::LoadDebugLines()
 {
-	if (debugLinesMesh.first.size() == 0 || debugLinesMesh.second.size() != debugLinesMesh.first.size())
+	for (auto debugLinesMesh : m_debugRenderingManager->m_lineMeshes)
 	{
-		m_debugLinesInfo = { 0, 0, 0, 0 };
-		return false;
+		if (debugLinesMesh.first.size() == 0 || debugLinesMesh.second.size() != debugLinesMesh.first.size())
+		{
+			m_debugLinesInfo = { 0, 0, 0, 0 };
+			return false;
+		}
+
+		m_debugLinesInfo.size = debugLinesMesh.first.size();
+
+		glGenBuffers(1, &(m_debugLinesInfo.vertBuffer));
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
+		glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.first[0]), GL_STATIC_DRAW);
+
+		glGenBuffers(1, &(m_debugLinesInfo.colorBuffer));
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
+		glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.second[0]), GL_STATIC_DRAW);
+
+		// 1rst attribute buffer : vertices
+		glGenVertexArrays(1, &(m_debugLinesInfo.vao));
+		glBindVertexArray(m_debugLinesInfo.vao);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
+		glVertexAttribPointer(
+			1,                  // attribute 1. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
 	}
-
-	m_debugLinesInfo.size = debugLinesMesh.first.size();
-
-	glGenBuffers(1, &(m_debugLinesInfo.vertBuffer));
-	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.first[0]), GL_STATIC_DRAW);
-
-	glGenBuffers(1, &(m_debugLinesInfo.colorBuffer));
-	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.second[0]), GL_STATIC_DRAW);
-
-	// 1rst attribute buffer : vertices
-	glGenVertexArrays(1, &(m_debugLinesInfo.vao));
-	glBindVertexArray(m_debugLinesInfo.vao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
-	glVertexAttribPointer(
-		1,                  // attribute 1. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
 
 	return true;
 }
@@ -601,6 +624,27 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
 	if (!m_renderingManager)
 		return 0;
 
+
+	// PROBABLY CHANGE THIS TO A MORE OPTIMIZED SYSTEM:
+	vector<uint> toErase;
+	for (auto renderingObject : m_meshRenderPool)
+	{
+		if (m_renderingManager->GetTicketedMeshRenderers()->count(renderingObject.first) == 0)
+		{
+			if (GL33RenderObject* gl33object = dynamic_cast<GL33RenderObject*>(renderingObject.second))
+			{
+				this->CleanUp(*gl33object);
+				toErase.push_back(renderingObject.first);
+			}
+		}
+	}
+
+	for (auto ticket : toErase)
+	{
+		m_meshRenderPool.erase(ticket);
+	}
+
+
 	int addedObjectsOnCall = 0;
 
 	for (auto ticketedObject : *(m_renderingManager->GetTicketedMeshRenderers()))
@@ -834,9 +878,10 @@ void GL33Renderer::CleanUpFrameDebug()
 	}
 }
 
-void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* renderManager)
+void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* renderManager, DebugRenderingManager* debugRenderManager)
 {
 	m_renderingManager = renderManager;
+	m_debugRenderingManager = debugRenderManager;
 
 	bool initialized = false;
 #ifdef GLFW_INTERFACE
@@ -1133,6 +1178,8 @@ void GL33Renderer::RenderDebugLines()
 	{
 		return;
 	}
+
+	LoadDebugLines();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

@@ -108,16 +108,17 @@ namespace BLAengine
 	{
 	public:
 
-		void InitializeRenderer(RenderWindow* window, RenderingManager* renderingManager);
+		void InitializeRenderer(RenderWindow* window, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager);
 		void SwitchRenderingManager(RenderingManager* renderingManager);
 		bool Update();
 
 		RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
 		bool	CancelRender(const MeshRenderer& object);
-		bool	LoadDebugLines(pair<vector<vec3>, vector<vec3>>& debugLinesMesh);
+		bool	LoadDebugLines();
 
 		RenderWindow* GetWindow() const { return m_renderWindow; }
 		void		ViewportResize(int width, int height);
+		Ray		ScreenToRay();
 
 		GL33Renderer();
 		~GL33Renderer();

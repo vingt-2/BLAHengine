@@ -280,6 +280,78 @@ bool CollisionModel3DImpl::rayCollision(const float origin[3],
   return false;
 }
 
+bool CollisionModel3DImpl::threadSafeClosestRayCollision(const float origin[3],
+	const float direction[3],
+	int &triIndex,
+	float &colT,
+	float colPointLocal[3],
+	float segmin,
+	float segmax)
+{
+	colT = 9e9f;
+	float tparm;
+	Vector3D col_point;
+	Vector3D O;
+	Vector3D D;
+	if (m_Static)
+	{
+		O = Transform(*(Vector3D*)origin, m_InvTransform);
+		D = rotateVector(*(Vector3D*)direction, m_InvTransform);
+	}
+	else
+	{
+		Matrix3D inv = m_Transform.Inverse();
+		O = Transform(*(Vector3D*)origin, inv);
+		D = rotateVector(*(Vector3D*)direction, inv);
+	}
+	if (segmin != 0.0f) // normalize ray
+	{
+		O += segmin*D;
+		segmax -= segmin;
+		segmin = 0.0f;
+	}
+	if (segmax<segmin)
+	{
+		D = -D;
+		segmax = -segmax;
+	}
+	std::vector<BoxTreeNode*> checks;
+	checks.push_back(&m_Root);
+	while (!checks.empty())
+	{
+		BoxTreeNode* b = checks.back();
+		checks.pop_back();
+		if (b->intersect(O, D, segmax))
+		{
+			int sons = b->getSonsNumber();
+			if (sons)
+				while (sons--) checks.push_back(b->getSon(sons));
+			else
+			{
+				int tri = b->getTrianglesNumber();
+				while (tri--)
+				{
+					BoxedTriangle* bt = b->getTriangle(tri);
+					Triangle* t = static_cast<Triangle*>(bt);
+					if (t->intersect(O, D, col_point, tparm, segmax))
+					{
+						if (tparm < colT)
+						{
+							colT = tparm;
+							triIndex = getTriangleIndex(bt);
+							colPointLocal[0] = col_point.x;
+							colPointLocal[1] = col_point.y;
+							colPointLocal[2] = col_point.z;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (colT<9e9f) return true;
+	return false;
+}
+
 bool CollisionModel3DImpl::sphereCollision(const float origin[3], float radius)
 {
   m_ColType=Sphere;

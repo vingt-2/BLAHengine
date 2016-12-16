@@ -146,14 +146,19 @@ GLFWRenderWindow::~GLFWRenderWindow()
 
 #endif
 
-WPFRenderWindow::WPFRenderWindow():
+WPFRenderWindow::WPFRenderWindow() :
 	m_glVersion(string("NONE")),
 	m_makeGLCurrentRequest(true),
 	m_updateWindowRequest(false),
 	m_width(0), m_height(0),
 	m_mousePosX(0), m_mousePosY(0),
 	m_mouseDownState(0x00)
-{}
+{
+	for (int i = 0; i < 100; i++)
+	{
+		m_keyPressed[i] = false;
+	}
+}
 
 void WPFRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
@@ -191,7 +196,12 @@ void WPFRenderWindow::WriteMousePos(int x, int y)
 
 void WPFRenderWindow::SetMouseXY() {}
 
-bool WPFRenderWindow::GetKeyPressed(int key) { return false; }
+bool WPFRenderWindow::GetKeyPressed(int key) 
+{
+	bool r = m_keyPressed[key];
+	return r;
+}
+
 bool WPFRenderWindow::GetMousePressed(int button)
 { 
 	int mask = (unsigned char) (0x01 << button);
@@ -201,7 +211,10 @@ bool WPFRenderWindow::GetMousePressed(int button)
 
 string WPFRenderWindow::GetMaxGLVersion() { return m_glVersion; }
 
-bool WPFRenderWindow::isFullScreen() { return false; }
+bool WPFRenderWindow::isFullScreen() 
+{
+	return false; 
+}
 
 void WPFRenderWindow::SetWindowTitle(string title) { }
 string WPFRenderWindow::GetWindowTitle() { return ""; }
