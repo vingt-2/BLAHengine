@@ -177,8 +177,17 @@ void TriangleMesh::ComputeFaceTangents()
 
 		float invScale = 1 / (st1.s*st2.t - st2.s*st1.t);
 
+		if (isnan(invScale))
+			invScale = 0.0;
+		
 		vec3 T = invScale * mat2x3(q1, q2) * vec2(st2.t, -st1.t);
 		//vec3 B = invScale * mat2x3(q1, q2) * vec2(-st2.s, st1.s);
+
+		if (isnan(T.x) || isnan(T.y) || isnan(T.z))
+		{
+			//cout << "bla\n";
+			T = vec3(0);
+		}
 
 		m_faceTangent.push_back(T);
 	}
@@ -191,7 +200,8 @@ void TriangleMesh::ApplyGeomScaling(vec3 scaling)
 		vec3(0, scaling.y, 0),
 		vec3(0, 0, scaling.z));
 
-	for (auto &v : m_vertexPos) {
+	for (auto &v : m_vertexPos) 
+	{
 		v = scaleMat * v;
 	}
 }
@@ -200,7 +210,8 @@ void TriangleMesh::ApplyUVScaling(vec2 scaling)
 {
 	mat2 scaleMat(vec2(scaling.x, 0), vec2(0, scaling.y));
 
-	for (auto &v : m_vertexUVs) {
+	for (auto &v : m_vertexUVs) 
+	{
 		v = scaleMat * v;
 	}
 }
@@ -245,7 +256,14 @@ void TriangleMesh::GenerateRenderData()
 				}
 			}
 			tangent = tangent - (vert.vn * dot(tangent, vert.vn));
-			tangent = normalize(tangent);
+			
+			if(length(tangent) > 0)
+				tangent = normalize(tangent);
+
+			if (isnan(tangent.x) || isnan(tangent.y) || isnan(tangent.z))
+			{
+				tangent = vec3(0);
+			}
 
 			if (vertexMap.count(vert) == 0)
 			{

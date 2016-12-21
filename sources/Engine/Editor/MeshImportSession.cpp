@@ -91,7 +91,7 @@ bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string 
 
 	m_importedMesh = new TriangleMesh(name);
 
-	if (!objImporter.ImportMesh(filepath, *m_importedMesh, false, false))
+	if (!objImporter.ImportMesh(filepath, *m_importedMesh, false, true))
 	{
 		return false;
 	}
@@ -136,13 +136,23 @@ void BLAengine::MeshEditorControls::ControlCamera()
 {
 	GameObject* object = nullptr;
 	vec3* rotation = nullptr;
-	if (m_renderWindow->GetMousePressed(1))
+	bool scale = false;
+	bool rotate = false;
+	if (m_renderWindow->GetMousePressed(1) && (m_renderWindow->GetMousePressed(0)))
 	{
+		scale = true;
+		object = m_cameraObject;
+		rotation = new vec3(0);
+	}
+	else if (m_renderWindow->GetMousePressed(1))
+	{
+		rotate = true;
 		object = m_cameraObject;
 		rotation = &m_cameraRotation;
 	}
 	else if (m_renderWindow->GetKeyPressed('L'))
 	{
+		rotate = true;
 		object = m_lightObj;
 		rotation = &m_lightRotation;
 	}
@@ -181,7 +191,11 @@ void BLAengine::MeshEditorControls::ControlCamera()
 
 
 	*rotation += 0.01f * deltaRotation;
-	transform.SetRotationUsingEuler(*rotation);
+	if (rotate)
+		transform.SetRotationUsingEuler(*rotation);
+	
+	if (scale)
+		transform.m_scale += vec3(0.05*deltaRotation.x);
 	object->SetTransform(transform);
 	object->Update();
 }

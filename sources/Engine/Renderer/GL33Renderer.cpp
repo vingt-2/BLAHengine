@@ -2,7 +2,7 @@
 using namespace BLAengine;
 
 GL33Renderer::GL33Renderer():
-	debug_renderGBuffer(true),
+	debug_renderGBuffer(false),
 	m_renderDebug(true),
 	m_defaultColor(0.3,0.3,0.3)
 {}
