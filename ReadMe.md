@@ -12,7 +12,7 @@ from the ground's up and use as little libraries as possible.It is periodically 
 various features, the most prevalent being as of now:
 * Asset importation, with internal data structures stored in binary formats for fast load time.
 * An Object and Object Components architecture, with full scene graph support (in the vein of Unity3d). 
-* A deffered Renderer structure based on OpenGL 3.3, with real-time shadows and normal mapping (in rework)
+* A deffered Renderer structure based on OpenGL 3.3, with point/directional lights, real-time shadows and normal maps.
 * Full Object Physics routines to enable real-time interaction of 3D objects. 
 * Fast Collision routines for transformed Meshes, primitives, and Ray intersections
 * A real-time Linear Complementary based constraint solver, with which Mesh to Mesh rigid body collisions are handled.
