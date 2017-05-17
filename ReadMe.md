@@ -17,12 +17,12 @@ various features, the most prevalent being as of now:
 * A real-time Linear Complementary based constraint solver, with which Mesh to Mesh rigid body collisions are handled.
 * The ground work is laid to add further types of constraints on object.
 
-* For the kicks, I also implemented a parallelized Physically Based Offline renderer as an Object Component !
-* It implements a parallized Volumetric Photon Mapping renderer, and supports severals bounces on solid and participating media:
+* For kicks, I also implemented a parallelized Physically Based Offline renderer as an Object Component! It implements a parallized (CPU) Volumetric Photon Mapping renderer, and supports severals bounces on solid and participating media:
 
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/PBR-VolumetricPhotonMapping.png)
 
 ===================================
+
 The demo application "MainDemo" is a quick pot-pourris of the stuff in the engine. 
 It populates a scene with objects and let you interact with it. It's not very pretty
 and changes to help test features quickly.
@@ -36,6 +36,7 @@ and changes to help test features quickly.
 * CTRL: Move sun auto
 
 ===================================
+
 Installation:
 
 To compile and run this code sample, make sure you provide your programming environmment with:
