@@ -21,7 +21,6 @@ various features, the most prevalent being as of now:
 * For kicks, I also implemented a parallelized Physically Based Offline renderer as an Object Component! It implements a parallized (CPU) Volumetric Photon Mapping renderer, and supports severals bounces on solid and participating media:
 * BLAH, Blah, blah.
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/PBR-VolumetricPhotonMapping.png)
-====
  
 There is more to come ! 
 ===================================
