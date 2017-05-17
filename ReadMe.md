@@ -3,6 +3,7 @@ BLAHengine - A little bit of everything
 
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/illustration.bmp)
 
+What is this ?
 ===================================
 
 BLAHengine is real-time game engine inspired from Unity3D, and is a bit of a test bed for 
@@ -20,11 +21,16 @@ various features, the most prevalent being as of now:
 * For kicks, I also implemented a parallelized Physically Based Offline renderer as an Object Component! It implements a parallized (CPU) Volumetric Photon Mapping renderer, and supports severals bounces on solid and participating media:
 
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/PBR-VolumetricPhotonMapping.png)
-
-There is more to come! The next big construction is a complete rework of the renderer,
+====
+ 
+There is more to come ! 
+===================================
+The next big construction is a complete rework of the renderer,
 and an implementation of physically based methods with real-time global illumination.
 The engine is intended to be used as a library. There is an external editor on the way, but it's not quite
 there yet, so stay tuned for more :).
+
+MainDemo
 ===================================
 
 The demo application "MainDemo" is a quick pot-pourris of the stuff in the engine. 
@@ -38,10 +44,10 @@ and changes to help test features quickly.
 * Backspace: Enable/Disable gravity
 * Left/Right: Move Sun left and right
 * CTRL: Move sun auto
-
-===================================
+Enjoy !
 
 Installation:
+===================================
 
 To compile and run this code sample, make sure you provide your programming environmment with:
 * GLEW to enable OpenGL 3.0 and extensions
