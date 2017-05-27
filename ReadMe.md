@@ -1,7 +1,11 @@
 BLAHengine - A little bit of everything
 ===================================
 
+<<<<<<< HEAD
 ![demo](BLAengine.gif)
+=======
+![alt tag](https://raw.github.com/vingt-2/BLAengine/master/illustration.bmp)
+>>>>>>> e64644b9c36ab0c1b49a2e30617468e1c5c233b6
 
 What is this ?
 ===================================
