@@ -22,6 +22,8 @@ void DirectionalLight::Update()
 		Camera* shadowCamera = new Camera();
 		
 		m_parentObject->AddComponent(shadowCamera);
+
+		shadowCamera->Update();
 	}
 }
 

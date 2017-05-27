@@ -45,7 +45,7 @@ void main(){
     }
     else
     {
-        float ambientLight = 1;
+        float ambientLight = 0.5;
 		
         vec4 shadowPos = shadowMV * vec4(worldPos, 1.0);
         //shadowPos /= shadowPos.w;
@@ -68,10 +68,8 @@ void main(){
             }
         }
 
-        float vis = ambientLight + (factor / 50.0f);
-
-		//vec3 fogColor = (depth/0.99) * vec3(1,1,1);
+        float vis = max(ambientLight,(factor / 16.0f));
 		
-        color = diffuse * (3 * vis * max(dot(normal, lightDirection),0) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor));
+        color = diffuse * (3 * vis * max(dot(normal, lightDirection),0)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
     }
 }

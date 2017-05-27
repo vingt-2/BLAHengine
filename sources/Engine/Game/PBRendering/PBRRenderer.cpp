@@ -29,7 +29,7 @@ std::uniform_real_distribution<float> zeroToOneDist(0, 1);
 
 void BLAengine::PBRCamera::Render()
 {
-	vec2 resolution(1920,1080);
+	vec2 resolution(1000,1000);
 	if (m_renderer == nullptr)
 	{
 		m_renderer = new PBRPhotonMapping(m_sceneObjects);
@@ -654,7 +654,7 @@ vector<vec3> BLAengine::PBRPhotonMapping::Render(Transform cameraTransform, vec2
 	vector<vec3> renderedImage;
 	renderedImage.reserve(w*h);
 
-	BuildPhotonMap(inParallel, 8000000);
+	BuildPhotonMap(inParallel, 10000000);
 
 	std::cout << "\nRendering:\n";
 	if (inParallel)

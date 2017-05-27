@@ -1,0 +1,293 @@
+{
+    "Scene": {
+        "Objects": [
+            {
+                "Name": "sphere",
+                "Transform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -3,
+                        "z": -5
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "sphere",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+			{
+                "Name": "sky",
+                "Transform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -3,
+                        "z": -5
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 5000,
+                        "y": 5000,
+                        "z": 5000
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "skymesh",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+			{
+				"Name": "redcube1",
+                "Transform": {
+                    "position": {
+                        "x": 2,
+                        "y": 5,
+                        "z": -5
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "cube",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+			{
+				"Name": "redcube2",
+                "Transform": {
+                    "position": {
+                        "x": -2,
+                        "y": 5,
+                        "z": -5
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "cube",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+			{
+				"Name": "redcube3",
+                "Transform": {
+                    "position": {
+                        "x": 0,
+                        "y": 8,
+                        "z": -5
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "cube",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+			{
+				"Name": "redcube4",
+                "Transform": {
+                    "position": {
+                        "x": 0,
+                        "y": 5,
+                        "z": -2.5
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "cube",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+			{
+                "Name": "sponza",
+                "Transform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 2,
+                        "z": -1.0
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 60,
+                        "y": 60,
+                        "z": 60
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "sponza",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,47 @@
+{
+    "Scene": {
+        "Objects": [
+            {
+                "Name": "sponza",
+                "Transform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -2.0
+                    },
+                    "rotation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "c": 0.0,
+                        "d": 0.0,
+                        "e": 1.0,
+                        "f": 0.0,
+                        "g": 0.0,
+                        "h": 0.0,
+                        "i": 1.0
+                    },
+                    "scale": {
+                        "x": 10.0,
+                        "y": 10.0,
+                        "z": 10.0
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "sponza",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -55,32 +55,6 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 
 void EditorSession::UpdateEditor()
 {
-	for (auto gobject : m_workingScene->GetObjects())
-	{
-		if (MeshRenderer* mRender = gobject->GetComponent<MeshRenderer>())
-		{
-			if (!gobject->GetComponent<PBRSurface>())
-			{
-				if (gobject->GetName() == "sky")
-				{
-					PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
-					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-					//pbmRender->m_material.m_emissivePower = vec3(100000000, 100000000, 100000000);
-
-					gobject->AddComponent(pbmRender);
-				}
-				else
-				{
-					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
-					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
-					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-					pbmRender->m_material.m_color = vec3(0.6,0.3,0.2);
-					gobject->AddComponent(pbmRender);
-				}
-			}
-		}
-	}
-
 	if (m_renderWindow->GetMousePressed(0))
 	{
 		Ray screenRay = m_editorRenderer->ScreenToRay();
@@ -93,15 +67,16 @@ void EditorSession::UpdateEditor()
 		}
 	}
 
-	GameObject* pbrenderObject = m_workingScene->FindNameInScene("PBRCamera");
-	int i = 0;
-	vector<Ray> debugRays;
-	if (pbrenderObject)
+	if (GameObject* dirlightObj = m_workingScene->FindNameInScene("DirLight"))
 	{
-		if (PBRCamera* renderer = pbrenderObject->GetComponent<PBRCamera>())
+		if (DirectionalLight* dirLight = dirlightObj->GetComponent<DirectionalLight>())
 		{
-			if (m_renderWindow->GetKeyPressed('R'))
-				renderer->m_shouldRender = true;
+			Transform lightT = dirLight->GetObjectTransform();
+			lightT.m_position = vec3(0, 50, 0);
+			vec3 rotationInEuler = lightT.GetEulerRotation();
+			cout << rotationInEuler.y;
+			lightT.SetRotationUsingEuler(vec3(rotationInEuler.x + 0.01, 0 ,0));
+			dirlightObj->SetTransform(lightT);
 		}
 	}
 
@@ -132,27 +107,12 @@ bool BLAengine::EditorSession::LoadWorkingScene(std::string filepath)
 	m_editorRenderer->SwitchRenderingManager(m_renderingManager);
 
 	GameObject* light = m_workingScene->CreateObject("DirLight");
-	DirectionalLight* dirLight = new DirectionalLight(vec3(0, -1, 0));
+	DirectionalLight* dirLight = new DirectionalLight(vec3(0, 10, 0));
 	light->AddComponent(dirLight);
 	Transform lightT = light->GetTransform();
-	lightT.SetRotationUsingEuler(vec3(1.07, 0, 0));
+	lightT.m_position = vec3(0, 20, 0);
+	lightT.SetRotationUsingEuler(vec3(0, 1.2, 0));
 	light->SetTransform(lightT);
-
-	GameObject* pbrender = m_workingScene->CreateObject("PBRCamera");
-	Transform t1;
-	t1.m_position = vec3(0, 1, 5);
-	t1.SetRotationUsingEuler(vec3(0.3, 0, 0));
-	pbrender->SetTransform(t1);
-	pbrender->AddComponent(new PBRCamera());
-
-	GameObject* pblight = m_workingScene->CreateObject("Light");
-	Transform t;
-	t.m_position = vec3(0, 2, -3);
-	pblight->SetTransform(t);
-	PBRSurface* surface = new PBRSphere(0.4);
-	surface->m_material.m_emissivePower = vec3(400, 400, 400);
-	pblight->AddComponent(surface);
-	pblight->AddComponent(new SphereCollider(1));
 
 	return true;
 }
@@ -182,19 +142,19 @@ void BLAengine::EditorControls::ControlCamera()
 
 
 	if (m_renderWindow->GetKeyPressed('W'))
-		tangentForce.z = 1.f;
+		tangentForce.z = 2.f;
 	if (m_renderWindow->GetKeyPressed('S'))
-		tangentForce.z = -1.f;
+		tangentForce.z = -2.f;
 
 	if (m_renderWindow->GetKeyPressed('A'))
-		tangentForce.x = 1.f;
+		tangentForce.x = 2.f;
 	if (m_renderWindow->GetKeyPressed('D'))
-		tangentForce.x = -1.f;
+		tangentForce.x = -2.f;
 
 	if (m_renderWindow->GetKeyPressed('Q'))
-		tangentForce.y = 1.f;
+		tangentForce.y = 2.f;
 	if (m_renderWindow->GetKeyPressed('E'))
-		tangentForce.y = -1.f;
+		tangentForce.y = -2.f;
 
 	vec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
 	cameraForce *= coeff;

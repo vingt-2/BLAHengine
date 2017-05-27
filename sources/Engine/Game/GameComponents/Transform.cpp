@@ -49,8 +49,11 @@ void Transform::SetRotationUsingEuler(vec3 eulerAngles)
 
 vec3 Transform::GetEulerRotation() const
 {
-	//TODO: Implement.
-	return vec3(0);
+	float x = atan2f(m_rotation[2][1], m_rotation[2][2]);
+	float y = atan2f(-m_rotation[2][0], sqrtf(m_rotation[2][1] * m_rotation[2][1] + m_rotation[2][2] * m_rotation[2][2]));
+	float z = atan2f(m_rotation[1][0], m_rotation[0][0]);
+
+	return vec3(x, y, z);
 }
 
 vec3 Transform::LocalDirectionToWorld(vec3 direction) const

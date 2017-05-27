@@ -1,12 +1,17 @@
-#include "EngineDemo.h"
+#include "Engine/Editor/EditorSession.h"
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
 int main()
 {
-	Raytracer demo(true, false);
+	EditorSession demo(true, false);
 
-	demo.InitializeEngine();
+	GLFWRenderWindow* renderWindow = new GLFWRenderWindow();
+	renderWindow->CreateRenderWindow("BLAengineDemo", 100, 100, false); // Add arguments
+
+	demo.InitializeEngine(renderWindow);
+
+	demo.LoadWorkingScene("C:/Users/Vingt-2/Desktop/BLASoftware/BLAengine/Scenes/test_scene");
 
 	while (!demo.ShouldTerminate())
 	{
@@ -15,7 +20,7 @@ int main()
 
 	demo.TerminateEditor();
 
-	demo.~Raytracer();
+	demo.~EditorSession();
 }
 
 #endif

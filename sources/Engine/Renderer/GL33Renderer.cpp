@@ -3,7 +3,7 @@ using namespace BLAengine;
 
 GL33Renderer::GL33Renderer():
 	debug_renderGBuffer(false),
-	m_renderDebug(true),
+	m_renderDebug(false),
 	m_defaultColor(0.3,0.3,0.3)
 {}
 
@@ -83,7 +83,23 @@ bool GL33Renderer::Update()
 		DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
 		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
 		DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
-		DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+		if (m_directionalLightPool.size() > 0)
+		{
+			DirectionalLightRender* not_null = nullptr;
+			for (auto dlptr : m_directionalLightPool)
+			{
+				if (dlptr.second != nullptr)
+				{
+					not_null = dlptr.second;
+				}
+			}
+			RenderDirectionalShadowMap(not_null->m_shadowRender);
+			DrawDepthBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), not_null->m_shadowRender.m_depthTexture);
+		}
+		else
+		{
+			DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+		}
 	}
 	else
 	{
@@ -671,6 +687,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
 			dirLightRender->m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);
 			dirLightRender->m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
 			dirLightRender->m_shadowRender.m_bufferSize = 8192;
+			SetupDirectionalShadowBuffer(dirLightRender->m_shadowRender);
 			m_directionalLightPool[ticketedObject.first] = dirLightRender;
 
 			addedObjectsOnCall++;

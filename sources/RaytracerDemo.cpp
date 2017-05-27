@@ -1,4 +1,4 @@
-#include "EngineDemo.h"
+#include "RaytracerDemo.h"
 #include "./Engine/Game/PBRendering/PBRRenderer.h"
 
 using namespace BLAengine;
@@ -52,9 +52,9 @@ void Raytracer::UpdateEditor()
 	m_debug->Update();
 
 
-	//m_timer->Update();
+	m_timer->Update();
 	m_workingScene->Update();
-	//m_editorRenderer->Update();
+	m_editorRenderer->Update();
 
 	GameObject* pbrenderObject = m_workingScene->FindNameInScene("PBRCamera");
 	int i = 0;
@@ -131,7 +131,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
 
 					gobject->AddComponent(pbmRender);
 				}
-				else if(gobject->GetName() == "cube")
+				else if(gobject->GetName() == "sphere")
 				{
 					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
 					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
@@ -140,12 +140,21 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
 					//pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
 					gobject->AddComponent(pbmRender);
 				}
-				else if (gobject->GetName() == "cube2")
+				else if (gobject->GetName() == "redcube1" || gobject->GetName() == "redcube4")
 				{
 					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
 					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
 					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-					pbmRender->m_material.m_color = vec3(3, 0.1, 0.1);
+					pbmRender->m_material.m_color = vec3(1, 0.1, 0.1);
+					//pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
+					gobject->AddComponent(pbmRender);
+				}
+				else if (gobject->GetName() == "redcube2" || gobject->GetName() == "redcube3")
+				{
+					PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
+					//PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
+					pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
+					pbmRender->m_material.m_color = vec3(1, 0.1, 0.1);
 					//pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
 					gobject->AddComponent(pbmRender);
 				}
