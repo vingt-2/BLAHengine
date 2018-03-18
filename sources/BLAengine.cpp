@@ -4,23 +4,23 @@ using namespace BLAengine;
 
 int main()
 {
-	EditorSession demo(true, false);
+    EditorSession demo(true, false);
 
-	GLFWRenderWindow* renderWindow = new GLFWRenderWindow();
-	renderWindow->CreateRenderWindow("BLAengineDemo", 100, 100, false); // Add arguments
+    GLFWRenderWindow* renderWindow = new GLFWRenderWindow();
+    renderWindow->CreateRenderWindow("BLAengineDemo", 512, 512, false); // Add arguments
 
-	demo.InitializeEngine(renderWindow);
+    demo.InitializeEngine(renderWindow);
 
-	demo.LoadWorkingScene("C:/Users/Vingt-2/Desktop/BLASoftware/BLAengine/Scenes/test_scene");
+    demo.LoadWorkingScene("./Scenes/test_scene");
 
-	while (!demo.ShouldTerminate())
-	{
-		demo.UpdateEditor();
-	}
+    while (!demo.ShouldTerminate())
+    {
+        demo.UpdateEditor();
+    }
 
-	demo.TerminateEditor();
+    demo.TerminateEditor();
 
-	demo.~EditorSession();
+    demo.~EditorSession();
 }
 
 #endif

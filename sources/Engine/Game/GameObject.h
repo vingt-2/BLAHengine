@@ -5,82 +5,82 @@
 
 namespace BLAengine
 {
-	class BLACORE_API GameObject
-	{
-	public:
+    class BLACORE_API GameObject
+    {
+    public:
 
-		void Update();
+        void Update();
 
-		void SetParent(GameObject* parent) { m_parent = parent; }
-		GameObject* GetParent() { return m_parent; }
+        void SetParent(GameObject* parent) { m_parent = parent; }
+        GameObject* GetParent() { return m_parent; }
 
-		const Transform& GetTransform();
-		void SetTransform(const Transform& transform);
+        const Transform& GetTransform();
+        void SetTransform(const Transform& transform);
 
-		GameObject(string name);
-		~GameObject(void);
+        GameObject(string name);
+        ~GameObject(void);
 
-		void SetName(std::string name) { m_objectName = name; }
-		std::string GetName() { return m_objectName; }
+        void SetName(std::string name) { m_objectName = name; }
+        std::string GetName() { return m_objectName; }
 
-		void AddComponent(GameComponent* component);
+        void AddComponent(GameComponent* component);
 
-		vector<GameComponent*> GetAllComponents();
+        vector<GameComponent*> GetAllComponents();
 
-		template<class ComponentType>
-		ComponentType* GetComponent();
+        template<class ComponentType>
+        ComponentType* GetComponent();
 
-		template<class ComponentType>
-		ComponentType* GetComponentInChildren();
+        template<class ComponentType>
+        ComponentType* GetComponentInChildren();
 
-		template<class ComponentType>
-		vector<ComponentType*> GetComponents();
+        template<class ComponentType>
+        vector<ComponentType*> GetComponents();
 
-		template<class ComponentType>
-		vector<ComponentType*> GetComponentsInChildren();
+        template<class ComponentType>
+        vector<ComponentType*> GetComponentsInChildren();
 
-	private:
+    private:
 
-		string m_objectName;
-		GameObject* m_parent;
-		Transform* m_transform;
+        string m_objectName;
+        GameObject* m_parent;
+        Transform* m_transform;
 
-		vector<GameComponent*> m_componentVector;
+        vector<GameComponent*> m_componentVector;
 
-		void UpdateTransform();
-	};
+        void UpdateTransform();
+    };
 
-	inline vector<GameComponent*> GameObject::GetAllComponents()
-	{
-		return m_componentVector;
-	}
+    inline vector<GameComponent*> GameObject::GetAllComponents()
+    {
+        return m_componentVector;
+    }
 
-	template<class ComponentType>
-	inline ComponentType* GameObject::GetComponent()
-	{
-		for (int i = 0; i < m_componentVector.size(); i++)
-		{
-			GameComponent* gComp = m_componentVector[i];
-			if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))
-			{
-				return comp;
-			}
-		}
-		return nullptr;
-	}
+    template<class ComponentType>
+    inline ComponentType* GameObject::GetComponent()
+    {
+        for (int i = 0; i < m_componentVector.size(); i++)
+        {
+            GameComponent* gComp = m_componentVector[i];
+            if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))
+            {
+                return comp;
+            }
+        }
+        return nullptr;
+    }
 
-	template<class ComponentType>
-	inline vector<ComponentType*> GameObject::GetComponents()
-	{
-		vector<ComponentType*> comps;
-		for (int i = 0; i < m_componentVector.size(); i++)
-		{
-			GameComponent* gComp = m_componentVector[i];
-			if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))
-			{
-				comps.push_back(comp);
-			}
-		}
-		return comps;
-	}
+    template<class ComponentType>
+    inline vector<ComponentType*> GameObject::GetComponents()
+    {
+        vector<ComponentType*> comps;
+        for (int i = 0; i < m_componentVector.size(); i++)
+        {
+            GameComponent* gComp = m_componentVector[i];
+            if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))
+            {
+                comps.push_back(comp);
+            }
+        }
+        return comps;
+    }
 }

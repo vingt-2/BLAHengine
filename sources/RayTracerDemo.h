@@ -8,50 +8,50 @@
 
 namespace BLAengine
 {
-	class BLACORE_API Raytracer
-	{
-	public:
-		Raytracer(bool external, bool isFullscreen) :
-			m_isFullScreen(isFullscreen),
-			m_isTerminationRequested(false),
-			m_pbr_render_requested(false),
-			debugRay(Ray(vec3(0), vec3(0), 1))
-		{};
+    class BLACORE_API Raytracer
+    {
+    public:
+        Raytracer(bool external, bool isFullscreen) :
+            m_isFullScreen(isFullscreen),
+            m_isTerminationRequested(false),
+            m_pbr_render_requested(false),
+            debugRay(Ray(vec3(0), vec3(0), 1))
+        {};
 
-		~Raytracer() { TerminateEditor(); };
+        ~Raytracer() { TerminateEditor(); };
 
-		bool InitializeEngine();
+        bool InitializeEngine();
 
-		void UpdateEditor();
+        void UpdateEditor();
 
-		void TerminateEditor();
+        void TerminateEditor();
 
-		bool ShouldTerminate() { return m_isTerminationRequested; };
+        bool ShouldTerminate() { return m_isTerminationRequested; };
 
-		bool LoadWorkingScene(std::string filePath);
+        bool LoadWorkingScene(std::string filePath);
 
-		bool SaveWorkingScene(std::string filePath);
+        bool SaveWorkingScene(std::string filePath);
 
-		std::vector<string> GetSceneObjects();
+        std::vector<string> GetSceneObjects();
 
-	private:
+    private:
 
-		// Required Engine Modules
-		GL33Renderer* m_editorRenderer;
-		AssetManager* m_assetManager;
-		SceneManager* m_sceneManager;
-		Debug* m_debug;
-		Scene* m_workingScene;
-		Scene* m_editorScene;
-		RenderWindow* m_renderWindow;
-		Time* m_timer;
-		RenderingManager* m_renderingManager;
-		DebugRenderingManager* m_debugRenderingManager;
+        // Required Engine Modules
+        GL33Renderer* m_editorRenderer;
+        AssetManager* m_assetManager;
+        SceneManager* m_sceneManager;
+        Debug* m_debug;
+        Scene* m_workingScene;
+        Scene* m_editorScene;
+        RenderWindow* m_renderWindow;
+        Time* m_timer;
+        RenderingManager* m_renderingManager;
+        DebugRenderingManager* m_debugRenderingManager;
 
-		//States
-		bool m_pbr_render_requested;
-		Ray debugRay;
-		bool m_isFullScreen;
-		bool m_isTerminationRequested;
-	};
+        //States
+        bool m_pbr_render_requested;
+        Ray debugRay;
+        bool m_isFullScreen;
+        bool m_isTerminationRequested;
+    };
 };

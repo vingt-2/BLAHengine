@@ -4,25 +4,25 @@
 using namespace BLAengine;
 
 RigidBody::RigidBody(const Transform& transform) :
-	m_forcesAccu(vec3(0)),
-	m_torquesAccu(vec3(0)),
-	m_acceleration(vec3(0)),
-	m_velocity(vec3(0)),
-	m_angularVelocity(vec3(0)),
-	m_previousPosition(vec3(0)),
-	m_previousRotation(vec3(0)),
-	m_isPinned(false),
-	m_applyGravity(true),
-	m_impulseAccu(0),
-	m_massTensor(mat3(1)),
-	m_inertiaTensor(mat3(1)),
-	m_enableCollision(true),
-	m_transform(transform)
+    m_forcesAccu(vec3(0)),
+    m_torquesAccu(vec3(0)),
+    m_acceleration(vec3(0)),
+    m_velocity(vec3(0)),
+    m_angularVelocity(vec3(0)),
+    m_previousPosition(vec3(0)),
+    m_previousRotation(vec3(0)),
+    m_isPinned(false),
+    m_applyGravity(true),
+    m_impulseAccu(0),
+    m_massTensor(mat3(1)),
+    m_inertiaTensor(mat3(1)),
+    m_enableCollision(true),
+    m_transform(transform)
 {
-	m_collider = nullptr;
+    m_collider = nullptr;
 
-	m_invMassTensor = inverse(m_massTensor);
-	m_invInertiaTensor = inverse(m_inertiaTensor);
+    m_invMassTensor = inverse(m_massTensor);
+    m_invInertiaTensor = inverse(m_inertiaTensor);
 }
 
 
@@ -36,36 +36,36 @@ void RigidBody::Update()
 
 void RigidBody::PushForceWorld(vec3 pushAtW, vec3 forceW)
 {
-	Transform transform = m_parentObject->GetTransform();
-	vec3 contactInBody = pushAtW - transform.m_position;
+    Transform transform = m_parentObject->GetTransform();
+    vec3 contactInBody = pushAtW - transform.m_position;
 
-	vec3 torque = cross(forceW, contactInBody);
-	torque = transform.WorldDirectionToLocal(torque);
+    vec3 torque = cross(forceW, contactInBody);
+    torque = transform.WorldDirectionToLocal(torque);
 
-	AddTorque(torque);
-	AddLinearForce(forceW / length(torque));
+    AddTorque(torque);
+    AddLinearForce(forceW / length(torque));
 }
 
 void RigidBody::AddLinearForce(vec3 force)
 {
-	m_forcesAccu += force;
+    m_forcesAccu += force;
 }
 
 void RigidBody::AddTorque(vec3 torque)
 {
-	m_torquesAccu += torque;
+    m_torquesAccu += torque;
 }
 
 void RigidBody::AddImpulse(vec3 impulse)
 {
-	m_impulseAccu += impulse;
+    m_impulseAccu += impulse;
 }
 
 NextState::NextState():
-	m_acceleration(vec3(0)),
-	m_velocity(vec3(0)),
-	m_angularAcceleration(vec3(0)),
-	m_angularVelocity(vec3(0)),
-	m_correctionLinearVelocity(vec3(0)),
-	m_correctionAngularVelocity(vec3(0))
+    m_acceleration(vec3(0)),
+    m_velocity(vec3(0)),
+    m_angularAcceleration(vec3(0)),
+    m_angularVelocity(vec3(0)),
+    m_correctionLinearVelocity(vec3(0)),
+    m_correctionAngularVelocity(vec3(0))
 {}

@@ -248,7 +248,7 @@ public:
     const SNP::intr_set& s=m_SP.get_intersections();
     for(SNP::intr_set::const_iterator it=s.begin();it!=s.end();++it)
     {
-	  const SNP::Intersection& intr=*it;
+      const SNP::Intersection& intr=*it;
       m_Results.push_back(CollisionDetails());
       CollisionDetails& cd=m_Results.back();
       cd.id1=intr.id1;

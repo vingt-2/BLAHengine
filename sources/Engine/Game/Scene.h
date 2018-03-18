@@ -8,39 +8,39 @@
 
 namespace BLAengine
 {
-	class BLACORE_API Scene
-	{
-	public:
-		Scene();
-		~Scene(); // TODO: IMPLEMENT!
+    class BLACORE_API Scene
+    {
+    public:
+        Scene();
+        ~Scene(); // TODO: IMPLEMENT!
 
-		void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
-		void Update();
+        void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
+        void Update();
 
-		GameObject* CreateObject(std::string name);
-		bool DeleteObject(std::string name);
-		GameObject* FindNameInScene(std::string name);
+        GameObject* CreateObject(std::string name);
+        bool DeleteObject(std::string name);
+        GameObject* FindNameInScene(std::string name);
 
-		vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
-		Camera* GetMainCamera();
-		vector<Contact>* GetContacts();
+        vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
+        Camera* GetMainCamera();
+        vector<Contact>* GetContacts();
 
-		bool m_enableSimulation;
+        bool m_enableSimulation;
 
-		void EnableGravity() { m_rigidBodySystem->m_enableGravity = true; }
-		void DisableGravity() { m_rigidBodySystem->m_enableGravity = false; }
-		bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
-		RigidBodySystem* m_rigidBodySystem;
+        void EnableGravity() { m_rigidBodySystem->m_enableGravity = true; }
+        void DisableGravity() { m_rigidBodySystem->m_enableGravity = false; }
+        bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
+        RigidBodySystem* m_rigidBodySystem;
 
-		void SetTimeObject(Time* time); //TODO: Implement !
+        void SetTimeObject(Time* time); //TODO: Implement !
 
-		std::pair<GameObject*, Collider::RayCollision> PickGameObjectInScene(Ray ray);
+        std::pair<GameObject*, Collider::RayCollision> PickGameObjectInScene(Ray ray);
 
-	private:
+    private:
 
-		Camera* m_camera; //TODO: Find in object scene !
-		RenderingManager* m_renderingManager;
-		vector<GameObject*>  m_sceneObjectsVector;
-	};
+        Camera* m_camera; //TODO: Find in object scene !
+        RenderingManager* m_renderingManager;
+        vector<GameObject*>  m_sceneObjectsVector;
+    };
 
 }

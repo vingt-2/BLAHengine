@@ -4,43 +4,43 @@
 
 namespace BLAengine
 {
-	class BLACORE_API RigidBodySystem
-	{
-	public:
-		int m_substeps;
-		float m_uniformViscosity;
-		vec3 m_gravity;
-		bool m_enableGravity;
-		bool m_tieToTime;
+    class BLACORE_API RigidBodySystem
+    {
+    public:
+        int m_substeps;
+        float m_uniformViscosity;
+        vec3 m_gravity;
+        bool m_enableGravity;
+        bool m_tieToTime;
 
-		RigidBodySystem(Time* time);
-		~RigidBodySystem();
+        RigidBodySystem(Time* time);
+        ~RigidBodySystem();
 
-		void UpdateSystem();
-		bool RegisterRigidBody(RigidBody &body);
-		float GetTimeStep() { return m_timeStep; };
+        void UpdateSystem();
+        bool RegisterRigidBody(RigidBody &body);
+        float GetTimeStep() { return m_timeStep; };
 
-		void EnableSimulation();
-		void DisableSimulation();
+        void EnableSimulation();
+        void DisableSimulation();
 
-		CollisionProcessor* m_collisionProcessor;
+        CollisionProcessor* m_collisionProcessor;
 
-		void SetTimeObject(Time* time);
+        void SetTimeObject(Time* time);
 
-	private:
-		vector<RigidBody*> m_rigidBodyList;
-		Time* m_time;
+    private:
+        vector<RigidBody*> m_rigidBodyList;
+        Time* m_time;
 
-		float m_timeStep;
-		double m_oldTime;
-		bool m_isSimulating;
+        float m_timeStep;
+        double m_oldTime;
+        bool m_isSimulating;
 
-		void ApplyWorldForces();
-		void GetNewStates();
-		void UpdateStates();
+        void ApplyWorldForces();
+        void GetNewStates();
+        void UpdateStates();
 
-		void UpdateAcceleration(RigidBody& body);
-		void UpdateVelocity(RigidBody& body);
-		void UpdateTransform(RigidBody& body);
-	};
+        void UpdateAcceleration(RigidBody& body);
+        void UpdateVelocity(RigidBody& body);
+        void UpdateTransform(RigidBody& body);
+    };
 }

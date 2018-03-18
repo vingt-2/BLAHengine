@@ -9,32 +9,32 @@
 
 namespace BLAengine
 {
-	class BLACORE_API MeshRenderer : public GameComponent
-	{
-	public:
+    class BLACORE_API MeshRenderer : public GameComponent
+    {
+    public:
 
-		int m_renderTicket;
+        int m_renderTicket;
 
-		TriangleMesh* m_mesh;
+        TriangleMesh* m_mesh;
 
-		vector<Material*> m_materials;
+        vector<Material*> m_materials;
 
-		GLuint m_renderType;
+        GLuint m_renderType;
 
-		MeshRenderer();
-		~MeshRenderer(void);
+        MeshRenderer();
+        ~MeshRenderer(void);
 
-		bool AssignTriangleMesh(TriangleMesh* mesh);
-		bool AssignMaterial(Material* material, int matIndx);
-		
-		mat4* GetTransformMatrix() const;
-		
-		string ToString(void);
+        bool AssignTriangleMesh(TriangleMesh* mesh);
+        bool AssignMaterial(Material* material, int matIndx);
+        
+        mat4* GetTransformMatrix() const;
+        
+        string ToString(void);
 
-		void Update();
+        void Update();
 
-	private:
+    private:
 
-		mat4* m_modelTransformMatrix;
-	};
+        mat4* m_modelTransformMatrix;
+    };
 }

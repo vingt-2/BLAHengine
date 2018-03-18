@@ -7,50 +7,50 @@
 
 namespace BLAengine
 {
-	class BLACORE_API RenderingManager
-	{
-	public:
-		enum RenderManagerType{ Game = 0, EditorGizmos = 1 };
+    class BLACORE_API RenderingManager
+    {
+    public:
+        enum RenderManagerType{ Game = 0, EditorGizmos = 1 };
 
-		RenderingManager(RenderManagerType type);
-		~RenderingManager();
+        RenderingManager(RenderManagerType type);
+        ~RenderingManager();
 
-		uint RegisterMeshRenderer(MeshRenderer* object);
-		bool		 CancelMeshRendererTicket(MeshRenderer* object);
+        uint RegisterMeshRenderer(MeshRenderer* object);
+        bool         CancelMeshRendererTicket(MeshRenderer* object);
 
-		uint RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera);
-		uint CancelDirectionalLightTicket(DirectionalLight* dirLight);
+        uint RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera);
+        uint CancelDirectionalLightTicket(DirectionalLight* dirLight);
 
-		std::unordered_map<uint, MeshRenderer*>* GetTicketedMeshRenderers();
-		std::unordered_map<uint, std::pair<DirectionalLight*, Camera*>>* GetTicketedDirectionalLights();
+        std::unordered_map<uint, MeshRenderer*>* GetTicketedMeshRenderers();
+        std::unordered_map<uint, std::pair<DirectionalLight*, Camera*>>* GetTicketedDirectionalLights();
 
-		void Update();
+        void Update();
 
 
-	private:
+    private:
 
-		RenderManagerType m_renderManagerType;
+        RenderManagerType m_renderManagerType;
 
-		std::unordered_map<uint, MeshRenderer*> m_ticketedMeshRenderers;
-		std::unordered_map<uint, pair<DirectionalLight*, Camera*>> m_ticketedDirLights;
+        std::unordered_map<uint, MeshRenderer*> m_ticketedMeshRenderers;
+        std::unordered_map<uint, pair<DirectionalLight*, Camera*>> m_ticketedDirLights;
 
-		int currentTicket;
+        int currentTicket;
 
-	};
+    };
 
-	class BLACORE_API DebugRenderingManager
-	{
-	public:
+    class BLACORE_API DebugRenderingManager
+    {
+    public:
 
-		DebugRenderingManager() {};
-		~DebugRenderingManager() {};
+        DebugRenderingManager() {};
+        ~DebugRenderingManager() {};
 
-		vector<pair<vector<vec3>, vector<vec3>>> m_lineMeshes;
+        vector<pair<vector<vec3>, vector<vec3>>> m_lineMeshes;
 
-		void LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh);
+        void LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh);
 
-		void Update();
-	};
+        void Update();
+    };
 
 
 

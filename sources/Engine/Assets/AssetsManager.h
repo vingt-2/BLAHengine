@@ -11,40 +11,40 @@
 
 namespace BLAengine
 {
-	class BLACORE_API AssetManager
-	{
-	public:
+    class BLACORE_API AssetManager
+    {
+    public:
 
-		enum AssetType
-		{
-			TriangleMeshAsset,
-			TextureAsset,
-			MaterialAsset,
-			InvalidAsset
-		};
+        enum AssetType
+        {
+            TriangleMeshAsset,
+            TextureAsset,
+            MaterialAsset,
+            InvalidAsset
+        };
 
-		AssetManager(void);
-		~AssetManager(void);
+        AssetManager(void);
+        ~AssetManager(void);
 
-		int LoadCookedAssets();
+        int LoadCookedAssets();
 
-		AssetType GetAsset(std::string filepath, Asset* &assetPtr);
+        AssetType GetAsset(std::string filepath, Asset* &assetPtr);
 
-		bool LoadTriangleMesh(std::string filepath);
-		bool LoadTexture(std::string filepath);
-		bool LoadMaterial(std::string filepath);
+        bool LoadTriangleMesh(std::string filepath);
+        bool LoadTexture(std::string filepath);
+        bool LoadMaterial(std::string filepath);
 
-		bool SaveMaterial(Material* mat);
-		bool SaveTexture(Texture2D* mesh);
-		bool SaveTriangleMesh(TriangleMesh* mesh);
+        bool SaveMaterial(Material* mat);
+        bool SaveTexture(Texture2D* mesh);
+        bool SaveTriangleMesh(TriangleMesh* mesh);
 
-	private:
+    private:
 
-		map<std::string, std::pair<AssetType, uint32_t>> m_resourceMap;
+        map<std::string, std::pair<AssetType, uint32_t>> m_resourceMap;
 
-		vector<TriangleMesh*> m_triangleMeshesInMemory;
-		vector<Material*> m_materialsInMemory;
-		vector<Texture2D*> m_textures2DInMemory;
-	};
+        vector<TriangleMesh*> m_triangleMeshesInMemory;
+        vector<Material*> m_materialsInMemory;
+        vector<Texture2D*> m_textures2DInMemory;
+    };
 
 }

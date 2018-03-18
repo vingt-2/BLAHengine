@@ -21,7 +21,7 @@ using namespace std;
 
 #ifndef BLA_NO_DLL
 #ifdef EXPORT_DLL
-#define	BLACORE_API __declspec ( dllexport )
+#define    BLACORE_API __declspec ( dllexport )
 #else
 #define BLACORE_API __declspec ( dllimport )
 #endif

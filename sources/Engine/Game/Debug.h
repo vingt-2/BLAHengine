@@ -5,39 +5,39 @@
 
 /*
  TODO: 
-	SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
-	And Common m_debug asserts
+    SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
+    And Common m_debug asserts
 */
 
 namespace BLAengine
 {
-	class BLACORE_API Debug
-	{
-	public:
+    class BLACORE_API Debug
+    {
+    public:
 
-		Debug(DebugRenderingManager* renderManager);
-		~Debug();
+        Debug(DebugRenderingManager* renderManager);
+        ~Debug();
 
-		DebugRenderingManager* m_debugRenderManager;
+        DebugRenderingManager* m_debugRenderManager;
 
-		bool m_drawDebugRays;
+        bool m_drawDebugRays;
 
-		void Update();
+        void Update();
 
-		//Render m_debug:
-		void DrawLine(const vec3 origin, const vec3 destination);
-		void DrawLine(const vec3 origin, const vec3 destination, const vec3 color);
-		void DrawRay(Ray ray, const vec3 color);
-		void DrawRay(Ray ray);
+        //Render m_debug:
+        void DrawLine(const vec3 origin, const vec3 destination);
+        void DrawLine(const vec3 origin, const vec3 destination, const vec3 color);
+        void DrawRay(Ray ray, const vec3 color);
+        void DrawRay(Ray ray);
 
-		void DrawGrid(int size, float spacing, const vec3 color);
-		void DrawBasis(Transform* transform, float opacity);
+        void DrawGrid(int size, float spacing, const vec3 color);
+        void DrawBasis(Transform* transform, float opacity);
 
-		//Common m_debug::
-		static void OutputToDebug(char* m_debug);
+        //Common m_debug::
+        static void OutputToDebug(char* m_debug);
 
-	private:
-		pair<vector<vec3>, vector<vec3>> m_lineMeshVertsAndColor;
-	};
+    private:
+        pair<vector<vec3>, vector<vec3>> m_lineMeshVertsAndColor;
+    };
 
 }

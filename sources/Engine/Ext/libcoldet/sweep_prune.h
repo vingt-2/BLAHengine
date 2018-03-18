@@ -42,7 +42,7 @@ struct Intersection
   int id1,id2;
 
   Intersection(int i1, int i2)
-	: id1(i1), id2(i2) 
+    : id1(i1), id2(i2) 
   {
     if (id2<id1) std::swap(id1,id2);
   }

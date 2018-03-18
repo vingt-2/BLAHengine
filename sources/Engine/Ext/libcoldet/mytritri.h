@@ -29,9 +29,9 @@
 __CD__BEGIN
 
 /** A slower triangle-triangle intersection test, that returns the
-	point of intersection. */
-	Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2, int& face);
-	void multiple_tri_tri_intersect(const Triangle& t1, const Triangle& t2, Vector3D* colPoints, int* faces, int& size);
+    point of intersection. */
+    Vector3D my_tri_tri_intersect(const Triangle& t1, const Triangle& t2, int& face);
+    void multiple_tri_tri_intersect(const Triangle& t1, const Triangle& t2, Vector3D* colPoints, int* faces, int& size);
 
 /** Triangle description class.  It is used to determine if a point
     on the triangle's plane is inside the triangle. */
@@ -57,14 +57,14 @@ public:
 
   bool sameSide(const Vector3D& p1, const Vector3D& p2, const Vector3D& a, const Vector3D& b)
   {
-	  Vector3D cp1 = CrossProduct(b - a, p1 - a);
-	  Vector3D cp2 = CrossProduct(b - a, p2 - a);
-	  return ((cp1 * cp2) >= 0);
+      Vector3D cp1 = CrossProduct(b - a, p1 - a);
+      Vector3D cp2 = CrossProduct(b - a, p2 - a);
+      return ((cp1 * cp2) >= 0);
   }
 
   bool pointInTri(const Vector3D& P)
   {
-	  return (sameSide(P, v1, v2, v3) && sameSide(P, v2, v1, v3) && sameSide(P, v3, v1, v2));
+      return (sameSide(P, v1, v2, v3) && sameSide(P, v2, v1, v3) && sameSide(P, v3, v1, v2));
   }
 
   const Vector3D& operator[] (int index) 

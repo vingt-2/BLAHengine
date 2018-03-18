@@ -6,16 +6,16 @@
 
 namespace BLAengine
 {
-	class BLACORE_API SceneManager
-	{
-	public:
-		SceneManager(AssetManager* assetManager);
+    class BLACORE_API SceneManager
+    {
+    public:
+        SceneManager(AssetManager* assetManager);
 
-		bool SaveScene(std::string filepath, Scene* scene);
+        bool SaveScene(std::string filepath, Scene* scene);
 
-		Scene* LoadScene(std::string filepath);
+        Scene* LoadScene(std::string filepath);
 
-	private:
-		AssetManager* m_assetManager;
-	};
+    private:
+        AssetManager* m_assetManager;
+    };
 }

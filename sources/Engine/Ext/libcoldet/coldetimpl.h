@@ -39,18 +39,18 @@ public:
   void setTriangleNumber(int num) { if (!m_Final) m_Triangles.reserve(num); }
 
   void addTriangle(float x1, float y1, float z1,
-				   float x2, float y2, float z2,
-				   float x3, float y3, float z3)
+                   float x2, float y2, float z2,
+                   float x3, float y3, float z3)
   {
-	addTriangle(Vector3D(x1,y1,z1),
-				Vector3D(x2,y2,z2),
-				Vector3D(x3,y3,z3));
+    addTriangle(Vector3D(x1,y1,z1),
+                Vector3D(x2,y2,z2),
+                Vector3D(x3,y3,z3));
   }
   void addTriangle(const float v1[3], const float v2[3], const float v3[3])
   {
-	addTriangle(Vector3D(v1[0],v1[1],v1[2]),
-				Vector3D(v2[0],v2[1],v2[2]),
-				Vector3D(v3[0],v3[1],v3[2]));
+    addTriangle(Vector3D(v1[0],v1[1],v1[2]),
+                Vector3D(v2[0],v2[1],v2[2]),
+                Vector3D(v3[0],v3[1],v3[2]));
   }
   void addTriangle(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3);
   void finalize();
@@ -61,12 +61,12 @@ public:
   void setTransform(const Matrix3D& m);
 
   bool collision(CollisionModel3D* other,
-				 int AccuracyDepth, 
-				 int MaxProcessingTime,
-				 float* other_transform);
+                 int AccuracyDepth, 
+                 int MaxProcessingTime,
+                 float* other_transform);
 
   bool rayCollision(const float origin[3], const float direction[3], bool closest,
-					float segmin, float segmax);
+                    float segmin, float segmax);
   bool threadSafeClosestRayCollision(const float origin[3], const float direction[3], int & triIndex, float & colT, float colPointLocal[3], float segmin, float segmax);
   bool sphereCollision(const float origin[3], float radius);
 
@@ -81,11 +81,11 @@ public:
 
   int getTriangleIndex(BoxedTriangle* bt)
   {
-	return int(bt-&(*m_Triangles.begin()));
+    return int(bt-&(*m_Triangles.begin()));
   }
 
   /** Stores all the actual triangles.  Other objects will use
-	  pointers into this array.
+      pointers into this array.
   */
   std::vector<BoxedTriangle> m_Triangles;
   /** Root of the hierarchy tree */
@@ -100,18 +100,18 @@ public:
   Vector3D                   m_ColPoint;
 
   std::vector<std::pair<int, int>>     m_intersectedTriangles;
-  std::vector<float>				   m_collisionPoints;
-  std::vector<int>					   m_collidingFaces;
-  std::vector<int>					   m_colSizes;
+  std::vector<float>                   m_collisionPoints;
+  std::vector<int>                       m_collidingFaces;
+  std::vector<int>                       m_colSizes;
 
   /** Type of the last collision test */
   enum { Models, Ray, Sphere }       
-							 m_ColType;
+                             m_ColType;
   /** Flag for indicating the model is finalized. */
   bool                       m_Final;
   /** Static models will maintain the same transform for a while
-	  so the inverse transform is calculated each set instead
-	  of in the collision test. */
+      so the inverse transform is calculated each set instead
+      of in the collision test. */
   bool                       m_Static;
 };
 

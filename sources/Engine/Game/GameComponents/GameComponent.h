@@ -4,17 +4,17 @@
 
 namespace BLAengine
 {
-	class GameObject;
-	class BLACORE_API GameComponent
-	{
-	public:
+    class GameObject;
+    class BLACORE_API GameComponent
+    {
+    public:
 
-		GameComponent() : m_parentObject(nullptr){}
+        GameComponent() : m_parentObject(nullptr){}
 
-		virtual void Update() = 0;
+        virtual void Update() = 0;
 
-		const Transform& GetObjectTransform();
+        const Transform& GetObjectTransform();
 
-		GameObject* m_parentObject;
-	};
+        GameObject* m_parentObject;
+    };
 }

@@ -5,24 +5,24 @@
 
 namespace BLAengine
 {
-	class BLACORE_API Time
-	{
-	public:
-		Time(uint8_t timeBufferSize);
-		~Time();
+    class BLACORE_API Time
+    {
+    public:
+        Time(uint8_t timeBufferSize);
+        ~Time();
 
-		double GetTime();
-		double GetDelta();
-		double GetFramerate();
+        double GetTime();
+        double GetDelta();
+        double GetFramerate();
 
-		void Update();
+        void Update();
 
-	private:
+    private:
 
-		double m_time;
-		double m_elapsedTime;
+        double m_time;
+        double m_elapsedTime;
 
-		vector<double> m_timeBuffer;
-		uint8_t m_timeBufferSize;
-	};
+        vector<double> m_timeBuffer;
+        uint8_t m_timeBufferSize;
+    };
 }

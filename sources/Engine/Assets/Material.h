@@ -6,14 +6,14 @@
 
 namespace BLAengine
 {
-	class BLACORE_API Material : public Asset
-	{
-	public:
-		Material(std::string name) : Asset(name)
-		{};
+    class BLACORE_API Material : public Asset
+    {
+    public:
+        Material(std::string name) : Asset(name)
+        {};
 
-		bool AssignTexture(std::string textureName, std::string handleName);
+        bool AssignTexture(std::string textureName, std::string handleName);
 
-		std::vector<pair<std::string, std::string>> m_textureSamplerAttributes;
-	};
+        std::vector<pair<std::string, std::string>> m_textureSamplerAttributes;
+    };
 }
