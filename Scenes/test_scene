@@ -35,7 +35,7 @@
                             "data": {
                                 "TriangleMesh": "sphere",
                                 "Material": [
-                                    "BlankDiffuseMat"
+                                    "EarthMat"
                                 ]
                             }
                         }
@@ -117,7 +117,7 @@
                             "data": {
                                 "TriangleMesh": "cube",
                                 "Material": [
-                                    "BlankDiffuseMat"
+                                    "DamierMat"
                                 ]
                             }
                         }
@@ -158,7 +158,7 @@
                             "data": {
                                 "TriangleMesh": "cube",
                                 "Material": [
-                                    "BlankDiffuseMat"
+                                    "DamierMat"
                                 ]
                             }
                         }
@@ -199,7 +199,7 @@
                             "data": {
                                 "TriangleMesh": "cube",
                                 "Material": [
-                                    "BlankDiffuseMat"
+                                    "DamierMat"
                                 ]
                             }
                         }
@@ -240,7 +240,7 @@
                             "data": {
                                 "TriangleMesh": "cube",
                                 "Material": [
-                                    "BlankDiffuseMat"
+                                    "StoneWall"
                                 ]
                             }
                         }

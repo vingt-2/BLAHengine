@@ -18,9 +18,11 @@ void main()
 	
     DiffuseOut = texture(diffuseMap, TexCoord0).rgb;
 	
-	vec3 normalMapSample = texture(normalMap, TexCoord0).rgb;
-	normalMapSample = normalize(2*normalMapSample - 1.0);
-	NormalOut = normalize(TangentSpace0[2]);//normalize(TangentSpace0 * normalMapSample);
+	vec3 normalMapSample  = texture(normalMap, TexCoord0).rgb;
+
+	normalMapSample = normalize(2.0f*normalMapSample - vec3(1.f,1.f,1.f));
+
+	NormalOut = normalize(TangentSpace0 * normalMapSample);
 	
 	TexCoordOut = vec3(TexCoord0, 0.0);
 } 

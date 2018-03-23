@@ -274,7 +274,7 @@ void TriangleMesh::GenerateRenderData()
 
                 vertexMap[vert] = m_renderData.m_vertPos.size() - 1;
 
-                m_renderData.m_triangleIndices[3*triIndx + i] = m_renderData.m_vertPos.size() - 1;
+                m_renderData.m_triangleIndices[3 * triIndx + i] = m_renderData.m_vertPos.size() - 1;
 
             }
             else

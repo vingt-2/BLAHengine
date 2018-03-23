@@ -8,6 +8,27 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
     this->m_renderWindow = _renderWindow;
     m_assetManager = new AssetManager();
 
+    //if (Material* damierMat = new Material("EarthMat"))
+    //{
+    //    damierMat->AssignTexture("Earth", "diffuseMap");
+    //    damierMat->AssignTexture("EarthNRM", "normalMap");
+    //    m_assetManager->SaveMaterial(damierMat);
+    //}
+    //else
+    //{
+    //    std::cout << "Cannot do dis\n";
+    //}
+
+    //if (Texture2D* damierTexture = TextureImport::LoadBMP("Earth", "./resources/textures/earth.bmp"))
+    //{
+    //    m_assetManager->SaveTexture(damierTexture);
+    //}
+
+    //if (Texture2D* damierTexture = TextureImport::LoadBMP("EarthNRM", "./resources/textures/earth_NRM.bmp"))
+    //{
+    //    m_assetManager->SaveTexture(damierTexture);
+    //}
+    
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
 
@@ -45,7 +66,7 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
         printf("Failed to initiate Context!");
         return false;
     }
-
+    
     m_assetManager->LoadCookedAssets();
 
     m_editorControls = new EditorControls(cameraObject, m_renderWindow);
@@ -75,7 +96,7 @@ void EditorSession::UpdateEditor()
             lightT.m_position = vec3(0, 50, 0);
             vec3 rotationInEuler = lightT.GetEulerRotation();
             //cout << rotationInEuler.y;
-            lightT.SetRotationUsingEuler(vec3(0.25*3.14, 0 ,0));
+            lightT.SetRotationUsingEuler(vec3(0.5*3.14, 0 ,0));
             dirlightObj->SetTransform(lightT);
         }
     }

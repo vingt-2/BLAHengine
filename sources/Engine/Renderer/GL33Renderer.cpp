@@ -13,7 +13,6 @@ void GL33Renderer::ViewportResize(int width, int height)
 {
     m_renderSize = ivec2(width, height);
 
-    float aspectRatio = m_renderSize.x / m_renderSize.y;
     m_mainRenderCamera.SetPerspective(m_renderSize);
 
     m_GBuffer.DeleteGBufferResources();
