@@ -22,7 +22,7 @@ void CameraComponent::UpdateView()
     if (!m_parentObject)
         return;
 
-    m_viewTransform.SetPosition(-1.f * m_parentObject->GetTransform().GetPosition());
+    m_viewTransform.SetPosition(m_parentObject->GetTransform().GetPosition());
     m_viewTransform.SetRotation(m_parentObject->GetTransform().GetRotation());
 
     m_viewTransform.m_transform = m_viewTransform.m_transform.GetInverse();

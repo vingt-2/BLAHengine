@@ -16,9 +16,12 @@ void PerspectiveCamera::SetPerspective(glm::vec2 renderSize)
 void PerspectiveCamera::Update()
 {
     this->m_attachedCamera->Update();
+    
+    blaMat4 cameraTransformMat;
+    m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(cameraTransformMat);
 
     if (m_attachedCamera != nullptr)
-        m_ViewProjection = m_perspectiveProjection * m_attachedCamera->m_viewTransform.GetScaledTransformMatrix();
+        m_ViewProjection = m_perspectiveProjection * cameraTransformMat;
     else
         m_ViewProjection = blaMat4(1);
 }
@@ -37,8 +40,11 @@ void OrthographicCamera::Update()
 {
     this->m_attachedCamera->Update();
 
+    blaMat4 cameraTransformMat;
+    m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(cameraTransformMat);
+
     if (m_attachedCamera != nullptr)
-        m_ViewProjection = m_orthographicProjection * m_attachedCamera->m_viewTransform.GetScaledTransformMatrix();
+        m_ViewProjection = m_orthographicProjection * cameraTransformMat;
     else
         m_ViewProjection = blaMat4(1);
 }

@@ -145,6 +145,41 @@ public:
         q.w = 1.f;
         return blaPosQuat(blaVec4(0.f, 0.f, 0.f, 1.f), q);
     };
+
+    static blaQuat EulerToQuat(float pitch, float yaw, float roll)
+    {
+        float cyaw = cos(roll * 0.5f);
+        float syaw = sin(roll * 0.5f);
+        float cp = cos(yaw * 0.5f);
+        float sp = sin(yaw * 0.5f);
+        float cr = cos(pitch * 0.5f);
+        float sr = sin(pitch * 0.5f);
+
+        blaQuat q;
+        q.w = cyaw * cp * cr + syaw * sp * sr;
+        q.x = cyaw * cp * sr - syaw * sp * cr;
+        q.y = syaw * cp * sr + cyaw * sp * cr;
+        q.z = syaw * cp * cr - cyaw * sp * sr;
+        return q;
+    }
+
+    static blaMat4 EulerToMat3(float pitch, float yaw, float roll)
+    {
+        float cospitch = cos(pitch);
+        float cosyaw = cos(yaw);
+        float cosroll = cos(roll);
+
+        float sinpitch = sin(pitch);
+        float sinyaw = sin(yaw);
+        float sinroll = sin(roll);
+
+        return blaMat3
+        (
+            blaVec3(cosyaw*cosroll, -cosyaw*sinroll, sinyaw),
+            blaVec3(cospitch*sinroll + sinpitch*sinyaw*cosroll, cospitch*cosroll - sinpitch*sinyaw*sinroll, -sinpitch*cosyaw),
+            blaVec3(sinpitch*sinroll - cospitch*sinyaw*cosroll, sinpitch*cosroll + cospitch*sinyaw*sinroll, cospitch*cosyaw)
+        );
+    }
 };
 
 blaMat3 matrixCross(blaVec3 vector);

@@ -78,7 +78,7 @@ void HairDemo::UpdateEditor()
             ObjectTransform lightT = dirLight->GetObjectTransform();
             lightT.SetPosition(blaVec3(0, 50, 0));
             blaVec3 rotationInEuler = lightT.GetEulerAngles();
-            lightT.SetEulerAngles(0.5f*3.14f, 0.f, 0.f);
+            lightT.SetEulerAngles(-0.5f*3.14f + 0.02f * m_timer->GetTime(), 0.f, 0.f);
             dirlightObj->SetTransform(lightT);
         }
     }
@@ -150,7 +150,11 @@ bool BLAengine::HairDemo::LoadWorkingScene(std::string filepath)
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = new CameraComponent();
     cameraObject->AddComponent(cameraComp);
-
+    ObjectTransform cameraT= cameraObject->GetTransform();
+    cameraT.SetPosition(blaVec3(0.f, 20.f, 0.f));
+    cameraT.SetEulerAngles(0.f, 1.2f, 0.f);
+    cameraObject->SetTransform(cameraT);
+    
     m_editorRenderer->SetCamera(cameraComp);
 
     return true;
@@ -186,19 +190,19 @@ void BLAengine::HairDemoControls::ControlCamera()
 
 
     if (m_renderWindow->GetKeyPressed('W'))
-        tangentForce.z = 2.f;
-    if (m_renderWindow->GetKeyPressed('S'))
         tangentForce.z = -2.f;
+    if (m_renderWindow->GetKeyPressed('S'))
+        tangentForce.z = 2.f;
 
     if (m_renderWindow->GetKeyPressed('A'))
-        tangentForce.x = 2.f;
-    if (m_renderWindow->GetKeyPressed('D'))
         tangentForce.x = -2.f;
+    if (m_renderWindow->GetKeyPressed('D'))
+        tangentForce.x = 2.f;
 
     if (m_renderWindow->GetKeyPressed('Q'))
-        tangentForce.y = 2.f;
-    if (m_renderWindow->GetKeyPressed('E'))
         tangentForce.y = -2.f;
+    if (m_renderWindow->GetKeyPressed('E'))
+        tangentForce.y = 2.f;
 
     if (m_renderWindow->GetMousePressed(2))
     {
@@ -208,19 +212,19 @@ void BLAengine::HairDemoControls::ControlCamera()
 
         if (x - m_prevMouse.x > 0)
         {
-            tangentForce.x = 1.f;
+            tangentForce.x = -1.f;
         }
         else if (x - m_prevMouse.x < 0)
         {
-            tangentForce.x = -1.f;
+            tangentForce.x = 1.f;
         }
         if (y - m_prevMouse.y > 0)
         {
-            tangentForce.y = 1.f;
+            tangentForce.y = -1.f;
         }
         else if (y - m_prevMouse.y < 0)
         {
-            tangentForce.y = -1.f;
+            tangentForce.y = 1.f;
         }
 
         m_prevMouse = glm::vec2(x, y);
@@ -240,24 +244,24 @@ void BLAengine::HairDemoControls::ControlCamera()
 
         if (x - m_prevMouse.x > 0)
         {
-            deltaRotation.y = 1.f;
+            deltaRotation.y = -1.f;
         }
         else if (x - m_prevMouse.x < 0)
         {
-            deltaRotation.y = -1.f;
+            deltaRotation.y = 1.f;
         }
         if (y - m_prevMouse.y > 0)
         {
-            deltaRotation.x = 1.f;
+            deltaRotation.x = -1.f;
         }
         else if (y - m_prevMouse.y < 0)
         {
-            deltaRotation.x = -1.f;
+            deltaRotation.x = 1.f;
         }
 
         m_prevMouse = curMouse;
 
-        m_cameraRotation += 0.05f * deltaRotation;
+        m_cameraRotation += 0.033f * deltaRotation;
 
         transform.SetEulerAngles(m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z);
     }

@@ -42,7 +42,8 @@ ColliderComponent::RayCollision MeshCollider::CollideWithRay(Ray & ray)
 {
     ObjectTransform transform = this->GetObjectTransform();
 
-    blaMat4 objectTransformForCollider = transform.GetScaledTransformMatrix();
+    blaMat4 objectTransformForCollider;
+    transform.GetScaledTransformMatrix(objectTransformForCollider);
 
     this->m_collisionMesh->setTransform(&(objectTransformForCollider[0][0]));
 

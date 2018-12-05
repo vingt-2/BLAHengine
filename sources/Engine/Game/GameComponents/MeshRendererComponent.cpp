@@ -45,5 +45,5 @@ void MeshRendererComponent::Update()
     if (!m_parentObject)
         *m_modelTransformMatrix = blaMat4(0);
     else
-        *m_modelTransformMatrix = m_parentObject->GetTransform().GetScaledTransformMatrix();
+        m_parentObject->GetTransform().GetScaledTransformMatrix(*m_modelTransformMatrix);
 }

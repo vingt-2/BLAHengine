@@ -34,7 +34,10 @@ Ray BLAengine::GL33Renderer::ScreenToRay()
 
     rayDirection.y = -(((2.0f * (m_renderSize.y - y)) / m_renderSize.y) - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
 
-    blaMat4 inverseView = inverse(this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.GetScaledTransformMatrix());
+    blaMat4 viewTransformMatrix;
+    this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(viewTransformMatrix);
+
+    blaMat4 inverseView = inverse(viewTransformMatrix);
 
     blaVec4 direction = (inverseView * blaVec4(rayDirection, 0));
     rayDirection = normalize(blaVec3(direction.x, direction.y, direction.z));
@@ -515,7 +518,10 @@ void GL33Renderer::DrawPointLight(PointLightRender pointLight)
 
     glUseProgram(m_GBuffer.m_drawSphereStencilPgrmID);
 
-    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection * pointLight.m_transform->GetScaledTransformMatrix();
+    blaMat4 modelMatrix;
+    pointLight.m_transform->GetScaledTransformMatrix(modelMatrix);
+
+    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection * modelMatrix;
 
     GLuint MVPid = glGetUniformLocation(m_GBuffer.m_drawSphereStencilPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);

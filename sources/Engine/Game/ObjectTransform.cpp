@@ -11,17 +11,13 @@ m_transform(blaPosQuat::GetIdentity())
 ObjectTransform::~ObjectTransform(void)
 {}
 
-blaMat4 ObjectTransform::GetScaledTransformMatrix() const
+void ObjectTransform::GetScaledTransformMatrix(blaMat4 &outputMatrix) const
 {
-    blaMat4 sizeMatrix = blaMat4
-        (
-        blaVec4(m_scale.x, 0, 0, 0),
-        blaVec4(0, m_scale.y, 0, 0),
-        blaVec4(0, 0, m_scale.z, 0),
-        blaVec4(0, 0, 0, 1)
-        );
+    outputMatrix = m_transform.ToMat4();
 
-    return m_transform.ToMat4() * sizeMatrix;
+    outputMatrix[0][0] *= m_scale.x;
+    outputMatrix[1][1] *= m_scale.y;
+    outputMatrix[2][2] *= m_scale.z;
 }
 
 void ObjectTransform::SetRotation(blaQuat rotation)
@@ -47,14 +43,7 @@ blaVec3 ObjectTransform::GetPosition() const
 
 void ObjectTransform::SetEulerAngles(float pitch, float yaw, float roll)
 {
-    const blaMat3 rotationMatrix = blaMat3
-    (
-        blaVec3(cos(yaw)*cos(roll), -cos(yaw)*sin(roll), sin(yaw)),
-        blaVec3(cos(pitch)*sin(roll) + sin(pitch)*sin(yaw)*cos(roll), cos(pitch)*cos(roll) - sin(pitch)*sin(yaw)*sin(roll), -sin(pitch)*cos(yaw)),
-        blaVec3(sin(pitch)*sin(roll) - cos(pitch)*sin(yaw)*cos(roll), sin(pitch)*cos(roll) + cos(pitch)*sin(yaw)*sin(roll), cos(pitch)*cos(yaw))
-    );
-
-    m_transform.SetRotation(blaQuat(rotationMatrix));
+    m_transform.SetRotation(blaPosQuat::EulerToQuat(pitch, yaw, roll));
 }
 
 blaVec3 ObjectTransform::GetEulerAngles() const
