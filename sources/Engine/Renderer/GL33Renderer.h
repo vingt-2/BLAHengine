@@ -25,7 +25,7 @@ namespace BLAengine
     {
     public:
 
-        ivec2 m_GbufferSize;
+        glm::vec2 m_GbufferSize;
 
         GLuint m_frameBufferObject;
 
@@ -73,14 +73,14 @@ namespace BLAengine
         GL33RenderObject();
         ~GL33RenderObject();
 
-        mat4* m_modelTransform;
+        blaMat4* m_modelTransform;
 
-        const vector<uint32>* m_toMeshTriangles;
-        const vector<vec3>* m_toMeshVertices;
-        const vector<vec3>* m_toMeshNormals;
-        const vector<vec3>* m_toMeshTangents;
-        const vector<vec3>* m_toMeshBiTangents;
-        const vector<vec2>* m_toMeshUVs;
+        const vector<glm::uint32>* m_toMeshTriangles;
+        const vector<blaVec3>* m_toMeshVertices;
+        const vector<blaVec3>* m_toMeshNormals;
+        const vector<blaVec3>* m_toMeshTangents;
+        const vector<blaVec3>* m_toMeshBiTangents;
+        const vector<glm::vec2>* m_toMeshUVs;
 
         vector <pair<GLuint, GLuint> > m_activeTextures;
 
@@ -112,8 +112,8 @@ namespace BLAengine
         void SwitchRenderingManager(RenderingManager* renderingManager);
         bool Update();
 
-        RenderObject* LoadRenderObject(const MeshRenderer& meshRenderer, int type);
-        bool    CancelRender(const MeshRenderer& object);
+        RenderObject* LoadRenderObject(const MeshRendererComponent& meshRenderer, int type);
+        bool    CancelRender(const MeshRendererComponent& object);
         bool    LoadDebugLines();
 
         RenderWindow* GetWindow() const { return m_renderWindow; }
@@ -128,7 +128,7 @@ namespace BLAengine
         GLuint DrawDepthBufferPrgmID;
         //
 
-        vec3 m_defaultColor;
+        blaVec3 m_defaultColor;
 
         vector<PointLightRender> m_pointLightsVector;
 
@@ -157,7 +157,7 @@ namespace BLAengine
 
         // MOVE?
         bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
-        void SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, vector<GLuint> indices);
+        void SetupPointLightRenderSphere(vector<blaVec3> sphereMeshVertices, vector<GLuint> indices);
 
     protected:
 
@@ -191,8 +191,8 @@ namespace BLAengine
             }
         }
 
-        void DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
-        void DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget);
+        void DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
+        void DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
 
         void DrawDirectionalLight(DirectionalLightRender directionalLight);
 

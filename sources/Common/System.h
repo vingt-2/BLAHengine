@@ -11,3 +11,4 @@
 #include <GL/glext.h>
 #endif
 
+#include <glm\glm.hpp>

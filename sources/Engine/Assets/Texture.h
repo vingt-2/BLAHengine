@@ -2,7 +2,7 @@
 #include "Asset.h"
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
-#include "../../Common/Maths.h"
+#include "../../Common/Maths/Maths.h"
 
 namespace BLAengine
 {
@@ -11,14 +11,14 @@ namespace BLAengine
     public:
 
         //TODO: Support mipmapping 
-        Texture2D(string name, uint8_t nComponents, vector<uint8_t> data, uint32_t width, uint32_t height);
+        Texture2D(string name, glm::uint8 nComponents, vector<glm::uint8> data, glm::uint32 width, glm::uint32 height);
         ~Texture2D(void);
 
-        uint8_t m_nComponents;
-        uint32_t m_dataSize;
-        uint32_t m_width, m_height;
+        glm::uint8 m_nComponents;
+        glm::uint32 m_dataSize;
+        glm::uint32 m_width, m_height;
 
-        std::vector<uint8_t> m_data;
+        std::vector<glm::uint8> m_data;
 
     private:
     };

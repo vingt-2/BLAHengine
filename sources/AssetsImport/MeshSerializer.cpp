@@ -1,42 +1,42 @@
 #include "MeshSerializer.h"
 using namespace BLAengine;
 
-void TriangleMeshSerializer::vec3VectorToSerializer(std::vector<vec3> &actualVector, std::vector<vec3serializer> &serialVector)
+void TriangleMeshSerializer::vec3VectorToSerializer(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector)
 {
     serialVector.resize(actualVector.size());
-    for (int i = 0; i < actualVector.size(); i++)
+    for (size_t i = 0; i < actualVector.size(); i++)
     {
         serialVector[i] = vec3serializer();
         serialVector[i].FillData(actualVector[i]);
     }
 }
 
-void TriangleMeshSerializer::vec2VectorToSerializer(std::vector<vec2> &actualVector, std::vector<vec2serializer> &serialVector)
+void TriangleMeshSerializer::vec2VectorToSerializer(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector)
 {
     serialVector.resize(actualVector.size());
-    for (int i = 0; i < actualVector.size(); i++)
+    for (size_t i = 0; i < actualVector.size(); i++)
     {
         serialVector[i] = vec2serializer();
         serialVector[i].FillData(actualVector[i]);
     }
 }
 
-void TriangleMeshSerializer::vec3SerializerVectorToVec3(std::vector<vec3> &actualVector, std::vector<vec3serializer> &serialVector)
+void TriangleMeshSerializer::vec3serializerVectorTovec3(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector)
 {
     actualVector.resize(serialVector.size());
-    for (int i = 0; i < actualVector.size(); i++)
+    for (size_t i = 0; i < actualVector.size(); i++)
     {
-        actualVector[i] = vec3();
+        actualVector[i] = blaVec3();
         serialVector[i].LoadData(actualVector[i]);
     }
 }
 
-void TriangleMeshSerializer::vec2SerializerVectorToVec2(std::vector<vec2> &actualVector, std::vector<vec2serializer> &serialVector)
+void TriangleMeshSerializer::vec2serializerVectorTovec2(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector)
 {
     actualVector.resize(serialVector.size());
-    for (int i = 0; i < actualVector.size(); i++)
+    for (size_t i = 0; i < actualVector.size(); i++)
     {
-        actualVector[i] = vec2();
+        actualVector[i] = glm::vec2();
         serialVector[i].LoadData(actualVector[i]);
     }
 }
@@ -47,7 +47,7 @@ void TriangleMeshSerializer::BuildFromMesh(TriangleMesh* triangleMesh)
 
     m_meshTriangles.resize(triangleMesh->m_meshTriangles.size());
 
-    for (int i = 0; i < triangleMesh->m_meshTriangles.size(); i++)
+    for (size_t i = 0; i < triangleMesh->m_meshTriangles.size(); i++)
     {
         m_meshTriangles[i] = FaceSerializer();
         m_meshTriangles[i].FillData(triangleMesh->m_meshTriangles[i]);
@@ -55,7 +55,7 @@ void TriangleMeshSerializer::BuildFromMesh(TriangleMesh* triangleMesh)
 
     m_halfEdges.resize(triangleMesh->m_halfEdges.size());
 
-    for (int i = 0; i < triangleMesh->m_halfEdges.size(); i++)
+    for (size_t i = 0; i < triangleMesh->m_halfEdges.size(); i++)
     {
         m_halfEdges[i] = HalfEdgeSerializer();
         m_halfEdges[i].FillData(triangleMesh->m_halfEdges[i]);
@@ -82,7 +82,7 @@ TriangleMesh* TriangleMeshSerializer::BuildMesh()
 
     triangleMesh->m_meshTriangles.resize(m_meshTriangles.size());
 
-    for (int i = 0; i < triangleMesh->m_meshTriangles.size(); i++)
+    for (size_t i = 0; i < triangleMesh->m_meshTriangles.size(); i++)
     {
         triangleMesh->m_meshTriangles[i] = TriangleMesh::Face();
         m_meshTriangles[i].LoadData(triangleMesh->m_meshTriangles[i]);
@@ -90,26 +90,26 @@ TriangleMesh* TriangleMeshSerializer::BuildMesh()
 
     triangleMesh->m_halfEdges.resize(m_halfEdges.size());
 
-    for (int i = 0; i < triangleMesh->m_halfEdges.size(); i++)
+    for (size_t i = 0; i < triangleMesh->m_halfEdges.size(); i++)
     {
         triangleMesh->m_halfEdges[i] = TriangleMesh::HalfEdge();
         m_halfEdges[i].LoadData(triangleMesh->m_halfEdges[i]);
     }
 
     triangleMesh->m_heEmanatingFromVert = m_heEmanatingFromVert;
-    vec3SerializerVectorToVec3(triangleMesh->m_vertexPos, m_vertexPos);
-    vec3SerializerVectorToVec3(triangleMesh->m_vertexNormals, m_vertexNormals);
-    vec2SerializerVectorToVec2(triangleMesh->m_vertexUVs, m_vertexUVs);
-    vec3SerializerVectorToVec3(triangleMesh->m_faceTangent, m_faceTangent);
+    vec3serializerVectorTovec3(triangleMesh->m_vertexPos, m_vertexPos);
+    vec3serializerVectorTovec3(triangleMesh->m_vertexNormals, m_vertexNormals);
+    vec2serializerVectorTovec2(triangleMesh->m_vertexUVs, m_vertexUVs);
+    vec3serializerVectorTovec3(triangleMesh->m_faceTangent, m_faceTangent);
 
     triangleMesh->m_manifoldViolationEdges = m_manifoldViolationEdges;
 
     triangleMesh->m_renderData.m_triangleIndices = m_renderData.triangleIndices;
-    vec3SerializerVectorToVec3(triangleMesh->m_renderData.m_vertPos, m_renderData.vertPos);
-    vec3SerializerVectorToVec3(triangleMesh->m_renderData.m_vertNormal, m_renderData.vertNormal);
-    vec3SerializerVectorToVec3(triangleMesh->m_renderData.m_vertTangent, m_renderData.vertTangent);
-    vec3SerializerVectorToVec3(triangleMesh->m_renderData.m_vertBiTangent, m_renderData.vertBiTangent);
-    vec2SerializerVectorToVec2(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
+    vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertPos, m_renderData.vertPos);
+    vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertNormal, m_renderData.vertNormal);
+    vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertTangent, m_renderData.vertTangent);
+    vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertBiTangent, m_renderData.vertBiTangent);
+    vec2serializerVectorTovec2(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
 
     return triangleMesh;
 }

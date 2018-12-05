@@ -16,11 +16,11 @@
 
 
 /* if USE_EPSILON_TEST is true then we do a check: 
-         if |dv|<EPSILON then dv=0.0;
+         if |dv|<EPSILON then dv=0.0f;
    else no check is done (which is less robust)
 */
 #define USE_EPSILON_TEST TRUE  
-#define EPSILON 0.00001
+#define EPSILON 0.0001
 
 
 /* some macros */
@@ -29,7 +29,7 @@
               dest[1]=v1[2]*v2[0]-v1[0]*v2[2]; \
               dest[2]=v1[0]*v2[1]-v1[1]*v2[0];
 
-#define DOT(v1,v2) (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
+#define dot(v1,v2) (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
 
 #define SUB(dest,v1,v2)          \
             dest[0]=v1[0]-v2[0]; \
@@ -54,18 +54,18 @@
 #define COMPUTE_INTERVALS(VV0,VV1,VV2,D0,D1,D2,D0D1,D0D2,isect0,isect1) \
   if(D0D1>0.0f)                                         \
   {                                                     \
-    /* here we know that D0D2<=0.0 */                   \
+    /* here we know that D0D2<=0.0f */                   \
     /* that is D0, D1 are on the same side, D2 on the other or on the plane */ \
     ISECT(VV2,VV0,VV1,D2,D0,D1,isect0,isect1);          \
   }                                                     \
   else if(D0D2>0.0f)                                    \
   {                                                     \
-    /* here we know that d0d1<=0.0 */                   \
+    /* here we know that d0d1<=0.0f */                   \
     ISECT(VV1,VV0,VV2,D1,D0,D2,isect0,isect1);          \
   }                                                     \
   else if(D1*D2>0.0f || D0!=0.0f)                       \
   {                                                     \
-    /* here we know that d0d1<=0.0 or that D0!=0.0 */   \
+    /* here we know that d0d1<=0.0f or that D0!=0.0f */   \
     ISECT(VV0,VV1,VV2,D0,D1,D2,isect0,isect1);          \
   }                                                     \
   else if(D1!=0.0f)                                     \
@@ -139,9 +139,9 @@
   b=-(U0[i0]-U2[i0]);                       \
   c=-a*U2[i0]-b*U2[i1];                     \
   d2=a*V0[i0]+b*V0[i1]+c;                   \
-  if(d0*d1>0.0)                             \
+  if(d0*d1>0.0f)                             \
   {                                         \
-    if(d0*d2>0.0) return 1;                 \
+    if(d0*d2>0.0f) return 1;                 \
   }                                         \
 }
 
@@ -215,19 +215,19 @@ int tri_tri_intersect(float V0[3],float V1[3],float V2[3],
   SUB(E1,V1,V0);
   SUB(E2,V2,V0);
   CROSS(N1,E1,E2);
-  d1=-DOT(N1,V0);
+  d1=-dot(N1,V0);
   /* plane equation 1: N1.X+d1=0 */
 
   /* put U0,U1,U2 into plane equation 1 to compute signed distances to the plane*/
-  du0=DOT(N1,U0)+d1;
-  du1=DOT(N1,U1)+d1;
-  du2=DOT(N1,U2)+d1;
+  du0=dot(N1,U0)+d1;
+  du1=dot(N1,U1)+d1;
+  du2=dot(N1,U2)+d1;
 
   /* coplanarity robustness check */
 #if USE_EPSILON_TEST==TRUE
-  if(fabs(du0)<EPSILON) du0=0.0;
-  if(fabs(du1)<EPSILON) du1=0.0;
-  if(fabs(du2)<EPSILON) du2=0.0;
+  if(fabs(du0)<EPSILON) du0=0.0f;
+  if(fabs(du1)<EPSILON) du1=0.0f;
+  if(fabs(du2)<EPSILON) du2=0.0f;
 #endif
   du0du1=du0*du1;
   du0du2=du0*du2;
@@ -239,18 +239,18 @@ int tri_tri_intersect(float V0[3],float V1[3],float V2[3],
   SUB(E1,U1,U0);
   SUB(E2,U2,U0);
   CROSS(N2,E1,E2);
-  d2=-DOT(N2,U0);
+  d2=-dot(N2,U0);
   /* plane equation 2: N2.X+d2=0 */
 
   /* put V0,V1,V2 into plane equation 2 */
-  dv0=DOT(N2,V0)+d2;
-  dv1=DOT(N2,V1)+d2;
-  dv2=DOT(N2,V2)+d2;
+  dv0=dot(N2,V0)+d2;
+  dv1=dot(N2,V1)+d2;
+  dv2=dot(N2,V2)+d2;
 
 #if USE_EPSILON_TEST==TRUE
-  if(fabs(dv0)<EPSILON) dv0=0.0;
-  if(fabs(dv1)<EPSILON) dv1=0.0;
-  if(fabs(dv2)<EPSILON) dv2=0.0;
+  if(fabs(dv0)<EPSILON) dv0=0.0f;
+  if(fabs(dv1)<EPSILON) dv1=0.0f;
+  if(fabs(dv2)<EPSILON) dv2=0.0f;
 #endif
 
   dv0dv1=dv0*dv1;

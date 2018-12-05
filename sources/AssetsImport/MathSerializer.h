@@ -1,10 +1,9 @@
 #pragma once
-
-#include "../Common/Maths.h"
 #include <cereal\cereal.hpp>
 #include <cereal\archives\binary.hpp>
 #include <cereal\archives\xml.hpp>
 
+#include "../Common/Maths/Maths.h"
 
 class vec3serializer
 {
@@ -12,14 +11,14 @@ public:
 
     vec3serializer() = default;
 
-    void FillData(vec3 &vec)
+    void FillData(blaVec3 &vec)
     {
         x = vec.x;
         y = vec.y;
         z = vec.z;
     }
 
-    void LoadData(vec3 &vec)
+    void LoadData(blaVec3 &vec)
     {
         vec.x = x;
         vec.y = y;
@@ -47,13 +46,13 @@ class vec2serializer
 public:
     vec2serializer() = default;
 
-    void FillData(vec2 &vec)
+    void FillData(glm::vec2 &vec)
     {
         x = vec.x;
         y = vec.y;
     }
 
-    void LoadData(vec2 &vec)
+    void LoadData(glm::vec2 &vec)
     {
         vec.x = x;
         vec.y = y;
@@ -75,13 +74,51 @@ private:
     }
 };
 
+class quatserializer
+{
+public:
+
+    quatserializer() = default;
+
+    void FillData(blaQuat &q)
+    {
+        x = q.x;
+        y = q.y;
+        z = q.z;
+        w = q.w;
+    }
+
+    void LoadData(blaQuat &q)
+    {
+        q.x = x;
+        q.y = y;
+        q.z = z;
+        q.w = w;
+    }
+
+    float x, y, z, w;
+
+private:
+
+    friend class cereal::access;
+
+    template <class Archive>
+    void serialize(Archive & archive)
+    {
+        archive
+        (
+            CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(z), CEREAL_NVP(w)
+        );
+    }
+};
+
 class mat3serializer
 {
 public:
 
     mat3serializer() = default;
 
-    void FillData(mat3 &mat)
+    void FillData(blaMat3 &mat)
     {
         a = mat[0][0];
         b = mat[0][1];
@@ -94,7 +131,7 @@ public:
         i = mat[2][2];
     }
 
-    void LoadData(mat3 &mat)
+    void LoadData(blaMat3 &mat)
     {
         mat[0][0] = a;
         mat[0][1] = b;

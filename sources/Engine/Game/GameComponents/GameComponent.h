@@ -1,6 +1,6 @@
 #pragma once
 #include "../../../Common/StdInclude.h"
-#include "Transform.h"
+#include "../ObjectTransform.h"
 
 namespace BLAengine
 {
@@ -13,7 +13,7 @@ namespace BLAengine
 
         virtual void Update() = 0;
 
-        const Transform& GetObjectTransform();
+        const ObjectTransform& GetObjectTransform();
 
         GameObject* m_parentObject;
     };

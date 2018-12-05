@@ -32,7 +32,7 @@
 #pragma once
 #include "nanoflann.h"
 #include "../../../Common/StdInclude.h"
-#include "../../../Common/Maths.h"
+#include "../../../Common/Maths/Maths.h"
 #include <concurrent_vector.h>
 
 using namespace std;
@@ -41,15 +41,15 @@ using namespace nanoflann;
 // This is an example of a custom data set class
 struct Photon
 {
-    Photon(vec3 pos, vec3 dir, vec3 power)
+    Photon(blaVec3 pos, blaVec3 dir, blaVec3 power)
     {
         m_pos = pos;
         m_dir = dir;
         m_power = power;
     }
-    vec3 m_pos;
-    vec3 m_dir;
-    vec3 m_power;
+    blaVec3 m_pos;
+    blaVec3 m_dir;
+    blaVec3 m_power;
 };
 
 struct PhotonVector
@@ -90,14 +90,14 @@ class PhotonMap
 {
 public:
 
-    PhotonMap(uint sizeHint);
+    PhotonMap(glm::uint sizeHint);
     ~PhotonMap();
 
     void AddPhoton(Photon photon);
     
     void BuildKDTree();
 
-    vector<Photon*> PhotonMap::GetPhotons(vec3 position, int knnSize, float &biggestRadius);
+    vector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &biggestRadius);
 
 private:
     PhotonVector m_photonVector;
@@ -106,7 +106,7 @@ private:
     PhotonTree* m_photonTree;
 };
 
-inline PhotonMap::PhotonMap(uint sizeHint)
+inline PhotonMap::PhotonMap(glm::uint sizeHint)
 {
     m_photonTree = nullptr;
 }
@@ -127,7 +127,7 @@ inline void PhotonMap::BuildKDTree()
     m_photonTree->buildIndex();
 }
 
-inline vector<Photon*> PhotonMap::GetPhotons(vec3 position, int knnSize, float &outRadius)
+inline vector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &outRadius)
 {
     std::vector<Photon*> results;
     
@@ -142,7 +142,7 @@ inline vector<Photon*> PhotonMap::GetPhotons(vec3 position, int knnSize, float &
     results.reserve(nMatches);
     
     outRadius = 0;
-    for (int i = 0; i < ret_index.size(); i++)
+    for (size_t i = 0; i < ret_index.size(); i++)
     {
         size_t matchIndx = ret_index[i];
         float dist = out_dist_sqr[i];

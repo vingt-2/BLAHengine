@@ -63,7 +63,7 @@ unsigned get_tick_count();
   inline unsigned get_tick_count() { return GetTickCount(); }
 
 ///////////////////////////////////////////////////
-// MacOS 9.0.4/MacOS X.  CodeWarrior Pro 6
+// MacOS 9.0f.4/MacOS X.  CodeWarrior Pro 6
 // Thanks to Marco Tenuti for this addition
 ///////////////////////////////////////////////////
 #elif defined(macintosh)
@@ -73,7 +73,7 @@ unsigned get_tick_count();
 
 #elif defined(CUSTOM)
 //typedef unsigned DWORD;
-double get_tick_count();
+float get_tick_count();
 #else
 
 #error No system specified (WIN32 GCC macintosh)

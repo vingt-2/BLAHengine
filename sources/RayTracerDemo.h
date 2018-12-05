@@ -1,6 +1,6 @@
 #include "./Common/StdInclude.h"
 #include "./Common/System.h"
-#include "./Common/Maths.h"
+#include "./Common/Maths/Maths.h"
 #include "./Engine/Renderer/GL33Renderer.h"
 #include "./Engine/Game/RenderingManager.h"
 #include "./Engine/Game/Debug.h"
@@ -15,7 +15,7 @@ namespace BLAengine
             m_isFullScreen(isFullscreen),
             m_isTerminationRequested(false),
             m_pbr_render_requested(false),
-            debugRay(Ray(vec3(0), vec3(0), 1))
+            debugRay(Ray(blaVec3(0), blaVec3(0), 1))
         {};
 
         ~Raytracer() { TerminateEditor(); };

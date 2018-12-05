@@ -1,5 +1,5 @@
 #pragma once
-#include "..\GameComponents\RigidBody.h"
+#include "..\GameComponents\RigidBodyComponent.h"
 #include "..\..\..\Common\StdInclude.h"
 #include "..\time.h"
 namespace BLAengine
@@ -7,22 +7,22 @@ namespace BLAengine
     class BLACORE_API Contact
     {
     public:
-        Contact(RigidBody* body1, RigidBody* body2, vec3 colPoint, vec3 normalW, vec3 tangentW, int face);
+        Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face);
         ~Contact();
 
         int m_faceFrom;
-        RigidBody* m_body1;
-        RigidBody* m_body2;
+        RigidBodyComponent* m_body1;
+        RigidBodyComponent* m_body2;
 
-        dvec3 m_contactNormalW;
-        dvec3 m_contactTangent1W;
-        dvec3 m_contactTangent2W;
+        blaVec3 m_contactNormalW;
+        blaVec3 m_contactTangent1W;
+        blaVec3 m_contactTangent2W;
 
-        dvec3 m_contactPositionW;
+        blaVec3 m_contactPositionW;
 
-        vector<dvec3> m_normalJacobian;
-        vector<dvec3> m_tangentJacobian1;
-        vector<dvec3> m_tangentJacobian2;
+        vector<blaVec3> m_normalJacobian;
+        vector<blaVec3> m_tangentJacobian1;
+        vector<blaVec3> m_tangentJacobian2;
 
         void ComputeJacobian();
     private:
@@ -38,7 +38,7 @@ namespace BLAengine
         bool m_flagInterpolateNormals;
         float m_friction;
         float m_bounce;
-        double m_epsilon;
+        float m_epsilon;
 
         float* m_timeStepPointer;
 
@@ -47,22 +47,24 @@ namespace BLAengine
         int m_iterationCount;
         int m_solveCount;
 
-        vector<RigidBody*> m_bodiesList;
+        vector<RigidBodyComponent*> m_bodiesList;
         vector<Contact> m_currentContacts;
 
 
         //Profiling
-        double m_detectionTime;
-        double m_processingTime;
+        float m_detectionTime;
+        float m_processingTime;
 
         void ProcessCollisions();
+
+        void setTimeObject(Time* time) { m_time = time; }
     private:
         Time* m_time;
 
-        void ComputeT(vector<vector<dvec3>>& T);
-        void GetDiagonalElements(vector<vector<dvec3>> T, vector<double>& D);
+        void ComputeT(vector<vector<blaVec3>>& T);
+        void GetDiagonalElements(vector<vector<blaVec3>> T, vector<float>& D);
         void BroadPhaseDetection();
-        void NarrowPhaseDetection(RigidBody* body1, RigidBody* body2);
+        void NarrowPhaseDetection(RigidBodyComponent* body1, RigidBodyComponent* body2);
         void SolveContacts();
     };
 

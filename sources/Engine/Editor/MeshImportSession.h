@@ -1,6 +1,6 @@
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
-#include "../../Common/Maths.h"
+#include "../../Common/Maths/Maths.h"
 #include "../Renderer/GL33Renderer.h"
 #include "../Game/RenderingManager.h"
 #include "../Game\Debug.h"
@@ -12,18 +12,18 @@ namespace BLAengine
     {
     public:
 
-        vec2 m_prevMouse;
-        vec3 m_cameraRotation;
-        vec3 m_lightRotation;
+        glm::vec2 m_prevMouse;
+        blaVec3 m_cameraRotation;
+        blaVec3 m_lightRotation;
 
         GameObject* m_cameraObject;
         GameObject* m_lightObj;
         RenderWindow* m_renderWindow;
 
         MeshEditorControls(GameObject* cameraObject, GameObject* lightObj, RenderWindow* renderWindow) :
-            m_prevMouse(vec2(0)),
-            m_cameraRotation(vec3(0)),
-            m_lightRotation(vec3(0)),
+            m_prevMouse(glm::vec2(0)),
+            m_cameraRotation(blaVec3(0)),
+            m_lightRotation(blaVec3(0)),
             m_cameraObject(cameraObject),
             m_renderWindow(renderWindow),
             m_lightObj(lightObj)

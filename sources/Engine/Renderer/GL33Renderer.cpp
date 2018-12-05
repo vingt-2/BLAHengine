@@ -1,9 +1,10 @@
 #include "GL33Renderer.h"
 using namespace BLAengine;
+using namespace glm;
 
 GL33Renderer::GL33Renderer():
     debug_renderGBuffer(false),
-    m_renderDebug(false),
+    m_renderDebug(true),
     m_defaultColor(0.3,0.3,0.3)
 {}
 
@@ -11,7 +12,7 @@ GL33Renderer::~GL33Renderer() {}
 
 void GL33Renderer::ViewportResize(int width, int height)
 {
-    m_renderSize = ivec2(width, height);
+    m_renderSize = glm::vec2(width, height);
 
     m_mainRenderCamera.SetPerspective(m_renderSize);
 
@@ -22,22 +23,25 @@ void GL33Renderer::ViewportResize(int width, int height)
 
 Ray BLAengine::GL33Renderer::ScreenToRay()
 {
-    double x, y;
-    m_renderWindow->GetMouse(x, y);
+    double xd, yd;
+    m_renderWindow->GetMouse(xd, yd);
 
-    vec3 rayDirection = vec3(1.f);
-    rayDirection.x = (((2.0f * (m_renderSize.x - x)) / m_renderSize.x) - 1) / this->m_mainRenderCamera.m_perspectiveProjection[0][0];
+    float x = (float)xd;
+    float y = (float)yd;
 
-    rayDirection.y = -(((2.0f * (m_renderSize.y - (y))) / m_renderSize.y) - 1) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
+    blaVec3 rayDirection = blaVec3(1.f);
+    rayDirection.x = (((2.0f * (m_renderSize.x - x)) / m_renderSize.x) - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[0][0];
 
-    mat4 inverseView = inverse(this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.m_transformMatrix);
+    rayDirection.y = -(((2.0f * (m_renderSize.y - y)) / m_renderSize.y) - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
 
-    vec4 direction = (inverseView * vec4(rayDirection, 0));
-    rayDirection = normalize(vec3(direction.x, direction.y, direction.z));
+    blaMat4 inverseView = inverse(this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.GetScaledTransformMatrix());
 
-    vec3 rayOrigin = vec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
+    blaVec4 direction = (inverseView * blaVec4(rayDirection, 0));
+    rayDirection = normalize(blaVec3(direction.x, direction.y, direction.z));
 
-    return Ray(rayOrigin, -1.f * rayDirection, 0xFFFFFFFF);
+    blaVec3 rayOrigin = blaVec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
+
+    return Ray(rayOrigin, -1.f * rayDirection, MAX_NORMAL_FLOAT);
 }
 
 GL33RenderObject::GL33RenderObject():
@@ -79,9 +83,9 @@ bool GL33Renderer::Update()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        DrawColorBufferOnScreen(ivec2(0, 0), ivec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
-        DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, 0), ivec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
-        DrawColorBufferOnScreen(ivec2(0, m_renderSize.y / 2), ivec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+        DrawColorBufferOnScreen(glm::vec2(0, 0), glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
+        DrawColorBufferOnScreen(glm::vec2(m_renderSize.x / 2, 0), glm::vec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
+        DrawColorBufferOnScreen(glm::vec2(0, m_renderSize.y / 2), glm::vec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
         if (m_directionalLightPool.size() > 0)
         {
             DirectionalLightRender* not_null = nullptr;
@@ -93,11 +97,11 @@ bool GL33Renderer::Update()
                 }
             }
             RenderDirectionalShadowMap(not_null->m_shadowRender);
-            DrawDepthBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), not_null->m_shadowRender.m_depthTexture);
+            DrawDepthBufferOnScreen(glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), glm::vec2(m_renderSize.x, m_renderSize.y), not_null->m_shadowRender.m_depthTexture);
         }
         else
         {
-            DrawColorBufferOnScreen(ivec2(m_renderSize.x / 2, m_renderSize.y / 2), ivec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+            DrawColorBufferOnScreen(glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), glm::vec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
         }
     }
     else
@@ -143,10 +147,10 @@ void GL33Renderer::RenderGBuffer()
     GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, DrawBuffers);
 
-    glViewport(0, 0, m_GBuffer.m_GbufferSize.x, m_GBuffer.m_GbufferSize.y);
+    glViewport(0, 0, (GLsizei)m_GBuffer.m_GbufferSize.x, (GLsizei)m_GBuffer.m_GbufferSize.y);
 
     // Clear Frame Buffer.
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(m_GBuffer.m_geometryPassPrgmID);
@@ -156,7 +160,7 @@ void GL33Renderer::RenderGBuffer()
         RenderObject* renderObject = loadedRenderObject.second;
         if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
         {
-            mat4 MVP = m_mainRenderCamera.m_ViewProjection  * (*(gl33RenderObject->m_modelTransform));
+            blaMat4 MVP = m_mainRenderCamera.m_ViewProjection  * (*(gl33RenderObject->m_modelTransform));
 
             GLuint MVPid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "MVP");
             glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
@@ -166,7 +170,7 @@ void GL33Renderer::RenderGBuffer()
             glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(gl33RenderObject->m_modelTransform))[0][0]);
 
             // Send textureSamplers to shader
-            for (uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
+            for (glm::uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
             {
                 glActiveTexture(GL_TEXTURE0 + samplerIndex);
 
@@ -182,7 +186,7 @@ void GL33Renderer::RenderGBuffer()
 
             glBindVertexArray(0);
             // Send textureSamplers to shader
-            for (uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
+            for (glm::uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
             {
                 glActiveTexture(GL_TEXTURE0 + samplerIndex);
             }
@@ -202,10 +206,10 @@ void GL33Renderer::DrawDisplayBuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    DrawColorBufferOnScreen(ivec2(0,0), m_renderSize, m_GBuffer.m_displayTextureTarget);
+    DrawColorBufferOnScreen(glm::vec2(0,0), m_renderSize, m_GBuffer.m_displayTextureTarget);
 }
 
-RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, int type)
+RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRenderer, int type)
 {
     GL33RenderObject* object = new GL33RenderObject();
     this->GenerateVertexArrayID(*object);
@@ -224,13 +228,13 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
         return nullptr;
     }
 
-    for (int i = 0; i < meshRenderer.m_materials.size(); i++)
+    for (size_t i = 0; i < meshRenderer.m_materials.size(); i++)
     {
         Material* mat = meshRenderer.m_materials[i];
 
         AssignMaterial(*object, mat->GetName());
 
-        for (int j = 0; j < mat->m_textureSamplerAttributes.size(); j++)
+        for (size_t j = 0; j < mat->m_textureSamplerAttributes.size(); j++)
         {
             LoadTextureSample(*object, mat->m_textureSamplerAttributes[j].first, mat->m_textureSamplerAttributes[j].second);
         }
@@ -246,7 +250,7 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRenderer& meshRenderer, i
     return object;
 }
 
-bool GL33Renderer::CancelRender(const MeshRenderer& object)
+bool GL33Renderer::CancelRender(const MeshRendererComponent& object)
 {
     return true;
 }
@@ -265,11 +269,11 @@ bool GL33Renderer::LoadDebugLines()
 
         glGenBuffers(1, &(m_debugLinesInfo.vertBuffer));
         glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.vertBuffer);
-        glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.first[0]), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(blaVec3), &(debugLinesMesh.first[0]), GL_STATIC_DRAW);
 
         glGenBuffers(1, &(m_debugLinesInfo.colorBuffer));
         glBindBuffer(GL_ARRAY_BUFFER, m_debugLinesInfo.colorBuffer);
-        glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(vec3), &(debugLinesMesh.second[0]), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, m_debugLinesInfo.size * sizeof(blaVec3), &(debugLinesMesh.second[0]), GL_STATIC_DRAW);
 
         // 1rst attribute buffer : vertices
         glGenVertexArrays(1, &(m_debugLinesInfo.vao));
@@ -330,7 +334,7 @@ bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowR
     return true;
 }
 
-void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
+void GL33Renderer::DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget)
 {
     if (!m_screenSpaceQuad.m_isInit)
         SetupScreenSpaceRenderQuad();
@@ -365,7 +369,7 @@ void GL33Renderer::DrawColorBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLu
     glUseProgram(0);
 }
 
-void GL33Renderer::DrawDepthBufferOnScreen(ivec2 topLeft, ivec2 bottomRight, GLuint textureTarget)
+void GL33Renderer::DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget)
 {
     if (!m_screenSpaceQuad.m_isInit)
         SetupScreenSpaceRenderQuad();
@@ -410,7 +414,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
     glDrawBuffers(1, DrawBuffers);
 
     // Clear Frame Buffer.
-    glClearColor(m_defaultColor.x, m_defaultColor.y, m_defaultColor.z, 0.0);
+    glClearColor(m_defaultColor.x, m_defaultColor.y, m_defaultColor.z, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glViewport(0, 0, m_renderSize.x, m_renderSize.y);
@@ -446,24 +450,24 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
     // Set our "renderedTexture" sampler to user Texture Unit 3
     glUniform1i(depthMapID, 3);
 
-    glm::mat4 biasMatrix(
-        0.5, 0.0, 0.0, 0.0,
-        0.0, 0.5, 0.0, 0.0,
-        0.0, 0.0, 0.5, 0.0,
-        0.5, 0.5, 0.5, 1.0
+    blaMat4 biasMatrix(
+        0.5, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.5, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.5, 0.0f,
+        0.5, 0.5, 0.5, 1.0f
     );
 
-    mat4 shadowMV = biasMatrix * shadowCamera->m_ViewProjection;
+    blaMat4 shadowMV = biasMatrix * shadowCamera->m_ViewProjection;
     GLuint shadowTID = glGetUniformLocation(prgmID, "shadowMV");
     glUniformMatrix4fv(shadowTID, 1, GL_FALSE, &shadowMV[0][0]);
 
-    vec3 lightDirection = directionalLight.m_shadowRender.m_shadowDirection;
+    blaVec3 lightDirection = directionalLight.m_shadowRender.m_shadowDirection;
 
     GLuint lightID = glGetUniformLocation(prgmID, "lightDirection");
     glUniform3f(lightID, lightDirection.x, lightDirection.y, lightDirection.z);
 
     GLuint eyeID = glGetUniformLocation(prgmID, "eyePosition");
-    vec3 eye = m_mainRenderCamera.m_attachedCamera->GetObjectTransform().m_position;
+    blaVec3 eye = m_mainRenderCamera.m_attachedCamera->GetObjectTransform().GetPosition();
     glUniform3f(eyeID, eye.x, eye.y, eye.z);
 
     GLuint shadowmapHandle = glGetUniformLocation(prgmID, "shadowMap");
@@ -511,7 +515,7 @@ void GL33Renderer::DrawPointLight(PointLightRender pointLight)
 
     glUseProgram(m_GBuffer.m_drawSphereStencilPgrmID);
 
-    mat4 MVP = m_mainRenderCamera.m_ViewProjection * pointLight.m_transform->m_transformMatrix;
+    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection * pointLight.m_transform->GetScaledTransformMatrix();
 
     GLuint MVPid = glGetUniformLocation(m_GBuffer.m_drawSphereStencilPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
@@ -545,7 +549,7 @@ void GL33Renderer::DrawPointLight(PointLightRender pointLight)
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
     GLuint lightPrId = glGetUniformLocation(pointLight.m_pointLightPrgmID, "lightPR");
-    vec4 lightPr = vec4(pointLight.m_transform->m_position, length(pointLight.m_transform->m_scale)/2);
+    blaVec4 lightPr = blaVec4(pointLight.m_transform->GetPosition(), length(pointLight.m_transform->m_scale)/2);
     glUniform4fv(lightPrId, 1, &(lightPr[0]));
 
     // Use our shader
@@ -613,11 +617,11 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
 
     // Enable Z-Buffer test.
     glEnable(GL_DEPTH_TEST);
-    for (int i = 0; i < m_meshRenderPool.size(); i++)
+    for (size_t i = 0; i < m_meshRenderPool.size(); i++)
     {
         if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_meshRenderPool[i]))
         {
-            mat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelTransform));
+            blaMat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelTransform));
 
             GLuint shadowMVID = glGetUniformLocation(programId, "depthMVP");
             glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
@@ -666,7 +670,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     {
         if (m_meshRenderPool.count(ticketedObject.first) == 0)
         {
-            MeshRenderer* meshRenderer = ticketedObject.second;
+            MeshRendererComponent* meshRenderer = ticketedObject.second;
 
             RenderObject* renderObject = this->LoadRenderObject(*meshRenderer, 0);
 
@@ -680,7 +684,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     {
         if (m_directionalLightPool.count(ticketedObject.first) == 0)
         {
-            std::pair<DirectionalLight*,Camera*> dirLightAndCamera = ticketedObject.second;
+            std::pair<DirectionalLight*,CameraComponent*> dirLightAndCamera = ticketedObject.second;
 
             DirectionalLightRender* dirLightRender = new DirectionalLightRender();
             dirLightRender->m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);
@@ -705,31 +709,31 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
     //HARDCODED, suits:
     // Input vertex data, different for all executions of this shader.
 
-    //layout(location = 0) in vec3 vertexPosition_modelspace;
-    //layout(location = 1) in vec2 vertexUV;
-    //layout(location = 2) in vec3 vertexNormals;
-    //layout(location = 3) in vec3 vertexTangent;
+    //layout(location = 0) in blaVec3 vertexPosition_modelspace;
+    //layout(location = 1) in glm::vec2 vertexUV;
+    //layout(location = 2) in blaVec3 vertexNormals;
+    //layout(location = 3) in blaVec3 vertexTangent;
     bool success = false;
 
     int layoutIndex = 0;
 
-    GenerateBufferObject<vec3>(object, &((*object.m_toMeshVertices)[0]), object.m_toMeshVertices->size() * sizeof(vec3), 3, layoutIndex);
+    GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshVertices)[0]), object.m_toMeshVertices->size() * sizeof(blaVec3), 3, layoutIndex);
     layoutIndex++;
     if (!object.m_toMeshUVs->empty())
     {
-        GenerateBufferObject<vec2>(object, &((*object.m_toMeshUVs)[0]), object.m_toMeshUVs->size() * sizeof(vec2), 2, layoutIndex);
+        GenerateBufferObject<glm::vec2>(object, &((*object.m_toMeshUVs)[0]), object.m_toMeshUVs->size() * sizeof(glm::vec2), 2, layoutIndex);
         layoutIndex++;
     }
 
     if (!object.m_toMeshNormals->empty())
     {
-        GenerateBufferObject<vec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshNormals->size() * sizeof(vec3), 3, layoutIndex);
+        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshNormals->size() * sizeof(blaVec3), 3, layoutIndex);
         layoutIndex++;
     }
 
     if (!object.m_toMeshTangents->empty())
     {
-        GenerateBufferObject<vec3>(object, &((*object.m_toMeshTangents)[0]), object.m_toMeshTangents->size() * sizeof(vec3), 3, layoutIndex);
+        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshTangents)[0]), object.m_toMeshTangents->size() * sizeof(blaVec3), 3, layoutIndex);
         layoutIndex++;
     }
 
@@ -783,7 +787,7 @@ void GL33Renderer::GenerateElementBuffer(GL33RenderObject& object, GLuint elemen
 
 void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
 {
-    // Vertex array of size 1 hardcoded for each MeshRenderer !
+    // Vertex array of size 1 hardcoded for each MeshRendererComponent !
     glGenVertexArrays(1, &(object.m_vertexArrayID));
 }
 
@@ -880,7 +884,7 @@ void GL33Renderer::CleanUpVBOs(GL33RenderObject& object)
 
 void GL33Renderer::DestroyVertexArrayID(GL33RenderObject& object)
 {
-    // Vertex array of size 1 hardcoded for each MeshRenderer !
+    // Vertex array of size 1 hardcoded for each MeshRendererComponent !
     glDeleteVertexArrays(1, &object.m_vertexArrayID);
 }
 
@@ -932,7 +936,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
             // window-> IMPLEMENT CHECK WINDOW STATUS
             int x, y;
             render->GetSize(x, y);
-            m_renderSize = ivec2(100, 100);
+            m_renderSize = glm::vec2(100, 100);
 
             //Neat grey background
             glClearColor(1.f, 0.f, 0.f, 1.0f);
@@ -1147,7 +1151,7 @@ void GL33Renderer::SetupScreenSpaceRenderQuad()
     m_screenSpaceQuad.m_isInit = true;
 }
 
-void GL33Renderer::SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, vector<GLuint> indices)
+void GL33Renderer::SetupPointLightRenderSphere(vector<blaVec3> sphereMeshVertices, vector<GLuint> indices)
 {
     if (sphereMeshVertices.empty())
     {
@@ -1160,7 +1164,7 @@ void GL33Renderer::SetupPointLightRenderSphere(vector<vec3> sphereMeshVertices, 
 
     glGenBuffers(1, &(m_pointLightSphereMesh.m_geomBuffer));
     glBindBuffer(GL_ARRAY_BUFFER, m_pointLightSphereMesh.m_geomBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sphereMeshVertices.size() * sizeof(vec3), &(sphereMeshVertices[0]), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sphereMeshVertices.size() * sizeof(blaVec3), &(sphereMeshVertices[0]), GL_STATIC_DRAW);
 
     // 1rst attribute buffer : vertices
     glGenVertexArrays(1, &(m_pointLightSphereMesh.m_vao));
@@ -1207,17 +1211,17 @@ void GL33Renderer::RenderDebugLines()
 
     glUseProgram(m_debugRayPgrmID);
 
-    mat4 MVP = m_mainRenderCamera.m_ViewProjection;
+    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection;
 
     GLuint MVPid = glGetUniformLocation(m_debugRayPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
-    GLuint depthMapID = glGetUniformLocation(m_debugRayPgrmID, "depthMap");
+    GLuint worldPosMapID = glGetUniformLocation(m_debugRayPgrmID, "worldPosMap");
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_depthTextureTarget);
+    glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_worldPosTextureTarget);
     // Set our "renderedTexture" sampler to user Texture Unit 0
-    glUniform1i(depthMapID, 0);
+    glUniform1i(worldPosMapID, 0);
 
     GLuint displayBufferID = glGetUniformLocation(m_debugRayPgrmID, "displayBuffer");
     // Bind our texture in Texture Unit 1

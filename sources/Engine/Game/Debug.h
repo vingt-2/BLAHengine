@@ -25,19 +25,19 @@ namespace BLAengine
         void Update();
 
         //Render m_debug:
-        void DrawLine(const vec3 origin, const vec3 destination);
-        void DrawLine(const vec3 origin, const vec3 destination, const vec3 color);
-        void DrawRay(Ray ray, const vec3 color);
+        void DrawLine(const blaVec3 origin, const blaVec3 destination);
+        void DrawLine(const blaVec3 origin, const blaVec3 destination, const blaVec3 color);
+        void DrawRay(Ray ray, const blaVec3 color);
         void DrawRay(Ray ray);
 
-        void DrawGrid(int size, float spacing, const vec3 color);
-        void DrawBasis(Transform* transform, float opacity);
+        void DrawGrid(int size, float spacing, const blaVec3 color);
+        void DrawBasis(ObjectTransform* transform, float opacity);
 
         //Common m_debug::
         static void OutputToDebug(char* m_debug);
 
     private:
-        pair<vector<vec3>, vector<vec3>> m_lineMeshVertsAndColor;
+        pair<vector<blaVec3>, vector<blaVec3>> m_lineMeshVertsAndColor;
     };
 
 }

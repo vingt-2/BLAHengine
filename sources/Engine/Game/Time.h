@@ -1,28 +1,28 @@
 #pragma once
 #include "..\..\Common\StdInclude.h"
 #include "..\..\Common\System.h"
-#include "..\..\Common\Maths.h"
+#include "..\..\Common\Maths\Maths.h"
 
 namespace BLAengine
 {
     class BLACORE_API Time
     {
     public:
-        Time(uint8_t timeBufferSize);
+        Time(glm::uint8 timeBufferSize);
         ~Time();
 
-        double GetTime();
-        double GetDelta();
-        double GetFramerate();
+        float GetTime();
+        float GetDelta();
+        float GetFramerate();
 
         void Update();
 
     private:
 
-        double m_time;
-        double m_elapsedTime;
+        float m_time;
+        float m_elapsedTime;
 
-        vector<double> m_timeBuffer;
-        uint8_t m_timeBufferSize;
+        vector<float> m_timeBuffer;
+        glm::uint8 m_timeBufferSize;
     };
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include "./RigidBodySystem.h"
 #include "../../Common/StdInclude.h"
-#include "./GameComponents/RigidBody.h"
-#include "./GameComponents/Camera.h"
+#include "./GameComponents/RigidBodyComponent.h"
+#include "./GameComponents/CameraComponent.h"
 #include "./RenderingManager.h"
 #include "GameObject.h"
 
@@ -21,8 +21,9 @@ namespace BLAengine
         bool DeleteObject(std::string name);
         GameObject* FindNameInScene(std::string name);
 
+        void AddComponent(GameObject* object, GameComponent* component);
         vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
-        Camera* GetMainCamera();
+        CameraComponent* GetMainCamera();
         vector<Contact>* GetContacts();
 
         bool m_enableSimulation;
@@ -32,13 +33,13 @@ namespace BLAengine
         bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
         RigidBodySystem* m_rigidBodySystem;
 
-        void SetTimeObject(Time* time); //TODO: Implement !
+        void SetTimeObject(Time* time);
 
-        std::pair<GameObject*, Collider::RayCollision> PickGameObjectInScene(Ray ray);
+        std::pair<GameObject*, ColliderComponent::RayCollision> PickGameObjectInScene(Ray ray);
 
     private:
 
-        Camera* m_camera; //TODO: Find in object scene !
+        CameraComponent* m_camera; //TODO: Find in object scene !
         RenderingManager* m_renderingManager;
         vector<GameObject*>  m_sceneObjectsVector;
     };

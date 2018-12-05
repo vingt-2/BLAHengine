@@ -1,8 +1,9 @@
-#include "../Engine/Assets/Material.h"
 #include <cereal\cereal.hpp>
 #include <cereal\types\vector.hpp>
 #include <cereal\types\string.hpp>
 #include <cereal\archives\binary.hpp>
+
+#include "../Engine/Assets/Material.h"
 
 class MaterialSerializer
 {
@@ -26,7 +27,7 @@ public:
 
         BLAengine::Material* mat = new BLAengine::Material(m_name);
         
-        for (int i = 0; i < m_textureHandles.size(); i++)
+        for (size_t i = 0; i < m_textureHandles.size(); i++)
         {
             std::string texName = m_textureNames[i];
             std::string texHandle = m_textureHandles[i];

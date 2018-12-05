@@ -31,8 +31,8 @@
 unsigned get_tick_count()
 {
   static struct timezone tz={0,0};
-  static const double t1=1000.0;
-  static const double t2=0.001;
+  static const float t1=1000.0f;
+  static const float t2=0.01;
   timeval t;
   gettimeofday(&t,&tz);
   return long((t.tv_sec&0x000FFFFF)*t1 + t.tv_usec*t2);

@@ -1,7 +1,6 @@
 #pragma once
 #include "..\..\Common\StdInclude.h"
 #include "GameComponents/GameComponent.h"
-#include "GameComponents/Transform.h"
 
 namespace BLAengine
 {
@@ -14,8 +13,8 @@ namespace BLAengine
         void SetParent(GameObject* parent) { m_parent = parent; }
         GameObject* GetParent() { return m_parent; }
 
-        const Transform& GetTransform();
-        void SetTransform(const Transform& transform);
+        const ObjectTransform& GetTransform();
+        void SetTransform(const ObjectTransform& transform);
 
         GameObject(string name);
         ~GameObject(void);
@@ -43,11 +42,9 @@ namespace BLAengine
 
         string m_objectName;
         GameObject* m_parent;
-        Transform* m_transform;
+        ObjectTransform* m_transform;
 
         vector<GameComponent*> m_componentVector;
-
-        void UpdateTransform();
     };
 
     inline vector<GameComponent*> GameObject::GetAllComponents()
@@ -58,7 +55,7 @@ namespace BLAengine
     template<class ComponentType>
     inline ComponentType* GameObject::GetComponent()
     {
-        for (int i = 0; i < m_componentVector.size(); i++)
+        for (size_t i = 0; i < m_componentVector.size(); i++)
         {
             GameComponent* gComp = m_componentVector[i];
             if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))
@@ -73,7 +70,7 @@ namespace BLAengine
     inline vector<ComponentType*> GameObject::GetComponents()
     {
         vector<ComponentType*> comps;
-        for (int i = 0; i < m_componentVector.size(); i++)
+        for (size_t i = 0; i < m_componentVector.size(); i++)
         {
             GameComponent* gComp = m_componentVector[i];
             if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))

@@ -54,6 +54,8 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
         return;
     }
 
+    glfwSwapInterval(0);
+
     glfwSetWindowTitle(window, windowTitle.c_str());
 
     // Ensure we can capture the escape key being pressed below
@@ -108,7 +110,7 @@ std::string GLFWRenderWindow::GetWindowTitle()
     return std::string();
 }
 
-void GLFWRenderWindow::GetMouse(double & x, double & y)
+void GLFWRenderWindow::GetMouse(double & x, double& y)
 {
     glfwGetCursorPos(m_glfwWindow, &x, &y);
 }

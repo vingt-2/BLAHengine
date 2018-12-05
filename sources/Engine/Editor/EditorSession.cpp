@@ -36,17 +36,10 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 
     m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_editorRenderer->m_assetManager = m_assetManager;
-    
-    m_workingScene = new Scene();
-
-    m_editorScene = new Scene();
-
-    GameObject* cameraObject = m_editorScene->CreateObject("EditorCamera");
-    Camera* cameraComp = new Camera();
-    cameraObject->AddComponent(cameraComp);
-    m_editorRenderer->SetCamera(cameraComp);
 
     m_timer = new Time(10);
+
+    m_editorScene = new Scene();
 
     m_workingScene = new Scene();
 
@@ -69,8 +62,6 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
     
     m_assetManager->LoadCookedAssets();
 
-    m_editorControls = new EditorControls(cameraObject, m_renderWindow);
-
     return true;
 }
 
@@ -79,11 +70,18 @@ void EditorSession::UpdateEditor()
     if (m_renderWindow->GetMousePressed(0))
     {
         Ray screenRay = m_editorRenderer->ScreenToRay();
-        vec3 t;
+
         if (GameObject* object = m_workingScene->PickGameObjectInScene(screenRay).first)
         {
-            std::cout << "Picked " << object->GetName() << "\n";
-            Collider::RayCollision cp = object->GetComponent<Collider>()->CollideWithRay(screenRay);
+            ColliderComponent::RayCollision cp = object->GetComponent<ColliderComponent>()->CollideWithRay(screenRay);
+            if (RigidBodyComponent* rb = object->GetComponent<RigidBodyComponent>())
+            {
+                rb->PushForceWorld(cp.m_colPositionW, cp.m_colNormalW);
+            }
+            else
+            {
+                object->AddComponent(new RigidBodyComponent());
+            }
             debugRay = Ray(cp.m_colPositionW, cp.m_colNormalW, 10000);
         }
     }
@@ -92,23 +90,34 @@ void EditorSession::UpdateEditor()
     {
         if (DirectionalLight* dirLight = dirlightObj->GetComponent<DirectionalLight>())
         {
-            Transform lightT = dirLight->GetObjectTransform();
-            lightT.m_position = vec3(0, 50, 0);
-            vec3 rotationInEuler = lightT.GetEulerRotation();
+            ObjectTransform lightT = dirLight->GetObjectTransform();
+            lightT.SetPosition(blaVec3(0.f, 50.f, 0.f));
+            blaVec3 rotationInEuler = lightT.GetEulerAngles();
             //cout << rotationInEuler.y;
-            lightT.SetRotationUsingEuler(vec3(0.5*3.14, 0 ,0));
+            lightT.SetEulerAngles(0.5f*3.14f, 0.f ,0.f);
             dirlightObj->SetTransform(lightT);
         }
     }
 
-    m_debug->DrawRay(debugRay, vec3(0, 1, 0));
-    m_debug->DrawGrid(1000, 10, vec3(0.4));
-    m_debug->Update();
+    if (m_editorControls)
+    {
+        m_editorControls->ControlCamera();
+    }
+    else
+    {
+        if (CameraComponent* cameraObject = m_workingScene->GetMainCamera())
+        {
+            m_editorControls = new EditorControls(cameraObject->m_parentObject, m_renderWindow);
+        }
+    }
 
-    m_editorControls->ControlCamera();
+    m_debug->DrawRay(debugRay, blaVec3(0, 1, 0));
+    //m_debug->DrawGrid(1000, 10, blaVec3(0.4));
+    m_debug->Update();
     m_timer->Update();
     m_workingScene->Update();
     m_editorRenderer->Update();
+
 }
 
 void EditorSession::TerminateEditor()
@@ -122,18 +131,24 @@ bool BLAengine::EditorSession::LoadWorkingScene(std::string filepath)
     m_workingScene->~Scene();
     Scene* scenePtr = m_sceneManager->LoadScene(filepath);
     m_workingScene = scenePtr;
-
+    m_workingScene->SetTimeObject(m_timer);
     m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
     m_workingScene->Initialize(m_renderingManager);
     m_editorRenderer->SwitchRenderingManager(m_renderingManager);
 
     GameObject* light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = new DirectionalLight(vec3(0, 10, 0));
+    DirectionalLight* dirLight = new DirectionalLight(blaVec3(0, 10, 0));
     light->AddComponent(dirLight);
-    Transform lightT = light->GetTransform();
-    lightT.m_position = vec3(0, 20, 0);
-    lightT.SetRotationUsingEuler(vec3(0, 1.2, 0));
+    ObjectTransform lightT = light->GetTransform();
+    lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
+    lightT.SetEulerAngles(0.f, 1.2f, 0.f);
     light->SetTransform(lightT);
+
+    GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
+    CameraComponent* cameraComp = new CameraComponent();
+    cameraObject->AddComponent(cameraComp);
+
+    m_editorRenderer->SetCamera(cameraComp);
 
     return true;
 }
@@ -155,11 +170,16 @@ std::vector<string> BLAengine::EditorSession::GetSceneObjects()
 
 void BLAengine::EditorControls::ControlCamera()
 {
-    Transform transform = m_cameraObject->GetTransform();
+    if (m_renderWindow->GetKeyPressed(GLFW_KEY_ESCAPE))
+    {
+        exit(0);
+    }
+    
+    ObjectTransform transform = m_cameraObject->GetTransform();
 
-    vec3 tangentForce = vec3(0);
-    vec3 movementForce = vec3(0);
-    float coeff = 0.01f;
+    blaVec3 tangentForce = blaVec3(0);
+    blaVec3 movementForce = blaVec3(0);
+    float coeff = 0.1f;
 
 
     if (m_renderWindow->GetKeyPressed('W'))
@@ -177,18 +197,44 @@ void BLAengine::EditorControls::ControlCamera()
     if (m_renderWindow->GetKeyPressed('E'))
         tangentForce.y = -2.f;
 
-    vec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
-    cameraForce *= coeff;
-    transform.m_position += cameraForce;
+    if (m_renderWindow->GetMousePressed(2))
+    {
+        double x, y;
+        m_renderWindow->GetMouse(x, y);
+        tangentForce = blaVec3(0, 0, 0);
 
+        if (x - m_prevMouse.x > 0)
+        {
+            tangentForce.x = 1.f;
+        }
+        else if (x - m_prevMouse.x < 0)
+        {
+            tangentForce.x = -1.f;
+        }
+        if (y - m_prevMouse.y > 0)
+        {
+            tangentForce.y = 1.f;
+        }
+        else if (y - m_prevMouse.y < 0)
+        {
+            tangentForce.y = -1.f;
+        }
+
+        m_prevMouse = glm::vec2(x,y);
+    }
+
+    blaVec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
+    cameraForce *= coeff;
+
+    transform.SetPosition(transform.GetPosition() + cameraForce);
 
     if (m_renderWindow->GetMousePressed(1))
     {
         double x, y;
         m_renderWindow->GetMouse(x, y);
-        vec2 curMouse = vec2(x, y);
+        glm::vec2 curMouse = glm::vec2(x, y);
 
-        vec3 deltaRotation = vec3(0);
+        blaVec3 deltaRotation = blaVec3(0);
 
         if (x - m_prevMouse.x > 0)
         {
@@ -211,7 +257,7 @@ void BLAengine::EditorControls::ControlCamera()
 
         m_cameraRotation += 0.05f * deltaRotation;
         
-        transform.SetRotationUsingEuler(m_cameraRotation);
+        transform.SetEulerAngles(m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z);
     }
 
     m_cameraObject->SetTransform(transform);

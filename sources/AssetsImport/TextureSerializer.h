@@ -1,8 +1,13 @@
-#include "../Engine/Assets/Texture.h"
+using namespace std;
+
 #include <cereal\cereal.hpp>
 #include <cereal\types\vector.hpp>
 #include <cereal\types\string.hpp>
-#include <cereal\archives\binary.hpp>
+#include <cereal\archives\binary.hpp>    
+
+
+
+#include "../Engine/Assets/Texture.h"
 
 class Texture2DSerializer
 {
@@ -27,12 +32,12 @@ public:
 private:
     friend class cereal::access;
 
-    uint8_t m_nComponents;
-    uint32_t m_dataSize;
-    uint32_t m_width, m_height;
+    glm::uint8 m_nComponents;
+    glm::uint32 m_dataSize;
+    glm::uint32 m_width, m_height;
 
     std::string m_name;
-    std::vector<uint8_t> m_data;
+    std::vector<glm::uint8> m_data;
 
     template <class Archive>
     void serialize(Archive & archive)

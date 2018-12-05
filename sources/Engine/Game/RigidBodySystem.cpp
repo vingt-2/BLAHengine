@@ -1,10 +1,11 @@
 #include "RigidBodySystem.h"
+#include "GameObject.h"
 using namespace BLAengine;
 
-RigidBodySystem::RigidBodySystem(Time* time) :
-    m_timeStep(0.001f),
-    m_uniformViscosity(0.001),
-    m_gravity(vec3(0, -5, 0)),
+RigidBodySystem::RigidBodySystem(Time* time):
+    m_timeStep(0.01f),
+    m_uniformViscosity(0.01f),
+    m_gravity(blaVec3(0.f, -5.f, 0.f)),
     m_substeps(1),
     m_oldTime(-1),
     m_isSimulating(true),
@@ -13,7 +14,7 @@ RigidBodySystem::RigidBodySystem(Time* time) :
 {
     m_collisionProcessor = new CollisionProcessor(time, &m_timeStep);
     m_time = time;
-    m_timeStep /= sqrt(m_substeps);
+    m_timeStep /= sqrtf((float) m_substeps);
 }
 
 
@@ -22,7 +23,7 @@ RigidBodySystem::~RigidBodySystem()
 
 }
 
-bool RigidBodySystem::RegisterRigidBody(RigidBody &body)
+bool RigidBodySystem::RegisterRigidBody(RigidBodyComponent &body)
 {
     m_rigidBodyList.push_back(&body);
     
@@ -53,6 +54,7 @@ void RigidBodySystem::DisableSimulation()
 
 void BLAengine::RigidBodySystem::SetTimeObject(Time * time)
 {
+    m_collisionProcessor->setTimeObject(time);
     m_time = time;
     m_oldTime = m_time->GetTime();
 }
@@ -61,15 +63,15 @@ void RigidBodySystem::UpdateSystem()
 {
     if (m_isSimulating)
     {
-        double time = m_time->GetTime();
+        float time = m_time->GetTime();
         if (m_tieToTime)
         {
-            double timeStep = 2 * (time - m_oldTime) / 1;
-            if (timeStep < 0.1)
+            float timeStep = 2.f * (time - m_oldTime) / 1.f;
+            if (timeStep < 0.1f)
                 m_timeStep = timeStep;
             
             if (m_timeStep == 0)
-                m_timeStep = 0.001;
+                m_timeStep = 0.01f;
 
         }
         m_oldTime = time;
@@ -86,9 +88,9 @@ void RigidBodySystem::UpdateSystem()
 
 void RigidBodySystem::UpdateStates()
 {
-    for (RigidBody* bodyPtr : (m_rigidBodyList))
+    for (RigidBodyComponent* bodyPtr : (m_rigidBodyList))
     {
-        RigidBody& body = *bodyPtr;
+        RigidBodyComponent& body = *bodyPtr;
         if (!body.m_isPinned)
         {
             if (body.m_nextState== nullptr) cout << "Empty state for body, check your calls!\n";
@@ -99,35 +101,38 @@ void RigidBodySystem::UpdateStates()
 
 void RigidBodySystem::GetNewStates()
 {
-    for (RigidBody* bodyPtr : (m_rigidBodyList))
+    for (RigidBodyComponent* bodyPtr : (m_rigidBodyList))
     {
-        RigidBody& body = *bodyPtr;
+        RigidBodyComponent& body = *bodyPtr;
+
+        ObjectTransform bodyTransform = body.GetObjectTransform();
+
         if (!body.m_isPinned)
         {
             UpdateAcceleration(body);
             UpdateVelocity(body);
 
-            body.m_nextState->m_nextPos = body.m_transform.m_position + m_timeStep * body.m_velocity;
+            body.m_nextState->m_nextPos = bodyTransform.GetPosition() + m_timeStep * body.m_velocity;
         }
         else
         {
             body.m_nextState = new NextState();
-            body.m_invInertiaTensor = mat3(0);
-            body.m_invMassTensor = mat3(0);
+            body.m_invInertiaTensor = blaMat3(0);
+            body.m_invMassTensor = blaMat3(0);
             body.ClearForces();
         }
     }
 }
 
-void RigidBodySystem::UpdateAcceleration(RigidBody& body)
+void RigidBodySystem::UpdateAcceleration(RigidBodyComponent& body)
 {
     NextState* newState = new NextState();
 
-    mat3 omegaHat = matrixCross(body.m_angularVelocity);
+    blaMat3 omegaHat = matrixCross(body.m_angularVelocity);
 
     newState->m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));
     
-    vec3 inertia = omegaHat * body.m_inertiaTensor * body.m_angularVelocity;
+    blaVec3 inertia = omegaHat * body.m_inertiaTensor * body.m_angularVelocity;
     newState->m_angularAcceleration = -body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
     
     body.m_nextState = newState;
@@ -136,7 +141,7 @@ void RigidBodySystem::UpdateAcceleration(RigidBody& body)
 /*
     Forward Euler Velocity Step
 */
-void RigidBodySystem::UpdateVelocity(RigidBody& body)
+void RigidBodySystem::UpdateVelocity(RigidBodyComponent& body)
 {
     if (body.m_nextState== nullptr) 
     {
@@ -149,20 +154,20 @@ void RigidBodySystem::UpdateVelocity(RigidBody& body)
 }
 
 /*
-    Forward Euler Transform Update
+    Forward Euler ObjectTransform Update
 */
-void RigidBodySystem::UpdateTransform(RigidBody& body)
+void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
 {
-    Transform transform = body.m_transform;
+    ObjectTransform transform = body.GetObjectTransform();
     
     //    Update State, delete NextState entry;
     {
-        vec3 correctionL;
-        vec3 correctionA;
+        blaVec3 correctionL;
+        blaVec3 correctionA;
         if (m_collisionProcessor->debug_stop)
         {
-            correctionL = vec3(0);
-            correctionA = vec3(0);
+            correctionL = blaVec3(0);
+            correctionA = blaVec3(0);
         }
         else
         {
@@ -184,26 +189,28 @@ void RigidBodySystem::UpdateTransform(RigidBody& body)
     }
 
     //    Evaluate new Position;
-    transform.m_position += m_timeStep * body.m_velocity;
+    transform.SetPosition( transform.GetPosition() + m_timeStep * body.m_velocity);
     
     //    Evaluate Exponential Map
-    mat3 omegaHat = matrixCross(-body.m_angularVelocity);
-    mat3 deltaRot = mat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
-    mat3 newRotation = transform.m_rotation *= deltaRot;
+    blaMat3 omegaHat = matrixCross(-body.m_angularVelocity);
+    blaMat3 deltaRot = blaMat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
+    blaMat3 newRotation = toMat3(transform.GetRotation()) * deltaRot;
 
     //    Normalize each axis of rotation to avoid scale drift 
-    vec3 X = vec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
-    vec3 Y = vec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
-    vec3 Z = vec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
-    transform.m_rotation = mat3(normalize(X), normalize(Y), normalize(Z));
+    blaVec3 X = blaVec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
+    blaVec3 Y = blaVec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
+    blaVec3 Z = blaVec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
+    transform.SetRotation(blaQuat(blaMat3(normalize(X), normalize(Y), normalize(Z))));
+
+    body.m_parentObject->SetTransform(transform);
 }
 
 void RigidBodySystem::ApplyWorldForces()
 {
     for (auto body : m_rigidBodyList)
     {
-        vec3 linearFriction = -1.f * m_uniformViscosity * body->m_velocity;
-        vec3 angularFriction = 1.f * m_uniformViscosity * body->m_angularVelocity;
+        blaVec3 linearFriction = -1.f * m_uniformViscosity * body->m_velocity;
+        blaVec3 angularFriction = 1.f * m_uniformViscosity * body->m_angularVelocity;
         body->AddLinearForce(linearFriction);
         body->AddTorque(angularFriction);
         if (body->m_applyGravity && m_enableGravity)

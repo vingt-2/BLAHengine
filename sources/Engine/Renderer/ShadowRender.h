@@ -7,7 +7,7 @@ namespace BLAengine
     class BLACORE_API ShadowRender
     {
     public:
-        virtual mat4 getShadowViewProjection() = 0;
+        virtual blaMat4 getShadowViewProjection() = 0;
         virtual void Update() = 0;  // <-- m_shadowCamera.Update();
     };
 
@@ -15,7 +15,7 @@ namespace BLAengine
     {
     public:
         bool m_isSetup;
-        vec3 m_shadowDirection;
+        blaVec3 m_shadowDirection;
 
         //OpenGL
         GLuint m_depthTexture;
@@ -24,7 +24,7 @@ namespace BLAengine
 
         int m_bufferSize;
 
-        mat4 getShadowViewProjection();
+        blaMat4 getShadowViewProjection();
         void Update();
 
         OrthographicCamera m_shadowCamera;
@@ -34,7 +34,7 @@ namespace BLAengine
     {
     public:
         bool m_isSetup;
-        vec3 m_shadowDirection;
+        blaVec3 m_shadowDirection;
 
         //OpenGL
         GLuint m_depthTexture;
@@ -43,7 +43,7 @@ namespace BLAengine
 
         int m_bufferSize;
 
-        mat4 getShadowViewProjection();
+        blaMat4 getShadowViewProjection();
         void Update();
 
         OrthographicCamera m_shadowCamera;

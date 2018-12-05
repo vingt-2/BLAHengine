@@ -5,20 +5,18 @@ using namespace BLAengine;
 GameObject::GameObject(string name):
     m_objectName(name)
 {
-    m_transform = new Transform();
+    m_transform = new ObjectTransform();
 }
 
 
 GameObject::~GameObject(void)
 {
-    m_transform->~Transform();
+    m_transform->~ObjectTransform();
 }
 
-void BLAengine::GameObject::Update()
+void GameObject::Update()
 {
-    this->UpdateTransform();
-
-    for (int c = 0; c < this->m_componentVector.size(); c++)
+    for (size_t c = 0; c < this->m_componentVector.size(); c++)
     {
         GameComponent* component = this->m_componentVector[c];
 
@@ -26,23 +24,14 @@ void BLAengine::GameObject::Update()
     }
 }
 
-const Transform& GameObject::GetTransform() 
+const ObjectTransform& GameObject::GetTransform() 
 {
     return *m_transform;
 }
 
-void GameObject::SetTransform(const Transform& transform)
+void GameObject::SetTransform(const ObjectTransform& transform)
 {
-    m_transform->m_position = transform.m_position;
-    m_transform->m_rotation = transform.m_rotation;
-    m_transform->m_scale = transform.m_scale;
-
-    m_transform->UpdateTransform();
-}
-
-void GameObject::UpdateTransform()
-{
-    this->m_transform->UpdateTransform();
+    *m_transform = transform;
 }
 
 void GameObject::AddComponent(GameComponent* component)

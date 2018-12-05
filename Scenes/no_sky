@@ -3,22 +3,17 @@
         "Objects": [
             {
                 "Name": "sponza",
-                "Transform": {
+                "ObjectTransform": {
                     "position": {
                         "x": 0.0,
                         "y": 0.0,
                         "z": -2.0
                     },
-                    "rotation": {
-                        "a": 1.0,
-                        "b": 0.0,
-                        "c": 0.0,
-                        "d": 0.0,
-                        "e": 1.0,
-                        "f": 0.0,
-                        "g": 0.0,
-                        "h": 0.0,
-                        "i": 1.0
+                    rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
                     },
                     "scale": {
                         "x": 10.0,

@@ -15,18 +15,16 @@ bool Raytracer::InitializeEngine()
     //m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     //m_editorRenderer->m_assetManager = m_assetManager;
 
-    m_workingScene = new Scene();
-
-    m_editorScene = new Scene();
-
     GameObject* cameraObject = m_editorScene->CreateObject("EditorCamera");
-    Camera* cameraComp = new Camera();
+    CameraComponent* cameraComp = new CameraComponent();
     cameraObject->AddComponent(cameraComp);
     //m_editorRenderer->SetCamera(cameraComp);
 
     m_timer = new Time(10);
 
     m_workingScene = new Scene();
+
+    m_editorScene = new Scene();
 
     m_workingScene->SetTimeObject(m_timer);
 
@@ -47,8 +45,8 @@ bool Raytracer::InitializeEngine()
 
 void Raytracer::UpdateEditor()
 {
-    m_debug->DrawRay(debugRay, vec3(0, 1, 0));
-    m_debug->DrawGrid(1000, 10, vec3(0.4));
+    m_debug->DrawRay(debugRay, blaVec3(0.f, 1.f, 0.f));
+    m_debug->DrawGrid(1000, 10.f, blaVec3(0.4f));
     m_debug->Update();
 
 
@@ -84,6 +82,9 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     m_renderingManager->~RenderingManager();
     m_workingScene->~Scene();
     Scene* scenePtr = m_sceneManager->LoadScene(filepath);
+
+    scenePtr->SetTimeObject(m_timer);
+
     m_workingScene = scenePtr;
 
     m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
@@ -91,35 +92,35 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     m_editorRenderer->SwitchRenderingManager(m_renderingManager);
 
     GameObject* light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = new DirectionalLight(vec3(0, -1, 0));
+    DirectionalLight* dirLight = new DirectionalLight(blaVec3(0.f, -1.f, 0.f));
     light->AddComponent(dirLight);
-    Transform lightT = light->GetTransform();
-    lightT.SetRotationUsingEuler(vec3(1.07, 0, 0));
+    ObjectTransform lightT = light->GetTransform();
+    lightT.SetEulerAngles(1.07f, 0.f, 0.f);
     light->SetTransform(lightT);
 
     GameObject* pbrender = m_workingScene->CreateObject("PBRCamera");
-    Transform t1;
-    /*t1.m_position = vec3(5, 1, 3);
-    t1.SetRotationUsingEuler(vec3(0.2, -0.75, 0));*/
-    t1.m_position = vec3(0, 0.5, 5);
-    t1.SetRotationUsingEuler(vec3(0, 0, 0));
+    ObjectTransform t1;
+    /*t1.m_position = blaVec3(5, 1, 3);
+    t1.SetEulerAngles(blaVec3(0.2, -0.75, 0));*/
+    t1.SetPosition(blaVec3(0.f, 0.5f, 5.f));
+    t1.SetEulerAngles(0.f, 0.f, 0.f);
     pbrender->SetTransform(t1);
     pbrender->AddComponent(new PBRCamera());
 
     GameObject* pblight = m_workingScene->CreateObject("Light");
-    Transform t;
-    t.m_position = vec3(0, 5, -3);
-    //t.m_position = vec3(2, -3, -8);
-    //t.m_position = vec3(0, 10, -8);
+    ObjectTransform t;
+    t.GetPosition() = blaVec3(0, 5, -3);
+    //t.m_position = blaVec3(2, -3, -8);
+    //t.m_position = blaVec3(0, 10, -8);
     pblight->SetTransform(t);
     PBRSurface* surface = new PBRSphere(0.5);
-    surface->m_material.m_emissivePower = vec3(1000, 1000, 1000);
+    surface->m_material.m_emissivePower = blaVec3(1000, 1000, 1000);
     pblight->AddComponent(surface);
     pblight->AddComponent(new SphereCollider(0.5));
 
     for (auto gobject : m_workingScene->GetObjects())
     {
-        if (MeshRenderer* mRender = gobject->GetComponent<MeshRenderer>())
+        if (MeshRendererComponent* mRender = gobject->GetComponent<MeshRendererComponent>())
         {
             if (!gobject->GetComponent<PBRSurface>())
             {
@@ -127,7 +128,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
                 {
                     PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
                     pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-                    //pbmRender->m_material.m_emissivePower = vec3(100000000, 100000000, 100000000);
+                    //pbmRender->m_material.m_emissivePower = blaVec3(100000000, 100000000, 100000000);
 
                     gobject->AddComponent(pbmRender);
                 }
@@ -136,8 +137,8 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
                     PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
                     //PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
                     pbmRender->m_material.m_brdf = new PBRMaterial::MirrorBRDF();
-                    pbmRender->m_material.m_color = vec3(0.2, 0.2, 1);
-                    //pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
+                    pbmRender->m_material.m_color = blaVec3(0.2, 0.2, 1);
+                    //pbmRender->m_material.m_emissivePower = blaVec3(5, 5, 40);
                     gobject->AddComponent(pbmRender);
                 }
                 else if (gobject->GetName() == "redcube1" || gobject->GetName() == "redcube4")
@@ -145,8 +146,8 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
                     PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
                     //PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
                     pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-                    pbmRender->m_material.m_color = vec3(1, 0.1, 0.1);
-                    //pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
+                    pbmRender->m_material.m_color = blaVec3(1, 0.1, 0.1);
+                    //pbmRender->m_material.m_emissivePower = blaVec3(5, 5, 40);
                     gobject->AddComponent(pbmRender);
                 }
                 else if (gobject->GetName() == "redcube2" || gobject->GetName() == "redcube3")
@@ -154,8 +155,8 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
                     PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
                     //PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
                     pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-                    pbmRender->m_material.m_color = vec3(1, 0.1, 0.1);
-                    //pbmRender->m_material.m_emissivePower = vec3(5, 5, 40);
+                    pbmRender->m_material.m_color = blaVec3(1, 0.1, 0.1);
+                    //pbmRender->m_material.m_emissivePower = blaVec3(5, 5, 40);
                     gobject->AddComponent(pbmRender);
                 }
                 else
@@ -163,7 +164,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
                     PBRSurface* pbmRender = new PBRMesh(mRender->m_mesh);
                     //PBRSurface* pbmRender = new PBRSphere(gobject->GetTransform().m_scale.x);
                     pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
-                    pbmRender->m_material.m_color = vec3(1, 1, 1);
+                    pbmRender->m_material.m_color = blaVec3(1, 1, 1);
                     gobject->AddComponent(pbmRender);
                 }
             }

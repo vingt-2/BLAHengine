@@ -74,10 +74,10 @@ AssetManager::AssetType BLAengine::AssetManager::GetAsset(std::string filepath, 
         return type;
     }
 
-    std::pair<AssetType, uint32_t> asset = m_resourceMap[filepath];
+    std::pair<AssetType, glm::uint32> asset = m_resourceMap[filepath];
 
     type = asset.first;
-    uint32_t assetIndx = asset.second;
+    glm::uint32 assetIndx = asset.second;
 
     switch (type)
     {
@@ -137,9 +137,9 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
     TriangleMesh* triangleMesh = meshSerializer.BuildMesh();
     m_triangleMeshesInMemory.push_back(triangleMesh);
 
-    uint32_t indx = m_triangleMeshesInMemory.size() - 1;
+    glm::uint32 indx = m_triangleMeshesInMemory.size() - 1;
 
-    m_resourceMap[filepath] = std::pair<AssetType, uint32_t>(AssetType::TriangleMeshAsset, indx);
+    m_resourceMap[filepath] = std::pair<AssetType, glm::uint32>(AssetType::TriangleMeshAsset, indx);
 
     return true;
 }
@@ -171,9 +171,9 @@ bool AssetManager::LoadTexture(std::string filepath)
 
     m_textures2DInMemory.push_back(texture2D);
 
-    uint32_t indx = m_textures2DInMemory.size() - 1;
+    glm::uint32 indx = m_textures2DInMemory.size() - 1;
 
-    m_resourceMap[filepath] = std::pair<AssetType, uint32_t>(AssetType::TextureAsset, indx);
+    m_resourceMap[filepath] = std::pair<AssetType, glm::uint32>(AssetType::TextureAsset, indx);
 
     return true;
 }
@@ -205,9 +205,9 @@ bool AssetManager::LoadMaterial(std::string filepath)
 
     m_materialsInMemory.push_back(material);
 
-    uint32_t indx = m_materialsInMemory.size() - 1;
+    glm::uint32 indx = m_materialsInMemory.size() - 1;
 
-    m_resourceMap[filepath] = std::pair<AssetType, uint32_t>(AssetType::MaterialAsset, indx);
+    m_resourceMap[filepath] = std::pair<AssetType, glm::uint32>(AssetType::MaterialAsset, indx);
 
     return true;
 }

@@ -2,7 +2,7 @@
 
 using namespace BLAengine;
 
-void Renderer::SetCamera(Camera * camera)
+void Renderer::SetCamera(CameraComponent * camera)
 {
     m_mainRenderCamera.AttachCamera(camera);
 }
@@ -10,7 +10,7 @@ void Renderer::SetCamera(Camera * camera)
 Renderer::Renderer()
 {
     m_isContextEnabled = false;
-    this->m_renderSize = ivec2(0,0);
+    this->m_renderSize = glm::vec2(0,0);
 }
 
 

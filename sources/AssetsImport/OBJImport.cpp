@@ -22,7 +22,7 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
     ifstream fileStream (filename,ifstream::in);
     string lineInFile = " ";
 
-    vector<uint32_t> vertexIndices, uvIndices, normalIndices;
+    vector<glm::uint32> vertexIndices, uvIndices, normalIndices;
 
     int quadsCount = 0;
     int missedFaces = 0;
@@ -53,21 +53,21 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
                 if (lineInFile.at(1) == ' ')
                 {
                     m_currentMaxVertexPos++;
-                    vec3 currentVertice;
+                    blaVec3 currentVertice;
                     sscanf(lineInFile.data(), "%*s %f %f %f", &currentVertice.x, &currentVertice.y, &currentVertice.z);
                     mesh.m_vertexPos.push_back(currentVertice);
                 }
                 else if (lineInFile.at(1) == 't')
                 {
                     m_currentMaxUVPos++;
-                    vec2 currentTexCoord;
+                    glm::vec2 currentTexCoord;
                     sscanf(lineInFile.data(), "%*s %f %f", &currentTexCoord.x, &currentTexCoord.y);
                     mesh.m_vertexUVs.push_back(currentTexCoord);
                 }
                 else if (lineInFile.at(1) == 'n')
                 {
                     m_currentMaxNormalPos++;
-                    vec3 currentNormal;
+                    blaVec3 currentNormal;
                     sscanf(lineInFile.data(), "%*s %f %f %f\n", &currentNormal.x, &currentNormal.y, &currentNormal.z);
                     if (swapNormals)
                         currentNormal *= -1.f;

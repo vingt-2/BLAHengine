@@ -21,7 +21,9 @@ void main()
 	vec3 normalMapSample  = texture(normalMap, TexCoord0).rgb;
 
 	normalMapSample = normalize(2.0f*normalMapSample - vec3(1.f,1.f,1.f));
-
+	
+	normalMapSample = vec3(0,0,1);
+	
 	NormalOut = normalize(TangentSpace0 * normalMapSample);
 	
 	TexCoordOut = vec3(TexCoord0, 0.0);

@@ -29,6 +29,7 @@ void main(){
     
     vec3 overalSunColor = vec3(sunOrientation, sunOrientation*0.5, sunOrientation*0.2);
     
+	// This is for the sky rendering ...
     if(length(worldPos) > 3000)
     {
         float altitude = abs(dot(normalize(worldPos),vec3(0.0,1.0,0.0)));
@@ -43,9 +44,10 @@ void main(){
         
         color = clamp((1-sunOrientation),0,1) * (skyColor + (1-sunOrientation) * (sunColor * (1+overalSunColor))) + clamp((sunOrientation),0,1) * vec3(0,0,0.1);
     }
+	// And this is the standard shader...
     else
     {
-        float ambientLight = 0.5;
+        float ambientLight = 0.8;
 		
         vec4 shadowPos = shadowMV * vec4(worldPos, 1.0);
         //shadowPos /= shadowPos.w;
@@ -53,7 +55,7 @@ void main(){
 		float xOffset = 1.0f/8192;
         float yOffset = 1.0f/8192;
         
-        float factor = 0.0;
+        float shadowFactor = 0.0;
         
         float bias = 0.0001*tan(acos(dot(normal, lightDirection)));
 		bias = clamp(bias, 0,0.0002);
@@ -64,12 +66,13 @@ void main(){
             {
                 vec2 Offsets = vec2(x * xOffset, y * yOffset);
                 vec3 UVC = vec3(shadowUV + Offsets, shadowPos.z - bias);
-                factor += texture(shadowMap, UVC);
+                shadowFactor += texture(shadowMap, UVC);
             }
         }
 
-        float vis = max(ambientLight,(factor / 16.0f));
+        float vis = max(ambientLight,(shadowFactor / 16.0f));
 		
-        color = diffuse * (3 * vis * max(dot(normal, lightDirection),0)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
-    }
+        //color = diffuse * (3 * vis * max(dot(normal, lightDirection),0)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
+		color = diffuse * (vis * max(dot(normal, lightDirection), 0) + ambientLight);
+	}
 }

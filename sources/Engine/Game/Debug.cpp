@@ -8,7 +8,6 @@ Debug::Debug(DebugRenderingManager* manager)
     this->m_debugRenderManager = manager;
 }
 
-
 Debug::~Debug(void)
 {
 }
@@ -24,15 +23,15 @@ void Debug::Update()
     m_lineMeshVertsAndColor.second.clear();
 }
 
-void Debug::DrawLine(const vec3 origin,const vec3 destination)
+void Debug::DrawLine(const blaVec3 origin,const blaVec3 destination)
 {
     m_lineMeshVertsAndColor.first.push_back(origin); 
     m_lineMeshVertsAndColor.first.push_back(destination);
-    m_lineMeshVertsAndColor.second.push_back(vec3(0));
-    m_lineMeshVertsAndColor.second.push_back(vec3(0));
+    m_lineMeshVertsAndColor.second.push_back(blaVec3(0));
+    m_lineMeshVertsAndColor.second.push_back(blaVec3(0));
 }
 
-void Debug::DrawLine(const vec3 origin,const vec3 destination,const vec3 color)
+void Debug::DrawLine(const blaVec3 origin,const blaVec3 destination,const blaVec3 color)
 {
     m_lineMeshVertsAndColor.first.push_back(origin);
     m_lineMeshVertsAndColor.first.push_back(destination);
@@ -40,36 +39,36 @@ void Debug::DrawLine(const vec3 origin,const vec3 destination,const vec3 color)
     m_lineMeshVertsAndColor.second.push_back(color);
 }
 
-void Debug::DrawRay(Ray ray,const vec3 color)
+void Debug::DrawRay(Ray ray,const blaVec3 color)
 {
-    vec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
+    blaVec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
 
     DrawLine(ray.m_origin, destination, color);
 }
 
 void Debug::DrawRay(Ray ray)
 {
-    vec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
+    blaVec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
 
-    DrawLine(ray.m_origin, destination, vec3(1));
+    DrawLine(ray.m_origin, destination, blaVec3(1));
 }
 
-void Debug::DrawGrid(int size, float spacing, const vec3 color)
+void Debug::DrawGrid(int size, float spacing, const blaVec3 color)
 {
     for (int i=-size/2; i<=size/2; i++)
     {
         float iSpacing = i*spacing;
         float sizeSpacing = size*spacing;
-        DrawLine(vec3(sizeSpacing /2, 0, iSpacing),vec3(-sizeSpacing /2, 0, iSpacing), color);
-        DrawLine(vec3(iSpacing, 0, sizeSpacing /2),vec3(iSpacing, 0, -sizeSpacing /2), color);
+        DrawLine(blaVec3(sizeSpacing /2, 0, iSpacing),blaVec3(-sizeSpacing /2, 0, iSpacing), color);
+        DrawLine(blaVec3(iSpacing, 0, sizeSpacing /2),blaVec3(iSpacing, 0, -sizeSpacing /2), color);
     }
 }
 
-void Debug::DrawBasis(Transform* transform, float opacity)
+void Debug::DrawBasis(ObjectTransform* transform, float opacity)
 {
-    DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(1, 0, 0)))), 1), vec3(1, 0, 0));
-    DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 1, 0)))), 1), vec3(0, 1, 0));
-    DrawRay(Ray(transform->LocalPositionToWorld(vec3(0, 0, 0)), normalize((transform->LocalDirectionToWorld(vec3(0, 0, 1)))), 1), vec3(0, 0, 1));
+    DrawRay(Ray(transform->LocalPositionToWorld(blaVec3(0.f)), normalize(transform->LocalDirectionToWorld(blaVec3(1.f, 0.f, 0.f))), 1), blaVec3(1.f, 0.f, 0.f));
+    DrawRay(Ray(transform->LocalPositionToWorld(blaVec3(0.f)), normalize(transform->LocalDirectionToWorld(blaVec3(0.f, 1.f, 0.f))), 1), blaVec3(0.f, 1.f, 0.f));
+    DrawRay(Ray(transform->LocalPositionToWorld(blaVec3(0.f)), normalize(transform->LocalDirectionToWorld(blaVec3(0.f, 0.f, 1.f))), 1), blaVec3(0.f, 0.f, 1.f));
 }
 
 void Debug::OutputToDebug(char* m_debug)

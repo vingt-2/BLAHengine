@@ -112,9 +112,9 @@ void BoxTreeInnerNode::recalcBounds(Vector3D& center)
   center/=float(m_Boxes.size());
   m_Pos=mn;
   m_Size=mx-mn;
-  if (m_Size.x==0.0f) { m_Size.x=0.002f; m_Pos.x-=0.001f; }
-  if (m_Size.y==0.0f) { m_Size.y=0.002f; m_Pos.y-=0.001f; }
-  if (m_Size.z==0.0f) { m_Size.z=0.002f; m_Pos.z-=0.001f; }
+  if (m_Size.x==0.0f) { m_Size.x=0.02f; m_Pos.x-=0.01f; }
+  if (m_Size.y==0.0f) { m_Size.y=0.02f; m_Pos.y-=0.01f; }
+  if (m_Size.z==0.0f) { m_Size.z=0.02f; m_Pos.z-=0.01f; }
   m_Center=getPosition()+0.5f*getSize();
 }
 

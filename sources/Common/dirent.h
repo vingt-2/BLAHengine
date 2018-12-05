@@ -13,7 +13,7 @@
 
 /*
 * Include windows.h without Windows Sockets 1.1 to prevent conflicts with
-* Windows Sockets 2.0.
+* Windows Sockets 2.0f.
 */
 #ifndef WIN32_LEAN_AND_MEAN
 #   define WIN32_LEAN_AND_MEAN
@@ -36,7 +36,7 @@
 /* Indicates that d_namlen field is available in dirent structure */
 #define _DIRENT_HAVE_D_NAMLEN
 
-/* Entries missing from MSVC 6.0 */
+/* Entries missing from MSVC 6.0f */
 #if !defined(FILE_ATTRIBUTE_DEVICE)
 #   define FILE_ATTRIBUTE_DEVICE 0x40
 #endif

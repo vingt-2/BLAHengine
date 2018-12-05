@@ -1,6 +1,6 @@
 #include "../../Common/StdInclude.h"
 #include "../../Common/System.h"
-#include "../../Common/Maths.h"
+#include "../../Common/Maths/Maths.h"
 #include "../Renderer/GL33Renderer.h"
 #include "../Game/RenderingManager.h"
 #include "../Game\Debug.h"
@@ -12,15 +12,15 @@ namespace BLAengine
     {
     public:
 
-        vec2 m_prevMouse;
-        vec3 m_cameraRotation;
+        glm::vec2 m_prevMouse;
+        blaVec3 m_cameraRotation;
 
         GameObject* m_cameraObject;
         RenderWindow* m_renderWindow;
 
         EditorControls(GameObject* cameraObject, RenderWindow* renderWindow) :
-            m_prevMouse(vec2(0)),
-            m_cameraRotation(vec3(0)),
+            m_prevMouse(glm::vec2(0)),
+            m_cameraRotation(blaVec3(0)),
             m_cameraObject(cameraObject),
             m_renderWindow(renderWindow)
         {};
@@ -36,9 +36,10 @@ namespace BLAengine
     {
     public:
         EditorSession(bool external, bool isFullscreen) :
+            m_editorControls(nullptr),
             m_isFullScreen(isFullscreen),
             m_isTerminationRequested(false),
-            debugRay(Ray(vec3(0), vec3(0),1))
+            debugRay(Ray(blaVec3(0), blaVec3(0),1))
         {};
 
         ~EditorSession() { TerminateEditor(); };

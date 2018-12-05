@@ -1,3 +1,4 @@
+#pragma once
 #include "../../Common/StdInclude.h"
 #include "../Game/Scene.h"
 #include "AssetsManager.h"

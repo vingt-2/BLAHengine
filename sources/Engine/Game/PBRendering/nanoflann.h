@@ -251,8 +251,8 @@ namespace nanoflann
 
     /** Manhattan distance functor (generic version, optimized for high-dimensionality data sets).
     *  Corresponding distance traits: nanoflann::metric_L1
-    *     param T Type of the elements (e.g. double, float, uint8_t)
-    *     param _DistanceType Type of distance variables (must be signed) (e.g. float, double, int64_t)
+    *     param T Type of the elements (e.g. float, float, glm::uint8)
+    *     param _DistanceType Type of distance variables (must be signed) (e.g. float, float, int64)
     */
     template<class T, class DataSource, typename _DistanceType = T>
     struct L1_Adaptor
@@ -299,8 +299,8 @@ namespace nanoflann
 
     /** Squared Euclidean distance functor (generic version, optimized for high-dimensionality data sets).
     *  Corresponding distance traits: nanoflann::metric_L2
-    *     param T Type of the elements (e.g. double, float, uint8_t)
-    *     param _DistanceType Type of distance variables (must be signed) (e.g. float, double, int64_t)
+    *     param T Type of the elements (e.g. float, float, glm::uint8)
+    *     param _DistanceType Type of distance variables (must be signed) (e.g. float, float, int64)
     */
     template<class T, class DataSource, typename _DistanceType = T>
     struct L2_Adaptor
@@ -348,8 +348,8 @@ namespace nanoflann
 
     /** Squared Euclidean (L2) distance functor (suitable for low-dimensionality datasets, like 2D or 3D point clouds)
     *  Corresponding distance traits: nanoflann::metric_L2_Simple
-    *     param T Type of the elements (e.g. double, float, uint8_t)
-    *     param _DistanceType Type of distance variables (must be signed) (e.g. float, double, int64_t)
+    *     param T Type of the elements (e.g. float, float, glm::uint8)
+    *     param _DistanceType Type of distance variables (must be signed) (e.g. float, float, int64)
     */
     template<class T, class DataSource, typename _DistanceType = T>
     struct L2_Simple_Adaptor
@@ -1102,7 +1102,7 @@ namespace nanoflann
 
         void middleSplit_(IndexType* ind, IndexType count, IndexType& index, int& cutfeat, DistanceType& cutval, const BoundingBox& bbox)
         {
-            const DistanceType EPS = static_cast<DistanceType>(0.00001);
+            const DistanceType EPS = static_cast<DistanceType>(0.0001);
             ElementType max_span = bbox[0].high - bbox[0].low;
             for (int i = 1; i<(DIM>0 ? DIM : dim); ++i) {
                 ElementType span = bbox[i].high - bbox[i].low;

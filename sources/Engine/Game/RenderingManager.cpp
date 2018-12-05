@@ -1,6 +1,7 @@
 #include "RenderingManager.h"
 
 using namespace BLAengine;
+using namespace glm;
 
 RenderingManager::RenderingManager(RenderManagerType type)
 {
@@ -14,7 +15,7 @@ RenderingManager::~RenderingManager()
 
 }
 
-uint RenderingManager::RegisterMeshRenderer(MeshRenderer* meshRender)
+uint RenderingManager::RegisterMeshRenderer(MeshRendererComponent* meshRender)
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
@@ -24,7 +25,7 @@ uint RenderingManager::RegisterMeshRenderer(MeshRenderer* meshRender)
     return this->currentTicket;
 }
 
-bool RenderingManager::CancelMeshRendererTicket(MeshRenderer* meshRender)
+bool RenderingManager::CancelMeshRendererTicket(MeshRendererComponent* meshRender)
 {
     int renderTicket = meshRender->m_renderTicket;
     auto itTicket = m_ticketedMeshRenderers.find(renderTicket);
@@ -32,11 +33,11 @@ bool RenderingManager::CancelMeshRendererTicket(MeshRenderer* meshRender)
     return true;
 }
 
-uint BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera)
+uint BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera)
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
-    this->m_ticketedDirLights[renderTicket] = std::pair<DirectionalLight*, Camera*>(dirLight, shadowCamera);
+    this->m_ticketedDirLights[renderTicket] = std::pair<DirectionalLight*, CameraComponent*>(dirLight, shadowCamera);
 
     dirLight->m_renderTicket = this->currentTicket;
     return this->currentTicket;
@@ -50,12 +51,12 @@ uint BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight 
     return true;
 }
 
-std::unordered_map<uint, MeshRenderer*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
+std::unordered_map<uint, MeshRendererComponent*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
 {
     return &(m_ticketedMeshRenderers);
 }
 
-std::unordered_map<uint, std::pair<DirectionalLight*,Camera*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
+std::unordered_map<uint, std::pair<DirectionalLight*,CameraComponent*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
 {
     return &(m_ticketedDirLights);
 }
@@ -64,7 +65,7 @@ void RenderingManager::Update()
 {
 }
 
-void DebugRenderingManager::LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh)
+void DebugRenderingManager::LoadDebugLineMesh(pair<vector<blaVec3>, vector<blaVec3>>& lineMesh)
 {
     m_lineMeshes.push_back(lineMesh);
 }

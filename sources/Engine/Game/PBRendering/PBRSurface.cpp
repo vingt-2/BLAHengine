@@ -18,7 +18,7 @@ PBRSurface::~PBRSurface(void)
 
 void PBRSurface::Update()
 {
-    if(!m_parentObject->GetComponent<Collider>())
+    if(!m_parentObject->GetComponent<ColliderComponent>())
         m_parentObject->AddComponent(m_collider);
 }
 
@@ -30,58 +30,58 @@ PBRMesh::PBRMesh(TriangleMesh* mesh):
     ComputeSurfaceArea(meshCollider);
 }
 
-void BLAengine::PBRMesh::SampleSurface(vec3 &pos, float& prob)
+void BLAengine::PBRMesh::SampleSurface(blaVec3 &pos, float& prob)
 {
     if (MeshCollider* mesh = dynamic_cast<MeshCollider*>(m_collider))
     {
         std::uniform_int_distribution<> randIndx(0, (mesh->m_vertPosIndices->size() / 3)-1);
         
-        vec3 contactVertices[3] = { vec3(0), vec3(0), vec3(0) };
+        blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
 
         int randomIndex = randIndx(gen);
 
         for (int k = 0; k < 3; k++)
         {
-            uint32_t vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
+            glm::uint32 vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
             contactVertices[k] = mesh->m_triVertices->at((int)vertPosIndex);
         }
 
-        std::uniform_real_distribution<> randDist(0, 1);
+        std::uniform_real_distribution<float> randDist(0.f, 1.f);
         float s = randDist(gen);
-        vec3 sample = s*(contactVertices[1] - contactVertices[0]) + (1-s)*(contactVertices[2] - contactVertices[0]);
+        blaVec3 sample = s*(contactVertices[1] - contactVertices[0]) + (1.f-s)*(contactVertices[2] - contactVertices[0]);
 
         pos = GetObjectTransform().LocalPositionToWorld(sample);
         prob = 1.0f / m_surfaceArea;
     }
     else
     {
-        pos = vec3(0);
-        prob = 0;
+        pos = blaVec3(0.f);
+        prob = 0.f;
     }
 }
 
-void BLAengine::PBRMesh::SampleSurfaceWithNormal(vec3 & position, vec3 & normal, float & prob)
+void BLAengine::PBRMesh::SampleSurfaceWithNormal(blaVec3 & position, blaVec3 & normal, float & prob)
 {
     if (MeshCollider* mesh = dynamic_cast<MeshCollider*>(m_collider))
     {
         std::uniform_int_distribution<> randIndx(0, (mesh->m_vertPosIndices->size() / 3) - 1);
 
-        vec3 contactVertices[3] = { vec3(0), vec3(0), vec3(0) };
-        vec3 contactNormals[3] = { vec3(0), vec3(0), vec3(0) };
+        blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
+        blaVec3 contactNormals[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
 
         int randomIndex = randIndx(gen);
 
         for (int k = 0; k < 3; k++)
         {
-            uint32_t vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
+            glm::uint32 vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
             contactVertices[k] = mesh->m_triVertices->at((int)vertPosIndex);
-            uint32_t vertNormalIndex = mesh->m_vertNormalIndices->at(3 * randomIndex + k);
+            glm::uint32 vertNormalIndex = mesh->m_vertNormalIndices->at(3 * randomIndex + k);
             if (mesh->m_triNormals->size() != 0) contactNormals[k] = mesh->m_triNormals->at((int)vertNormalIndex);
         }
 
-        std::uniform_real_distribution<> randDist(0, 1);
+        std::uniform_real_distribution<float> randDist(0.f, 1.f);
         float s = randDist(gen);
-        vec3 sample = s*(contactVertices[1] - contactVertices[0]) + (1 - s)*(contactVertices[2] - contactVertices[0]);
+        blaVec3 sample = s*(contactVertices[1] - contactVertices[0]) + (1 - s)*(contactVertices[2] - contactVertices[0]);
 
         position = GetObjectTransform().LocalPositionToWorld(sample);
         prob = 1.0f / m_surfaceArea;
@@ -89,7 +89,7 @@ void BLAengine::PBRMesh::SampleSurfaceWithNormal(vec3 & position, vec3 & normal,
     }
     else
     {
-        position = vec3(0);
+        position = blaVec3(0);
         prob = 0;
     }
 }
@@ -104,13 +104,13 @@ PBRMesh::~PBRMesh(void) {}
 void BLAengine::PBRMesh::ComputeSurfaceArea(MeshCollider* mesh)
 {
     float totalArea = 0;
-    for (int i = 0; i < mesh->m_vertPosIndices->size() / 3; i++)
+    for (size_t i = 0; i < mesh->m_vertPosIndices->size() / 3; i++)
     {
-        vec3 contactVertices[3] = { vec3(0), vec3(0), vec3(0) };
+        blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
 
         for (int k = 0; k < 3; k++)
         {
-            uint32_t vertPosIndex = mesh->m_vertPosIndices->at(3 * i + k);
+            glm::uint32 vertPosIndex = mesh->m_vertPosIndices->at(3 * i + k);
             contactVertices[k] = mesh->m_triVertices->at((int)vertPosIndex);
         }
         float triArea = length(cross(contactVertices[1] - contactVertices[0], contactVertices[2] - contactVertices[0])) / 2.0f;
@@ -119,31 +119,31 @@ void BLAengine::PBRMesh::ComputeSurfaceArea(MeshCollider* mesh)
     m_surfaceArea = totalArea;
 }
 
-void BLAengine::PBRSphere::SampleSurface(vec3 &position, float &prob)
+void BLAengine::PBRSphere::SampleSurface(blaVec3 &position, float &prob)
 {
-    std::uniform_real_distribution<> randDist(-1, 1);
+    std::uniform_real_distribution<float> randDist(-1.f, 1.f);
 
     float x = randDist(gen);
     float y = randDist(gen);
     float z = randDist(gen);
 
-    vec3 pOnSphere(x, y, z);
+    blaVec3 pOnSphere(x, y, z);
     float radius = m_collider->GetBoundingRadius();
-    position = GetObjectTransform().m_position + pOnSphere * radius;
+    position = GetObjectTransform().GetPosition() + pOnSphere * radius;
     prob = 1.0f / (2.0f * M_PI * radius * radius);
 }
 
-void BLAengine::PBRSphere::SampleSurfaceWithNormal(vec3 &position, vec3& normal, float &prob)
+void BLAengine::PBRSphere::SampleSurfaceWithNormal(blaVec3 &position, blaVec3& normal, float &prob)
 {
-    std::uniform_real_distribution<> randDist(-1, 1);
+    std::uniform_real_distribution<float> randDist(-1.f, 1.f);
 
     float x = randDist(gen);
     float y = randDist(gen);
     float z = randDist(gen);
 
-    vec3 pOnSphere(x, y, z);
+    blaVec3 pOnSphere(x, y, z);
     float radius = m_collider->GetBoundingRadius();
-    position = GetObjectTransform().m_position + pOnSphere * radius;
+    position = GetObjectTransform().GetPosition() + pOnSphere * radius;
     prob = 1.0f / (2.0f * M_PI * radius * radius);
     normal = pOnSphere;
 }
@@ -162,7 +162,7 @@ PBRSphere::PBRSphere(float radius)
 
 PBRSphere::~PBRSphere(void) {}
 
-float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(vec3& outDir, mat3& tangentSpace, vec3& inDir)
+float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(blaVec3& outDir, blaMat3& tangentSpace, blaVec3& inDir)
 {
     auto randDist = uniform_real_distribution<float>(0, 1);
     // Sample the unit disk!
@@ -173,7 +173,7 @@ float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(vec3& outDir, mat3& tan
     float y = r * sinf(theta);
 
     // Project it on the unit sphere
-    vec3 directionL = vec3(sqrt(1 - (x*x + y*y)), x, y); // positive z cap
+    blaVec3 directionL = blaVec3(sqrt(1 - (x*x + y*y)), x, y); // positive z cap
 
     //Convert to World Direction
     outDir = tangentSpace * directionL;
@@ -181,9 +181,9 @@ float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(vec3& outDir, mat3& tan
     return 1 / M_PI;
 }
 
-float BLAengine::PBRMaterial::MirrorBRDF::SampleBRDF(vec3& outDir, mat3& tangentSpace, vec3 & inDir)
+float BLAengine::PBRMaterial::MirrorBRDF::SampleBRDF(blaVec3& outDir, blaMat3& tangentSpace, blaVec3 & inDir)
 {
-    vec3 normal = column(tangentSpace, 0);
-    outDir = -2.0f * dot(normal, inDir)*normal + inDir;
+    blaVec3 normal = column(tangentSpace, 0);
+    outDir = -2.0f * glm::dot(normal, inDir)*normal + inDir;
     return 1.0f;
 }

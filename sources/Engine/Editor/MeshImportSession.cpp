@@ -16,14 +16,14 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_editorRenderer->m_assetManager = m_assetManager;
 
+    Time* time = new Time(10);
+
     m_workingScene = new Scene();
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
-    Camera* cameraComp = new Camera();
+    CameraComponent* cameraComp = new CameraComponent();
     cameraObject->AddComponent(cameraComp);
     m_editorRenderer->SetCamera(cameraComp);
-
-    m_workingScene = new Scene();
 
     m_debug = new Debug(m_debugRenderingManager);
 
@@ -41,7 +41,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     m_assetManager->LoadCookedAssets();
 
     GameObject* light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = new DirectionalLight(vec3(1, 0, 0));
+    DirectionalLight* dirLight = new DirectionalLight(blaVec3(1, 0, 0));
     light->AddComponent(dirLight);
 
     Asset* skyMeshAsset = nullptr;
@@ -50,10 +50,10 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
 
     GameObject* ball_obj = m_workingScene->CreateObject("sky");
-    Transform t = ball_obj->GetTransform();
-    t.m_scale = vec3(5000, 5000, 5000);
+    ObjectTransform t = ball_obj->GetTransform();
+    t.m_scale = blaVec3(5000, 5000, 5000);
     ball_obj->SetTransform(t);
-    MeshRenderer* meshRender = new MeshRenderer();
+    MeshRendererComponent* meshRender = new MeshRendererComponent();
     ball_obj->AddComponent(meshRender);
     meshRender->AssignTriangleMesh(sky);
 
@@ -101,7 +101,7 @@ bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string 
     m_workingScene->DeleteObject("MeshVisualizer_"+std::to_string(i));
 
     GameObject* visualizerObject = m_workingScene->CreateObject("MeshVisualizer_" + std::to_string(++i));
-    MeshRenderer* meshRenderer = new MeshRenderer();
+    MeshRendererComponent* meshRenderer = new MeshRendererComponent();
     meshRenderer->AssignTriangleMesh(m_importedMesh);
     visualizerObject->AddComponent(meshRenderer);
 
@@ -115,8 +115,8 @@ bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string 
         cout << "Couldn't find Material: " << "BlankDiffuseMat" << "in AssetManager.\n";
     }
 
-    Transform t = visualizerObject->GetTransform();
-    t.m_position = vec3(0, 0, -5);
+    ObjectTransform t = visualizerObject->GetTransform();
+    t.SetPosition(blaVec3(0.f, 0.f, -5.f));
     visualizerObject->SetTransform(t);
 
     m_editorControls->m_cameraObject = visualizerObject;
@@ -135,14 +135,14 @@ bool BLAengine::MeshImportSession::SaveMeshToCooked()
 void BLAengine::MeshEditorControls::ControlCamera()
 {
     GameObject* object = nullptr;
-    vec3* rotation = nullptr;
+    blaVec3* rotation = nullptr;
     bool scale = false;
     bool rotate = false;
     if (m_renderWindow->GetMousePressed(1) && (m_renderWindow->GetMousePressed(0)))
     {
         scale = true;
         object = m_cameraObject;
-        rotation = new vec3(0);
+        rotation = new blaVec3(0);
     }
     else if (m_renderWindow->GetMousePressed(1))
     {
@@ -162,13 +162,13 @@ void BLAengine::MeshEditorControls::ControlCamera()
         return;
     }
 
-    Transform transform = object->GetTransform();
+    ObjectTransform transform = object->GetTransform();
 
     double x, y;
     m_renderWindow->GetMouse(x, y);
-    vec2 curMouse = vec2(x, y);
+    glm::vec2 curMouse = glm::vec2(x, y);
 
-    vec3 deltaRotation = vec3(0);
+    blaVec3 deltaRotation = blaVec3(0);
 
     if (x - m_prevMouse.x > 0)
     {
@@ -190,12 +190,12 @@ void BLAengine::MeshEditorControls::ControlCamera()
     m_prevMouse = curMouse;
 
 
-    *rotation += 0.01f * deltaRotation;
+    *rotation += 0.1f * deltaRotation;
     if (rotate)
-        transform.SetRotationUsingEuler(*rotation);
+        transform.SetEulerAngles(rotation->x, rotation->y, rotation->z);
     
     if (scale)
-        transform.m_scale += vec3(0.05*deltaRotation.x);
+        transform.m_scale += blaVec3(0.5f*deltaRotation.x);
     object->SetTransform(transform);
     object->Update();
 }

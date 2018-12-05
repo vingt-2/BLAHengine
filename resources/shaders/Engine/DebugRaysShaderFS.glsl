@@ -6,7 +6,8 @@ in vec4 position;
 // Ouput data
 layout(location = 0) out vec4 color;
 
-uniform sampler2D depthMap;
+uniform mat4 MVP;
+uniform sampler2D worldPosMap;
 uniform sampler2D displayBuffer;
 
 vec3 clipToScreen( vec4 v ) 
@@ -23,12 +24,13 @@ void main()
 {
     vec3 p = clipToScreen(position);
     
-    float depth = texture(depthMap, screenToUV(p.xy)).r;
+    vec4 bufferPosProjected = MVP * vec4(texture(worldPosMap, screenToUV(p.xy)).rgb, 1.0f);
+	
+	//bufferPosProjected /= bufferPosProjected.w;
+	
     vec3 backPixelColor = texture(displayBuffer, screenToUV(p.xy)).rgb;
     
-    float alphablend = gl_FragCoord.z > depth ? 0.2f : 1.f; 
-    
-    alphablend *= 1 - pow(gl_FragCoord.z,50);
+    float alphablend = position.z > bufferPosProjected.z ? 0.0f : 1.f; 
 
     color = vec4((alphablend) * vertexColor + (1-alphablend) * backPixelColor, 1);
 }

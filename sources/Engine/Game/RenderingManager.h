@@ -1,7 +1,7 @@
 #pragma once
-#include "./GameComponents/Camera.h"
+#include "./GameComponents/CameraComponent.h"
 #include "./GameComponents/DirectionalLight.h"
-#include "./GameComponents/MeshRenderer.h"
+#include "./GameComponents/MeshRendererComponent.h"
 #include "./GameComponents/PointLight.h"
 #include "../../Common/StdInclude.h"
 
@@ -15,14 +15,14 @@ namespace BLAengine
         RenderingManager(RenderManagerType type);
         ~RenderingManager();
 
-        uint RegisterMeshRenderer(MeshRenderer* object);
-        bool         CancelMeshRendererTicket(MeshRenderer* object);
+        glm::uint RegisterMeshRenderer(MeshRendererComponent* object);
+        bool         CancelMeshRendererTicket(MeshRendererComponent* object);
 
-        uint RegisterDirectionalLight(DirectionalLight* dirLight, Camera* shadowCamera);
-        uint CancelDirectionalLightTicket(DirectionalLight* dirLight);
+        glm::uint RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera);
+        glm::uint CancelDirectionalLightTicket(DirectionalLight* dirLight);
 
-        std::unordered_map<uint, MeshRenderer*>* GetTicketedMeshRenderers();
-        std::unordered_map<uint, std::pair<DirectionalLight*, Camera*>>* GetTicketedDirectionalLights();
+        std::unordered_map<glm::uint, MeshRendererComponent*>* GetTicketedMeshRenderers();
+        std::unordered_map<glm::uint, std::pair<DirectionalLight*, CameraComponent*>>* GetTicketedDirectionalLights();
 
         void Update();
 
@@ -31,8 +31,8 @@ namespace BLAengine
 
         RenderManagerType m_renderManagerType;
 
-        std::unordered_map<uint, MeshRenderer*> m_ticketedMeshRenderers;
-        std::unordered_map<uint, pair<DirectionalLight*, Camera*>> m_ticketedDirLights;
+        std::unordered_map<glm::uint, MeshRendererComponent*> m_ticketedMeshRenderers;
+        std::unordered_map<glm::uint, pair<DirectionalLight*, CameraComponent*>> m_ticketedDirLights;
 
         int currentTicket;
 
@@ -45,9 +45,9 @@ namespace BLAengine
         DebugRenderingManager() {};
         ~DebugRenderingManager() {};
 
-        vector<pair<vector<vec3>, vector<vec3>>> m_lineMeshes;
+        vector<pair<vector<blaVec3>, vector<blaVec3>>> m_lineMeshes;
 
-        void LoadDebugLineMesh(pair<vector<vec3>, vector<vec3>>& lineMesh);
+        void LoadDebugLineMesh(pair<vector<blaVec3>, vector<blaVec3>>& lineMesh);
 
         void Update();
     };

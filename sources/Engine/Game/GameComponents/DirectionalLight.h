@@ -1,6 +1,6 @@
 #pragma once
 #include "..\..\..\Common\StdInclude.h"
-#include "..\..\..\Common\Maths.h"
+#include "..\..\..\Common\Maths\Maths.h"
 #include "GameComponent.h"
 
 namespace BLAengine
@@ -9,18 +9,18 @@ namespace BLAengine
     {
     public:
 
-        DirectionalLight(vec3 direction);
+        DirectionalLight(blaVec3 direction);
         ~DirectionalLight(void);
 
-        void SetDirection(vec3 direction);
-        vec3 GetDirection();
+        void SetDirection(blaVec3 direction);
+        blaVec3 GetDirection();
 
         void Update();
 
-        uint m_renderTicket;
+        glm::uint m_renderTicket;
 
     private:
-        vec3 m_lightDirection;
+        blaVec3 m_lightDirection;
 
     };
 }

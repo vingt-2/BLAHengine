@@ -5,22 +5,23 @@
 
 using namespace BLAengine;
 using namespace concurrency;
+using namespace glm;
 
 inline float ClampOne(float x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
-inline int ToDisplayValue(float x) { return int(pow(ClampOne(x), 1.0 / 2.2) * 255 + .5); }
-inline mat3 GetTangentSpace(vec3 normal)
+inline int ToDisplayValue(float x) { return int(pow(ClampOne(x), 1.0f / 2.2) * 255 + .5); }
+inline blaMat3 GetTangentSpace(blaVec3 normal)
 {
-    vec3 trash(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3);
-    vec3 orthYU = cross(normal, trash);
-    vec3 orthY = normalize(orthYU);
-    if (dot(orthY, orthYU) < 0.1f)
+    blaVec3 trash(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3);
+    blaVec3 orthYU = cross(normal, trash);
+    blaVec3 orthY = normalize(orthYU);
+    if (glm::dot(orthY, orthYU) < 0.1f)
     {
-        vec3 trash2(1, 0, 0);
+        blaVec3 trash2(1, 0, 0);
         orthY = normalize(cross(normal, trash2));
     }
-    vec3 orthX = cross(normal, orthY);
+    blaVec3 orthX = cross(normal, orthY);
 
-    return mat3(normal, orthX, orthY);
+    return blaMat3(normal, orthX, orthY);
 }
 
 std::random_device rd2;
@@ -29,7 +30,7 @@ std::uniform_real_distribution<float> zeroToOneDist(0, 1);
 
 void BLAengine::PBRCamera::Render()
 {
-    vec2 resolution(1000,1000);
+    glm::vec2 resolution(1000,1000);
     if (m_renderer == nullptr)
     {
         m_renderer = new PBRPhotonMapping(m_sceneObjects);
@@ -56,24 +57,24 @@ bool BLAengine::PBRCamera::WriteImageToFile(string filepath, int w, int h)
     return true;
 }
 
-std::pair<PBRSurface*, Collider::RayCollision> BLAengine::IntersectWithScene(Ray ray, vector<PBRSurface*> &objects)
+std::pair<PBRSurface*, ColliderComponent::RayCollision> BLAengine::IntersectWithScene(Ray ray, vector<PBRSurface*> &objects)
 {
     float minDistance = INFINITY;
     PBRSurface* pickedObject = nullptr;
-    Collider::RayCollision closestContact;
+    ColliderComponent::RayCollision closestContact;
     for (auto obj : objects)
     {
-        Collider* collider = obj->m_collider;
+        ColliderComponent* collider = obj->m_collider;
 
         if (collider == nullptr)
             continue;
 
-        Collider::RayCollision contactPoint = collider->CollideWithRay(ray);
+        ColliderComponent::RayCollision contactPoint = collider->CollideWithRay(ray);
 
         if (!contactPoint.m_isValid)
             continue;
 
-        float distance = dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
+        float distance = glm::dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
 
         if (distance > 0 && distance < minDistance)
         {
@@ -83,10 +84,10 @@ std::pair<PBRSurface*, Collider::RayCollision> BLAengine::IntersectWithScene(Ray
         }
     }
 
-    return std::pair<PBRSurface*, Collider::RayCollision>(pickedObject, closestContact);
+    return std::pair<PBRSurface*, ColliderComponent::RayCollision>(pickedObject, closestContact);
 }
 
-vector<vec3> BLAengine::PBRExplicitPathTracer::Render(Transform cameraTransform, vec2 resolution, bool inParallel)
+vector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
 {
     for (PBRSurface* surface : m_sceneObjects)
     {
@@ -96,21 +97,21 @@ vector<vec3> BLAengine::PBRExplicitPathTracer::Render(Transform cameraTransform,
         }
     }
 
-    int w = resolution.x, h = resolution.y;
+    int w = (int)resolution.x, h = (int)resolution.y;
 
     float horizontalFov = 100;
 
     float fovFactor = tan((125 / 180.0f) * M_PI);
 
-    vec3 cameraForward = cameraTransform.LocalDirectionToWorld(vec3(0, 0, -1));
+    blaVec3 cameraForward = cameraTransform.LocalDirectionToWorld(blaVec3(0, 0, -1));
 
-    vec3 cx = vec3(w * fovFactor / h, 0.f, 0.f); // hint : tan( 30 / 180.0 * M_PI ) == 0.57735
-    vec3 cy = cross(cx, cameraForward) * fovFactor * (h / (float)w);
+    blaVec3 cx = blaVec3(w * fovFactor / h, 0.f, 0.f); // hint : tan( 30 / 180.0f * M_PI ) == 0.57735
+    blaVec3 cy = cross(cx, cameraForward) * fovFactor * (h / (float)w);
 
 
-    vec3* concurrent_img_vector = (vec3*)malloc(sizeof(vec3)*h*w);
+    blaVec3* concurrent_img_vector = (blaVec3*)malloc(sizeof(blaVec3)*h*w);
 
-    vector<vec3> renderedImage;
+    vector<blaVec3> renderedImage;
     renderedImage.reserve(w*h);
 
     if (inParallel)
@@ -125,11 +126,11 @@ vector<vec3> BLAengine::PBRExplicitPathTracer::Render(Transform cameraTransform,
             for (int x = 0; x < w; x++)
             {
                 int idx = (h - y - 1) * w + x;
-                vec3 pixelValue(0);
-                vec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
-                Ray ray = Ray(cameraTransform.m_position, cameraRayDir, INFINITY);
+                blaVec3 pixelValue(0);
+                blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
+                Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
                 pixelValue = this->PathTraceShade(ray, 0);
-                concurrent_img_vector[idx] = vec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
+                concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
             }
             progress++;
         });
@@ -141,11 +142,11 @@ vector<vec3> BLAengine::PBRExplicitPathTracer::Render(Transform cameraTransform,
             fprintf(stderr, "\r%5.2f%%", 100.*y / (h - 1));
             for (int x = 0; x < w; x++) {
                 int idx = (h - y - 1) * w + x;
-                vec3 pixelValue = vec3(0);
-                vec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
-                Ray ray = Ray(cameraTransform.m_position, cameraRayDir, INFINITY);
+                blaVec3 pixelValue = blaVec3(0);
+                blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
+                Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
                 pixelValue = this->PathTraceShade(ray, 0);
-                concurrent_img_vector[idx] = vec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
+                concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
             }
         }
     }
@@ -161,21 +162,21 @@ vector<vec3> BLAengine::PBRExplicitPathTracer::Render(Transform cameraTransform,
     return renderedImage;
 }
 
-vec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int depth)
+blaVec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int depth)
 {
     if (depth > 1)
     {
-        return vec3(0);
+        return blaVec3(0);
     }
 
     auto p = IntersectWithScene(incidentRay, m_sceneObjects);
 
     if (p.first == nullptr)
     {
-        return vec3(0);
+        return blaVec3(0);
     }
 
-    Collider::RayCollision shadeRayCollision = p.second;
+    ColliderComponent::RayCollision shadeRayCollision = p.second;
 
     PBRMaterial* m = &(p.first->m_material);
 
@@ -184,31 +185,31 @@ vec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int depth
         if (depth < 1)
             return m->m_emissivePower / p.first->GetSurfaceArea();
         else
-            return vec3(0);
+            return blaVec3(0);
     }
 
-    vec3 lightRadiance(0);
+    blaVec3 lightRadiance(0);
     for (PBRSurface* lightSurface : m_lightObjects)
     {
-        vec3 montecarloRadiance = vec3(0, 0, 0);
+        blaVec3 montecarloRadiance = blaVec3(0, 0, 0);
         float mc_samples = 20;
         for (int mc = 0; mc < mc_samples; mc++)
         {
 
-            vec3 samplePoint;
+            blaVec3 samplePoint;
             float samplePDF;
 
             lightSurface->SampleSurface(samplePoint, samplePDF);
 
-            vec3 directionToLightSample = samplePoint - shadeRayCollision.m_colPositionW;
-            float sqrDistToSamplePoint = dot(directionToLightSample, directionToLightSample);
+            blaVec3 directionToLightSample = samplePoint - shadeRayCollision.m_colPositionW;
+            float sqrDistToSamplePoint = glm::dot(directionToLightSample, directionToLightSample);
             directionToLightSample /= sqrt(sqrDistToSamplePoint);
 
-            Ray toLightRay(shadeRayCollision.m_colPositionW + 0.001f * shadeRayCollision.m_colNormalW, directionToLightSample, INFINITY);
+            Ray toLightRay(shadeRayCollision.m_colPositionW + 0.01f * shadeRayCollision.m_colNormalW, directionToLightSample, INFINITY);
 
             auto toLightRayCollision = IntersectWithScene(toLightRay, m_sceneObjects);
 
-            vec3 lightIrradiance(0);
+            blaVec3 lightIrradiance(0);
             if (toLightRayCollision.first == lightSurface)
             {
                 lightIrradiance = lightSurface->m_material.m_emissivePower / lightSurface->GetSurfaceArea();
@@ -218,44 +219,44 @@ vec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int depth
                 continue;
             }
             // The diffuse Brdf...
-            vec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, -incidentRay.m_direction);
+            blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, -incidentRay.m_direction);
 
             // The geometric term for the change of coordinates (from directions to point on surfaces...)
-            float geometricTerm = abs(dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
+            float geometricTerm = abs(glm::dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
             // You now the drill
-            vec3 sampleContribution = evaluatedBRDF * geometricTerm * dot(shadeRayCollision.m_colNormalW, directionToLightSample);
+            blaVec3 sampleContribution = evaluatedBRDF * geometricTerm * glm::dot(shadeRayCollision.m_colNormalW, directionToLightSample);
 
             montecarloRadiance += sampleContribution * (1.0f / samplePDF);
         }
         lightRadiance += montecarloRadiance * (1.0f / mc_samples);
     }
 
-    vec3 n = shadeRayCollision.m_colNormalW;
+    blaVec3 n = shadeRayCollision.m_colNormalW;
 
-    mat3 tangentSpace = GetTangentSpace(n);
+    blaMat3 tangentSpace = GetTangentSpace(n);
 
     std::uniform_real_distribution<> randDist(-1, 1);
 
-    vec3 indirectRadiance(0);
-    vec3 mcIndirectRadiance(0);
+    blaVec3 indirectRadiance(0);
+    blaVec3 mcIndirectRadiance(0);
     float mc_indirectSamples = 10;
     for (int i = 0; i < mc_indirectSamples; i++)
     {
-        vec3 outDir;
+        blaVec3 outDir;
         float samplePdf = m->m_brdf->SampleBRDF(outDir, tangentSpace, incidentRay.m_direction);
 
-        Ray outRay(shadeRayCollision.m_colPositionW + 0.001f*n, outDir, INFINITY);
+        Ray outRay(shadeRayCollision.m_colPositionW + 0.01f*n, outDir, INFINITY);
 
-        vec3 indirectIrradiance = this->PathTraceShade(outRay, depth + 1);
+        blaVec3 indirectIrradiance = this->PathTraceShade(outRay, depth + 1);
 
-        vec3 sampleContribution = m->m_brdf->EvaluateBRDF(indirectIrradiance, n, incidentRay.m_direction, outDir);
+        blaVec3 sampleContribution = m->m_brdf->EvaluateBRDF(indirectIrradiance, n, incidentRay.m_direction, outDir);
 
         mcIndirectRadiance = mcIndirectRadiance + sampleContribution;// *(1.0f / samplePdf);
     }
     if (mc_indirectSamples)
         indirectRadiance = mcIndirectRadiance * (1.0f / mc_indirectSamples);
 
-    vec3 sampleRadiance = lightRadiance + indirectRadiance;
+    blaVec3 sampleRadiance = lightRadiance + indirectRadiance;
 
     return m->m_color * sampleRadiance;
 }
@@ -268,7 +269,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
     std::uniform_real_distribution<float> uniformDist(0, 1);
 
     float totalPower = 0;
-    for (int i = 0; i < m_lightObjects.size(); i++)
+    for (size_t i = 0; i < m_lightObjects.size(); i++)
     {
         PBRSurface* lightSurface = m_lightObjects[i];
 
@@ -276,7 +277,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
     }
 
     std::vector<float> lightSamplingPDF;
-    for (int i = 0; i < m_lightObjects.size(); i++)
+    for (size_t i = 0; i < m_lightObjects.size(); i++)
     {
         PBRSurface* lightSurface = m_lightObjects[i];
         lightSamplingPDF.push_back(length(lightSurface->m_material.m_emissivePower) / totalPower);
@@ -284,10 +285,10 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
 
     if (!inParallel)
     {
-        for (int photonIndex = 0; photonIndex < numberOfPhotons; photonIndex++)
+        for (size_t photonIndex = 0; photonIndex < numberOfPhotons; photonIndex++)
         {
             fprintf(stderr, "\r%5.2f%%", 100.* (photonIndex / (float)numberOfPhotons));
-            for (int i = 0; i < m_lightObjects.size(); i++)
+            for (size_t i = 0; i < m_lightObjects.size(); i++)
             {
                 if (zeroToOneDist(dgen) >= lightSamplingPDF[i])
                     continue;
@@ -310,7 +311,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
         parallel_for(size_t(0), ht, [&](size_t yp)
         {
             fprintf(stderr, "\r%5.2f%%", 100.*progress / (float)numberOfPhotons);
-            for (int i = 0; i < m_lightObjects.size(); i++)
+            for (size_t i = 0; i < m_lightObjects.size(); i++)
             {
                 if (zeroToOneDist(dgen) >= lightSamplingPDF[i])
                     continue;
@@ -334,29 +335,29 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
 
 Ray BLAengine::PBRPhotonMapping::GeneratePhoton(PBRSurface* lightSurface, float &outEmissionProb)
 {
-    vec3 samplePos, sampleNormal;
+    blaVec3 samplePos, sampleNormal;
     float samplePDF;
 
     lightSurface->SampleSurfaceWithNormal(samplePos, sampleNormal, samplePDF);
 
-    mat3 tangentSpace = GetTangentSpace(sampleNormal);
+    blaMat3 tangentSpace = GetTangentSpace(sampleNormal);
 
     // Generate uniformly distributed spherical coordinates
-    double randtheta = 2 * M_PI * zeroToOneDist(dgen);
-    double randphi = acos(2 * zeroToOneDist(dgen) - 1);
+    float randtheta = 2 * M_PI * zeroToOneDist(dgen);
+    float randphi = acos(2 * zeroToOneDist(dgen) - 1);
 
     // Get the World direction of our sample
-    vec3 tangentDirection = vec3(cosf(randphi), cosf(randtheta)*sinf(randphi), sinf(randtheta)*sinf(randphi));
-    vec3 direction = tangentSpace * tangentDirection;
+    blaVec3 tangentDirection = blaVec3(cosf(randphi), cosf(randtheta)*sinf(randphi), sinf(randtheta)*sinf(randphi));
+    blaVec3 direction = tangentSpace * tangentDirection;
 
     float directionPdf = 1.5707963f; // 1 / 2Pi
 
     outEmissionProb = samplePDF * directionPdf;
 
-    return Ray(samplePos + 0.001f * sampleNormal, direction, INFINITY);
+    return Ray(samplePos + 0.01f * sampleNormal, direction, INFINITY);
 }
 
-void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, vec3 photonPower, int bounce)
+void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, blaVec3 photonPower, int bounce)
 {
     if (bounce > 10)
         return;
@@ -364,7 +365,7 @@ void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, vec3 photonPower,
     auto p = IntersectWithScene(incidentRay, m_sceneObjects);
 
     PBRSurface* surface = p.first;
-    Collider::RayCollision colHit = p.second;
+    ColliderComponent::RayCollision colHit = p.second;
 
     if (surface == nullptr || length(surface->m_material.m_emissivePower) > 0)
         return;
@@ -376,7 +377,7 @@ void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, vec3 photonPower,
 
         if (nextEvent < colHit.m_t)
         {
-            vec3 hitPosition = incidentRay.m_origin + nextEvent * incidentRay.m_direction;
+            blaVec3 hitPosition = incidentRay.m_origin + nextEvent * incidentRay.m_direction;
             Photon p(hitPosition, incidentRay.m_direction, photonPower);
             m_volumetricPhotonMap.AddPhoton(p);
 
@@ -387,7 +388,7 @@ void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, vec3 photonPower,
                 float randphi = acos(2 * zeroToOneDist(dgen) - 1);
 
                 // Convert them into a World directions
-                vec3 direction(cosf(randphi), cosf(randtheta)*sinf(randphi), sinf(randtheta)*sinf(randphi));
+                blaVec3 direction(cosf(randphi), cosf(randtheta)*sinf(randphi), sinf(randtheta)*sinf(randphi));
                 Ray outScatter(hitPosition, direction, INFINITY);
                 TracePhoton(outScatter, photonPower, bounce + 1);
             }
@@ -410,15 +411,15 @@ void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, vec3 photonPower,
 
     if (!shouldAbsorb)
     {
-        mat3 tangentSpace = GetTangentSpace(colHit.m_colNormalW);
-        vec3 outDir;
+        blaMat3 tangentSpace = GetTangentSpace(colHit.m_colNormalW);
+        blaVec3 outDir;
         float outSamplePDF = material->m_brdf->SampleBRDF(outDir, tangentSpace, incidentRay.m_direction);
 
-        TracePhoton(Ray(colHit.m_colPositionW + 0.001f * colHit.m_colNormalW, outDir, INFINITY), material->m_color * photonPower, bounce + 1);
+        TracePhoton(Ray(colHit.m_colPositionW + 0.01f * colHit.m_colNormalW, outDir, INFINITY), material->m_color * photonPower, bounce + 1);
     }
 }
 
-vec3 BLAengine::PBRPhotonMapping::GatherSurfaceDensity(Ray incidentRay)
+blaVec3 BLAengine::PBRPhotonMapping::GatherSurfaceDensity(Ray incidentRay)
 {
     auto p = IntersectWithScene(incidentRay, m_sceneObjects);
 
@@ -426,39 +427,39 @@ vec3 BLAengine::PBRPhotonMapping::GatherSurfaceDensity(Ray incidentRay)
 
     if (p.first == nullptr || length(m->m_emissivePower) > 0.0f)
     {
-        return vec3(0);
+        return blaVec3(0);
     }
 
-    vec3 hitPosition = p.second.m_colPositionW;
+    blaVec3 hitPosition = p.second.m_colPositionW;
 
     float gatherAreaRadius;
     vector<Photon*> photons = m_photonMap.GetPhotons(hitPosition, 100, gatherAreaRadius);
 
-    vec3 powerDensity(0);
+    blaVec3 powerDensity(0);
     for (Photon* photon : photons)
     {
         powerDensity += m->m_brdf->EvaluateBRDF(photon->m_power, p.second.m_colNormalW, photon->m_dir, -incidentRay.m_direction);
     }
 
-    vec3 toPoint = incidentRay.m_origin - hitPosition;
-    float sqrDistance = dot(toPoint, toPoint);
+    blaVec3 toPoint = incidentRay.m_origin - hitPosition;
+    float sqrDistance = glm::dot(toPoint, toPoint);
 
     if (sqrDistance < 16 * gatherAreaRadius * gatherAreaRadius)
     {
-        return vec3(0);
+        return blaVec3(0);
     }
     powerDensity *= ComputeTransmittance(p.second.m_t);
-    powerDensity /= (M_PI * gatherAreaRadius * gatherAreaRadius * -1.0f * dot(incidentRay.m_direction, p.second.m_colNormalW) * sqrDistance * (float)m_photonsShot);
+    powerDensity /= (M_PI * gatherAreaRadius * gatherAreaRadius * -1.0f * glm::dot(incidentRay.m_direction, p.second.m_colNormalW) * sqrDistance * (float)m_photonsShot);
 
     return length(powerDensity) > sqrt(1) ? normalize(powerDensity) : powerDensity;
 }
 
-vec3 BLAengine::PBRPhotonMapping::GatherVolumetricDensity(vec3 pos, vec3 incomingDir)
+blaVec3 BLAengine::PBRPhotonMapping::GatherVolumetricDensity(blaVec3 pos, blaVec3 incomingDir)
 {
     float gatherAreaRadius;
     vector<Photon*> photons = m_volumetricPhotonMap.GetPhotons(pos, 100, gatherAreaRadius);
 
-    vec3 powerDensity(0);
+    blaVec3 powerDensity(0);
     for (Photon* photon : photons)
     {
         if (photon != nullptr)
@@ -468,9 +469,9 @@ vec3 BLAengine::PBRPhotonMapping::GatherVolumetricDensity(vec3 pos, vec3 incomin
     return powerDensity / ((float)m_photonsShot * (4.0f / 3.0f) * M_PI * gatherAreaRadius * gatherAreaRadius * gatherAreaRadius);
 }
 
-vec3 BLAengine::PBRPhotonMapping::MarchIndirectVolumetric(Ray ray, float endOfRay, int numberOfSamples)
+blaVec3 BLAengine::PBRPhotonMapping::MarchIndirectVolumetric(Ray ray, float endOfRay, int numberOfSamples)
 {
-    vec3 indirectRadiance(0);
+    blaVec3 indirectRadiance(0);
     float dt = endOfRay / (float)numberOfSamples;
     float marchedDistance = dt;
     while (marchedDistance < endOfRay && m_volumeExtinctionCoeff > 0)
@@ -482,35 +483,35 @@ vec3 BLAengine::PBRPhotonMapping::MarchIndirectVolumetric(Ray ray, float endOfRa
     return indirectRadiance;
 }
 
-vec3 BLAengine::PBRPhotonMapping::MarchDirectEquiAngular(Ray ray, float endOfRay, int numberOfSamples)
+blaVec3 BLAengine::PBRPhotonMapping::MarchDirectEquiAngular(Ray ray, float endOfRay, int numberOfSamples)
 {
     float dt = endOfRay / (float) numberOfSamples;
     float marchedDistance = dt;
-    vec3 indirectRadiance(0);
+    blaVec3 indirectRadiance(0);
     while (marchedDistance < endOfRay && m_volumeExtinctionCoeff > 0)
     {
-        vec3 lightContribution(0);
+        blaVec3 lightContribution(0);
         for (PBRSurface* lightSurface : m_lightObjects)
         {
-            vec3 montecarloRadiance = vec3(0);
+            blaVec3 montecarloRadiance = blaVec3(0);
             float MCSamples = 10;
             for (int mc = 0; mc < MCSamples; mc++)
             {
 
-                vec3 samplePoint;
+                blaVec3 samplePoint;
                 float samplePDF;
 
                 lightSurface->SampleSurface(samplePoint, samplePDF);
 
-                vec3 directionToLightSample = samplePoint - ray.m_origin + marchedDistance * ray.m_direction;
-                float sqrDistToSamplePoint = dot(directionToLightSample, directionToLightSample);
+                blaVec3 directionToLightSample = samplePoint - ray.m_origin + marchedDistance * ray.m_direction;
+                float sqrDistToSamplePoint = glm::dot(directionToLightSample, directionToLightSample);
                 directionToLightSample /= sqrt(sqrDistToSamplePoint);
 
                 Ray toLightRay(ray.m_origin + marchedDistance * ray.m_direction, directionToLightSample, INFINITY);
 
                 auto toLightRayCollision = IntersectWithScene(toLightRay, m_sceneObjects);
 
-                vec3 lightIrradiance(0);
+                blaVec3 lightIrradiance(0);
                 if (toLightRayCollision.first == lightSurface)
                 {
                     lightIrradiance = lightSurface->m_material.m_emissivePower / lightSurface->GetSurfaceArea();
@@ -523,9 +524,9 @@ vec3 BLAengine::PBRPhotonMapping::MarchDirectEquiAngular(Ray ray, float endOfRay
                 float cont = ComputeTransmittance(toLightRayCollision.second.m_t) / (4 * M_PI);
 
                 // The geometric term for the change of coordinates (from directions to point on surfaces...)
-                float geometricTerm = abs(dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
+                float geometricTerm = abs(glm::dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
                 // You now the drill
-                vec3 sampleContribution = lightIrradiance * cont;// geometricTerm * cont;
+                blaVec3 sampleContribution = lightIrradiance * cont;// geometricTerm * cont;
 
                 montecarloRadiance += sampleContribution * (1.0f / samplePDF);
             }
@@ -538,20 +539,20 @@ vec3 BLAengine::PBRPhotonMapping::MarchDirectEquiAngular(Ray ray, float endOfRay
     return indirectRadiance;
 }
 
-vec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
+blaVec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
 {
     auto p = IntersectWithScene(incidentRay, m_sceneObjects);
 
     if (p.first == nullptr)
-        return vec3(0);
+        return blaVec3(0);
 
-    Collider::RayCollision shadeRayCollision = p.second;
+    ColliderComponent::RayCollision shadeRayCollision = p.second;
     //return p.second.m_colNormalW;
-    vec3 indirectVolumetricRadiance = MarchIndirectVolumetric(incidentRay, p.second.m_t, 256);
+    blaVec3 indirectVolumetricRadiance = MarchIndirectVolumetric(incidentRay, p.second.m_t, 256);
 
-    vec3 directVolumetricRadiance(0);// = MarchDirectEquiAngular(incidentRay, p.second.m_t, 100);
+    blaVec3 directVolumetricRadiance(0);// = MarchDirectEquiAngular(incidentRay, p.second.m_t, 100);
 
-    vec3 volumetricRadiance = indirectVolumetricRadiance + directVolumetricRadiance;
+    blaVec3 volumetricRadiance = indirectVolumetricRadiance + directVolumetricRadiance;
 
     PBRMaterial* m = &(p.first->m_material);
 
@@ -560,30 +561,30 @@ vec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
         return ComputeTransmittance(shadeRayCollision.m_t) * m->m_emissivePower / p.first->GetSurfaceArea();
     }
 
-    mat3 tangentSpace = GetTangentSpace(shadeRayCollision.m_colNormalW);
+    blaMat3 tangentSpace = GetTangentSpace(shadeRayCollision.m_colNormalW);
 
-    vec3 directRadiance(0);
+    blaVec3 directRadiance(0);
     for (PBRSurface* lightSurface : m_lightObjects)
     {
-        vec3 montecarloRadiance = vec3(0);
+        blaVec3 montecarloRadiance = blaVec3(0);
         float MCSamples = 50;
         for (int mc = 0; mc < MCSamples; mc++)
         {
 
-            vec3 samplePoint;
+            blaVec3 samplePoint;
             float samplePDF;
 
             lightSurface->SampleSurface(samplePoint, samplePDF);
 
-            vec3 directionToLightSample = samplePoint - shadeRayCollision.m_colPositionW;
-            float sqrDistToSamplePoint = dot(directionToLightSample, directionToLightSample);
+            blaVec3 directionToLightSample = samplePoint - shadeRayCollision.m_colPositionW;
+            float sqrDistToSamplePoint = glm::dot(directionToLightSample, directionToLightSample);
             directionToLightSample /= sqrt(sqrDistToSamplePoint);
 
-            Ray toLightRay(shadeRayCollision.m_colPositionW + 0.001f * shadeRayCollision.m_colNormalW, directionToLightSample, INFINITY);
+            Ray toLightRay(shadeRayCollision.m_colPositionW + 0.01f * shadeRayCollision.m_colNormalW, directionToLightSample, INFINITY);
 
             auto toLightRayCollision = IntersectWithScene(toLightRay, m_sceneObjects);
 
-            vec3 lightIrradiance(0);
+            blaVec3 lightIrradiance(0);
             if (toLightRayCollision.first == lightSurface)
             {
                 lightIrradiance = lightSurface->m_material.m_emissivePower / lightSurface->GetSurfaceArea();
@@ -593,12 +594,12 @@ vec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
                 continue;
             }
             // The diffuse Brdf...
-            vec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, -incidentRay.m_direction);
+            blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, -incidentRay.m_direction);
 
             // The geometric term for the change of coordinates (from directions to point on surfaces...)
-            float geometricTerm = abs(dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
+            float geometricTerm = abs(glm::dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
             // You now the drill
-            vec3 sampleContribution = evaluatedBRDF * geometricTerm * dot(shadeRayCollision.m_colNormalW, directionToLightSample);
+            blaVec3 sampleContribution = evaluatedBRDF * geometricTerm * glm::dot(shadeRayCollision.m_colNormalW, directionToLightSample);
 
             montecarloRadiance += sampleContribution * (1.0f / samplePDF);
         }
@@ -606,18 +607,18 @@ vec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
             directRadiance += montecarloRadiance * (1.0f / MCSamples);
     }
 
-    vec3 indirectRadiance(0);
+    blaVec3 indirectRadiance(0);
     float indirectMCsamples = 20;
     for (int i = 0; i < indirectMCsamples; i++)
     {
-        vec3 outDir;
+        blaVec3 outDir;
         float samplePdf = m->m_brdf->SampleBRDF(outDir, tangentSpace, incidentRay.m_direction);
 
-        Ray outRay(shadeRayCollision.m_colPositionW + 0.001f*shadeRayCollision.m_colNormalW, outDir, INFINITY);
+        Ray outRay(shadeRayCollision.m_colPositionW + 0.01f*shadeRayCollision.m_colNormalW, outDir, INFINITY);
 
-        vec3 incomingRadiance = GatherSurfaceDensity(outRay);
+        blaVec3 incomingRadiance = GatherSurfaceDensity(outRay);
 
-        vec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(incomingRadiance, shadeRayCollision.m_colNormalW, outDir, -incidentRay.m_direction);
+        blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(incomingRadiance, shadeRayCollision.m_colNormalW, outDir, -incidentRay.m_direction);
 
         indirectRadiance += evaluatedBRDF;
     }
@@ -627,7 +628,7 @@ vec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
     return ComputeTransmittance(shadeRayCollision.m_t) * (m->m_color * (directRadiance + indirectRadiance)) + volumetricRadiance;
 }
 
-vector<vec3> BLAengine::PBRPhotonMapping::Render(Transform cameraTransform, vec2 resolution, bool inParallel)
+vector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
 {
     for (PBRSurface* surface : m_sceneObjects)
     {
@@ -637,21 +638,21 @@ vector<vec3> BLAengine::PBRPhotonMapping::Render(Transform cameraTransform, vec2
         }
     }
 
-    int w = resolution.x, h = resolution.y;
+    int w = (int)resolution.x, h = (int)resolution.y;
 
     float horizontalFov = 100;
 
     float fovFactor = tan((125 / 180.0f) * M_PI);
 
-    vec3 cameraForward = cameraTransform.LocalDirectionToWorld(vec3(0, 0, -1));
+    blaVec3 cameraForward = cameraTransform.LocalDirectionToWorld(blaVec3(0, 0, -1));
 
-    vec3 cx = vec3(w * fovFactor / h, 0.f, 0.f); // hint : tan( 30 / 180.0 * M_PI ) == 0.57735
-    vec3 cy = cross(cx, cameraForward) * fovFactor * (h / (float)w);
+    blaVec3 cx = blaVec3(w * fovFactor / h, 0.f, 0.f); // hint : tan( 30 / 180.0f * M_PI ) == 0.57735
+    blaVec3 cy = cross(cx, cameraForward) * fovFactor * (h / (float)w);
 
 
-    vec3* concurrent_img_vector = (vec3*)malloc(sizeof(vec3)*h*w);
+    blaVec3* concurrent_img_vector = (blaVec3*)malloc(sizeof(blaVec3)*h*w);
 
-    vector<vec3> renderedImage;
+    vector<blaVec3> renderedImage;
     renderedImage.reserve(w*h);
 
     BuildPhotonMap(inParallel, 10000000);
@@ -669,11 +670,11 @@ vector<vec3> BLAengine::PBRPhotonMapping::Render(Transform cameraTransform, vec2
             for (int x = 0; x < w; x++)
             {
                 int idx = (h - y - 1) * w + x;
-                vec3 pixelValue(0);
-                vec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
-                Ray ray = Ray(cameraTransform.m_position, cameraRayDir, INFINITY);
+                blaVec3 pixelValue(0);
+                blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
+                Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
                 pixelValue = Shade(ray);
-                concurrent_img_vector[idx] = vec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
+                concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
             }
             progress++;
         });
@@ -685,11 +686,11 @@ vector<vec3> BLAengine::PBRPhotonMapping::Render(Transform cameraTransform, vec2
             fprintf(stderr, "\r%5.2f%%", 100.*y / (h - 1));
             for (int x = 0; x < w; x++) {
                 int idx = (h - y - 1) * w + x;
-                vec3 pixelValue(0);
-                vec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
-                Ray ray = Ray(cameraTransform.m_position, cameraRayDir, INFINITY);
+                blaVec3 pixelValue(0);
+                blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
+                Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
                 pixelValue = Shade(ray);
-                concurrent_img_vector[idx] = vec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
+                concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
             }
         }
     }

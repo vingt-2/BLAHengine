@@ -5,7 +5,7 @@ using namespace BLAengine;
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
-Texture2D::Texture2D(string name, uint8_t dim, vector<uint8_t> data, uint32_t width, uint32_t height) : Asset(name)
+Texture2D::Texture2D(string name, glm::uint8 dim, vector<glm::uint8> data, glm::uint32 width, glm::uint32 height) : Asset(name)
 {
     this->m_data = data;
     this->m_width = width;
@@ -24,10 +24,10 @@ Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
     printf("Reading image %s\n", filePath.data());
 
     // Data read from the header of the BMP file
-    uint8_t header[54];
-    uint32_t dataPos;
-    uint32_t imageSize;
-    uint32_t width, height;
+    glm::uint8 header[54];
+    glm::uint32 dataPos;
+    glm::uint32 imageSize;
+    glm::uint32 width, height;
 
     // Open the file
     FILE * file = fopen(filePath.data(), "rb");
@@ -66,7 +66,7 @@ Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
     if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
     
     // Create a buffer Actual RGB data
-    vector<uint8_t> data = vector<uint8_t>(imageSize);
+    vector<glm::uint8> data = vector<glm::uint8>(imageSize);
     
     // Read the actual data from the file into the buffer
     fread(data.data(), 1, imageSize, file);
@@ -77,7 +77,7 @@ Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
     return new Texture2D(resourceName, 3, data, width, height);
 }
 
-Texture2D * TextureImport::LoadDDS(string name, string imagepath)
+Texture2D* TextureImport::LoadDDS(string name, string imagepath)
 {
 
     cout << "UNEMPLEMENTED !!! \n";
@@ -89,7 +89,7 @@ Texture2D * TextureImport::LoadDDS(string name, string imagepath)
     /* try to open the file */
     fp = fopen(imagepath.data(), "rb");
     if (fp== nullptr)
-        return 0;
+        return nullptr;
 
     /* verify the type of file */
     char filecode[4];
@@ -133,6 +133,7 @@ Texture2D * TextureImport::LoadDDS(string name, string imagepath)
             break;
         default:
             free(buffer);
-            return 0;
+            return nullptr;
     }
+    return nullptr;
 }

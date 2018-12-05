@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../Common/Maths.h"
-#include "../Engine/Assets/PolygonalMesh.h"
-#include "MathSerializer.h"
 #include <cereal\cereal.hpp>
 #include <cereal\types\vector.hpp>
 #include <cereal\types\string.hpp>
 #include <cereal\archives\binary.hpp>
 
+#include "../Common/Maths/Maths.h"
+#include "../Engine/Assets/PolygonalMesh.h"
+#include "MathSerializer.h"
 
 class TriangleMeshSerializer
 {
@@ -61,9 +61,9 @@ public:
             dvert.UV = UV;
         }
 
-        uint32_t pos; // Vertex the HE points to.
-        uint32_t normal; // Normals at the destination Vertex (may be unique to this face)
-        uint32_t UV; // UV at the destination Vertex (may be unique to this face)
+        glm::uint32 pos; // Vertex the HE points to.
+        glm::uint32 normal; // Normals at the destination Vertex (may be unique to this face)
+        glm::uint32 UV; // UV at the destination Vertex (may be unique to this face)
 
     private:
         friend class cereal::access;
@@ -147,10 +147,10 @@ public:
         
     TriangleMeshSerializer() = default;
 
-    void vec3VectorToSerializer(std::vector<vec3> &actualVector, std::vector<vec3serializer> &serialVector);
-    void vec2VectorToSerializer(std::vector<vec2> &actualVector, std::vector<vec2serializer> &serialVector);
-    void vec3SerializerVectorToVec3(std::vector<vec3> &actualVector, std::vector<vec3serializer> &serialVector);
-    void vec2SerializerVectorToVec2(std::vector<vec2> &actualVector, std::vector<vec2serializer> &serialVector);
+    void vec3VectorToSerializer(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector);
+    void vec2VectorToSerializer(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector);
+    void vec3serializerVectorTovec3(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector);
+    void vec2serializerVectorTovec2(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector);
 
     void BuildFromMesh(BLAengine::TriangleMesh* triangleMesh);
     BLAengine::TriangleMesh* BuildMesh();

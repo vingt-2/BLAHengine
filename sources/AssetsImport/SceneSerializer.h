@@ -1,6 +1,4 @@
 #pragma once
-#include "../Engine/Game/Scene.h"
-#include "MathSerializer.h"
 
 /*Serialization Includes: */
 #include <cereal\cereal.hpp>
@@ -9,22 +7,31 @@
 #include <cereal\types\string.hpp>
 #include <cereal\archives\json.hpp>
 
+#include "../Engine/Game/Scene.h"
+#include "MathSerializer.h"
+
 class TransformSerializer
 {
 public:
 
     TransformSerializer() = default;
 
-    void FromTransform(BLAengine::Transform* transform)
+    void FromTransform(BLAengine::ObjectTransform* transform)
     {
-        m_position.FillData(transform->m_position);
-        m_rotation.FillData(transform->m_rotation);
+        m_position.FillData(transform->GetPosition());
+        m_rotation.FillData(transform->GetRotation());
         m_scale.FillData(transform->m_scale);
     }
-    void ToTransform(BLAengine::Transform* transform)
+    void ToTransform(BLAengine::ObjectTransform* transform)
     {
-        m_position.LoadData(transform->m_position);
-        m_rotation.LoadData(transform->m_rotation);
+        blaVec3 position;
+        m_position.LoadData(position);
+        transform->SetPosition(position);
+
+        blaQuat rotation;
+        m_rotation.LoadData(rotation);
+        transform->SetRotation(rotation);
+
         m_scale.LoadData(transform->m_scale);
     }
 
@@ -32,7 +39,7 @@ private:
     friend class cereal::access;
 
     vec3serializer m_position;
-    mat3serializer m_rotation;
+    quatserializer m_rotation;
     vec3serializer m_scale;
 
     template <class Archive>
@@ -75,7 +82,7 @@ public:
     void FromGameComponent(BLAengine::GameComponent* comp)
     {
         GameComponentSerializer::FromGameComponent(comp);
-        if (BLAengine::MeshRenderer* meshRender = dynamic_cast<BLAengine::MeshRenderer*>(comp))
+        if (BLAengine::MeshRendererComponent* meshRender = dynamic_cast<BLAengine::MeshRendererComponent*>(comp))
         {
             m_triangleMeshName = meshRender->m_mesh->GetName();
 
@@ -120,7 +127,7 @@ public:
     }
     void ToGameComponent(BLAengine::GameComponent* comp)
     {
-        vec3 dir;
+        blaVec3 dir;
         m_lightDirection.LoadData(dir);
 
         if (BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp))
@@ -151,12 +158,12 @@ public:
 
     void FromGameComponent(BLAengine::GameComponent* comp)
     {
-        if (BLAengine::RigidBody* rgb = dynamic_cast<BLAengine::RigidBody*>(comp))
+        if (BLAengine::RigidBodyComponent* rgb = dynamic_cast<BLAengine::RigidBodyComponent*>(comp))
             m_mass.FillData(rgb->m_massTensor);
     }
     void ToGameComponent(BLAengine::GameComponent* comp)
     {
-        if (BLAengine::RigidBody* rgb = dynamic_cast<BLAengine::RigidBody*>(comp))
+        if (BLAengine::RigidBodyComponent* rgb = dynamic_cast<BLAengine::RigidBodyComponent*>(comp))
             m_mass.LoadData(rgb->m_massTensor);
     }
 
@@ -183,15 +190,15 @@ public:
 
     void FromGameObject(BLAengine::GameObject* gobject)
     {
-        BLAengine::Transform transform = gobject->GetTransform();
+        BLAengine::ObjectTransform transform = gobject->GetTransform();
         m_transform.FromTransform(&transform);
 
         m_objectName = gobject->GetName();
 
-        vector<BLAengine::MeshRenderer*> meshRenderers = gobject->GetComponents<BLAengine::MeshRenderer>();
-        for (int i = 0; i < meshRenderers.size(); i++)
+        vector<BLAengine::MeshRendererComponent*> meshRenderers = gobject->GetComponents<BLAengine::MeshRendererComponent>();
+        for (size_t i = 0; i < meshRenderers.size(); i++)
         {
-            BLAengine::MeshRenderer* mrenderer = meshRenderers[i];
+            BLAengine::MeshRendererComponent* mrenderer = meshRenderers[i];
             MeshRendererSerializer serializer;
             serializer.FromGameComponent(mrenderer);
 
@@ -200,7 +207,7 @@ public:
         }
 
         vector<BLAengine::DirectionalLight*> dirLights = gobject->GetComponents<BLAengine::DirectionalLight>();
-        for (int i = 0; i < dirLights.size(); i++)
+        for (size_t i = 0; i < dirLights.size(); i++)
         {
             BLAengine::DirectionalLight* mrenderer = dirLights[i];
             DirectionalLightSerializer serializer;
@@ -210,10 +217,10 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
 
-        vector<BLAengine::RigidBody*> rgbs = gobject->GetComponents<BLAengine::RigidBody>();
-        for (int i = 0; i < rgbs.size(); i++)
+        vector<BLAengine::RigidBodyComponent*> rgbs = gobject->GetComponents<BLAengine::RigidBodyComponent>();
+        for (size_t i = 0; i < rgbs.size(); i++)
         {
-            BLAengine::RigidBody* mrenderer = rgbs[i];
+            BLAengine::RigidBodyComponent* mrenderer = rgbs[i];
             RigidBodySerializer serializer;
             serializer.FromGameComponent(mrenderer);
 
@@ -222,9 +229,9 @@ public:
         }
     }
     
-    BLAengine::Transform GetTransform()
+    BLAengine::ObjectTransform GetTransform()
     {
-        BLAengine::Transform t;
+        BLAengine::ObjectTransform t;
         m_transform.ToTransform(&t);
         return t;
     }
@@ -248,7 +255,7 @@ private:
         archive
         (
             cereal::make_nvp("Name", m_objectName),
-            cereal::make_nvp("Transform", m_transform),
+            cereal::make_nvp("ObjectTransform", m_transform),
             cereal::make_nvp("Components", m_componentsVector)
         );
     }
@@ -265,7 +272,7 @@ public:
     {
         std::vector<BLAengine::GameObject*> objVec = scene->GetObjects();
         
-        for (int i = 0; i < objVec.size(); i++)
+        for (size_t i = 0; i < objVec.size(); i++)
         {
             BLAengine::GameObject* obj = objVec[i];
 

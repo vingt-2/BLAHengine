@@ -1,11 +1,8 @@
 #pragma once
 #include "..\..\..\Common\StdInclude.h"
-#include "..\GameComponents\Collider.h"
+#include "..\GameComponents\ColliderComponent.h"
 #include "../../Assets/Material.h"
-#include "../GameComponents/Transform.h"
 #include "../GameComponents/GameComponent.h"
-
-#define M_PI 3.14159265359f
 
 namespace BLAengine
 {
@@ -21,12 +18,12 @@ namespace BLAengine
             /*
                 Returns outgoing Radiance as a function of incoming and inDir, outDir
             */
-            virtual vec3 EvaluateBRDF(vec3 incomingRadiance, vec3 &normal, vec3 &inDir, vec3 &outDir) = 0;
+            virtual blaVec3 EvaluateBRDF(blaVec3 incomingRadiance, blaVec3 &normal, blaVec3 &inDir, blaVec3 &outDir) = 0;
 
             /*
                 Returns the sample probability and outDir from input argument
             */
-            virtual float SampleBRDF(vec3 &outDir, mat3 &tangentSpace, vec3 &inDir) = 0;
+            virtual float SampleBRDF(blaVec3 &outDir, blaMat3 &tangentSpace, blaVec3 &inDir) = 0;
             
             virtual bool IsSpecular() = 0;
         };
@@ -34,12 +31,12 @@ namespace BLAengine
         class LambertianBRDF : public BRDF
         {
         public:
-            vec3 EvaluateBRDF(vec3 incomingRadiance, vec3 &normal, vec3 &inDir, vec3 &outDir)
+            blaVec3 EvaluateBRDF(blaVec3 incomingRadiance, blaVec3 &normal, blaVec3 &inDir, blaVec3 &outDir)
             {
                 return incomingRadiance / M_PI;
             }
 
-            float SampleBRDF(vec3 &outDir, mat3&tangentSpace, vec3 &inDir);
+            float SampleBRDF(blaVec3 &outDir, blaMat3&tangentSpace, blaVec3 &inDir);
 
             bool IsSpecular() { return false;  }
         };
@@ -47,13 +44,13 @@ namespace BLAengine
         class MirrorBRDF : public BRDF
         {
         public:
-            vec3 EvaluateBRDF(vec3 incomingRadiance, vec3 &normal, vec3 &inDir, vec3 &outDir)
+            blaVec3 EvaluateBRDF(blaVec3 incomingRadiance, blaVec3 &normal, blaVec3 &inDir, blaVec3 &outDir)
             {
-                vec3 mirrorOutDir = 2.0f * dot(normal, inDir)*normal - inDir;
-                return dot(mirrorOutDir, outDir) > 0.95f ? incomingRadiance : vec3(0);
+                blaVec3 mirrorOutDir = 2.0f * glm::dot(normal, inDir)*normal - inDir;
+                return glm::dot(mirrorOutDir, outDir) > 0.95f ? incomingRadiance : blaVec3(0);
             }
 
-            float SampleBRDF(vec3 &outDir, mat3&tangentSpace, vec3 &inDir);
+            float SampleBRDF(blaVec3 &outDir, blaMat3&tangentSpace, blaVec3 &inDir);
 
             bool IsSpecular() { return true; }
         };
@@ -61,20 +58,20 @@ namespace BLAengine
         BRDF* m_brdf;
     
     //private:
-        vec3 m_color;
-        vec3 m_emissivePower;
+        blaVec3 m_color;
+        blaVec3 m_emissivePower;
     };
 
     class BLACORE_API PBRSurface : public GameComponent
     {
     public:
 
-        Collider* m_collider;
+        ColliderComponent* m_collider;
 
         PBRMaterial m_material;
 
-        virtual void SampleSurface(vec3 &position, float &prob) = 0;
-        virtual void SampleSurfaceWithNormal(vec3 &position, vec3 &normal, float &prob) = 0;
+        virtual void SampleSurface(blaVec3 &position, float &prob) = 0;
+        virtual void SampleSurfaceWithNormal(blaVec3 &position, blaVec3 &normal, float &prob) = 0;
 
         virtual float GetSurfaceArea() = 0;
 
@@ -87,8 +84,8 @@ namespace BLAengine
     class BLACORE_API PBRMesh : public PBRSurface
     {
     public:
-        void SampleSurface(vec3 &position, float &prob);
-        void SampleSurfaceWithNormal(vec3 &position, vec3 &normal, float &prob);
+        void SampleSurface(blaVec3 &position, float &prob);
+        void SampleSurfaceWithNormal(blaVec3 &position, blaVec3 &normal, float &prob);
         float GetSurfaceArea();
 
         PBRMesh(TriangleMesh* mesh);
@@ -102,8 +99,8 @@ namespace BLAengine
     class BLACORE_API PBRSphere : public PBRSurface
     {
     public:
-        void SampleSurface(vec3 &position, float &prob);
-        void SampleSurfaceWithNormal(vec3 &position, vec3 &normal, float &prob);
+        void SampleSurface(blaVec3 &position, float &prob);
+        void SampleSurfaceWithNormal(blaVec3 &position, blaVec3 &normal, float &prob);
         float GetSurfaceArea();
 
         PBRSphere(float radius);

@@ -6,8 +6,8 @@ using namespace BLAengine;
 
 Scene::Scene()
 {
-    this->m_enableSimulation = false;
-    this->m_rigidBodySystem = new RigidBodySystem(new Time(200));
+    this->m_enableSimulation = true;
+    this->m_rigidBodySystem = new RigidBodySystem(nullptr);
     this->m_sceneObjectsVector = vector<GameObject*>();
     this->m_camera = nullptr;
     this->m_renderingManager = nullptr;
@@ -33,15 +33,17 @@ bool BLAengine::Scene::DeleteObject(std::string name)
     if (!object)
         return false;
 
-    for (auto meshRenderer : object->GetComponents<MeshRenderer>())
+    for (auto meshRenderer : object->GetComponents<MeshRendererComponent>())
     {
         m_renderingManager->CancelMeshRendererTicket(meshRenderer);
     }
+
+    return true;
 }
 
 GameObject* Scene::FindNameInScene(std::string name)
 {
-    for (int i = 0; i < m_sceneObjectsVector.size(); i++)
+    for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
         GameObject* object = m_sceneObjectsVector[i];
         if (object->GetName().compare(name) == 0)
@@ -83,13 +85,13 @@ void Scene::Update()
     m_rigidBodySystem->UpdateSystem();
     //m_camera->m_rigidBody->Update();
 
-    for(int i = 0; i < m_sceneObjectsVector.size(); i++)
+    for(size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
         GameObject* object = m_sceneObjectsVector[i];
 
         object->Update();
 
-        for (auto meshRenderer : object->GetComponents<MeshRenderer>())
+        for (auto meshRenderer : object->GetComponents<MeshRendererComponent>())
         {
             if (meshRenderer->m_renderTicket == 0)
             {
@@ -99,7 +101,7 @@ void Scene::Update()
 
         for (auto dirLightComp : object->GetComponents<DirectionalLight>())
         {
-            Camera* shadowCamera = dirLightComp->m_parentObject->GetComponent<Camera>();
+            CameraComponent* shadowCamera = dirLightComp->m_parentObject->GetComponent<CameraComponent>();
             if (dirLightComp->m_renderTicket == 0 && shadowCamera != nullptr)
             {
                 m_renderingManager->RegisterDirectionalLight(dirLightComp, shadowCamera);
@@ -122,16 +124,18 @@ void Scene::Update()
     }
 }
 
-Camera* BLAengine::Scene::GetMainCamera()
+CameraComponent* BLAengine::Scene::GetMainCamera()
 {
     if (m_camera == nullptr)
     {
         for (auto object : m_sceneObjectsVector)
         {
-            Camera* camera = object->GetComponent<Camera>();
-            if (camera != nullptr)
+            CameraComponent* camera = object->GetComponent<CameraComponent>();
+            if (camera != nullptr && !camera->m_isShadowMapCamera)
+            {
                 m_camera = camera;
                 break;
+            }
         }
     }
     return m_camera;
@@ -142,26 +146,26 @@ vector<Contact>* Scene::GetContacts()
     return &(this->m_rigidBodySystem->m_collisionProcessor->m_currentContacts);
 }
 
-std::pair<GameObject*, Collider::RayCollision>  Scene::PickGameObjectInScene(Ray ray)
+std::pair<GameObject*, ColliderComponent::RayCollision>  Scene::PickGameObjectInScene(Ray ray)
 {
     vector<GameObject*> objects = m_sceneObjectsVector;
 
-    float minDistance = INFINITY;
+    float minDistance = MAX_NORMAL_FLOAT;
     GameObject* pickedObject = nullptr;
-    Collider::RayCollision closestContact;
+    ColliderComponent::RayCollision closestContact;
     for (auto obj : objects)
     {
-        Collider* collider = obj->GetComponent<Collider>();
+        ColliderComponent* collider = obj->GetComponent<ColliderComponent>();
 
         if (collider == nullptr)
             continue;
 
-        Collider::RayCollision contactPoint = collider->CollideWithRay(ray);
+        ColliderComponent::RayCollision contactPoint = collider->CollideWithRay(ray);
 
         if (!contactPoint.m_isValid)
             continue;
 
-        float distance = dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
+        float distance = glm::dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
 
         if (distance > 0 && distance < minDistance)
         {
@@ -171,5 +175,5 @@ std::pair<GameObject*, Collider::RayCollision>  Scene::PickGameObjectInScene(Ray
         }
     }
 
-    return std::pair<GameObject*, Collider::RayCollision>(pickedObject, closestContact);
+    return std::pair<GameObject*, ColliderComponent::RayCollision>(pickedObject, closestContact);
 }
