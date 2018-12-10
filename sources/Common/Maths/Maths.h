@@ -182,5 +182,14 @@ public:
     }
 };
 
+template<T>
+class SpringDamper
+{
+    static T Evaluate(blaF32 t)
+    {
+        
+    }
+};
+
 blaMat3 matrixCross(blaVec3 vector);
 void printVector(blaVec3 vec);

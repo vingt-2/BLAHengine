@@ -12,3 +12,11 @@
 #endif
 
 #include <glm\glm.hpp>
+
+typedef glm::u8 blaU8;
+typedef glm::i8 blaS8;
+typedef glm::u16 blaU16;
+typedef glm::i16 blaS16;
+typedef glm::u32 blaU32;
+typedef glm::i32 blaS32;
+typedef glm::f32 blaf32;

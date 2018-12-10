@@ -40,7 +40,6 @@ blaVec3 ObjectTransform::GetPosition() const
     return blaVec3(m_transform.GetTranslation());
 }
 
-
 void ObjectTransform::SetEulerAngles(float pitch, float yaw, float roll)
 {
     m_transform.SetRotation(blaPosQuat::EulerToQuat(pitch, yaw, roll));

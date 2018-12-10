@@ -40,7 +40,7 @@ void main(){
         
         float sunAligned = clamp(dot(normalize(worldPos),lightDirection),0.0,1.0);
         
-        vec3 sunColor = ((2-sunOrientation) * clamp(pow(sunAligned,700),0,1)) * vec3(3.2,0.8,0.5) +  (0.1f * clamp(pow(sunAligned,2),0,1) * vec3(1));
+        vec3 sunColor = ((2-sunOrientation) * clamp(pow(sunAligned,700),0,1)) * vec3(3.2,0.8,0.5) +  (0.1f * clamp(pow(sunAligned,3),0,1) * vec3(1));
         
         color = clamp((1-sunOrientation),0,1) * (skyColor + (1-sunOrientation) * (sunColor * (1+overalSunColor))) + clamp((sunOrientation),0,1) * vec3(0,0,0.1);
     }
