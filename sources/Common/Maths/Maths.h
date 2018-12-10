@@ -42,6 +42,11 @@ public:
         m_q = q;
     }
 
+	blaPosQuat()
+    {
+		*this = blaPosQuat::GetIdentity();
+    }
+
     blaPosQuat operator* (const blaPosQuat &otherPosQuat) const
     {
         blaVec4 newP = glm::rotate(m_q, otherPosQuat.m_p) + m_p;
@@ -125,11 +130,23 @@ public:
         return m_q;
     }
 
-
-    void SetTranslation(blaVec4 p)
+    void SetTranslation3(const blaVec3& p)
     {
-        m_p = p;
+        m_p[0] = p[0];
+		m_p[1] = p[1];
+		m_p[2] = p[2];
+		m_p[3] = 1.0f;
     }
+
+	void SetTranslation(const blaVec4& p)
+	{
+		m_p = p;
+	}
+
+	blaVec3 GetTranslation3() const
+	{
+		return blaVec3(m_p[0], m_p[1], m_p[2]);
+	}
 
     blaVec4 GetTranslation() const
     {
@@ -162,7 +179,8 @@ public:
         q.z = syaw * cp * cr - cyaw * sp * sr;
         return q;
     }
-
+	
+	//TODO: The order of inputs here is probably wrong
     static blaMat4 EulerToMat3(float pitch, float yaw, float roll)
     {
         float cospitch = cos(pitch);
@@ -182,5 +200,6 @@ public:
     }
 };
 
+void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat);
 blaMat3 matrixCross(blaVec3 vector);
 void printVector(blaVec3 vec);

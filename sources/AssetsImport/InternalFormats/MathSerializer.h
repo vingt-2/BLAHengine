@@ -3,7 +3,7 @@
 #include <cereal\archives\binary.hpp>
 #include <cereal\archives\xml.hpp>
 
-#include "../Common/Maths/Maths.h"
+#include "../../Common/Maths/Maths.h"
 
 class vec3serializer
 {

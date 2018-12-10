@@ -14,3 +14,8 @@ void printVector(blaVec3 vec)
 {
     std::cout << vec.x << ", " << vec.y << ", " << vec.z << "\n";
 }
+
+void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat)
+{
+	outQuat = 0.5f * inputQuat * blaQuat(angularVelocity[0], angularVelocity[1], angularVelocity[2], 0.f);
+}

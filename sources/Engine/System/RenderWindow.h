@@ -25,7 +25,9 @@ namespace BLAengine
         virtual void SetMouseXY() = 0;
 
         virtual bool GetMousePressed(int button) = 0;
-        virtual bool GetKeyPressed(int key) = 0; 
+        virtual bool GetKeyPressed(int key) = 0;
+
+		virtual void SetMouseCursorVisibility(bool visibility) = 0;
     };
 
     class BLACORE_API WPFRenderWindow : public RenderWindow
@@ -63,6 +65,8 @@ namespace BLAengine
 
         bool ShouldMakeGLCurrent();
         void SetMadeGLCurrent();
+
+		void SetMouseCursorVisibility(bool visibility) override {};
     
         unsigned char m_mouseDownState;
         bool m_keyPressed[100];
@@ -99,6 +103,8 @@ namespace BLAengine
 
         virtual bool GetKeyPressed(int key);
         virtual bool GetMousePressed(int button);
+
+		void SetMouseCursorVisibility(bool visibility) override;
 
         GLFWRenderWindow();
         ~GLFWRenderWindow();

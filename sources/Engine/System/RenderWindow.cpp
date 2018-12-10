@@ -146,6 +146,12 @@ GLFWRenderWindow::~GLFWRenderWindow()
     glfwTerminate();
 }
 
+void GLFWRenderWindow::SetMouseCursorVisibility(bool visiblity)
+{
+	//GLFW_CURSOR_HIDDEN to not lock the cursor while hidden
+	glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, visiblity ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+}
+
 #endif
 
 WPFRenderWindow::WPFRenderWindow() :
