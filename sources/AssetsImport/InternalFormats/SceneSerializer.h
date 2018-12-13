@@ -7,7 +7,7 @@
 #include <cereal\types\string.hpp>
 #include <cereal\archives\json.hpp>
 
-#include "../Engine/Game/Scene.h"
+#include "../../Engine/Game/Scene.h"
 #include "MathSerializer.h"
 
 class TransformSerializer

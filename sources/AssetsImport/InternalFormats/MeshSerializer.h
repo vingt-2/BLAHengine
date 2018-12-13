@@ -5,8 +5,8 @@
 #include <cereal\types\string.hpp>
 #include <cereal\archives\binary.hpp>
 
-#include "../Common/Maths/Maths.h"
-#include "../Engine/Assets/PolygonalMesh.h"
+#include "../../Common/Maths/Maths.h"
+#include "../../Engine/Assets/PolygonalMesh.h"
 #include "MathSerializer.h"
 
 class TriangleMeshSerializer

@@ -1,34 +1,15 @@
-#include "EditorSession.h"
-#include "../Game/PBRendering/PBRRenderer.h"
+#include "AnimationDemo.h"
+#include "Engine/Game/GameComponents/SimpleHairComponent.h"
+#include "Engine/Game/GameComponents/AnimationComponent.h"
+#include "./AssetsImport/ExternalFormats/BVHImport.h"
 
 using namespace BLAengine;
 
-bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
+bool AnimationDemo::InitializeEngine(RenderWindow* _renderWindow)
 {
     this->m_renderWindow = _renderWindow;
     m_assetManager = new AssetManager();
 
-    //if (Material* damierMat = new Material("EarthMat"))
-    //{
-    //    damierMat->AssignTexture("Earth", "diffuseMap");
-    //    damierMat->AssignTexture("EarthNRM", "normalMap");
-    //    m_assetManager->SaveMaterial(damierMat);
-    //}
-    //else
-    //{
-    //    std::cout << "Cannot do dis\n";
-    //}
-
-    //if (Texture2D* damierTexture = TextureImport::LoadBMP("Earth", "./resources/textures/earth.bmp"))
-    //{
-    //    m_assetManager->SaveTexture(damierTexture);
-    //}
-
-    //if (Texture2D* damierTexture = TextureImport::LoadBMP("EarthNRM", "./resources/textures/earth_NRM.bmp"))
-    //{
-    //    m_assetManager->SaveTexture(damierTexture);
-    //}
-    
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
 
@@ -59,44 +40,50 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
         printf("Failed to initiate Context!");
         return false;
     }
-    
+
     m_assetManager->LoadCookedAssets();
+
+    m_lastHairPlacementTime = m_timer->GetTime();
 
     return true;
 }
 
-void EditorSession::UpdateEditor()
+void AnimationDemo::UpdateEditor()
 {
-    if (m_renderWindow->GetMousePressed(0))
-    {
-        Ray screenRay = m_editorRenderer->ScreenToRay();
+    GameObject* animationObject = m_workingScene->FindObjectByName("AnimatedObject");
 
-        if (GameObject* object = m_workingScene->PickGameObjectInScene(screenRay).first)
+    std::vector<blaVec3> jointPositions;
+    std::vector<std::pair<blaVec3, blaVec3>> bones;
+
+    if (m_renderWindow->GetKeyPressed(GLFW_KEY_RIGHT))
+    {
+        m_frameIndex += 0.01f;
+    }
+    if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT))
+    {
+        m_frameIndex -= 0.01f;
+        m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
+    }
+    
+    if (animationObject != nullptr)
+    {
+        if (auto animCmp = animationObject->GetComponent<AnimationComponent>())
         {
-            ColliderComponent::RayCollision cp = object->GetComponent<ColliderComponent>()->CollideWithRay(screenRay);
-            if (RigidBodyComponent* rb = object->GetComponent<RigidBodyComponent>())
+            if (animCmp->m_animation == nullptr)
             {
-                rb->PushForceWorld(cp.m_colPositionW, cp.m_colNormalW);
+                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/91_61.bvh");
             }
             else
             {
-                object->AddComponent(new RigidBodyComponent());
+                animCmp->m_animation->QuerySkeletalAnimation(static_cast<int>(m_frameIndex), 0, true, &jointPositions, nullptr, &bones, nullptr);
             }
-            debugRay = Ray(cp.m_colPositionW, cp.m_colNormalW, 10000);
         }
     }
 
-    if (GameObject* dirlightObj = m_workingScene->FindObjectByName("DirLight"))
+    blaVec3 offset(0.f, 3.f, 0.f);
+    for (size_t i = 0; i < bones.size(); i++)
     {
-        if (DirectionalLight* dirLight = dirlightObj->GetComponent<DirectionalLight>())
-        {
-            ObjectTransform lightT = dirLight->GetObjectTransform();
-            lightT.SetPosition(blaVec3(0.f, 50.f, 0.f));
-            blaVec3 rotationInEuler = lightT.GetEulerAngles();
-            //cout << rotationInEuler.y;
-            lightT.SetEulerAngles(0.5f*3.14f, 0.f ,0.f);
-            dirlightObj->SetTransform(lightT);
-        }
+        m_debug->DrawLine(offset + bones[i].first, offset + bones[i].second);
     }
 
     if (m_editorControls)
@@ -107,12 +94,15 @@ void EditorSession::UpdateEditor()
     {
         if (CameraComponent* cameraObject = m_workingScene->GetMainCamera())
         {
-            m_editorControls = new EditorControls(cameraObject->m_parentObject, m_renderWindow);
+            m_editorControls = new AnimationDemoControls(cameraObject->m_parentObject, m_renderWindow);
         }
     }
 
     m_debug->DrawRay(debugRay, blaVec3(0, 1, 0));
     //m_debug->DrawGrid(1000, 10, blaVec3(0.4));
+
+    ObjectTransform identity;
+    m_debug->DrawBasis(&identity,1.f);
     m_debug->Update();
     m_timer->Update();
     m_workingScene->Update();
@@ -120,12 +110,12 @@ void EditorSession::UpdateEditor()
 
 }
 
-void EditorSession::TerminateEditor()
+void AnimationDemo::TerminateEditor()
 {
     //renderWindow->~GLFWRenderWindow();
 }
 
-bool BLAengine::EditorSession::LoadWorkingScene(std::string filepath)
+bool AnimationDemo::LoadWorkingScene(std::string filepath)
 {
     m_renderingManager->~RenderingManager();
     m_workingScene->~Scene();
@@ -141,24 +131,32 @@ bool BLAengine::EditorSession::LoadWorkingScene(std::string filepath)
     light->AddComponent(dirLight);
     ObjectTransform lightT = light->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
-    lightT.SetEulerAngles(0.f, 1.2f, 0.f);
+    lightT.SetEulerAngles(-0.66f, 0.f, 0.f);
     light->SetTransform(lightT);
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = new CameraComponent();
     cameraObject->AddComponent(cameraComp);
+    ObjectTransform cameraT= cameraObject->GetTransform();
+    cameraT.SetPosition(blaVec3(0.f, 20.f, 0.f));
+    cameraT.SetEulerAngles(1.2f, 1.2f, 0.f);
+    cameraObject->SetTransform(cameraT);
 
     m_editorRenderer->SetCamera(cameraComp);
 
+    GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
+    AnimationComponent* animationCmp = new AnimationComponent();
+    animatedObject->AddComponent(animationCmp);
+    
     return true;
 }
 
-bool BLAengine::EditorSession::SaveWorkingScene(std::string filepath)
+bool AnimationDemo::SaveWorkingScene(std::string filepath)
 {
     return m_sceneManager->SaveScene(filepath, m_workingScene);
 }
 
-std::vector<string> BLAengine::EditorSession::GetSceneObjects()
+std::vector<string> AnimationDemo::GetSceneObjects()
 {
     std::vector<string> objs;
     for (auto go : m_workingScene->GetObjects())
@@ -168,34 +166,35 @@ std::vector<string> BLAengine::EditorSession::GetSceneObjects()
     return objs;
 }
 
-void BLAengine::EditorControls::ControlCamera()
+void AnimationDemoControls::ControlCamera()
 {
     if (m_renderWindow->GetKeyPressed(GLFW_KEY_ESCAPE))
     {
         exit(0);
     }
-    
+
     ObjectTransform transform = m_cameraObject->GetTransform();
 
     blaVec3 tangentForce = blaVec3(0);
     blaVec3 movementForce = blaVec3(0);
     float coeff = 0.1f;
 
+    bool hideMouse = false;
 
     if (m_renderWindow->GetKeyPressed('W'))
-        tangentForce.z = 2.f;
-    if (m_renderWindow->GetKeyPressed('S'))
         tangentForce.z = -2.f;
+    if (m_renderWindow->GetKeyPressed('S'))
+        tangentForce.z = 2.f;
 
     if (m_renderWindow->GetKeyPressed('A'))
-        tangentForce.x = 2.f;
-    if (m_renderWindow->GetKeyPressed('D'))
         tangentForce.x = -2.f;
+    if (m_renderWindow->GetKeyPressed('D'))
+        tangentForce.x = 2.f;
 
     if (m_renderWindow->GetKeyPressed('Q'))
-        tangentForce.y = 2.f;
-    if (m_renderWindow->GetKeyPressed('E'))
         tangentForce.y = -2.f;
+    if (m_renderWindow->GetKeyPressed('E'))
+        tangentForce.y = 2.f;
 
     if (m_renderWindow->GetMousePressed(2))
     {
@@ -205,27 +204,28 @@ void BLAengine::EditorControls::ControlCamera()
 
         if (x - m_prevMouse.x > 0)
         {
-            tangentForce.x = 1.f;
+            tangentForce.x = -1.f;
         }
         else if (x - m_prevMouse.x < 0)
         {
-            tangentForce.x = -1.f;
+            tangentForce.x = 1.f;
         }
         if (y - m_prevMouse.y > 0)
         {
-            tangentForce.y = 1.f;
+            tangentForce.y = -1.f;
         }
         else if (y - m_prevMouse.y < 0)
         {
-            tangentForce.y = -1.f;
+            tangentForce.y = 1.f;
         }
 
-        m_prevMouse = glm::vec2(x,y);
+        m_prevMouse = glm::vec2(x, y);
+
+        hideMouse = true;
     }
 
     blaVec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
     cameraForce *= coeff;
-
     transform.SetPosition(transform.GetPosition() + cameraForce);
 
     if (m_renderWindow->GetMousePressed(1))
@@ -238,27 +238,31 @@ void BLAengine::EditorControls::ControlCamera()
 
         if (x - m_prevMouse.x > 0)
         {
-            deltaRotation.y = 1.f;
+            deltaRotation.y = -1.f;
         }
         else if (x - m_prevMouse.x < 0)
         {
-            deltaRotation.y = -1.f;
+            deltaRotation.y = 1.f;
         }
         if (y - m_prevMouse.y > 0)
         {
-            deltaRotation.x = 1.f;
+            deltaRotation.x = -1.f;
         }
         else if (y - m_prevMouse.y < 0)
         {
-            deltaRotation.x = -1.f;
+            deltaRotation.x = 1.f;
         }
 
         m_prevMouse = curMouse;
 
-        m_cameraRotation += 0.05f * deltaRotation;
-        
+        m_cameraRotation += 0.033f * deltaRotation;
+
         transform.SetEulerAngles(m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z);
+
+        hideMouse = true;
     }
+
+    m_renderWindow->SetMouseCursorVisibility(!hideMouse);
 
     m_cameraObject->SetTransform(transform);
 

@@ -29,7 +29,7 @@ GameObject* Scene::CreateObject(std::string name)
 
 bool BLAengine::Scene::DeleteObject(std::string name)
 {
-    GameObject* object = this->FindNameInScene(name);
+    GameObject* object = this->FindObjectByName(name);
     if (!object)
         return false;
 
@@ -41,7 +41,7 @@ bool BLAengine::Scene::DeleteObject(std::string name)
     return true;
 }
 
-GameObject* Scene::FindNameInScene(std::string name)
+GameObject* BLAengine::Scene::FindObjectByName(std::string name)
 {
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {

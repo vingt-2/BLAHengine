@@ -1,7 +1,7 @@
 #include "AssetsManager.h"
-#include "../../AssetsImport/MeshSerializer.h"
-#include "../../AssetsImport/TextureSerializer.h"
-#include "../../AssetsImport/MaterialSerializer.h"
+#include "../../AssetsImport/InternalFormats/MeshSerializer.h"
+#include "../../AssetsImport/InternalFormats/TextureSerializer.h"
+#include "../../AssetsImport/InternalFormats/MaterialSerializer.h"
 #include "../../Common/dirent.h"
 
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII

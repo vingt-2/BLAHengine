@@ -1,5 +1,5 @@
 #include "MeshImportSession.h"
-#include "../../AssetsImport/OBJImport.h"
+#include "../../AssetsImport/ExternalFormats/OBJImport.h"
 
 using namespace BLAengine;
 

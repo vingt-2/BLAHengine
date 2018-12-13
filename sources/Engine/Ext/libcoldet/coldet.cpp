@@ -438,7 +438,7 @@ bool CollisionModel3DImpl::getCollidingTriangles(int& t1, int& t2)
 
 bool CollisionModel3DImpl::getCollidingTriangles(std::vector<std::pair<int, int>>* pairs)
 {
-    for (int i = 0; i < m_intersectedTriangles.size(); i++)
+    for (size_t i = 0; i < m_intersectedTriangles.size(); i++)
     {
         std::pair<int, int> pair = m_intersectedTriangles.at(i);
         pairs->push_back(std::pair<int, int>(pair.first, pair.second));
@@ -447,7 +447,7 @@ bool CollisionModel3DImpl::getCollidingTriangles(std::vector<std::pair<int, int>
 }
 bool CollisionModel3DImpl::getCollisionPoints(std::vector<float>* points)
 {
-    for (int i = 0; i < m_collisionPoints.size(); i++)
+    for (size_t i = 0; i < m_collisionPoints.size(); i++)
     {
         points->push_back(m_collisionPoints.at(i));
     }
@@ -456,7 +456,7 @@ bool CollisionModel3DImpl::getCollisionPoints(std::vector<float>* points)
 
 bool CollisionModel3DImpl::getPointsFromTri(std::vector<int>* collidingFaces)
 {
-    for (int i = 0; i < m_collidingFaces.size(); i++)
+    for (size_t i = 0; i < m_collidingFaces.size(); i++)
     {
         collidingFaces->push_back(m_collidingFaces.at(i));
     }
@@ -465,7 +465,7 @@ bool CollisionModel3DImpl::getPointsFromTri(std::vector<int>* collidingFaces)
 
 bool CollisionModel3DImpl::getColSizeForTri(std::vector<int>* colSizes)
 {
-    for (int i = 0; i < m_colSizes.size(); i++)
+    for (size_t i = 0; i < m_colSizes.size(); i++)
     {
         colSizes->push_back(m_colSizes.at(i));
     }

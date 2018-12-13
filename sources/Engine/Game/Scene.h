@@ -19,7 +19,7 @@ namespace BLAengine
 
         GameObject* CreateObject(std::string name);
         bool DeleteObject(std::string name);
-        GameObject* FindNameInScene(std::string name);
+        GameObject* FindObjectByName(std::string name);
 
         void AddComponent(GameObject* object, GameComponent* component);
         vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }

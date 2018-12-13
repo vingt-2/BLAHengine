@@ -3,7 +3,7 @@
 #include <cereal\types\string.hpp>
 #include <cereal\archives\binary.hpp>
 
-#include "../Engine/Assets/Material.h"
+#include "../../Engine/Assets/Material.h"
 
 class MaterialSerializer
 {

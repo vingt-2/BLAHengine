@@ -71,19 +71,19 @@ void HairDemo::UpdateEditor()
         }
     }
 
-    if (GameObject* dirlightObj = m_workingScene->FindNameInScene("DirLight"))
-    {
-        if (DirectionalLight* dirLight = dirlightObj->GetComponent<DirectionalLight>())
-        {
-            ObjectTransform lightT = dirLight->GetObjectTransform();
-            lightT.SetPosition(blaVec3(0, 50, 0));
-            blaVec3 rotationInEuler = lightT.GetEulerAngles();
-            lightT.SetEulerAngles(-0.5f*3.14f + 0.02f * m_timer->GetTime(), 0.f, 0.f);
-            dirlightObj->SetTransform(lightT);
-        }
-    }
+    //if (GameObject* dirlightObj = m_workingScene->FindNameInScene("DirLight"))
+    //{
+    //    if (DirectionalLight* dirLight = dirlightObj->GetComponent<DirectionalLight>())
+    //    {
+    //        ObjectTransform lightT = dirLight->GetObjectTransform();
+    //        lightT.SetPosition(blaVec3(0, 50, 0));
+    //        blaVec3 rotationInEuler = lightT.GetEulerAngles();
+    //        lightT.SetEulerAngles(-0.5f*3.14f + 0.02f * m_timer->GetTime(), 0.f, 0.f);
+    //        dirlightObj->SetTransform(lightT);
+    //    }
+    //}
 
-    if (GameObject* sphereObj = m_workingScene->FindNameInScene("sphere"))
+    if (GameObject* sphereObj = m_workingScene->FindObjectByName("sphere"))
     {
         if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT))
         {
@@ -144,7 +144,7 @@ bool BLAengine::HairDemo::LoadWorkingScene(std::string filepath)
     light->AddComponent(dirLight);
     ObjectTransform lightT = light->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
-    lightT.SetEulerAngles(0.f, 1.2f, 0.f);
+    lightT.SetEulerAngles(-0.66f, 0.f, 0.f);
     light->SetTransform(lightT);
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
@@ -152,7 +152,7 @@ bool BLAengine::HairDemo::LoadWorkingScene(std::string filepath)
     cameraObject->AddComponent(cameraComp);
     ObjectTransform cameraT= cameraObject->GetTransform();
     cameraT.SetPosition(blaVec3(0.f, 20.f, 0.f));
-    cameraT.SetEulerAngles(0.f, 1.2f, 0.f);
+    cameraT.SetEulerAngles(1.2f, 1.2f, 0.f);
     cameraObject->SetTransform(cameraT);
     
     m_editorRenderer->SetCamera(cameraComp);
@@ -188,6 +188,7 @@ void BLAengine::HairDemoControls::ControlCamera()
     blaVec3 movementForce = blaVec3(0);
     float coeff = 0.1f;
 
+    bool hideMouse = false;
 
     if (m_renderWindow->GetKeyPressed('W'))
         tangentForce.z = -2.f;
@@ -228,6 +229,8 @@ void BLAengine::HairDemoControls::ControlCamera()
         }
 
         m_prevMouse = glm::vec2(x, y);
+
+        hideMouse = true;
     }
 
     blaVec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
@@ -264,7 +267,11 @@ void BLAengine::HairDemoControls::ControlCamera()
         m_cameraRotation += 0.033f * deltaRotation;
 
         transform.SetEulerAngles(m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z);
+
+        hideMouse = true;
     }
+
+    m_renderWindow->SetMouseCursorVisibility(!hideMouse);
 
     m_cameraObject->SetTransform(transform);
 

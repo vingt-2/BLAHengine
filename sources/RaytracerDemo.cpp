@@ -54,7 +54,7 @@ void Raytracer::UpdateEditor()
     m_workingScene->Update();
     m_editorRenderer->Update();
 
-    GameObject* pbrenderObject = m_workingScene->FindNameInScene("PBRCamera");
+    GameObject* pbrenderObject = m_workingScene->FindObjectByName("PBRCamera");
     int i = 0;
     vector<Ray> debugRays;
     if (pbrenderObject)

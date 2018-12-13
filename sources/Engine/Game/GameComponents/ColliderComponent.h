@@ -44,8 +44,8 @@ namespace BLAengine
         float GetBoundingRadius() { return m_boundingRadius; }
 
         CollisionModel3D* m_collisionMesh;
-        vector<glm::uint32>* m_vertPosIndices;
-        vector<glm::uint32>* m_vertNormalIndices;
+        vector<blaU32>* m_vertPosIndices;
+        vector<blaU32>* m_vertNormalIndices;
         vector<blaVec3>* m_triVertices;
         vector<blaVec3>* m_triNormals;
     private:
