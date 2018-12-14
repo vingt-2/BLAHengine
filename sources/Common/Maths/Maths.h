@@ -13,7 +13,6 @@ typedef glm::vec3 blaVec3;
 typedef glm::vec4 blaVec4;
 typedef glm::mat3 blaMat3;
 typedef glm::mat4 blaMat4;
-typedef glm::quat blaQuat;
 
 #define M_PI 3.14159265359f
 #define P_GRAVITY blaVec3(0.f, -0.9807f, 0.f)
@@ -21,6 +20,99 @@ typedef glm::quat blaQuat;
 #define MAX_NORMAL_FLOAT 3.4028234664e38
 #define MIN_NORMAL_FLOAT -3.4028234664e38
 //#define MAX_SUBNORMAL_FLOAT 0x00800000
+
+typedef glm::quat blaQuat;
+
+//class blaQuat : public glm::quat
+//{
+//public:
+//    blaQuat(blaF32 x, blaF32 y, blaF32 z, blaF32 w)
+//    {
+//        this->x = x;
+//        this->y = y;
+//        this->z = z;
+//        this->w = w;
+//    }
+//
+//    blaQuat operator* (const blaQuat &otherQuat) const
+//    {
+//        glm::quat q = static_cast<const glm::quat>(*this) * static_cast<const glm::quat>(otherQuat);
+//        return blaQuat(q.x, q.y, q.z, q.w);
+//    }
+//
+//    blaQuat operator* (const float scalar) const
+//    {
+//        glm::quat q = *this * scalar;
+//        return blaQuat(q.x, q.y, q.z, q.w);
+//    }
+//
+//    blaQuat &operator*= (const blaQuat &otherQuat)
+//    {
+//        return *this = *this * otherQuat;
+//    }
+//
+//    blaQuat operator*= (const float scalar)
+//    {
+//        return *this = *this * scalar;
+//    }
+//
+//    void Inverse()
+//    {
+//        const glm::quat q = glm::inverse(*static_cast<glm::quat*>(this));
+//        this->x = q.x;
+//        this->y = q.y;
+//        this->z = q.z;
+//        this->w = q.w;
+//    }
+//
+//    void Normalize()
+//    {
+//        const glm::quat q = glm::normalize(*static_cast<glm::quat*>(this));
+//        this->x = q.x;
+//        this->y = q.y;
+//        this->z = q.z;
+//        this->w = q.w;
+//    }
+//
+//    blaQuat GetInverse() const
+//    {
+//        const glm::quat q = glm::inverse(*static_cast<const glm::quat*>(this));
+//        return blaQuat(q.x,q.y,q.z,q.w);
+//    }
+//
+//    blaQuat GetNormalized() const
+//    {
+//        const glm::quat q = glm::normalize(*static_cast<const glm::quat*>(this));
+//        return blaQuat(q.x, q.y, q.z, q.w);
+//    }
+//
+//    static blaQuat GetIdentity()
+//    {
+//        return blaQuat(0.f,0.f,0.f,1.f); 
+//    }
+//
+//    static blaQuat EulerToQuat(float roll, float yaw, float pitch)
+//    {
+//        float cyaw = cos(roll * 0.5f);
+//        float syaw = sin(roll * 0.5f);
+//        float cp = cos(-yaw * 0.5f);
+//        float sp = sin(-yaw * 0.5f);
+//        float cr = cos(pitch * 0.5f);
+//        float sr = sin(pitch * 0.5f);
+//        blaQuat q = GetIdentity();
+//        q.x = cyaw * cp * cr + syaw * sp * sr;
+//        q.y = cyaw * cp * sr - syaw * sp * cr;
+//        q.z = syaw * cp * sr + cyaw * sp * cr;
+//        q.w = syaw * cp * cr - cyaw * sp * sr;
+//
+//        return q;
+//    }
+//};
+//
+//inline blaQuat operator* (const float scalar, const blaQuat & q)
+//{
+//    return q * scalar;
+//}
 
 class blaPosQuat
 {
@@ -30,37 +122,29 @@ private:
     blaQuat m_q;
 
 public:    
-    blaPosQuat(blaVec4 p, blaQuat q)
-    {
-        m_p = p;
-        m_q = q;
-    }
+    blaPosQuat(blaVec4 p, blaQuat q):
+        m_p(p), m_q(q)
+    {}
 
-    blaPosQuat(blaVec3 p, blaQuat q)
-    {
-        m_p = blaVec4(p[0], p[1], p[2], 1.f);
-        m_q = q;
-    }
-
-    blaPosQuat()
-    {
-        *this = blaPosQuat::GetIdentity();
-    }
+    blaPosQuat(blaVec3 p, blaQuat q):
+        m_q(q),
+        m_p(blaVec4(p[0], p[1], p[2], 1.f))
+    {}
 
     blaPosQuat operator* (const blaPosQuat &otherPosQuat) const
     {
-        blaVec4 newP = glm::rotate(m_q, otherPosQuat.m_p) + m_p;
+        const blaVec4 newP = glm::rotate(m_q, otherPosQuat.m_p) + m_p;
         return blaPosQuat(newP, m_q*otherPosQuat.m_q);
-    }
-
-    blaVec4 operator* (const blaVec4 &v) const
-    {
-        return glm::rotate(m_q, v) + m_p;
     }
 
     blaPosQuat &operator*= (const blaPosQuat &otherPosQuat)
     {
         return (*this = *this * otherPosQuat);
+    }
+
+    blaVec4 operator* (const blaVec4 &v) const
+    {
+        return glm::rotate(m_q, v) + m_p;
     }
 
     blaPosQuat &operator= (const blaPosQuat &otherPosQuat)
@@ -109,6 +193,7 @@ public:
         return mat;
     }
 
+    // TODO: Verify it is correct to invert q then use it...
     void Inverse()
     {
         m_q = glm::inverse(m_q);
@@ -155,12 +240,7 @@ public:
 
     static blaPosQuat GetIdentity()
     {
-        blaQuat q;
-        q.x = 0.f;
-        q.y = 0.f;
-        q.z = 0.f;
-        q.w = 1.f;
-        return blaPosQuat(blaVec4(0.f, 0.f, 0.f, 1.f), q);
+        return blaPosQuat(blaVec4(0.f, 0.f, 0.f, 1.f), blaQuatIdentity());
     };
 
     static blaQuat EulerToQuat(float pitch, float yaw, float roll)
@@ -198,6 +278,18 @@ public:
             blaVec3(sinpitch*sinroll - cospitch*sinyaw*cosroll, sinpitch*cosroll + cospitch*sinyaw*sinroll, cospitch*cosyaw)
         );
     }
+
+    static blaQuat blaQuatIdentity()
+    {
+        blaQuat q;
+        q.x = 0.f;
+        q.y = 0.f;
+        q.z = 0.f;
+        q.w = 1.f;
+
+        return q;
+    }
+
 };
 
 void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat);

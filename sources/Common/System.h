@@ -19,4 +19,4 @@ typedef glm::u16 blaU16;
 typedef glm::i16 blaS16;
 typedef glm::u32 blaU32;
 typedef glm::i32 blaS32;
-typedef glm::f32 blaf32;
+typedef glm::f32 blaF32;

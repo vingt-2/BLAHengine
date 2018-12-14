@@ -22,23 +22,23 @@ void SkeletonJoint::PrintJoint()
 
 void QuerySkeletalAnimationRecursive
 (
-/*Defines the recursion parameters */
-SkeletonJoint* joint,
-blaPosQuat& cumulativeTransform,
-unordered_map<string, vector<blaPosQuat>>& jointTransforms,
-float skeletonScale,
-/*Defines the query inputs*/
-int frameIndex,
-int skeletonIndex,
-/*Defines the query outputs*/
-vector<blaVec3>* jointPositions,
-unordered_map<string, blaVec3>* jointPositionsByName,
-vector<pair<blaVec3, blaVec3>>* segmentPositions,
-unordered_map<string, blaPosQuat>* cumulativeTransformsByName
+    /*Defines the recursion parameters */
+    SkeletonJoint* joint,
+    blaPosQuat& cumulativeTransform,
+    unordered_map<string, vector<blaPosQuat>>& jointTransforms,
+    float skeletonScale,
+    /*Defines the query inputs*/
+    int frameIndex,
+    int skeletonIndex,
+    /*Defines the query outputs*/
+    vector<blaVec3>* jointPositions,
+    unordered_map<string, blaVec3>* jointPositionsByName,
+    vector<pair<blaVec3, blaVec3>>* segmentPositions,
+    unordered_map<string, blaPosQuat>* cumulativeTransformsByName
 )
 {
     blaVec3 jointPositionL = joint->GetLocalOffset();
-    blaVec3 jointPositionW = cumulativeTransform * blaVec4(jointPositionL[0], jointPositionL[1], jointPositionL[2], 1) * skeletonScale;
+    blaVec3 jointPositionW = cumulativeTransform.TransformPoint(jointPositionL);//skeletonScale;
 
     if (cumulativeTransformsByName)
     {
@@ -55,7 +55,7 @@ unordered_map<string, blaPosQuat>* cumulativeTransformsByName
             jointPositionsByName->emplace(joint->GetName(), jointPositionW);
     }
 
-    blaPosQuat nextCumulativeTransform;
+    blaPosQuat nextCumulativeTransform = blaPosQuat::GetIdentity();
     if (joint->GetDirectChildren().size()) // Leaf joints do not have transforms, let's not try looking for them
         nextCumulativeTransform = cumulativeTransform * jointTransforms[joint->GetName()][frameIndex];
 
@@ -64,9 +64,9 @@ unordered_map<string, blaPosQuat>* cumulativeTransformsByName
         if (segmentPositions)
         {
             blaVec3 childPositionL = child->GetLocalOffset();
-            blaVec3 childPositionW = nextCumulativeTransform * blaVec4(childPositionL[0], childPositionL[1], childPositionL[2], 1) * skeletonScale;
+            blaVec3 childPositionW = nextCumulativeTransform.TransformPoint(childPositionL);// *skeletonScale;
 
-            segmentPositions->push_back(pair<blaVec3, blaVec3>(nextCumulativeTransform.GetTranslation() * skeletonScale, childPositionW));
+            segmentPositions->push_back(pair<blaVec3, blaVec3>(nextCumulativeTransform.GetTranslation(), childPositionW)); //* skeletonScale, childPositionW));
         }
 
         QuerySkeletalAnimationRecursive(

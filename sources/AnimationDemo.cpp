@@ -54,16 +54,6 @@ void AnimationDemo::UpdateEditor()
 
     std::vector<blaVec3> jointPositions;
     std::vector<std::pair<blaVec3, blaVec3>> bones;
-
-    if (m_renderWindow->GetKeyPressed(GLFW_KEY_RIGHT))
-    {
-        m_frameIndex += 0.01f;
-    }
-    if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT))
-    {
-        m_frameIndex -= 0.01f;
-        m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
-    }
     
     if (animationObject != nullptr)
     {
@@ -71,10 +61,22 @@ void AnimationDemo::UpdateEditor()
         {
             if (animCmp->m_animation == nullptr)
             {
-                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/91_61.bvh");
+                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_01.bvh");
             }
             else
             {
+                blaF32 animDt = 1.0f / animCmp->m_animation->GetSamplingRate();
+                if (m_renderWindow->GetKeyPressed(GLFW_KEY_RIGHT))
+                {
+                    m_frameIndex += 0.1f;
+                }
+                if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT))
+                {
+                    m_frameIndex -= 0.1f;
+                    m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
+                }
+
+                m_frameIndex = m_frameIndex >= animCmp->m_animation->GetFrameCount() ? 0.f : m_frameIndex;
                 animCmp->m_animation->QuerySkeletalAnimation(static_cast<int>(m_frameIndex), 0, true, &jointPositions, nullptr, &bones, nullptr);
             }
         }
@@ -84,6 +86,7 @@ void AnimationDemo::UpdateEditor()
     for (size_t i = 0; i < bones.size(); i++)
     {
         m_debug->DrawLine(offset + bones[i].first, offset + bones[i].second);
+        //m_debug->DrawLine(offset , offset + jointPositions[i]);
     }
 
     if (m_editorControls)
@@ -212,11 +215,11 @@ void AnimationDemoControls::ControlCamera()
         }
         if (y - m_prevMouse.y > 0)
         {
-            tangentForce.y = -1.f;
+            tangentForce.y = 1.f;
         }
         else if (y - m_prevMouse.y < 0)
         {
-            tangentForce.y = 1.f;
+            tangentForce.y = -1.f;
         }
 
         m_prevMouse = glm::vec2(x, y);

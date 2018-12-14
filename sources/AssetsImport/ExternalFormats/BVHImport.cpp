@@ -165,8 +165,8 @@ void ReadFrameRecursive(vector<string>& tokens,
     if (!joint->GetDirectChildren().size())
         return;
 
-    blaQuat rotation(0.f,0.f,0.f,1.f);
-    for (int r = 0; r < 3; r++)
+    blaQuat rotation = blaPosQuat::blaQuatIdentity();
+    for (int r = 0; r < 3; ++r)
     {
         rotation *= GetRotation(jointsChannelOrderings[joint->GetName()][bIsRoot ? r + 3 : r], atof(tokens[currentToken + r].c_str()));
     }
@@ -361,15 +361,15 @@ int ChannelOrderToInt(string str)
 {
     if (!str.compare("Xrotation"))
     {
-        return 5;
+        return 0;
     }
     else if (!str.compare("Yrotation"))
     {
-        return 5;
+        return 1;
     }
     else if (!str.compare("Zrotation"))
     {
-        return 5;
+        return 2;
     }
     else if (!str.compare("Xposition"))
     {

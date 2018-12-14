@@ -200,7 +200,11 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
     blaVec3 X = blaVec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
     blaVec3 Y = blaVec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
     blaVec3 Z = blaVec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
-    transform.SetRotation(blaQuat(blaMat3(normalize(X), normalize(Y), normalize(Z))));
+
+
+    // TODO: Implement conversion in blaQuat class ...
+    glm::quat q = blaMat3(normalize(X), normalize(Y), normalize(Z));
+    transform.SetRotation(blaQuat(q.x,q.y,q.z,q.w));
 
     body.m_parentObject->SetTransform(transform);
 }
