@@ -101,7 +101,7 @@ void Scene::Update()
 
         for (auto dirLightComp : object->GetComponents<DirectionalLight>())
         {
-            CameraComponent* shadowCamera = dirLightComp->m_parentObject->GetComponent<CameraComponent>();
+            CameraComponent* shadowCamera = dirLightComp->GetParentObject()->GetComponent<CameraComponent>();
             if (dirLightComp->m_renderTicket == 0 && shadowCamera != nullptr)
             {
                 m_renderingManager->RegisterDirectionalLight(dirLightComp, shadowCamera);
@@ -114,7 +114,7 @@ void Scene::Update()
                 continue;
             for (auto object : m_sceneObjectsVector)
             {
-                if (PBRSurface* obj = object->GetComponent<PBRSurface>())
+                if (PBRSurfaceComponent* obj = object->GetComponent<PBRSurfaceComponent>())
                 {
                     pbrenderer->AddObject(obj);
                 }

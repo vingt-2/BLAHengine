@@ -62,12 +62,10 @@ namespace BLAengine
         blaVec3 m_emissivePower;
     };
 
-    class BLACORE_API PBRSurface : public GameComponent
+    class BLACORE_API PBRSurfaceComponent : public GameComponent
     {
+        friend class PBRRenderer;
     public:
-
-        ColliderComponent* m_collider;
-
         PBRMaterial m_material;
 
         virtual void SampleSurface(blaVec3 &position, float &prob) = 0;
@@ -75,36 +73,43 @@ namespace BLAengine
 
         virtual float GetSurfaceArea() = 0;
 
-        PBRSurface();
-        ~PBRSurface(void);
+        PBRSurfaceComponent(GameObject* parentObject);
+        ~PBRSurfaceComponent(void);
 
         void Update();
+
+    protected:
+        ColliderComponent* m_associatedCollider;
     };
 
-    class BLACORE_API PBRMesh : public PBRSurface
+    class BLACORE_API PBRMeshComponent : public PBRSurfaceComponent
     {
     public:
         void SampleSurface(blaVec3 &position, float &prob);
         void SampleSurfaceWithNormal(blaVec3 &position, blaVec3 &normal, float &prob);
         float GetSurfaceArea();
 
-        PBRMesh(TriangleMesh* mesh);
-        ~PBRMesh(void);
+        void CreateAndSetMeshCollider(TriangleMesh* mesh);
+
+        PBRMeshComponent(GameObject* parentObject);
+        ~PBRMeshComponent(void);
     private:
 
-        void ComputeSurfaceArea(MeshCollider* mesh);
+        void ComputeSurfaceArea();
         float m_surfaceArea = -1;
     };
 
-    class BLACORE_API PBRSphere : public PBRSurface
+    class BLACORE_API PBRSphereComponent : public PBRSurfaceComponent
     {
     public:
         void SampleSurface(blaVec3 &position, float &prob);
         void SampleSurfaceWithNormal(blaVec3 &position, blaVec3 &normal, float &prob);
         float GetSurfaceArea();
 
-        PBRSphere(float radius);
-        ~PBRSphere(void);
+        void CreateAndSetSphereCollider(float radius);
+
+        PBRSphereComponent(GameObject* parentObject) : PBRSurfaceComponent(parentObject) {};
+        ~PBRSphereComponent(void) {};
     private:
 
         float m_surfaceArea = -1;

@@ -57,14 +57,14 @@ bool BLAengine::PBRCamera::WriteImageToFile(string filepath, int w, int h)
     return true;
 }
 
-std::pair<PBRSurface*, ColliderComponent::RayCollision> BLAengine::IntersectWithScene(Ray ray, vector<PBRSurface*> &objects)
+std::pair<PBRSurfaceComponent*, ColliderComponent::RayCollision> PBRRenderer::IntersectWithScene(Ray ray, vector<PBRSurfaceComponent*> &surfaceComponents)
 {
     float minDistance = INFINITY;
-    PBRSurface* pickedObject = nullptr;
+    PBRSurfaceComponent* pickedObject = nullptr;
     ColliderComponent::RayCollision closestContact;
-    for (auto obj : objects)
+    for (auto surfaceComp : surfaceComponents)
     {
-        ColliderComponent* collider = obj->m_collider;
+        ColliderComponent* collider = surfaceComp->m_associatedCollider;
 
         if (collider == nullptr)
             continue;
@@ -79,17 +79,17 @@ std::pair<PBRSurface*, ColliderComponent::RayCollision> BLAengine::IntersectWith
         if (distance > 0 && distance < minDistance)
         {
             minDistance = distance;
-            pickedObject = obj;
+            pickedObject = surfaceComp;
             closestContact = contactPoint;
         }
     }
 
-    return std::pair<PBRSurface*, ColliderComponent::RayCollision>(pickedObject, closestContact);
+    return std::pair<PBRSurfaceComponent*, ColliderComponent::RayCollision>(pickedObject, closestContact);
 }
 
 vector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
 {
-    for (PBRSurface* surface : m_sceneObjects)
+    for (PBRSurfaceComponent* surface : m_sceneObjects)
     {
         if (length(surface->m_material.m_emissivePower) > 0.0f)
         {
@@ -189,7 +189,7 @@ blaVec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int de
     }
 
     blaVec3 lightRadiance(0);
-    for (PBRSurface* lightSurface : m_lightObjects)
+    for (PBRSurfaceComponent* lightSurface : m_lightObjects)
     {
         blaVec3 montecarloRadiance = blaVec3(0, 0, 0);
         float mc_samples = 20;
@@ -271,7 +271,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
     float totalPower = 0;
     for (size_t i = 0; i < m_lightObjects.size(); i++)
     {
-        PBRSurface* lightSurface = m_lightObjects[i];
+        PBRSurfaceComponent* lightSurface = m_lightObjects[i];
 
         totalPower += length(lightSurface->m_material.m_emissivePower);
     }
@@ -279,7 +279,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
     std::vector<float> lightSamplingPDF;
     for (size_t i = 0; i < m_lightObjects.size(); i++)
     {
-        PBRSurface* lightSurface = m_lightObjects[i];
+        PBRSurfaceComponent* lightSurface = m_lightObjects[i];
         lightSamplingPDF.push_back(length(lightSurface->m_material.m_emissivePower) / totalPower);
     }
 
@@ -293,7 +293,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
                 if (zeroToOneDist(dgen) >= lightSamplingPDF[i])
                     continue;
 
-                PBRSurface* lightSurface = m_lightObjects[i];
+                PBRSurfaceComponent* lightSurface = m_lightObjects[i];
 
                 float emissionProb;
                 Ray ray = GeneratePhoton(lightSurface, emissionProb);
@@ -316,7 +316,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
                 if (zeroToOneDist(dgen) >= lightSamplingPDF[i])
                     continue;
 
-                PBRSurface* lightSurface = m_lightObjects[i];
+                PBRSurfaceComponent* lightSurface = m_lightObjects[i];
 
                 float emissionProb;
                 Ray ray = GeneratePhoton(lightSurface, emissionProb);
@@ -333,7 +333,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfP
     m_volumetricPhotonMap.BuildKDTree();
 }
 
-Ray BLAengine::PBRPhotonMapping::GeneratePhoton(PBRSurface* lightSurface, float &outEmissionProb)
+Ray BLAengine::PBRPhotonMapping::GeneratePhoton(PBRSurfaceComponent* lightSurface, float &outEmissionProb)
 {
     blaVec3 samplePos, sampleNormal;
     float samplePDF;
@@ -364,7 +364,7 @@ void BLAengine::PBRPhotonMapping::TracePhoton(Ray incidentRay, blaVec3 photonPow
 
     auto p = IntersectWithScene(incidentRay, m_sceneObjects);
 
-    PBRSurface* surface = p.first;
+    PBRSurfaceComponent* surface = p.first;
     ColliderComponent::RayCollision colHit = p.second;
 
     if (surface == nullptr || length(surface->m_material.m_emissivePower) > 0)
@@ -491,7 +491,7 @@ blaVec3 BLAengine::PBRPhotonMapping::MarchDirectEquiAngular(Ray ray, float endOf
     while (marchedDistance < endOfRay && m_volumeExtinctionCoeff > 0)
     {
         blaVec3 lightContribution(0);
-        for (PBRSurface* lightSurface : m_lightObjects)
+        for (PBRSurfaceComponent* lightSurface : m_lightObjects)
         {
             blaVec3 montecarloRadiance = blaVec3(0);
             float MCSamples = 10;
@@ -564,7 +564,7 @@ blaVec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
     blaMat3 tangentSpace = GetTangentSpace(shadeRayCollision.m_colNormalW);
 
     blaVec3 directRadiance(0);
-    for (PBRSurface* lightSurface : m_lightObjects)
+    for (PBRSurfaceComponent* lightSurface : m_lightObjects)
     {
         blaVec3 montecarloRadiance = blaVec3(0);
         float MCSamples = 50;
@@ -630,7 +630,7 @@ blaVec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
 
 vector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
 {
-    for (PBRSurface* surface : m_sceneObjects)
+    for (PBRSurfaceComponent* surface : m_sceneObjects)
     {
         if (length(surface->m_material.m_emissivePower) > 0.0f)
         {

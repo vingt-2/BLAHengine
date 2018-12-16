@@ -2,8 +2,9 @@
 
 using namespace BLAengine;
 
-AnimationComponent::AnimationComponent():
-m_animation(nullptr)
+AnimationComponent::AnimationComponent(GameObject* parentObject) :
+    GameComponent(parentObject),
+    m_animation(nullptr)
 {}
 
 AnimationComponent::~AnimationComponent()

@@ -9,6 +9,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+typedef glm::ivec2 blaIVec2;
+typedef glm::vec2 blaVec2;
 typedef glm::vec3 blaVec3;
 typedef glm::vec4 blaVec4;
 typedef glm::mat3 blaMat3;
@@ -20,6 +22,8 @@ typedef glm::mat4 blaMat4;
 #define MAX_NORMAL_FLOAT 3.4028234664e38
 #define MIN_NORMAL_FLOAT -3.4028234664e38
 //#define MAX_SUBNORMAL_FLOAT 0x00800000
+
+#define BLA_EPSILON 1.192092896e-07F
 
 typedef glm::quat blaQuat;
 

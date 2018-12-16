@@ -1,5 +1,5 @@
 #pragma once
-#include "PBRSurface.h"
+#include "PBRSurfaceComponent.h"
 #include "PBRPhotonMap.h"
 
 namespace BLAengine
@@ -8,28 +8,31 @@ namespace BLAengine
     {
     public:
         virtual vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel) = 0;
+        
+        static std::pair<PBRSurfaceComponent*, ColliderComponent::RayCollision> IntersectWithScene(Ray r, vector<PBRSurfaceComponent*> &objects);
     };
 
     class PBRExplicitPathTracer : public PBRRenderer
     {
     public:
-        PBRExplicitPathTracer(vector<PBRSurface*> sceneObjects)
+        PBRExplicitPathTracer(vector<PBRSurfaceComponent*> sceneObjects)
         {
             m_sceneObjects = sceneObjects;
         }
 
         vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
     private:
+
         blaVec3 PathTraceShade(Ray r, int depth);
 
-        vector<PBRSurface*> m_sceneObjects;
-        vector<PBRSurface*> m_lightObjects;
+        vector<PBRSurfaceComponent*> m_sceneObjects;
+        vector<PBRSurfaceComponent*> m_lightObjects;
     };
 
     class PBRPhotonMapping : public PBRRenderer
     {
     public:
-        PBRPhotonMapping(vector<PBRSurface*> sceneObjects):
+        PBRPhotonMapping(vector<PBRSurfaceComponent*> sceneObjects):
             m_photonMap(PhotonMap(0)),
             m_volumetricPhotonMap(PhotonMap(0))
         {
@@ -42,7 +45,7 @@ namespace BLAengine
         vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
     private:
         void BuildPhotonMap(bool inParallel, glm::uint numberOfPhotons);
-        Ray GeneratePhoton(PBRSurface* surface, float &outEmissionProb);
+        Ray GeneratePhoton(PBRSurfaceComponent* surface, float &outEmissionProb);
         void TracePhoton(Ray incidentRay, blaVec3 photonPower,int bounce);
 
         blaVec3 GatherSurfaceDensity(Ray incidentRay);
@@ -62,19 +65,21 @@ namespace BLAengine
         }
 
         int m_photonsShot;
-        vector<PBRSurface*> m_sceneObjects;
-        vector<PBRSurface*> m_lightObjects;
+        vector<PBRSurfaceComponent*> m_sceneObjects;
+        vector<PBRSurfaceComponent*> m_lightObjects;
     };
-
-    static std::pair<PBRSurface*, ColliderComponent::RayCollision> IntersectWithScene(Ray r, vector<PBRSurface*> &objects);
 
     class BLACORE_API PBRCamera : public GameComponent
     {
     public:
+
+        PBRCamera(GameObject* parentObject): GameComponent(parentObject) {};
+        ~PBRCamera(){};
+
         vector<blaVec3> m_renderedImage;
         PBRRenderer* m_renderer;
 
-        void AddObject(PBRSurface* mesh)
+        void AddObject(PBRSurfaceComponent* mesh)
         {
             m_sceneObjects.push_back(mesh);
         }
@@ -85,7 +90,7 @@ namespace BLAengine
 
         void Update() {};
     private:
-        vector<PBRSurface*> m_sceneObjects;
+        vector<PBRSurfaceComponent*> m_sceneObjects;
 
         bool WriteImageToFile(string filepath, int w, int h);
     };

@@ -51,7 +51,7 @@ void CollisionProcessor::BroadPhaseDetection()
             {
                 blaVec3* nxtPos1 = &(body1->m_nextState->m_nextPos);
                 blaVec3* nxtPos2 = &(body2->m_nextState->m_nextPos);
-                if (length(*nxtPos1 - *nxtPos2) < (body1->m_collider->GetBoundingRadius() + body2->m_collider->GetBoundingRadius()))
+                if (length(*nxtPos1 - *nxtPos2) < (body1->GetAssociatedCollider()->GetBoundingRadius() + body2->GetAssociatedCollider()->GetBoundingRadius()))
                     NarrowPhaseDetection(body1, body2);
             }
         }

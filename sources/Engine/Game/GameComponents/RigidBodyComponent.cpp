@@ -3,7 +3,8 @@
 
 using namespace BLAengine;
 
-RigidBodyComponent::RigidBodyComponent() :
+RigidBodyComponent::RigidBodyComponent(GameObject* parentObject) :
+    GameComponent(parentObject),
     m_forcesAccu(blaVec3(0)),
     m_torquesAccu(blaVec3(0)),
     m_acceleration(blaVec3(0)),
@@ -18,7 +19,7 @@ RigidBodyComponent::RigidBodyComponent() :
     m_inertiaTensor(blaMat3(1)),
     m_enableCollision(true)
 {
-    m_collider = nullptr;
+    m_associatedCollider = nullptr;
 
     m_invMassTensor = inverse(m_massTensor);
     m_invInertiaTensor = inverse(m_inertiaTensor);
@@ -28,14 +29,32 @@ RigidBodyComponent::RigidBodyComponent() :
 RigidBodyComponent::~RigidBodyComponent(void)
 {}
 
+void RigidBodyComponent::SetCollider(ColliderComponent* collider)
+{
+    if (collider->GetParentObject() != GetParentObject())
+    {
+        //TODO: Say something sassy about the programmer that programmed that
+        return;
+    }
+    
+    m_associatedCollider = collider;
+}
+
+void RigidBodyComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
+{
+    MeshColliderComponent* newMeshColliderComponent = BLA_CREATE_COMPONENT(MeshColliderComponent, GetParentObject());
+    newMeshColliderComponent->SetColliderMesh(mesh);
+    m_associatedCollider = newMeshColliderComponent;
+}
+
 void RigidBodyComponent::Update()
 {
-// TODO ? Eventually do some stuff here.
+// TODO: Eventually do some stuff here ?
 }
 
 void RigidBodyComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
 {
-    ObjectTransform transform = m_parentObject->GetTransform();
+    ObjectTransform transform = GetParentObject()->GetTransform();
     blaVec3 contactInBody = pushAtW - transform.GetPosition();
 
     blaVec3 torque = cross(forceW, contactInBody);

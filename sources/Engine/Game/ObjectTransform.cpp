@@ -45,6 +45,11 @@ void ObjectTransform::SetEulerAngles(float pitch, float yaw, float roll)
     m_transform.SetRotation(blaPosQuat::EulerToQuat(pitch, yaw, roll));
 }
 
+void ObjectTransform::SetEulerAngles(blaVec3 eulerAngles)
+{
+    m_transform.SetRotation(blaPosQuat::EulerToQuat(eulerAngles.x, eulerAngles.y, eulerAngles.z));
+}
+
 blaVec3 ObjectTransform::GetEulerAngles() const
 {
     blaQuat q = m_transform.GetRotation();

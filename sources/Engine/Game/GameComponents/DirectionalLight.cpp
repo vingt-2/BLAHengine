@@ -3,9 +3,10 @@
 #include "../GameObject.h"
 using namespace BLAengine;
 
-DirectionalLight::DirectionalLight(blaVec3 direction)
+DirectionalLight::DirectionalLight(GameObject *parentObject):
+    GameComponent(parentObject)
 {
-    m_lightDirection = direction;
+    m_lightDirection = blaVec3(0.f);
     m_renderTicket = 0;
 }
 
@@ -16,12 +17,11 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::Update()
 {
-    vector<CameraComponent*> cameras = m_parentObject->GetComponents<CameraComponent>();
+    vector<CameraComponent*> cameras = GetParentObject()->GetComponents<CameraComponent>();
     if (!cameras.size())
     {
-        CameraComponent* shadowCamera = new CameraComponent();
+        CameraComponent* shadowCamera = BLA_CREATE_COMPONENT(CameraComponent, GetParentObject());
         shadowCamera->m_isShadowMapCamera = true;
-        m_parentObject->AddComponent(shadowCamera);
 
         shadowCamera->Update();
     }
@@ -34,6 +34,6 @@ void DirectionalLight::SetDirection(blaVec3 direction)
 
 blaVec3 DirectionalLight::GetDirection()
 {
-    const ObjectTransform& t = m_parentObject->GetTransform();
+    const ObjectTransform& t = GetParentObject()->GetTransform();
     return t.LocalDirectionToWorld(m_lightDirection);
 }

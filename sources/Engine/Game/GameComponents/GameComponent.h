@@ -2,6 +2,9 @@
 #include "../../../Common/StdInclude.h"
 #include "../ObjectTransform.h"
 
+#define BLA_CREATE_COMPONENT(ComponentType, parentObject)\
+    parentObject != nullptr ? new ComponentType(parentObject) : nullptr;
+
 namespace BLAengine
 {
     class GameObject;
@@ -9,12 +12,15 @@ namespace BLAengine
     {
     public:
 
-        GameComponent() : m_parentObject(nullptr){}
+        GameComponent(GameObject* parentObject);
 
         virtual void Update() = 0;
 
-        const ObjectTransform& GetObjectTransform();
+        const ObjectTransform& GetObjectTransform() const;
 
+        GameObject* GetParentObject() { return m_parentObject; };
+
+    private:
         GameObject* m_parentObject;
     };
 }

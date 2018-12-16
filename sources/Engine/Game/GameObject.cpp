@@ -37,6 +37,4 @@ void GameObject::SetTransform(const ObjectTransform& transform)
 void GameObject::AddComponent(GameComponent* component)
 {
     m_componentVector.push_back(component);
-    component->m_parentObject = this;
-    component->Update();
 }

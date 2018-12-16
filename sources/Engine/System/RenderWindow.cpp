@@ -65,7 +65,7 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     m_glfwWindow = window;
 }
 
-string GLFWRenderWindow::GetMaxGLVersion()
+string GLFWRenderWindow::GetMaxGLVersion() const
 {
     return string("");
 }
@@ -77,13 +77,25 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
+    bool cursorVisibility = true;
+    for (auto mouseButton : m_mouseButtonsThatKillCursorWhenHeld)
+    {
+        if (GetMousePressed(mouseButton))
+        {
+            cursorVisibility = false;
+            break;
+        }
+    }
+
+    SetMouseCursorVisibility(cursorVisibility);
+    
     glfwSwapInterval(0);
 
     glfwSwapBuffers(m_glfwWindow);
     glfwPollEvents();
 }
 
-void GLFWRenderWindow::GetSize(int &width, int &height)
+void GLFWRenderWindow::GetSize(int &width, int &height) const
 {
     if (m_isFullscreen)
     {
@@ -96,7 +108,7 @@ void GLFWRenderWindow::GetSize(int &width, int &height)
     }
 }
 
-bool GLFWRenderWindow::isFullScreen()
+bool GLFWRenderWindow::isFullScreen() const
 {
     return m_isFullscreen;
 }
@@ -105,12 +117,12 @@ void GLFWRenderWindow::SetWindowTitle(std::string title)
 {
 }
 
-std::string GLFWRenderWindow::GetWindowTitle()
+std::string GLFWRenderWindow::GetWindowTitle() const
 {
     return std::string();
 }
 
-void GLFWRenderWindow::GetMouse(double & x, double& y)
+void GLFWRenderWindow::GetMouse(double & x, double& y) const
 {
     glfwGetCursorPos(m_glfwWindow, &x, &y);
 }
@@ -119,12 +131,12 @@ void GLFWRenderWindow::SetMouseXY()
 {
 }
 
-bool GLFWRenderWindow::GetKeyPressed(int key)
+bool GLFWRenderWindow::GetKeyPressed(int key) const
 {
     return (glfwGetKey(m_glfwWindow, key) == GLFW_PRESS);
 }
 
-bool GLFWRenderWindow::GetMousePressed(int button)
+bool GLFWRenderWindow::GetMousePressed(int button) const
 {
     return (glfwGetMouseButton(m_glfwWindow, button) == GLFW_PRESS);
 }
@@ -148,8 +160,13 @@ GLFWRenderWindow::~GLFWRenderWindow()
 
 void GLFWRenderWindow::SetMouseCursorVisibility(bool visiblity)
 {
-	//GLFW_CURSOR_HIDDEN to not lock the cursor while hidden
-	glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, visiblity ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    //GLFW_CURSOR_HIDDEN to not lock the cursor while hidden
+    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, visiblity ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+}
+
+void GLFWRenderWindow::SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton)
+{
+    m_mouseButtonsThatKillCursorWhenHeld.push_back(mouseButton);
 }
 
 #endif
@@ -204,42 +221,42 @@ void WPFRenderWindow::WriteMousePos(int x, int y)
 
 void WPFRenderWindow::SetMouseXY() {}
 
-bool WPFRenderWindow::GetKeyPressed(int key) 
+bool WPFRenderWindow::GetKeyPressed(int key) const
 {
     bool r = m_keyPressed[key];
     return r;
 }
 
-bool WPFRenderWindow::GetMousePressed(int button)
+bool WPFRenderWindow::GetMousePressed(int button) const
 { 
     int mask = (unsigned char) (0x01 << button);
 
     return (mask & m_mouseDownState) != 0x00;
 }
 
-string WPFRenderWindow::GetMaxGLVersion() { return m_glVersion; }
+string WPFRenderWindow::GetMaxGLVersion() const { return m_glVersion; }
 
-bool WPFRenderWindow::isFullScreen() 
+bool WPFRenderWindow::isFullScreen() const
 {
     return false; 
 }
 
 void WPFRenderWindow::SetWindowTitle(string title) { }
-string WPFRenderWindow::GetWindowTitle() { return ""; }
+string WPFRenderWindow::GetWindowTitle() const { return ""; }
 
-bool WPFRenderWindow::ShouldUpdateWindow() { return m_updateWindowRequest; }
+bool WPFRenderWindow::ShouldUpdateWindow() const { return m_updateWindowRequest; }
 void WPFRenderWindow::SetWindowUpdated() { m_updateWindowRequest = false; }
 
-bool WPFRenderWindow::ShouldMakeGLCurrent() { return m_makeGLCurrentRequest; }
+bool WPFRenderWindow::ShouldMakeGLCurrent() const { return m_makeGLCurrentRequest; }
 void WPFRenderWindow::SetMadeGLCurrent() { m_makeGLCurrentRequest = false; }
 
-void WPFRenderWindow::GetSize(int &width, int &height)
+void WPFRenderWindow::GetSize(int &width, int &height) const
 {
     width = m_width;
     height = m_height;
 }
 
-void WPFRenderWindow::GetMouse(double &x, double &y)
+void WPFRenderWindow::GetMouse(double &x, double &y) const
 {
     x = m_mousePosX;
     y = m_mousePosY;

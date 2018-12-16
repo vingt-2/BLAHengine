@@ -7,27 +7,6 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 {
     this->m_renderWindow = _renderWindow;
     m_assetManager = new AssetManager();
-
-    //if (Material* damierMat = new Material("EarthMat"))
-    //{
-    //    damierMat->AssignTexture("Earth", "diffuseMap");
-    //    damierMat->AssignTexture("EarthNRM", "normalMap");
-    //    m_assetManager->SaveMaterial(damierMat);
-    //}
-    //else
-    //{
-    //    std::cout << "Cannot do dis\n";
-    //}
-
-    //if (Texture2D* damierTexture = TextureImport::LoadBMP("Earth", "./resources/textures/earth.bmp"))
-    //{
-    //    m_assetManager->SaveTexture(damierTexture);
-    //}
-
-    //if (Texture2D* damierTexture = TextureImport::LoadBMP("EarthNRM", "./resources/textures/earth_NRM.bmp"))
-    //{
-    //    m_assetManager->SaveTexture(damierTexture);
-    //}
     
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
@@ -80,7 +59,7 @@ void EditorSession::UpdateEditor()
             }
             else
             {
-                object->AddComponent(new RigidBodyComponent());
+                BLA_CREATE_COMPONENT(RigidBodyComponent, object);
             }
             debugRay = Ray(cp.m_colPositionW, cp.m_colNormalW, 10000);
         }
@@ -107,7 +86,7 @@ void EditorSession::UpdateEditor()
     {
         if (CameraComponent* cameraObject = m_workingScene->GetMainCamera())
         {
-            m_editorControls = new EditorControls(cameraObject->m_parentObject, m_renderWindow);
+            m_editorControls = new EditorControls(cameraObject->GetParentObject(), m_renderWindow);
         }
     }
 
@@ -136,17 +115,15 @@ bool BLAengine::EditorSession::LoadWorkingScene(std::string filepath)
     m_workingScene->Initialize(m_renderingManager);
     m_editorRenderer->SwitchRenderingManager(m_renderingManager);
 
-    GameObject* light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = new DirectionalLight(blaVec3(0, 10, 0));
-    light->AddComponent(dirLight);
-    ObjectTransform lightT = light->GetTransform();
+    GameObject* lightObject = m_workingScene->CreateObject("DirLight");
+    DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, lightObject);
+    ObjectTransform lightT = lightObject->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
     lightT.SetEulerAngles(0.f, 1.2f, 0.f);
-    light->SetTransform(lightT);
+    lightObject->SetTransform(lightT);
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
-    CameraComponent* cameraComp = new CameraComponent();
-    cameraObject->AddComponent(cameraComp);
+    CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
 
     m_editorRenderer->SetCamera(cameraComp);
 

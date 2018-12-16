@@ -6,6 +6,9 @@ namespace BLAengine
 {
     class BLACORE_API GameObject
     {
+        // Game component is a friend class to GameObjects. They call Add Component upon Creation
+        friend class GameComponent;
+
     public:
 
         void Update();
@@ -22,8 +25,6 @@ namespace BLAengine
         void SetName(std::string name) { m_objectName = name; }
         std::string GetName() { return m_objectName; }
 
-        void AddComponent(GameComponent* component);
-
         vector<GameComponent*> GetAllComponents();
 
         template<class ComponentType>
@@ -39,6 +40,8 @@ namespace BLAengine
         vector<ComponentType*> GetComponentsInChildren();
 
     private:
+
+        void AddComponent(GameComponent* component);
 
         string m_objectName;
         GameObject* m_parent;

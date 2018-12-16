@@ -28,3 +28,15 @@ using namespace std;
 #else
 #define BLACORE_API
 #endif
+
+#define BLA_DECLARE_SINGLETON(type)\
+    type* g_bla_singleton_##type;\
+    bool g_bla_singleton_set_##type = false;
+
+#define BLA_ASSIGN_SINGLETON(type, value)\
+    g_bla_singleton_##type = g_bla_singleton_set_##type ? g_bla_singleton_##type : value;\
+    g_bla_singleton_set_##type = true;
+
+#define BLA_RETRIEVE_SINGLETON(type, variable)\
+    extern type* g_bla_singleton_##type; \
+    variable = g_bla_singleton_##type;

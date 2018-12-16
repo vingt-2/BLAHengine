@@ -2,7 +2,7 @@
 #include "./GameComponents/CameraComponent.h"
 #include "./GameComponents/DirectionalLight.h"
 #include "./GameComponents/MeshRendererComponent.h"
-#include "./GameComponents/PointLight.h"
+#include "./GameComponents/PointLightComponent.h"
 #include "../../Common/StdInclude.h"
 
 namespace BLAengine

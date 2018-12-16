@@ -1,7 +1,6 @@
 #include "./Debug.h"
 using namespace BLAengine;
 
-
 Debug::Debug(DebugRenderingManager* manager)
 {
     m_drawDebugRays = true;
@@ -23,7 +22,7 @@ void Debug::Update()
     m_lineMeshVertsAndColor.second.clear();
 }
 
-void Debug::DrawLine(const blaVec3 origin,const blaVec3 destination)
+void Debug::DrawLine(const blaVec3& origin, const blaVec3& destination)
 {
     m_lineMeshVertsAndColor.first.push_back(origin); 
     m_lineMeshVertsAndColor.first.push_back(destination);
@@ -31,7 +30,7 @@ void Debug::DrawLine(const blaVec3 origin,const blaVec3 destination)
     m_lineMeshVertsAndColor.second.push_back(blaVec3(0));
 }
 
-void Debug::DrawLine(const blaVec3 origin,const blaVec3 destination,const blaVec3 color)
+void Debug::DrawLine(const blaVec3& origin, const blaVec3& destination, const blaVec3& color)
 {
     m_lineMeshVertsAndColor.first.push_back(origin);
     m_lineMeshVertsAndColor.first.push_back(destination);
@@ -39,7 +38,7 @@ void Debug::DrawLine(const blaVec3 origin,const blaVec3 destination,const blaVec
     m_lineMeshVertsAndColor.second.push_back(color);
 }
 
-void Debug::DrawRay(Ray ray,const blaVec3 color)
+void Debug::DrawRay(Ray ray, const blaVec3& color)
 {
     blaVec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
 
@@ -50,10 +49,20 @@ void Debug::DrawRay(Ray ray)
 {
     blaVec3 destination = ray.m_origin + ray.m_length* ray.m_direction;
 
-    DrawLine(ray.m_origin, destination, blaVec3(1));
+    DrawLine(ray.m_origin, destination, blaVec3(1.f));
 }
 
-void Debug::DrawGrid(int size, float spacing, const blaVec3 color)
+void Debug::DrawSphere(const blaVec3& origin, const blaVec3& color)
+{
+
+}
+
+void Debug::DrawSphere(const blaVec3& origin)
+{
+    DrawSphere(origin, blaVec3(1.f));
+}
+
+void Debug::DrawGrid(int size, float spacing, const blaVec3& color)
 {
     for (int i=-size/2; i<=size/2; i++)
     {

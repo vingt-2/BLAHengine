@@ -1,4 +1,5 @@
 #include "SimpleHairComponent.h"
+#include "../../EngineInstance.h"
 #include "../GameObject.h"
 #include "../Debug.h"
 #include <random>
@@ -7,7 +8,8 @@ using namespace BLAengine;
 
 std::default_random_engine g_random_generator;
 
-SimpleHairComponent::SimpleHairComponent() :
+SimpleHairComponent::SimpleHairComponent(GameObject* parentObject) :
+    GameComponent(parentObject),
     m_forcesAccu(blaVec3(0)),
     m_isPinned(false),
     m_applyGravity(true)
@@ -41,9 +43,13 @@ SimpleHairComponent::~SimpleHairComponent(void)
 
 void SimpleHairComponent::RenderSimpleHair()
 {
-    extern Debug* g_debugInstance;
+    EngineInstance* engineInstance;
+    
+    BLA_RETRIEVE_SINGLETON(EngineInstance, engineInstance);
+    
+    Debug* debugInstance = engineInstance->GetDebug();
 
-    if (!g_debugInstance)
+    if (!debugInstance)
         return;
 
     for (auto hair : m_hairStrands)
@@ -52,7 +58,7 @@ void SimpleHairComponent::RenderSimpleHair()
         {
             blaVec3 color = blaVec3(0.f);
 
-            g_debugInstance->DrawLine(hair.m_particlePositionsW[i], hair.m_particlePositionsW[i + 1], color);
+            debugInstance->DrawLine(hair.m_particlePositionsW[i], hair.m_particlePositionsW[i + 1], color);
         }
     }
 }
@@ -125,7 +131,7 @@ void SimpleHairComponent::Update()
 
 void SimpleHairComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
 {
-    ObjectTransform transform = m_parentObject->GetTransform();
+    ObjectTransform transform = GetParentObject()->GetTransform();
     blaVec3 contactInBody = pushAtW - transform.GetPosition();
 
     blaVec3 torque = cross(forceW, contactInBody);

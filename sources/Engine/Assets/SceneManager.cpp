@@ -57,7 +57,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
         {
             if (std::shared_ptr<MeshRendererSerializer> meshRenderSer = std::dynamic_pointer_cast<MeshRendererSerializer>(compSer))
             {
-                MeshRendererComponent* meshRenderer = new MeshRendererComponent();
+                MeshRendererComponent* meshRenderer = BLA_CREATE_COMPONENT(MeshRendererComponent, gameObject);
 
                 Asset* triMeshAsset = nullptr;
                 if (m_assetManager->GetAsset(meshRenderSer->GetMeshName(), triMeshAsset) == AssetManager::AssetType::TriangleMeshAsset)
@@ -83,15 +83,14 @@ Scene* SceneManager::LoadScene(std::string filepath)
                     }
                     matIndex++;
                 }
-                gameObject->AddComponent(meshRenderer);
 
                 //
                 // Automatically add a collider for now...
                 // 
 
-                ColliderComponent* collider = new MeshCollider((TriangleMesh*)triMeshAsset);
+                MeshColliderComponent* collider = BLA_CREATE_COMPONENT(MeshColliderComponent, gameObject);
 
-                gameObject->AddComponent(collider);
+                collider->SetColliderMesh((TriangleMesh*)triMeshAsset);
             }
         }
     }

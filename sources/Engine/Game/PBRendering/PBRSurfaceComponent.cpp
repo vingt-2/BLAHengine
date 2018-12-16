@@ -1,4 +1,4 @@
-#include "PBRSurface.h"
+#include "PBRSurfaceComponent.h"
 #include <random>
 #include "../GameObject.h"
 
@@ -7,32 +7,34 @@ using namespace BLAengine;
 std::random_device rd;
 std::mt19937 gen(rd());
 
-PBRSurface::PBRSurface()
+PBRSurfaceComponent::PBRSurfaceComponent(GameObject* parentObject):
+    GameComponent(parentObject)
 {
-    this->m_collider = nullptr;
+    this->m_associatedCollider = nullptr;
 } 
 
-PBRSurface::~PBRSurface(void)
+PBRSurfaceComponent::~PBRSurfaceComponent(void)
 {}
 
 
-void PBRSurface::Update()
+void PBRSurfaceComponent::Update()
 {
-    if(!m_parentObject->GetComponent<ColliderComponent>())
-        m_parentObject->AddComponent(m_collider);
+    //TODO: Might want to figure that one out if I want to use the pbr rendere again...
+   /* if(!m_parentObject->GetComponent<ColliderComponent>())
+    {
+        m_parentObject->AddComponent(m_associatedCollider);
+    }*/
 }
 
-PBRMesh::PBRMesh(TriangleMesh* mesh):
-    PBRSurface()
+PBRMeshComponent::PBRMeshComponent(GameObject* parentObject):
+    PBRSurfaceComponent(parentObject)
 {
-    MeshCollider* meshCollider = new MeshCollider(mesh);
-    m_collider = meshCollider;
-    ComputeSurfaceArea(meshCollider);
+    m_surfaceArea = BLA_EPSILON;
 }
 
-void BLAengine::PBRMesh::SampleSurface(blaVec3 &pos, float& prob)
+void BLAengine::PBRMeshComponent::SampleSurface(blaVec3 &pos, float& prob)
 {
-    if (MeshCollider* mesh = dynamic_cast<MeshCollider*>(m_collider))
+    if (MeshColliderComponent* mesh = dynamic_cast<MeshColliderComponent*>(m_associatedCollider))
     {
         std::uniform_int_distribution<> randIndx(0, (mesh->m_vertPosIndices->size() / 3)-1);
         
@@ -60,9 +62,9 @@ void BLAengine::PBRMesh::SampleSurface(blaVec3 &pos, float& prob)
     }
 }
 
-void BLAengine::PBRMesh::SampleSurfaceWithNormal(blaVec3 & position, blaVec3 & normal, float & prob)
+void BLAengine::PBRMeshComponent::SampleSurfaceWithNormal(blaVec3 & position, blaVec3 & normal, float & prob)
 {
-    if (MeshCollider* mesh = dynamic_cast<MeshCollider*>(m_collider))
+    if (MeshColliderComponent* mesh = dynamic_cast<MeshColliderComponent*>(m_associatedCollider))
     {
         std::uniform_int_distribution<> randIndx(0, (mesh->m_vertPosIndices->size() / 3) - 1);
 
@@ -94,32 +96,46 @@ void BLAengine::PBRMesh::SampleSurfaceWithNormal(blaVec3 & position, blaVec3 & n
     }
 }
 
-float BLAengine::PBRMesh::GetSurfaceArea()
+float BLAengine::PBRMeshComponent::GetSurfaceArea()
 {
     return m_surfaceArea;
 }
 
-PBRMesh::~PBRMesh(void) {}
-
-void BLAengine::PBRMesh::ComputeSurfaceArea(MeshCollider* mesh)
+void PBRMeshComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
 {
-    float totalArea = 0;
-    for (size_t i = 0; i < mesh->m_vertPosIndices->size() / 3; i++)
-    {
-        blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
+    MeshColliderComponent* collider = BLA_CREATE_COMPONENT(MeshColliderComponent, GetParentObject());
 
-        for (int k = 0; k < 3; k++)
-        {
-            glm::uint32 vertPosIndex = mesh->m_vertPosIndices->at(3 * i + k);
-            contactVertices[k] = mesh->m_triVertices->at((int)vertPosIndex);
-        }
-        float triArea = length(cross(contactVertices[1] - contactVertices[0], contactVertices[2] - contactVertices[0])) / 2.0f;
-        totalArea += triArea;
-    }
-    m_surfaceArea = totalArea;
+    collider->SetColliderMesh(mesh);
+    
+    m_associatedCollider = collider;
+
+    ComputeSurfaceArea();
 }
 
-void BLAengine::PBRSphere::SampleSurface(blaVec3 &position, float &prob)
+PBRMeshComponent::~PBRMeshComponent(void) {}
+
+void PBRMeshComponent::ComputeSurfaceArea()
+{
+    if (MeshColliderComponent* meshColliderComponent = dynamic_cast<MeshColliderComponent*>(m_associatedCollider))
+    {
+        float totalArea = 0;
+        for (size_t i = 0; i < meshColliderComponent->m_vertPosIndices->size() / 3; i++)
+        {
+            blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
+
+            for (int k = 0; k < 3; k++)
+            {
+                glm::uint32 vertPosIndex = meshColliderComponent->m_vertPosIndices->at(3 * i + k);
+                contactVertices[k] = meshColliderComponent->m_triVertices->at((int)vertPosIndex);
+            }
+            float triArea = length(cross(contactVertices[1] - contactVertices[0], contactVertices[2] - contactVertices[0])) / 2.0f;
+            totalArea += triArea;
+        }
+        m_surfaceArea = totalArea;
+    }
+}
+
+void BLAengine::PBRSphereComponent::SampleSurface(blaVec3 &position, float &prob)
 {
     std::uniform_real_distribution<float> randDist(-1.f, 1.f);
 
@@ -128,12 +144,12 @@ void BLAengine::PBRSphere::SampleSurface(blaVec3 &position, float &prob)
     float z = randDist(gen);
 
     blaVec3 pOnSphere(x, y, z);
-    float radius = m_collider->GetBoundingRadius();
+    float radius = m_associatedCollider->GetBoundingRadius();
     position = GetObjectTransform().GetPosition() + pOnSphere * radius;
     prob = 1.0f / (2.0f * M_PI * radius * radius);
 }
 
-void BLAengine::PBRSphere::SampleSurfaceWithNormal(blaVec3 &position, blaVec3& normal, float &prob)
+void BLAengine::PBRSphereComponent::SampleSurfaceWithNormal(blaVec3 &position, blaVec3& normal, float &prob)
 {
     std::uniform_real_distribution<float> randDist(-1.f, 1.f);
 
@@ -142,25 +158,24 @@ void BLAengine::PBRSphere::SampleSurfaceWithNormal(blaVec3 &position, blaVec3& n
     float z = randDist(gen);
 
     blaVec3 pOnSphere(x, y, z);
-    float radius = m_collider->GetBoundingRadius();
+    float radius = m_associatedCollider->GetBoundingRadius();
     position = GetObjectTransform().GetPosition() + pOnSphere * radius;
     prob = 1.0f / (2.0f * M_PI * radius * radius);
     normal = pOnSphere;
 }
 
-float BLAengine::PBRSphere::GetSurfaceArea()
+float BLAengine::PBRSphereComponent::GetSurfaceArea()
 {
     return m_surfaceArea;
 }
 
-PBRSphere::PBRSphere(float radius)
+void PBRSphereComponent::CreateAndSetSphereCollider(float radius)
 {
-    m_collider = new SphereCollider(radius);
+    SphereColliderComponent* sphereColliderComponent = BLA_CREATE_COMPONENT(SphereColliderComponent, GetParentObject());
+    sphereColliderComponent->SetSize(radius);
 
     m_surfaceArea = (4.0f * M_PI * M_PI) * radius * radius;
 }
-
-PBRSphere::~PBRSphere(void) {}
 
 float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(blaVec3& outDir, blaMat3& tangentSpace, blaVec3& inDir)
 {

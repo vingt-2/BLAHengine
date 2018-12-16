@@ -21,8 +21,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     m_workingScene = new Scene();
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
-    CameraComponent* cameraComp = new CameraComponent();
-    cameraObject->AddComponent(cameraComp);
+    CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
     m_editorRenderer->SetCamera(cameraComp);
 
     m_debug = new Debug(m_debugRenderingManager);
@@ -41,20 +40,18 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     m_assetManager->LoadCookedAssets();
 
     GameObject* light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = new DirectionalLight(blaVec3(1, 0, 0));
-    light->AddComponent(dirLight);
+    DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
 
     Asset* skyMeshAsset = nullptr;
     this->m_assetManager->GetAsset("SkyMesh", skyMeshAsset);
 
     TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
 
-    GameObject* ball_obj = m_workingScene->CreateObject("sky");
-    ObjectTransform t = ball_obj->GetTransform();
+    GameObject* ballObj = m_workingScene->CreateObject("sky");
+    ObjectTransform t = ballObj->GetTransform();
     t.m_scale = blaVec3(5000, 5000, 5000);
-    ball_obj->SetTransform(t);
-    MeshRendererComponent* meshRender = new MeshRendererComponent();
-    ball_obj->AddComponent(meshRender);
+    ballObj->SetTransform(t);
+    MeshRendererComponent* meshRender = BLA_CREATE_COMPONENT(MeshRendererComponent, ballObj);
     meshRender->AssignTriangleMesh(sky);
 
     Asset* materialAsset = nullptr;
@@ -101,9 +98,8 @@ bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string 
     m_workingScene->DeleteObject("MeshVisualizer_"+std::to_string(i));
 
     GameObject* visualizerObject = m_workingScene->CreateObject("MeshVisualizer_" + std::to_string(++i));
-    MeshRendererComponent* meshRenderer = new MeshRendererComponent();
+    MeshRendererComponent* meshRenderer = BLA_CREATE_COMPONENT(MeshRendererComponent, visualizerObject);
     meshRenderer->AssignTriangleMesh(m_importedMesh);
-    visualizerObject->AddComponent(meshRenderer);
 
     Asset* materialAsset = nullptr;
     if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)

@@ -47,10 +47,11 @@ namespace BLAengine
         bool m_applyGravity;
         bool m_enableCollision;
 
-        ColliderComponent* m_collider;
+        void SetCollider(ColliderComponent* collider);
 
-        void SetCollider(ColliderComponent* collider) { m_collider = collider; }
-        void SetMeshCollider(TriangleMesh* mesh) { m_collider = new MeshCollider(mesh); }
+        void CreateAndSetMeshCollider(TriangleMesh* mesh);
+
+        ColliderComponent* GetAssociatedCollider() const { return m_associatedCollider; }
 
         void Update();
 
@@ -60,11 +61,11 @@ namespace BLAengine
         void AddTorque(blaVec3 vector);
         void AddImpulse(blaVec3 impulse);
 
-        blaVec3 GetForcesAccu() { return m_forcesAccu; };
-        blaVec3 GetTorquesAccu() { return m_torquesAccu; };
+        blaVec3 GetForcesAccu() const { return m_forcesAccu; };
+        blaVec3 GetTorquesAccu() const { return m_torquesAccu; };
         void ClearForces() { m_forcesAccu = blaVec3(0); m_torquesAccu = blaVec3(0); }
 
-        RigidBodyComponent();
+        RigidBodyComponent(GameObject* parentObject);
         ~RigidBodyComponent(void);
 
     private:
@@ -75,6 +76,8 @@ namespace BLAengine
 
         blaVec3 m_linearImpulseAccu;
         blaVec3 m_angularImpulseAccu;
+
+        ColliderComponent* m_associatedCollider;
     };
 
 }

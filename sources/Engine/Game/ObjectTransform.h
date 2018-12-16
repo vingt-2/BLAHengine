@@ -15,7 +15,8 @@ namespace BLAengine
         void GetScaledTransformMatrix(blaMat4 &outputMatrix) const;
 
         blaVec3 GetEulerAngles() const;
-        void SetEulerAngles(float xAngle, float yAngle, float zAngle);
+        void SetEulerAngles(float pitch, float yaw, float roll);
+        void SetEulerAngles(blaVec3 eulerAngles);
 
         void SetRotation(blaQuat newRotation);
         blaQuat GetRotation() const;

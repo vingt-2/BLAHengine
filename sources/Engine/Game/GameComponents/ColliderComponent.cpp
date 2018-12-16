@@ -17,7 +17,18 @@ inline blaVec3 Barycentric(blaVec3 p, blaVec3 a, blaVec3 b, blaVec3 c)
     return r;
 }
 
-MeshCollider::MeshCollider(TriangleMesh* mesh)
+MeshColliderComponent::MeshColliderComponent(GameObject* parentObject) : ColliderComponent(parentObject){}
+
+MeshColliderComponent::~MeshColliderComponent()
+{
+    m_collisionMesh->~CollisionModel3D();
+    m_vertPosIndices->clear();
+    m_vertNormalIndices->clear();
+    m_vertPosIndices->~vector();
+    m_vertNormalIndices->~vector();
+}
+
+void MeshColliderComponent::SetColliderMesh(TriangleMesh* mesh)
 {
     m_vertPosIndices = new vector<glm::uint32>;
     m_vertNormalIndices = new vector<glm::uint32>;
@@ -29,16 +40,7 @@ MeshCollider::MeshCollider(TriangleMesh* mesh)
     GenerateCollisionModel();
 }
 
-MeshCollider::~MeshCollider()
-{
-    m_collisionMesh->~CollisionModel3D();
-    m_vertPosIndices->clear();
-    m_vertNormalIndices->clear();
-    m_vertPosIndices->~vector();
-    m_vertNormalIndices->~vector();
-}
-
-ColliderComponent::RayCollision MeshCollider::CollideWithRay(Ray & ray)
+ColliderComponent::RayCollision MeshColliderComponent::CollideWithRay(Ray & ray)
 {
     ObjectTransform transform = this->GetObjectTransform();
 
@@ -53,7 +55,7 @@ ColliderComponent::RayCollision MeshCollider::CollideWithRay(Ray & ray)
 
     bool collision = this->m_collisionMesh->threadSafeClosestRayCollision(&(ray.m_origin.x), &(ray.m_direction.x), triangleIndex, colT, &(colPointL.x));
 
-    MeshCollider::RayCollision contactPoint;
+    MeshColliderComponent::RayCollision contactPoint;
     if (!collision)
     {
         contactPoint.m_isValid = false;
@@ -83,12 +85,12 @@ ColliderComponent::RayCollision MeshCollider::CollideWithRay(Ray & ray)
     return contactPoint;
 }
 
-ColliderComponent::RayCollision MeshCollider::CollideWithCollider(ColliderComponent & collider)
+ColliderComponent::RayCollision MeshColliderComponent::CollideWithCollider(ColliderComponent & collider)
 {
     return RayCollision();
 }
 
-void MeshCollider::GenerateBoundingRadius()
+void MeshColliderComponent::GenerateBoundingRadius()
 {
     blaVec3 maxVert = blaVec3(0);
 
@@ -103,7 +105,7 @@ void MeshCollider::GenerateBoundingRadius()
     m_boundingRadius = length(maxVert);
 }
 
-void MeshCollider::GenerateCollisionModel()
+void MeshColliderComponent::GenerateCollisionModel()
 {
     m_collisionMesh = newCollisionModel3D();
     for (size_t i = 0; i < m_vertPosIndices->size(); i += 3)
@@ -120,7 +122,7 @@ void MeshCollider::GenerateCollisionModel()
     m_collisionMesh->finalize();
 }
 
-ColliderComponent::RayCollision SphereCollider::CollideWithRay(Ray& ray)
+ColliderComponent::RayCollision SphereColliderComponent::CollideWithRay(Ray& ray)
 {
     ColliderComponent::RayCollision contactPoint;
     ObjectTransform transform = this->GetObjectTransform();
@@ -161,7 +163,7 @@ ColliderComponent::RayCollision SphereCollider::CollideWithRay(Ray& ray)
     return contactPoint;
 }
 
-ColliderComponent::RayCollision SphereCollider::CollideWithCollider(ColliderComponent & collider)
+ColliderComponent::RayCollision SphereColliderComponent::CollideWithCollider(ColliderComponent & collider)
 {
     return RayCollision();
 }

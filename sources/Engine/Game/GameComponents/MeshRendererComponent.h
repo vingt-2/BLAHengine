@@ -20,7 +20,7 @@ namespace BLAengine
 
         GLuint m_renderType;
 
-        MeshRendererComponent();
+        MeshRendererComponent(GameObject* parentObject);
         ~MeshRendererComponent(void);
 
         bool AssignTriangleMesh(TriangleMesh* mesh);

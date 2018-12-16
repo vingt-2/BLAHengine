@@ -27,7 +27,7 @@ bool RigidBodySystem::RegisterRigidBody(RigidBodyComponent &body)
 {
     m_rigidBodyList.push_back(&body);
     
-    if (body.m_collider)
+    if (body.GetAssociatedCollider())
     {
         m_collisionProcessor->m_bodiesList.push_back(&body);
         return true;
@@ -206,7 +206,7 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
     glm::quat q = blaMat3(normalize(X), normalize(Y), normalize(Z));
     transform.SetRotation(blaQuat(q.x,q.y,q.z,q.w));
 
-    body.m_parentObject->SetTransform(transform);
+    body.GetParentObject()->SetTransform(transform);
 }
 
 void RigidBodySystem::ApplyWorldForces()

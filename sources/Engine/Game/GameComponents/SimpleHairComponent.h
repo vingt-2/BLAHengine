@@ -35,7 +35,7 @@ namespace BLAengine
 
         void AddHairStrand(blaVec3 positionW);
 
-        SimpleHairComponent();
+        SimpleHairComponent(GameObject* parentObject);
         ~SimpleHairComponent(void);
 
     private:

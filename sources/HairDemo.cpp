@@ -65,7 +65,7 @@ void HairDemo::UpdateEditor()
             }
             else
             {
-                object->AddComponent(new SimpleHairComponent());
+                BLA_CREATE_COMPONENT(SimpleHairComponent, object);
             }
 
         }
@@ -107,7 +107,7 @@ void HairDemo::UpdateEditor()
     {
         if (CameraComponent* cameraObject = m_workingScene->GetMainCamera())
         {
-            m_editorControls = new HairDemoControls(cameraObject->m_parentObject, m_renderWindow);
+            m_editorControls = new HairDemoControls(cameraObject->GetParentObject(), m_renderWindow);
         }
     }
 
@@ -140,16 +140,14 @@ bool BLAengine::HairDemo::LoadWorkingScene(std::string filepath)
     m_editorRenderer->SwitchRenderingManager(m_renderingManager);
 
     GameObject* light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = new DirectionalLight(blaVec3(0, 10, 0));
-    light->AddComponent(dirLight);
+    DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
     ObjectTransform lightT = light->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
     lightT.SetEulerAngles(-0.66f, 0.f, 0.f);
     light->SetTransform(lightT);
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
-    CameraComponent* cameraComp = new CameraComponent();
-    cameraObject->AddComponent(cameraComp);
+    CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
     ObjectTransform cameraT= cameraObject->GetTransform();
     cameraT.SetPosition(blaVec3(0.f, 20.f, 0.f));
     cameraT.SetEulerAngles(1.2f, 1.2f, 0.f);

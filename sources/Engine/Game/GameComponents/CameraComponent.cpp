@@ -2,9 +2,9 @@
 #include "../GameObject.h"
 using namespace BLAengine;
 
-CameraComponent::CameraComponent():
+CameraComponent::CameraComponent(GameObject* parentObject) :
+    GameComponent(parentObject),
     m_fovSize(glm::vec2(1,1)),
-    GameComponent(),
     m_isShadowMapCamera(false)
 {
     UpdateView();
@@ -19,11 +19,11 @@ CameraComponent::~CameraComponent(void)
 
 void CameraComponent::UpdateView()
 {
-    if (!m_parentObject)
+    if (!GetParentObject())
         return;
 
-    m_viewTransform.SetPosition(m_parentObject->GetTransform().GetPosition());
-    m_viewTransform.SetRotation(m_parentObject->GetTransform().GetRotation());
+    m_viewTransform.SetPosition(GetParentObject()->GetTransform().GetPosition());
+    m_viewTransform.SetRotation(GetParentObject()->GetTransform().GetRotation());
 
     m_viewTransform.m_transform = m_viewTransform.m_transform.GetInverse();
 }

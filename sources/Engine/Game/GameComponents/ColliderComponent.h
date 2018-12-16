@@ -23,7 +23,10 @@ namespace BLAengine
             float m_t;
         };
 
-        ColliderComponent() {};
+        ColliderComponent(GameObject* parentObject):
+            GameComponent(parentObject)
+        {};
+
         ~ColliderComponent() {};
 
         virtual RayCollision CollideWithRay(Ray &ray) = 0;
@@ -31,11 +34,13 @@ namespace BLAengine
         virtual float GetBoundingRadius() = 0;
     };
 
-    class BLACORE_API MeshCollider : public ColliderComponent
+    class BLACORE_API MeshColliderComponent : public ColliderComponent
     {
     public:
-        MeshCollider(TriangleMesh* mesh);
-        ~MeshCollider();
+        MeshColliderComponent(GameObject* gameObject);
+        ~MeshColliderComponent();
+
+        void SetColliderMesh(TriangleMesh* mesh);
 
         void Update() {};
 
@@ -55,15 +60,14 @@ namespace BLAengine
         void GenerateCollisionModel();
     };
 
-    class BLACORE_API SphereCollider : public ColliderComponent
+    class BLACORE_API SphereColliderComponent : public ColliderComponent
     {
     public:
-        SphereCollider(float size) 
-        {
-            m_boundingRadius = size;
-        }
+        SphereColliderComponent(GameObject* parentObject): ColliderComponent(parentObject) {}
 
-        ~SphereCollider() {};
+        void SetSize(float size) { m_boundingRadius = size; }
+
+        ~SphereColliderComponent() {};
 
         void Update() {};
 

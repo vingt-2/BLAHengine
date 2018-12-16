@@ -2,7 +2,8 @@
 #include "../GameObject.h"
 using namespace BLAengine;
 
-MeshRendererComponent::MeshRendererComponent():
+MeshRendererComponent::MeshRendererComponent(GameObject* parentObject) : 
+    GameComponent(parentObject),
     m_renderType    (GL_TRIANGLES),
     m_renderTicket  (0),
     m_modelTransformMatrix(new blaMat4(0))
@@ -42,8 +43,8 @@ blaMat4* MeshRendererComponent::GetTransformMatrix() const
 
 void MeshRendererComponent::Update()
 {
-    if (!m_parentObject)
+    if (!GetParentObject())
         *m_modelTransformMatrix = blaMat4(0);
     else
-        m_parentObject->GetTransform().GetScaledTransformMatrix(*m_modelTransformMatrix);
+        GetParentObject()->GetTransform().GetScaledTransformMatrix(*m_modelTransformMatrix);
 }
