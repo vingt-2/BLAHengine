@@ -17,7 +17,7 @@ namespace BLAengine
 
         void Update();
 
-        glm::uint m_renderTicket;
+        blaU32 m_renderTicket;
 
     private:
         blaVec3 m_lightDirection;

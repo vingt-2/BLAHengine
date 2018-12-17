@@ -62,7 +62,7 @@ void AnimationDemo::PreEngineUpdate()
         m_cameraController->UpdateController();
     }
     
-    m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
+    //m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
 
     ObjectTransform identity;
     m_debug->DrawBasis(&identity,1.f);

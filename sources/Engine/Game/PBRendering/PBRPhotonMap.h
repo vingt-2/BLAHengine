@@ -90,7 +90,7 @@ class PhotonMap
 {
 public:
 
-    PhotonMap(glm::uint sizeHint);
+    PhotonMap(blaU32 sizeHint);
     ~PhotonMap();
 
     void AddPhoton(Photon photon);
@@ -106,7 +106,7 @@ private:
     PhotonTree* m_photonTree;
 };
 
-inline PhotonMap::PhotonMap(glm::uint sizeHint)
+inline PhotonMap::PhotonMap(blaU32 sizeHint)
 {
     m_photonTree = nullptr;
 }

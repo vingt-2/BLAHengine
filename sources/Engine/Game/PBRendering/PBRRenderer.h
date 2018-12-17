@@ -44,7 +44,7 @@ namespace BLAengine
 
         vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
     private:
-        void BuildPhotonMap(bool inParallel, glm::uint numberOfPhotons);
+        void BuildPhotonMap(bool inParallel, blaU32 numberOfPhotons);
         Ray GeneratePhoton(PBRSurfaceComponent* surface, float &outEmissionProb);
         void TracePhoton(Ray incidentRay, blaVec3 photonPower,int bounce);
 

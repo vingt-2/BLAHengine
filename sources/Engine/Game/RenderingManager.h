@@ -15,14 +15,14 @@ namespace BLAengine
         RenderingManager(RenderManagerType type);
         ~RenderingManager();
 
-        glm::uint RegisterMeshRenderer(MeshRendererComponent* object);
+        blaU32 RegisterMeshRenderer(MeshRendererComponent* object);
         bool         CancelMeshRendererTicket(MeshRendererComponent* object);
 
-        glm::uint RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera);
-        glm::uint CancelDirectionalLightTicket(DirectionalLight* dirLight);
+        blaU32 RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera);
+        blaU32 CancelDirectionalLightTicket(DirectionalLight* dirLight);
 
-        std::unordered_map<glm::uint, MeshRendererComponent*>* GetTicketedMeshRenderers();
-        std::unordered_map<glm::uint, std::pair<DirectionalLight*, CameraComponent*>>* GetTicketedDirectionalLights();
+        std::unordered_map<blaU32, MeshRendererComponent*>* GetTicketedMeshRenderers();
+        std::unordered_map<blaU32, std::pair<DirectionalLight*, CameraComponent*>>* GetTicketedDirectionalLights();
 
         void Update();
 
@@ -31,8 +31,8 @@ namespace BLAengine
 
         RenderManagerType m_renderManagerType;
 
-        std::unordered_map<glm::uint, MeshRendererComponent*> m_ticketedMeshRenderers;
-        std::unordered_map<glm::uint, pair<DirectionalLight*, CameraComponent*>> m_ticketedDirLights;
+        std::unordered_map<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
+        std::unordered_map<blaU32, pair<DirectionalLight*, CameraComponent*>> m_ticketedDirLights;
 
         int currentTicket;
 

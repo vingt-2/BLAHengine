@@ -48,11 +48,11 @@ private:
 	vector<SkeletonJoint*>	m_childJoints;
 };
 
-class SkeletalMotion
+class SkeletalAnimation
 {
 public:
 
-	SkeletalMotion(
+	SkeletalAnimation(
 		string name,
 		vector<vector<blaVec3>> rootTrajectories,
 		unordered_map<string, vector<blaPosQuat>> jointTransforms,
@@ -69,7 +69,7 @@ public:
 		m_skeletonScale = 1.0f;
 	};
 
-	~SkeletalMotion();
+	~SkeletalAnimation();
 
 	string GetName()		{ return m_name; }
 
@@ -236,7 +236,7 @@ public:
 	/*
 		Set which Skeletal Motion animation we are playing. We need to know about it for things like sampling rate and frame count
 	*/
-	void SetSkeletalMotion(SkeletalMotion* motion)
+	void SetSkeletalMotion(SkeletalAnimation* motion)
 	{
 		m_currentAnimationFrame = 0;
 		m_skeletalMotion = motion;
@@ -270,7 +270,7 @@ private:
 	blaS32	m_currentAnimationFrame;
 	float	m_lastTime;
 	AnimationPlayerState m_playerState;
-	SkeletalMotion*		 m_skeletalMotion;
+	SkeletalAnimation*		 m_skeletalMotion;
 	float				 m_timeElapsedInAnimation;
 
 	float	m_motionSpeed;

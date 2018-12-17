@@ -214,7 +214,12 @@ public:
         m_q = q;
     }
 
-    blaQuat GetRotation() const
+    const blaQuat& GetRotation() const
+    {
+        return m_q;
+    }
+
+    blaQuat& GetRotation()
     {
         return m_q;
     }
@@ -232,12 +237,22 @@ public:
         m_p = p;
     }
 
-    blaVec3 GetTranslation3() const
+    const blaVec3& GetTranslation3() const
     {
         return blaVec3(m_p[0], m_p[1], m_p[2]);
     }
 
-    blaVec4 GetTranslation() const
+    const blaVec4& GetTranslation() const
+    {
+        return m_p;
+    }
+
+    blaVec3& GetTranslation3()
+    {
+        return blaVec3(m_p[0], m_p[1], m_p[2]);
+    }
+
+    blaVec4& GetTranslation() 
     {
         return m_p;
     }

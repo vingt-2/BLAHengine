@@ -5,7 +5,7 @@
 #include "./BVHImport.h"
 
 //TODO: Extract asset data to the Asset folder out of Engine/Game
-#include "../../Engine/Game/Animation/SkeletalAnimation.h"
+#include "../../Engine/Game/Animation/SkeletonAnimationData.h"
 
 #define _HAS_ITERATOR_DEBUGGING 0
 
@@ -21,10 +21,17 @@ void InvalidBVH()
     cout << "There were invalid values encountered in your BVH file.\n";
 }
 
-#define INVALID_BVH {InvalidBVH(); return NULL;}
+#define INVALID_BVH_IN_SKEL_DEF \
+    InvalidBVH(); \
+    return nullptr;
+
+#define INVALID_BVH_IN_DATA_DEF \
+    InvalidBVH(); \
+    return vector<SkeletonAnimationData*>();
 
 // Helper that gets Which rotation matrix we should output for each axis
-blaQuat GetRotation(int axis, float angle);
+blaVec3 GetTranslationForChannel(int axis, float offset);
+blaQuat GetRotationForChannel(int axis, float angle);
 // Helper that turns a bunch of string parameters from a bvh to int values
 int ChannelOrderToInt(string str);
 
@@ -54,140 +61,125 @@ void tokenize(vector<string>& tokens, string str)
 }
 
 // See BVHImport for explanation
-SkeletonJoint* ParseJoint(vector<string> &tokens, int startToken, int* endToken, unordered_map<string, vector<int>> &jointChannelsOrderings)
+SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChannelsOrderings, int& startToken, int& jointIndex)
 {
-    if (tokens[startToken + 2].compare("{"))
+    int currentToken = startToken;
+
+    string jointName = tokens[++currentToken];
+
+    if (tokens[++currentToken].compare("{"))
     {
-        INVALID_BVH
+        INVALID_BVH_IN_SKEL_DEF
     }
 
-    if (tokens[startToken + 3].compare("OFFSET"))
+    if (tokens[++currentToken].compare("OFFSET"))
     {
-        INVALID_BVH
+        INVALID_BVH_IN_SKEL_DEF
     }
 
-    string jointName = tokens[startToken + 1];
     blaVec3 jointLocalOffset = blaVec3
     (
-        float(atof(tokens[startToken + 4].c_str())),
-        float(atof(tokens[startToken + 5].c_str())),
-        float(atof(tokens[startToken + 6].c_str()))
+        float(atof(tokens[++currentToken].c_str())),
+        float(atof(tokens[++currentToken].c_str())),
+        float(atof(tokens[++currentToken].c_str()))
     );
 
     vector<SkeletonJoint*> jointChildren;
 
-    if (tokens[startToken + 7].compare("CHANNELS"))
+    // Next token should say "Channels". If it don't, we got a problem ...
+    if (tokens[++currentToken].compare("CHANNELS"))
     {
-        INVALID_BVH
+        INVALID_BVH_IN_SKEL_DEF
     }
 
-    int currentToken;
-    if (!tokens[startToken + 8].compare("3"))
-    {
-        currentToken = startToken + 12;
-        
-        jointChannelsOrderings[jointName] = vector<int>({ ChannelOrderToInt(tokens[startToken + 9]),
-            ChannelOrderToInt(tokens[startToken + 10]),
-            ChannelOrderToInt(tokens[startToken + 11]) });
+    //Next token is the numbero of data channel for this joint
+    int dataChannels = atoi(tokens[++currentToken].c_str());
 
-    }
-    else if (!tokens[startToken + 8].compare("6"))
+    vector<int> channelOrderForJoint(dataChannels);
+    for (int i = 0; i < dataChannels; ++i)
     {
-        currentToken = startToken + 15;
-
-        jointChannelsOrderings[jointName] = vector<int>({ ChannelOrderToInt(tokens[startToken + 9]),
-            ChannelOrderToInt(tokens[startToken + 10]),
-            ChannelOrderToInt(tokens[startToken + 11]),
-            ChannelOrderToInt(tokens[startToken + 12]),
-            ChannelOrderToInt(tokens[startToken + 13]),
-            ChannelOrderToInt(tokens[startToken + 14])});
-    }
-    else
-    {
-        INVALID_BVH
+        channelOrderForJoint[i] = ChannelOrderToInt(tokens[++currentToken]);
     }
 
+    jointChannelsOrderings.push_back(channelOrderForJoint);
+ 
     // Now to read the child joints ...
-    while (tokens[currentToken].compare("}"))
+
+    const blaU32 currentJointIndex = jointIndex;
+
+    while (tokens[++currentToken].compare("}"))
     {
+        ++currentToken;
         if (!tokens[currentToken].compare("JOINT"))
         {
-            int currentEndToken = -1;
-            SkeletonJoint* childJoint = ParseJoint(tokens, currentToken, &currentEndToken, jointChannelsOrderings);
+            SkeletonJoint* childJoint = ParseJoint(tokens, jointChannelsOrderings, ++currentToken, ++jointIndex);
+
             if (childJoint)
             {
                 jointChildren.push_back(childJoint);
-                currentToken = currentEndToken + 1;
             }
         }
         else if (!tokens[currentToken].compare("End") && !tokens[currentToken + 1].compare("Site"))
         {
             if (!tokens[currentToken + 2].compare("{") && !tokens[currentToken + 3].compare("OFFSET") && !tokens[currentToken + 7].compare("}"))
             {
+                currentToken += 4;
                 string endJointName = jointName + "_end";
                 blaVec3 endJointLocalOffset = blaVec3
                 (
-                    float(atof(tokens[startToken + 4].c_str())),
-                    float(atof(tokens[startToken + 5].c_str())),
-                    float(atof(tokens[startToken + 6].c_str()))
+                    float(atof(tokens[++currentToken].c_str())),
+                    float(atof(tokens[++currentToken].c_str())),
+                    float(atof(tokens[++currentToken].c_str()))
                 );
                 
-                SkeletonJoint* endJoint = new SkeletonJoint(endJointName, vector<SkeletonJoint*>(), endJointLocalOffset);
-
+                SkeletonJoint* endJoint = new SkeletonJoint(endJointName, vector<SkeletonJoint*>(), endJointLocalOffset, currentJointIndex);
                 jointChildren.push_back(endJoint);
-                currentToken += 8;
             }
             else
             {
-                INVALID_BVH
-                    currentToken++;
+                INVALID_BVH_IN_SKEL_DEF
             }
         }
         else
         {
-            cout << "Doing nothing for token " << tokens[currentToken] << "\n";
-            currentToken++;
+            INVALID_BVH_IN_SKEL_DEF
         }
     }
-    *endToken = currentToken;
 
-    return new SkeletonJoint(jointName,jointChildren,jointLocalOffset);
+    return new SkeletonJoint(jointName, jointChildren, jointLocalOffset, currentJointIndex);
 }
 
 // See BVHImport for explanation
 void ReadFrameRecursive(vector<string>& tokens,
-    unordered_map<string, vector<blaPosQuat>>& jointTransforms,
-    SkeletonJoint* joint,
-    int &currentToken,
-    unordered_map<string, vector<int>> &jointsChannelOrderings,
-    bool bIsRoot)
+                        vector<blaPosQuat>& jointTransforms,
+                        SkeletonJoint* joint,
+                        int &currentToken,
+                        vector<vector<int>> &jointsChannelOrderings)
 {
     if (!joint->GetDirectChildren().size())
         return;
 
-    blaQuat rotation = blaPosQuat::blaQuatIdentity();
-    for (int r = 0; r < 3; ++r)
-    {
-        rotation *= GetRotation(jointsChannelOrderings[joint->GetName()][bIsRoot ? r + 3 : r], atof(tokens[currentToken + r].c_str()));
-    }
-        
-    blaPosQuat jointTransform = blaPosQuat(joint->GetLocalOffset(), rotation);
+    blaPosQuat localJointTransform = blaPosQuat::GetIdentity();
 
-    unordered_map<string, vector<blaPosQuat>>::const_iterator mapIterator = jointTransforms.find(joint->GetName());
-    if (mapIterator == jointTransforms.end())
+    // Read the data for that joint !
+    const blaU32 currentJointIdx = joint->GetJointIndex();
+    for (int c = 0; c < jointsChannelOrderings[currentJointIdx].size(); ++c)
     {
-        jointTransforms[joint->GetName()] = vector<blaPosQuat>({ jointTransform });
-    }
-    else
-    {
-        jointTransforms[joint->GetName()].push_back(jointTransform);
+        if (c < 3)
+        {
+            localJointTransform.GetTranslation3() += GetRotationForChannel(jointsChannelOrderings[currentJointIdx][c], atof(tokens[++currentToken].c_str()));
+        }
+        else
+        {
+            localJointTransform.GetRotation() *= GetRotationForChannel(jointsChannelOrderings[currentJointIdx][c], atof(tokens[++currentToken].c_str()));
+        }
     }
 
-    currentToken += 3;
+    jointTransforms.push_back(localJointTransform);
 
     for (auto child : joint->GetDirectChildren())
     {
-        ReadFrameRecursive(tokens, jointTransforms, child, currentToken, jointsChannelOrderings, false);
+        ReadFrameRecursive(tokens, jointTransforms, child, ++currentToken, jointsChannelOrderings);
     }
 }
 
@@ -200,7 +192,7 @@ void ReadFrameRecursive(vector<string>& tokens,
         the tree's joints data and advances in the frames data block.
     4) Profit. Returns a null pointer if there were any issue parsing the data.
 */
-SkeletalMotion* BVHImport::ImportAnimation(string bvhFilePath)
+vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
 {
     ifstream bvhFile(bvhFilePath, std::ifstream::binary);
 
@@ -233,107 +225,82 @@ SkeletalMotion* BVHImport::ImportAnimation(string bvhFilePath)
 
     if (!tokens.size())
     {
-        InvalidBVH();
-        return NULL;
+        INVALID_BVH_IN_DATA_DEF
     }
 
-    int currentToken = 0;
+    int currentToken = -1;
     
     vector<SkeletonJoint*>		skeletalRoots;
-    vector<vector<blaVec3>>	rootTrajectories;
-    unordered_map<string, vector<blaPosQuat>>	jointTransforms;
-
-    unordered_map<string, vector<int>>			jointChannelsOrderings;
-    while (tokens[currentToken] != "MOTION")
+    vector<vector<int>>			jointChannelsOrderings;
+    int jointIndex = 0;
+    while (tokens[++currentToken] != "MOTION")
     {
 
-        if (!currentToken && tokens[currentToken].compare("HIERARCHY"))
+        if (tokens[++currentToken].compare("HIERARCHY"))
         {
-            InvalidBVH();
-            return NULL;
+            INVALID_BVH_IN_DATA_DEF
         }
 
-        if (!tokens[currentToken].compare("ROOT"))
+        if (!tokens[++currentToken].compare("ROOT"))
         {
             vector<int> rootOrdering;
-            int endToken = -1;
-            SkeletonJoint* rootJoint = ParseJoint(tokens, currentToken, &endToken, jointChannelsOrderings);
+            SkeletonJoint* rootJoint = ParseJoint(tokens, jointChannelsOrderings, currentToken, jointIndex);
 
             if (rootJoint)
                 skeletalRoots.push_back(rootJoint);
-
-            currentToken = endToken;
         }
-
-        currentToken++;
     }
 
     // Print the Skeleton to the console
-    std::cout << "Loaded the following Skeleton: \n\n";
+    std::cout << "Loaded the following Skeleton(s): \n\n";
     for (auto roots : skeletalRoots)
     {
         roots->PrintJoint();
     }
 
-    if (tokens[currentToken + 1].compare("Frames:") || tokens[currentToken + 3].compare("Frame") | tokens[currentToken + 4].compare("Time:"))
-        INVALID_BVH
+    if (tokens[++currentToken].compare("Frames:") || tokens[++currentToken].compare("Frame") | tokens[++currentToken].compare("Time:"))
+    {
+        INVALID_BVH_IN_DATA_DEF
+    }
 
-    int frameCount = atoi(tokens[currentToken + 2].c_str());
-    float frameTime = atof(tokens[currentToken + 5].c_str());
+    int frameCount = atoi(tokens[++currentToken].c_str());
+    float frameTime = atof(tokens[++currentToken].c_str());
 
-    currentToken += 6;
+    vector<vector<vector<blaPosQuat>>>	jointTransformsPerFramePerAnimationInBVH(skeletalRoots.size());
 
+    // Frame and multiple skeleton are not presented how we want in the file so We'll just build our result vector later
     for (int frame = 0; frame < frameCount; frame++)
     {
-        vector<blaVec3> rootPositions;
         for (int rootIndex = 0; rootIndex < skeletalRoots.size(); rootIndex++)
         {
+            // Add a new data frame in the result...
+            jointTransformsPerFramePerAnimationInBVH[rootIndex].push_back(vector<blaPosQuat>());
+
             SkeletonJoint* root = skeletalRoots[rootIndex];
 
-            blaVec3 rootPosition;
-            rootPosition[jointChannelsOrderings[root->GetName()][0]] = atof(tokens[currentToken + 0].c_str());
-            rootPosition[jointChannelsOrderings[root->GetName()][1]] = atof(tokens[currentToken + 1].c_str());
-            rootPosition[jointChannelsOrderings[root->GetName()][2]] = atof(tokens[currentToken + 2].c_str());
-
-            rootPositions.push_back(rootPosition);
-
-            currentToken += 3;
-
-            ReadFrameRecursive(tokens, jointTransforms, root, currentToken, jointChannelsOrderings, true);
+            // Call Read Frame Recursive which will fill up the newly added dataframe!
+            ReadFrameRecursive(tokens, jointTransformsPerFramePerAnimationInBVH[rootIndex][frame], root, ++currentToken, jointChannelsOrderings);
         }
-        rootTrajectories.push_back(rootPositions);
     }
+
     if (currentToken != tokens.size())
-        INVALID_BVH
-
-    SkeletalMotion* result = new SkeletalMotion(bvhFilePath, rootTrajectories, jointTransforms, skeletalRoots, 1.0f / frameTime, frameCount);
-    
-    /*if (bNormalizedOffsets)
     {
-        for (int i = 0; i < result->m_skeletonRoots.size(); i++)
-        {
-            unordered_map<string, SkeletonJoint*> joints;
-            result->m_skeletonRoots[i]->QuerySkeleton(&joints,NULL);
-            float maxOffsetLen = 0;
-            for (auto joint : joints)
-            {
-                float length = joint.second->GetLocalOffset().length();
-                if (maxOffsetLen < length)
-                    maxOffsetLen = length;
-            }
-            for (auto joint : joints)
-            {
-                joint.second->ApplyOffsetNormalization(maxOffsetLen);
-            }
+        INVALID_BVH_IN_DATA_DEF
+    }
 
-        }
-    }*/
+    //Todo: Really don't like that the importer in in chager of allocating the data here ...
+    vector<SkeletonAnimationData*> results;
+    for (int rootIndex = 0; rootIndex < skeletalRoots.size(); ++rootIndex)
+    {
+        SkeletonAnimationData* skeletonAnimation = new SkeletonAnimationData(bvhFilePath, jointTransformsPerFramePerAnimationInBVH[rootIndex], skeletalRoots[rootIndex], 1.0f / frameTime, frameCount);
+        results.push_back(skeletonAnimation);
+    }
 
-    return result;
+    return results;
 }
 
 // Gets Which rotation matrix we should output for each axis
-blaQuat GetRotation(int axis, float angle)
+blaQuat GetRotationForChannel(int axis, float angle)
 {
     angle *= M_PI / 180.0f;
 
@@ -356,35 +323,47 @@ blaQuat GetRotation(int axis, float angle)
     }
 }
 
+// Gets Which rotation matrix we should output for each axis
+blaVec3 GetTranslationForChannel(int axis, float offset)
+{
+    blaVec3 vec(0.f);
+    if (axis < 0 || axis > 2)
+    {
+        return vec;
+    }
+
+    vec[axis] = offset;
+
+    return vec;
+}
+
 // Helper that turns a bunch of string parameters from a bvh to int values
 int ChannelOrderToInt(string str)
 {
+    if (!str.compare("Xposition"))
+    {
+        return 0;
+    }
+    if (!str.compare("Yposition"))
+    {
+        return 1;
+    }
+    if (!str.compare("Zposition"))
+    {
+        return 2;
+    }
     if (!str.compare("Xrotation"))
     {
-        return 0;
+        return 3;
     }
-    else if (!str.compare("Yrotation"))
+    if (!str.compare("Yrotation"))
     {
-        return 1;
+        return 4;
     }
-    else if (!str.compare("Zrotation"))
+    if (!str.compare("Zrotation"))
     {
-        return 2;
+        return 5;
     }
-    else if (!str.compare("Xposition"))
-    {
-        return 0;
-    }
-    else if (!str.compare("Yposition"))
-    {
-        return 1;
-    }
-    else if (!str.compare("Zposition"))
-    {
-        return 2;
-    }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }

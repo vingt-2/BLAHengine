@@ -2,13 +2,13 @@
 #include "../../Common/StdInclude.h"
 #include "../../Common/Maths/Maths.h"
 
-class SkeletalMotion;
+class SkeletonAnimationData;
 
 namespace BLAengine
 {
     class BLACORE_API BVHImport
     {
     public:
-        static SkeletalMotion* ImportAnimation(string bvhFilePath);
+        static vector<SkeletonAnimationData*> ImportAnimation(string bvhFilePath);
     };
 }

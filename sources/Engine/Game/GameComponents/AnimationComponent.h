@@ -2,7 +2,7 @@
 #include "../../../Common/StdInclude.h"
 #include "../../../Common/Maths/Maths.h"
 
-#include "../Animation/SkeletalAnimation.h"
+#include "../Animation/SkeletonAnimationData.h"
 #include "GameComponent.h"
 
 namespace BLAengine
@@ -13,7 +13,7 @@ namespace BLAengine
 
         void Update() override;
 
-        SkeletalMotion* m_animation;
+        SkeletonAnimationData* m_animation;
 
         AnimationComponent(GameObject* parentObject);
         ~AnimationComponent(void);
