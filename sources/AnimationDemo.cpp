@@ -28,7 +28,7 @@ void AnimationDemo::PreEngineUpdate()
         {
             if (animCmp->m_animation == nullptr)
             {
-                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_01.bvh");
+                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_01.bvh")[0];
             }
             else
             {
@@ -36,16 +36,16 @@ void AnimationDemo::PreEngineUpdate()
 
                 if (m_renderWindow->GetKeyPressed(GLFW_KEY_RIGHT))
                 {
-                    m_frameIndex += 0.1f;
+                    m_frameIndex += 0.5f;
                 }
                 if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT))
                 {
-                    m_frameIndex -= 0.1f;
+                    m_frameIndex -= 0.5f;
                     m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
                 }
 
                 m_frameIndex = m_frameIndex >= animCmp->m_animation->GetFrameCount() ? 0.f : m_frameIndex;
-                animCmp->m_animation->QuerySkeletalAnimation(static_cast<int>(m_frameIndex), 0, true, &jointPositions, nullptr, &bones, nullptr);
+                animCmp->m_animation->ForwardKinematicQuery(static_cast<int>(m_frameIndex), nullptr, &jointPositions, nullptr, &bones);
             }
         }
     }
@@ -53,8 +53,9 @@ void AnimationDemo::PreEngineUpdate()
     blaVec3 offset(0.f, 3.f, 0.f);
     for (size_t i = 0; i < bones.size(); i++)
     {
-        m_debug->DrawLine(offset + bones[i].first, offset + bones[i].second);
-        m_debug->DrawSphere(offset + bones[i].second, blaVec3(1.f, 0.f, 0.f));
+        m_debug->DrawLine(bones[i].first, bones[i].second);
+        //m_debug->DrawLine(blaVec3(0.f), jointPositions[i]);
+        m_debug->DrawSphere(offset + jointPositions[i], blaVec3(1.f, 0.f, 0.f));
     }
 
     if (m_cameraController)

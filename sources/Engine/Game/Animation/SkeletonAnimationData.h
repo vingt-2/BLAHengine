@@ -12,7 +12,7 @@ class SkeletonJoint
 {
 public:
 
-    SkeletonJoint(string name, vector<SkeletonJoint*> childJoints, blaVec3 &localOffset, blaU32 jointIndex)
+    SkeletonJoint(string name, vector<SkeletonJoint*> childJoints, const blaVec3 &localOffset, blaU32 jointIndex)
     {
         m_name = name;
         m_childJoints = childJoints;
@@ -92,21 +92,20 @@ public:
     SkeletonJoint* GetSkeleton() { return m_skeletonDef; }
 
     /*
-        QuerySkeletalAnimation:
+        ForwardKinematicQuery:
         Use this function to retrieve information about the pose of an animation at a frameIndex, in the required formats.
         Careful there... this traverses the skeleton and assembles the full pose. Call only once a frame if possible <3.
     */
-    void QuerySkeletalAnimation
+    void ForwardKinematicQuery
     (
         /*Defines the query inputs*/
         int frameIndex,
-        int skeletonIndex,
-        bool addRootOffset,
+        /*Main query output*/
+        vector<blaPosQuat>* worldJointTransform,
         /*Defines the query outputs*/
         vector<blaVec3>* jointPositions = NULL,
         unordered_map<string, blaVec3>* jointPositionsByName = NULL,
-        vector<pair<blaVec3, blaVec3>>* segmentPositions = NULL,
-        unordered_map<string, blaPosQuat>* cumulativeTransformsByName = NULL
+        vector<pair<blaVec3, blaVec3>>* segmentPositions = NULL
     );
 
     /*
@@ -148,6 +147,23 @@ private:
             ComputeJointIndexByNameTable(child);
         }
     }
+
+    static void ForwardKinematicQueryRecursive
+    (
+        /*Defines the recursion parameters */
+        SkeletonJoint* joint,
+        const blaPosQuat& cumulativeTransform,
+        vector<vector<blaPosQuat>>& jointTransforms,
+        float skeletonScale,
+        /*Defines the query inputs*/
+        int frameIndex,
+        /*Main query output*/
+        vector<blaPosQuat>* worldJointTransforms,
+        /*Optional query output*/
+        vector<blaVec3>* jointPositions,
+        unordered_map<string, blaVec3>* jointPositionsByName,
+        vector<pair<blaVec3, blaVec3>>* segmentPositions
+    );
 
     string m_name;
 

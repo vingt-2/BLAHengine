@@ -135,6 +135,11 @@ public:
         m_p(blaVec4(p[0], p[1], p[2], 1.f))
     {}
 
+    blaPosQuat()
+    {
+        *this = GetIdentity();
+    }
+
     blaPosQuat operator* (const blaPosQuat &otherPosQuat) const
     {
         const blaVec4 newP = glm::rotate(m_q, otherPosQuat.m_p) + m_p;
@@ -237,7 +242,7 @@ public:
         m_p = p;
     }
 
-    const blaVec3& GetTranslation3() const
+    blaVec3 GetTranslation3() const
     {
         return blaVec3(m_p[0], m_p[1], m_p[2]);
     }
@@ -245,11 +250,6 @@ public:
     const blaVec4& GetTranslation() const
     {
         return m_p;
-    }
-
-    blaVec3& GetTranslation3()
-    {
-        return blaVec3(m_p[0], m_p[1], m_p[2]);
     }
 
     blaVec4& GetTranslation() 

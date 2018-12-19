@@ -20,108 +20,104 @@ void SkeletonJoint::PrintJoint()
     PrintJointRecursive(this, 0);
 }
 
-void QuerySkeletalAnimationRecursive
+void SkeletonAnimationData:: ForwardKinematicQueryRecursive
 (
     /*Defines the recursion parameters */
     SkeletonJoint* joint,
-    blaPosQuat& cumulativeTransform,
-    unordered_map<string, vector<blaPosQuat>>& jointTransforms,
+    const blaPosQuat& parentWorldTransform,
+    vector<vector<blaPosQuat>>& localJointTransforms,
     float skeletonScale,
     /*Defines the query inputs*/
     int frameIndex,
-    int skeletonIndex,
-    /*Defines the query outputs*/
+    /*Main query output*/
+    vector<blaPosQuat>* worldJointTransforms,
+    /*Optional query output*/
     vector<blaVec3>* jointPositions,
     unordered_map<string, blaVec3>* jointPositionsByName,
-    vector<pair<blaVec3, blaVec3>>* segmentPositions,
-    unordered_map<string, blaPosQuat>* cumulativeTransformsByName
+    vector<pair<blaVec3, blaVec3>>* segmentPositions
 )
 {
-    blaVec3 jointPositionL = joint->GetLocalOffset();
-    blaVec3 jointPositionW = cumulativeTransform.TransformPoint(jointPositionL);//skeletonScale;
+    blaPosQuat worldJointTransform = parentWorldTransform * localJointTransforms[frameIndex][joint->GetJointIndex()];
 
-    if (cumulativeTransformsByName)
+    if (worldJointTransforms)
     {
-        if (cumulativeTransformsByName->find(joint->GetName()) == cumulativeTransformsByName->end())
-            cumulativeTransformsByName->emplace(joint->GetName(), cumulativeTransform);
+        (*worldJointTransforms)[joint->GetJointIndex()] = worldJointTransform;
     }
 
     if (jointPositions)
-        jointPositions->push_back(jointPositionW);
+    {
+        jointPositions->push_back(worldJointTransform.GetTranslation3());
+    }
 
     if (jointPositionsByName)
     {
         if (jointPositionsByName->find(joint->GetName()) == jointPositionsByName->end())
-            jointPositionsByName->emplace(joint->GetName(), jointPositionW);
+            jointPositionsByName->emplace(joint->GetName(), worldJointTransform.GetTranslation3());
     }
-
-    blaPosQuat nextCumulativeTransform = blaPosQuat::GetIdentity();
-    if (joint->GetDirectChildren().size()) // Leaf joints do not have transforms, let's not try looking for them
-        nextCumulativeTransform = cumulativeTransform * jointTransforms[joint->GetName()][frameIndex];
 
     for (auto child : joint->GetDirectChildren())
     {
         if (segmentPositions)
         {
-            blaVec3 childPositionL = child->GetLocalOffset();
-            blaVec3 childPositionW = nextCumulativeTransform.TransformPoint(childPositionL);// *skeletonScale;
+            blaPosQuat nextJointTransform = blaPosQuat::GetIdentity();
+            nextJointTransform = worldJointTransform * localJointTransforms[frameIndex][child->GetJointIndex()];
 
-            segmentPositions->push_back(pair<blaVec3, blaVec3>(nextCumulativeTransform.GetTranslation(), childPositionW)); //* skeletonScale, childPositionW));
+            segmentPositions->push_back(pair<blaVec3, blaVec3>(worldJointTransform.GetTranslation3(), nextJointTransform.GetTranslation3())); //* skeletonScale, childPositionW));
         }
 
-        QuerySkeletalAnimationRecursive(
+        ForwardKinematicQueryRecursive(
             child,
-            nextCumulativeTransform,
-            jointTransforms,
+            worldJointTransform,
+            localJointTransforms,
             skeletonScale,
             frameIndex,
-            skeletonIndex,
+            worldJointTransforms,
             jointPositions,
             jointPositionsByName,
-            segmentPositions,
-            cumulativeTransformsByName);
+            segmentPositions);
         
     }
 }
 
-void SkeletonAnimationData::QuerySkeletalAnimation
+void SkeletonAnimationData::ForwardKinematicQuery
 (
 /*Defines the query inputs*/
 int frameIndex,
-int skeletonIndex,
-bool addRootOffset,
+/*Defines the main query output*/
+vector<blaPosQuat>* worldJointTransforms,
 /*Defines the query outputs*/
 vector<blaVec3>* jointPositions,
 unordered_map<string, blaVec3>* jointPositionsByName,
-vector<pair<blaVec3, blaVec3>>* segmentPositions,
-unordered_map<string, blaPosQuat>* cumulativeTransformsByName
+vector<pair<blaVec3, blaVec3>>* segmentPositions
 )
 {
-    if (!jointPositions && !jointPositionsByName && !segmentPositions && !cumulativeTransformsByName)
+    if (!jointPositions && !jointPositionsByName && !segmentPositions && !worldJointTransforms)
         return;
 
-    SkeletonJoint* root = m_skeletonsDef;
+    SkeletonJoint* root = m_skeletonDef;
 
-    blaPosQuat rootTransform = blaPosQuat::GetIdentity();
-
-    if (addRootOffset)
-        rootTransform.SetTranslation3(m_rootTrajectories[frameIndex][skeletonIndex]);
+    blaPosQuat cumulativeTransform = blaPosQuat::GetIdentity();
 
     // Build world pose of the skeleton by traversing the skeleton recursively and fetching joint rotation at the right frame.
     // fills out provided containers while traversing
 
-    QuerySkeletalAnimationRecursive
+    if (worldJointTransforms)
+    {
+        blaPosQuat a = blaPosQuat::GetIdentity();
+        worldJointTransforms->resize(m_jointTransforms[0].size());
+    }
+    
+    ForwardKinematicQueryRecursive
     (
         root, 
-        rootTransform, 
+        cumulativeTransform,
         m_jointTransforms,
         m_skeletonScale,
         frameIndex, 
-        skeletonIndex,
+        worldJointTransforms,
         jointPositions,
         jointPositionsByName, 
-        segmentPositions,
-        cumulativeTransformsByName
+        segmentPositions
     );
 }
 
@@ -187,7 +183,7 @@ void SkeletalAnimationPlayer::UpdatePlayer(bool &bIsAnimationStarting)
 void SkeletonAnimationData::SetNormalizedScale()
 {
     vector<blaVec3> jointPositions;
-    QuerySkeletalAnimation(0, 0, false, &jointPositions, NULL, NULL, NULL);
+    ForwardKinematicQuery(0, NULL, &jointPositions, NULL, NULL);
 
     float maxLength = 0;
     for (blaVec3 position : jointPositions)
@@ -202,7 +198,7 @@ void SkeletonAnimationData::SetNormalizedScale()
 void SkeletonAnimationData::SetNormalizedScaleWithMultiplier(float scaleCoeff)
 {
     vector<blaVec3> jointPositions;
-    QuerySkeletalAnimation(0, 0, false, &jointPositions, NULL, NULL, NULL);
+    ForwardKinematicQuery(0, NULL, &jointPositions, NULL, NULL);
 
     float maxLength = 0;
     for (blaVec3 position : jointPositions)
