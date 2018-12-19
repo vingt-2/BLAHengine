@@ -18,9 +18,6 @@ void AnimationDemo::PreEngineUpdate()
     EngineInstance::PreEngineUpdate();
 
     GameObject* animationObject = m_workingScene->FindObjectByName("AnimatedObject");
-
-    std::vector<blaVec3> jointPositions;
-    std::vector<std::pair<blaVec3, blaVec3>> bones;
     
     if (animationObject != nullptr)
     {
@@ -28,7 +25,7 @@ void AnimationDemo::PreEngineUpdate()
         {
             if (animCmp->m_animation == nullptr)
             {
-                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_01.bvh")[0];
+                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_02.bvh")[0];
             }
             else
             {
@@ -45,17 +42,20 @@ void AnimationDemo::PreEngineUpdate()
                 }
 
                 m_frameIndex = m_frameIndex >= animCmp->m_animation->GetFrameCount() ? 0.f : m_frameIndex;
-                animCmp->m_animation->ForwardKinematicQuery(static_cast<int>(m_frameIndex), nullptr, &jointPositions, nullptr, &bones);
+
+                vector<blaPosQuat> jointTransformsW;
+                animCmp->m_animation->EvaluateAnimation(static_cast<int>(m_frameIndex), jointTransformsW);
+
+                std::vector<std::pair<blaVec3, blaVec3>> bones;
+                
+                SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, animCmp->m_animation->GetSkeleton(), jointTransformsW);
+
+                for (size_t i = 0; i < bones.size(); ++i)
+                {
+                    m_debug->DrawLine(bones[i].first, bones[i].second);
+                }
             }
         }
-    }
-
-    blaVec3 offset(0.f, 3.f, 0.f);
-    for (size_t i = 0; i < bones.size(); i++)
-    {
-        m_debug->DrawLine(bones[i].first, bones[i].second);
-        //m_debug->DrawLine(blaVec3(0.f), jointPositions[i]);
-        m_debug->DrawSphere(offset + jointPositions[i], blaVec3(1.f, 0.f, 0.f));
     }
 
     if (m_cameraController)

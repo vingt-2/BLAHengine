@@ -22,19 +22,19 @@ public:
 
     ~SkeletonJoint() {};
 
-    string		GetName()			{ return m_name; }
+    string		GetName() const		{ return m_name; }
     
-    blaVec3		GetLocalOffset()	{ return m_localOffset; }
+    blaVec3		GetLocalOffset() const { return m_localOffset; }
 
-    blaU32      GetJointIndex()     { return m_jointIndex; }
-
-    void		ApplyOffsetNormalization(float normalizer)	{ m_localOffset /= normalizer; }
+    blaU32      GetJointIndex() const { return m_jointIndex; }
 
     /*
         Returns a vector of pointers to all the direct descendance of this joint.
         An end joint will return a empty vector.
     */
-    vector<SkeletonJoint*> GetDirectChildren()	{ return m_childJoints; }
+    vector<SkeletonJoint*> GetDirectChildren() const	{ return m_childJoints; }
+
+    void ApplyOffsetNormalization(float normalizer)	{ m_localOffset /= normalizer; }
 
     /*
         QuerySkeleton:
@@ -68,60 +68,39 @@ public:
         m_skeletonDef = skeletonDef;
         m_samplingRate = samplingRate;
         m_frameCount = frameCount;
-        m_skeletonScale = 1.0f;
     };
 
     ~SkeletonAnimationData();
 
-    string GetName()		{ return m_name; }
+    string GetName() const		{ return m_name; }
 
     /*
         Returns the sampling rate in secs as specified in the animation file 
     */
-
-    float GetSamplingRate() { return m_samplingRate; }
+    float GetSamplingRate() const { return m_samplingRate; }
     
     /*
         Returns the length of the animation, in number of frames. Length in time = framecout * sampling_rate
     */
-    int GetFrameCount()		{ return m_frameCount; }
+    int GetFrameCount() const { return m_frameCount; }
 
     /*
         Returns the Root joint of the desired skeleton defined in the animation clip.
     */
-    SkeletonJoint* GetSkeleton() { return m_skeletonDef; }
+    SkeletonJoint* GetSkeleton() const { return m_skeletonDef; }
 
     /*
-        ForwardKinematicQuery:
+        EvaluateAnimation:
         Use this function to retrieve information about the pose of an animation at a frameIndex, in the required formats.
         Careful there... this traverses the skeleton and assembles the full pose. Call only once a frame if possible <3.
     */
-    void ForwardKinematicQuery
+    void EvaluateAnimation
     (
         /*Defines the query inputs*/
         int frameIndex,
         /*Main query output*/
-        vector<blaPosQuat>* worldJointTransform,
-        /*Defines the query outputs*/
-        vector<blaVec3>* jointPositions = NULL,
-        unordered_map<string, blaVec3>* jointPositionsByName = NULL,
-        vector<pair<blaVec3, blaVec3>>* segmentPositions = NULL
+        vector<blaPosQuat>& worldJointTransform
     );
-
-    /*
-        Compute and set a normalizing scale so that differnt skeleton definition appear at the same scale in the application
-    */
-    void SetNormalizedScale();
-
-    /*
-        Compute and set a normalizing scale, with a multiplier applied (for visualization)
-    */
-    void SetNormalizedScaleWithMultiplier(float scaleCoeff);
-
-    /*
-        Sets the scale of positions information retrieved.
-    */
-    void SetScale(float scale) { m_skeletonScale = scale; }
 
     /*
         Queries the local transform of a joint using its name, for a specific frame index.
@@ -136,6 +115,8 @@ public:
         return m_jointTransforms[frameIndex][m_jointIndexByName[name]];
     }
 
+    static void GetBoneArrayFromEvalAnim(vector<pair<blaVec3, blaVec3>>& outputBones, const SkeletonJoint* skeleton, vector<blaPosQuat> evalAnim);
+
 private:
 
     void ComputeJointIndexByNameTable(SkeletonJoint* skeleton)
@@ -148,21 +129,16 @@ private:
         }
     }
 
-    static void ForwardKinematicQueryRecursive
+    static void ForwardKinematicRecursive
     (
+        /*Defines the query inputs*/
+        int frameIndex,
         /*Defines the recursion parameters */
         SkeletonJoint* joint,
         const blaPosQuat& cumulativeTransform,
         vector<vector<blaPosQuat>>& jointTransforms,
-        float skeletonScale,
-        /*Defines the query inputs*/
-        int frameIndex,
         /*Main query output*/
-        vector<blaPosQuat>* worldJointTransforms,
-        /*Optional query output*/
-        vector<blaVec3>* jointPositions,
-        unordered_map<string, blaVec3>* jointPositionsByName,
-        vector<pair<blaVec3, blaVec3>>* segmentPositions
+        vector<blaPosQuat>& worldJointTransforms
     );
 
     string m_name;
@@ -176,7 +152,6 @@ private:
 
     float							m_samplingRate;
     int								m_frameCount;
-    float							m_skeletonScale;
 };
 
 class SkeletalAnimationPlayer

@@ -20,104 +20,68 @@ void SkeletonJoint::PrintJoint()
     PrintJointRecursive(this, 0);
 }
 
-void SkeletonAnimationData:: ForwardKinematicQueryRecursive
+void SkeletonAnimationData::GetBoneArrayFromEvalAnim(vector<pair<blaVec3, blaVec3>>& outputBones,
+    const SkeletonJoint* skeleton, vector<blaPosQuat> evalAnim)
+{
+
+    blaPosQuat transform = evalAnim[skeleton->GetJointIndex()];
+
+    for (auto child : skeleton->GetDirectChildren())
+    {
+        outputBones.emplace_back(pair<blaVec3, blaVec3>(transform.GetTranslation3(), evalAnim[child->GetJointIndex()].GetTranslation3()));
+        GetBoneArrayFromEvalAnim(outputBones, child, evalAnim);
+    }
+}
+
+void SkeletonAnimationData::ForwardKinematicRecursive
 (
+    /*Defines the query inputs*/
+    int frameIndex,
     /*Defines the recursion parameters */
     SkeletonJoint* joint,
     const blaPosQuat& parentWorldTransform,
     vector<vector<blaPosQuat>>& localJointTransforms,
-    float skeletonScale,
-    /*Defines the query inputs*/
-    int frameIndex,
     /*Main query output*/
-    vector<blaPosQuat>* worldJointTransforms,
-    /*Optional query output*/
-    vector<blaVec3>* jointPositions,
-    unordered_map<string, blaVec3>* jointPositionsByName,
-    vector<pair<blaVec3, blaVec3>>* segmentPositions
+    vector<blaPosQuat>& worldJointTransforms
 )
 {
-    blaPosQuat worldJointTransform = parentWorldTransform * localJointTransforms[frameIndex][joint->GetJointIndex()];
+    const blaPosQuat worldJointTransform = parentWorldTransform * localJointTransforms[frameIndex][joint->GetJointIndex()];
 
-    if (worldJointTransforms)
-    {
-        (*worldJointTransforms)[joint->GetJointIndex()] = worldJointTransform;
-    }
-
-    if (jointPositions)
-    {
-        jointPositions->push_back(worldJointTransform.GetTranslation3());
-    }
-
-    if (jointPositionsByName)
-    {
-        if (jointPositionsByName->find(joint->GetName()) == jointPositionsByName->end())
-            jointPositionsByName->emplace(joint->GetName(), worldJointTransform.GetTranslation3());
-    }
+    worldJointTransforms[joint->GetJointIndex()] = worldJointTransform;
 
     for (auto child : joint->GetDirectChildren())
     {
-        if (segmentPositions)
-        {
-            blaPosQuat nextJointTransform = blaPosQuat::GetIdentity();
-            nextJointTransform = worldJointTransform * localJointTransforms[frameIndex][child->GetJointIndex()];
-
-            segmentPositions->push_back(pair<blaVec3, blaVec3>(worldJointTransform.GetTranslation3(), nextJointTransform.GetTranslation3())); //* skeletonScale, childPositionW));
-        }
-
-        ForwardKinematicQueryRecursive(
+        ForwardKinematicRecursive(
+            frameIndex,
             child,
             worldJointTransform,
             localJointTransforms,
-            skeletonScale,
-            frameIndex,
-            worldJointTransforms,
-            jointPositions,
-            jointPositionsByName,
-            segmentPositions);
+            worldJointTransforms);
         
     }
 }
 
-void SkeletonAnimationData::ForwardKinematicQuery
+void SkeletonAnimationData::EvaluateAnimation
 (
 /*Defines the query inputs*/
 int frameIndex,
 /*Defines the main query output*/
-vector<blaPosQuat>* worldJointTransforms,
-/*Defines the query outputs*/
-vector<blaVec3>* jointPositions,
-unordered_map<string, blaVec3>* jointPositionsByName,
-vector<pair<blaVec3, blaVec3>>* segmentPositions
+vector<blaPosQuat>& worldJointTransforms
 )
 {
-    if (!jointPositions && !jointPositionsByName && !segmentPositions && !worldJointTransforms)
-        return;
-
     SkeletonJoint* root = m_skeletonDef;
 
     blaPosQuat cumulativeTransform = blaPosQuat::GetIdentity();
 
-    // Build world pose of the skeleton by traversing the skeleton recursively and fetching joint rotation at the right frame.
-    // fills out provided containers while traversing
+    worldJointTransforms.resize(m_jointTransforms[0].size());
 
-    if (worldJointTransforms)
-    {
-        blaPosQuat a = blaPosQuat::GetIdentity();
-        worldJointTransforms->resize(m_jointTransforms[0].size());
-    }
-    
-    ForwardKinematicQueryRecursive
+    ForwardKinematicRecursive
     (
-        root, 
-        cumulativeTransform,
+        frameIndex,
+        m_skeletonDef,
+        blaPosQuat::GetIdentity(),
         m_jointTransforms,
-        m_skeletonScale,
-        frameIndex, 
-        worldJointTransforms,
-        jointPositions,
-        jointPositionsByName, 
-        segmentPositions
+        worldJointTransforms
     );
 }
 
@@ -178,36 +142,6 @@ void SkeletalAnimationPlayer::UpdatePlayer(bool &bIsAnimationStarting)
     {
         UpdatePlayer();
     }
-}
-
-void SkeletonAnimationData::SetNormalizedScale()
-{
-    vector<blaVec3> jointPositions;
-    ForwardKinematicQuery(0, NULL, &jointPositions, NULL, NULL);
-
-    float maxLength = 0;
-    for (blaVec3 position : jointPositions)
-    {
-        if (maxLength < glm::length(position))
-            maxLength = glm::length(position);
-    }
-
-    m_skeletonScale = 1.0f / maxLength;
-}
-
-void SkeletonAnimationData::SetNormalizedScaleWithMultiplier(float scaleCoeff)
-{
-    vector<blaVec3> jointPositions;
-    ForwardKinematicQuery(0, NULL, &jointPositions, NULL, NULL);
-
-    float maxLength = 0;
-    for (blaVec3 position : jointPositions)
-    {
-        if (maxLength < glm::length(position))
-            maxLength = glm::length(position);
-    }
-
-    m_skeletonScale = scaleCoeff / maxLength;
 }
 
 SkeletonAnimationData::~SkeletonAnimationData()
