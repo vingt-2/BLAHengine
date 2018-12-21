@@ -13,12 +13,12 @@ Time::~Time()
     m_timeBuffer.~vector();
 }
 
-float Time::GetTime()
+float Time::GetTime() const
 {
     return m_time;
 }
 
-float Time::GetDelta()
+float Time::GetDelta() const
 {
     return m_elapsedTime;
 }
@@ -43,7 +43,7 @@ void Time::Update()
     m_timeBuffer.push_back(time);*/
 }
 
-float Time::GetFramerate()
+float Time::GetFramerate() const
 {
     if (m_timeBuffer.size() < 2)
         return 0.0f;

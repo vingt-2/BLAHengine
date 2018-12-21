@@ -3,6 +3,8 @@
 #include "../System/RenderWindow.h"
 #include "../Game/GameComponents/CameraComponent.h"
 #include "../Game/GameObject.h"
+#include "../EngineInstance.h"
+#include "../Game/Time.h"
 
 using namespace BLAengine;
 
@@ -16,56 +18,64 @@ void CameraController::UpdateController()
     ObjectTransform transform = m_controlledCamera->GetObjectTransform();
     GameObject* cameraObject = m_controlledCamera->GetParentObject();
 
-    blaVec3 tangentForce = blaVec3(0);
-    blaVec3 movementForce = blaVec3(0);
-    float coeff = 0.1f;
+    blaVec3 linearAcceleration(0.f);
+    blaVec3 angularAcceleration(0.f);
 
-    bool hideMouse = false;
+    float coeff = 1.f;
+    if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT_SHIFT))
+    {
+        coeff = 3.f;
+    }
 
     if (m_renderWindow->GetKeyPressed('W'))
-        tangentForce.z = -2.f;
+        linearAcceleration.z = -1.f;
     if (m_renderWindow->GetKeyPressed('S'))
-        tangentForce.z = 2.f;
+        linearAcceleration.z = 1.f;
 
     if (m_renderWindow->GetKeyPressed('A'))
-        tangentForce.x = -2.f;
+        linearAcceleration.x = -1.f;
     if (m_renderWindow->GetKeyPressed('D'))
-        tangentForce.x = 2.f;
+        linearAcceleration.x = 1.f;
 
     if (m_renderWindow->GetKeyPressed('Q'))
-        tangentForce.y = -2.f;
+        linearAcceleration.y = -1.f;
     if (m_renderWindow->GetKeyPressed('E'))
-        tangentForce.y = 2.f;
+        linearAcceleration.y = 1.f;
 
     if (m_renderWindow->GetMousePressed(2))
     {
         double x, y;
         m_renderWindow->GetMouse(x, y);
-        tangentForce = blaVec3(0, 0, 0);
+        linearAcceleration = blaVec3(0, 0, 0);
 
         if (x - m_prevMousePosition.x > 0)
         {
-            tangentForce.x = -1.f;
+            linearAcceleration.x = -1.f;
         }
         else if (x - m_prevMousePosition.x < 0)
         {
-            tangentForce.x = 1.f;
+            linearAcceleration.x = 1.f;
         }
         if (y - m_prevMousePosition.y > 0)
         {
-            tangentForce.y = 1.f;
+            linearAcceleration.y = 1.f;
         }
         else if (y - m_prevMousePosition.y < 0)
         {
-            tangentForce.y = -1.f;
+            linearAcceleration.y = -1.f;
         }
 
         m_prevMousePosition = glm::vec2(x, y);
     }
 
-    blaVec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
-    cameraForce *= coeff;
-    transform.SetPosition(transform.GetPosition() + cameraForce);
+    blaF32 mouseScroll;
+    m_renderWindow->GetMouseWheel(mouseScroll);
+
+    linearAcceleration.z -= 100.f * (mouseScroll - m_lastScrollValue);
+
+    m_lastScrollValue = mouseScroll;
+
+    linearAcceleration = coeff * 2000.f * transform.LocalDirectionToWorld(linearAcceleration);
 
     if (m_renderWindow->GetMousePressed(1))
     {
@@ -73,31 +83,44 @@ void CameraController::UpdateController()
         m_renderWindow->GetMouse(x, y);
         glm::vec2 curMouse = glm::vec2(x, y);
 
-        blaVec3 deltaRotation = blaVec3(0);
-
         if (x - m_prevMousePosition.x > 0)
         {
-            deltaRotation.y = -1.f;
+            angularAcceleration.y = -1.f;
         }
         else if (x - m_prevMousePosition.x < 0)
         {
-            deltaRotation.y = 1.f;
+            angularAcceleration.y = 1.f;
         }
         if (y - m_prevMousePosition.y > 0)
         {
-            deltaRotation.x = -1.f;
+            angularAcceleration.x = -1.f;
         }
         else if (y - m_prevMousePosition.y < 0)
         {
-            deltaRotation.x = 1.f;
+            angularAcceleration.x = 1.f;
         }
 
         m_prevMousePosition = curMouse;
 
-        const blaVec3 eulerAngles = transform.GetEulerAngles();
+        angularAcceleration *= 600.f;
 
-        transform.SetEulerAngles(eulerAngles + 0.01f * deltaRotation);
+        angularAcceleration.x *= 9.0f/16.0f;
     }
+
+    EngineInstance* engineInstance;
+
+    BLA_RETRIEVE_SINGLETON(EngineInstance, engineInstance);
+
+    blaF32 dt = engineInstance->GetTime()->GetDelta();
+
+    m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
+    transform.SetPosition( transform.GetPosition() + dt * m_cameraLinearVelocity);
+
+    m_cameraAngularVelocity += dt * (angularAcceleration - m_cameraDamping * m_cameraAngularVelocity);
+    m_currentCameraEulerAngles += dt * m_cameraAngularVelocity;
+    m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x > 0.45f * M_PI ? 0.45f * M_PI : m_currentCameraEulerAngles.x;
+    m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x < -0.45f * M_PI ? -0.45f * M_PI : m_currentCameraEulerAngles.x;
+    transform.SetEulerAngles(m_currentCameraEulerAngles);
 
     cameraObject->SetTransform(transform);
 

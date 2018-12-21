@@ -8,7 +8,7 @@ void PrintJointRecursive(SkeletonJoint* joint, int depth)
 {
     string out = "";
     for (int i = 0; i < depth; i++)
-        out += "_";
+        out += " ";
     cout << out + joint->GetName() + "\n";
 
     for (auto child : joint->GetDirectChildren())

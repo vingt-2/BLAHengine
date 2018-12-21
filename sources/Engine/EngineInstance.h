@@ -41,6 +41,8 @@ namespace BLAengine
 
         Debug* GetDebug() const { return m_debug; }
 
+        const Time* GetTime() const { return m_timer; }
+
     protected:
 
         void SetupDirLightAndCamera();

@@ -2,6 +2,14 @@
 using namespace BLAengine;
 
 #ifdef GLFW_INTERFACE
+
+std::pair<GLFWwindow*, float> g_lastGlfwScrollValue;
+
+void MouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
+{
+    g_lastGlfwScrollValue = std::pair<GLFWwindow*, blaF32>(window, yAxisScroll);
+}
+
 #define GLFW_DEFAULT_WINDOW_NAME "glfwWindow"
 void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
@@ -62,6 +70,8 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetCursorPos(window, m_width / 2, m_height / 2);
 
+    glfwSetScrollCallback(window, (GLFWscrollfun) MouseWheelCallback);
+
     m_glfwWindow = window;
 }
 
@@ -77,6 +87,12 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
+    if (g_lastGlfwScrollValue.first == m_glfwWindow)
+    {
+        m_mouseScrollAxis += g_lastGlfwScrollValue.second;
+        g_lastGlfwScrollValue.first = nullptr;
+    }
+
     bool cursorVisibility = true;
     for (auto mouseButton : m_mouseButtonsThatKillCursorWhenHeld)
     {
@@ -127,6 +143,11 @@ void GLFWRenderWindow::GetMouse(double & x, double& y) const
     glfwGetCursorPos(m_glfwWindow, &x, &y);
 }
 
+void GLFWRenderWindow::GetMouseWheel(float& wheelAxisValue) const
+{
+    wheelAxisValue = m_mouseScrollAxis;
+}
+
 void GLFWRenderWindow::SetMouseXY()
 {
 }
@@ -141,13 +162,13 @@ bool GLFWRenderWindow::GetMousePressed(int button) const
     return (glfwGetMouseButton(m_glfwWindow, button) == GLFW_PRESS);
 }
 
-GLFWRenderWindow::GLFWRenderWindow()
-{
-    m_isFullscreen = false;
-    m_width = 0;
-    m_height = 0;
-    m_glfwWindow = nullptr;
-}
+GLFWRenderWindow::GLFWRenderWindow():
+    m_mouseScrollAxis(0.f),
+    m_isFullscreen(false),
+    m_width(0),
+    m_height(0),
+    m_glfwWindow(nullptr)
+{};
 
 GLFWRenderWindow::~GLFWRenderWindow()
 {

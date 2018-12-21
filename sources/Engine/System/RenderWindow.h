@@ -25,16 +25,20 @@ namespace BLAengine
 
         virtual void GetMouse(double &x, double &y) const = 0;
 
-        virtual void SetMouseXY() = 0;
-
         virtual bool GetMousePressed(int button) const = 0;
+
+        virtual void GetMouseWheel(float& wheelAxisValue) const = 0;
+
         virtual bool GetKeyPressed(int key) const = 0;
+
+        virtual void SetMouseXY() = 0;
 
         virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) = 0;
 
         virtual void SetMouseCursorVisibility(bool visibility) = 0;
     };
 
+    //TODO: Implement MousWheel
     class BLACORE_API WPFRenderWindow : public RenderWindow
     {
     public:
@@ -112,6 +116,8 @@ namespace BLAengine
 
         void GetMouse(double &x, double &y) const override;
 
+        void GetMouseWheel(float& wheelAxisValue) const override;
+
         void SetMouseXY() override;
 
         bool GetKeyPressed(int key) const override;
@@ -129,6 +135,8 @@ namespace BLAengine
         GLFWwindow* m_glfwWindow;
 
         int m_width, m_height;
+
+        float m_mouseScrollAxis;
 
         bool m_isFullscreen;
 

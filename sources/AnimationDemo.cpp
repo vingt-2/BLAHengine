@@ -25,7 +25,7 @@ void AnimationDemo::PreEngineUpdate()
         {
             if (animCmp->m_animation == nullptr)
             {
-                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_02.bvh")[0];
+                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/ben_is_just_talking.bvh")[0];
             }
             else
             {
@@ -81,7 +81,11 @@ bool AnimationDemo::LoadWorkingScene(std::string filepath)
     GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
     AnimationComponent* animationCmp = BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
-    m_cameraController = new CameraController(m_renderWindow, m_workingScene->GetMainCamera());
+    m_cameraController = new CameraController(
+        m_renderWindow, 
+        m_workingScene->GetMainCamera(),
+        55.f,
+        10.0f);
 
     m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);
     m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);

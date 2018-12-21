@@ -16,11 +16,10 @@ void DoAnimationDemoSession()
     BLA_RETRIEVE_SINGLETON(EngineInstance, demo);
 
     GLFWRenderWindow* renderWindow = new GLFWRenderWindow();
-    renderWindow->CreateRenderWindow("BLAengineDemo", 1280, 720, false); // Add arguments
+
+    renderWindow->CreateRenderWindow("BLAengineDemo", 1280, 720, false);
 
     demo->InitializeEngine(renderWindow);
-
-    //g_debugInstance = demo.m_debug;
 
     demo->LoadWorkingScene("./Scenes/empty_scene");
 
@@ -31,7 +30,7 @@ void DoAnimationDemoSession()
         demo->PostEngineUpdate();
     }
 
-    // Calls terminate Engine
+    // Call terminates engine
     demo->TerminateEngine();
 }
 

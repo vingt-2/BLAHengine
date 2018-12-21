@@ -11,9 +11,9 @@ namespace BLAengine
         Time(glm::uint8 timeBufferSize);
         ~Time();
 
-        float GetTime();
-        float GetDelta();
-        float GetFramerate();
+        float GetTime() const;
+        float GetDelta() const;
+        float GetFramerate() const;
 
         void Update();
 

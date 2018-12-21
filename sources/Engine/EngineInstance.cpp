@@ -9,6 +9,8 @@
 
 using namespace BLAengine;
 
+#pragma optimize("", off)
+
 bool EngineInstance::InitializeEngine(RenderWindow* _renderWindow)
 {
     this->m_renderWindow = _renderWindow;
@@ -43,6 +45,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* _renderWindow)
         return false;
     }
 
+    // Finally, load our assets in memory...
     m_assetManager->LoadCookedAssets();
 
     return true;
@@ -113,7 +116,7 @@ void EngineInstance::SetupDirLightAndCamera()
     DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
     ObjectTransform lightT = light->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
-    lightT.SetEulerAngles(-0.66f, 0.f, 0.f);
+    lightT.SetEulerAngles(-0.93f, 0.f, 0.f);
     light->SetTransform(lightT);
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");

@@ -29,6 +29,7 @@ const ObjectTransform& GameObject::GetTransform()
     return *m_transform;
 }
 
+//TODO: Why is m_transform even a pointer then ??
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
     *m_transform = transform;
