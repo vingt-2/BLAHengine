@@ -16,7 +16,7 @@ bool HairDemo::InitializeEngine(RenderWindow* _renderWindow)
     m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_editorRenderer->m_assetManager = m_assetManager;
 
-    m_timer = new Time(10);
+    m_timer = new Timer(10);
 
     m_editorScene = new Scene();
 
@@ -78,7 +78,7 @@ void HairDemo::UpdateEditor()
     //        ObjectTransform lightT = dirLight->GetObjectTransform();
     //        lightT.SetPosition(blaVec3(0, 50, 0));
     //        blaVec3 rotationInEuler = lightT.GetEulerAngles();
-    //        lightT.SetEulerAngles(-0.5f*3.14f + 0.02f * m_timer->GetTime(), 0.f, 0.f);
+    //        lightT.SetEulerAngles(-0.5f*3.14f + 0.02f * m_timer->GetTimer(), 0.f, 0.f);
     //        dirlightObj->SetTransform(lightT);
     //    }
     //}

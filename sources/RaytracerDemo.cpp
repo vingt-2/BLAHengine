@@ -19,7 +19,7 @@ bool Raytracer::InitializeEngine()
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
     //m_editorRenderer->SetCamera(cameraComp);
 
-    m_timer = new Time(10);
+    m_timer = new Timer(10);
 
     m_workingScene = new Scene();
 

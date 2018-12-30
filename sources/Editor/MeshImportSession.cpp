@@ -1,5 +1,5 @@
 #include "MeshImportSession.h"
-#include "../../AssetsImport/ExternalFormats/OBJImport.h"
+#include "../AssetsImport/ExternalFormats/OBJImport.h"
 
 using namespace BLAengine;
 
@@ -16,7 +16,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_editorRenderer->m_assetManager = m_assetManager;
 
-    Time* time = new Time(10);
+    Timer* time = new Timer(10);
 
     m_workingScene = new Scene();
 

@@ -54,7 +54,22 @@ GameObject* BLAengine::Scene::FindObjectByName(std::string name)
     return nullptr;
 }
 
-void BLAengine::Scene::SetTimeObject(Time * time)
+vector<GameObject*> Scene::FindObjectsMatchingName(std::string name)
+{
+	std::vector<GameObject*> results;
+
+	for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
+	{
+		GameObject* object = m_sceneObjectsVector[i];
+		if (object->GetName().find(name) != std::string::npos)
+		{
+			results.push_back(object);
+		}
+	}
+	return results;
+}
+
+void BLAengine::Scene::SetTimeObject(Timer * time)
 {
     m_rigidBodySystem->SetTimeObject(time);
 }

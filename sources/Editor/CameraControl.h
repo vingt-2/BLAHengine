@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Common/Maths/Maths.h"
+#include "../Common/Maths/Maths.h"
 
 namespace BLAengine
 {
@@ -37,7 +37,6 @@ namespace BLAengine
 
         blaVec3 m_cameraAngularVelocity;
         blaVec3 m_cameraLinearVelocity;
-
 
         blaVec3 m_currentCameraEulerAngles;
 

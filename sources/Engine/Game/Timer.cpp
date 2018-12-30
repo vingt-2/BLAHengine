@@ -1,29 +1,29 @@
-#include "Time.h"
+#include "Timer.h"
 using namespace BLAengine;
 
-Time::Time(glm::uint8 timeBufferSize)
+Timer::Timer(glm::uint8 timeBufferSize)
 {
     m_timeBufferSize = m_timeBufferSize;
     m_time = 0;
     m_elapsedTime = 0;
 }
 
-Time::~Time()
+Timer::~Timer()
 {
     m_timeBuffer.~vector();
 }
 
-float Time::GetTime() const
+float Timer::GetTime() const
 {
     return m_time;
 }
 
-float Time::GetDelta() const
+float Timer::GetDelta() const
 {
     return m_elapsedTime;
 }
 
-void Time::Update()
+void Timer::Update()
 {
     float time = 0;
 
@@ -43,7 +43,7 @@ void Time::Update()
     m_timeBuffer.push_back(time);*/
 }
 
-float Time::GetFramerate() const
+float Timer::GetFramerate() const
 {
     if (m_timeBuffer.size() < 2)
         return 0.0f;

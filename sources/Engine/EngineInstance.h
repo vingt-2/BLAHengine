@@ -9,7 +9,7 @@ namespace BLAengine
     class Scene;
     class Scene;
     class RenderWindow;
-    class Time;
+    class Timer;
     class RenderingManager;
     class DebugRenderingManager;
 
@@ -41,7 +41,7 @@ namespace BLAengine
 
         Debug* GetDebug() const { return m_debug; }
 
-        const Time* GetTime() const { return m_timer; }
+        const Timer* GetTimer() const { return m_timer; }
 
     protected:
 
@@ -55,7 +55,7 @@ namespace BLAengine
         Scene* m_workingScene;
         Scene* m_editorScene;
         RenderWindow* m_renderWindow;
-        Time* m_timer;
+        Timer* m_timer;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
 

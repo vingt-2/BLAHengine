@@ -24,6 +24,9 @@ namespace BLAengine
         void SetPosition(blaVec3 newPosition);
         blaVec3 GetPosition() const;
 
+		blaPosQuat& GetPosQuat() { return m_transform; };
+		const blaPosQuat& GetPosQuat() const { return m_transform; };
+
         blaVec3 LocalDirectionToWorld(const blaVec3&  direction) const;
         blaVec3 LocalPositionToWorld(const blaVec3&  position) const;
         blaVec3 WorldDirectionToLocal(const blaVec3&  direction) const;
@@ -31,9 +34,6 @@ namespace BLAengine
 
         ObjectTransform(void);
         ~ObjectTransform(void);
-
-    private:
-
     };
 
 }

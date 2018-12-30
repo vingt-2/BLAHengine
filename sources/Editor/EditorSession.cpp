@@ -1,5 +1,5 @@
 #include "EditorSession.h"
-#include "../Game/PBRendering/PBRRenderer.h"
+#include "../Engine/Game/PBRendering/PBRRenderer.h"
 
 using namespace BLAengine;
 
@@ -16,7 +16,7 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
     m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_editorRenderer->m_assetManager = m_assetManager;
 
-    m_timer = new Time(10);
+    m_timer = new Timer(10);
 
     m_editorScene = new Scene();
 

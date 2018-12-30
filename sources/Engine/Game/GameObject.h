@@ -1,10 +1,13 @@
 #pragma once
-#include "..\..\Common\StdInclude.h"
+#include "../../Common/StdInclude.h"
+#include "../../Common/DataStructures\Tree.h"
 #include "GameComponents/GameComponent.h"
+
+#include "../../Common/TypeCast.h"
 
 namespace BLAengine
 {
-    class BLACORE_API GameObject
+    class BLACORE_API GameObject : public IntrusiveTree<GameObject>
     {
         // Game component is a friend class to GameObjects. They call Add Component upon Creation
         friend class GameComponent;
@@ -13,9 +16,6 @@ namespace BLAengine
 
         void Update();
 
-        void SetParent(GameObject* parent) { m_parent = parent; }
-        GameObject* GetParent() { return m_parent; }
-
         const ObjectTransform& GetTransform();
         void SetTransform(const ObjectTransform& transform);
 
@@ -23,9 +23,9 @@ namespace BLAengine
         ~GameObject(void);
 
         void SetName(std::string name) { m_objectName = name; }
-        std::string GetName() { return m_objectName; }
+        std::string GetName() const { return m_objectName; }
 
-        vector<GameComponent*> GetAllComponents();
+        vector<GameComponent*> GetAllComponents() const;
 
         template<class ComponentType>
         ComponentType* GetComponent();
@@ -44,19 +44,18 @@ namespace BLAengine
         void AddComponent(GameComponent* component);
 
         string m_objectName;
-        GameObject* m_parent;
-        ObjectTransform* m_transform;
+        ObjectTransform m_transform;
 
         vector<GameComponent*> m_componentVector;
     };
-
-    inline vector<GameComponent*> GameObject::GetAllComponents()
+	
+    inline vector<GameComponent*> GameObject::GetAllComponents() const
     {
         return m_componentVector;
     }
 
     template<class ComponentType>
-    inline ComponentType* GameObject::GetComponent()
+    ComponentType* GameObject::GetComponent()
     {
         for (size_t i = 0; i < m_componentVector.size(); i++)
         {
@@ -70,16 +69,22 @@ namespace BLAengine
     }
 
     template<class ComponentType>
-    inline vector<ComponentType*> GameObject::GetComponents()
+    vector<ComponentType*> GameObject::GetComponents()
     {
         vector<ComponentType*> comps;
+
         for (size_t i = 0; i < m_componentVector.size(); i++)
         {
-            GameComponent* gComp = m_componentVector[i];
-            if (ComponentType* comp = dynamic_cast<ComponentType*>(gComp))
-            {
-                comps.push_back(comp);
-            }
+            GameComponent* baseComp = m_componentVector[i];
+
+			ComponentType* comp;
+			
+        	BLA_DYNAMIC_CAST(ComponentType, baseComp, comp);
+
+			if(comp != nullptr)
+			{
+				comps.push_back(comp);
+			}
         }
         return comps;
     }

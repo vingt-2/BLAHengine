@@ -70,7 +70,7 @@ namespace BLAengine
         Scene* m_workingScene;
         Scene* m_editorScene;
         RenderWindow* m_renderWindow;
-        Time* m_timer;
+        Timer* m_timer;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
         HairDemoControls* m_editorControls;

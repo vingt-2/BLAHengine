@@ -30,7 +30,7 @@ void main()
 	
     vec3 backPixelColor = texture(displayBuffer, screenToUV(p.xy)).rgb;
     
-    float alphablend = position.z > bufferPosProjected.z ? 0.0f : 1.f; 
+    float alphablend = position.z > bufferPosProjected.z ? 0.3f : 1.f; 
 
     color = vec4((alphablend) * vertexColor + (1-alphablend) * backPixelColor, 1);
 }

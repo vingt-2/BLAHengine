@@ -1,21 +1,20 @@
 #pragma once
 #include "../../../Common/StdInclude.h"
 #include "../../../Common/Maths/Maths.h"
-
+#include "../../../Common/DataStructures/Tree.h"
 
 /*
     Class SkeletonJoint:
     
     This is the tree node that holds information about a specific joint. A skeleton is a tree of these things.
 */
-class SkeletonJoint
+class SkeletonJoint : public IntrusiveTree<SkeletonJoint>
 {
 public:
 
-    SkeletonJoint(string name, vector<SkeletonJoint*> childJoints, const blaVec3 &localOffset, blaU32 jointIndex)
+    SkeletonJoint(string name, const blaVec3 &localOffset, blaU32 jointIndex)
     {
         m_name = name;
-        m_childJoints = childJoints;
         m_localOffset = localOffset;
         m_jointIndex = jointIndex;
     }
@@ -28,12 +27,6 @@ public:
 
     blaU32      GetJointIndex() const { return m_jointIndex; }
 
-    /*
-        Returns a vector of pointers to all the direct descendance of this joint.
-        An end joint will return a empty vector.
-    */
-    vector<SkeletonJoint*> GetDirectChildren() const	{ return m_childJoints; }
-
     void ApplyOffsetNormalization(float normalizer)	{ m_localOffset /= normalizer; }
 
     /*
@@ -45,10 +38,11 @@ public:
 
     void PrintJoint();
 
+	void FilterJointsByName(string subname);
+
 private:
     string					m_name;
     blaVec3					m_localOffset;
-    vector<SkeletonJoint*>	m_childJoints;
     blaU32                  m_jointIndex;
 };
 
@@ -123,9 +117,9 @@ private:
     {
         m_jointIndexByName[skeleton->GetName()] = skeleton->GetJointIndex();
 
-        for (auto child : skeleton->GetDirectChildren())
+        for (auto& child : *skeleton)
         {
-            ComputeJointIndexByNameTable(child);
+            ComputeJointIndexByNameTable(&child);
         }
     }
 

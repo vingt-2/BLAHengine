@@ -1,7 +1,7 @@
 #pragma once
 #include "..\GameComponents\RigidBodyComponent.h"
 #include "..\..\..\Common\StdInclude.h"
-#include "..\time.h"
+#include "..\Timer.h"
 namespace BLAengine
 {
     class BLACORE_API Contact
@@ -31,7 +31,7 @@ namespace BLAengine
     class BLACORE_API CollisionProcessor
     {
     public:
-        CollisionProcessor(Time* time, float* timestepPtr);
+        CollisionProcessor(Timer* time, float* timestepPtr);
         ~CollisionProcessor();
 
         int m_maxIterations;
@@ -57,9 +57,9 @@ namespace BLAengine
 
         void ProcessCollisions();
 
-        void setTimeObject(Time* time) { m_time = time; }
+        void setTimeObject(Timer* time) { m_time = time; }
     private:
-        Time* m_time;
+        Timer* m_time;
 
         void ComputeT(vector<vector<blaVec3>>& T);
         void GetDiagonalElements(vector<vector<blaVec3>> T, vector<float>& D);

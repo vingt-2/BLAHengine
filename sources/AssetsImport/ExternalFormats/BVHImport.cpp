@@ -13,6 +13,8 @@
 #define M_PI       float(3.14159265358979323846)
 #endif
 
+#pragma optimize("", off)
+
 using namespace std;
 using namespace BLAengine;
 
@@ -128,7 +130,7 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
 
                 currentToken += 7;
 
-                SkeletonJoint* endJoint = new SkeletonJoint(endJointName, vector<SkeletonJoint*>(), endJointLocalOffset, currentJointIndex);
+                SkeletonJoint* endJoint = new SkeletonJoint(endJointName, endJointLocalOffset, currentJointIndex);
                 jointChildren.push_back(endJoint);
             }
             else
@@ -142,7 +144,14 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
         }
     }
 
-    return new SkeletonJoint(jointName, jointChildren, jointLocalOffset, currentJointIndex);
+    auto joint =  new SkeletonJoint(jointName, jointLocalOffset, currentJointIndex);
+
+	for(auto c : jointChildren)
+	{
+		joint->AddChild(c);
+	}
+
+	return joint;
 }
 
 // See BVHImport for explanation
@@ -152,7 +161,7 @@ void ReadFrameRecursive(vector<string>& tokens,
                         int &currentToken,
                         vector<vector<int>> &jointsChannelOrderings)
 {
-    if (!joint->GetDirectChildren().size())
+    if (joint->GetChild() == nullptr)
         return;
 
     blaPosQuat localJointTransform(joint->GetLocalOffset(), blaPosQuat::blaQuatIdentity());
@@ -176,9 +185,9 @@ void ReadFrameRecursive(vector<string>& tokens,
 
     jointTransforms.push_back(localJointTransform);
 
-    for (auto child : joint->GetDirectChildren())
+    for (auto& child : *joint)
     {
-        ReadFrameRecursive(tokens, jointTransforms, child, currentToken, jointsChannelOrderings);
+        ReadFrameRecursive(tokens, jointTransforms, &child, currentToken, jointsChannelOrderings);
     }
 }
 

@@ -11,8 +11,8 @@ void PrintJointRecursive(SkeletonJoint* joint, int depth)
         out += " ";
     cout << out + joint->GetName() + "\n";
 
-    for (auto child : joint->GetDirectChildren())
-        PrintJointRecursive(child, depth + 1);
+    for (auto& child : *joint)
+        PrintJointRecursive(&child, depth + 1);
 }
 
 void SkeletonJoint::PrintJoint()
@@ -20,16 +20,47 @@ void SkeletonJoint::PrintJoint()
     PrintJointRecursive(this, 0);
 }
 
+void SkeletonJoint::FilterJointsByName(string subname)
+{
+	auto child = GetChild();
+
+	if(child != nullptr)
+	{
+		if(child->GetName().find(subname) != string::npos)
+		{
+			m_child = child->GetNext();
+			delete child;
+		}
+		
+	}
+	SkeletonJoint* prevChild = nullptr;
+
+	while(child != nullptr)
+	{
+		if(child->GetName().find(subname) != string::npos)
+		{
+			prevChild->m_next = child->GetNext();
+			delete child;
+		}
+		else
+		{
+			child->FilterJointsByName(subname);
+		}
+
+		prevChild = child;
+		child = child->GetNext();
+	}
+}
+
 void SkeletonAnimationData::GetBoneArrayFromEvalAnim(vector<pair<blaVec3, blaVec3>>& outputBones,
     const SkeletonJoint* skeleton, vector<blaPosQuat> evalAnim)
 {
-
     blaPosQuat transform = evalAnim[skeleton->GetJointIndex()];
 
-    for (auto child : skeleton->GetDirectChildren())
+    for (auto& child : *skeleton)
     {
-        outputBones.emplace_back(pair<blaVec3, blaVec3>(transform.GetTranslation3(), evalAnim[child->GetJointIndex()].GetTranslation3()));
-        GetBoneArrayFromEvalAnim(outputBones, child, evalAnim);
+        outputBones.emplace_back(pair<blaVec3, blaVec3>(transform.GetTranslation3(), evalAnim[child.GetJointIndex()].GetTranslation3()));
+        GetBoneArrayFromEvalAnim(outputBones, &child, evalAnim);
     }
 }
 
@@ -49,11 +80,11 @@ void SkeletonAnimationData::ForwardKinematicRecursive
 
     worldJointTransforms[joint->GetJointIndex()] = worldJointTransform;
 
-    for (auto child : joint->GetDirectChildren())
+    for (auto &child : *joint)
     {
         ForwardKinematicRecursive(
             frameIndex,
-            child,
+            &child,
             worldJointTransform,
             localJointTransforms,
             worldJointTransforms);
@@ -95,14 +126,14 @@ void SkeletonJoint::QuerySkeleton(unordered_map<string, SkeletonJoint*>* jointPo
             jointPointersByNames->emplace(m_name, this);
     }
 
-    for (auto child : m_childJoints)
+    for (auto child : *this)
     {
         if (bonesByJointNames)
         {
-            bonesByJointNames->push_back(pair<string, string>(m_name, child->GetName()));
+            bonesByJointNames->push_back(pair<string, string>(m_name, child.GetName()));
         }
 
-        child->QuerySkeleton(jointPointersByNames, bonesByJointNames);
+        child.QuerySkeleton(jointPointersByNames, bonesByJointNames);
     }
 }
 

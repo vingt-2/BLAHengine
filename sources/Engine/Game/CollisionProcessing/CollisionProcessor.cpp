@@ -1,7 +1,7 @@
 #include "CollisionProcessor.h"
 using namespace BLAengine;
 
-CollisionProcessor::CollisionProcessor(Time* time, float* timestepPtr) :
+CollisionProcessor::CollisionProcessor(Timer* time, float* timestepPtr) :
     m_flagInterpolateNormals(false),
     m_maxIterations(500),
     m_bounce(0.5f),

@@ -1,6 +1,7 @@
 #include "Common/StdInclude.h"
 #include "Engine/System/RenderWindow.h"
 #include "AnimationDemo.h"
+#include "./Common/DataStructures/Tree.h"
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
@@ -15,9 +16,9 @@ void DoAnimationDemoSession()
 
     BLA_RETRIEVE_SINGLETON(EngineInstance, demo);
 
-    GLFWRenderWindow* renderWindow = new GLFWRenderWindow();
+    auto renderWindow = new GLFWRenderWindow();
 
-    renderWindow->CreateRenderWindow("BLAengineDemo", 1280, 720, false);
+    renderWindow->CreateRenderWindow("BLAengine Animation Demo", 1280, 720, false);
 
     demo->InitializeEngine(renderWindow);
 

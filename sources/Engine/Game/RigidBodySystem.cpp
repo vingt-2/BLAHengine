@@ -2,7 +2,7 @@
 #include "GameObject.h"
 using namespace BLAengine;
 
-RigidBodySystem::RigidBodySystem(Time* time):
+RigidBodySystem::RigidBodySystem(Timer* time):
     m_timeStep(0.01f),
     m_uniformViscosity(0.01f),
     m_gravity(blaVec3(0.f, -5.f, 0.f)),
@@ -52,7 +52,7 @@ void RigidBodySystem::DisableSimulation()
     m_isSimulating = false;
 }
 
-void BLAengine::RigidBodySystem::SetTimeObject(Time * time)
+void BLAengine::RigidBodySystem::SetTimeObject(Timer * time)
 {
     m_collisionProcessor->setTimeObject(time);
     m_time = time;

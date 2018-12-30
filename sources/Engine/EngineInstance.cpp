@@ -9,11 +9,11 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
+BLA_DECLARE_SINGLETON(Debug);
 
-bool EngineInstance::InitializeEngine(RenderWindow* _renderWindow)
+bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
-    this->m_renderWindow = _renderWindow;
+    this->m_renderWindow = renderWindow;
     m_assetManager = new AssetManager();
 
     m_renderingManager = new RenderingManager(RenderingManager::Game);
@@ -24,7 +24,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* _renderWindow)
     m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_renderer->m_assetManager = m_assetManager;
 
-    m_timer = new Time(10);
+    m_timer = new Timer(10);
 
     m_editorScene = new Scene();
 
@@ -36,12 +36,14 @@ bool EngineInstance::InitializeEngine(RenderWindow* _renderWindow)
 
     m_debug = new Debug(m_debugRenderingManager);
 
+	BLA_ASSIGN_SINGLETON(Debug, m_debug);
+
     m_workingScene->Initialize(m_renderingManager);
 
-    // OPENGL CONTEXT UP AND RUNNING
+    // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())
     {
-        printf("Failed to initiate Context!");
+        printf("Failed to initiate renderer and / or render window... Terminating.\n");
         return false;
     }
 
@@ -53,7 +55,6 @@ bool EngineInstance::InitializeEngine(RenderWindow* _renderWindow)
 
 void EngineInstance::PreEngineUpdate()
 {
-    m_debug->Update();
     m_timer->Update();
     //TODO: Build an Input Manager and scan inputs here...
 }
@@ -70,6 +71,7 @@ void EngineInstance::EngineUpdate()
 
 void EngineInstance::PostEngineUpdate()
 {
+	m_debug->Update();
     m_renderer->Update();
 }
 
@@ -100,16 +102,6 @@ bool EngineInstance::SaveWorkingScene(std::string filepath)
     return m_sceneManager->SaveScene(filepath, m_workingScene);
 }
 
-//std::vector<string> EngineInstance::GetSceneObjects()
-//{
-//    std::vector<string> objs;
-//    for (auto go : m_workingScene->GetObjects())
-//    {
-//        objs.push_back(go->GetName());
-//    }
-//    return objs;
-//}
-
 void EngineInstance::SetupDirLightAndCamera()
 {
     GameObject* light = m_workingScene->CreateObject("DirLight");
@@ -121,6 +113,12 @@ void EngineInstance::SetupDirLightAndCamera()
 
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
+
+	ObjectTransform  cameraStartTransform;
+
+	cameraStartTransform.SetPosition(blaVec3(0.f, 2.f, 2.f));
+
+	cameraObject->SetTransform(cameraStartTransform);
 
     m_renderer->SetCamera(cameraComp);
 }

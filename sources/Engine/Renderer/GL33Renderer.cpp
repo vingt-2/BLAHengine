@@ -1200,11 +1200,6 @@ void GL33Renderer::SetupPointLightRenderSphere(vector<blaVec3> sphereMeshVertice
 
 void GL33Renderer::RenderDebugLines()
 {
-    if (m_debugLinesInfo.size == 0)
-    {
-        return;
-    }
-
     LoadDebugLines();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

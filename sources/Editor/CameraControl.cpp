@@ -1,10 +1,10 @@
 #include "CameraControl.h"
 
-#include "../System/RenderWindow.h"
-#include "../Game/GameComponents/CameraComponent.h"
-#include "../Game/GameObject.h"
-#include "../EngineInstance.h"
-#include "../Game/Time.h"
+#include "../Engine/System/RenderWindow.h"
+#include "../Engine/Game/GameComponents/CameraComponent.h"
+#include "../Engine/Game/GameObject.h"
+#include "../Engine/EngineInstance.h"
+#include "../Engine/Game/Timer.h"
 
 using namespace BLAengine;
 
@@ -102,7 +102,7 @@ void CameraController::UpdateController()
 
         m_prevMousePosition = curMouse;
 
-        angularAcceleration *= 600.f;
+        angularAcceleration *= 450.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }
@@ -111,7 +111,7 @@ void CameraController::UpdateController()
 
     BLA_RETRIEVE_SINGLETON(EngineInstance, engineInstance);
 
-    blaF32 dt = engineInstance->GetTime()->GetDelta();
+    blaF32 dt = engineInstance->GetTimer()->GetDelta();
 
     m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
     transform.SetPosition( transform.GetPosition() + dt * m_cameraLinearVelocity);

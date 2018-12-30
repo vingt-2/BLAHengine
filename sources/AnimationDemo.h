@@ -5,13 +5,18 @@
 namespace BLAengine
 {
     class CameraController;
+	class GameObject;
 
     class BLACORE_API AnimationDemo : public EngineInstance
     {
     public:
         AnimationDemo(bool external, bool isFullscreen):
             EngineInstance(external, isFullscreen),
-            m_frameIndex(0)
+			m_selectedObject(nullptr),
+            m_frameIndex(0),
+			m_lastTimePlayerInteraction(0.f),
+			m_autoPlay(true),
+			m_lastIkSolveTime(0.f)
         {}
 
         void PreEngineUpdate() override;
@@ -24,6 +29,11 @@ namespace BLAengine
 
     private:
         CameraController* m_cameraController;
+		GameObject* m_selectedObject;
         float m_frameIndex;
+		float m_lastTimePlayerInteraction;
+		blaF32 m_lastIkSolveTime;
+		bool m_autoPlay;
+		bool m_clickState = false;
     };
 };

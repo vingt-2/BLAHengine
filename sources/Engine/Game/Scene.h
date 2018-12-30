@@ -20,6 +20,7 @@ namespace BLAengine
         GameObject* CreateObject(std::string name);
         bool DeleteObject(std::string name);
         GameObject* FindObjectByName(std::string name);
+		vector<GameObject*> FindObjectsMatchingName(std::string name);
 
         void AddComponent(GameObject* object, GameComponent* component);
         vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
@@ -33,7 +34,7 @@ namespace BLAengine
         bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
         RigidBodySystem* m_rigidBodySystem;
 
-        void SetTimeObject(Time* time);
+        void SetTimeObject(Timer* time);
 
         std::pair<GameObject*, ColliderComponent::RayCollision> PickGameObjectInScene(Ray ray);
 

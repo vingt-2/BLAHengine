@@ -5,11 +5,11 @@
 
 namespace BLAengine
 {
-    class BLACORE_API Time
+    class BLACORE_API Timer
     {
     public:
-        Time(glm::uint8 timeBufferSize);
-        ~Time();
+        Timer(glm::uint8 timeBufferSize);
+        ~Timer();
 
         float GetTime() const;
         float GetDelta() const;

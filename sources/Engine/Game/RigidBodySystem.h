@@ -13,7 +13,7 @@ namespace BLAengine
         bool m_enableGravity;
         bool m_tieToTime;
 
-        RigidBodySystem(Time* time);
+        RigidBodySystem(Timer* time);
         ~RigidBodySystem();
 
         void UpdateSystem();
@@ -25,12 +25,12 @@ namespace BLAengine
 
         CollisionProcessor* m_collisionProcessor;
 
-        void SetTimeObject(Time* time);
+        void SetTimeObject(Timer* time);
 
 
     private:
         vector<RigidBodyComponent*> m_rigidBodyList;
-        Time* m_time;
+        Timer* m_time;
 
         float m_timeStep;
         float m_oldTime;

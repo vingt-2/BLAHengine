@@ -1,50 +1,48 @@
-#include "../../Common/StdInclude.h"
-#include "../../Common/System.h"
-#include "../../Common/Maths/Maths.h"
-#include "../Renderer/GL33Renderer.h"
-#include "../Game/RenderingManager.h"
-#include "../Game\Debug.h"
-#include "../Assets/SceneManager.h"
+#include "../Common/StdInclude.h"
+#include "../Common/System.h"
+#include "../Common/Maths/Maths.h"
+#include "../Engine/Renderer/GL33Renderer.h"
+#include "../Engine/Game/RenderingManager.h"
+#include "../Engine/Game/Debug.h"
+#include "../Engine/Assets/SceneManager.h"
 
 namespace BLAengine
 {
-    class BLACORE_API MeshEditorControls
+    class BLACORE_API EditorControls
     {
     public:
 
         glm::vec2 m_prevMouse;
         blaVec3 m_cameraRotation;
-        blaVec3 m_lightRotation;
 
         GameObject* m_cameraObject;
-        GameObject* m_lightObj;
         RenderWindow* m_renderWindow;
 
-        MeshEditorControls(GameObject* cameraObject, GameObject* lightObj, RenderWindow* renderWindow) :
+        EditorControls(GameObject* cameraObject, RenderWindow* renderWindow) :
             m_prevMouse(glm::vec2(0)),
             m_cameraRotation(blaVec3(0)),
-            m_lightRotation(blaVec3(0)),
             m_cameraObject(cameraObject),
-            m_renderWindow(renderWindow),
-            m_lightObj(lightObj)
+            m_renderWindow(renderWindow)
         {};
 
 
-        ~MeshEditorControls() {};
+        ~EditorControls() {};
 
         void ControlCamera();
 
     };
 
-    class BLACORE_API MeshImportSession
+    class BLACORE_API EditorSession
     {
     public:
-        MeshImportSession(bool external, bool isFullscreen) :
+        EditorSession(bool external, bool isFullscreen) :
+            m_editorControls(nullptr),
             m_isFullScreen(isFullscreen),
-            m_isTerminationRequested(false)
+            m_isTerminationRequested(false),
+            debugRay(Ray(blaVec3(0), blaVec3(0),1))
         {};
 
-        ~MeshImportSession() { TerminateEditor(); };
+        ~EditorSession() { TerminateEditor(); };
 
         bool InitializeEngine(RenderWindow* renderWindow);
 
@@ -54,27 +52,29 @@ namespace BLAengine
 
         bool ShouldTerminate() { return m_isTerminationRequested; };
 
-        bool ImportMesh(std::string filepath, std::string name);
+        bool LoadWorkingScene(std::string filePath);
 
-        bool SaveMeshToCooked();
+        bool SaveWorkingScene(std::string filePath);
+
+        std::vector<string> GetSceneObjects();
 
     private:
 
         // Required Engine Modules
         GL33Renderer* m_editorRenderer;
         AssetManager* m_assetManager;
+        SceneManager* m_sceneManager;
         Debug* m_debug;
         Scene* m_workingScene;
+        Scene* m_editorScene;
         RenderWindow* m_renderWindow;
+        Timer* m_timer;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
-        MeshEditorControls* m_editorControls;
-
+        EditorControls* m_editorControls;
         //States
+        Ray debugRay;
         bool m_isFullScreen;
         bool m_isTerminationRequested;
-        int i = 0;
-
-        TriangleMesh* m_importedMesh = nullptr;
     };
 };

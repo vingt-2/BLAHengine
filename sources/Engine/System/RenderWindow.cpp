@@ -62,7 +62,7 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
         return;
     }
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     glfwSetWindowTitle(window, windowTitle.c_str());
 
