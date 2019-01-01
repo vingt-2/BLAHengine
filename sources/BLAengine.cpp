@@ -3,6 +3,8 @@
 #include "AnimationDemo.h"
 #include "./Common/DataStructures/Tree.h"
 
+#include <thread>
+
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
@@ -24,11 +26,19 @@ void DoAnimationDemoSession()
 
     demo->LoadWorkingScene("./Scenes/empty_scene");
 
-    while (!demo->ShouldTerminate())
+	int framerate = 120;
+	
+	while (!demo->ShouldTerminate())
     {
+		auto frameStarTime = std::chrono::steady_clock::now();
         demo->PreEngineUpdate();
         demo->EngineUpdate();
         demo->PostEngineUpdate();
+		auto frameEndTime = std::chrono::steady_clock::now();
+		int microSecondsFrameTime = (int) (1000000.f / (float)framerate);
+		auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStarTime);
+
+		std::this_thread::sleep_for(waitDuration);
     }
 
     // Call terminates engine

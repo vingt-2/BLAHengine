@@ -35,7 +35,7 @@ namespace BLAengine
         void DrawSphere(const blaVec3& origin, const blaVec3& color);
 
         void DrawGrid(int size, float spacing, const blaVec3& color);
-        void DrawBasis(ObjectTransform* transform, float opacity);
+        void DrawBasis(const blaPosQuat& transform, float opacity);
 
         //Common m_debug::
         static void OutputToDebug(char* m_debug);

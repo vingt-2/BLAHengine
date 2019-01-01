@@ -8,6 +8,8 @@
 
 using namespace BLAengine;
 
+//TODO: Rewrite DT independant if you want high stiffnesses...
+
 void CameraController::UpdateController()
 {
     if (m_controlledCamera == nullptr)
@@ -75,7 +77,7 @@ void CameraController::UpdateController()
 
     m_lastScrollValue = mouseScroll;
 
-    linearAcceleration = coeff * 2000.f * transform.LocalDirectionToWorld(linearAcceleration);
+    linearAcceleration = coeff * 200.f * transform.LocalDirectionToWorld(linearAcceleration);
 
     if (m_renderWindow->GetMousePressed(1))
     {
@@ -102,7 +104,7 @@ void CameraController::UpdateController()
 
         m_prevMousePosition = curMouse;
 
-        angularAcceleration *= 450.f;
+        angularAcceleration *= 45.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }

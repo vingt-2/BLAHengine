@@ -38,7 +38,7 @@ public:
 
     void PrintJoint();
 
-	void FilterJointsByName(string subname);
+	void DiscardJointsByName(string subname);
 
 private:
     string					m_name;

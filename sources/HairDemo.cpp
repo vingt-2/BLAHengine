@@ -114,8 +114,7 @@ void HairDemo::UpdateEditor()
     m_debug->DrawRay(debugRay, blaVec3(0, 1, 0));
     //m_debug->DrawGrid(1000, 10, blaVec3(0.4));
 
-    ObjectTransform identity;
-    m_debug->DrawBasis(&identity,1.f);
+    m_debug->DrawBasis(blaPosQuat::GetIdentity(),1.f);
     m_debug->Update();
     m_timer->Update();
     m_workingScene->Update();

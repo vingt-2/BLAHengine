@@ -20,7 +20,7 @@ void SkeletonJoint::PrintJoint()
     PrintJointRecursive(this, 0);
 }
 
-void SkeletonJoint::FilterJointsByName(string subname)
+void SkeletonJoint::DiscardJointsByName(string subname)
 {
 	auto child = GetChild();
 
@@ -44,7 +44,7 @@ void SkeletonJoint::FilterJointsByName(string subname)
 		}
 		else
 		{
-			child->FilterJointsByName(subname);
+			child->DiscardJointsByName(subname);
 		}
 
 		prevChild = child;

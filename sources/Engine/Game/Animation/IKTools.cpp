@@ -5,6 +5,8 @@
 
 using namespace std;
 
+#pragma optimize("", off)
+
 IKChainJoint* IKChainJoint::CreateTestIKChain2Ends(int numberOfJoints, blaF32 sizeOfBones, blaVec3 origin)
 {
 	auto root = new IKChainJoint(origin, sizeOfBones);
@@ -14,9 +16,20 @@ IKChainJoint* IKChainJoint::CreateTestIKChain2Ends(int numberOfJoints, blaF32 si
 	for(int i = 1; i < numberOfJoints; i++)
 	{
 		blaVec3 newPos = joint->m_jointPosition + blaVec3(0.f, sizeOfBones, 0.f);
-		joint->AddChild(new IKChainJoint(newPos, sizeOfBones));
-		
-		joint = joint->GetChild();
+		auto newChild = new IKChainJoint(newPos, sizeOfBones);
+		joint->AddChild(newChild);
+
+		joint = newChild;
+	}
+
+	joint = root;
+	for (int i = 1; i < numberOfJoints; i++)
+	{
+		blaVec3 newPos = joint->m_jointPosition - blaVec3(0.f, sizeOfBones, 0.f);		
+		auto newChild = new IKChainJoint(newPos, sizeOfBones);
+		joint->AddChild(newChild);
+
+		joint = newChild;
 	}
 
 	return root;
@@ -95,42 +108,76 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorD
 
 		endEffector->m_jointPosition = endEffectorDesiredPositions[i];
 
-		auto currentJoint = endEffector;
-		while (currentJoint->m_parent != nullptr)
-		{
-			auto parent = currentJoint->m_parent;
-
-			if (parent->m_parent != nullptr)
-			{
-				const blaVec3 toParent = parent->m_jointPosition - currentJoint->m_jointPosition;
-				const blaF32 toParentLength = glm::length(toParent);
-				if (toParentLength > BLA_EPSILON)
-				{
-					parent->m_jointPosition = currentJoint->m_jointPosition + parent->m_length * toParent / toParentLength;
-				}
-			}
-
-			currentJoint = parent;
-		}
+		IKSolveBackwardPhase(endEffector);
+		IKSolveForwardPhase(root);
 	}
+}
 
-	IKSolveBackwardPhase(root);
+void IKChainJoint::SetupJointRotationAxes(IKChainJoint* root)
+{
+
 }
 
 void IKChainJoint::IKSolveBackwardPhase(IKChainJoint* currentJoint)
 {
-	auto child = currentJoint->GetChild();
-	while (child != nullptr)
+	while (currentJoint->m_parent != nullptr)
 	{
-		const blaVec3 toChild = child->m_jointPosition - currentJoint->m_jointPosition;
-		const blaF32 toChildLength = glm::length(toChild);
-		if (toChildLength > BLA_EPSILON)
+		auto parent = currentJoint->m_parent;
+
+		//if (parent->m_parent != nullptr)
 		{
-			child->m_jointPosition = currentJoint->m_jointPosition + currentJoint->m_length * toChild / toChildLength;
+			const blaVec3 toParent = parent->m_jointPosition - currentJoint->m_jointPosition;
+			const blaF32 toParentLength = glm::length(toParent);
+			if (toParentLength > BLA_EPSILON)
+			{
+				parent->m_jointPosition = currentJoint->m_jointPosition + parent->m_length * toParent / toParentLength;
+			}
 		}
 
-		IKSolveBackwardPhase(child);
+		currentJoint = parent;
+	}
+}
 
-		child = child->GetNext();
+void IKChainJoint::IKSolveForwardPhase(IKChainJoint* root)
+{
+	auto currentJoint= root->GetChild();
+	while (currentJoint != nullptr)
+	{
+		blaVec3 toChild = currentJoint->m_jointPosition - root->m_jointPosition;
+		blaF32 toChildLength = glm::length(toChild);
+		if (toChildLength > BLA_EPSILON)
+		{
+			currentJoint->m_jointPosition = root->m_jointPosition + root->m_length * toChild / toChildLength;
+
+			//TODO: It actually works quite alright... Now write it better ?
+			//Let's try to write a cone-twist constraint geometrically
+			// (u.v) / ||u||.||v|| < cos(a) (test a = Pi/4)
+
+			blaVec3 toChild = currentJoint->m_jointPosition - root->m_jointPosition;
+			blaF32 toChildLength = glm::length(toChild);
+
+			//...
+			if(root->m_parent != nullptr)
+			{
+				const blaVec3 toCurrent = root->m_jointPosition - root->m_parent->m_jointPosition;
+				const blaF32 toCurrentLength = glm::length(toCurrent);
+
+				if(toCurrentLength > BLA_EPSILON)
+				{
+					blaF32 toChildDotToParent = glm::dot(toCurrent, toChild) / (toCurrentLength * toChildLength);
+					if (toChildDotToParent < 1.f - glm::cos(0.25f * M_PI))
+					{
+						blaVec3 toChildProjectedOnToParent = (toChild / toChildLength) - toCurrent * toChildDotToParent;
+
+						//Normalize is safe here since we already know the two bones aren't colinear...
+						currentJoint->m_jointPosition = glm::cos(0.25f * M_PI) * glm::normalize(toChildProjectedOnToParent) + toChild + root->m_jointPosition;
+					}
+				}
+			}
+		}
+
+		IKSolveForwardPhase(currentJoint);
+
+		currentJoint = currentJoint->GetNext();
 	}
 }

@@ -37,7 +37,7 @@ void AnimationDemo::PreEngineUpdate()
 					if (animCmp->m_animation == nullptr)
 					{
 						animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_04.bvh")[0];
-						animCmp->m_animation->GetSkeleton()->FilterJointsByName("Thumb");
+						animCmp->m_animation->GetSkeleton()->DiscardJointsByName("Thumb");
 					}
 
 					vector<blaPosQuat> jointTransformsW;
@@ -47,7 +47,7 @@ void AnimationDemo::PreEngineUpdate()
 				}
 				else
 				{
-					ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2Ends(10, 0.1f, blaVec3(1.f, 2.f, 0.f));
+					ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2Ends(4, 1.f, blaVec3(1.f, 2.f, 0.f));
 				}
 
 				int c = 0;
@@ -159,6 +159,11 @@ void AnimationDemo::PreEngineUpdate()
                 vector<blaPosQuat> jointTransformsW;
                 animCmp->m_animation->EvaluateAnimation(static_cast<int>(m_frameIndex), jointTransformsW);
 
+				for(auto jointW : jointTransformsW)
+				{
+					GetDebug()->DrawBasis(jointW,1.f);
+				}
+
                 std::vector<std::pair<blaVec3, blaVec3>> bones;
                 
                 SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, animCmp->m_animation->GetSkeleton(), jointTransformsW);
@@ -201,9 +206,13 @@ void AnimationDemo::PreEngineUpdate()
 			RaycastHit hit = screenRay.RayToPlaneIntersection(m_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
 
 			ObjectTransform selectedObjectTransform = m_selectedObject->GetTransform();
-			selectedObjectTransform.SetPosition(hit.hitPosition);
 
-			m_selectedObject->SetTransform(selectedObjectTransform);
+			if (glm::length2(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.0f)
+			{
+				selectedObjectTransform.SetPosition(hit.hitPosition);
+
+				m_selectedObject->SetTransform(selectedObjectTransform);
+			}
 		}
 	}
 
@@ -214,8 +223,7 @@ void AnimationDemo::PreEngineUpdate()
     
     //m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
 
-    ObjectTransform identity;
-	m_debug->DrawBasis(&identity, 1.f);
+	m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
 }
 
 bool AnimationDemo::LoadWorkingScene(std::string filepath)
@@ -226,12 +234,12 @@ bool AnimationDemo::LoadWorkingScene(std::string filepath)
 
     BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
-	BLA_CREATE_COMPONENT(IKComponent, animatedObject);
+	//BLA_CREATE_COMPONENT(IKComponent, animatedObject);
 
     m_cameraController = new CameraController(
         m_renderWindow, 
         m_workingScene->GetMainCamera(),
-        55.f,
+        10.f,
         10.0f);
 
     m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);

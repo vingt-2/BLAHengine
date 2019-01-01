@@ -73,11 +73,11 @@ void Debug::DrawGrid(int size, float spacing, const blaVec3& color)
     }
 }
 
-void Debug::DrawBasis(ObjectTransform* transform, float opacity)
+void Debug::DrawBasis(const blaPosQuat& transform, float opacity)
 {
-    DrawRay(Ray(transform->LocalPositionToWorld(blaVec3(0.f)), normalize(transform->LocalDirectionToWorld(blaVec3(1.f, 0.f, 0.f))), 1), blaVec3(1.f, 0.f, 0.f));
-    DrawRay(Ray(transform->LocalPositionToWorld(blaVec3(0.f)), normalize(transform->LocalDirectionToWorld(blaVec3(0.f, 1.f, 0.f))), 1), blaVec3(0.f, 1.f, 0.f));
-    DrawRay(Ray(transform->LocalPositionToWorld(blaVec3(0.f)), normalize(transform->LocalDirectionToWorld(blaVec3(0.f, 0.f, 1.f))), 1), blaVec3(0.f, 0.f, 1.f));
+    DrawRay(Ray(transform.TransformPoint(blaVec3(0.f)), normalize(transform.TransformVector(blaVec3(1.f, 0.f, 0.f))), 1), blaVec3(1.f, 0.f, 0.f));
+    DrawRay(Ray(transform.TransformPoint(blaVec3(0.f)), normalize(transform.TransformVector(blaVec3(0.f, 1.f, 0.f))), 1), blaVec3(0.f, 1.f, 0.f));
+    DrawRay(Ray(transform.TransformPoint(blaVec3(0.f)), normalize(transform.TransformVector(blaVec3(0.f, 0.f, 1.f))), 1), blaVec3(0.f, 0.f, 1.f));
 }
 
 void Debug::OutputToDebug(char* m_debug)
