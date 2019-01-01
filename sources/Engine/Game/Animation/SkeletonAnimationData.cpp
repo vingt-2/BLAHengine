@@ -37,18 +37,19 @@ void SkeletonJoint::DiscardJointsByName(string subname)
 
 	while(child != nullptr)
 	{
+        auto nextChild = child->GetNext();
 		if(child->GetName().find(subname) != string::npos)
 		{
-			prevChild->m_next = child->GetNext();
+            prevChild->m_next = nextChild;
 			delete child;
 		}
 		else
 		{
 			child->DiscardJointsByName(subname);
+            prevChild = child;
 		}
 
-		prevChild = child;
-		child = child->GetNext();
+        child = nextChild;
 	}
 }
 
