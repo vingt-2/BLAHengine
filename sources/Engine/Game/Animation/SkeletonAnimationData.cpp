@@ -4,6 +4,8 @@
 #include <stack>
 #include "SkeletonAnimationData.h"
 
+using namespace BLAengine;
+
 void PrintJointRecursive(SkeletonJoint* joint, int depth)
 {
     string out = "";
@@ -22,35 +24,35 @@ void SkeletonJoint::PrintJoint()
 
 void SkeletonJoint::DiscardJointsByName(string subname)
 {
-	auto child = GetChild();
+    auto child = GetChild();
 
-	if(child != nullptr)
-	{
-		if(child->GetName().find(subname) != string::npos)
-		{
-			m_child = child->GetNext();
-			delete child;
-		}
-		
-	}
-	SkeletonJoint* prevChild = nullptr;
+    if(child != nullptr)
+    {
+        if(child->GetName().find(subname) != string::npos)
+        {
+            m_child = child->GetNext();
+            delete child;
+        }
+        
+    }
+    SkeletonJoint* prevChild = nullptr;
 
-	while(child != nullptr)
-	{
+    while(child != nullptr)
+    {
         auto nextChild = child->GetNext();
-		if(child->GetName().find(subname) != string::npos)
-		{
+        if(child->GetName().find(subname) != string::npos)
+        {
             prevChild->m_next = nextChild;
-			delete child;
-		}
-		else
-		{
-			child->DiscardJointsByName(subname);
+            delete child;
+        }
+        else
+        {
+            child->DiscardJointsByName(subname);
             prevChild = child;
-		}
+        }
 
         child = nextChild;
-	}
+    }
 }
 
 void SkeletonAnimationData::GetBoneArrayFromEvalAnim(vector<pair<blaVec3, blaVec3>>& outputBones,

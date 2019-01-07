@@ -34,3 +34,16 @@ typedef glm::f64 blaF64;
 #endif
 
 typedef bool blaBool;
+
+namespace BLAColors
+{
+    static const glm::vec3 RED = glm::vec3(1.f, 0.f, 0.f);
+    static const glm::vec3 GREEN = glm::vec3(0.f, 0.5f, 0.f);
+    static const glm::vec3 LIME = glm::vec3(0.f, 0.5f, 0.f);
+    static const glm::vec3 BLUE = glm::vec3(0.f, 0.f, 1.f);
+    static const glm::vec3 YELLOW = glm::vec3(1.f, 1.f, 0.f);
+    static const glm::vec3 MAGENTA = glm::vec3(1.f, 0.f, 1.f);
+    static const glm::vec3 PURPLE = glm::vec3(0.5f, 0.f, 0.5f);
+    static const glm::vec3 ORANGE = glm::vec3(1.f, 0.3f, 0.f);
+
+};

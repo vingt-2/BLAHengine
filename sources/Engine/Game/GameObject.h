@@ -3,7 +3,7 @@
 #include "../../Common/DataStructures\Tree.h"
 #include "GameComponents/GameComponent.h"
 
-#include "../../Common/TypeCast.h"
+#include "../../Common/Types.h"
 
 namespace BLAengine
 {
@@ -48,7 +48,7 @@ namespace BLAengine
 
         vector<GameComponent*> m_componentVector;
     };
-	
+    
     inline vector<GameComponent*> GameObject::GetAllComponents() const
     {
         return m_componentVector;
@@ -77,14 +77,14 @@ namespace BLAengine
         {
             GameComponent* baseComp = m_componentVector[i];
 
-			ComponentType* comp;
-			
-        	BLA_DYNAMIC_CAST(ComponentType, baseComp, comp);
+            ComponentType* comp;
+            
+            BLA_DYNAMIC_CAST(ComponentType, baseComp, comp);
 
-			if(comp != nullptr)
-			{
-				comps.push_back(comp);
-			}
+            if(comp != nullptr)
+            {
+                comps.push_back(comp);
+            }
         }
         return comps;
     }

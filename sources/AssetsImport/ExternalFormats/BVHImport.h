@@ -2,10 +2,10 @@
 #include "../../Common/StdInclude.h"
 #include "../../Common/Maths/Maths.h"
 
-class SkeletonAnimationData;
-
 namespace BLAengine
 {
+    class SkeletonAnimationData;
+
     class BLACORE_API BVHImport
     {
     public:

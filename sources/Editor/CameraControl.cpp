@@ -23,10 +23,14 @@ void CameraController::UpdateController()
     blaVec3 linearAcceleration(0.f);
     blaVec3 angularAcceleration(0.f);
 
-    float coeff = 1.f;
+    blaF32 multiplier = 1.f;
+    if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT_CONTROL))
+    {
+        multiplier *= 0.3f;
+    }
     if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT_SHIFT))
     {
-        coeff = 3.f;
+        multiplier *= 3.f;
     }
 
     if (m_renderWindow->GetKeyPressed('W'))
@@ -73,11 +77,12 @@ void CameraController::UpdateController()
     blaF32 mouseScroll;
     m_renderWindow->GetMouseWheel(mouseScroll);
 
-    linearAcceleration.z -= 100.f * (mouseScroll - m_lastScrollValue);
+
+    linearAcceleration.z -= multiplier * 30.f * (mouseScroll - m_lastScrollValue);
 
     m_lastScrollValue = mouseScroll;
 
-    linearAcceleration = coeff * 200.f * transform.LocalDirectionToWorld(linearAcceleration);
+    linearAcceleration = multiplier * 500.f * transform.LocalDirectionToWorld(linearAcceleration);
 
     if (m_renderWindow->GetMousePressed(1))
     {
@@ -104,7 +109,7 @@ void CameraController::UpdateController()
 
         m_prevMousePosition = curMouse;
 
-        angularAcceleration *= 45.f;
+        angularAcceleration *= multiplier * 200.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }
@@ -115,16 +120,21 @@ void CameraController::UpdateController()
 
     blaF32 dt = engineInstance->GetTimer()->GetDelta();
 
-    m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
-    transform.SetPosition( transform.GetPosition() + dt * m_cameraLinearVelocity);
+    for (int i = 0; i < 2; ++i)
+    {
+        blaF32 dt = engineInstance->GetTimer()->GetDelta() / 2.f;
 
-    m_cameraAngularVelocity += dt * (angularAcceleration - m_cameraDamping * m_cameraAngularVelocity);
-    m_currentCameraEulerAngles += dt * m_cameraAngularVelocity;
-    m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x > 0.45f * M_PI ? 0.45f * M_PI : m_currentCameraEulerAngles.x;
-    m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x < -0.45f * M_PI ? -0.45f * M_PI : m_currentCameraEulerAngles.x;
-    transform.SetEulerAngles(m_currentCameraEulerAngles);
+        m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
+        transform.SetPosition(transform.GetPosition() + dt * m_cameraLinearVelocity);
 
-    cameraObject->SetTransform(transform);
+        m_cameraAngularVelocity += dt * (angularAcceleration - m_cameraDamping * m_cameraAngularVelocity);
+        m_currentCameraEulerAngles += dt * m_cameraAngularVelocity;
+        m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x > 0.45f * M_PI ? 0.45f * M_PI : m_currentCameraEulerAngles.x;
+        m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x < -0.45f * M_PI ? -0.45f * M_PI : m_currentCameraEulerAngles.x;
+        transform.SetEulerAngles(m_currentCameraEulerAngles);
+
+        cameraObject->SetTransform(transform);
+    }
 
     cameraObject->Update();
 }

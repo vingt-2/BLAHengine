@@ -26,19 +26,19 @@ void DoAnimationDemoSession()
 
     demo->LoadWorkingScene("./Scenes/empty_scene");
 
-	int framerate = 120;
-	
-	while (!demo->ShouldTerminate())
+    int framerate = 80;
+    
+    while (!demo->ShouldTerminate())
     {
-		auto frameStarTime = std::chrono::steady_clock::now();
+        auto frameStarTime = std::chrono::steady_clock::now();
         demo->PreEngineUpdate();
         demo->EngineUpdate();
         demo->PostEngineUpdate();
-		auto frameEndTime = std::chrono::steady_clock::now();
-		int microSecondsFrameTime = (int) (1000000.f / (float)framerate);
-		auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStarTime);
+        auto frameEndTime = std::chrono::steady_clock::now();
+        int microSecondsFrameTime = (int) (1000000.f / (float)framerate);
+        auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStarTime);
 
-		std::this_thread::sleep_for(waitDuration);
+        std::this_thread::sleep_for(waitDuration);
     }
 
     // Call terminates engine

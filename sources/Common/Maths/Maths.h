@@ -202,7 +202,6 @@ public:
         return mat;
     }
 
-    // TODO: Verify it is correct to invert q then use it...
     void Inverse()
     {
         m_q = glm::inverse(m_q);
@@ -310,6 +309,15 @@ public:
     }
 
 };
+
+blaQuat inline QuatBetweenVectors(const blaVec3& u, const blaVec3& v)
+{
+    blaVec3 w = cross(u, v); 
+    blaQuat q = blaQuat(glm::dot(u, v), w.x, w.y, w.z); 
+    q.w += glm::length(q); 
+    return normalize(q);
+
+}
 
 void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat);
 blaMat3 matrixCross(blaVec3 vector);

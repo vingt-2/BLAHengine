@@ -4,8 +4,6 @@
 
 #include "./BVHImport.h"
 
-//TODO: Extract asset data to the Asset folder out of Engine/Game
-#include "../../Engine/Game/Animation/SkeletonAnimationData.h"
 
 #define _HAS_ITERATOR_DEBUGGING 0
 
@@ -13,10 +11,11 @@
 #define M_PI       float(3.14159265358979323846)
 #endif
 
-#pragma optimize("", off)
-
 using namespace std;
 using namespace BLAengine;
+
+//TODO: Extract asset data to the Asset folder out of Engine/Game
+#include "../../Engine/Game/Animation/SkeletonAnimationData.h"
 
 void InvalidBVH()
 {
@@ -146,12 +145,12 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
 
     auto joint =  new SkeletonJoint(jointName, jointLocalOffset, currentJointIndex);
 
-	for(auto c : jointChildren)
-	{
-		joint->AddChild(c);
-	}
+    for(auto c : jointChildren)
+    {
+        joint->AddChild(c);
+    }
 
-	return joint;
+    return joint;
 }
 
 // See BVHImport for explanation
