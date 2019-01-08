@@ -109,7 +109,7 @@ void CameraController::UpdateController()
 
         m_prevMousePosition = curMouse;
 
-        angularAcceleration *= multiplier * 200.f;
+        angularAcceleration *= 400.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }

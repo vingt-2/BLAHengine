@@ -13,29 +13,45 @@ namespace BLAengine
     protected:
         enum class IKJointConstraintType
         {
-            IKFixedLengthConstraint
+            IKFixedLengthConstraint,
+            IKConeTwistConstraint
         } m_constraintType;
+    
     public:
         IKJointConstraint(IKJointConstraintType type) :
             m_constraintType(type)
         {};
 
-    public:
-        static void ClampToConstraint(IKChainJoint* currentJoint);
+        static void BackwardClampToConstraint(const IKJointConstraint* constraint, IKChainJoint* currentJoint, const IKChainJoint* childJoint);
+        static void ForwardClampToConstraint(const IKJointConstraint* constraint, const IKChainJoint* currentJoint, IKChainJoint* childJoint);
     };
 
     struct FixedChildPositionConstraint : IKJointConstraint
     {
-    public:
         // Contraint parameterization...
         // This constraint is that the child IKChainJoint has got to be at this place in local Space
         blaVec4 m_childConstrainedPositionL;
 
-    public:
-        FixedChildPositionConstraint():
+        FixedChildPositionConstraint() :
             IKJointConstraint(IKJointConstraintType::IKFixedLengthConstraint){};
 
-        void ClampToConstraint(IKChainJoint* currentJoint) const;
+        static void BackwardClampToConstraint(const FixedChildPositionConstraint* constraint, IKChainJoint* currentJoint, const IKChainJoint* childJoint);
+        static void ForwardClampToConstraint(const FixedChildPositionConstraint* constraint, const IKChainJoint* currentJoint, IKChainJoint* childJoint);
+    };
+
+    struct ConeTwistConstraint : IKJointConstraint
+    {
+        // Contraint parameterization...
+        // This constraint is that the child IKChainJoint has got to be at this place in local Space
+        blaVec4 m_childConstrainedPositionL;
+        blaQuat m_restOrientation;
+        blaF32 m_coneAngleConstraint = 0.f;
+
+        ConeTwistConstraint() :
+            IKJointConstraint(IKJointConstraintType::IKConeTwistConstraint){};
+
+        static void BackwardClampToConstraint(const ConeTwistConstraint* constraint, IKChainJoint* currentJoint, const IKChainJoint* childJoint);
+        static void ForwardClampToConstraint(const ConeTwistConstraint* constraint, const IKChainJoint* currentJoint, IKChainJoint* childJoint);
     };
 
     class BLACORE_API IKChainJoint : public IntrusiveTree<IKChainJoint>
@@ -48,7 +64,7 @@ namespace BLAengine
 
         blaF32 m_length;
 
-        IKJointConstraint* m_jointConstraint;
+        std::vector<IKJointConstraint*> m_jointConstraints;
 
     public:
 
@@ -56,16 +72,16 @@ namespace BLAengine
             m_jointTransform(blaPosQuat::GetIdentity()),
             m_length(0.f),
             m_parent(nullptr),
-            m_joint(nullptr),
-            m_jointConstraint(new FixedChildPositionConstraint())
-        {};
+            m_joint(nullptr)
+        {
+
+        };
 
         IKChainJoint(blaPosQuat jointTransform, blaF32 length) :
             m_jointTransform(jointTransform),
             m_length(length),
             m_parent(nullptr),
-            m_joint(nullptr),
-            m_jointConstraint(new FixedChildPositionConstraint())
+            m_joint(nullptr)
         {};
 
         ~IKChainJoint() {};
@@ -75,7 +91,7 @@ namespace BLAengine
         void AddChild(IKChainJoint* next);
 
 
-    // Static members
+        // Static members
         static IKChainJoint* BuildFromSkeleton(const SkeletonJoint* skeletonRoot, const vector<blaPosQuat>& jointTransformsW);
 
         static IKChainJoint* CreateTestIKChain2Ends(int numberOfJoints, blaF32 sizeOfBones, blaVec3 origin);
@@ -84,7 +100,7 @@ namespace BLAengine
 
         static void GetJointTransforms(vector<blaPosQuat>& jointTransforms, const IKChainJoint& skeleton);
 
-        static void SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorDesiredPositions);
+        static void SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorDesiredPositions, int iterationCount);
 
         static void SetupJointRotationAxes(IKChainJoint* root);
 
@@ -93,9 +109,9 @@ namespace BLAengine
     private:
 
         static void GetEndEffectorRecursive(IKChainJoint* joint, std::vector<IKChainJoint*>& results);
-        
+
         static void IKSolveForwardPhase(IKChainJoint* currentJoint);
-        
+
         static void IKSolveBackwardPhase(IKChainJoint* currentJoint);
     };
 }

@@ -47,7 +47,7 @@ void AnimationDemo::PreEngineUpdate()
                 }
                 else
                 {
-                    ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2Ends(3, 1.f, blaVec3(1.f, 2.f, 0.f));
+                    ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2Ends(40, 1.f, blaVec3(1.f, 2.f, 0.f));
                 }
 
                 int c = 0;
@@ -98,10 +98,7 @@ void AnimationDemo::PreEngineUpdate()
 
                 if (m_timer->GetTime() - m_lastIkSolveTime > .01f)
                 {
-                    for(int i = 0; i < 10; i++)
-                    {
-                        IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos);
-                    }
+                    IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 10);
 
                     m_lastIkSolveTime = m_timer->GetTime();
                 }
