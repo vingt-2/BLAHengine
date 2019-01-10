@@ -24,7 +24,7 @@ void DoAnimationDemoSession()
 
     demo->InitializeEngine(renderWindow);
 
-    demo->LoadWorkingScene("./Scenes/empty_scene");
+    demo->LoadWorkingScene("./Scenes/floor_scene");
 
     int framerate = 1000;
     

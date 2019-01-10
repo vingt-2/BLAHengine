@@ -44,7 +44,7 @@ namespace BLAengine
         // Contraint parameterization...
         // This constraint is that the child IKChainJoint has got to be at this place in local Space
         blaVec4 m_childConstrainedPositionL;
-        blaQuat m_restOrientation;
+        blaQuat m_restOrientationLocalToParent;
         blaF32 m_coneAngleConstraint = 0.f;
 
         ConeTwistConstraint() :
@@ -62,24 +62,20 @@ namespace BLAengine
 
         blaPosQuat m_jointTransform;
 
-        blaF32 m_length;
-
         std::vector<IKJointConstraint*> m_jointConstraints;
 
     public:
 
         IKChainJoint() :
             m_jointTransform(blaPosQuat::GetIdentity()),
-            m_length(0.f),
             m_parent(nullptr),
             m_joint(nullptr)
         {
 
         };
 
-        IKChainJoint(blaPosQuat jointTransform, blaF32 length) :
+        IKChainJoint(blaPosQuat jointTransform) :
             m_jointTransform(jointTransform),
-            m_length(length),
             m_parent(nullptr),
             m_joint(nullptr)
         {};

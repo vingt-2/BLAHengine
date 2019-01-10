@@ -10,28 +10,73 @@
 using namespace std;
 using namespace BLAengine;
 
-#pragma optimize("", off)
+
+#define BLA_IK_CONVERGENCE_EPSILON 0.01f
 
 IKChainJoint* IKChainJoint::CreateTestIKChain2Ends(int numberOfJoints, blaF32 sizeOfBones, blaVec3 origin)
 {
     blaPosQuat originId = blaPosQuat::GetIdentity();
     originId.SetTranslation3(origin);
-    auto root = new IKChainJoint(originId, sizeOfBones);
+    auto root = new IKChainJoint(originId);
     root->m_jointTransform.SetTranslation3(origin);
 
     auto joint = root;
-    for (int i = 1; i < numberOfJoints; i++)
+    for (int i = 0; i < numberOfJoints; i++)
     {
-        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() + blaVec3(0.f, sizeOfBones, 0.f);
+        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() + blaVec3(0.f, i == 0 ? 0.f : sizeOfBones, 0.f);
         blaPosQuat newPosId = blaPosQuat::GetIdentity();
         newPosId.SetTranslation3(newPos);
-        auto newChild = new IKChainJoint(newPosId, sizeOfBones);
+        auto newChild = new IKChainJoint(newPosId);
 
         ConeTwistConstraint* constraint = new ConeTwistConstraint();
 
         constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
-        constraint->m_restOrientation = blaPosQuat::blaQuatIdentity();
-        constraint->m_coneAngleConstraint = 0.125 * M_PI;
+        constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
+        constraint->m_coneAngleConstraint = M_PI;
+
+        joint->m_jointConstraints.push_back(constraint);
+
+        joint->AddChild(newChild);
+
+        joint = newChild;
+    }
+
+    joint = root;
+    for (int i = 0; i < numberOfJoints; i++)
+    {
+        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() - blaVec3(0.f, i == 0 ? 0.f : sizeOfBones, 0.f);
+
+        blaPosQuat newPosId = blaPosQuat::GetIdentity();
+        newPosId.SetTranslation3(newPos);
+        auto newChild = new IKChainJoint(newPosId);
+
+        ConeTwistConstraint* constraint = new ConeTwistConstraint();
+
+        constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
+        constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
+        constraint->m_coneAngleConstraint = M_PI;
+
+        joint->m_jointConstraints.push_back(constraint);
+
+        joint->AddChild(newChild);
+
+        joint = newChild;
+    }
+
+    joint = root;
+    for (int i = 0; i < numberOfJoints; i++)
+    {
+        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() + blaVec3(i == 0 ? 0.f : sizeOfBones, 0.f, 0.f);
+
+        blaPosQuat newPosId = blaPosQuat::GetIdentity();
+        newPosId.SetTranslation3(newPos);
+        auto newChild = new IKChainJoint(newPosId);
+
+        ConeTwistConstraint* constraint = new ConeTwistConstraint();
+
+        constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
+        constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
+        constraint->m_coneAngleConstraint = M_PI;
 
         joint->m_jointConstraints.push_back(constraint);
 
@@ -43,61 +88,17 @@ IKChainJoint* IKChainJoint::CreateTestIKChain2Ends(int numberOfJoints, blaF32 si
     joint = root;
     for (int i = 1; i < numberOfJoints; i++)
     {
-        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() - blaVec3(0.f, sizeOfBones, 0.f);
+        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() - blaVec3(i == 0 ? 0.f : sizeOfBones, 0.f, 0.f);
 
         blaPosQuat newPosId = blaPosQuat::GetIdentity();
         newPosId.SetTranslation3(newPos);
-        auto newChild = new IKChainJoint(newPosId, sizeOfBones);
+        auto newChild = new IKChainJoint(newPosId);
 
         ConeTwistConstraint* constraint = new ConeTwistConstraint();
 
         constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
-        constraint->m_restOrientation = blaPosQuat::blaQuatIdentity();
-        constraint->m_coneAngleConstraint = 0.125 * M_PI;
-
-        joint->m_jointConstraints.push_back(constraint);
-
-        joint->AddChild(newChild);
-
-        joint = newChild;
-    }
-
-    joint = root;
-    for (int i = 1; i < numberOfJoints; i++)
-    {
-        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() + blaVec3(sizeOfBones, 0.f, 0.f);
-
-        blaPosQuat newPosId = blaPosQuat::GetIdentity();
-        newPosId.SetTranslation3(newPos);
-        auto newChild = new IKChainJoint(newPosId, sizeOfBones);
-
-        ConeTwistConstraint* constraint = new ConeTwistConstraint();
-
-        constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
-        constraint->m_restOrientation = blaPosQuat::blaQuatIdentity();
-        constraint->m_coneAngleConstraint = 0.125 * M_PI;
-
-        joint->m_jointConstraints.push_back(constraint);
-
-        joint->AddChild(newChild);
-
-        joint = newChild;
-    }
-
-    joint = root;
-    for (int i = 1; i < numberOfJoints; i++)
-    {
-        blaVec3 newPos = joint->m_jointTransform.GetTranslation3() - blaVec3(sizeOfBones, 0.f, 0.f);
-
-        blaPosQuat newPosId = blaPosQuat::GetIdentity();
-        newPosId.SetTranslation3(newPos);
-        auto newChild = new IKChainJoint(newPosId, sizeOfBones);
-
-        ConeTwistConstraint* constraint = new ConeTwistConstraint();
-
-        constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
-        constraint->m_restOrientation = blaPosQuat::blaQuatIdentity();
-        constraint->m_coneAngleConstraint = 0.125 * M_PI;
+        constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
+        constraint->m_coneAngleConstraint = 0.25f * M_PI;
 
         joint->m_jointConstraints.push_back(constraint);
 
@@ -138,7 +139,7 @@ std::vector<IKChainJoint*> IKChainJoint::GetEndEffectors()
 
 IKChainJoint * IKChainJoint::BuildFromSkeleton(const SkeletonJoint* skeletonRoot, const vector<blaPosQuat>& jointTransformsW)
 {
-    IKChainJoint* ikJoint = new IKChainJoint(jointTransformsW[skeletonRoot->GetJointIndex()], 0.f);
+    IKChainJoint* ikJoint = new IKChainJoint(jointTransformsW[skeletonRoot->GetJointIndex()]);
 
     ikJoint->m_joint = skeletonRoot;
 
@@ -146,7 +147,17 @@ IKChainJoint * IKChainJoint::BuildFromSkeleton(const SkeletonJoint* skeletonRoot
     while (child != nullptr)
     {
         auto childIkJoint = BuildFromSkeleton(child, jointTransformsW);
-        ikJoint->m_length = glm::length(ikJoint->m_jointTransform.GetTranslation3() - childIkJoint->m_jointTransform.GetTranslation3());
+
+        /*ConeTwistConstraint* constraint = new ConeTwistConstraint();
+        constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
+        constraint->m_childConstrainedPositionL = ikJoint->m_jointTransform.GetTranslation() - childIkJoint->m_jointTransform.GetTranslation();*/
+
+        FixedChildPositionConstraint* constraint = new FixedChildPositionConstraint();
+
+        constraint->m_childConstrainedPositionL = ikJoint->m_jointTransform.GetTranslation() - childIkJoint->m_jointTransform.GetTranslation();
+
+        ikJoint->m_jointConstraints.push_back(constraint);
+
         ikJoint->AddChild(childIkJoint);
         child = child->GetNext();
     }
@@ -188,6 +199,8 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorD
 {
     for (int i = 0; i < iterationCount; ++i)
     {
+        blaF32 distanceToEndEffectors = 0.f;
+
         vector<IKChainJoint*> endEffectors = root->GetEndEffectors();
 
         for (int i = 0; i < endEffectors.size(); ++i)
@@ -198,6 +211,18 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorD
 
             IKSolveBackwardPhase(endEffector);
             IKSolveForwardPhase(root);
+        }
+
+        for (int i = 0; i < endEffectors.size(); ++i)
+        {
+            auto endEffector = endEffectors[i];
+
+            distanceToEndEffectors += glm::length2(endEffector->m_jointTransform.GetTranslation3() - endEffectorDesiredPositions[i]);
+        }
+
+        if (distanceToEndEffectors < BLA_IK_CONVERGENCE_EPSILON)
+        {
+            break;
         }
     }
 }
@@ -293,7 +318,7 @@ void FixedChildPositionConstraint::BackwardClampToConstraint(const FixedChildPos
 
     const blaF32 constraintLength = glm::length(constraint->m_childConstrainedPositionL);
 
-    if (glm::length2(currentToConstrainedChildPositionW - currentToChildW) > 0.00001f)
+    if (glm::length2(currentToConstrainedChildPositionW - currentToChildW) > 0.0001f)
     {
         // Rotate towards solution to minimize displacement
         parentJoint->m_jointTransform.GetRotation() *= QuatBetweenVectors(currentToConstrainedChildPositionW, currentToChildW);
@@ -320,12 +345,23 @@ void ConeTwistConstraint::BackwardClampToConstraint(const ConeTwistConstraint* c
 
     const blaF32 constraintLength = glm::length(constraint->m_childConstrainedPositionL);
 
-    if (glm::length2(currentToConstrainedChildPositionW - currentToChildW) > 0.00001f)
+    if (glm::length2(currentToConstrainedChildPositionW - currentToChildW) > 0.0001f)
     {
         // Rotate towards solution to minimize displacement
         parentJoint->m_jointTransform.GetRotation() *= QuatBetweenVectors(currentToConstrainedChildPositionW, currentToChildW);
 
-        const blaVec3 restToChildW = constraint->m_restOrientation * constraint->m_childConstrainedPositionL;
+        blaQuat restOrientationW;
+
+        if (parentJoint->m_parent != nullptr)
+        {
+            restOrientationW = parentJoint->m_parent->m_jointTransform.GetRotation() * constraint->m_restOrientationLocalToParent;
+        }
+        else
+        {
+            restOrientationW = constraint->m_restOrientationLocalToParent;
+        }
+
+        const blaVec3 restToChildW = restOrientationW * constraint->m_childConstrainedPositionL;
 
         const blaVec3 newToChildW = parentJoint->m_jointTransform.TransformVector(constraint->m_childConstrainedPositionL);
 
@@ -337,7 +373,7 @@ void ConeTwistConstraint::BackwardClampToConstraint(const ConeTwistConstraint* c
         {
             blaQuat clampedOrientation = glm::angleAxis(clampedAngle, glm::normalize(glm::cross(restToChildW, newToChildW)));
 
-            parentJoint->m_jointTransform.SetRotation(constraint->m_restOrientation * clampedOrientation);
+            parentJoint->m_jointTransform.SetRotation(restOrientationW * clampedOrientation);
         }
 
         // Snap Translation to proper length;

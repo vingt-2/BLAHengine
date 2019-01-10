@@ -258,7 +258,7 @@ public:
 
     static blaPosQuat GetIdentity()
     {
-        return blaPosQuat(blaVec4(0.f, 0.f, 0.f, 1.f), blaQuatIdentity());
+        return blaPosQuat(blaVec4(0.f, 0.f, 0.f, 1.f), QuatIdentity());
     };
 
     static blaQuat EulerToQuat(float pitch, float yaw, float roll)
@@ -297,7 +297,7 @@ public:
         );
     }
 
-    static blaQuat blaQuatIdentity()
+    static blaQuat QuatIdentity()
     {
         blaQuat q;
         q.x = 0.f;

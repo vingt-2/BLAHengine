@@ -28,7 +28,7 @@ public:
         m_position.LoadData(position);
         transform->SetPosition(position);
 
-        blaQuat rotation = blaPosQuat::blaQuatIdentity();
+        blaQuat rotation = blaPosQuat::QuatIdentity();
         m_rotation.LoadData(rotation);
         transform->SetRotation(rotation);
 

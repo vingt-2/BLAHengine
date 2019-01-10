@@ -47,7 +47,7 @@ void AnimationDemo::PreEngineUpdate()
                 }
                 else
                 {
-                    ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2Ends(40, 1.f, blaVec3(1.f, 2.f, 0.f));
+                    ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2Ends(4, 1.f, blaVec3(1.f, 2.f, 0.f));
                 }
 
                 int c = 0;
@@ -96,13 +96,16 @@ void AnimationDemo::PreEngineUpdate()
                     desiredPos.push_back(obj->GetTransform().GetPosition());
                 }
 
-                if (m_timer->GetTime() - m_lastIkSolveTime > .01f)
-                {
-                    IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 10);
+                if (m_renderWindow->GetKeyPressed(GLFW_KEY_SPACE))
+                {    
+                    if (m_timer->GetTime() - m_lastIkSolveTime > .01f)
+                    {
+                        IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 1000);
 
-                    m_lastIkSolveTime = m_timer->GetTime();
+                        m_lastIkSolveTime = m_timer->GetTime();
+                    }
                 }
-
+                
                 for (size_t i = 0; i < jointTransforms.size(); ++i)
                 {
                     m_debug->DrawBasis(jointTransforms[i], 1.f);
@@ -227,7 +230,7 @@ void AnimationDemo::PreEngineUpdate()
     
     //m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
 
-    m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
+    //m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
 }
 
 bool AnimationDemo::LoadWorkingScene(std::string filepath)

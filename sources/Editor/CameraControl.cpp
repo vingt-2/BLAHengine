@@ -52,23 +52,22 @@ void CameraController::UpdateController()
     {
         double x, y;
         m_renderWindow->GetMouse(x, y);
-        linearAcceleration = blaVec3(0, 0, 0);
 
         if (x - m_prevMousePosition.x > 0)
         {
-            linearAcceleration.x = -1.f;
+            linearAcceleration.x += -1.f;
         }
         else if (x - m_prevMousePosition.x < 0)
         {
-            linearAcceleration.x = 1.f;
+            linearAcceleration.x += 1.f;
         }
         if (y - m_prevMousePosition.y > 0)
         {
-            linearAcceleration.y = 1.f;
+            linearAcceleration.y += 1.f;
         }
         else if (y - m_prevMousePosition.y < 0)
         {
-            linearAcceleration.y = -1.f;
+            linearAcceleration.y += -1.f;
         }
 
         m_prevMousePosition = glm::vec2(x, y);

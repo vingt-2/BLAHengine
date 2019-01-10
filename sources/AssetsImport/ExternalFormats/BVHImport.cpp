@@ -163,7 +163,7 @@ void ReadFrameRecursive(vector<string>& tokens,
     if (joint->GetChild() == nullptr)
         return;
 
-    blaPosQuat localJointTransform(joint->GetLocalOffset(), blaPosQuat::blaQuatIdentity());
+    blaPosQuat localJointTransform(joint->GetLocalOffset(), blaPosQuat::QuatIdentity());
 
     // Read the data for that joint !
     const blaU32 currentJointIdx = joint->GetJointIndex();
