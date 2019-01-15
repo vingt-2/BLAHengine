@@ -1,4 +1,6 @@
 #include "../Common/StdInclude.h"
+#include "../Common/BLASingleton.h"
+#include "Gui/Gui.h"
 
 namespace BLAengine
 {
@@ -12,9 +14,12 @@ namespace BLAengine
     class Timer;
     class RenderingManager;
     class DebugRenderingManager;
+    class InputManager;
 
     class BLACORE_API EngineInstance
     {
+        BLA_DECLARE_SINGLETON(EngineInstance)
+
     public:
         EngineInstance(bool external, bool isFullscreen) :
             m_isFullScreen(isFullscreen),
@@ -58,6 +63,8 @@ namespace BLAengine
         Timer* m_timer;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
+        InputManager* m_inputManager;
+        GuiTest* m_guiManager;
 
         bool m_isFullScreen;
         bool m_isTerminationRequested;

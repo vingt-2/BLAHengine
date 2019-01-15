@@ -1,8 +1,9 @@
 #pragma once
 #include "Asset.h"
-#include "../../Common/StdInclude.h"
-#include "../../Common/System.h"
-#include "../../Common/Maths/Maths.h"
+
+#include <Common/StdInclude.h>
+#include <Common/System.h>
+#include <Common/Maths/Maths.h>
 
 namespace BLAengine
 {

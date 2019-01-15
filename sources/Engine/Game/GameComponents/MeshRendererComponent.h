@@ -1,7 +1,8 @@
 #pragma once
-#include "..\..\..\Common\StdInclude.h"
-#include "../../Assets/PolygonalMesh.h"
-#include "../../Assets/Material.h"
+#include <Common\StdInclude.h>
+#include <Engine/Assets/PolygonalMesh.h>
+#include <Engine/Assets/Material.h>
+
 #include "GameComponent.h"
 
 #define BLA_LINE_RENDER 0x0003
@@ -18,7 +19,7 @@ namespace BLAengine
 
         vector<Material*> m_materials;
 
-        GLuint m_renderType;
+        blaU32 m_renderType;
 
         MeshRendererComponent(GameObject* parentObject);
         ~MeshRendererComponent(void);

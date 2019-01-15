@@ -1,10 +1,10 @@
 #pragma once
-#include "../../Common/StdInclude.h"
-#include "../Game/RenderingManager.h"
-#include "../System/RenderWindow.h"
-#include "../Game/GameComponents/CameraComponent.h"
-#include "../Game/GameComponents/MeshRendererComponent.h"
-#include "../Game/GameAlgebra/Ray.h"
+#include <Common/StdInclude.h>
+#include <Engine/Game/RenderingManager.h>
+#include <Engine/System/RenderWindow.h>
+#include <Engine/Game/GameComponents/CameraComponent.h>
+#include <Engine/Game/GameComponents/MeshRendererComponent.h>
+#include <Engine/Game/GameAlgebra/Ray.h>
 #include "LightRender.h"
 
 namespace BLAengine
@@ -44,7 +44,7 @@ namespace BLAengine
         virtual RenderObject* LoadRenderObject(const MeshRendererComponent& object, int type) = 0;
         virtual bool    CancelRender(const MeshRendererComponent& object) = 0;
         virtual bool	LoadDebugLines() = 0;
-        virtual Ray		ScreenToRay() = 0;
+        virtual Ray		ScreenToRay(blaVec2 screenSpaceCoord) = 0;
 
         bool GetStatus()        const   { return m_isContextEnabled; }
         glm::vec2 GetRenderSize()    const   { return m_renderSize; }

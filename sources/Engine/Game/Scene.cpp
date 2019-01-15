@@ -1,5 +1,6 @@
 #include "Scene.h"
-#include "PBRendering\PBRRenderer.h"
+
+#include <Engine/Game/PBRendering/PBRRenderer.h>
 
 using namespace BLAengine;
 
@@ -56,17 +57,17 @@ GameObject* BLAengine::Scene::FindObjectByName(std::string name)
 
 vector<GameObject*> Scene::FindObjectsMatchingName(std::string name)
 {
-	std::vector<GameObject*> results;
+    std::vector<GameObject*> results;
 
-	for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
-	{
-		GameObject* object = m_sceneObjectsVector[i];
-		if (object->GetName().find(name) != std::string::npos)
-		{
-			results.push_back(object);
-		}
-	}
-	return results;
+    for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
+    {
+        GameObject* object = m_sceneObjectsVector[i];
+        if (object->GetName().find(name) != std::string::npos)
+        {
+            results.push_back(object);
+        }
+    }
+    return results;
 }
 
 void BLAengine::Scene::SetTimeObject(Timer * time)

@@ -1,5 +1,6 @@
 #include "CameraComponent.h"
-#include "../GameObject.h"
+#include <Engine/Game/GameObject.h>
+
 using namespace BLAengine;
 
 CameraComponent::CameraComponent(GameObject* parentObject) :

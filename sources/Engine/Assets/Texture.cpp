@@ -1,4 +1,7 @@
 #include "Texture.h"
+
+#include <Common/RenderBackend.h>
+
 using namespace BLAengine;
 
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII

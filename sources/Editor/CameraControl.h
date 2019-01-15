@@ -1,5 +1,5 @@
 #pragma once
-#include "../Common/Maths/Maths.h"
+#include <Common/Maths/Maths.h>
 
 namespace BLAengine
 {
@@ -15,13 +15,13 @@ namespace BLAengine
             blaF32 maxVelocity) :
 
             m_cameraAngularVelocity(blaVec3(0.f)),
+            m_cameraLinearVelocity(blaVec3(0.f)),
             m_cameraDamping(damping),
             m_maxAngularVelocity(maxVelocity),
-            m_currentCameraEulerAngles(0.f, 0.f, 0.f),
-            m_lastScrollValue(0.f)
+            m_currentCameraEulerAngles(0.f, 0.f, 0.f)
         {
-            m_renderWindow = renderWindow;
             m_controlledCamera = controlledCamera;
+            m_prevMousePosition = blaVec2(0.f);
         }
 
         ~CameraController();
@@ -30,10 +30,8 @@ namespace BLAengine
 
     private:
         CameraComponent* m_controlledCamera;
-        const RenderWindow* m_renderWindow;
-    
+
         blaIVec2 m_prevMousePosition;
-        blaF32 m_lastScrollValue;
 
         blaVec3 m_cameraAngularVelocity;
         blaVec3 m_cameraLinearVelocity;

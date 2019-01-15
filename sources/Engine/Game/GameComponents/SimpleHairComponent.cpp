@@ -1,7 +1,8 @@
 #include "SimpleHairComponent.h"
-#include "../../EngineInstance.h"
-#include "../GameObject.h"
-#include "../Debug.h"
+#include <Engine/EngineInstance.h>
+#include <Engine/Game/GameObject.h>
+#include <Engine/Game/Debug.h>
+
 #include <random>
 
 using namespace BLAengine;
@@ -43,10 +44,8 @@ SimpleHairComponent::~SimpleHairComponent(void)
 
 void SimpleHairComponent::RenderSimpleHair()
 {
-    EngineInstance* engineInstance;
-    
-    BLA_RETRIEVE_SINGLETON(EngineInstance, engineInstance);
-    
+    const EngineInstance* engineInstance = EngineInstance::GetSingletonInstanceRead();
+
     Debug* debugInstance = engineInstance->GetDebug();
 
     if (!debugInstance)

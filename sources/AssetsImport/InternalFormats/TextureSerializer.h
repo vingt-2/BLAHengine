@@ -7,7 +7,7 @@ using namespace std;
 
 
 
-#include "../../Engine/Assets/Texture.h"
+#include <Engine/Assets/Texture.h>
 
 class Texture2DSerializer
 {

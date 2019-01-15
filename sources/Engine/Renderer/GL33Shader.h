@@ -1,4 +1,4 @@
-#include "../../Common/StdInclude.h"
+#include <Common/StdInclude.h>
 
 namespace BLAengine
 {

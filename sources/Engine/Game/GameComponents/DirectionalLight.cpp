@@ -1,6 +1,8 @@
 #include "DirectionalLight.h"
 #include "CameraComponent.h"
-#include "../GameObject.h"
+
+#include <Engine/Game/GameObject.h>
+
 using namespace BLAengine;
 
 DirectionalLight::DirectionalLight(GameObject *parentObject):

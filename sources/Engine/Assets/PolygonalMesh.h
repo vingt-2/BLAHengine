@@ -1,7 +1,7 @@
 #pragma once
 #include "Asset.h"
-#include "../../Common/Maths/Maths.h"
-#include "../../Common/StdInclude.h"
+#include <Common/Maths/Maths.h>
+#include <Common/StdInclude.h>
 
 namespace BLAengine
 {

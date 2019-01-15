@@ -1,8 +1,8 @@
 #pragma once
-#include "../../../Common/StdInclude.h"
-#include "../../../Common/Maths/Maths.h"
+#include <Common/StdInclude.h>
+#include <Common/Maths/Maths.h>
+#include <Engine/Game/Animation/SkeletonAnimationData.h>
 
-#include "../Animation/SkeletonAnimationData.h"
 #include "GameComponent.h"
 
 namespace BLAengine

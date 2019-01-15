@@ -1,8 +1,10 @@
 #pragma once
-#include "../Game/RenderingManager.h"
-#include "GameAlgebra\Ray.h"
-#include "..\..\Common\StdInclude.h"
+#include <Engine/Game/RenderingManager.h>
 
+#include <Engine/Game/GameAlgebra/Ray.h>
+
+#include <Common/StdInclude.h>
+#include <Common/BLASingleton.h>
 /*
  TODO: 
     SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
@@ -13,6 +15,8 @@ namespace BLAengine
 {
     class BLACORE_API Debug
     {
+        BLA_DECLARE_SINGLETON(Debug)
+
     public:
 
         Debug(DebugRenderingManager* renderManager);

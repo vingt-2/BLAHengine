@@ -1,10 +1,10 @@
 #include "CameraControl.h"
 
-#include "../Engine/System/RenderWindow.h"
-#include "../Engine/Game/GameComponents/CameraComponent.h"
-#include "../Engine/Game/GameObject.h"
-#include "../Engine/EngineInstance.h"
-#include "../Engine/Game/Timer.h"
+#include <Engine/Game/GameComponents/CameraComponent.h>
+#include <Engine/Game/GameObject.h>
+#include <Engine/EngineInstance.h>
+#include <Engine/Game/Timer.h>
+#include <Engine/System/InputManager.h>
 
 using namespace BLAengine;
 
@@ -12,6 +12,8 @@ using namespace BLAengine;
 
 void CameraController::UpdateController()
 {
+    auto inputs = InputManager::GetSingletonInstanceRead();
+
     if (m_controlledCamera == nullptr)
     {
         return;
@@ -24,104 +26,90 @@ void CameraController::UpdateController()
     blaVec3 angularAcceleration(0.f);
 
     blaF32 multiplier = 1.f;
-    if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT_CONTROL))
+    if (inputs->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
     {
         multiplier *= 0.3f;
     }
-    if (m_renderWindow->GetKeyPressed(GLFW_KEY_LEFT_SHIFT))
+    if (inputs->GetKeyState(BLA_KEY_LEFT_SHIFT).IsDown())
     {
         multiplier *= 3.f;
     }
 
-    if (m_renderWindow->GetKeyPressed('W'))
+    if (inputs->GetKeyState(BLA_KEY_W).IsDown())
         linearAcceleration.z = -1.f;
-    if (m_renderWindow->GetKeyPressed('S'))
+    if (inputs->GetKeyState(BLA_KEY_S).IsDown())
         linearAcceleration.z = 1.f;
 
-    if (m_renderWindow->GetKeyPressed('A'))
+    if (inputs->GetKeyState(BLA_KEY_A).IsDown())
         linearAcceleration.x = -1.f;
-    if (m_renderWindow->GetKeyPressed('D'))
+    if (inputs->GetKeyState(BLA_KEY_D).IsDown())
         linearAcceleration.x = 1.f;
 
-    if (m_renderWindow->GetKeyPressed('Q'))
+    if (inputs->GetKeyState(BLA_KEY_Q).IsDown())
         linearAcceleration.y = -1.f;
-    if (m_renderWindow->GetKeyPressed('E'))
+    if (inputs->GetKeyState(BLA_KEY_E).IsDown())
         linearAcceleration.y = 1.f;
 
-    if (m_renderWindow->GetMousePressed(2))
-    {
-        double x, y;
-        m_renderWindow->GetMouse(x, y);
+    const blaVec2 mouseDelta = inputs->GetMousePointerState().GetDelta();
 
-        if (x - m_prevMousePosition.x > 0)
+    auto middleMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_MIDDLE);
+    if (middleMouseButton.IsDown())
+    {
+        if (mouseDelta.x > 0)
         {
             linearAcceleration.x += -1.f;
         }
-        else if (x - m_prevMousePosition.x < 0)
+        else if (mouseDelta.x < 0)
         {
             linearAcceleration.x += 1.f;
         }
-        if (y - m_prevMousePosition.y > 0)
+        if (mouseDelta.y > 0)
         {
             linearAcceleration.y += 1.f;
         }
-        else if (y - m_prevMousePosition.y < 0)
+        else if (mouseDelta.y < 0)
         {
             linearAcceleration.y += -1.f;
         }
-
-        m_prevMousePosition = glm::vec2(x, y);
     }
 
-    blaF32 mouseScroll;
-    m_renderWindow->GetMouseWheel(mouseScroll);
+    blaF32 mouseScrollDelta = inputs->GetMouseScrollDelta();
 
+    linearAcceleration.z -= multiplier * 30.f * mouseScrollDelta;
 
-    linearAcceleration.z -= multiplier * 30.f * (mouseScroll - m_lastScrollValue);
-
-    m_lastScrollValue = mouseScroll;
 
     linearAcceleration = multiplier * 500.f * transform.LocalDirectionToWorld(linearAcceleration);
 
-    if (m_renderWindow->GetMousePressed(1))
+    auto rightButtonState = inputs->GetMouseButtonTimedState(BLA_MOUSE_BUTTON_RIGHT);
+    if (rightButtonState.IsDown())
     {
-        double x, y;
-        m_renderWindow->GetMouse(x, y);
-        glm::vec2 curMouse = glm::vec2(x, y);
-
-        if (x - m_prevMousePosition.x > 0)
+        if (mouseDelta.x > 0)
         {
             angularAcceleration.y = -1.f;
         }
-        else if (x - m_prevMousePosition.x < 0)
+        else if (mouseDelta.x < 0)
         {
             angularAcceleration.y = 1.f;
         }
-        if (y - m_prevMousePosition.y > 0)
+        if (mouseDelta.y > 0)
         {
             angularAcceleration.x = -1.f;
         }
-        else if (y - m_prevMousePosition.y < 0)
+        else if (mouseDelta.y < 0)
         {
             angularAcceleration.x = 1.f;
         }
 
-        m_prevMousePosition = curMouse;
-
-        angularAcceleration *= 400.f;
+        angularAcceleration *= 200.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }
 
-    EngineInstance* engineInstance;
-
-    BLA_RETRIEVE_SINGLETON(EngineInstance, engineInstance);
-
-    blaF32 dt = engineInstance->GetTimer()->GetDelta();
+    const EngineInstance* engineInstance = EngineInstance::GetSingletonInstanceRead();
 
     for (int i = 0; i < 2; ++i)
     {
-        blaF32 dt = engineInstance->GetTimer()->GetDelta() / 2.f;
+        blaF32 dt = engineInstance->GetTimer()->GetDelta();
 
         m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
         transform.SetPosition(transform.GetPosition() + dt * m_cameraLinearVelocity);

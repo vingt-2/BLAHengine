@@ -1,7 +1,7 @@
 // Include GLM
 #pragma once
 
-#include "../System.h"
+#include <Common/System.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 
@@ -317,6 +317,26 @@ blaQuat inline QuatBetweenVectors(const blaVec3& u, const blaVec3& v)
     q.w += glm::length(q); 
     return normalize(q);
 
+}
+
+inline blaVec3 SafeNormalize(const blaVec3& v)
+{
+    blaF32 vLength = glm::length(v);
+    if (vLength < BLA_EPSILON)
+    {
+        return blaVec3(0.f);
+    }
+    return v / vLength;
+}
+
+inline blaVec4 SafeNormalize(const blaVec4& v)
+{
+    blaF32 vLength = glm::length(v);
+    if (vLength < BLA_EPSILON)
+    {
+        return blaVec4(0.f);
+    }
+    return v / vLength;
 }
 
 void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat);

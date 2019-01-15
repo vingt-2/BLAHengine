@@ -1,12 +1,13 @@
 #pragma once
-#include "../../../Common/StdInclude.h"
-#include "../../../Common/Maths/Maths.h"
+#include <Common/StdInclude.h>
+#include <Common/Maths/Maths.h>
 
-#include "../Animation/IKTools.h"
 #include "GameComponent.h"
 
 namespace BLAengine
 {
+    class IKChainJoint;
+
     class BLACORE_API IKComponent : public GameComponent
     {
     public:

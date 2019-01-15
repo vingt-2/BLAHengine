@@ -1,6 +1,6 @@
 #pragma once
-#include "../../../Common/StdInclude.h"
-#include "../ObjectTransform.h"
+#include <Common/StdInclude.h>
+#include <Engine/Game/ObjectTransform.h>
 
 #define BLA_CREATE_COMPONENT(ComponentType, parentObject)\
     parentObject != nullptr ? new ComponentType(parentObject) : nullptr;

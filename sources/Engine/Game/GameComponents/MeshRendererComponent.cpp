@@ -1,6 +1,10 @@
 #include "MeshRendererComponent.h"
-#include "../GameObject.h"
+
+#include <Engine/Game/GameObject.h>
+#include <Common/RenderBackend.h>
+
 using namespace BLAengine;
+
 
 MeshRendererComponent::MeshRendererComponent(GameObject* parentObject) : 
     GameComponent(parentObject),

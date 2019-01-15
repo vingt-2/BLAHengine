@@ -4,7 +4,7 @@ using namespace BLAengine;
 
 GameObject::GameObject(string name):
     m_objectName(name),
-	m_transform(ObjectTransform())
+    m_transform(ObjectTransform())
 {}
 
 
@@ -29,14 +29,14 @@ const ObjectTransform& GameObject::GetTransform()
 //TODO: We might not actually want to recursively update the world transform every time we change a parent
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
-	GameObject* child = GetChild();
-	while(child != nullptr)
-	{
-		ObjectTransform newChildT = child->GetTransform();
-		newChildT.GetPosQuat() = transform.GetPosQuat() * newChildT.GetPosQuat();
-		child->SetTransform(newChildT);
-	}
-	m_transform = transform;
+    GameObject* child = GetChild();
+    while(child != nullptr)
+    {
+        ObjectTransform newChildT = child->GetTransform();
+        newChildT.GetPosQuat() = transform.GetPosQuat() * newChildT.GetPosQuat();
+        child->SetTransform(newChildT);
+    }
+    m_transform = transform;
 }
 
 void GameObject::AddComponent(GameComponent* component)

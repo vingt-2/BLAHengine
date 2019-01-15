@@ -1,5 +1,5 @@
 #include "SceneManager.h"
-#include "../../AssetsImport/InternalFormats/SceneSerializer.h"
+#include <AssetsImport/InternalFormats/SceneSerializer.h>
 
 using namespace BLAengine;
 

@@ -1,10 +1,10 @@
 #pragma once
-#include "..\..\..\Common\StdInclude.h"
-#include "..\..\Assets\PolygonalMesh.h"
-#include "../GameAlgebra/Ray.h"
+#include<Common\StdInclude.h>
+#include <Engine/Assets/PolygonalMesh.h>
+#include <Engine/Game/GameAlgebra/Ray.h>
 
 // Collision detection Library !
-#include "../../Ext/libcoldet/coldet.h"
+#include <External/libcoldet/coldet.h>
 
 #include "GameComponent.h"
 

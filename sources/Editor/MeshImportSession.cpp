@@ -1,5 +1,6 @@
 #include "MeshImportSession.h"
-#include "../AssetsImport/ExternalFormats/OBJImport.h"
+#include <AssetsImport/ExternalFormats/OBJImport.h>
+#include <Engine/System/InputManager.h>
 
 using namespace BLAengine;
 
@@ -130,23 +131,26 @@ bool BLAengine::MeshImportSession::SaveMeshToCooked()
 
 void BLAengine::MeshEditorControls::ControlCamera()
 {
+    auto inputs = InputManager::GetSingletonInstance();
+
     GameObject* object = nullptr;
     blaVec3* rotation = nullptr;
     bool scale = false;
     bool rotate = false;
-    if (m_renderWindow->GetMousePressed(1) && (m_renderWindow->GetMousePressed(0)))
+    if (inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT).IsDown() && 
+        inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_RIGHT).IsDown())
     {
         scale = true;
         object = m_cameraObject;
         rotation = new blaVec3(0);
     }
-    else if (m_renderWindow->GetMousePressed(1))
+    else if (inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT).IsDown())
     {
         rotate = true;
         object = m_cameraObject;
         rotation = &m_cameraRotation;
     }
-    else if (m_renderWindow->GetKeyPressed('L'))
+    else if (inputs->GetKeyState(BLA_KEY_L).IsDown())
     {
         rotate = true;
         object = m_lightObj;
@@ -160,31 +164,26 @@ void BLAengine::MeshEditorControls::ControlCamera()
 
     ObjectTransform transform = object->GetTransform();
 
-    double x, y;
-    m_renderWindow->GetMouse(x, y);
-    glm::vec2 curMouse = glm::vec2(x, y);
+    blaVec2 deltaMouse = inputs->GetMousePointerState().GetDelta();
 
     blaVec3 deltaRotation = blaVec3(0);
 
-    if (x - m_prevMouse.x > 0)
+    if(deltaMouse.x > 0)
     {
         deltaRotation.y = 1.f;
     }
-    else if (x - m_prevMouse.x < 0)
+    else if (deltaMouse.x < 0)
     {
         deltaRotation.y = -1.f;
     }
-    if (y - m_prevMouse.y > 0)
+    if (deltaMouse.y > 0)
     {
         deltaRotation.x = 1.f;
     }
-    else if (y - m_prevMouse.y < 0)
+    else if (deltaMouse.y < 0)
     {
         deltaRotation.x = -1.f;
     }
-
-    m_prevMouse = curMouse;
-
 
     *rotation += 0.1f * deltaRotation;
     if (rotate)

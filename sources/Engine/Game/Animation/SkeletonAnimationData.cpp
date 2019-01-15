@@ -140,44 +140,6 @@ void SkeletonJoint::QuerySkeleton(unordered_map<string, SkeletonJoint*>* jointPo
     }
 }
 
-void SkeletalAnimationPlayer::UpdatePlayer()
-{
-    float time = 0.f;//m_clock.getTimeSeconds();
-    float dt = time - m_lastTime;
-    if (dt > 0.1f)
-        dt = 0.1f;
-    m_lastTime = time;
-    if(m_playerState == IS_PLAYING)
-    {
-        m_currentAnimationFrame += dt * m_motionSpeed * m_skeletalMotion->GetSamplingRate();
-        if (m_currentAnimationFrame >= m_skeletalMotion->GetFrameCount())
-        {
-            m_currentAnimationFrame = m_skeletalMotion->GetFrameCount();
-            std::cout << "Animation Ended. Press Enter to start over.\n";
-            m_playerState = IS_WAITING_START;
-        }
-    }
-    else if (m_playerState == SHOULD_START)
-    {
-        m_playerState = IS_PLAYING;
-    }
-}
-
-void SkeletalAnimationPlayer::UpdatePlayer(bool &bIsAnimationStarting)
-{
-    bIsAnimationStarting = false;
-    if (m_playerState == SHOULD_START)
-    {
-        UpdatePlayer();
-        if (m_playerState == IS_PLAYING)
-            bIsAnimationStarting = true;
-    }
-    else
-    {
-        UpdatePlayer();
-    }
-}
-
 SkeletonAnimationData::~SkeletonAnimationData()
 {
 

@@ -1,11 +1,11 @@
 #include "PBRRenderer.h"
+
 #include <random>
 #include <ppl.h>
 #include <concurrent_vector.h>
 
 using namespace BLAengine;
 using namespace concurrency;
-using namespace glm;
 
 inline float ClampOne(float x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
 inline int ToDisplayValue(float x) { return int(pow(ClampOne(x), 1.0f / 2.2) * 255 + .5); }
@@ -261,7 +261,7 @@ blaVec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int de
     return m->m_color * sampleRadiance;
 }
 
-void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, uint numberOfPhotons)
+void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, blaU32 numberOfPhotons)
 {
     std::cout << "Building Photon Map:\n";
     m_photonMap = PhotonMap(numberOfPhotons);

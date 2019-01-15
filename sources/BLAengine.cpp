@@ -1,22 +1,20 @@
-#include "Common/StdInclude.h"
-#include "Engine/System/RenderWindow.h"
-#include "AnimationDemo.h"
-#include "./Common/DataStructures/Tree.h"
-
 #include <thread>
+
+#include <Common/StdInclude.h>
+#include <Engine/System/RenderWindow.h>
+#include <Demos/AnimationDemo.h>
+#include <Common/DataStructures/Tree.h>
+#include <Engine/Gui/Gui.h>
+
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
-BLA_DECLARE_SINGLETON(EngineInstance)
-
 void DoAnimationDemoSession()
 {
-    BLA_ASSIGN_SINGLETON(EngineInstance, new AnimationDemo(true, false));
+    EngineInstance::AssignSingletonInstance(new AnimationDemo(true, false));
 
-    EngineInstance* demo;
-
-    BLA_RETRIEVE_SINGLETON(EngineInstance, demo);
+    EngineInstance* demo = EngineInstance::GetSingletonInstance();
 
     auto renderWindow = new GLFWRenderWindow();
 
@@ -27,16 +25,18 @@ void DoAnimationDemoSession()
     demo->LoadWorkingScene("./Scenes/floor_scene");
 
     int framerate = 1000;
-    
+
     while (!demo->ShouldTerminate())
     {
-        auto frameStarTime = std::chrono::steady_clock::now();
+        auto frameStartTime = std::chrono::steady_clock::now();
+
         demo->PreEngineUpdate();
         demo->EngineUpdate();
         demo->PostEngineUpdate();
+
         auto frameEndTime = std::chrono::steady_clock::now();
         int microSecondsFrameTime = (int) (1000000.f / (float)framerate);
-        auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStarTime);
+        auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStartTime);
 
         std::this_thread::sleep_for(waitDuration);
     }

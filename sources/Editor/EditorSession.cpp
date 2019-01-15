@@ -1,5 +1,6 @@
 #include "EditorSession.h"
-#include "../Engine/Game/PBRendering/PBRRenderer.h"
+#include <Engine/Game/PBRendering/PBRRenderer.h>
+#include <Engine/System/InputManager.h>
 
 using namespace BLAengine;
 
@@ -46,9 +47,11 @@ bool EditorSession::InitializeEngine(RenderWindow* _renderWindow)
 
 void EditorSession::UpdateEditor()
 {
-    if (m_renderWindow->GetMousePressed(0))
+    auto inputs = InputManager::GetSingletonInstance();
+
+    if (inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT).IsDown())
     {
-        Ray screenRay = m_editorRenderer->ScreenToRay();
+        Ray screenRay = m_editorRenderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
 
         if (GameObject* object = m_workingScene->PickGameObjectInScene(screenRay).first)
         {
@@ -78,22 +81,10 @@ void EditorSession::UpdateEditor()
         }
     }
 
-    if (m_editorControls)
-    {
-        m_editorControls->ControlCamera();
-    }
-    else
-    {
-        if (CameraComponent* cameraObject = m_workingScene->GetMainCamera())
-        {
-            m_editorControls = new EditorControls(cameraObject->GetParentObject(), m_renderWindow);
-        }
-    }
-
     m_debug->DrawRay(debugRay, blaVec3(0, 1, 0));
     //m_debug->DrawGrid(1000, 10, blaVec3(0.4));
     m_debug->Update();
-    m_timer->Update();
+    m_timer->Update(glfwGetTime());
     m_workingScene->Update();
     m_editorRenderer->Update();
 
@@ -143,101 +134,4 @@ std::vector<string> BLAengine::EditorSession::GetSceneObjects()
         objs.push_back(go->GetName());
     }
     return objs;
-}
-
-void BLAengine::EditorControls::ControlCamera()
-{
-    if (m_renderWindow->GetKeyPressed(GLFW_KEY_ESCAPE))
-    {
-        exit(0);
-    }
-    
-    ObjectTransform transform = m_cameraObject->GetTransform();
-
-    blaVec3 tangentForce = blaVec3(0);
-    blaVec3 movementForce = blaVec3(0);
-    float coeff = 0.1f;
-
-
-    if (m_renderWindow->GetKeyPressed('W'))
-        tangentForce.z = 2.f;
-    if (m_renderWindow->GetKeyPressed('S'))
-        tangentForce.z = -2.f;
-
-    if (m_renderWindow->GetKeyPressed('A'))
-        tangentForce.x = 2.f;
-    if (m_renderWindow->GetKeyPressed('D'))
-        tangentForce.x = -2.f;
-
-    if (m_renderWindow->GetKeyPressed('Q'))
-        tangentForce.y = 2.f;
-    if (m_renderWindow->GetKeyPressed('E'))
-        tangentForce.y = -2.f;
-
-    if (m_renderWindow->GetMousePressed(2))
-    {
-        double x, y;
-        m_renderWindow->GetMouse(x, y);
-        tangentForce = blaVec3(0, 0, 0);
-
-        if (x - m_prevMouse.x > 0)
-        {
-            tangentForce.x = 1.f;
-        }
-        else if (x - m_prevMouse.x < 0)
-        {
-            tangentForce.x = -1.f;
-        }
-        if (y - m_prevMouse.y > 0)
-        {
-            tangentForce.y = 1.f;
-        }
-        else if (y - m_prevMouse.y < 0)
-        {
-            tangentForce.y = -1.f;
-        }
-
-        m_prevMouse = glm::vec2(x,y);
-    }
-
-    blaVec3 cameraForce = transform.LocalDirectionToWorld(tangentForce);
-    cameraForce *= coeff;
-
-    transform.SetPosition(transform.GetPosition() + cameraForce);
-
-    if (m_renderWindow->GetMousePressed(1))
-    {
-        double x, y;
-        m_renderWindow->GetMouse(x, y);
-        glm::vec2 curMouse = glm::vec2(x, y);
-
-        blaVec3 deltaRotation = blaVec3(0);
-
-        if (x - m_prevMouse.x > 0)
-        {
-            deltaRotation.y = 1.f;
-        }
-        else if (x - m_prevMouse.x < 0)
-        {
-            deltaRotation.y = -1.f;
-        }
-        if (y - m_prevMouse.y > 0)
-        {
-            deltaRotation.x = 1.f;
-        }
-        else if (y - m_prevMouse.y < 0)
-        {
-            deltaRotation.x = -1.f;
-        }
-
-        m_prevMouse = curMouse;
-
-        m_cameraRotation += 0.05f * deltaRotation;
-        
-        transform.SetEulerAngles(m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z);
-    }
-
-    m_cameraObject->SetTransform(transform);
-
-    m_cameraObject->Update();
 }

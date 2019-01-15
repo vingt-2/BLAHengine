@@ -1,6 +1,6 @@
 #include "GL33Renderer.h"
+
 using namespace BLAengine;
-using namespace glm;
 
 GL33Renderer::GL33Renderer():
     debug_renderGBuffer(false),
@@ -21,18 +21,12 @@ void GL33Renderer::ViewportResize(int width, int height)
     m_GBuffer.InitializeGBuffer();
 }
 
-Ray BLAengine::GL33Renderer::ScreenToRay()
+Ray BLAengine::GL33Renderer::ScreenToRay(blaVec2 screenSpaceCoord)
 {
-    double xd, yd;
-    m_renderWindow->GetMouse(xd, yd);
-
-    float x = (float)xd;
-    float y = (float)yd;
-
     blaVec3 rayDirection = blaVec3(1.f);
-    rayDirection.x = (((2.0f * (m_renderSize.x - x)) / m_renderSize.x) - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[0][0];
+    rayDirection.x = (2.0f * screenSpaceCoord.x - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[0][0];
 
-    rayDirection.y = -(((2.0f * (m_renderSize.y - y)) / m_renderSize.y) - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
+    rayDirection.y = -(2.0f * screenSpaceCoord.y - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
 
     blaMat4 viewTransformMatrix;
     this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(viewTransformMatrix);
@@ -135,8 +129,6 @@ bool GL33Renderer::Update()
 
     CleanUpFrameDebug();
 
-    m_renderWindow->UpdateWindowAndBuffers();
-
     return true;
 }
 
@@ -194,7 +186,7 @@ void GL33Renderer::RenderGBuffer()
                 glActiveTexture(GL_TEXTURE0 + samplerIndex);
             }
 
-            for (uint vboIndex = 0; vboIndex < gl33RenderObject->m_vboIDVector.size(); vboIndex++)
+            for (blaU32 vboIndex = 0; vboIndex < gl33RenderObject->m_vboIDVector.size(); vboIndex++)
             {
                 glDisableVertexAttribArray(vboIndex);
             }
@@ -651,7 +643,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
 
 
     // PROBABLY CHANGE THIS TO A MORE OPTIMIZED SYSTEM:
-    vector<uint> toErase;
+    vector<blaU32> toErase;
     for (auto renderingObject : m_meshRenderPool)
     {
         if (m_renderingManager->GetTicketedMeshRenderers()->count(renderingObject.first) == 0)
@@ -881,7 +873,7 @@ bool GL33Renderer::CleanUp(GL33RenderObject& object)
 void GL33Renderer::CleanUpVBOs(GL33RenderObject& object)
 {
     // Cleanup VBO
-    for (uint vboIndex = 0; vboIndex < object.m_vboIDVector.size(); vboIndex++)
+    for (blaU32 vboIndex = 0; vboIndex < object.m_vboIDVector.size(); vboIndex++)
     {
         glDeleteBuffers(1, &((object.m_vboIDVector.at(vboIndex)).first));
     }

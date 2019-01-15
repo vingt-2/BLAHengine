@@ -1,5 +1,6 @@
 #include "GameComponent.h"
-#include "../GameObject.h"
+
+#include <Engine/Game/GameObject.h>
 
 using namespace BLAengine; 
 

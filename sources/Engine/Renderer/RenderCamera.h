@@ -1,5 +1,5 @@
 #pragma once
-#include "../Game/GameComponents/CameraComponent.h"
+#include <Engine/Game/GameComponents/CameraComponent.h>
 
 namespace BLAengine
 {

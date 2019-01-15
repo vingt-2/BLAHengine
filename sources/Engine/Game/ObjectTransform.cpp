@@ -1,5 +1,7 @@
 #include "ObjectTransform.h"
 
+#pragma optimize("" ,off)
+
 using namespace BLAengine;
 
 ObjectTransform::ObjectTransform(void) :

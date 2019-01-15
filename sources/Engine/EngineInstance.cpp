@@ -1,18 +1,22 @@
-#include "../Common/System.h"
-#include "../Common/Maths/Maths.h"
-#include "./Renderer/GL33Renderer.h"
-#include "./Game/RenderingManager.h"
-#include "./Game\Debug.h"
-#include "./Assets/SceneManager.h"
+#include <Common/System.h>
+#include <Common/Maths/Maths.h>
+#include <Engine/Renderer/GL33Renderer.h>
+#include <Engine/Game/RenderingManager.h>
+#include <Engine/Game/Debug.h>
+#include <Engine/Assets/SceneManager.h>
+#include <Engine/System/InputManager.h>
+#include <Engine/System/RenderWindow.h>
 
 #include "EngineInstance.h"
 
 using namespace BLAengine;
 
-BLA_DECLARE_SINGLETON(Debug);
+BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
+    m_inputManager = InputManager::AssignAndReturnSingletonInstance(new InputManager());
+
     this->m_renderWindow = renderWindow;
     m_assetManager = new AssetManager();
 
@@ -36,9 +40,11 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_debug = new Debug(m_debugRenderingManager);
 
-	BLA_ASSIGN_SINGLETON(Debug, m_debug);
+    Debug::AssignSingletonInstance(m_debug);
 
     m_workingScene->Initialize(m_renderingManager);
+
+    m_guiManager = new GuiTest((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer());
 
     // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())
@@ -55,13 +61,13 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
 void EngineInstance::PreEngineUpdate()
 {
-    m_timer->Update();
+    m_timer->Update(glfwGetTime());
     //TODO: Build an Input Manager and scan inputs here...
 }
 
 void EngineInstance::EngineUpdate()
 {
-    if (m_renderWindow->GetKeyPressed(GLFW_KEY_ESCAPE))
+    if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsDown())
     {
         m_isTerminationRequested = true;
     }
@@ -71,14 +77,21 @@ void EngineInstance::EngineUpdate()
 
 void EngineInstance::PostEngineUpdate()
 {
-	m_debug->Update();
+    m_debug->Update();
     m_renderer->Update();
+    m_inputManager->Update();
+
+    m_guiManager->Update();
+    
+    // Final update of the frame
+    m_renderWindow->UpdateWindowAndBuffers();
 }
 
 void EngineInstance::TerminateEngine()
 {
     //TODO: Clean the render window ...
     //m_renderWindow->~RenderWindow();
+    delete m_guiManager;
 }
 
 bool BLAengine::EngineInstance::LoadWorkingScene(std::string filepath)
@@ -114,11 +127,11 @@ void EngineInstance::SetupDirLightAndCamera()
     GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
 
-	ObjectTransform  cameraStartTransform;
+    ObjectTransform  cameraStartTransform;
 
-	cameraStartTransform.SetPosition(blaVec3(0.f, 2.f, 2.f));
+    cameraStartTransform.SetPosition(blaVec3(0.f, 2.f, 2.f));
 
-	cameraObject->SetTransform(cameraStartTransform);
+    cameraObject->SetTransform(cameraStartTransform);
 
     m_renderer->SetCamera(cameraComp);
 }

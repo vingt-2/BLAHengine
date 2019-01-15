@@ -1,6 +1,8 @@
 #pragma once
-#include "../../Common/StdInclude.h"
-#include "../Assets/AssetsManager.h"
+#include <Common/StdInclude.h>
+#include <Common/RenderBackend.h>
+#include <Engine/Assets/AssetsManager.h>
+
 #include "Renderer.h"
 #include "GL33Shader.h"
 
@@ -118,7 +120,7 @@ namespace BLAengine
 
         RenderWindow* GetWindow() const { return m_renderWindow; }
         void        ViewportResize(int width, int height);
-        Ray        ScreenToRay();
+        Ray        ScreenToRay(blaVec2 screenSpaceCoord);
 
         GL33Renderer();
         ~GL33Renderer();

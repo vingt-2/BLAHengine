@@ -1,7 +1,7 @@
 #pragma once
-#include "..\..\Common\StdInclude.h"
-#include "..\..\Common\System.h"
-#include "..\..\Common\Maths\Maths.h"
+#include <Common/StdInclude.h>
+#include <Common/System.h>
+#include <Common/Maths/Maths.h>
 
 namespace BLAengine
 {
@@ -15,7 +15,7 @@ namespace BLAengine
         float GetDelta() const;
         float GetFramerate() const;
 
-        void Update();
+        void Update(blaF32 systemTime);
 
     private:
 

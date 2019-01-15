@@ -1,5 +1,7 @@
 #include "IKComponent.h"
 
+#include <Engine/Game/Animation/IK/IKTools.h>
+
 using namespace BLAengine;
 
 IKComponent::IKComponent(GameObject* parentObject) :
@@ -9,7 +11,7 @@ IKComponent::IKComponent(GameObject* parentObject) :
 
 IKComponent::~IKComponent()
 {
-	delete m_ikChain;
+    delete m_ikChain;
 }
 
 void IKComponent::Update()

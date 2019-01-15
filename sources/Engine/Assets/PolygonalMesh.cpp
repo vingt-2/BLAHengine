@@ -1,6 +1,5 @@
 #include "PolygonalMesh.h"
 using namespace BLAengine;
-using namespace glm;
 
 #define INVALID_HE 0xFFFFFFFF
 
@@ -181,7 +180,7 @@ void TriangleMesh::ComputeFaceTangents()
         if (isnan(invScale))
             invScale = 0.0f;
         
-        blaVec3 T = invScale * mat2x3(q1, q2) * glm::vec2(st2.t, -st1.t);
+        blaVec3 T = invScale * glm::mat2x3(q1, q2) * glm::vec2(st2.t, -st1.t);
         //blaVec3 B = invScale * mat2x3(q1, q2) * glm::vec2(-st2.s, st1.s);
 
         if (isnan(T.x) || isnan(T.y) || isnan(T.z))
@@ -209,7 +208,7 @@ void TriangleMesh::ApplyGeomScaling(blaVec3 scaling)
 
 void TriangleMesh::ApplyUVScaling(glm::vec2 scaling)
 {
-    mat2 scaleMat(glm::vec2(scaling.x, 0), glm::vec2(0, scaling.y));
+    glm::mat2 scaleMat(glm::vec2(scaling.x, 0), glm::vec2(0, scaling.y));
 
     for (auto &v : m_vertexUVs) 
     {

@@ -1,9 +1,12 @@
 #pragma once
-#include "./RigidBodySystem.h"
-#include "../../Common/StdInclude.h"
-#include "./GameComponents/RigidBodyComponent.h"
-#include "./GameComponents/CameraComponent.h"
-#include "./RenderingManager.h"
+
+#include <Common/StdInclude.h>
+
+#include <Engine/Game/RigidBodySystem.h>
+#include <Engine/Game/GameComponents/RigidBodyComponent.h>
+#include <Engine/Game/GameComponents/CameraComponent.h>
+#include <Engine/Game/RenderingManager.h>
+
 #include "GameObject.h"
 
 namespace BLAengine
@@ -20,7 +23,7 @@ namespace BLAengine
         GameObject* CreateObject(std::string name);
         bool DeleteObject(std::string name);
         GameObject* FindObjectByName(std::string name);
-		vector<GameObject*> FindObjectsMatchingName(std::string name);
+        vector<GameObject*> FindObjectsMatchingName(std::string name);
 
         void AddComponent(GameObject* object, GameComponent* component);
         vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }

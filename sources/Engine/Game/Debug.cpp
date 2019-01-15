@@ -1,5 +1,8 @@
-#include "./Debug.h"
+#include "Debug.h"
+
 using namespace BLAengine;
+
+BLA_IMPLEMENT_SINGLETON(Debug)
 
 Debug::Debug(DebugRenderingManager* manager)
 {

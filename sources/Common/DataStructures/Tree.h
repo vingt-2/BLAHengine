@@ -1,5 +1,6 @@
 #pragma once
-#include "../System.h"
+
+#include <Common/System.h>
 #include <Iterator>
 
 template<class T>
@@ -86,7 +87,7 @@ public:
 		return static_cast<T*>(this);
 	}
 
-	blaU32 GetNumberChildren()
+	blaU32 GetNumberChildren() const
 	{
 		auto child = static_cast<IntrusiveTree<T>*>(m_child);
 
@@ -100,7 +101,7 @@ public:
 		return count;
 	}
 
-	blaBool HasChild(T* value)
+	blaBool HasChild(T* value) const
 	{
 		auto child = static_cast<IntrusiveTree<T>*>(m_child);
 		while (child != nullptr)

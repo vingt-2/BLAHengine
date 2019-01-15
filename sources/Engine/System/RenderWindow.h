@@ -1,6 +1,8 @@
 #pragma once
-#include "../../Common/System.h"
-#include "../../Common/StdInclude.h"
+#include <Common/System.h>
+#include <Common/StdInclude.h>
+#include <Common/RenderBackend.h>
+#include <Common/Maths/Maths.h>
 
 namespace BLAengine
 {
@@ -23,19 +25,13 @@ namespace BLAengine
         virtual void SetWindowTitle(std::string title) = 0;
         virtual std::string GetWindowTitle() const = 0;
 
-        virtual void GetMouse(double &x, double &y) const = 0;
-
-        virtual bool GetMousePressed(int button) const = 0;
-
-        virtual void GetMouseWheel(float& wheelAxisValue) const = 0;
-
-        virtual bool GetKeyPressed(int key) const = 0;
-
         virtual void SetMouseXY() = 0;
 
         virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) = 0;
 
         virtual void SetMouseCursorVisibility(bool visibility) = 0;
+
+        virtual blaVec2 GetMousePointerScreenSpaceCoordinates() = 0;
     };
 
     //TODO: Implement MousWheel
@@ -53,13 +49,6 @@ namespace BLAengine
         virtual void MakeGLContextCurrent();
 
         virtual void GetSize(int &width, int &height) const;
-
-        virtual void GetMouse(double &x, double &y) const;
-
-        virtual void SetMouseXY();
-
-        virtual bool GetKeyPressed(int key) const;
-        virtual bool GetMousePressed(int button) const;
 
         virtual string GetMaxGLVersion() const;
 
@@ -80,6 +69,8 @@ namespace BLAengine
         void SetMouseCursorVisibility(bool visibility) override {};
 
         virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override {};
+
+        blaVec2 GetMousePointerScreenSpaceCoordinates(){ return blaVec2(0.f); }
     
         unsigned char m_mouseDownState;
         bool m_keyPressed[100];
@@ -114,18 +105,17 @@ namespace BLAengine
         void SetWindowTitle(std::string title) override;
         std::string GetWindowTitle() const override;
 
-        void GetMouse(double &x, double &y) const override;
-
-        void GetMouseWheel(float& wheelAxisValue) const override;
-
-        void SetMouseXY() override;
-
-        bool GetKeyPressed(int key) const override;
-        bool GetMousePressed(int button) const override;
-
         void SetMouseCursorVisibility(bool visibility) override;
 
+        void SetMouseXY() override {};
+
         void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override;
+
+        blaVec2 GetMousePointerScreenSpaceCoordinates() override;
+
+        // GLFW Window specific stuff ...
+
+        GLFWwindow* GetWindowPointer() { return m_glfwWindow; }
 
         GLFWRenderWindow();
         ~GLFWRenderWindow();
@@ -135,8 +125,6 @@ namespace BLAengine
         GLFWwindow* m_glfwWindow;
 
         int m_width, m_height;
-
-        float m_mouseScrollAxis;
 
         bool m_isFullscreen;
 

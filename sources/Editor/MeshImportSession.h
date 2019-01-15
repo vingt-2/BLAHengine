@@ -1,10 +1,10 @@
-#include "../Common/StdInclude.h"
-#include "../Common/System.h"
-#include "../Common/Maths/Maths.h"
-#include "../Engine/Renderer/GL33Renderer.h"
-#include "../Engine/Game/RenderingManager.h"
-#include "../Engine/Game/Debug.h"
-#include "../Engine/Assets/SceneManager.h"
+#include <Common/StdInclude.h>
+#include <Common/System.h>
+#include <Common/Maths/Maths.h>
+#include <Engine/Renderer/GL33Renderer.h>
+#include <Engine/Game/RenderingManager.h>
+#include <Engine/Game/Debug.h>
+#include <Engine/Assets/SceneManager.h>
 
 namespace BLAengine
 {

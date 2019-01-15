@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Common/StdInclude.h"
-#include "../../Common/Maths/Maths.h"
+#include <Common/StdInclude.h>
+#include <Common/Maths/Maths.h>
 
 namespace BLAengine
 {

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string.h>
 
-#include "./BVHImport.h"
+#include "BVHImport.h"
 
 
 #define _HAS_ITERATOR_DEBUGGING 0

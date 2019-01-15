@@ -1,16 +1,97 @@
 #include "RenderWindow.h"
+#include "InputManager.h"
+
 using namespace BLAengine;
 
 #ifdef GLFW_INTERFACE
 
-std::pair<GLFWwindow*, float> g_lastGlfwScrollValue;
-
-void MouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
+void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
 {
-    g_lastGlfwScrollValue = std::pair<GLFWwindow*, blaF32>(window, yAxisScroll);
+    InputStateSetter::SetMouseScrollDelta(yAxisScroll);
 }
 
-#define GLFW_DEFAULT_WINDOW_NAME "glfwWindow"
+BLAKeyboard GLFWToBlaKeyboard(int glfwKey)
+{
+    if (glfwKey >= GLFW_KEY_A && glfwKey <= GLFW_KEY_RIGHT_BRACKET)
+    {
+        return (BLAKeyboard)(BLA_KEY_A + (glfwKey - GLFW_KEY_A));
+    }
+
+    if (glfwKey >= GLFW_KEY_COMMA && glfwKey <= GLFW_KEY_9)
+    {
+        return (BLAKeyboard)(BLA_KEY_COMMA + (glfwKey - GLFW_KEY_COMMA));
+    }
+
+    if (glfwKey >= GLFW_KEY_ESCAPE && glfwKey <= GLFW_KEY_END)
+    {
+        return (BLAKeyboard)(BLA_KEY_ESCAPE + (glfwKey - GLFW_KEY_ESCAPE));
+    }
+
+    if (glfwKey >= GLFW_KEY_CAPS_LOCK && glfwKey <= GLFW_KEY_PAUSE)
+    {
+        return (BLAKeyboard)(BLA_KEY_CAPS_LOCK + (glfwKey - GLFW_KEY_CAPS_LOCK));
+    }
+
+    if (glfwKey >= GLFW_KEY_F1 && glfwKey <= GLFW_KEY_F25)
+    {
+        return (BLAKeyboard)(BLA_KEY_F1 + (glfwKey - GLFW_KEY_F1));
+    }
+
+    if (glfwKey >= GLFW_KEY_KP_0 && glfwKey <= GLFW_KEY_KP_EQUAL)
+    {
+        return (BLAKeyboard)(BLA_KEY_KP_0 + (glfwKey - GLFW_KEY_KP_0));
+    }
+
+    if (glfwKey >= GLFW_KEY_LEFT_SHIFT && glfwKey <= GLFW_KEY_MENU)
+    {
+        return (BLAKeyboard)(BLA_KEY_LEFT_SHIFT + (glfwKey - GLFW_KEY_LEFT_SHIFT));
+    }
+
+    if (glfwKey == GLFW_KEY_SPACE) return BLA_KEY_SPACE;
+
+    if (glfwKey == GLFW_KEY_APOSTROPHE) return BLA_KEY_APOSTROPHE;
+
+    if (glfwKey == GLFW_KEY_SEMICOLON) return BLA_KEY_SEMICOLON;
+
+    if (glfwKey == GLFW_KEY_GRAVE_ACCENT) return BLA_KEY_GRAVE_ACCENT;
+
+    if (glfwKey == GLFW_KEY_WORLD_1) return BLA_KEY_WORLD_1;
+
+    if (glfwKey == GLFW_KEY_WORLD_2) return BLA_KEY_WORLD_2;
+
+    return BLA_KEY_ENUM_END;
+}
+
+void GLFWKeyboardCallBack(GLFWwindow* window, int keyCode, int scandone, int action, int mods)
+{
+    if (action == GLFW_REPEAT)
+    {
+        return;
+    }
+
+    BLAKeyboard key = GLFWToBlaKeyboard(keyCode);
+
+    if (key != BLA_KEY_ENUM_END)
+    {
+        InputStateSetter::SetKey(GLFWToBlaKeyboard(keyCode), glfwGetTime(), action == GLFW_PRESS);
+    }
+}
+
+void GLFWMouseButtonCallBack(GLFWwindow* window, int button, int action, int mods)
+{
+    if (action == GLFW_REPEAT)
+    {
+        return;
+    }
+
+    InputStateSetter::SetMouseButton((BLAMouseButtons) button, glfwGetTime(), action == GLFW_PRESS);
+}
+
+void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
+{
+    InputStateSetter::SetMousePointer(blaVec2(xpos, ypos));
+}
+
 void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
     GLFWwindow* window;
@@ -70,7 +151,10 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetCursorPos(window, m_width / 2, m_height / 2);
 
-    glfwSetScrollCallback(window, (GLFWscrollfun) MouseWheelCallback);
+    glfwSetMouseButtonCallback(window, GLFWMouseButtonCallBack);
+    glfwSetCursorPosCallback(window, GLFWMouseCursorPosCallBack);
+    glfwSetKeyCallback(window, GLFWKeyboardCallBack);
+    glfwSetScrollCallback(window, (GLFWscrollfun) GLFWMouseWheelCallback);
 
     m_glfwWindow = window;
 }
@@ -87,22 +171,15 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
-    if (g_lastGlfwScrollValue.first == m_glfwWindow)
-    {
-        m_mouseScrollAxis += g_lastGlfwScrollValue.second;
-        g_lastGlfwScrollValue.first = nullptr;
-    }
-
     bool cursorVisibility = true;
     for (auto mouseButton : m_mouseButtonsThatKillCursorWhenHeld)
     {
-        if (GetMousePressed(mouseButton))
+        if (glfwGetMouseButton(m_glfwWindow, mouseButton) == GLFW_PRESS)
         {
             cursorVisibility = false;
             break;
         }
     }
-
     SetMouseCursorVisibility(cursorVisibility);
     
     glfwSwapInterval(0);
@@ -138,32 +215,7 @@ std::string GLFWRenderWindow::GetWindowTitle() const
     return std::string();
 }
 
-void GLFWRenderWindow::GetMouse(double & x, double& y) const
-{
-    glfwGetCursorPos(m_glfwWindow, &x, &y);
-}
-
-void GLFWRenderWindow::GetMouseWheel(float& wheelAxisValue) const
-{
-    wheelAxisValue = m_mouseScrollAxis;
-}
-
-void GLFWRenderWindow::SetMouseXY()
-{
-}
-
-bool GLFWRenderWindow::GetKeyPressed(int key) const
-{
-    return (glfwGetKey(m_glfwWindow, key) == GLFW_PRESS);
-}
-
-bool GLFWRenderWindow::GetMousePressed(int button) const
-{
-    return (glfwGetMouseButton(m_glfwWindow, button) == GLFW_PRESS);
-}
-
 GLFWRenderWindow::GLFWRenderWindow():
-    m_mouseScrollAxis(0.f),
     m_isFullscreen(false),
     m_width(0),
     m_height(0),
@@ -189,6 +241,15 @@ void GLFWRenderWindow::SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mou
 {
     m_mouseButtonsThatKillCursorWhenHeld.push_back(mouseButton);
 }
+
+blaVec2 GLFWRenderWindow::GetMousePointerScreenSpaceCoordinates()
+{
+    double x, y;
+    glfwGetCursorPos(m_glfwWindow, &x, &y);
+
+    return blaVec2((m_width - x) / m_width, (m_height - y) / m_height);
+}
+
 
 #endif
 
@@ -240,20 +301,20 @@ void WPFRenderWindow::WriteMousePos(int x, int y)
     m_mousePosY = y;
 }
 
-void WPFRenderWindow::SetMouseXY() {}
-
-bool WPFRenderWindow::GetKeyPressed(int key) const
-{
-    bool r = m_keyPressed[key];
-    return r;
-}
-
-bool WPFRenderWindow::GetMousePressed(int button) const
-{ 
-    int mask = (unsigned char) (0x01 << button);
-
-    return (mask & m_mouseDownState) != 0x00;
-}
+//void WPFRenderWindow::SetMouseXY() {}
+//
+//bool WPFRenderWindow::GetKeyPressed(int key) const
+//{
+//    bool r = m_keyPressed[key];
+//    return r;
+//}
+//
+//bool WPFRenderWindow::GetMousePressed(int button) const
+//{ 
+//    int mask = (unsigned char) (0x01 << button);
+//
+//    return (mask & m_mouseDownState) != 0x00;
+//}
 
 string WPFRenderWindow::GetMaxGLVersion() const { return m_glVersion; }
 
@@ -276,9 +337,9 @@ void WPFRenderWindow::GetSize(int &width, int &height) const
     width = m_width;
     height = m_height;
 }
-
-void WPFRenderWindow::GetMouse(double &x, double &y) const
-{
-    x = m_mousePosX;
-    y = m_mousePosY;
-}
+//
+//void WPFRenderWindow::GetMouse(double &x, double &y) const
+//{
+//    x = m_mousePosX;
+//    y = m_mousePosY;
+//}

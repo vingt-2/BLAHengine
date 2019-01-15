@@ -1,7 +1,9 @@
 #pragma once
-#include "..\GameComponents\RigidBodyComponent.h"
-#include "..\..\..\Common\StdInclude.h"
-#include "..\Timer.h"
+#include <Engine/Game/GameComponents/RigidBodyComponent.h>
+
+#include <Common/StdInclude.h>
+#include <Engine/Game/Timer.h>
+
 namespace BLAengine
 {
     class BLACORE_API Contact

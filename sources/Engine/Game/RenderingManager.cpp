@@ -1,7 +1,6 @@
 #include "RenderingManager.h"
 
 using namespace BLAengine;
-using namespace glm;
 
 RenderingManager::RenderingManager(RenderManagerType type)
 {
@@ -15,7 +14,7 @@ RenderingManager::~RenderingManager()
 
 }
 
-uint RenderingManager::RegisterMeshRenderer(MeshRendererComponent* meshRender)
+blaU32 RenderingManager::RegisterMeshRenderer(MeshRendererComponent* meshRender)
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
@@ -33,7 +32,7 @@ bool RenderingManager::CancelMeshRendererTicket(MeshRendererComponent* meshRende
     return true;
 }
 
-uint BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera)
+blaU32 BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera)
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
@@ -43,7 +42,7 @@ uint BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dir
     return this->currentTicket;
 }
 
-uint BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
+blaU32 BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
 {
     int renderTicket = dirLight->m_renderTicket;
     auto itTicket = m_ticketedDirLights.find(renderTicket);
@@ -51,12 +50,12 @@ uint BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight 
     return true;
 }
 
-std::unordered_map<uint, MeshRendererComponent*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
+std::unordered_map<blaU32, MeshRendererComponent*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
 {
     return &(m_ticketedMeshRenderers);
 }
 
-std::unordered_map<uint, std::pair<DirectionalLight*,CameraComponent*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
+std::unordered_map<blaU32, std::pair<DirectionalLight*, CameraComponent*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
 {
     return &(m_ticketedDirLights);
 }

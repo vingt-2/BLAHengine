@@ -23,17 +23,11 @@ float Timer::GetDelta() const
     return m_elapsedTime;
 }
 
-void Timer::Update()
+void Timer::Update(blaF32 systemTime)
 {
-    float time = 0;
+    m_elapsedTime = systemTime - m_time;
 
-#ifdef GLFW_INTERFACE
-    time = (float) glfwGetTime();
-#endif
-
-    m_elapsedTime = time - m_time;
-
-    m_time = time;
+    m_time = systemTime;
 
     /*if (m_timeBuffer.size() == m_timeBufferSize)
     {

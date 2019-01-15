@@ -1,6 +1,7 @@
 #include "PBRSurfaceComponent.h"
 #include <random>
-#include "../GameObject.h"
+
+#include <Engine/Game/GameObject.h>
 
 using namespace BLAengine;
 

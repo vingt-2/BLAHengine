@@ -1,10 +1,10 @@
-#include "../Common/StdInclude.h"
-#include "../Common/System.h"
-#include "../Common/Maths/Maths.h"
-#include "../Engine/Renderer/GL33Renderer.h"
-#include "../Engine/Game/RenderingManager.h"
-#include "../Engine/Game/Debug.h"
-#include "../Engine/Assets/SceneManager.h"
+#include <Common/StdInclude.h>
+#include <Common/System.h>
+#include <Common/Maths/Maths.h>
+#include <Engine/Renderer/GL33Renderer.h>
+#include <Engine/Game/RenderingManager.h>
+#include <Engine/Game/Debug.h>
+#include <Engine/Assets/SceneManager.h>
 
 namespace BLAengine
 {
@@ -36,7 +36,6 @@ namespace BLAengine
     {
     public:
         EditorSession(bool external, bool isFullscreen) :
-            m_editorControls(nullptr),
             m_isFullScreen(isFullscreen),
             m_isTerminationRequested(false),
             debugRay(Ray(blaVec3(0), blaVec3(0),1))
@@ -71,7 +70,7 @@ namespace BLAengine
         Timer* m_timer;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
-        EditorControls* m_editorControls;
+
         //States
         Ray debugRay;
         bool m_isFullScreen;

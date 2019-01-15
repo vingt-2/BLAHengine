@@ -1,6 +1,7 @@
 #pragma once
-#include "../../../Common/Maths/Maths.h"
-#include "../../../Common/StdInclude.h"
+
+#include <Common/Maths/Maths.h>
+#include <Common/StdInclude.h>
 #include "ColliderComponent.h"
 
 #define HAIR_SEGMENT_COUNT 50

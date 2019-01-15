@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Common/StdInclude.h"
-#include "./CollisionProcessing/CollisionProcessor.h"
+#include <Common/StdInclude.h>
+#include <Engine/Game/CollisionProcessing/CollisionProcessor.h>
 
 namespace BLAengine
 {

@@ -1,9 +1,10 @@
 #pragma once
-#include "./GameComponents/CameraComponent.h"
-#include "./GameComponents/DirectionalLight.h"
-#include "./GameComponents/MeshRendererComponent.h"
-#include "./GameComponents/PointLightComponent.h"
-#include "../../Common/StdInclude.h"
+#include <Engine/Game/GameComponents/CameraComponent.h>
+#include <Engine/Game/GameComponents/DirectionalLight.h>
+#include <Engine/Game/GameComponents/MeshRendererComponent.h>
+#include <Engine/Game/GameComponents/PointLightComponent.h>
+
+#include <Common/StdInclude.h>
 
 namespace BLAengine
 {
