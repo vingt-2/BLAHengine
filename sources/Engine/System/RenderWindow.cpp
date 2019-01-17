@@ -5,6 +5,33 @@ using namespace BLAengine;
 
 #ifdef GLFW_INTERFACE
 
+std::vector<GLFWRenderWindow*> GLFWRenderWindow::ms_glfwRenderWindowInstanced = std::vector<GLFWRenderWindow*>();
+
+void GLFWRenderWindow::GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths)
+{
+    GLFWRenderWindow* renderWindow = nullptr;
+    for (int i = 0; i < ms_glfwRenderWindowInstanced.size(); ++i)
+    {
+        if (ms_glfwRenderWindowInstanced[i]->GetWindowPointer() == glfwWindow)
+        {
+            renderWindow = ms_glfwRenderWindowInstanced[i];
+        }
+    }
+
+    if (renderWindow)
+    {
+        if (renderWindow->m_registeredDragAndDropCallback != nullptr)
+        {
+            DragAndDropPayloadDontStore dragAndDropPayload;
+            for (int i = 0; i < argc; ++i)
+            {
+                dragAndDropPayload.push_back(std::string(paths[i]));
+            }
+            renderWindow->m_registeredDragAndDropCallback(&dragAndDropPayload);
+        }
+    }
+}
+
 void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
 {
     InputStateSetter::SetMouseScrollDelta(yAxisScroll);
@@ -130,6 +157,8 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
 
     window = glfwCreateWindow(m_width, m_height, windowTitle.c_str(), monitor, NULL);
 
+    ms_glfwRenderWindowInstanced.push_back(this);
+
     glfwMakeContextCurrent(window);
 
     // Initialize GLEW
@@ -155,6 +184,8 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     glfwSetCursorPosCallback(window, GLFWMouseCursorPosCallBack);
     glfwSetKeyCallback(window, GLFWKeyboardCallBack);
     glfwSetScrollCallback(window, (GLFWscrollfun) GLFWMouseWheelCallback);
+    
+    glfwSetDropCallback(window, (GLFWdropfun)GLFWDragAndDropCallBack);
 
     m_glfwWindow = window;
 }
@@ -208,6 +239,7 @@ bool GLFWRenderWindow::isFullScreen() const
 
 void GLFWRenderWindow::SetWindowTitle(std::string title)
 {
+    glfwSetWindowTitle(m_glfwWindow, title.c_str());
 }
 
 std::string GLFWRenderWindow::GetWindowTitle() const
@@ -219,7 +251,8 @@ GLFWRenderWindow::GLFWRenderWindow():
     m_isFullscreen(false),
     m_width(0),
     m_height(0),
-    m_glfwWindow(nullptr)
+    m_glfwWindow(nullptr),
+    m_registeredDragAndDropCallback(nullptr)
 {};
 
 GLFWRenderWindow::~GLFWRenderWindow()
@@ -248,6 +281,11 @@ blaVec2 GLFWRenderWindow::GetMousePointerScreenSpaceCoordinates()
     glfwGetCursorPos(m_glfwWindow, &x, &y);
 
     return blaVec2((m_width - x) / m_width, (m_height - y) / m_height);
+}
+
+void GLFWRenderWindow::SetDragAndDropCallback(DragAndDropCallback dragAndDropCallback)
+{
+    m_registeredDragAndDropCallback = dragAndDropCallback;
 }
 
 

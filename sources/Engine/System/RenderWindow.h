@@ -6,6 +6,12 @@
 
 namespace BLAengine
 {
+    
+    typedef std::vector<string> DragAndDropPayloadDontStore;
+    
+
+    typedef void (*DragAndDropCallback) (const void* DragAndDropPayload);
+
     class BLACORE_API RenderWindow
     {
     public:
@@ -32,6 +38,8 @@ namespace BLAengine
         virtual void SetMouseCursorVisibility(bool visibility) = 0;
 
         virtual blaVec2 GetMousePointerScreenSpaceCoordinates() = 0;
+
+        virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
     };
 
     //TODO: Implement MousWheel
@@ -71,6 +79,8 @@ namespace BLAengine
         virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override {};
 
         blaVec2 GetMousePointerScreenSpaceCoordinates(){ return blaVec2(0.f); }
+
+        void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) override {};
     
         unsigned char m_mouseDownState;
         bool m_keyPressed[100];
@@ -81,6 +91,8 @@ namespace BLAengine
         
         bool m_makeGLCurrentRequest;
         bool m_updateWindowRequest;
+
+        DragAndDropCallback m_registeredDragAndDropCallback;
 
         string m_glVersion;
     };
@@ -111,6 +123,10 @@ namespace BLAengine
 
         void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override;
 
+        void SetDragAndDropCallback(DragAndDropCallback dragAndDropCallback) override;
+
+        //static void InternalDragAndDropCallback
+
         blaVec2 GetMousePointerScreenSpaceCoordinates() override;
 
         // GLFW Window specific stuff ...
@@ -120,6 +136,10 @@ namespace BLAengine
         GLFWRenderWindow();
         ~GLFWRenderWindow();
 
+        static std::vector<GLFWRenderWindow*> ms_glfwRenderWindowInstanced;
+
+        static void GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths);
+
     private:
 
         GLFWwindow* m_glfwWindow;
@@ -127,6 +147,8 @@ namespace BLAengine
         int m_width, m_height;
 
         bool m_isFullscreen;
+
+        DragAndDropCallback m_registeredDragAndDropCallback;
 
         std::vector<int> m_mouseButtonsThatKillCursorWhenHeld;
     };

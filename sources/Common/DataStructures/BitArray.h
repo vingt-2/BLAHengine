@@ -1,11 +1,14 @@
 #include <Common/System.h>
 
+#pragma optimize("", off)
+
+#define INTEGER_SIZE_BITS 32
+
 template<int size>
 class BitArray
 {
 private:
-    blaU32 m_buffer[size/sizeof(blaU32)];
-    const blaU32 m_size = size;
+    blaU32 m_buffer[1 + (size / INTEGER_SIZE_BITS)];
 
 public:
     BitArray()
@@ -15,35 +18,27 @@ public:
 
     BitArray(const BitArray& other)
     {
-        if (m_size / sizeof(blaU32) == other.m_size / sizeof(blaU32))
+        for (blaU32 i = 0; i <= size / INTEGER_SIZE_BITS; ++i)
         {
-            for (blaU32 i = 0; i <= m_size / sizeof(blaU32); ++i)
-            {
-                m_buffer[i] = other.m_buffer[i];
-            }
-        }
-        else
-        {
-            //TRAP
+            m_buffer[i] = other.m_buffer[i];
         }
     }
 
-    BitArray& operator=(const BitArray& other)
+    template<int otherSize>
+    BitArray& operator=(const BitArray<otherSize>& other)
     {
+        if (size != otherSize)
+        {
+            // TRAP:
+            return nullptr;
+        }
         // check for self-assignment
         if (&other == this)
             return *this;
 
-        if (m_size / sizeof(blaU32) == other.m_size / sizeof(blaU32))
+        for (blaU32 i = 0; i <= size / INTEGER_SIZE_BITS; ++i)
         {
-            for (blaU32 i = 0; i <= m_size / sizeof(blaU32); ++i)
-            {
-                m_buffer[i] = other.m_buffer[i];
-            }
-        }
-        else
-        {
-            //TRAP
+            m_buffer[i] = other.m_buffer[i];
         }
         return *this;
     }
@@ -51,7 +46,7 @@ public:
     void ClearAll()
     {
         blaU32 i;
-        for (i = 0; i < m_size; i++)
+        for (i = 0; i <= size / INTEGER_SIZE_BITS; i++)
         {
             m_buffer[i] = 0;
         }
@@ -60,7 +55,7 @@ public:
     void SetAll()
     {
         blaU32 i;
-        for (i = 0; i < m_size; i++)
+        for (i = 0; i <= size / INTEGER_SIZE_BITS; i++)
         {
             m_buffer[i] = 1;
         }
@@ -69,19 +64,19 @@ public:
     blaBool IsBitSet(blaU32 bit) const
     {
         //TODO: Add Check boundaries with trap system...
-        return m_buffer[bit / sizeof(blaU32)] & 1 << bit % sizeof(blaU32);
+        return m_buffer[bit / INTEGER_SIZE_BITS] & 1 << bit % INTEGER_SIZE_BITS;
     }
 
     void Set(blaU32 bit)
     {
         //TODO: Add Check boundaries with trap system...
-        m_buffer[bit / sizeof(blaU32)] |= (1 << bit % sizeof(blaU32));
+        m_buffer[bit / INTEGER_SIZE_BITS] |= (1 << bit % INTEGER_SIZE_BITS);
     }
 
     blaBool Clear(blaU32 bit)
     {
         //TODO: Add Check boundaries with trap system...
-        return m_buffer[bit / sizeof(blaU32)] &= ~(1 << bit % sizeof(blaU32));
+        return m_buffer[bit / INTEGER_SIZE_BITS] &= ~(1 << bit % INTEGER_SIZE_BITS);
     }
 };
 

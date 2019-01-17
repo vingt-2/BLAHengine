@@ -2,6 +2,8 @@
 
 using namespace BLAengine;
 
+#pragma optimize("", off)
+
 BLA_IMPLEMENT_SINGLETON(InputManager)
 
 BLAKeyState InputManager::GetKeyState(BLAKeyboard key) const
@@ -50,10 +52,6 @@ void InputManager::Update()
     m_previousMouseButtonSet = m_mouseButtonSet;
     m_previousGamePadSet = m_gamePadSet;
 
-    m_keysSet.ClearAll();
-    m_mouseButtonSet.ClearAll();
-    m_gamePadSet.ClearAll();
-
     m_mouseState.m_deltaMousePointerPosition = m_mouseState.m_mousePointerPosition - m_mouseState.m_previousMousePointerPosition;
     m_mouseState.m_previousMousePointerPosition = m_mouseState.m_mousePointerPosition;
     m_mouseState.m_scrollAxisDelta = 0.f;
@@ -61,6 +59,7 @@ void InputManager::Update()
     m_lockInputs = false;
 }
 
+int a = 0;
 
 void InputStateSetter::SetKey(BLAKeyboard key, blaF32 time, blaBool down)
 {
@@ -74,6 +73,8 @@ void InputStateSetter::SetKey(BLAKeyboard key, blaF32 time, blaBool down)
         inputManager->m_keysSet.Clear(key);
 
     inputManager->m_keyboardTimes[key] = time;
+
+    a++;
 }
 
 void InputStateSetter::SetMouseButton(BLAMouseButtons key, blaF32 time, blaBool down)

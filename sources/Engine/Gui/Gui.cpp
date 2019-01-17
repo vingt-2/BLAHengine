@@ -2,9 +2,12 @@
 
 #include <External/imgui/imgui.h>
 #include <External/imgui/examples/imgui_impl_glfw.h>
-#include <External/imgui/examples//imgui_impl_opengl3.h>
+#include <External/imgui/examples/imgui_impl_opengl3.h>
 
 #include <Engine/System/RenderWindow.h>
+#include <Engine/System/InputManager.h>
+
+#pragma optimize("", off)
 
 using namespace BLAengine;
 
@@ -51,6 +54,7 @@ void GuiTest::Update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
     static float f = 0.0f;
     static int counter = 0;
@@ -70,14 +74,20 @@ void GuiTest::Update()
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
-    
+
+    auto keyState = inputs->GetKeyState(BLA_KEY_W);
+    //auto keyState = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
+
+    std::cout << (blaU32)*((blaU8*)&keyState) << "\n";
+
+    if(keyState.IsRisingEdge())
+    {
+        g_show_demo_window = !g_show_demo_window;
+    }
+
     if (g_show_demo_window)
     {
-        ImGui::Begin("Another Window", &g_show_demo_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me"))
-            g_show_demo_window = false;
-        ImGui::End();
+        ImGui::ShowDemoWindow(&g_show_demo_window);
     }
 
     ImGui::Render();

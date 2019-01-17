@@ -9,9 +9,19 @@
 
 #include "EngineInstance.h"
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
+
+void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
+{
+    for (auto path : *dragAndDropInput)
+    {
+        std::cout << path << "\n";
+    }
+}
 
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
@@ -56,6 +66,8 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     // Finally, load our assets in memory...
     m_assetManager->LoadCookedAssets();
 
+    m_renderWindow->SetDragAndDropCallback((DragAndDropCallback) DragAndDropHandler);
+
     return true;
 }
 
@@ -79,10 +91,11 @@ void EngineInstance::PostEngineUpdate()
 {
     m_debug->Update();
     m_renderer->Update();
-    m_inputManager->Update();
 
     m_guiManager->Update();
-    
+
+    // Inputs should be the second to last thing to update !
+    m_inputManager->Update();
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
 }

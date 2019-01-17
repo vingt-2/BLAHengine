@@ -15,7 +15,6 @@
 
 using namespace BLAengine;
 
-int a = 0;
 void AnimationDemo::PreEngineUpdate()
 {
     EngineInstance::PreEngineUpdate();
