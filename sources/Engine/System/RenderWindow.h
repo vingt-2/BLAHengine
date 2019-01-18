@@ -39,6 +39,9 @@ namespace BLAengine
 
         virtual blaVec2 GetMousePointerScreenSpaceCoordinates() = 0;
 
+        virtual blaIVec2 GetMousePositionInWindow() = 0;
+
+
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
     };
 
@@ -128,6 +131,8 @@ namespace BLAengine
         //static void InternalDragAndDropCallback
 
         blaVec2 GetMousePointerScreenSpaceCoordinates() override;
+
+        blaIVec2 GetMousePositionInWindow() override;
 
         // GLFW Window specific stuff ...
 

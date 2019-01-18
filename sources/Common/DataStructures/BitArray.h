@@ -1,7 +1,5 @@
 #include <Common/System.h>
 
-#pragma optimize("", off)
-
 #define INTEGER_SIZE_BITS 32
 
 template<int size>

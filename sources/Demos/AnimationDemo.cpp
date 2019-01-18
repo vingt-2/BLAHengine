@@ -10,6 +10,7 @@
 #include <Engine/Game/GameComponents/IKComponent.h>
 #include <Engine/Game/Animation/IK/IKTools.h>
 #include <Engine/System/InputManager.h>
+#include <Engine/Gui/GuiManager.h>
 
 #include "AnimationDemo.h"
 
@@ -20,6 +21,17 @@ void AnimationDemo::PreEngineUpdate()
     EngineInstance::PreEngineUpdate();
 
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
+
+    Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
+
+    auto hoverHit = m_workingScene->PickGameObjectInScene(screenRay);
+
+    GameObject* hoverObject = (hoverHit.second.m_isValid && hoverHit.second.m_t < 100) ? hoverHit.first : nullptr;
+
+    if (hoverObject && inputs->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
+    {
+        m_guiManager->DrawText(hoverObject->GetName(), m_renderWindow->GetMousePositionInWindow());
+    }
 
     GameObject* animationObject = m_workingScene->FindObjectByName("AnimatedObject");
     
@@ -93,9 +105,9 @@ void AnimationDemo::PreEngineUpdate()
                     desiredPos.push_back(obj->GetTransform().GetPosition());
                 }
 
-                if (inputs->GetKeyState(BLA_KEY_SPACE).IsDown())
+                //if (inputs->GetKeyState(BLA_KEY_SPACE).IsDown())
                 {    
-                    if (m_timer->GetTime() - m_lastIkSolveTime > .5f)
+                    if (m_timer->GetTime() - m_lastIkSolveTime > .005f)
                     {
                         IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 1);
 
@@ -182,18 +194,12 @@ void AnimationDemo::PreEngineUpdate()
     auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
     if (leftMouseButton.IsRisingEdge())
     {
-        Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
-
-        if (GameObject* object = m_workingScene->PickGameObjectInScene(screenRay).first)
-        {
-            m_selectedObject = object;
-        }
+        m_selectedObject = hoverObject;
     }
     if (leftMouseButton.IsFallingEdge())
     {
         m_selectedObject = nullptr;
     }
-
 
     if(m_selectedObject != nullptr) 
     {
@@ -211,12 +217,9 @@ void AnimationDemo::PreEngineUpdate()
 
             ObjectTransform selectedObjectTransform = m_selectedObject->GetTransform();
 
-            if (glm::length2(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.0f)
-            {
-                selectedObjectTransform.SetPosition(hit.hitPosition);
+            selectedObjectTransform.SetPosition(hit.hitPosition);
 
-                m_selectedObject->SetTransform(selectedObjectTransform);
-            }
+            m_selectedObject->SetTransform(selectedObjectTransform);
         }
     }
 
@@ -236,7 +239,7 @@ bool AnimationDemo::LoadWorkingScene(std::string filepath)
 
     GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
 
-    BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
+    //BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
     BLA_CREATE_COMPONENT(IKComponent, animatedObject);
 

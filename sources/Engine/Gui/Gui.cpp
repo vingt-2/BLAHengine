@@ -1,4 +1,6 @@
-#include "Gui.h"
+#include "GuiManager.h"
+#include "GuiWindow.h"
+#include "GuiElements.h"
 
 #include <External/imgui/imgui.h>
 #include <External/imgui/examples/imgui_impl_glfw.h>
@@ -7,17 +9,9 @@
 #include <Engine/System/RenderWindow.h>
 #include <Engine/System/InputManager.h>
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
-
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
-}
  
-
-void GuiTest::Init()
+void BlaGuiManager::Init()
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -36,7 +30,7 @@ void GuiTest::Init()
 
 }
 
-void GuiTest::Destroy()
+void BlaGuiManager::Destroy()
 {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
@@ -44,50 +38,134 @@ void GuiTest::Destroy()
     ImGui::DestroyContext();
 }
 
-bool g_show_demo_window = true;
-ImVec4 g_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.00f);
+BlaGuiElement::~BlaGuiElement()
+{
+    auto child = GetChild();
 
-void GuiTest::Update()
+    while (child != nullptr)
+    {
+        delete child;
+    }
+}
+
+void BlaGuiElement::Render()
+{
+    auto child = GetChild();
+
+    while (child != nullptr)
+    {
+        child->Render();
+    }
+}
+
+void BlaGuiTextElement::Render()
+{
+    // BEGIN OCornut's Dear ImGui Specific Code Now
+    ImGui::Text(m_text.c_str());
+    // END OCornut's Dear ImGui Specific Code Now
+
+    BlaGuiElement::Render();
+}
+
+void BlaGuiWindow::Render()
+{
+    // BEGIN OCornut's Dear ImGui Specific Code Now
+    ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+    ImGui::SetNextWindowPos(position);
+    ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags);
+    // END OCornut's Dear ImGui Specific Code Now
+    
+    m_rootElement->Render();
+
+    // BEGIN OCornut's Dear ImGui Specific Code Now
+    ImGui::End();
+    // END OCornut's Dear ImGui Specific Code Now
+}
+
+void BlaGuiWindow::ShowTitleBar(blaBool set)
+{
+    if (set)
+        m_windowFlags &= ~(ImGuiWindowFlags_NoTitleBar);
+    else
+        m_windowFlags |= ImGuiWindowFlags_NoTitleBar;
+}
+
+bool g_show_demo_window = false;
+
+void BlaGuiManager::Update()
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    for (auto window : m_imguiWindows)
+    {
+        window->Render();
+    }
+    m_imguiWindows.clear();
+
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
-
-    static float f = 0.0f;
-    static int counter = 0;
-
-    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    ImGui::Checkbox("Demo Window", &g_show_demo_window);      // Edit bools storing our window open/close state
-
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-    ImGui::ColorEdit3("clear color", (float*)&g_clear_color); // Edit 3 floats representing a color
-
-    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-        counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
-
-    auto keyState = inputs->GetKeyState(BLA_KEY_W);
-    //auto keyState = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
-
-    std::cout << (blaU32)*((blaU8*)&keyState) << "\n";
-
-    if(keyState.IsRisingEdge())
+    // Display the Dear ImGui toolkit helper so we never have to look to long to know what we can get done !
+    if (inputs->GetKeyState(BLA_KEY_LEFT_SHIFT).IsDown() &&
+        inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsDown() &&
+        inputs->GetKeyState(BLA_KEY_GRAVE_ACCENT).IsRisingEdge())
     {
         g_show_demo_window = !g_show_demo_window;
     }
-
     if (g_show_demo_window)
     {
         ImGui::ShowDemoWindow(&g_show_demo_window);
+    }
+    ImVec2 main_viewport_size = ImGui::GetMainViewport()->Size;
+    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(main_viewport_size.x, 10), ImGuiCond_Always);
+
+    int windowFlags = ImGuiWindowFlags_MenuBar |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_HorizontalScrollbar;
+
+    ImGui::PushItemWidth(ImGui::GetWindowWidth());
+    blaBool open = true;
+
+    bool bla;
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Menu"))
+        {
+            ImGui::MenuItem("Main menu bar", NULL, &bla);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Examples"))
+        {
+            ImGui::MenuItem("Main menu bar", NULL, &bla);
+            ImGui::MenuItem("Console", NULL, &bla);
+            ImGui::MenuItem("Log", NULL, &bla);
+            ImGui::MenuItem("Simple layout", NULL, &bla);
+            ImGui::MenuItem("Property editor", NULL, &bla);
+            ImGui::MenuItem("Long text display", NULL, &bla);
+            ImGui::MenuItem("Auto-resizing window", NULL, &bla);
+            ImGui::MenuItem("Constrained-resizing window", NULL, &bla);
+            ImGui::MenuItem("Simple overlay", NULL, &bla);
+            ImGui::MenuItem("Manipulating window titles", NULL, &bla);
+            ImGui::MenuItem("Custom rendering", NULL, &bla);
+            ImGui::MenuItem("Dockspace", NULL, &bla);
+            ImGui::MenuItem("Documents", NULL, &bla);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Help"))
+        {
+            ImGui::MenuItem("Metrics", NULL, &bla);
+            ImGui::MenuItem("Style Editor", NULL, &bla);
+            ImGui::MenuItem("About Dear ImGui", NULL, &bla);
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
     }
 
     ImGui::Render();
@@ -97,4 +175,17 @@ void GuiTest::Update()
     glViewport(0, 0, display_w, display_h);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void BlaGuiManager::DrawText(std::string textToDraw, blaIVec2 renderWindowPosition)
+{
+    BlaGuiWindow* textWindow = new BlaGuiWindow(std::string(""), renderWindowPosition);
+    
+    textWindow->ShowTitleBar(false);
+
+    BlaGuiElement* textElement = new BlaGuiTextElement(textToDraw);
+
+    textWindow->SetRootElement(textElement);
+
+    m_imguiWindows.push_back(textWindow);
 }

@@ -2,8 +2,6 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 BLA_IMPLEMENT_SINGLETON(InputManager)
 
 BLAKeyState InputManager::GetKeyState(BLAKeyboard key) const

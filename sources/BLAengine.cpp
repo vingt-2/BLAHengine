@@ -3,9 +3,6 @@
 #include <Common/StdInclude.h>
 #include <Engine/System/RenderWindow.h>
 #include <Demos/AnimationDemo.h>
-#include <Common/DataStructures/Tree.h>
-#include <Engine/Gui/Gui.h>
-
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
@@ -22,9 +19,9 @@ void DoAnimationDemoSession()
 
     demo->InitializeEngine(renderWindow);
 
-    demo->LoadWorkingScene("./Scenes/floor_scene");
+    demo->LoadWorkingScene("./Scenes/empty_scene");
 
-    int framerate = 50;
+    int framerate = 150;
 
     while (!demo->ShouldTerminate())
     {
@@ -49,5 +46,19 @@ int main()
 {
     DoAnimationDemoSession();
 }
+
+#ifdef WIN32
+
+#include "windows.h"
+int CALLBACK WinMain(
+    __in  HINSTANCE hInstance,
+    __in  HINSTANCE hPrevInstance,
+    __in  LPSTR lpCmdLine,
+    __in  int nCmdShow
+    )
+{
+    DoAnimationDemoSession();
+}
+#endif
 
 #endif

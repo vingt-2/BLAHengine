@@ -6,10 +6,9 @@
 #include <Engine/Assets/SceneManager.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/System/RenderWindow.h>
+#include <Engine/Gui/GuiManager.h>
 
 #include "EngineInstance.h"
-
-#pragma optimize("", off)
 
 using namespace BLAengine;
 
@@ -54,7 +53,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_workingScene->Initialize(m_renderingManager);
 
-    m_guiManager = new GuiTest((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer());
+    m_guiManager = new BlaGuiManager((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer());
 
     // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())

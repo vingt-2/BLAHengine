@@ -129,6 +129,7 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
         //Debug::OutputToDebug("Failed to initialize GLFW\n" );
         return;
     }
+
     m_isFullscreen = false;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -217,6 +218,8 @@ void GLFWRenderWindow::UpdateWindowAndBuffers()
 
     glfwSwapBuffers(m_glfwWindow);
     glfwPollEvents();
+
+    glfwGetWindowSize(m_glfwWindow, &m_width, &m_height);
 }
 
 void GLFWRenderWindow::GetSize(int &width, int &height) const
@@ -281,6 +284,14 @@ blaVec2 GLFWRenderWindow::GetMousePointerScreenSpaceCoordinates()
     glfwGetCursorPos(m_glfwWindow, &x, &y);
 
     return blaVec2((m_width - x) / m_width, (m_height - y) / m_height);
+}
+
+blaIVec2 GLFWRenderWindow::GetMousePositionInWindow()
+{
+    double x, y;
+    glfwGetCursorPos(m_glfwWindow, &x, &y);
+
+    return blaIVec2((blaU32)x, (blaU32)y);
 }
 
 void GLFWRenderWindow::SetDragAndDropCallback(DragAndDropCallback dragAndDropCallback)

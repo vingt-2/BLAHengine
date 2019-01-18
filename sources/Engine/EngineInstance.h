@@ -1,6 +1,5 @@
 #include "../Common/StdInclude.h"
 #include "../Common/BLASingleton.h"
-#include "Gui/Gui.h"
 
 namespace BLAengine
 {
@@ -15,6 +14,7 @@ namespace BLAengine
     class RenderingManager;
     class DebugRenderingManager;
     class InputManager;
+    class BlaGuiManager;
 
     class BLACORE_API EngineInstance
     {
@@ -64,7 +64,7 @@ namespace BLAengine
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
         InputManager* m_inputManager;
-        GuiTest* m_guiManager;
+        BlaGuiManager* m_guiManager;
 
         bool m_isFullScreen;
         bool m_isTerminationRequested;
