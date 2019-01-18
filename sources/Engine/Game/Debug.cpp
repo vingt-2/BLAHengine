@@ -11,8 +11,7 @@ Debug::Debug(DebugRenderingManager* manager)
 }
 
 Debug::~Debug(void)
-{
-}
+{}
 
 void Debug::Update()
 {

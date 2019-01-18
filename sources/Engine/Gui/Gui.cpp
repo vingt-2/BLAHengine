@@ -10,7 +10,8 @@
 #include <Engine/System/InputManager.h>
 
 using namespace BLAengine;
- 
+ImFont* f;
+ImFont* f2;
 void BlaGuiManager::Init()
 {
     // Setup Dear ImGui context
@@ -19,6 +20,9 @@ void BlaGuiManager::Init()
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+
+	f = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-light.ttf", 22.0f);
+	f2 = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-thin.ttf", 24.0f);
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -99,6 +103,9 @@ void BlaGuiManager::Update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+	ImGui::PushFont(f); // PopFont()
+
+
     for (auto window : m_imguiWindows)
     {
         window->Render();
@@ -106,7 +113,7 @@ void BlaGuiManager::Update()
     m_imguiWindows.clear();
 
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
-    // Display the Dear ImGui toolkit helper so we never have to look to long to know what we can get done !
+    // Display the Dear ImGui toolkit helper so we never have to look too long to know what we can get done !
     if (inputs->GetKeyState(BLA_KEY_LEFT_SHIFT).IsDown() &&
         inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsDown() &&
         inputs->GetKeyState(BLA_KEY_GRAVE_ACCENT).IsRisingEdge())
@@ -117,25 +124,14 @@ void BlaGuiManager::Update()
     {
         ImGui::ShowDemoWindow(&g_show_demo_window);
     }
-    ImVec2 main_viewport_size = ImGui::GetMainViewport()->Size;
-    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(main_viewport_size.x, 10), ImGuiCond_Always);
-
-    int windowFlags = ImGuiWindowFlags_MenuBar |
-        ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoDocking |
-        ImGuiWindowFlags_HorizontalScrollbar;
-
-    ImGui::PushItemWidth(ImGui::GetWindowWidth());
-    blaBool open = true;
 
     bool bla;
-    if (ImGui::BeginMainMenuBar())
+	ImGui::PushFont(f2);
+	if (ImGui::BeginMainMenuBar())
     {
+		ImGui::Text("BLAengine");
+		ImGui::PopFont();
+		ImGui::PushFont(f);
         if (ImGui::BeginMenu("Menu"))
         {
             ImGui::MenuItem("Main menu bar", NULL, &bla);
@@ -167,6 +163,8 @@ void BlaGuiManager::Update()
         }
         ImGui::EndMainMenuBar();
     }
+
+	ImGui::PopFont();
 
     ImGui::Render();
     int display_w, display_h;
