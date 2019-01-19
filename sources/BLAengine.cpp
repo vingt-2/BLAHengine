@@ -21,7 +21,7 @@ void DoAnimationDemoSession()
 
     demo->LoadWorkingScene("./Scenes/empty_scene");
 
-    int framerate = 50;
+    int framerate = 150;
 
     while (!demo->ShouldTerminate())
     {

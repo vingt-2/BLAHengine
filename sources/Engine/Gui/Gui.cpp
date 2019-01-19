@@ -21,8 +21,8 @@ void BlaGuiManager::Init()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-	f = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-light.ttf", 22.0f);
-	f2 = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-thin.ttf", 24.0f);
+    f = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-light.ttf", 18.0f);
+    f2 = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-thin.ttf", 19.0f);
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -103,7 +103,7 @@ void BlaGuiManager::Update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-	ImGui::PushFont(f); // PopFont()
+    ImGui::PushFont(f); // PopFont()
 
 
     for (auto window : m_imguiWindows)
@@ -126,12 +126,12 @@ void BlaGuiManager::Update()
     }
 
     bool bla;
-	ImGui::PushFont(f2);
-	if (ImGui::BeginMainMenuBar())
+    ImGui::PushFont(f2);
+    if (ImGui::BeginMainMenuBar())
     {
-		ImGui::Text("BLAengine");
-		ImGui::PopFont();
-		ImGui::PushFont(f);
+        ImGui::Text("BLAengine");
+        ImGui::PopFont();
+        ImGui::PushFont(f);
         if (ImGui::BeginMenu("Menu"))
         {
             ImGui::MenuItem("Main menu bar", NULL, &bla);
@@ -164,7 +164,7 @@ void BlaGuiManager::Update()
         ImGui::EndMainMenuBar();
     }
 
-	ImGui::PopFont();
+    ImGui::PopFont();
 
     ImGui::Render();
     int display_w, display_h;
