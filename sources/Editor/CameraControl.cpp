@@ -107,9 +107,11 @@ void CameraController::UpdateController()
 
     const EngineInstance* engineInstance = EngineInstance::GetSingletonInstanceRead();
 
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         blaF32 dt = engineInstance->GetTimer()->GetDelta();
+
+		dt /= 3;
 
         m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
         transform.SetPosition(transform.GetPosition() + dt * m_cameraLinearVelocity);

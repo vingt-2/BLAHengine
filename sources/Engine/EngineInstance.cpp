@@ -77,12 +77,7 @@ void EngineInstance::PreEngineUpdate()
 }
 
 void EngineInstance::EngineUpdate()
-{
-    /*if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsDown())
-    {
-        m_isTerminationRequested = true;
-    }*/
-    
+{    
     m_workingScene->Update();
 }
 
