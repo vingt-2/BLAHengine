@@ -22,6 +22,8 @@ namespace BLAengine
 
         void PreEngineUpdate() override;
 
+        bool InitializeEngine(RenderWindow* renderWindow) override;
+
         bool LoadWorkingScene(std::string filepath) override;
 
         void TerminateEngine() override;

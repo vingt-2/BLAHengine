@@ -53,11 +53,9 @@ void InputManager::Update()
     m_mouseState.m_deltaMousePointerPosition = m_mouseState.m_mousePointerPosition - m_mouseState.m_previousMousePointerPosition;
     m_mouseState.m_previousMousePointerPosition = m_mouseState.m_mousePointerPosition;
     m_mouseState.m_scrollAxisDelta = 0.f;
-
+   
     m_lockInputs = false;
 }
-
-int a = 0;
 
 void InputStateSetter::SetKey(BLAKeyboard key, blaF32 time, blaBool down)
 {
@@ -71,13 +69,16 @@ void InputStateSetter::SetKey(BLAKeyboard key, blaF32 time, blaBool down)
         inputManager->m_keysSet.Clear(key);
 
     inputManager->m_keyboardTimes[key] = time;
-
-    a++;
 }
 
 void InputStateSetter::SetMouseButton(BLAMouseButtons key, blaF32 time, blaBool down)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
+
+    if (inputManager->m_lockMouse)
+    {
+        return;
+    }
 
     while (inputManager->m_lockInputs);
 
@@ -107,6 +108,11 @@ void InputStateSetter::SetMousePointer(const blaVec2& position)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
 
+    if (inputManager->m_lockMouse)
+    {
+        return;
+    }
+
     while (inputManager->m_lockInputs);
 
     inputManager->m_mouseState.m_mousePointerPosition = position;
@@ -115,6 +121,11 @@ void InputStateSetter::SetMousePointer(const blaVec2& position)
 void InputStateSetter::SetMouseScrollDelta(blaF32 mouseScrollDelta)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
+
+    if (inputManager->m_lockMouse)
+    {
+        return;
+    }
 
     while (inputManager->m_lockInputs);
 

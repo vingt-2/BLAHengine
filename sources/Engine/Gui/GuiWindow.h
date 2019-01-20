@@ -36,17 +36,15 @@ namespace BLAengine
         };
 
         BlaGuiWindow(const std::string& windowName, const blaIVec2& windowPosition)
-            : m_windowName(windowName),
-            m_windowPosition(windowPosition)
+            : m_windowName(windowName)
+            , m_windowPosition(windowPosition)
+            , m_windowFlags(0)
+            , m_rootElement(nullptr)
         {};
 
         void Render();
 
-        void ShowTitleBar(blaBool set);
-
     private:
-
-        blaU32 m_windowFlags = 0;
 
         BlaGuiElement* m_rootElement;
 
@@ -56,22 +54,21 @@ namespace BLAengine
             return m_rootElement;
         }
 
-        void SetRootElement(BlaGuiElement* imGuiElements)
-        {
-            m_rootElement = imGuiElements;
-        }
+        void SetRootElement(BlaGuiElement* imGuiElements);
 
-        std::string WindowName() const
+        std::string GetWindowName() const
         {
             return m_windowName;
         }
 
-        blaIVec2 WindowPosition() const
+        blaIVec2 GetWindowPosition() const
         {
             return m_windowPosition;
         }
 
     private:
+        blaU32 m_windowFlags;
+
         std::string m_windowName;
         blaIVec2 m_windowPosition;
     };

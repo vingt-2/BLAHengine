@@ -269,6 +269,7 @@ namespace BLAengine
 
         InputManager() :
             m_lockInputs(false)
+           ,m_lockMouse(false)
         {
             for (blaU32 i = 0; i < BLAKeyboard::BLA_KEY_ENUM_END; ++i)
             {
@@ -285,6 +286,8 @@ namespace BLAengine
                 m_gamepadTimes[i] = 0.f;
             }
         };
+
+        blaBool m_lockMouse;
 
         BLAKeyState GetKeyState(BLAKeyboard key) const;
         BLAKeyTimedState GetKeyTimedState(BLAKeyboard key) const;

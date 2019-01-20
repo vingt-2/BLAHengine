@@ -11,6 +11,7 @@
 #include <Engine/Game/Animation/IK/IKTools.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/Gui/GuiManager.h>
+#include <Engine/Gui/GuiMenu.h>
 
 #include "AnimationDemo.h"
 
@@ -231,6 +232,22 @@ void AnimationDemo::PreEngineUpdate()
     //m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
 
     //m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
+}
+
+bool AnimationDemo::InitializeEngine(RenderWindow* renderWindow)
+{
+    if(EngineInstance::InitializeEngine(renderWindow))
+    {
+        BlaGuiMenuTab fileMenu("File");
+
+        fileMenu.AddMenu(BlaGuiMenuItem("Exit", &m_isTerminationRequested));
+
+
+        m_guiManager->m_menuBar.m_menuTabs.push_back(fileMenu);
+
+        return true;
+    }
+    return false;
 }
 
 bool AnimationDemo::LoadWorkingScene(std::string filepath)

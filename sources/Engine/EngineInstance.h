@@ -28,7 +28,7 @@ namespace BLAengine
 
         ~EngineInstance() { TerminateEngine(); };
 
-        bool InitializeEngine(RenderWindow* renderWindow);
+        virtual bool InitializeEngine(RenderWindow* renderWindow);
 
         virtual void PreEngineUpdate();
 

@@ -78,10 +78,10 @@ void EngineInstance::PreEngineUpdate()
 
 void EngineInstance::EngineUpdate()
 {
-    if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsDown())
+    /*if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsDown())
     {
         m_isTerminationRequested = true;
-    }
+    }*/
     
     m_workingScene->Update();
 }
@@ -95,6 +95,8 @@ void EngineInstance::PostEngineUpdate()
 
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
+
+    m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
 }

@@ -19,7 +19,7 @@ void DoAnimationDemoSession()
 
     demo->InitializeEngine(renderWindow);
 
-    demo->LoadWorkingScene("./Scenes/empty_scene");
+    demo->LoadWorkingScene("./Scenes/test_scene");
 
     int framerate = 150;
 

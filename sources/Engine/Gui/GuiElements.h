@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Common/DataStructures/Tree.h>
+
 #include <Common/Maths/Maths.h>
 
 namespace BLAengine
