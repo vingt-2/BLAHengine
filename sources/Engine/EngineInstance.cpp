@@ -10,8 +10,6 @@
 
 #include "EngineInstance.h"
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
@@ -109,6 +107,7 @@ bool BLAengine::EngineInstance::LoadWorkingScene(std::string filepath)
 {
     m_renderingManager->~RenderingManager();
     m_workingScene->~Scene();
+
     Scene* scenePtr = m_sceneManager->LoadScene(filepath);
     m_workingScene = scenePtr;
     m_workingScene->SetTimeObject(m_timer);

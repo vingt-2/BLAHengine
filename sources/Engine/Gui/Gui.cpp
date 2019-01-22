@@ -14,8 +14,6 @@
 #include <memory>
 #include <iomanip>
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 void BLAengineStyleColors(ImGuiStyle* dst)
@@ -287,9 +285,23 @@ void BlaGuiMenu::Render()
         ImGui::EndMainMenuBar();
     }
 }
+
+void BlaFileBrowser::CurrentFolderGoBack()
+{
+    auto lastSlashPos = m_currentFilesDirectory.substr(0, m_currentFilesDirectory.length() - 1).find_last_of('/');
+    m_currentFilesDirectory = m_currentFilesDirectory.substr(0, lastSlashPos + 1);
+}
+
 void BlaFileBrowser::Render()
 {
-    ImGui::Begin(m_name.c_str(), NULL, 0);
+    blaBool open = true;
+    ImGui::Begin(m_name.c_str(), &open, 0);
+
+    if (!open)
+    {
+        m_currentState = CANCELLED_SELECTION;
+        return;
+    }
 
     ImGui::Text("Current Directory: "); ImGui::SameLine();
 
@@ -300,8 +312,7 @@ void BlaFileBrowser::Render()
     ImGui::InputText("", readonlyTextCpy, m_currentFilesDirectory.size() + 1, ImGuiInputTextFlags_ReadOnly); ImGui::SameLine();
     if (ImGui::Button("Back"))
     {
-        auto lastSlashPos = m_currentFilesDirectory.substr(0, m_currentFilesDirectory.length() - 1).find_last_of('/');
-        m_currentFilesDirectory = m_currentFilesDirectory.substr(0, lastSlashPos + 1);
+        CurrentFolderGoBack();
     }
     ImGui::Columns(2);
 
@@ -435,10 +446,31 @@ void BlaFileBrowser::FileBrowserDisplayAllContentNonRecursive()
             {
                 m_currentSelection.clear();
             }
-            m_currentSelection.insert(std::pair<std::string, FileEntry>(dirContent[i].m_name + dirContent[i].m_extention, dirContent[i]));
-            if (IsItemDoubleCliked())
+
+            if (dirContent[i].m_entryType == DirectoryEntry::DIRECTORY)
             {
-                m_currentState = CONFIRMED_SELECTION;
+                // If we double click on a file, we either go in the folder or go back if ".."
+                if (IsItemDoubleCliked())
+                {
+                    if (dirContent[i].m_name != "..")
+                    {
+                        m_currentFilesDirectory += dirContent[i].m_name + "/";
+                    }
+                    else
+                    {
+                        CurrentFolderGoBack();
+                    }
+                }
+            }
+            else if (dirContent[i].m_entryType == DirectoryEntry::REGULAR_FILE)
+            {
+                m_currentSelection.insert(std::pair<std::string, FileEntry>(dirContent[i].m_name + dirContent[i].m_extention, dirContent[i]));
+
+                // If we double click on a file, we confirm selection.
+                if (IsItemDoubleCliked())
+                {
+                    m_currentState = CONFIRMED_SELECTION;
+                }
             }
         }
 

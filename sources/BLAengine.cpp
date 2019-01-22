@@ -4,8 +4,6 @@
 #include <Engine/System/RenderWindow.h>
 #include <Demos/AnimationDemo.h>
 
-#pragma optimize("", off)
-
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 

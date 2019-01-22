@@ -51,6 +51,8 @@ namespace BLAengine
 
         void FileBrowserDisplayDirectoriesRecursive(std::string currentdirectory, blaBool displayEditTime);
 
+        void CurrentFolderGoBack();
+
         std::string m_currentFilesDirectory;
         std::string m_currentDirectoriesDirectory;
         std::string m_name;
