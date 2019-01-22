@@ -24,7 +24,8 @@ namespace BLAengine
             m_prevMousePosition = blaVec2(0.f);
         }
 
-        ~CameraController();
+        ~CameraController()
+        {};
 
         void UpdateController();
 

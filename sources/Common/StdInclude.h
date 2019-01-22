@@ -29,4 +29,6 @@ using namespace std;
 #define BLACORE_API
 #endif
 
+#ifndef WIN32
 #define WIN32
+#endif

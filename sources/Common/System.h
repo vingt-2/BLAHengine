@@ -17,7 +17,9 @@ typedef glm::i8 blaS8;
 typedef glm::u16 blaU16;
 typedef glm::i16 blaS16;
 typedef glm::u32 blaU32;
+typedef glm::u64 blaU64;
 typedef glm::i32 blaS32;
+typedef glm::i64 blaS64;
 typedef glm::f32 blaF32;
 typedef glm::f64 blaF64;
 #endif

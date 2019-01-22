@@ -100,7 +100,7 @@ void CameraController::UpdateController()
             angularAcceleration.x = 1.f;
         }
 
-        angularAcceleration *= 200.f;
+        angularAcceleration *= 400.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }
@@ -111,7 +111,7 @@ void CameraController::UpdateController()
     {
         blaF32 dt = engineInstance->GetTimer()->GetDelta();
 
-		dt /= 3;
+        dt /= 3;
 
         m_cameraLinearVelocity += dt * (linearAcceleration - m_cameraDamping * m_cameraLinearVelocity);
         transform.SetPosition(transform.GetPosition() + dt * m_cameraLinearVelocity);

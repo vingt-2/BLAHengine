@@ -1,6 +1,6 @@
 #include "AssetsManager.h"
 
-#include <Common/dirent.h>
+#include <External/Files/dirent.h>
 
 #include <AssetsImport/InternalFormats/MeshSerializer.h>
 #include <AssetsImport/InternalFormats/TextureSerializer.h>
@@ -12,7 +12,6 @@
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
 using namespace BLAengine;
-
 
 AssetManager::AssetManager(void)
 {

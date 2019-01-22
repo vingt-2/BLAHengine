@@ -17,10 +17,144 @@
 
 using namespace BLAengine;
 
+namespace BLAengine
+{
+    struct EditorState
+    {
+        enum StateType
+        {
+            BLA_EDITOR_EDITING,
+            BLA_EDITOR_LOADING_SCENE
+        } m_type = BLA_EDITOR_EDITING;
+    };
+
+    struct EditorLoadingSceneState : EditorState
+    {
+        EditorLoadingSceneState():
+            EditorState()
+        {
+            m_type = BLA_EDITOR_LOADING_SCENE;
+            m_currentFileBrowser = nullptr;
+        }
+
+        const BlaFileBrowser* m_currentFileBrowser;
+    };
+}
+
+
+void AnimationDemo::SetEditorState(EditorState* state)
+{
+    delete m_editorState;
+    m_editorState = state;
+}
+
 void AnimationDemo::PreEngineUpdate()
 {
     EngineInstance::PreEngineUpdate();
 
+    if (m_editorState->m_type == EditorState::BLA_EDITOR_EDITING && m_cameraController)
+    {
+        m_cameraController->UpdateController();
+    }
+    else if (m_editorState->m_type == EditorState::BLA_EDITOR_LOADING_SCENE)
+    {
+        EditorLoadingSceneState* state = static_cast<EditorLoadingSceneState*>(m_editorState);
+
+        if (state->m_currentFileBrowser)
+        {
+            std::vector<FileEntry> selectedFiles;
+            blaBool shouldCloseBrowser = false;
+            if (state->m_currentFileBrowser->GetConfirmedSelection(selectedFiles))
+            {
+                if (!selectedFiles.empty())
+                {
+                    LoadWorkingScene(selectedFiles[0].m_path);
+                    shouldCloseBrowser = true;
+                }
+            }
+            else if (state->m_currentFileBrowser->GetSelectionCancelled())
+            {
+                shouldCloseBrowser = true;
+            }
+
+            if (shouldCloseBrowser)
+            {
+                m_guiManager->CloseFileBrowser("Load Scene File");
+                SetEditorState(new EditorState());
+            }
+        }
+        else
+        {
+            state->m_currentFileBrowser = m_guiManager->OpenFileBrowser("Load Scene File", true);
+        }
+    }
+    //m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
+
+    //m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
+}
+
+void AnimationDemo::EngineUpdate()
+{
+    if (m_editorState->m_type == EditorState::BLA_EDITOR_EDITING)
+    {
+        EngineInstance::EngineUpdate();
+        DoAnimationDemoStuff();
+    }
+}
+
+
+bool AnimationDemo::InitializeEngine(RenderWindow* renderWindow)
+{
+    if(EngineInstance::InitializeEngine(renderWindow))
+    {
+        m_editorState = new EditorState();
+        m_editorState->m_type = EditorState::BLA_EDITOR_EDITING;
+        
+        BlaGuiMenuTab fileMenu("File");
+
+        fileMenu.AddMenu(BlaGuiMenuItem("Load Scene", &m_openSceneRequested));
+        fileMenu.AddMenu(BlaGuiMenuItem("Exit", &m_isTerminationRequested));
+
+        m_guiManager->m_menuBar.m_menuTabs.push_back(fileMenu);
+
+        return true;
+    }
+    return false;
+}
+
+bool AnimationDemo::LoadWorkingScene(std::string filepath)
+{
+    EngineInstance::LoadWorkingScene(filepath);
+
+    GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
+
+    //BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
+
+    BLA_CREATE_COMPONENT(IKComponent, animatedObject);
+
+    //delete m_cameraController;
+    m_cameraController = new CameraController(
+        m_renderWindow, 
+        m_workingScene->GetMainCamera(),
+        40.f,
+        10.0f);
+
+    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);
+    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);
+
+
+    SetEditorState(new EditorState());
+    
+    return true;
+}
+
+void AnimationDemo::TerminateEngine()
+{
+    EngineInstance::TerminateEngine();
+}
+
+void AnimationDemo::DoAnimationDemoStuff()
+{
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
     Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
@@ -35,7 +169,7 @@ void AnimationDemo::PreEngineUpdate()
     }
 
     GameObject* animationObject = m_workingScene->FindObjectByName("AnimatedObject");
-    
+
     if (animationObject != nullptr)
     {
         if (auto ikCmp = animationObject->GetComponent<IKComponent>())
@@ -53,7 +187,7 @@ void AnimationDemo::PreEngineUpdate()
                     vector<blaPosQuat> jointTransformsW;
                     animCmp->m_animation->EvaluateAnimation(0, jointTransformsW);
 
-                   ikCmp->m_ikChain = IKChainJoint::BuildFromSkeleton(animCmp->m_animation->GetSkeleton(), jointTransformsW);
+                    ikCmp->m_ikChain = IKChainJoint::BuildFromSkeleton(animCmp->m_animation->GetSkeleton(), jointTransformsW);
                 }
                 else
                 {
@@ -64,7 +198,7 @@ void AnimationDemo::PreEngineUpdate()
                 for (auto endEffector : ikCmp->m_ikChain->GetEndEffectors())
                 {
                     GameObject* object;
-                    if(endEffector->m_joint != nullptr)
+                    if (endEffector->m_joint != nullptr)
                     {
                         object = m_workingScene->CreateObject("EffectorHandles_" + endEffector->m_joint->GetName());
                     }
@@ -107,7 +241,7 @@ void AnimationDemo::PreEngineUpdate()
                 }
 
                 //if (inputs->GetKeyState(BLA_KEY_SPACE).IsDown())
-                {    
+                {
                     if (m_timer->GetTime() - m_lastIkSolveTime > .005f)
                     {
                         IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 1);
@@ -115,7 +249,7 @@ void AnimationDemo::PreEngineUpdate()
                         m_lastIkSolveTime = m_timer->GetTime();
                     }
                 }
-                
+
                 for (size_t i = 0; i < jointTransforms.size(); ++i)
                 {
                     m_debug->DrawBasis(jointTransforms[i], 1.f);
@@ -137,7 +271,7 @@ void AnimationDemo::PreEngineUpdate()
             {
                 blaF32 animDt = 1.0f / animCmp->m_animation->GetSamplingRate();
                 const EngineInstance* engine = GetSingletonInstanceRead();
-                
+
                 blaF32 gameDt = engine->GetTimer()->GetDelta();
                 blaF32 animStep = gameDt / animDt;
 
@@ -146,7 +280,7 @@ void AnimationDemo::PreEngineUpdate()
                     m_autoPlay = false;
                 }
 
-                if(m_autoPlay)
+                if (m_autoPlay)
                 {
                     m_frameIndex += animStep;
                 }
@@ -164,7 +298,7 @@ void AnimationDemo::PreEngineUpdate()
                         m_lastTimePlayerInteraction = engine->GetTimer()->GetTime();
                     }
 
-                    if(engine->GetTimer()->GetTime() - m_lastTimePlayerInteraction > 5.0f)
+                    if (engine->GetTimer()->GetTime() - m_lastTimePlayerInteraction > 5.0f)
                     {
                         m_autoPlay = true;
                     }
@@ -175,13 +309,13 @@ void AnimationDemo::PreEngineUpdate()
                 vector<blaPosQuat> jointTransformsW;
                 animCmp->m_animation->EvaluateAnimation(static_cast<int>(m_frameIndex), jointTransformsW);
 
-                for(auto jointW : jointTransformsW)
+                for (auto jointW : jointTransformsW)
                 {
-                    GetDebug()->DrawBasis(jointW,1.f);
+                    GetDebug()->DrawBasis(jointW, 1.f);
                 }
 
                 std::vector<std::pair<blaVec3, blaVec3>> bones;
-                
+
                 SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, animCmp->m_animation->GetSkeleton(), jointTransformsW);
 
                 for (size_t i = 0; i < bones.size(); ++i)
@@ -202,9 +336,9 @@ void AnimationDemo::PreEngineUpdate()
         m_selectedObject = nullptr;
     }
 
-    if(m_selectedObject != nullptr) 
+    if (m_selectedObject != nullptr)
     {
-        if(m_selectedObject->GetName().find("EffectorHandles_") != string::npos)
+        if (m_selectedObject->GetName().find("EffectorHandles_") != string::npos)
         {
             Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
             GameObject* camera = m_workingScene->GetMainCamera()->GetParentObject();
@@ -224,55 +358,9 @@ void AnimationDemo::PreEngineUpdate()
         }
     }
 
-    if (m_cameraController)
+    if (m_openSceneRequested)
     {
-        m_cameraController->UpdateController();
+        m_openSceneRequested = false;
+        SetEditorState(new EditorLoadingSceneState());
     }
-    
-    //m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
-
-    //m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
-}
-
-bool AnimationDemo::InitializeEngine(RenderWindow* renderWindow)
-{
-    if(EngineInstance::InitializeEngine(renderWindow))
-    {
-        BlaGuiMenuTab fileMenu("File");
-
-        fileMenu.AddMenu(BlaGuiMenuItem("Exit", &m_isTerminationRequested));
-
-
-        m_guiManager->m_menuBar.m_menuTabs.push_back(fileMenu);
-
-        return true;
-    }
-    return false;
-}
-
-bool AnimationDemo::LoadWorkingScene(std::string filepath)
-{
-    EngineInstance::LoadWorkingScene(filepath);
-
-    GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
-
-    //BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
-
-    BLA_CREATE_COMPONENT(IKComponent, animatedObject);
-
-    m_cameraController = new CameraController(
-        m_renderWindow, 
-        m_workingScene->GetMainCamera(),
-        40.f,
-        10.0f);
-
-    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);
-    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);
-    
-    return true;
-}
-
-void AnimationDemo::TerminateEngine()
-{
-    EngineInstance::TerminateEngine();
 }

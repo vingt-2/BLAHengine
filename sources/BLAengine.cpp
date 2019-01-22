@@ -4,6 +4,8 @@
 #include <Engine/System/RenderWindow.h>
 #include <Demos/AnimationDemo.h>
 
+#pragma optimize("", off)
+
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
@@ -19,9 +21,9 @@ void DoAnimationDemoSession()
 
     demo->InitializeEngine(renderWindow);
 
-    demo->LoadWorkingScene("./Scenes/test_scene");
+    demo->LoadWorkingScene("./Scenes/empty_scene");
 
-    int framerate = 150;
+    int framerate = 1050;
 
     while (!demo->ShouldTerminate())
     {

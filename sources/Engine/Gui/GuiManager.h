@@ -4,6 +4,7 @@
 
 #include "./GuiWindow.h"
 #include "./GuiMenu.h"
+#include "./GuiFileBrowser.h"
 
 #include <string>
 #include <vector>
@@ -20,6 +21,7 @@ namespace BLAengine
             m_window(glfwWindow)
         {
             Init();
+            m_lastFileBrowserOpenDirectory = "./";
         }
 
         ~BlaGuiManager()
@@ -35,7 +37,9 @@ namespace BLAengine
 
         void DrawText(std::string textToDraw, blaIVec2 renderWindowPosition);
 
-        void FileBrowser(const std::string startingDirectory, std::string& selection);
+        const BlaFileBrowser* OpenFileBrowser(std::string browserName, blaBool disableMultipleSelection);
+
+        blaBool CloseFileBrowser(std::string browserName);
 
         BlaGuiMenu m_menuBar;
 
@@ -46,7 +50,11 @@ namespace BLAengine
 
         std::vector<BlaGuiWindow> m_oneTimeWindows;
 
-        std::unordered_map<std::string, BlaGuiWindow> m_permanentWindows;
+        std::unordered_map<std::string, BlaGuiWindow> m_openWindows;
+
+        std::unordered_map<std::string, BlaFileBrowser> m_openBrowsers;
+
+        std::string m_lastFileBrowserOpenDirectory;
 
         GLFWwindow* m_window;
     };

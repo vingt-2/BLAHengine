@@ -10,6 +10,8 @@
 
 #include "EngineInstance.h"
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
