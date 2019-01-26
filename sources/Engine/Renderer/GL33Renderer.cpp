@@ -5,7 +5,7 @@ using namespace BLAengine;
 GL33Renderer::GL33Renderer():
     debug_renderGBuffer(false),
     m_renderDebug(true),
-    m_defaultColor(0.3,0.3,0.3)
+    m_clearColor(0.3,0.3,0.3)
 {}
 
 GL33Renderer::~GL33Renderer() {}
@@ -409,7 +409,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
     glDrawBuffers(1, DrawBuffers);
 
     // Clear Frame Buffer.
-    glClearColor(m_defaultColor.x, m_defaultColor.y, m_defaultColor.z, 0.0f);
+    glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glViewport(0, 0, m_renderSize.x, m_renderSize.y);

@@ -17,7 +17,6 @@ namespace BLAengine
             m_cameraAngularVelocity(blaVec3(0.f)),
             m_cameraLinearVelocity(blaVec3(0.f)),
             m_cameraDamping(damping),
-            m_maxAngularVelocity(maxVelocity),
             m_currentCameraEulerAngles(0.f, 0.f, 0.f)
         {
             m_controlledCamera = controlledCamera;

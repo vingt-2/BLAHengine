@@ -179,7 +179,7 @@ void BlaGuiManager::Update()
 
     for (auto& window : m_openBrowsers)
     {
-        window.second.Render();
+        window.second->Render();
     }
 
     for (auto& window : m_oneTimeWindows)
@@ -228,26 +228,44 @@ void BlaGuiManager::DrawText(std::string textToDraw, blaIVec2 renderWindowPositi
     m_oneTimeWindows.back().SetRootElement(new BlaGuiTextElement(textToDraw));
 }
 
-const BlaFileBrowser* BlaGuiManager::OpenFileBrowser(std::string browserName, blaBool disableMultipleSelection)
+OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(std::string browserName, blaBool disableMultipleSelection)
 {
-    BlaFileBrowser browser(browserName, m_lastFileBrowserOpenDirectory, "./", blaIVec2(0.f), disableMultipleSelection);
+    OpenFilePrompt* browser = new OpenFilePrompt(browserName, m_lastFileBrowserOpenDirectory, "./", disableMultipleSelection);
 
     auto browserSearch = m_openBrowsers.find(browserName);
     if (browserSearch != m_openBrowsers.end())
     {
-        return &browserSearch->second;
+        return dynamic_cast<OpenFilePrompt*>(browserSearch->second);
     }
 
-    m_openBrowsers.insert(std::pair<std::string, BlaFileBrowser>(browserName, browser));
-    return &m_openBrowsers.at(browserName);
+    m_openBrowsers.insert(std::pair<std::string, BlaFileBrowser*>(browserName, browser));
+    return (OpenFilePrompt*)m_openBrowsers.at(browserName);
 }
+
+SaveFilePrompt* BlaGuiManager::CreateSaveFilePrompt(std::string browserName)
+{
+    SaveFilePrompt* browser = new SaveFilePrompt(browserName, m_lastFileBrowserOpenDirectory, "./");
+
+    auto browserSearch = m_openBrowsers.find(browserName);
+    if (browserSearch != m_openBrowsers.end())
+    {
+        return dynamic_cast<SaveFilePrompt*>(browserSearch->second);
+    }
+
+    m_openBrowsers.insert(std::pair<std::string, BlaFileBrowser*>(browserName, browser));
+    return (SaveFilePrompt*)m_openBrowsers.at(browserName);
+}
+
 
 blaBool BlaGuiManager::CloseFileBrowser(std::string browserName)
 {
     auto browserSearch = m_openBrowsers.find(browserName);
     if (browserSearch != m_openBrowsers.end())
     {
-        m_lastFileBrowserOpenDirectory = browserSearch->second.m_currentFilesDirectory;
+        m_lastFileBrowserOpenDirectory = browserSearch->second->m_currentFilesDirectory;
+        
+        delete browserSearch->second;
+        
         m_openBrowsers.erase(browserSearch);
     }
     return false;
@@ -256,6 +274,7 @@ blaBool BlaGuiManager::CloseFileBrowser(std::string browserName)
 void BlaGuiMenuItem::Render()
 {
     ImGui::MenuItem(m_name.c_str(), NULL, m_switch);
+    ImGui::Separator();
 }
 
 void BlaGuiMenuTab::Render()
@@ -292,6 +311,20 @@ void BlaFileBrowser::CurrentFolderGoBack()
     m_currentFilesDirectory = m_currentFilesDirectory.substr(0, lastSlashPos + 1);
 }
 
+std::string StringSanitize(std::string in)
+{
+    std::string out;
+    for (char c : in)
+    {
+        if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c == '.' || c == '-' || c == '_')
+        {
+            out += c;
+        }
+    }
+
+    return out;
+}
+
 void BlaFileBrowser::Render()
 {
     blaBool open = true;
@@ -299,7 +332,7 @@ void BlaFileBrowser::Render()
 
     if (!open)
     {
-        m_currentState = CANCELLED_SELECTION;
+        m_currentState = CANCELLED;
         return;
     }
 
@@ -318,18 +351,18 @@ void BlaFileBrowser::Render()
 
     if (m_currentState == FileBrowserState::BROWSING_FIRST_RENDER)
     {
-        ImGui::SetColumnWidth(0, 200);
+        ImGui::SetColumnWidth(200, 0);
         m_currentState = FileBrowserState::BROWSING;
     }
 
-    ImGui::BeginChild("RecursiveDirs", ImVec2(0.f, 280.f), true, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("RecursiveDirs", ImVec2(0.f, 300), true, ImGuiWindowFlags_HorizontalScrollbar);
     std::vector<DirectoryEntry> dir;
     FileBrowserDisplayDirectoriesRecursive(m_currentDirectoriesDirectory, false);
     ImGui::EndChild();
 
     ImGui::NextColumn();
 
-    if(ImGui::BeginChild("FolderDisplay", ImVec2(0.f, 280.f), true, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar))
+    if (ImGui::BeginChild("FolderDisplay", ImVec2(0.f, 300), true, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar))
     {
         FileBrowserDisplayAllContentNonRecursive();
         ImGui::EndChild();
@@ -341,20 +374,20 @@ void BlaFileBrowser::Render()
 
     ImGui::NewLine();
 
-    std::string filesToOpen = "";
+    std::string selectedFiles = "";
     for (auto& file : m_currentSelection)
     {
-        filesToOpen += "\"" + file.first + "\" ";
+        selectedFiles += "\"" + file.first + "\" ";
     }
 
-    strcpy(readonlyTextCpy, filesToOpen.c_str());
-    readonlyTextCpy[filesToOpen.size()] = 0;
+    strcpy(readonlyTextCpy, selectedFiles.c_str());
+    readonlyTextCpy[selectedFiles.size()] = 0;
 
     static float selectedFileFormSize = 100.0f; //The 100.0f is just a guess size for the first frame.
     float pos = selectedFileFormSize + 10;
     ImGui::SameLine(ImGui::GetWindowWidth() - pos);
 
-    ImGui::InputText("Selected File(s)", readonlyTextCpy, filesToOpen.size() + 1, ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputText("Selected File(s)", readonlyTextCpy, selectedFiles.size() + 1, ImGuiInputTextFlags_ReadOnly);
 
     selectedFileFormSize = ImGui::GetItemRectSize().x;
 
@@ -368,7 +401,7 @@ void BlaFileBrowser::Render()
         ImGui::SameLine(ImGui::GetWindowWidth() - pos);
         if (ImGui::Button("Cancel"))
         {
-            m_currentState = FileBrowserState::CANCELLED_SELECTION;
+            m_currentState = FileBrowserState::CANCELLED;
         }
         cancelButtonSize = ImGui::GetItemRectSize().x;
 
@@ -387,7 +420,116 @@ void BlaFileBrowser::Render()
     ImGui::End();
 }
 
-blaBool BlaFileBrowser::GetConfirmedSelection(std::vector<FileEntry>& selection) const
+void OpenFilePrompt::Render()
+{
+    BlaFileBrowser::Render();
+
+    char readonlyTextCpy[500];
+
+    std::string selectedFiles = "";
+    for (auto& file : m_currentSelection)
+    {
+        selectedFiles += "\"" + file.first + "\" ";
+    }
+
+    strcpy(readonlyTextCpy, selectedFiles.c_str());
+    readonlyTextCpy[selectedFiles.size()] = 0;
+
+    static float selectedFileFormSize = 100.0f; //The 100.0f is just a guess size for the first frame.
+    float pos = selectedFileFormSize + 10;
+    ImGui::SameLine(ImGui::GetWindowWidth() - pos);
+
+    ImGui::InputText("Selected File(s)", readonlyTextCpy, selectedFiles.size() + 1, ImGuiInputTextFlags_ReadOnly);
+
+    selectedFileFormSize = ImGui::GetItemRectSize().x;
+
+
+    ImGui::NewLine();
+
+    if (ImGui::BeginChild("ButtonsDisplay", ImVec2(0.f, 0.f), false, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar))
+    {
+        static float cancelButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
+        float pos = cancelButtonSize + 10;
+        ImGui::SameLine(ImGui::GetWindowWidth() - pos);
+        if (ImGui::Button("Cancel"))
+        {
+            m_currentState = FileBrowserState::CANCELLED;
+        }
+        cancelButtonSize = ImGui::GetItemRectSize().x;
+
+        static float openButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
+        pos += openButtonSize + 10;
+        ImGui::SameLine(ImGui::GetWindowWidth() - pos);
+        if (ImGui::Button("Open File"))
+        {
+            m_currentState = FileBrowserState::CONFIRMED_SELECTION;
+        }
+        openButtonSize = ImGui::GetItemRectSize().x;
+
+        ImGui::EndChild();
+    }
+
+    ImGui::End();
+}
+
+void SaveFilePrompt::Render()
+{
+    BlaFileBrowser::Render();
+
+    char saveFileTextInput[500];
+
+    std::string selectedFiles = "";
+    for (auto& file : m_currentSelection)
+    {
+        selectedFiles += file.first;
+    }
+
+    strcpy(saveFileTextInput, selectedFiles.c_str());
+    saveFileTextInput[selectedFiles.size()] = 0;
+
+    static float selectedFileFormSize = 100.0f; //The 100.0f is just a guess size for the first frame.
+    float pos = selectedFileFormSize + 10;
+    ImGui::SameLine(ImGui::GetWindowWidth() - pos);
+
+    bool inputReturn = ImGui::InputText("Save Filename", saveFileTextInput, selectedFiles.size() + 1, ImGuiInputTextFlags_EnterReturnsTrue);
+
+    std::string txtInput = std::string(saveFileTextInput);
+
+    selectedFileFormSize = ImGui::GetItemRectSize().x;
+
+    ImGui::NewLine();
+
+    if (ImGui::BeginChild("ButtonsDisplay", ImVec2(0.f, 0.f), false, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar))
+    {
+        static float cancelButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
+        float pos = cancelButtonSize + 10;
+        ImGui::SameLine(ImGui::GetWindowWidth() - pos);
+        if (ImGui::Button("Cancel"))
+        {
+            m_currentState = FileBrowserState::CANCELLED;
+        }
+        cancelButtonSize = ImGui::GetItemRectSize().x;
+
+        static float openButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
+        pos += openButtonSize + 10;
+        ImGui::SameLine(ImGui::GetWindowWidth() - pos);
+        
+        if (ImGui::Button("Save File") || inputReturn)
+        {
+            if (StringSanitize(txtInput).length() > 0)
+            {
+                m_currentState = FileBrowserState::CONFIRMED_SELECTION;
+            }
+        }
+        openButtonSize = ImGui::GetItemRectSize().x;
+
+        ImGui::EndChild();
+    }
+
+    ImGui::End();
+}
+
+blaBool OpenFilePrompt::GetConfirmedSelection(std::vector<FileEntry>& selection) const
 {
     if (m_currentState == FileBrowserState::CONFIRMED_SELECTION)
     {
@@ -400,9 +542,21 @@ blaBool BlaFileBrowser::GetConfirmedSelection(std::vector<FileEntry>& selection)
     return false;
 }
 
-blaBool BlaFileBrowser::GetSelectionCancelled() const
+blaBool SaveFilePrompt::GetConfirmedSavePath(std::string& savePath) const
 {
-    return m_currentState == CANCELLED_SELECTION;
+    if (m_currentState == FileBrowserState::CONFIRMED_SELECTION)
+    {
+        savePath = m_currentSavePath;
+        return true;
+    }
+    savePath = "";
+    return false;
+}
+
+
+blaBool BlaFileBrowser::IsBrowsingCancelled() const
+{
+    return m_currentState == CANCELLED;
 }
 
 blaBool IsItemDoubleCliked(int mouse_button = 0)

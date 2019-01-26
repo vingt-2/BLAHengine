@@ -17,7 +17,14 @@ namespace BLAengine
 
         Scene* LoadScene(std::string filepath);
 
+        std::string GetCurrentSceneFilePath() const
+        {
+            return m_currentSceneFilePath;
+        }
+
     private:
         AssetManager* m_assetManager;
+
+        std::string m_currentSceneFilePath;
     };
 }

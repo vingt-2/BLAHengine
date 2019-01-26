@@ -3,7 +3,7 @@
 #include <stack>
 #include <utility>
 #include <Engine/EngineInstance.h>
-#include <Engine/Game/Debug.h>
+#include <Engine/Debug/Debug.h>
 #include <vector>
 
 using namespace BLAengine;

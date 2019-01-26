@@ -1,79 +1,69 @@
+#pragma once
+
 #include <Common/StdInclude.h>
-#include <Common/System.h>
-#include <Common/Maths/Maths.h>
-#include <Engine/Renderer/GL33Renderer.h>
-#include <Engine/Game/RenderingManager.h>
-#include <Engine/Game/Debug.h>
-#include <Engine/Assets/SceneManager.h>
+#include <Engine/EngineInstance.h>
 
 namespace BLAengine
 {
-    class BLACORE_API EditorControls
+    class CameraController;
+    class GameObject;
+    class EditorState;
+
+    class BLACORE_API EditorSession : public EngineInstance
     {
     public:
+        EditorSession(bool external, bool isFullscreen):
+            EngineInstance(external, isFullscreen),
+            m_selectedObject(nullptr),
+            m_frameIndex(0),
+            m_lastTimePlayerInteraction(0.f),
+            m_autoPlay(true),
+            m_lastIkSolveTime(0.f)
+        {}
 
-        glm::vec2 m_prevMouse;
-        blaVec3 m_cameraRotation;
+        void PreEngineUpdate() override;
 
-        GameObject* m_cameraObject;
-        RenderWindow* m_renderWindow;
+        void EngineUpdate() override;
 
-        EditorControls(GameObject* cameraObject, RenderWindow* renderWindow) :
-            m_prevMouse(glm::vec2(0)),
-            m_cameraRotation(blaVec3(0)),
-            m_cameraObject(cameraObject),
-            m_renderWindow(renderWindow)
-        {};
+        bool InitializeEngine(RenderWindow* renderWindow) override;
 
+        void TerminateEngine() override;
 
-        ~EditorControls() {};
-
-        void ControlCamera();
-
-    };
-
-    class BLACORE_API EditorSession
-    {
-    public:
-        EditorSession(bool external, bool isFullscreen) :
-            m_isFullScreen(isFullscreen),
-            m_isTerminationRequested(false),
-            debugRay(Ray(blaVec3(0), blaVec3(0),1))
-        {};
-
-        ~EditorSession() { TerminateEditor(); };
-
-        bool InitializeEngine(RenderWindow* renderWindow);
-
-        void UpdateEditor();
-
-        void TerminateEditor();
-
-        bool ShouldTerminate() { return m_isTerminationRequested; };
-
-        bool LoadWorkingScene(std::string filePath);
-
-        bool SaveWorkingScene(std::string filePath);
-
-        std::vector<string> GetSceneObjects();
+        ~EditorSession() { EngineInstance::~EngineInstance(); };
 
     private:
 
-        // Required Engine Modules
-        GL33Renderer* m_editorRenderer;
-        AssetManager* m_assetManager;
-        SceneManager* m_sceneManager;
-        Debug* m_debug;
-        Scene* m_workingScene;
-        Scene* m_editorScene;
-        RenderWindow* m_renderWindow;
-        Timer* m_timer;
-        RenderingManager* m_renderingManager;
-        DebugRenderingManager* m_debugRenderingManager;
+        bool LoadNewScene() override;
 
-        //States
-        Ray debugRay;
-        bool m_isFullScreen;
-        bool m_isTerminationRequested;
+        bool LoadWorkingScene(std::string filepath) override;
+
+        struct EditorStateRequests
+        {
+            blaBool m_newSceneRequest = false;
+            blaBool m_openSceneRequest = false;
+            blaBool m_saveSceneRequest = false;
+            blaBool m_saveSceneAsRequest = false;
+        } m_editorStateRequests;
+
+        void SetEditorState(EditorState* state);
+
+        void DoTestAnimationDemoStuff();
+
+        EditorState* m_editorState;
+        CameraController* m_cameraController;
+        GameObject* m_selectedObject;
+        float m_frameIndex;
+        float m_lastTimePlayerInteraction;
+        blaF32 m_lastIkSolveTime;
+        
+        bool m_autoPlay;
+
+        /*
+        *  Handle State changing things for the editor
+        *
+        */
+        void HandleLoadScenePrompt();
+
+        void HandleSaveScenePrompt();
     };
 };

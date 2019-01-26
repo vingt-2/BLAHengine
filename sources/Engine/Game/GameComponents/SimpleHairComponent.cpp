@@ -1,7 +1,7 @@
 #include "SimpleHairComponent.h"
 #include <Engine/EngineInstance.h>
 #include <Engine/Game/GameObject.h>
-#include <Engine/Game/Debug.h>
+#include <Engine/Debug/Debug.h>
 
 #include <random>
 

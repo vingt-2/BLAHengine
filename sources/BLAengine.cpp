@@ -2,24 +2,22 @@
 
 #include <Common/StdInclude.h>
 #include <Engine/System/RenderWindow.h>
-#include <Demos/AnimationDemo.h>
+#include <Editor/EditorSession.h>
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
-void DoAnimationDemoSession()
+void RunEditorSession()
 {
-    EngineInstance::AssignSingletonInstance(new AnimationDemo(true, false));
+    EngineInstance::AssignSingletonInstance(new EditorSession(true, false));
 
     EngineInstance* demo = EngineInstance::GetSingletonInstance();
 
     auto renderWindow = new GLFWRenderWindow();
 
-    renderWindow->CreateRenderWindow("BLAengine Animation Demo", 1280, 720, false);
+    renderWindow->CreateRenderWindow("BLAengine Editor", 1280, 720, false);
 
     demo->InitializeEngine(renderWindow);
-
-    demo->LoadWorkingScene("./Scenes/empty_scene");
 
     int framerate = 1050;
 
@@ -44,7 +42,7 @@ void DoAnimationDemoSession()
 
 int main()
 {
-    DoAnimationDemoSession();
+    RunEditorSession();
 }
 
 #ifdef WIN32
@@ -57,7 +55,7 @@ int CALLBACK WinMain(
     __in  int nCmdShow
     )
 {
-    DoAnimationDemoSession();
+    RunEditorSession();
 }
 #endif
 

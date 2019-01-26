@@ -2,13 +2,15 @@
 #include <Common/Maths/Maths.h>
 #include <Engine/Renderer/GL33Renderer.h>
 #include <Engine/Game/RenderingManager.h>
-#include <Engine/Game/Debug.h>
+#include <Engine/Debug/Debug.h>
 #include <Engine/Assets/SceneManager.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/System/RenderWindow.h>
 #include <Engine/Gui/GuiManager.h>
 
 #include "EngineInstance.h"
+
+#pragma optimize("", off)
 
 using namespace BLAengine;
 
@@ -103,10 +105,27 @@ void EngineInstance::TerminateEngine()
     delete m_guiManager;
 }
 
+bool EngineInstance::LoadNewScene()
+{
+    delete m_renderingManager;
+    delete m_workingScene;
+
+    m_workingScene = new Scene();
+    m_workingScene->SetTimeObject(m_timer);
+
+    m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
+    m_workingScene->Initialize(m_renderingManager);
+    m_renderer->SwitchRenderingManager(m_renderingManager);
+
+    SetupDirLightAndCamera();
+
+    return true;
+}
+
 bool BLAengine::EngineInstance::LoadWorkingScene(std::string filepath)
 {
-    m_renderingManager->~RenderingManager();
-    m_workingScene->~Scene();
+    delete m_renderingManager;
+    delete m_workingScene;
 
     Scene* scenePtr = m_sceneManager->LoadScene(filepath);
     m_workingScene = scenePtr;

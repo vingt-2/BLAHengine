@@ -37,7 +37,9 @@ namespace BLAengine
 
         void DrawText(std::string textToDraw, blaIVec2 renderWindowPosition);
 
-        const BlaFileBrowser* OpenFileBrowser(std::string browserName, blaBool disableMultipleSelection);
+        OpenFilePrompt* CreateOpenFilePrompt(std::string browserName, blaBool disableMultipleSelection);
+        
+        SaveFilePrompt* CreateSaveFilePrompt(std::string browserName);
 
         blaBool CloseFileBrowser(std::string browserName);
 
@@ -52,7 +54,7 @@ namespace BLAengine
 
         std::unordered_map<std::string, BlaGuiWindow> m_openWindows;
 
-        std::unordered_map<std::string, BlaFileBrowser> m_openBrowsers;
+        std::unordered_map<std::string, BlaFileBrowser*> m_openBrowsers;
 
         std::string m_lastFileBrowserOpenDirectory;
 

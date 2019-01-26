@@ -24,28 +24,22 @@ namespace BLAengine
             BROWSING_FIRST_RENDER,
             BROWSING,
             CONFIRMED_SELECTION,
-            CANCELLED_SELECTION
+            CANCELLED
         };
 
         BlaFileBrowser(std::string browserName, 
             std::string filesDirectory, 
-            std::string directoryDirectory, 
-            const blaIVec2& windowPosition,
-            blaBool disableMultipleSelection) :
-            m_name(browserName)
+            std::string directoryDirectory):
+              m_name(browserName)
             , m_currentFilesDirectory(filesDirectory)
             , m_currentDirectoriesDirectory(directoryDirectory)
             , m_currentState(BROWSING_FIRST_RENDER)
-            , m_disableMultipleSelection(disableMultipleSelection)
         {};
 
-        void Render();
+        virtual void Render();
 
-        blaBool GetConfirmedSelection(std::vector<FileEntry>& selection) const;
-        blaBool GetSelectionCancelled() const;
-    private:
-
-        void FileBrowserDisplayAllContentRecursive();
+        blaBool IsBrowsingCancelled() const;
+    protected:
 
         void FileBrowserDisplayAllContentNonRecursive();
 
@@ -62,5 +56,43 @@ namespace BLAengine
         FileBrowserState m_currentState;
 
         blaBool m_disableMultipleSelection;
+        //void FileBrowserDisplayAllContentRecursive();
+    };
+
+    class OpenFilePrompt : public BlaFileBrowser
+    {
+    public:
+        OpenFilePrompt(std::string browserName,
+            std::string filesDirectory,
+            std::string directoryDirectory,
+            blaBool disableMultipleSelection):
+          BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+        {
+            m_disableMultipleSelection = disableMultipleSelection;
+        }
+
+        virtual void Render();
+
+        blaBool GetConfirmedSelection(std::vector<FileEntry>& selection) const;
+    private:
+    };
+
+    class SaveFilePrompt : public BlaFileBrowser
+    {
+    public:
+        SaveFilePrompt(std::string browserName,
+            std::string filesDirectory,
+            std::string directoryDirectory) :
+            BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+        {
+            m_disableMultipleSelection = true;
+        }
+
+        virtual void Render();
+
+        blaBool GetConfirmedSavePath(std::string& savePath) const;
+    private:
+
+        std::string m_currentSavePath;
     };
 }

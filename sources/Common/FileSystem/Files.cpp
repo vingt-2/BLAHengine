@@ -70,7 +70,7 @@ void BLAengine::GetDirectoriesInDirectory(std::vector<DirectoryEntry>& directory
             directoryContent.push_back(entry);
         }
 
-        cf_dir_next(&dir);
+          cf_dir_next(&dir);
     }
 
     cf_dir_close(&dir);

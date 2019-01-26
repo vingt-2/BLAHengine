@@ -38,8 +38,6 @@ namespace BLAengine
 
         virtual void TerminateEngine();
 
-        virtual bool LoadWorkingScene(std::string filePath);
-
         bool ShouldTerminate() const { return m_isTerminationRequested; };
 
         bool SaveWorkingScene(std::string filePath);
@@ -49,6 +47,10 @@ namespace BLAengine
         const Timer* GetTimer() const { return m_timer; }
 
     protected:
+
+        virtual bool LoadNewScene();
+
+        virtual bool LoadWorkingScene(std::string filePath);
 
         void SetupDirLightAndCamera();
 

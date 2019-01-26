@@ -6,6 +6,7 @@ using namespace BLAengine;
 BLAengine::SceneManager::SceneManager(AssetManager * assetManager)
 {
     m_assetManager = assetManager;
+    m_currentSceneFilePath = "";
 }
 
 bool SceneManager::SaveScene(string filepath, Scene* scene)
@@ -27,6 +28,8 @@ bool SceneManager::SaveScene(string filepath, Scene* scene)
     cereal::JSONOutputArchive output(fs);
 
     output(cereal::make_nvp("Scene", sceneSerializer));
+
+    m_currentSceneFilePath = filepath;
 
     return true;
 }
@@ -94,6 +97,8 @@ Scene* SceneManager::LoadScene(std::string filepath)
             }
         }
     }
+
+    m_currentSceneFilePath = filepath;
 
     return newScene;
 }
