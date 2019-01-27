@@ -71,7 +71,7 @@ namespace BLAengine
             m_disableMultipleSelection = disableMultipleSelection;
         }
 
-        virtual void Render();
+        void Render() override;
 
         blaBool GetConfirmedSelection(std::vector<FileEntry>& selection) const;
     private:
@@ -88,7 +88,7 @@ namespace BLAengine
             m_disableMultipleSelection = true;
         }
 
-        virtual void Render();
+        void Render() override;
 
         blaBool GetConfirmedSavePath(std::string& savePath) const;
     private:

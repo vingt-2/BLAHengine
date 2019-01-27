@@ -1,0 +1,255 @@
+{
+    "Scene": {
+        "Objects": [
+            {
+                "Name": "sky",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -3.0,
+                        "z": -5.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 5000.0,
+                        "y": 5000.0,
+                        "z": 5000.0
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "skymesh",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "DirLight",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 20.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": -0.4484228193759918,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 0.8938215374946594
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483650,
+                        "polymorphic_name": "DirectionalLightSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483650,
+                            "data": {
+                                "lightDirection": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "EditorCamera",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 2.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": []
+            },
+            {
+                "Name": "AnimatedObject",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": []
+            },
+            {
+                "Name": "EffectorHandles_0",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 1.0,
+                        "y": 5.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.30000001192092898,
+                        "y": 0.30000001192092898,
+                        "z": 0.30000001192092898
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 1,
+                        "ptr_wrapper": {
+                            "id": 2147483651,
+                            "data": {
+                                "TriangleMesh": "sphere",
+                                "Material": []
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "EffectorHandles_1",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 1.0,
+                        "y": -1.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.30000001192092898,
+                        "y": 0.30000001192092898,
+                        "z": 0.30000001192092898
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 1,
+                        "ptr_wrapper": {
+                            "id": 2147483652,
+                            "data": {
+                                "TriangleMesh": "sphere",
+                                "Material": []
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "EffectorHandles_2",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 4.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.30000001192092898,
+                        "y": 0.30000001192092898,
+                        "z": 0.30000001192092898
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 1,
+                        "ptr_wrapper": {
+                            "id": 2147483653,
+                            "data": {
+                                "TriangleMesh": "sphere",
+                                "Material": []
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "EffectorHandles_3",
+                "ObjectTransform": {
+                    "position": {
+                        "x": -2.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.30000001192092898,
+                        "y": 0.30000001192092898,
+                        "z": 0.30000001192092898
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 1,
+                        "ptr_wrapper": {
+                            "id": 2147483654,
+                            "data": {
+                                "TriangleMesh": "sphere",
+                                "Material": []
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

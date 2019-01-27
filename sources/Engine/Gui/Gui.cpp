@@ -373,51 +373,6 @@ void BlaFileBrowser::Render()
     ImGui::Columns();
 
     ImGui::NewLine();
-
-    std::string selectedFiles = "";
-    for (auto& file : m_currentSelection)
-    {
-        selectedFiles += "\"" + file.first + "\" ";
-    }
-
-    strcpy(readonlyTextCpy, selectedFiles.c_str());
-    readonlyTextCpy[selectedFiles.size()] = 0;
-
-    static float selectedFileFormSize = 100.0f; //The 100.0f is just a guess size for the first frame.
-    float pos = selectedFileFormSize + 10;
-    ImGui::SameLine(ImGui::GetWindowWidth() - pos);
-
-    ImGui::InputText("Selected File(s)", readonlyTextCpy, selectedFiles.size() + 1, ImGuiInputTextFlags_ReadOnly);
-
-    selectedFileFormSize = ImGui::GetItemRectSize().x;
-
-   
-    ImGui::NewLine();
-
-    if (ImGui::BeginChild("ButtonsDisplay", ImVec2(0.f, 0.f), false, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar))
-    {
-        static float cancelButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
-        float pos = cancelButtonSize + 10;
-        ImGui::SameLine(ImGui::GetWindowWidth() - pos);
-        if (ImGui::Button("Cancel"))
-        {
-            m_currentState = FileBrowserState::CANCELLED;
-        }
-        cancelButtonSize = ImGui::GetItemRectSize().x;
-
-        static float openButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
-        pos += openButtonSize + 10;
-        ImGui::SameLine(ImGui::GetWindowWidth() - pos);
-        if (ImGui::Button("Open File"))
-        {
-            m_currentState = FileBrowserState::CONFIRMED_SELECTION;
-        }
-        openButtonSize = ImGui::GetItemRectSize().x;
-
-        ImGui::EndChild();
-    }
-
-    ImGui::End();
 }
 
 void OpenFilePrompt::Render()
@@ -514,10 +469,11 @@ void SaveFilePrompt::Render()
         pos += openButtonSize + 10;
         ImGui::SameLine(ImGui::GetWindowWidth() - pos);
         
-        if (ImGui::Button("Save File") || inputReturn)
+        if (ImGui::Button("Save") || inputReturn)
         {
             if (StringSanitize(txtInput).length() > 0)
             {
+				m_currentSavePath = m_currentFilesDirectory + txtInput;
                 m_currentState = FileBrowserState::CONFIRMED_SELECTION;
             }
         }

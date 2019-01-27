@@ -174,11 +174,11 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
-    GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
+    //GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
 
     //BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
-    BLA_CREATE_COMPONENT(IKComponent, animatedObject);
+    //BLA_CREATE_COMPONENT(IKComponent, animatedObject);
 
     //delete m_cameraController;
     m_cameraController = new CameraController(
@@ -432,7 +432,7 @@ void EditorSession::HandleSaveScenePrompt()
 
         if (shouldCloseBrowser)
         {
-            m_guiManager->CloseFileBrowser("Load Scene File");
+            m_guiManager->CloseFileBrowser("Save Scene");
             SetEditorState(new EditorState());
         }
     }

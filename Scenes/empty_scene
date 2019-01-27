@@ -1,43 +1,42 @@
 {
-    "Scene": 
-	{
+    "Scene": {
         "Objects": [
-			{
-			"Name": "sky",
-			"ObjectTransform": {
-				"position": {
-					"x": 0.0,
-					"y": -3,
-					"z": -5
-				},
-				"rotation": {
-					"x": 0,
-					"y": 0,
-					"z": 0,
-					"w": 1
-				},
-				"scale": {
-					"x": 5000,
-					"y": 5000,
-					"z": 5000
-				}
-			},
-			"Components": [
-					{
-						"polymorphic_id": 2147483649,
-						"polymorphic_name": "MeshRendererSerializer",
-						"ptr_wrapper": {
-							"id": 2147483649,
-							"data": {
-								"TriangleMesh": "skymesh",
-								"Material": [
-									"BlankDiffuseMat"
-								]
-							}
-						}
-					}
-				]
+            {
+                "Name": "sky",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -3.0,
+                        "z": -5.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 5000.0,
+                        "y": 5000.0,
+                        "z": 5000.0
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "TriangleMesh": "skymesh",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    }
+                ]
             }
-		]			
+        ]
     }
 }
