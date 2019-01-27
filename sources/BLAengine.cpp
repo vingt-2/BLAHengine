@@ -19,7 +19,7 @@ void RunEditorSession()
 
     demo->InitializeEngine(renderWindow);
 
-    int framerate = 1050;
+    int framerate = 60;
 
     while (!demo->ShouldTerminate())
     {
