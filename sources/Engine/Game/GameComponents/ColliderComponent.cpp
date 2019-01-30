@@ -30,8 +30,8 @@ MeshColliderComponent::~MeshColliderComponent()
 
 void MeshColliderComponent::SetColliderMesh(TriangleMesh* mesh)
 {
-    m_vertPosIndices = new vector<glm::uint32>;
-    m_vertNormalIndices = new vector<glm::uint32>;
+    m_vertPosIndices = new vector<blaU32>;
+    m_vertNormalIndices = new vector<blaU32>;
     mesh->GenerateTopoTriangleIndices(*m_vertPosIndices, *m_vertNormalIndices);
     m_triVertices = &(mesh->m_vertexPos);
     m_triNormals = &(mesh->m_vertexNormals);
@@ -71,9 +71,9 @@ ColliderComponent::RayCollision MeshColliderComponent::CollideWithRay(Ray & ray)
 
         for (int k = 0; k < 3; k++)
         {
-            glm::uint32 vertPosIndex = this->m_vertPosIndices->at(3 * triangleIndex + k);
+            blaU32 vertPosIndex = this->m_vertPosIndices->at(3 * triangleIndex + k);
             contactVertices[k] = this->m_triVertices->at((int)vertPosIndex);
-            glm::uint32 vertNormalIndex = this->m_vertNormalIndices->at(3 * triangleIndex + k);
+            blaU32 vertNormalIndex = this->m_vertNormalIndices->at(3 * triangleIndex + k);
             if (m_triNormals->size() != 0) contactNormals[k] = m_triNormals->at((int)vertNormalIndex);
         }
         blaVec3 bar = Barycentric(contactPoint.m_colPositionL, contactVertices[0], contactVertices[1], contactVertices[2]);
@@ -110,9 +110,9 @@ void MeshColliderComponent::GenerateCollisionModel()
     m_collisionMesh = newCollisionModel3D();
     for (size_t i = 0; i < m_vertPosIndices->size(); i += 3)
     {
-        glm::uint32 i0 = m_vertPosIndices->at(i + 0);
-        glm::uint32 i1 = m_vertPosIndices->at(i + 1);
-        glm::uint32 i2 = m_vertPosIndices->at(i + 2);
+        blaU32 i0 = m_vertPosIndices->at(i + 0);
+        blaU32 i1 = m_vertPosIndices->at(i + 1);
+        blaU32 i2 = m_vertPosIndices->at(i + 2);
 
         m_collisionMesh->addTriangle(&(m_triVertices->at(i0).x),
             &(m_triVertices->at(i1).x),

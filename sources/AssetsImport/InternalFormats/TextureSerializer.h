@@ -33,8 +33,8 @@ private:
     friend class cereal::access;
 
     glm::uint8 m_nComponents;
-    glm::uint32 m_dataSize;
-    glm::uint32 m_width, m_height;
+    blaU32 m_dataSize;
+    blaU32 m_width, m_height;
 
     std::string m_name;
     std::vector<glm::uint8> m_data;

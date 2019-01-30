@@ -188,14 +188,14 @@ public:
 
     GameObjectSerializer() = default;
 
-    void FromGameObject(BLAengine::GameObject* gobject)
+    void FromGameObject(BLAengine::GameObject& gobject)
     {
-        BLAengine::ObjectTransform transform = gobject->GetTransform();
+        BLAengine::ObjectTransform transform = gobject.GetTransform();
         m_transform.FromTransform(&transform);
 
-        m_objectName = gobject->GetName();
+        m_objectName = gobject.GetName();
 
-        vector<BLAengine::MeshRendererComponent*> meshRenderers = gobject->GetComponents<BLAengine::MeshRendererComponent>();
+        vector<BLAengine::MeshRendererComponent*> meshRenderers = gobject.GetComponents<BLAengine::MeshRendererComponent>();
         for (size_t i = 0; i < meshRenderers.size(); i++)
         {
             BLAengine::MeshRendererComponent* mrenderer = meshRenderers[i];
@@ -206,7 +206,7 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
 
-        vector<BLAengine::DirectionalLight*> dirLights = gobject->GetComponents<BLAengine::DirectionalLight>();
+        vector<BLAengine::DirectionalLight*> dirLights = gobject.GetComponents<BLAengine::DirectionalLight>();
         for (size_t i = 0; i < dirLights.size(); i++)
         {
             BLAengine::DirectionalLight* mrenderer = dirLights[i];
@@ -217,7 +217,7 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
 
-        vector<BLAengine::RigidBodyComponent*> rgbs = gobject->GetComponents<BLAengine::RigidBodyComponent>();
+        vector<BLAengine::RigidBodyComponent*> rgbs = gobject.GetComponents<BLAengine::RigidBodyComponent>();
         for (size_t i = 0; i < rgbs.size(); i++)
         {
             BLAengine::RigidBodyComponent* mrenderer = rgbs[i];
@@ -270,15 +270,11 @@ public:
 
     void FromScene(BLAengine::Scene* scene)
     {
-        std::vector<BLAengine::GameObject*> objVec = scene->GetObjects();
-        
-        for (size_t i = 0; i < objVec.size(); i++)
+        for (auto& object : scene->GetObjects())
         {
-            BLAengine::GameObject* obj = objVec[i];
-
             GameObjectSerializer gObjSerializer;
 
-            gObjSerializer.FromGameObject(obj);
+            gObjSerializer.FromGameObject(object);
 
             m_objectsVector.push_back(gObjSerializer);
         }

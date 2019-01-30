@@ -3,9 +3,12 @@
 #include <Common/StdInclude.h>
 #include <Engine/System/RenderWindow.h>
 #include <Editor/EditorSession.h>
+#include <Common/DataStructures/StringID.h>
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
+
+#pragma optimize("", off)
 
 void RunEditorSession()
 {
@@ -19,7 +22,7 @@ void RunEditorSession()
 
     demo->InitializeEngine(renderWindow);
 
-    int framerate = 60;
+    int framerate = 144;
 
     while (!demo->ShouldTerminate())
     {
@@ -55,6 +58,8 @@ int CALLBACK WinMain(
     __in  int nCmdShow
     )
 {
+    blaU32 stringId = COMPILE_TIME_CRC32_STR("helloworld");
+
     RunEditorSession();
 }
 #endif

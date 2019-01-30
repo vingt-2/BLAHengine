@@ -100,7 +100,7 @@ void CameraController::UpdateController()
             angularAcceleration.x = 1.f;
         }
 
-        angularAcceleration *= 400.f;
+        angularAcceleration *= 200.f;
 
         angularAcceleration.x *= 9.0f/16.0f;
     }

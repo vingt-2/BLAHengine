@@ -8,7 +8,7 @@ using namespace BLAengine;
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
-Texture2D::Texture2D(string name, glm::uint8 dim, vector<glm::uint8> data, glm::uint32 width, glm::uint32 height) : Asset(name)
+Texture2D::Texture2D(string name, glm::uint8 dim, vector<glm::uint8> data, blaU32 width, blaU32 height) : Asset(name)
 {
     this->m_data = data;
     this->m_width = width;
@@ -28,9 +28,9 @@ Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
 
     // Data read from the header of the BMP file
     glm::uint8 header[54];
-    glm::uint32 dataPos;
-    glm::uint32 imageSize;
-    glm::uint32 width, height;
+    blaU32 dataPos;
+    blaU32 imageSize;
+    blaU32 width, height;
 
     // Open the file
     FILE * file = fopen(filePath.data(), "rb");

@@ -175,17 +175,17 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     return true;
 }
 
-bool BLAengine::Raytracer::SaveWorkingScene(std::string filepath)
+bool Raytracer::SaveWorkingScene(std::string filepath)
 {
     return m_sceneManager->SaveScene(filepath, m_workingScene);
 }
 
-std::vector<string> BLAengine::Raytracer::GetSceneObjects()
+std::vector<string> Raytracer::GetSceneObjects()
 {
     std::vector<string> objs;
-    for (auto go : m_workingScene->GetObjects())
+    for (const auto& go : m_workingScene->GetObjects())
     {
-        objs.push_back(go->GetName());
+        objs.push_back(go.GetName());
     }
     return objs;
 }

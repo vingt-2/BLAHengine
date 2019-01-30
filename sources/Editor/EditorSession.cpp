@@ -79,7 +79,7 @@ void EditorSession::PreEngineUpdate()
         HandleSaveScenePrompt();
     }
     
-    m_debug->DrawGrid(1000, 10, blaVec3(0.4f));
+    m_debug->DrawGrid(1000, 1, blaVec3(0.85f));
 
     m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
 }
@@ -126,7 +126,6 @@ void EditorSession::EngineUpdate()
     }
 }
 
-
 bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 {
     if(EngineInstance::InitializeEngine(renderWindow))
@@ -137,12 +136,18 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         BlaGuiMenuTab fileMenu("File");
 
         fileMenu.AddMenu(BlaGuiMenuItem("New Scene", &m_editorStateRequests.m_newSceneRequest));
-        fileMenu.AddMenu(BlaGuiMenuItem("Open Scene", &m_editorStateRequests.m_openSceneRequest));
-        fileMenu.AddMenu(BlaGuiMenuItem("Save As", &m_editorStateRequests.m_saveSceneRequest));
-        fileMenu.AddMenu(BlaGuiMenuItem("Save As", &m_editorStateRequests.m_saveSceneAsRequest));
+        fileMenu.AddMenu(BlaGuiMenuItem("Open Scene", &m_editorStateRequests.m_openSceneRequest, true));
+        fileMenu.AddMenu(BlaGuiMenuItem("Save", &m_editorStateRequests.m_saveSceneRequest));
+        fileMenu.AddMenu(BlaGuiMenuItem("Save As", &m_editorStateRequests.m_saveSceneAsRequest, true));
         fileMenu.AddMenu(BlaGuiMenuItem("Exit", &(EngineInstance::m_isTerminationRequested)));
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(fileMenu);
+
+        BlaGuiMenuTab settingsMenu("Settings");
+        settingsMenu.AddMenu(BlaGuiMenuItem("G-Buffer", &m_renderer->m_debugDrawGBuffer));
+
+        m_guiManager->m_menuBar.m_menuTabs.push_back(settingsMenu);
+
 
         LoadNewScene();
 
@@ -174,9 +179,9 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
-    //GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
+    GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
 
-    //BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
+    BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
     //BLA_CREATE_COMPONENT(IKComponent, animatedObject);
 
@@ -366,9 +371,11 @@ void EditorSession::DoTestAnimationDemoStuff()
 
                 SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, animCmp->m_animation->GetSkeleton(), jointTransformsW);
 
+                blaF32 scaleFactor = 0.1f;
+
                 for (size_t i = 0; i < bones.size(); ++i)
                 {
-                    m_debug->DrawLine(bones[i].first, bones[i].second);
+                    m_debug->DrawLine(scaleFactor * bones[i].first, scaleFactor * bones[i].second);
                 }
             }
         }
@@ -400,14 +407,16 @@ void EditorSession::DoTestAnimationDemoStuff()
 
             ObjectTransform selectedObjectTransform = m_selectedObject->GetTransform();
 
-            if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) > 0.4f)
+            if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) > 1.f)
             {
-                __debugbreak();
+
             }
+            else
+            {
+                selectedObjectTransform.SetPosition(hit.hitPosition);
 
-            selectedObjectTransform.SetPosition(hit.hitPosition);
-
-            m_selectedObject->SetTransform(selectedObjectTransform);
+                m_selectedObject->SetTransform(selectedObjectTransform);
+            }
         }
     }
 }

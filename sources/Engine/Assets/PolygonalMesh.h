@@ -9,7 +9,7 @@ namespace BLAengine
     {
     public:
 
-        vector<glm::uint32> m_triangleIndices;
+        vector<blaU32> m_triangleIndices;
         vector<blaVec3> m_vertPos;
         vector<blaVec3> m_vertNormal;
         vector<blaVec3> m_vertTangent;
@@ -31,8 +31,8 @@ namespace BLAengine
     class BLACORE_API TriangleMesh : public Asset
     {
     public:
-        typedef glm::uint32 HeIndx;
-        typedef glm::uint32 FaceIndx;
+        typedef blaU32 HeIndx;
+        typedef blaU32 FaceIndx;
 
         typedef struct face_t
         {
@@ -41,9 +41,9 @@ namespace BLAengine
 
         typedef struct destVert_t
         {
-            glm::uint32 pos; // Vertex the HE points to.
-            glm::uint32 normal; // Normals at the destination Vertex (may be unique to this face)
-            glm::uint32 UV; // UV at the destination Vertex (may be unique to this face)
+            blaU32 pos; // Vertex the HE points to.
+            blaU32 normal; // Normals at the destination Vertex (may be unique to this face)
+            blaU32 UV; // UV at the destination Vertex (may be unique to this face)
         } DestVertex;
 
         vector<Face> m_meshTriangles;
@@ -53,7 +53,7 @@ namespace BLAengine
         */
         vector<blaVec3> m_vertexPos;
         vector<blaVec3> m_vertexNormals;
-        vector<glm::vec2> m_vertexUVs;
+        vector<blaVec2> m_vertexUVs;
 
         /*
         Tangent information for each face:
@@ -83,9 +83,9 @@ namespace BLAengine
         ~TriangleMesh();
 
         void BuildMeshTopo(
-            vector<glm::uint32> vertPosIndices,
-            vector<glm::uint32> vertNormalIndices,
-            vector<glm::uint32> vertUVsIndices,
+            vector<blaU32> vertPosIndices,
+            vector<blaU32> vertNormalIndices,
+            vector<blaU32> vertUVsIndices,
             bool swapNormals);
 
         void NormalizeModelCoordinates(bool normalizeScale);
@@ -94,17 +94,17 @@ namespace BLAengine
         void ApplyUVScaling(glm::vec2 scaling);
 
         void GenerateRenderData();
-        void GenerateTopoTriangleIndices(vector<glm::uint32> &posIndices, vector<glm::uint32> &normalIndices);
+        void GenerateTopoTriangleIndices(vector<blaU32> &posIndices, vector<blaU32> &normalIndices);
 
         bool IsMeshValid();
 
         void ReverseEdgesOrder();
-        void GetHEvertices(HeIndx halfEdge, pair<glm::uint32, glm::uint32>* vertexPair);
+        void GetHEvertices(HeIndx halfEdge, pair<blaU32, blaU32>* vertexPair);
         void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
-        bool GetSurroundingVertices(glm::uint32 vertexIndx, vector<DestVertex> &surroundingVertices);
-        bool GetSurroundingTriangles(glm::uint32 vertexIndx, vector<FaceIndx> &surroundingFaces);
-        bool GetEmanatingHalfEdges(glm::uint32 vertexIndx, vector<HeIndx> &edges);
-        void GetTriangleEdges(glm::uint32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
+        bool GetSurroundingVertices(blaU32 vertexIndx, vector<DestVertex> &surroundingVertices);
+        bool GetSurroundingTriangles(blaU32 vertexIndx, vector<FaceIndx> &surroundingFaces);
+        bool GetEmanatingHalfEdges(blaU32 vertexIndx, vector<HeIndx> &edges);
+        void GetTriangleEdges(blaU32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
     };
 
     typedef struct RenderVertEntry_t
@@ -197,7 +197,7 @@ namespace BLAengine
 
     struct uintPairHash
     {
-        long operator()(const pair<glm::uint32, glm::uint32> &key) const
+        long operator()(const pair<blaU32, blaU32> &key) const
         {
             return (key.first * 0x1f1f1f1f) ^ key.second;
         }

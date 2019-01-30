@@ -19,15 +19,19 @@ namespace BLAengine
     {
         friend class BlaGuiMenuTab;
     public:
-        BlaGuiMenuItem(std::string name, blaBool* bool_switch) :
+        BlaGuiMenuItem(std::string name, blaBool* bool_switch, blaBool endWithSeparator = false) :
             m_name(name)
            ,m_switch(bool_switch)
+           ,m_endWithSeparator(endWithSeparator)
         {}
 
     private:
+        void Render();
+        
         std::string m_name;
         blaBool* m_switch;
-        void Render();
+
+        blaBool m_endWithSeparator;
     };
 
     class BlaGuiMenuTab

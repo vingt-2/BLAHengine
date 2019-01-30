@@ -274,7 +274,11 @@ blaBool BlaGuiManager::CloseFileBrowser(std::string browserName)
 void BlaGuiMenuItem::Render()
 {
     ImGui::MenuItem(m_name.c_str(), NULL, m_switch);
-    ImGui::Separator();
+    
+    if (m_endWithSeparator)
+    {
+        ImGui::Separator();
+    }
 }
 
 void BlaGuiMenuTab::Render()
@@ -351,7 +355,7 @@ void BlaFileBrowser::Render()
 
     if (m_currentState == FileBrowserState::BROWSING_FIRST_RENDER)
     {
-        ImGui::SetColumnWidth(200, 0);
+        ImGui::SetColumnWidth(0, 150);
         m_currentState = FileBrowserState::BROWSING;
     }
 
@@ -473,7 +477,7 @@ void SaveFilePrompt::Render()
         {
             if (StringSanitize(txtInput).length() > 0)
             {
-				m_currentSavePath = m_currentFilesDirectory + txtInput;
+                m_currentSavePath = m_currentFilesDirectory + txtInput;
                 m_currentState = FileBrowserState::CONFIRMED_SELECTION;
             }
         }

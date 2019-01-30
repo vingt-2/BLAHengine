@@ -45,7 +45,7 @@ void BLAengine::PBRMeshComponent::SampleSurface(blaVec3 &pos, float& prob)
 
         for (int k = 0; k < 3; k++)
         {
-            glm::uint32 vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
+            blaU32 vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
             contactVertices[k] = mesh->m_triVertices->at((int)vertPosIndex);
         }
 
@@ -76,9 +76,9 @@ void BLAengine::PBRMeshComponent::SampleSurfaceWithNormal(blaVec3 & position, bl
 
         for (int k = 0; k < 3; k++)
         {
-            glm::uint32 vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
+            blaU32 vertPosIndex = mesh->m_vertPosIndices->at(3 * randomIndex + k);
             contactVertices[k] = mesh->m_triVertices->at((int)vertPosIndex);
-            glm::uint32 vertNormalIndex = mesh->m_vertNormalIndices->at(3 * randomIndex + k);
+            blaU32 vertNormalIndex = mesh->m_vertNormalIndices->at(3 * randomIndex + k);
             if (mesh->m_triNormals->size() != 0) contactNormals[k] = mesh->m_triNormals->at((int)vertNormalIndex);
         }
 
@@ -126,7 +126,7 @@ void PBRMeshComponent::ComputeSurfaceArea()
 
             for (int k = 0; k < 3; k++)
             {
-                glm::uint32 vertPosIndex = meshColliderComponent->m_vertPosIndices->at(3 * i + k);
+                blaU32 vertPosIndex = meshColliderComponent->m_vertPosIndices->at(3 * i + k);
                 contactVertices[k] = meshColliderComponent->m_triVertices->at((int)vertPosIndex);
             }
             float triArea = length(cross(contactVertices[1] - contactVertices[0], contactVertices[2] - contactVertices[0])) / 2.0f;

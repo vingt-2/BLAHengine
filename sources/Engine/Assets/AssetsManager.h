@@ -41,7 +41,7 @@ namespace BLAengine
 
     private:
 
-        map<std::string, std::pair<AssetType, glm::uint32>> m_resourceMap;
+        map<std::string, std::pair<AssetType, blaU32>> m_resourceMap;
 
         vector<TriangleMesh*> m_triangleMeshesInMemory;
         vector<Material*> m_materialsInMemory;

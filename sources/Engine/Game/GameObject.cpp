@@ -21,7 +21,7 @@ void GameObject::Update()
     }
 }
 
-const ObjectTransform& GameObject::GetTransform() 
+const ObjectTransform& GameObject::GetTransform() const
 {
     return m_transform;
 }

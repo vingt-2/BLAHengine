@@ -15,7 +15,6 @@ namespace BLAengine
     {
     public:
         Scene();
-        ~Scene(); // TODO: IMPLEMENT!
 
         void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
         void Update();
@@ -26,15 +25,16 @@ namespace BLAengine
         vector<GameObject*> FindObjectsMatchingName(std::string name);
 
         void AddComponent(GameObject* object, GameComponent* component);
-        vector<GameObject*> GetObjects() { return m_sceneObjectsVector; }
+        const vector<GameObject>& GetObjects() const { return m_sceneObjectsVector; }
+        vector<GameObject>& GetObjects() { return m_sceneObjectsVector; }
         CameraComponent* GetMainCamera();
-        vector<Contact>* GetContacts();
+        vector<Contact>* GetContacts() const;
 
         bool m_enableSimulation;
 
-        void EnableGravity() { m_rigidBodySystem->m_enableGravity = true; }
-        void DisableGravity() { m_rigidBodySystem->m_enableGravity = false; }
-        bool GetGravity() { return m_rigidBodySystem->m_enableGravity; }
+        void EnableGravity() const { m_rigidBodySystem->m_enableGravity = true; }
+        void DisableGravity() const { m_rigidBodySystem->m_enableGravity = false; }
+        bool GetGravity() const { return m_rigidBodySystem->m_enableGravity; }
         RigidBodySystem* m_rigidBodySystem;
 
         void SetTimeObject(Timer* time);
@@ -45,7 +45,7 @@ namespace BLAengine
 
         CameraComponent* m_camera; //TODO: Find in object scene !
         RenderingManager* m_renderingManager;
-        vector<GameObject*>  m_sceneObjectsVector;
+        vector<GameObject>  m_sceneObjectsVector;
     };
 
 }

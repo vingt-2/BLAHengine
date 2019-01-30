@@ -3,9 +3,9 @@
 using namespace BLAengine;
 
 GL33Renderer::GL33Renderer():
-    debug_renderGBuffer(false),
+    m_debugDrawGBuffer(false),
     m_renderDebug(true),
-    m_clearColor(0.3,0.3,0.3)
+    m_clearColor(blaVec3(0.3,0.3,0.3))
 {}
 
 GL33Renderer::~GL33Renderer() {}
@@ -75,7 +75,7 @@ bool GL33Renderer::Update()
     RenderGBuffer();
 
     // Draw vignettes with buffer results (from Gbuffer pass)
-    if (debug_renderGBuffer)
+    if (m_debugDrawGBuffer)
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -408,11 +408,12 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
     GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT4 };
     glDrawBuffers(1, DrawBuffers);
 
+    glViewport(0, 0, m_renderSize.x, m_renderSize.y);
+
     // Clear Frame Buffer.
-    glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, 1.f);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
     // Use our shader
     GLuint prgmID = m_glResources.m_glLoadedProgramsIds["DirectionalLight"].m_loaded_id;
@@ -1231,7 +1232,7 @@ void GL33Renderer::RenderDebugLines()
     glUseProgram(0);
 }
 
-bool BLAengine::GL33Resources::GLLoadTexture(std::string resourcePath, Texture2D texture)
+bool GL33Resources::GLLoadTexture(std::string resourcePath, Texture2D texture)
 {
     // Create one OpenGL texture
     GLuint texID;
@@ -1260,7 +1261,7 @@ bool BLAengine::GL33Resources::GLLoadTexture(std::string resourcePath, Texture2D
     return true;
 }
 
-bool BLAengine::GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
+bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
 {
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -1328,7 +1329,7 @@ bool BLAengine::GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     return true;
 }
 
-bool BLAengine::GL33Resources::GLLoadSystemShaders()
+bool GL33Resources::GLLoadSystemShaders()
 {
     this->GLLoadShaderProgram(this->m_systemShaders.m_drawColorBufferPrgm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_drawDepthBufferPrgm);

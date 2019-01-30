@@ -7,23 +7,23 @@ TriangleMesh::TriangleMesh(std::string name): Asset(name) {}
 TriangleMesh::~TriangleMesh() {}
 
 void TriangleMesh::BuildMeshTopo(
-    vector<glm::uint32> vertPosIndices,
-    vector<glm::uint32> vertNormalIndices,
-    vector<glm::uint32> vertUVsIndices,
-    bool swapNormals)
+    vector<blaU32> vertPosIndices,
+    vector<blaU32> vertNormalIndices,
+    vector<blaU32> vertUVsIndices,
+    bool swapNormals = false)
 {
-    unordered_map<pair<glm::uint32, glm::uint32>, glm::uint32, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
-    vector<pair<glm::uint32, glm::uint32>> hePairs;
+    unordered_map<pair<blaU32, blaU32>, blaU32, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
+    vector<pair<blaU32, blaU32>> hePairs;
 
     m_heEmanatingFromVert.resize(vertPosIndices.size());
 
-    for (glm::uint32 i = 0; i < vertPosIndices.size(); i += 3) // For each triangle
+    for (blaU32 i = 0; i < vertPosIndices.size(); i += 3) // For each triangle
     {
-        glm::uint32 currentTriangle = i / 3;
+        blaU32 currentTriangle = i / 3;
 
-        glm::uint32 vindx0, vindx1, vindx2;
-        glm::uint32 nindx0, nindx1, nindx2;
-        glm::uint32 uvIndx0, uvIndx1, uvIndx2;
+        blaU32 vindx0, vindx1, vindx2;
+        blaU32 nindx0, nindx1, nindx2;
+        blaU32 uvIndx0, uvIndx1, uvIndx2;
 
         if (swapNormals)
         {
@@ -74,7 +74,7 @@ void TriangleMesh::BuildMeshTopo(
 
 
         // Populating map and list to easily find opposite edges afterwards.
-        glm::uint32 v0, v1, v2;
+        blaU32 v0, v1, v2;
 
         if (swapNormals)
         {
@@ -89,12 +89,12 @@ void TriangleMesh::BuildMeshTopo(
             v2 = vertPosIndices.at(i + 2);
         }
 
-        halfEdgesIndices[pair<glm::uint32, glm::uint32>(v0, v1)] = i;
-        halfEdgesIndices[pair<glm::uint32, glm::uint32>(v1, v2)] = i + 1;
-        halfEdgesIndices[pair<glm::uint32, glm::uint32>(v2, v0)] = i + 2;
-        hePairs.push_back(pair<glm::uint32, glm::uint32>(v0, v1));
-        hePairs.push_back(pair<glm::uint32, glm::uint32>(v1, v2));
-        hePairs.push_back(pair<glm::uint32, glm::uint32>(v2, v0));
+        halfEdgesIndices[pair<blaU32, blaU32>(v0, v1)] = i;
+        halfEdgesIndices[pair<blaU32, blaU32>(v1, v2)] = i + 1;
+        halfEdgesIndices[pair<blaU32, blaU32>(v2, v0)] = i + 2;
+        hePairs.push_back(pair<blaU32, blaU32>(v0, v1));
+        hePairs.push_back(pair<blaU32, blaU32>(v1, v2));
+        hePairs.push_back(pair<blaU32, blaU32>(v2, v0));
 
         // Populates m_vertEmanatingHE
         m_heEmanatingFromVert[v0] = i;
@@ -106,12 +106,12 @@ void TriangleMesh::BuildMeshTopo(
         m_meshTriangles.push_back(face);
     }
 
-    for (glm::uint32 i = 0; i < m_halfEdges.size(); i++)
+    for (blaU32 i = 0; i < m_halfEdges.size(); i++)
     {
         HalfEdge* edge = &(m_halfEdges.at(i));
 
-        pair<glm::uint32, glm::uint32> vertPair = hePairs[i];
-        pair<glm::uint32, glm::uint32> invertVertPair = pair<glm::uint32, glm::uint32>(vertPair.second, vertPair.first);
+        pair<blaU32, blaU32> vertPair = hePairs[i];
+        pair<blaU32, blaU32> invertVertPair = pair<blaU32, blaU32>(vertPair.second, vertPair.first);
         if (halfEdgesIndices.count(invertVertPair))
         {
             edge->oppositeHE = halfEdgesIndices[invertVertPair];
@@ -137,7 +137,7 @@ void TriangleMesh::NormalizeModelCoordinates(bool normalizeScale)
 
     centroid /= m_vertexPos.size();
 
-    for (glm::uint32 i = 0; i < m_vertexPos.size(); i++)
+    for (blaU32 i = 0; i < m_vertexPos.size(); i++)
     {
         m_vertexPos[i] -= centroid;
     }
@@ -150,7 +150,7 @@ void TriangleMesh::NormalizeModelCoordinates(bool normalizeScale)
             maxDistance = distance > maxDistance ? distance : maxDistance;
         }
 
-        for (glm::uint32 i = 0; i < m_vertexPos.size(); i++)
+        for (blaU32 i = 0; i < m_vertexPos.size(); i++)
         {
             m_vertexPos[i] /= maxDistance;
         }
@@ -172,8 +172,8 @@ void TriangleMesh::ComputeFaceTangents()
         blaVec3 q1 = m_vertexPos[v1.pos] - m_vertexPos[v0.pos];
         blaVec3 q2 = m_vertexPos[v2.pos] - m_vertexPos[v0.pos];
 
-        glm::vec2 st1 = m_vertexUVs[v1.UV] - m_vertexUVs[v0.UV];
-        glm::vec2 st2 = m_vertexUVs[v2.UV] - m_vertexUVs[v0.UV];
+        blaVec2 st1 = m_vertexUVs[v1.UV] - m_vertexUVs[v0.UV];
+        blaVec2 st2 = m_vertexUVs[v2.UV] - m_vertexUVs[v0.UV];
 
         float invScale = 1 / (st1.s*st2.t - st2.s*st1.t);
 
@@ -218,17 +218,17 @@ void TriangleMesh::ApplyUVScaling(glm::vec2 scaling)
 
 void TriangleMesh::GenerateRenderData()
 {
-    unordered_map<RenderVertEntry, glm::uint32, vertEntryHasher> vertexMap;
+    unordered_map<RenderVertEntry, blaU32, vertEntryHasher> vertexMap;
     
     m_renderData.m_triangleIndices.resize(3*this->m_meshTriangles.size());
 
-    for (glm::uint32 triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
+    for (blaU32 triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
     {
         HalfEdge edge0 = m_halfEdges[m_meshTriangles[triIndx].firstEdge];
         HalfEdge edge1 = m_halfEdges[edge0.nextHE];
         HalfEdge edge2 = m_halfEdges[edge1.nextHE];
 
-        for (glm::uint32 i = 0; i < 3; i++)
+        for (blaU32 i = 0; i < 3; i++)
         {
             HalfEdge edge;
 
@@ -285,7 +285,7 @@ void TriangleMesh::GenerateRenderData()
     }
 }
 
-void TriangleMesh::GenerateTopoTriangleIndices(vector<glm::uint32> &posIndices, vector<glm::uint32> &normalIndices)
+void TriangleMesh::GenerateTopoTriangleIndices(vector<blaU32> &posIndices, vector<blaU32> &normalIndices)
 {
     for (size_t triIndx = 0; triIndx < m_meshTriangles.size(); triIndx++)
     {
@@ -323,7 +323,7 @@ void TriangleMesh::ReverseEdgesOrder()
     // TODO: IMPLEMENT DAH
     //for (auto face : m_meshTriangles)
     //{
-    //    //glm::uint32 temp;
+    //    //blaU32 temp;
 
     //    //HalfEdge edge0 = m_halfEdges[face.firstEdge];
     //    //edge0.
@@ -332,7 +332,7 @@ void TriangleMesh::ReverseEdgesOrder()
     //}
 }
 
-void TriangleMesh::GetHEvertices(HeIndx halfEdge, pair<glm::uint32, glm::uint32>* vertexPair)
+void TriangleMesh::GetHEvertices(HeIndx halfEdge, pair<blaU32, blaU32>* vertexPair)
 {
     HalfEdge edge = m_halfEdges[halfEdge];
     vertexPair->first = edge.destVertex.pos;
@@ -360,12 +360,12 @@ void TriangleMesh::GetHETriangle(HeIndx halfEdge, FaceIndx* triangle)
     *triangle = m_halfEdges[halfEdge].borderingFace;
 }
 
-bool TriangleMesh::GetSurroundingVertices(glm::uint32 vertexIndx, vector<DestVertex> &surroundingVertices)
+bool TriangleMesh::GetSurroundingVertices(blaU32 vertexIndx, vector<DestVertex> &surroundingVertices)
 {
     HeIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
     HeIndx currentEdgeIndx = startEdgeIndx;
 
-    glm::uint32 failCount = 0;
+    blaU32 failCount = 0;
 
     HalfEdge edge;
     do
@@ -403,12 +403,12 @@ bool TriangleMesh::GetSurroundingVertices(glm::uint32 vertexIndx, vector<DestVer
     return true;
 }
 
-bool TriangleMesh::GetEmanatingHalfEdges(glm::uint32 vertexIndx, vector<HeIndx> &surroundingEdges)
+bool TriangleMesh::GetEmanatingHalfEdges(blaU32 vertexIndx, vector<HeIndx> &surroundingEdges)
 {
     HeIndx startEdgeIndx = m_heEmanatingFromVert[vertexIndx];
     HeIndx currentEdgeIndx = startEdgeIndx;
 
-    glm::uint32 failCount = 0;
+    blaU32 failCount = 0;
 
     HalfEdge edge;
     do
@@ -455,7 +455,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(glm::uint32 vertexIndx, vector<HeIndx> 
     return true;
 }
 
-bool TriangleMesh::GetSurroundingTriangles(glm::uint32 vertexIndx, vector<FaceIndx> &surroundingFaces)
+bool TriangleMesh::GetSurroundingTriangles(blaU32 vertexIndx, vector<FaceIndx> &surroundingFaces)
 {
     vector<HeIndx> emanatingEdges;
     
@@ -470,7 +470,7 @@ bool TriangleMesh::GetSurroundingTriangles(glm::uint32 vertexIndx, vector<FaceIn
     return problem;
 }
 
-void TriangleMesh::GetTriangleEdges(glm::uint32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2)
+void TriangleMesh::GetTriangleEdges(blaU32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2)
 {
     *edge0 = m_meshTriangles[triangle].firstEdge;
     *edge1 = m_halfEdges[*edge0].nextHE;

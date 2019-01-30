@@ -17,7 +17,7 @@ namespace BLAengine
         ~RenderingManager();
 
         blaU32 RegisterMeshRenderer(MeshRendererComponent* object);
-        bool         CancelMeshRendererTicket(MeshRendererComponent* object);
+        bool   CancelMeshRendererTicket(MeshRendererComponent* object);
 
         blaU32 RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera);
         blaU32 CancelDirectionalLightTicket(DirectionalLight* dirLight);
@@ -47,6 +47,7 @@ namespace BLAengine
         ~DebugRenderingManager() {};
 
         vector<pair<vector<blaVec3>, vector<blaVec3>>> m_lineMeshes;
+        std::unordered_map<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
 
         void LoadDebugLineMesh(pair<vector<blaVec3>, vector<blaVec3>>& lineMesh);
 

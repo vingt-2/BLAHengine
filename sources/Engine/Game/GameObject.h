@@ -16,7 +16,7 @@ namespace BLAengine
 
         void Update();
 
-        const ObjectTransform& GetTransform();
+        const ObjectTransform& GetTransform() const;
         void SetTransform(const ObjectTransform& transform);
 
         GameObject(string name);

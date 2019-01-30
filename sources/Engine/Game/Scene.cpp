@@ -4,28 +4,22 @@
 
 using namespace BLAengine;
 
+#pragma optimize("", off)
 
 Scene::Scene()
 {
     this->m_enableSimulation = true;
     this->m_rigidBodySystem = new RigidBodySystem(nullptr);
-    this->m_sceneObjectsVector = vector<GameObject*>();
     this->m_camera = nullptr;
     this->m_renderingManager = nullptr;
-}
-
-Scene::~Scene()
-{
-    // TODO: DO SOME STUFF. YO
+    m_sceneObjectsVector.reserve(1000);
 }
 
 GameObject* Scene::CreateObject(std::string name)
 {
-    GameObject* newObject = new GameObject(name);
+    m_sceneObjectsVector.emplace_back(GameObject(name));
 
-    m_sceneObjectsVector.push_back(newObject);
-
-    return newObject;
+    return &(m_sceneObjectsVector[m_sceneObjectsVector.size() - 1]);
 }
 
 bool BLAengine::Scene::DeleteObject(std::string name)
@@ -46,7 +40,7 @@ GameObject* BLAengine::Scene::FindObjectByName(std::string name)
 {
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObject* object = m_sceneObjectsVector[i];
+        GameObject* object = &(m_sceneObjectsVector[i]);
         if (object->GetName().compare(name) == 0)
         {
             return object;
@@ -61,7 +55,7 @@ vector<GameObject*> Scene::FindObjectsMatchingName(std::string name)
 
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObject* object = m_sceneObjectsVector[i];
+        GameObject* object = &(m_sceneObjectsVector[i]);
         if (object->GetName().find(name) != std::string::npos)
         {
             results.push_back(object);
@@ -103,7 +97,7 @@ void Scene::Update()
 
     for(size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObject* object = m_sceneObjectsVector[i];
+        GameObject* object = &(m_sceneObjectsVector[i]);
 
         object->Update();
 
@@ -128,9 +122,9 @@ void Scene::Update()
         {
             if (!pbrenderer->m_shouldRender)
                 continue;
-            for (auto object : m_sceneObjectsVector)
+            for (auto& object : m_sceneObjectsVector)
             {
-                if (PBRSurfaceComponent* obj = object->GetComponent<PBRSurfaceComponent>())
+                if (PBRSurfaceComponent* obj = object.GetComponent<PBRSurfaceComponent>())
                 {
                     pbrenderer->AddObject(obj);
                 }
@@ -144,9 +138,9 @@ CameraComponent* BLAengine::Scene::GetMainCamera()
 {
     if (m_camera == nullptr)
     {
-        for (auto object : m_sceneObjectsVector)
+        for (auto& object : m_sceneObjectsVector)
         {
-            CameraComponent* camera = object->GetComponent<CameraComponent>();
+            CameraComponent* camera = object.GetComponent<CameraComponent>();
             if (camera != nullptr && !camera->m_isShadowMapCamera)
             {
                 m_camera = camera;
@@ -157,21 +151,21 @@ CameraComponent* BLAengine::Scene::GetMainCamera()
     return m_camera;
 }
 
-vector<Contact>* Scene::GetContacts()
+vector<Contact>* Scene::GetContacts() const
 {
     return &(this->m_rigidBodySystem->m_collisionProcessor->m_currentContacts);
 }
 
 std::pair<GameObject*, ColliderComponent::RayCollision>  Scene::PickGameObjectInScene(Ray ray)
 {
-    vector<GameObject*> objects = m_sceneObjectsVector;
+    vector<GameObject>& objects = m_sceneObjectsVector;
 
     float minDistance = MAX_NORMAL_FLOAT;
     GameObject* pickedObject = nullptr;
     ColliderComponent::RayCollision closestContact;
-    for (auto obj : objects)
+    for (auto& obj : objects)
     {
-        ColliderComponent* collider = obj->GetComponent<ColliderComponent>();
+        ColliderComponent* collider = obj.GetComponent<ColliderComponent>();
 
         if (collider == nullptr)
             continue;
@@ -181,15 +175,15 @@ std::pair<GameObject*, ColliderComponent::RayCollision>  Scene::PickGameObjectIn
         if (!contactPoint.m_isValid)
             continue;
 
-        float distance = glm::dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
+        const float distance = glm::dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
 
         if (distance > 0 && distance < minDistance)
         {
             minDistance = distance;
-            pickedObject = obj;
+            pickedObject = &obj;
             closestContact = contactPoint;
         }
     }
 
-    return std::pair<GameObject*, ColliderComponent::RayCollision>(pickedObject, closestContact);
+    return{ pickedObject, closestContact };
 }

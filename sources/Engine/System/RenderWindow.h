@@ -15,7 +15,7 @@ namespace BLAengine
     class BLACORE_API RenderWindow
     {
     public:
-        RenderWindow() {};
+        RenderWindow() = default;
         ~RenderWindow() {};
 
         virtual void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;

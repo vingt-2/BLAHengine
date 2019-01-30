@@ -5,13 +5,7 @@ OBJImport::OBJImport(void) :
     m_currentMaxVertexPos(0),
     m_currentMaxUVPos(0),
     m_currentMaxNormalPos(0)
-{
-}
-
-
-OBJImport::~OBJImport(void)
-{
-} 
+{}
 
 bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalScale)
 {
@@ -22,7 +16,7 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
     ifstream fileStream (filename,ifstream::in);
     string lineInFile = " ";
 
-    vector<glm::uint32> vertexIndices, uvIndices, normalIndices;
+    vector<blaU32> vertexIndices, uvIndices, normalIndices;
 
     int quadsCount = 0;
     int missedFaces = 0;

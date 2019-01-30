@@ -10,7 +10,7 @@ namespace BLAengine
         bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
 
         OBJImport(void);
-        ~OBJImport(void);
+        ~OBJImport(void) = default;
 
     private:
 

@@ -62,9 +62,9 @@ public:
             dvert.UV = UV;
         }
 
-        glm::uint32 pos; // Vertex the HE points to.
-        glm::uint32 normal; // Normals at the destination Vertex (may be unique to this face)
-        glm::uint32 UV; // UV at the destination Vertex (may be unique to this face)
+        blaU32 pos; // Vertex the HE points to.
+        blaU32 normal; // Normals at the destination Vertex (may be unique to this face)
+        blaU32 UV; // UV at the destination Vertex (may be unique to this face)
 
     private:
         friend class cereal::access;

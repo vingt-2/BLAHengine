@@ -136,6 +136,8 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
+    //glfwWindowHint(GLFW_DECORATED, false);
+
     // Open a window and create its OpenGL context
     GLFWmonitor* monitor = nullptr;
 

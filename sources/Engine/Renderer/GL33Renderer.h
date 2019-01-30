@@ -77,7 +77,7 @@ namespace BLAengine
 
         blaMat4* m_modelTransform;
 
-        const vector<glm::uint32>* m_toMeshTriangles;
+        const vector<blaU32>* m_toMeshTriangles;
         const vector<blaVec3>* m_toMeshVertices;
         const vector<blaVec3>* m_toMeshNormals;
         const vector<blaVec3>* m_toMeshTangents;
@@ -143,7 +143,7 @@ namespace BLAengine
         // External References 
         AssetManager* m_assetManager;
         
-        bool debug_renderGBuffer;
+        bool m_debugDrawGBuffer;
 
         bool m_renderDebug;
 

@@ -8,157 +8,184 @@ class IntrusiveTree
 {
 public:
 
-	class Iterator
-	{
-	public:
-		typedef Iterator self_type;
+    class ChildrenIterator
+    {
+    public:
+        typedef ChildrenIterator self_type;
 
-		typedef std::forward_iterator_tag Iterator_category;
-		typedef int difference_type;
-		Iterator(T* ptr) : ptr_(ptr) { }
-		self_type operator++() { self_type i = *this; ptr_ = static_cast<IntrusiveTree<T>*>(ptr_)->GetNext(); return i; }
-		self_type operator++(int junk) { ptr_ = static_cast<IntrusiveTree<T>*>(ptr_)->GetNext(); return *this; }
-		T& operator*() { return *ptr_; }
-		T* operator->() { return ptr_; }
-		bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
-		bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
-	private:
-		T* ptr_;
-	};
+        typedef std::forward_iterator_tag Iterator_category;
+        typedef int difference_type;
+        ChildrenIterator(T* ptr) : ptr_(ptr) { }
+        self_type operator++() { self_type i = *this; ptr_ = static_cast<IntrusiveTree<T>*>(ptr_)->GetNext(); return i; }
+        self_type operator++(int junk) { ptr_ = static_cast<IntrusiveTree<T>*>(ptr_)->GetNext(); return *this; }
+        T& operator*() { return *ptr_; }
+        T* operator->() { return ptr_; }
+        bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
+        bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
+    private:
+        T* ptr_;
+    };
 
-	IntrusiveTree():
-		m_child(nullptr), m_next(nullptr)
-	{};
+    IntrusiveTree():
+        m_child(nullptr), m_next(nullptr)
+    {};
 
-	IntrusiveTree(IntrusiveTree<T>& otherIntrusiveTree):
-		m_child(otherIntrusiveTree.GetChild()), m_next(otherIntrusiveTree.GetNext())
-	{};
+    IntrusiveTree(IntrusiveTree<T>& otherIntrusiveTree):
+        m_child(otherIntrusiveTree.GetChild()), m_next(otherIntrusiveTree.GetNext())
+    {};
 
-	~IntrusiveTree()
-	{
-		auto child = m_child;
-		while(child != nullptr)
-		{
-			auto nextChild = child->m_next;
-			delete child;
-			child = nextChild;
-		}
-	}
+    ~IntrusiveTree()
+    {
+        auto child = m_child;
+        while(child != nullptr)
+        {
+            auto nextChild = child->m_next;
+            delete child;
+            child = nextChild;
+        }
+    }
 
-	T* GetChild()
-	{
-		return m_child;
-	}
+    T* GetChild()
+    {
+        return m_child;
+    }
 
-	const T* GetChild() const
-	{
-		return m_child;
-	}
+    const T* GetChild() const
+    {
+        return m_child;
+    }
 
-	void AddChild(T* childToAdd)
-	{
-		IntrusiveTree<T>* child = m_child;
+    void AddChild(T* childToAdd)
+    {
+        if (m_child == nullptr)
+        {
+            m_child = childToAdd;
+        }
+        else
+        {
+            IntrusiveTree<T>* child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
 
-		if(child == nullptr)
-		{
-			m_child = childToAdd;
-			return;
-		}
+            while (child->m_next != nullptr)
+            {
+                child = reinterpret_cast<IntrusiveTree<T>*>(child->m_next);
+            }
+            child->m_next = childToAdd;
+        }
 
-		while (child->m_next != nullptr)
-		{
-			child = child->m_next;
-		}
-		child->m_next = childToAdd;
-	}
+        reinterpret_cast<IntrusiveTree<T>*>(childToAdd)->m_parent = reinterpret_cast<T*>(this);
+    }
 
-	T* GetNext()
-	{
-		return m_next;
-	}
+    blaBool AddChildAfterNode(T* childToAdd, T* previousNode)
+    {
+        if (m_child == nullptr)
+        {
+            return false;
+        }
 
-	const T* GetNext() const
-	{
-		return m_next;
-	}
+        if (m_child == previousNode)
+        {
+            m_next = childToAdd;
+            reinterpret_cast<IntrusiveTree<T>*>(childToAdd)->m_parent = reinterpret_cast<T*>(this);
 
-	T* GetUnderlying()
-	{
-		return static_cast<T*>(this);
-	}
+            return true;
+        }
+        
+        IntrusiveTree<T>* child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
+        blaBool result = false;
+        while (child->m_next != nullptr)
+        {
+            if (child->m_next == previousNode)
+            {
+                child = reinterpret_cast<IntrusiveTree<T>*>(child->m_next);
 
-	blaU32 GetNumberChildren() const
-	{
-		auto child = static_cast<IntrusiveTree<T>*>(m_child);
+                T* previousNext = child->m_next;
 
-		blaU32 count = 0;
-		while (child != nullptr)
-		{
-			++count;
-			child = child->GetNext();
-		}
+                child->m_next = childToAdd;
 
-		return count;
-	}
+                IntrusiveTree<T*> addedChild = reinterpret_cast<IntrusiveTree<T*>>(childToAdd);
+                addedChild->m_next = previousNext;
+                addedChild.m_parent = reinterpret_cast<T*>(this);
+            }
+        }
 
-	blaBool HasChild(T* value) const
-	{
-		auto child = static_cast<IntrusiveTree<T>*>(m_child);
-		while (child != nullptr)
-		{
-			if (child == value)
-			{
-				return true;
-			}
-			child = child->m_next;
-		}
-		return false;
-	}
+        return result;
+    }
 
-	Iterator begin()
-	{
-		return Iterator(m_child);
-	}
+    T* GetNext()
+    {
+        return m_next;
+    }
 
-	Iterator end()
-	{
-		return Iterator(nullptr);
-	}
+    const T* GetNext() const
+    {
+        return m_next;
+    }
 
-	Iterator begin() const
-	{
-		return Iterator(m_child);
-	}
+    T* GetParent()
+    {
+        return m_parent;
+    }
 
-	Iterator end() const
-	{
-		return Iterator(nullptr);
-	}
+    const T* GetParent() const
+    {
+        return m_parent;
+    }
+
+    T* GetUnderlying()
+    {
+        return reinterpret_cast<T*>(this);
+    }
+
+    blaU32 GetNumberChildren() const
+    {
+        auto child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
+
+        blaU32 count = 0;
+        while (child != nullptr)
+        {
+            ++count;
+            child = child->GetNext();
+        }
+
+        return count;
+    }
+
+    blaBool HasChild(T* value) const
+    {
+        auto child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
+        while (child != nullptr)
+        {
+            if (child == value)
+            {
+                return true;
+            }
+            child = child->m_next;
+        }
+        return false;
+    }
+
+    ChildrenIterator begin()
+    {
+        return ChildrenIterator(m_child);
+    }
+
+    ChildrenIterator end()
+    {
+        return ChildrenIterator(nullptr);
+    }
+
+    ChildrenIterator begin() const
+    {
+        return ChildrenIterator(m_child);
+    }
+
+    ChildrenIterator end() const
+    {
+        return ChildrenIterator(nullptr);
+    }
 
 protected:
-	T* m_next;
-	T* m_child;
+    T* m_parent;
+    T* m_next;
+    T* m_child;
 };
-
-//template<class T>
-//class TreeIterator
-//{
-//	// ... state variables ...
-//
-//public:
-//	// Constructor
-//	TreeIterator(IntrusiveTree<T>* ptr)
-//	{
-//		return ptr;
-//	}
-//
-//	TreeIterator& operator++() { /* increment */ return (*this).m_next; }
-//
-//	IntrusiveTree<T> operator*() const { return *this; }
-//
-//	bool operator!= (const TreeIterator& o) const
-//	{
-//		return this == o;
-//	}
-//};
-//

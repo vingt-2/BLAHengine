@@ -26,13 +26,11 @@ void main()
     
     vec4 bufferPosProjected = MVP * vec4(texture(worldPosMap, screenToUV(p.xy)).rgb, 1.0f);
 	
-	//bufferPosProjected /= bufferPosProjected.w;
-	
     vec3 backPixelColor = texture(displayBuffer, screenToUV(p.xy)).rgb;
     
-    float alphablend = position.z > bufferPosProjected.z ? 0.2f : 1.f;
+    float alphablend = position.z > bufferPosProjected.z ? 0.05f : 1.f;
 	
-	alphablend *= 1 - pow(gl_FragCoord.z,50);
+	alphablend *= clamp((100-position.z) / 40, 0.f, 1.f);
 
     color = vec4((alphablend) * vertexColor + (1-alphablend) * backPixelColor, 1);
 }

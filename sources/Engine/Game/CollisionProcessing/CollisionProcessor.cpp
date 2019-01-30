@@ -104,12 +104,12 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
 
     //        for (int k = 0; k < 3; k++)
     //        {
-    //            glm::uint32 vertIndexK1 = body1->m_collider->m_vertIndices->at(3 * triIndexBody1 + k);
+    //            blaU32 vertIndexK1 = body1->m_collider->m_vertIndices->at(3 * triIndexBody1 + k);
 
     //            body1ContactVertices[k] = body1->m_collider->m_triVertices->at((int)vertIndexK1);
     //            if (body1->m_collider->m_triNormals->size() != 0) body1ContactNormals[k] = body1->m_collider->m_triNormals->at((int)vertIndexK1);
 
-    //            glm::uint32 vertIndexK2 = body2->m_collider->m_vertIndices->at(3 * triIndexBody2 + k);
+    //            blaU32 vertIndexK2 = body2->m_collider->m_vertIndices->at(3 * triIndexBody2 + k);
 
     //            body2ContactVertices[k] = body2->m_collider->m_triVertices->at((int)vertIndexK2);
     //            if (body2->m_collider->m_triNormals->size() != 0) body2ContactNormals[k] = body2->m_collider->m_triNormals->at((int)vertIndexK2);

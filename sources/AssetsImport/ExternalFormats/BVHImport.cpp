@@ -15,7 +15,7 @@ using namespace std;
 using namespace BLAengine;
 
 //TODO: Extract asset data to the Asset folder out of Engine/Game
-#include "../../Engine/Game/Animation/SkeletonAnimationData.h"
+#include <Engine/Game/Animation/SkeletonAnimationData.h>
 
 void InvalidBVH()
 {
