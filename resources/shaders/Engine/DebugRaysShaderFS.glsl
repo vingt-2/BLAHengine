@@ -30,7 +30,7 @@ void main()
     
     float alphablend = position.z > bufferPosProjected.z ? 0.05f : 1.f;
 	
-	alphablend *= clamp((100-position.z) / 40, 0.f, 1.f);
+	alphablend *= clamp((100-position.z) / 20, 0.f, 1.f);
 
     color = vec4((alphablend) * vertexColor + (1-alphablend) * backPixelColor, 1);
 }

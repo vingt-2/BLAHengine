@@ -1,7 +1,7 @@
 // CRC32 Table (zlib polynomial)
+#pragma once
 
 #include <Common/System.h>
-
 
 static constexpr unsigned int crc_table[256] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -51,7 +51,8 @@ static constexpr unsigned int crc_table[256] = {
 
 
 template<int size, int idx = 0, class dummy = void>
-struct MM{
+struct MM
+{
     static constexpr unsigned int crc32(const char * str, unsigned int prev_crc = 0xFFFFFFFF)
     {
         return MM<size, idx + 1>::crc32(str, (prev_crc >> 8) ^ crc_table[(prev_crc ^ str[idx]) & 0xFF]);
@@ -60,7 +61,8 @@ struct MM{
 
 // This is the stop-recursion function
 template<int size, class dummy>
-struct MM<size, size, dummy>{
+struct MM<size, size, dummy>
+{
     static constexpr unsigned int crc32(const char * str, unsigned int prev_crc = 0xFFFFFFFF)
     {
         return prev_crc ^ 0xFFFFFFFF;
