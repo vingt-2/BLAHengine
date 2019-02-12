@@ -1,38 +1,28 @@
 #pragma once
-#include "Asset.h"
+
 #include <Common/Maths/Maths.h>
 #include <Common/StdInclude.h>
 
 namespace BLAengine
 {
-    class BLACORE_API RenderData
+    struct BLACORE_API RenderData
     {
-    public:
-
-        vector<blaU32> m_triangleIndices;
+        vector<blaU32>  m_triangleIndices;
         vector<blaVec3> m_vertPos;
         vector<blaVec3> m_vertNormal;
         vector<blaVec3> m_vertTangent;
         vector<blaVec3> m_vertBiTangent;
-        vector<glm::vec2> m_vertUVs;
-
-        RenderData() {};
-        ~RenderData()
-        {
-            m_triangleIndices.clear();
-            m_vertPos.clear();
-            m_vertNormal.clear();
-            m_vertTangent.clear();
-            m_vertBiTangent.clear();
-            m_vertUVs.clear();
-        }
+        vector<blaVec2> m_vertUVs;
     };
 
-    class BLACORE_API TriangleMesh : public Asset
+    class BLACORE_API TriangleMesh
     {
     public:
         typedef blaU32 HeIndx;
         typedef blaU32 FaceIndx;
+
+        TriangleMesh() = default;
+        ~TriangleMesh() = default;
 
         typedef struct face_t
         {
@@ -78,9 +68,6 @@ namespace BLAengine
         int m_manifoldViolationEdges = 0;
 
         RenderData m_renderData;
-
-        TriangleMesh(string name);
-        ~TriangleMesh();
 
         void BuildMeshTopo(
             vector<blaU32> vertPosIndices,

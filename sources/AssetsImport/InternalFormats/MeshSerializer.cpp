@@ -41,9 +41,11 @@ void TriangleMeshSerializer::vec2serializerVectorTovec2(std::vector<glm::vec2> &
     }
 }
 
-void TriangleMeshSerializer::BuildFromMesh(TriangleMesh* triangleMesh)
+void TriangleMeshSerializer::BuildFromMesh(MeshAsset* meshAsset)
 {
-    m_name = triangleMesh->GetName();
+    m_name = meshAsset->GetName();
+
+    TriangleMesh* triangleMesh = &meshAsset->m_triangleMesh;
 
     m_meshTriangles.resize(triangleMesh->m_meshTriangles.size());
 
@@ -76,9 +78,11 @@ void TriangleMeshSerializer::BuildFromMesh(TriangleMesh* triangleMesh)
     vec2VectorToSerializer(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
 }
 
-TriangleMesh* TriangleMeshSerializer::BuildMesh()
+MeshAsset* TriangleMeshSerializer::BuildMesh()
 {
-    TriangleMesh* triangleMesh = new TriangleMesh(m_name);
+    MeshAsset* meshAsset = new MeshAsset(m_name);
+
+    TriangleMesh* triangleMesh = &(meshAsset->m_triangleMesh);
 
     triangleMesh->m_meshTriangles.resize(m_meshTriangles.size());
 
@@ -111,5 +115,5 @@ TriangleMesh* TriangleMeshSerializer::BuildMesh()
     vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertBiTangent, m_renderData.vertBiTangent);
     vec2serializerVectorTovec2(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
 
-    return triangleMesh;
+    return meshAsset;
 }

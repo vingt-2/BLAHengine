@@ -6,7 +6,6 @@
 #include <AssetsImport/InternalFormats/TextureSerializer.h>
 #include <AssetsImport/InternalFormats/MaterialSerializer.h>
 
-
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
@@ -67,7 +66,7 @@ int BLAengine::AssetManager::LoadCookedAssets()
     return triMeshNames.size() + matNames.size() + textureNames.size();
 }
 
-AssetManager::AssetType BLAengine::AssetManager::GetAsset(std::string filepath, Asset* &assetPtr)
+AssetManager::AssetType AssetManager::GetAsset(std::string filepath, Asset* &assetPtr)
 {
     AssetType type;
     if (!m_resourceMap.count(filepath))
@@ -85,7 +84,7 @@ AssetManager::AssetType BLAengine::AssetManager::GetAsset(std::string filepath, 
     {
         case AssetType::TriangleMeshAsset:
         {
-            TriangleMesh* meshPtr = m_triangleMeshesInMemory.at(assetIndx);
+            MeshAsset* meshPtr = m_triangleMeshesInMemory.at(assetIndx);
             if (assetPtr = (Asset*) dynamic_cast<Asset*>(meshPtr))
             {
                 return TriangleMeshAsset;
@@ -136,7 +135,7 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 
     input(meshSerializer);
 
-    TriangleMesh* triangleMesh = meshSerializer.BuildMesh();
+    MeshAsset* triangleMesh = meshSerializer.BuildMesh();
     m_triangleMeshesInMemory.push_back(triangleMesh);
 
     blaU32 indx = m_triangleMeshesInMemory.size() - 1;
@@ -258,7 +257,7 @@ bool BLAengine::AssetManager::SaveTexture(Texture2D * tex)
     return true;
 }
 
-bool AssetManager::SaveTriangleMesh(TriangleMesh* mesh)
+bool AssetManager::SaveTriangleMesh(MeshAsset* mesh)
 {
     TriangleMeshSerializer meshSerializer;
 

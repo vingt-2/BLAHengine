@@ -6,7 +6,7 @@
 #include <cereal\archives\binary.hpp>
 
 #include <Common/Maths/Maths.h>
-#include <Engine/Assets/PolygonalMesh.h>
+#include <Engine/Assets/MeshAsset.h>
 
 #include "MathSerializer.h"
 
@@ -153,8 +153,8 @@ public:
     void vec3serializerVectorTovec3(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector);
     void vec2serializerVectorTovec2(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector);
 
-    void BuildFromMesh(BLAengine::TriangleMesh* triangleMesh);
-    BLAengine::TriangleMesh* BuildMesh();
+    void BuildFromMesh(BLAengine::MeshAsset* triangleMesh);
+    BLAengine::MeshAsset* BuildMesh();
 
 private:
 
@@ -164,7 +164,7 @@ private:
         
     std::vector<FaceSerializer> m_meshTriangles;
     std::vector<HalfEdgeSerializer> m_halfEdges;
-    std::vector<unsigned int> m_heEmanatingFromVert;
+    std::vector<blaU32> m_heEmanatingFromVert;
     std::vector<vec3serializer> m_vertexPos;
     std::vector<vec3serializer> m_vertexNormals;
     std::vector<vec2serializer> m_vertexUVs;

@@ -31,6 +31,4 @@ namespace BLAengine
         static Texture2D* LoadBMP(string name, string filePath);
         static Texture2D* LoadDDS(string name, string filePath);
     };
-
-
 }

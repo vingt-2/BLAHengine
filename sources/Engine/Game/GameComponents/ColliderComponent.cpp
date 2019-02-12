@@ -150,8 +150,6 @@ ColliderComponent::RayCollision SphereColliderComponent::CollideWithRay(Ray& ray
             contactPoint.m_isValid = true;
             contactPoint.m_colPositionW = ray.m_origin + ((float) t) * ray.m_direction;
             contactPoint.m_colPositionL = transform.WorldPositionToLocal(contactPoint.m_colPositionW);
-            
-            //printVector(contactPoint.m_colPositionW);
 
             contactPoint.m_colNormalW = (contactPoint.m_colPositionW - transform.GetPosition()) / m_boundingRadius;
 

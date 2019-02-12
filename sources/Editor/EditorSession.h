@@ -2,12 +2,14 @@
 
 #include <Common/StdInclude.h>
 #include <Engine/EngineInstance.h>
+#include <Engine/Assets/MeshAsset.h>
 
 namespace BLAengine
 {
     class CameraController;
     class GameObject;
     class EditorState;
+    class TriangleMesh;
 
     class BLACORE_API EditorSession : public EngineInstance
     {
@@ -18,7 +20,9 @@ namespace BLAengine
             m_frameIndex(0),
             m_lastTimePlayerInteraction(0.f),
             m_autoPlay(true),
-            m_lastIkSolveTime(0.f)
+            m_lastIkSolveTime(0.f),
+            m_testCone(MeshAsset("")),
+            m_testSphere(MeshAsset(""))
         {}
 
         void PreEngineUpdate() override;
@@ -49,6 +53,9 @@ namespace BLAengine
 
         void DoTestAnimationDemoStuff();
 
+        /*
+         * Editor State
+         */
         EditorState* m_editorState;
         CameraController* m_cameraController;
         GameObject* m_selectedObject;
@@ -65,5 +72,14 @@ namespace BLAengine
         void HandleLoadScenePrompt();
 
         void HandleSaveScenePrompt();
+
+        /*
+         *  Editor Data
+         */
+        /*TriangleMesh m_transformPositionGizmoMesh;
+        TriangleMesh m_transformOrientationGizmoMesh;
+        TriangleMesh m_transformScaleGizmoMesh;*/
+        MeshAsset m_testCone;
+        MeshAsset m_testSphere;
     };
 };

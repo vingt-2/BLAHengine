@@ -1,6 +1,6 @@
 #pragma once
 #include <Common\StdInclude.h>
-#include <Engine/Assets/PolygonalMesh.h>
+#include <Engine/Assets/MeshAsset.h>
 #include <Engine/Assets/Material.h>
 
 #include "GameComponent.h"
@@ -15,7 +15,7 @@ namespace BLAengine
 
         int m_renderTicket;
 
-        TriangleMesh* m_mesh;
+        MeshAsset* m_mesh;
 
         vector<Material*> m_materials;
 
@@ -24,7 +24,7 @@ namespace BLAengine
         MeshRendererComponent(GameObject* parentObject);
         ~MeshRendererComponent(void);
 
-        bool AssignTriangleMesh(TriangleMesh* mesh);
+        bool AssignTriangleMesh(MeshAsset* mesh);
         bool AssignMaterial(Material* material, int matIndx);
         
         blaMat4* GetTransformMatrix() const;

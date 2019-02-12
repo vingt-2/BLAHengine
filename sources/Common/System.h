@@ -38,3 +38,9 @@ namespace BLAColors
     static const glm::vec3 ORANGE = glm::vec3(1.f, 0.3f, 0.f);
 
 };
+
+#define BLA_ASSERT(Condition) \
+if(!(Condition))          \
+{                       \
+    __debugbreak();     \
+}                       

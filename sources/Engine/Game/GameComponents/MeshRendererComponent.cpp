@@ -25,7 +25,7 @@ string MeshRendererComponent::ToString()
     return "MeshRendererComponent ToString PLACEHOLDER";
 }
 
-bool MeshRendererComponent::AssignTriangleMesh(TriangleMesh* mesh)
+bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 {
     m_mesh = mesh;
 

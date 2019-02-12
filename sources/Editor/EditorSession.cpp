@@ -12,6 +12,7 @@
 #include <Engine/System/InputManager.h>
 #include <Engine/Gui/GuiManager.h>
 #include <Engine/Gui/GuiMenu.h>
+#include <Engine/Debug/PrimitiveGeometry.h>
 
 #include "EditorSession.h"
 
@@ -132,7 +133,10 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
     {
         m_editorState = new EditorState();
         m_editorState->m_type = EditorState::BLA_EDITOR_EDITING;
-        
+
+        /*
+         * Create The menu
+         */
         BlaGuiMenuTab fileMenu("File");
 
         fileMenu.AddMenu(BlaGuiMenuItem("New Scene", &m_editorStateRequests.m_newSceneRequest));
@@ -148,8 +152,40 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(settingsMenu);
 
+        /*
+         * Create and store gizmo meshes
+         */
+
+        m_testCone = MeshAsset("testCone");
+        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(100);
+
+        m_testSphere = MeshAsset("SkySphere");
+        m_testSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);
 
         LoadNewScene();
+        GameObject* discObject = m_workingScene->CreateObject("DiscObject");
+
+        BLA_CREATE_COMPONENT(MeshRendererComponent, discObject);
+        discObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testSphere);
+
+        int matIndex = 0;
+        Asset* materialAsset = nullptr;
+        if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+        {
+            discObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, matIndex);
+        }
+
+        GameObject* coneObject = m_workingScene->CreateObject("coneObject");
+
+        BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
+        coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
+
+        matIndex = 0;
+        materialAsset = nullptr;
+        if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+        {
+            coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, matIndex);
+        }
 
         return true;
     }
@@ -265,7 +301,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                     Asset* sphereMesh = nullptr;
                     this->m_assetManager->GetAsset("sphere", sphereMesh);
 
-                    meshCmp->AssignTriangleMesh((TriangleMesh*)sphereMesh);
+                    meshCmp->AssignTriangleMesh((MeshAsset*)sphereMesh);
 
                     auto meshCollider = BLA_CREATE_COMPONENT(MeshColliderComponent, object);
 

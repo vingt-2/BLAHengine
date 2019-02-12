@@ -1,6 +1,6 @@
 #pragma once
 #include<Common\StdInclude.h>
-#include <Engine/Assets/PolygonalMesh.h>
+#include <Engine/Geometry/TriangleMesh.h>
 #include <Engine/Game/GameAlgebra/Ray.h>
 
 // Collision detection Library !

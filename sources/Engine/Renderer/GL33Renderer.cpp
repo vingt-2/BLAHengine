@@ -208,7 +208,7 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRe
 {
     GL33RenderObject* object = new GL33RenderObject();
     this->GenerateVertexArrayID(*object);
-    RenderData* renderData = &(meshRenderer.m_mesh->m_renderData);
+    RenderData* renderData = &(meshRenderer.m_mesh->m_triangleMesh.m_renderData);
     object->m_toMeshTriangles = &(renderData->m_triangleIndices);
     object->m_toMeshVertices = &(renderData->m_vertPos);
     object->m_toMeshNormals = &(renderData->m_vertNormal);
