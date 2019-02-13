@@ -1,9 +1,10 @@
 #pragma once
 #include <Common/StdInclude.h>
 #include <Engine/Game/ObjectTransform.h>
+#include <Engine/Game/GameObject.h>
 
 #define BLA_CREATE_COMPONENT(ComponentType, parentObject)\
-    parentObject != nullptr ? new ComponentType(parentObject) : nullptr;
+    parentObject.IsValid() ? new ComponentType(parentObject) : nullptr;
 
 namespace BLAengine
 {
@@ -12,15 +13,15 @@ namespace BLAengine
     {
     public:
 
-        GameComponent(GameObject* parentObject);
+        GameComponent(GameObjectReference parentObject);
 
         virtual void Update() = 0;
 
         const ObjectTransform& GetObjectTransform() const;
 
-        GameObject* GetParentObject() { return m_parentObject; };
+        GameObjectReference GetParentObject() const { return m_parentObject; };
 
     private:
-        GameObject* m_parentObject;
+        GameObjectReference m_parentObject;
     };
 }

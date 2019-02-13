@@ -4,7 +4,7 @@
 
 using namespace BLAengine;
 
-IKComponent::IKComponent(GameObject* parentObject) :
+IKComponent::IKComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_ikChain(nullptr)
 {}

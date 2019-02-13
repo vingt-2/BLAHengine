@@ -16,7 +16,7 @@ namespace BLAengine
 
         IKChainJoint* m_ikChain;
 
-        IKComponent(GameObject* parentObject);
+        IKComponent(GameObjectReference parentObject);
         ~IKComponent(void);
 
     private:

@@ -2,11 +2,12 @@
 #include <Common/Maths/Maths.h>
 #include <Common/StdInclude.h>
 
-#include "ColliderComponent.h"
+#include "GameComponent.h"
 
 namespace BLAengine
 {
-
+	class TriangleMesh;
+	class ColliderComponent;
     class BLACORE_API NextState
     {
     public:
@@ -66,7 +67,7 @@ namespace BLAengine
         blaVec3 GetTorquesAccu() const { return m_torquesAccu; };
         void ClearForces() { m_forcesAccu = blaVec3(0); m_torquesAccu = blaVec3(0); }
 
-        RigidBodyComponent(GameObject* parentObject);
+        RigidBodyComponent(GameObjectReference parentObject);
         ~RigidBodyComponent(void);
 
     private:

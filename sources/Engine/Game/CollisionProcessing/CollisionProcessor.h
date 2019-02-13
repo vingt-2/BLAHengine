@@ -1,12 +1,13 @@
 #pragma once
-#include <Engine/Game/GameComponents/RigidBodyComponent.h>
 
 #include <Common/StdInclude.h>
 #include <Engine/Game/Timer.h>
 
 namespace BLAengine
 {
-    class BLACORE_API Contact
+	class RigidBodyComponent;
+    
+	class BLACORE_API Contact
     {
     public:
         Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face);

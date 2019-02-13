@@ -18,7 +18,7 @@ namespace BLAengine
 
         void Update();
 
-        PointLightComponent(GameObject* parentObject);
+        PointLightComponent(GameObjectReference parentObject);
         
         ~PointLightComponent();
     private:

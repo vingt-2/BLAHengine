@@ -179,7 +179,7 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
-    GameObject* animatedObject = m_workingScene->CreateObject("AnimatedObject");
+	GameObjectReference animatedObject = m_workingScene->CreateObject("AnimatedObject");
 
     BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
@@ -212,18 +212,17 @@ void EditorSession::DoTestAnimationDemoStuff()
 
     Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
 
-    auto hoverHit = m_workingScene->PickGameObjectInScene(screenRay);
+	ColliderComponent::CollisionContact contactPoint;
+	GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
 
-    GameObject* hoverObject = (hoverHit.second.m_isValid && hoverHit.second.m_t < 100) ? hoverHit.first : nullptr;
-
-    if (hoverObject && inputs->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
+    if (hoverObject.IsValid() && inputs->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
     {
         m_guiManager->DrawText(hoverObject->GetName(), m_renderWindow->GetMousePositionInWindow());
     }
 
-    GameObject* animationObject = m_workingScene->FindObjectByName("AnimatedObject");
+    GameObjectReference animationObject = m_workingScene->FindObjectByName("AnimatedObject");
 
-    if (animationObject != nullptr)
+    if (animationObject.IsValid())
     {
         if (auto ikCmp = animationObject->GetComponent<IKComponent>())
         {
@@ -250,7 +249,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                 int c = 0;
                 for (auto endEffector : ikCmp->m_ikChain->GetEndEffectors())
                 {
-                    GameObject* object;
+                    GameObjectReference object;
                     if (endEffector->m_joint != nullptr)
                     {
                         object = m_workingScene->CreateObject("EffectorHandles_" + endEffector->m_joint->GetName());
@@ -286,7 +285,8 @@ void EditorSession::DoTestAnimationDemoStuff()
                 IKChainJoint::GetBoneArray(bones, *ikCmp->m_ikChain);
                 IKChainJoint::GetJointTransforms(jointTransforms, *ikCmp->m_ikChain);
 
-                vector<GameObject*> effectorHandles = m_workingScene->FindObjectsMatchingName("EffectorHandles_");
+                vector<GameObjectReference> effectorHandles = m_workingScene->FindObjectsMatchingName("EffectorHandles_");
+
                 vector<blaVec3> desiredPos;
                 for (auto obj : effectorHandles)
                 {
@@ -388,15 +388,15 @@ void EditorSession::DoTestAnimationDemoStuff()
     }
     if (leftMouseButton.IsFallingEdge())
     {
-        m_selectedObject = nullptr;
+        m_selectedObject = GameObjectReference();
     }
 
-    if (m_selectedObject != nullptr)
+    if (m_selectedObject.IsValid())
     {
         if (m_selectedObject->GetName().find("EffectorHandles_") != string::npos)
         {
             Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
-            GameObject* camera = m_workingScene->GetMainCamera()->GetParentObject();
+            GameObjectReference camera = m_workingScene->GetMainCamera()->GetParentObject();
 
             blaVec3 camUp, camLeft;
 

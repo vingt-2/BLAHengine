@@ -1,9 +1,13 @@
 #pragma once
 #include <Common/StdInclude.h>
-#include <Engine/Game/CollisionProcessing/CollisionProcessor.h>
+#include <Common/Maths/Maths.h>
 
 namespace BLAengine
 {
+	class CollisionProcessor;
+	class Timer;
+	class RigidBodyComponent;
+
     class BLACORE_API RigidBodySystem
     {
     public:

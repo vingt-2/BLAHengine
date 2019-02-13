@@ -15,50 +15,49 @@ Scene::Scene()
     m_sceneObjectsVector.reserve(1000);
 }
 
-GameObject* Scene::CreateObject(std::string name)
+GameObjectReference Scene::CreateObject(std::string name)
 {
     m_sceneObjectsVector.emplace_back(GameObject(name));
 
-    return &(m_sceneObjectsVector[m_sceneObjectsVector.size() - 1]);
+    return GameObjectReference { m_sceneObjectsVector.size() - 1, &m_sceneObjectsVector };
 }
 
 bool BLAengine::Scene::DeleteObject(std::string name)
 {
-    GameObject* object = this->FindObjectByName(name);
+	//TODO: Keep a bitfield of valid game objects in the vector (don't actually clear it)
+    /*GameObjectReference object = this->FindObjectByName(name);
     if (!object)
         return false;
 
     for (auto meshRenderer : object->GetComponents<MeshRendererComponent>())
     {
         m_renderingManager->CancelMeshRendererTicket(meshRenderer);
-    }
+    }*/
 
     return true;
 }
 
-GameObject* BLAengine::Scene::FindObjectByName(std::string name)
+GameObjectReference BLAengine::Scene::FindObjectByName(std::string name)
 {
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObject* object = &(m_sceneObjectsVector[i]);
-        if (object->GetName().compare(name) == 0)
+        if (m_sceneObjectsVector[i].GetName().compare(name) == 0)
         {
-            return object;
+            return GameObjectReference(i, &m_sceneObjectsVector);
         }
     }
-    return nullptr;
+    return GameObjectReference::InvalidReference();
 }
 
-vector<GameObject*> Scene::FindObjectsMatchingName(std::string name)
+vector<GameObjectReference> Scene::FindObjectsMatchingName(std::string name)
 {
-    std::vector<GameObject*> results;
+    std::vector<GameObjectReference> results;
 
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObject* object = &(m_sceneObjectsVector[i]);
-        if (object->GetName().find(name) != std::string::npos)
+        if (m_sceneObjectsVector[i].GetName().find(name) != std::string::npos)
         {
-            results.push_back(object);
+            results.emplace_back(GameObjectReference(i, &m_sceneObjectsVector));
         }
     }
     return results;
@@ -97,7 +96,7 @@ void Scene::Update()
 
     for(size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObject* object = &(m_sceneObjectsVector[i]);
+        GameObjectReference object = &(m_sceneObjectsVector[i]);
 
         object->Update();
 
@@ -134,7 +133,7 @@ void Scene::Update()
     }
 }
 
-CameraComponent* BLAengine::Scene::GetMainCamera()
+CameraComponent* Scene::GetMainCamera()
 {
     if (m_camera == nullptr)
     {
@@ -156,34 +155,35 @@ vector<Contact>* Scene::GetContacts() const
     return &(this->m_rigidBodySystem->m_collisionProcessor->m_currentContacts);
 }
 
-std::pair<GameObject*, ColliderComponent::RayCollision>  Scene::PickGameObjectInScene(Ray ray)
+GameObjectReference Scene::PickGameObjectInScene(const Ray& inRay, ColliderComponent::CollisionContact& outContact)
 {
-    vector<GameObject>& objects = m_sceneObjectsVector;
-
     float minDistance = MAX_NORMAL_FLOAT;
-    GameObject* pickedObject = nullptr;
-    ColliderComponent::RayCollision closestContact;
-    for (auto& obj : objects)
+	GameObjectReference pickedObject;
+	ColliderComponent::CollisionContact contactPoint;
+
+    for (blaU32 i = 0; i < m_sceneObjectsVector.size(); ++i)
     {
+		GameObject& obj = m_sceneObjectsVector[i];
+
         ColliderComponent* collider = obj.GetComponent<ColliderComponent>();
 
         if (collider == nullptr)
             continue;
 
-        ColliderComponent::RayCollision contactPoint = collider->CollideWithRay(ray);
+        const blaBool collision = collider->CollideWithRay(inRay, contactPoint);
 
-        if (!contactPoint.m_isValid)
+        if (!collision)
             continue;
 
-        const float distance = glm::dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
+        const float distance = glm::dot(contactPoint.m_colPositionW - inRay.m_origin, inRay.m_direction);
 
         if (distance > 0 && distance < minDistance)
         {
             minDistance = distance;
-            pickedObject = &obj;
-            closestContact = contactPoint;
+            pickedObject = GameObjectReference(i, &m_sceneObjectsVector);
+            outContact = contactPoint;
         }
     }
 
-    return{ pickedObject, closestContact };
+	return pickedObject;
 }

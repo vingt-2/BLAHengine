@@ -29,13 +29,13 @@ const ObjectTransform& GameObject::GetTransform() const
 //TODO: We might not actually want to recursively update the world transform every time we change a parent
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
-    GameObject* child = GetChild();
+    /*GameObjectReference child = GetChild();
     while(child != nullptr)
     {
         ObjectTransform newChildT = child->GetTransform();
         newChildT.GetPosQuat() = transform.GetPosQuat() * newChildT.GetPosQuat();
         child->SetTransform(newChildT);
-    }
+    }*/
     m_transform = transform;
 }
 

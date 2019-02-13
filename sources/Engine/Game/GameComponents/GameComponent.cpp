@@ -4,9 +4,9 @@
 
 using namespace BLAengine; 
 
-GameComponent::GameComponent(GameObject* parentObject) : m_parentObject(parentObject)
+GameComponent::GameComponent(GameObjectReference parentObject) : m_parentObject(parentObject)
 {
-    if (parentObject != nullptr)
+    if (parentObject.IsValid())
     {
         parentObject->AddComponent(this);
         m_parentObject = parentObject;

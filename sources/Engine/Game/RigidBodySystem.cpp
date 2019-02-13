@@ -1,5 +1,10 @@
+#include <Engine/Game/CollisionProcessing/CollisionProcessor.h>
+#include <Engine/Game/GameComponents/RigidBodyComponent.h>
+#include <Engine/Game/GameObject.h>
+#include <Engine/Game/Timer.h>
+
 #include "RigidBodySystem.h"
-#include "GameObject.h"
+
 using namespace BLAengine;
 
 RigidBodySystem::RigidBodySystem(Timer* time):

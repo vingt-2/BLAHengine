@@ -6,7 +6,8 @@
 #include <Engine/Game/GameComponents/RigidBodyComponent.h>
 #include <Engine/Game/GameComponents/CameraComponent.h>
 #include <Engine/Game/RenderingManager.h>
-
+#include <Engine/Game/CollisionProcessing/CollisionProcessor.h>
+#include <Engine/Game/GameAlgebra/Ray.h>
 #include "GameObject.h"
 
 namespace BLAengine
@@ -19,14 +20,12 @@ namespace BLAengine
         void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
         void Update();
 
-        GameObject* CreateObject(std::string name);
+        GameObjectReference CreateObject(std::string name);
         bool DeleteObject(std::string name);
-        GameObject* FindObjectByName(std::string name);
-        vector<GameObject*> FindObjectsMatchingName(std::string name);
+		GameObjectReference FindObjectByName(std::string name);
+        vector<GameObjectReference> FindObjectsMatchingName(std::string name);
 
-        void AddComponent(GameObject* object, GameComponent* component);
-        const vector<GameObject>& GetObjects() const { return m_sceneObjectsVector; }
-        vector<GameObject>& GetObjects() { return m_sceneObjectsVector; }
+        void AddComponent(GameObjectReference object, GameComponent* component);
         CameraComponent* GetMainCamera();
         vector<Contact>* GetContacts() const;
 
@@ -39,7 +38,7 @@ namespace BLAengine
 
         void SetTimeObject(Timer* time);
 
-        std::pair<GameObject*, ColliderComponent::RayCollision> PickGameObjectInScene(Ray ray);
+        GameObjectReference PickGameObjectInScene(const Ray& inRay, ColliderComponent::CollisionContact& outContact);
 
     private:
 

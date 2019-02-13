@@ -1,10 +1,12 @@
 #include "RigidBodyComponent.h"
+#include "ColliderComponent.h"
 
 #include <Engine/Game/GameObject.h>
+#include <Engine/Assets/PolygonalMesh.h>
 
 using namespace BLAengine;
 
-RigidBodyComponent::RigidBodyComponent(GameObject* parentObject) :
+RigidBodyComponent::RigidBodyComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_forcesAccu(blaVec3(0)),
     m_torquesAccu(blaVec3(0)),

@@ -9,7 +9,7 @@ using namespace BLAengine;
 
 std::default_random_engine g_random_generator;
 
-SimpleHairComponent::SimpleHairComponent(GameObject* parentObject) :
+SimpleHairComponent::SimpleHairComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_forcesAccu(blaVec3(0)),
     m_isPinned(false),

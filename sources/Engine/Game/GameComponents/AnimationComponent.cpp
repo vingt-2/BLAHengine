@@ -2,7 +2,7 @@
 
 using namespace BLAengine;
 
-AnimationComponent::AnimationComponent(GameObject* parentObject) :
+AnimationComponent::AnimationComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_animation(nullptr)
 {}

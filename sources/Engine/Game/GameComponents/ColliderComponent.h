@@ -7,45 +7,46 @@
 #include <External/libcoldet/coldet.h>
 
 #include "GameComponent.h"
+#include "Engine/Game/Scene.h"
 
 namespace BLAengine
 {
     class BLACORE_API ColliderComponent : public GameComponent
     {
     public:
-        struct RayCollision
+        struct CollisionContact
         {
-            bool m_isValid;
             blaVec3 m_colPositionL;
             blaVec3 m_colPositionW;
             blaVec3 m_colNormalW;
             blaVec3 m_colNormalL;
-            float m_t;
+			float m_t;
         };
 
-        ColliderComponent(GameObject* parentObject):
+        ColliderComponent(GameObjectReference parentObject):
             GameComponent(parentObject)
         {};
 
         ~ColliderComponent() {};
 
-        virtual RayCollision CollideWithRay(Ray &ray) = 0;
-        virtual RayCollision CollideWithCollider(ColliderComponent& collider) = 0;
+        virtual blaBool CollideWithRay(const Ray& ray, CollisionContact& outCollision ) = 0;
+        virtual blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision) = 0;
         virtual float GetBoundingRadius() = 0;
     };
 
     class BLACORE_API MeshColliderComponent : public ColliderComponent
     {
     public:
-        MeshColliderComponent(GameObject* gameObject);
+        MeshColliderComponent(GameObjectReference gameObject);
         ~MeshColliderComponent();
 
         void SetColliderMesh(TriangleMesh* mesh);
 
         void Update() {};
 
-        RayCollision CollideWithRay(Ray &ray);
-        RayCollision CollideWithCollider(ColliderComponent& collider);
+		blaBool CollideWithRay(const Ray &ray, CollisionContact& outCollision);
+		blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision);
+
         float GetBoundingRadius() { return m_boundingRadius; }
 
         CollisionModel3D* m_collisionMesh;
@@ -63,7 +64,7 @@ namespace BLAengine
     class BLACORE_API SphereColliderComponent : public ColliderComponent
     {
     public:
-        SphereColliderComponent(GameObject* parentObject): ColliderComponent(parentObject) {}
+        SphereColliderComponent(GameObjectReference parentObject): ColliderComponent(parentObject) {}
 
         void SetSize(float size) { m_boundingRadius = size; }
 
@@ -73,8 +74,9 @@ namespace BLAengine
 
         float GetBoundingRadius() { return m_boundingRadius; }
 
-        RayCollision CollideWithRay(Ray &ray);
-        RayCollision CollideWithCollider(ColliderComponent& collider);
+		blaBool CollideWithRay(const Ray &ray, CollisionContact& outCollision);
+		blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision);
+
     private:
         float m_boundingRadius;
     };

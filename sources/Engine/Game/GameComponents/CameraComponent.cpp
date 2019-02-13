@@ -3,7 +3,7 @@
 
 using namespace BLAengine;
 
-CameraComponent::CameraComponent(GameObject* parentObject) :
+CameraComponent::CameraComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_fovSize(glm::vec2(1,1)),
     m_isShadowMapCamera(false)
@@ -20,7 +20,7 @@ CameraComponent::~CameraComponent(void)
 
 void CameraComponent::UpdateView()
 {
-    if (!GetParentObject())
+    if (!GetParentObject().IsValid())
         return;
 
     m_viewTransform.SetPosition(GetParentObject()->GetTransform().GetPosition());

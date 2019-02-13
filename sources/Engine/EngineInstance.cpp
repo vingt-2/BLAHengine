@@ -16,6 +16,8 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
+
+
 void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
 {
     for (auto path : *dragAndDropInput)
@@ -146,14 +148,14 @@ bool EngineInstance::SaveWorkingScene(std::string filepath)
 
 void EngineInstance::SetupDirLightAndCamera()
 {
-    GameObject* light = m_workingScene->CreateObject("DirLight");
+    GameObjectReference light = m_workingScene->CreateObject("DirLight");
     DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
     ObjectTransform lightT = light->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
     lightT.SetEulerAngles(-0.93f, 0.f, 0.f);
     light->SetTransform(lightT);
 
-    GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
+    GameObjectReference cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
 
     ObjectTransform  cameraStartTransform;

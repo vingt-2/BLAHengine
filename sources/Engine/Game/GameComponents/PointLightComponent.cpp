@@ -7,7 +7,7 @@ using namespace BLAengine;
 // Norm of the default m_scale for Object Transforms...
 #define BLA_SCALE_NORM 1.73205080757f
 
-PointLightComponent::PointLightComponent(GameObject* parentObject):
+PointLightComponent::PointLightComponent(GameObjectReference parentObject):
     GameComponent(parentObject),
     m_radiosity(blaVec3(1.f,1.f,1.f))
 {}

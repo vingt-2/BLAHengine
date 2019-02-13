@@ -21,7 +21,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
 
     m_workingScene = new Scene();
 
-    GameObject* cameraObject = m_workingScene->CreateObject("EditorCamera");
+    GameObjectReference cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
     m_editorRenderer->SetCamera(cameraComp);
 
@@ -40,7 +40,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
 
     m_assetManager->LoadCookedAssets();
 
-    GameObject* light = m_workingScene->CreateObject("DirLight");
+    GameObjectReference light = m_workingScene->CreateObject("DirLight");
     DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
 
     Asset* skyMeshAsset = nullptr;
@@ -48,7 +48,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
 
     TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
 
-    GameObject* ballObj = m_workingScene->CreateObject("sky");
+    GameObjectReference ballObj = m_workingScene->CreateObject("sky");
     ObjectTransform t = ballObj->GetTransform();
     t.m_scale = blaVec3(5000, 5000, 5000);
     ballObj->SetTransform(t);
@@ -98,7 +98,7 @@ bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string 
 
     m_workingScene->DeleteObject("MeshVisualizer_"+std::to_string(i));
 
-    GameObject* visualizerObject = m_workingScene->CreateObject("MeshVisualizer_" + std::to_string(++i));
+    GameObjectReference visualizerObject = m_workingScene->CreateObject("MeshVisualizer_" + std::to_string(++i));
     MeshRendererComponent* meshRenderer = BLA_CREATE_COMPONENT(MeshRendererComponent, visualizerObject);
     meshRenderer->AssignTriangleMesh(m_importedMesh);
 
@@ -133,7 +133,7 @@ void BLAengine::MeshEditorControls::ControlCamera()
 {
     auto inputs = InputManager::GetSingletonInstance();
 
-    GameObject* object = nullptr;
+    GameObjectReference object = nullptr;
     blaVec3* rotation = nullptr;
     bool scale = false;
     bool rotate = false;

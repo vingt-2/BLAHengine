@@ -8,7 +8,7 @@ using namespace BLAengine;
 std::random_device rd;
 std::mt19937 gen(rd());
 
-PBRSurfaceComponent::PBRSurfaceComponent(GameObject* parentObject):
+PBRSurfaceComponent::PBRSurfaceComponent(GameObjectReference parentObject):
     GameComponent(parentObject)
 {
     this->m_associatedCollider = nullptr;
@@ -27,7 +27,7 @@ void PBRSurfaceComponent::Update()
     }*/
 }
 
-PBRMeshComponent::PBRMeshComponent(GameObject* parentObject):
+PBRMeshComponent::PBRMeshComponent(GameObjectReference parentObject):
     PBRSurfaceComponent(parentObject)
 {
     m_surfaceArea = BLA_EPSILON;

@@ -15,7 +15,7 @@ namespace BLAengine
 
         SkeletonAnimationData* m_animation;
 
-        AnimationComponent(GameObject* parentObject);
+        AnimationComponent(GameObjectReference parentObject);
         ~AnimationComponent(void);
 
     private:

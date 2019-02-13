@@ -1,4 +1,7 @@
+#include <Engine/Game/GameComponents/RigidBodyComponent.h>
+
 #include "CollisionProcessor.h"
+
 using namespace BLAengine;
 
 CollisionProcessor::CollisionProcessor(Timer* time, float* timestepPtr) :

@@ -20,7 +20,7 @@ void CameraController::UpdateController()
     }
 
     ObjectTransform transform = m_controlledCamera->GetObjectTransform();
-    GameObject* cameraObject = m_controlledCamera->GetParentObject();
+    GameObjectReference cameraObject = m_controlledCamera->GetParentObject();
 
     blaVec3 linearAcceleration(0.f);
     blaVec3 angularAcceleration(0.f);

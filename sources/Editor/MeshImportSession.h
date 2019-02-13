@@ -16,11 +16,11 @@ namespace BLAengine
         blaVec3 m_cameraRotation;
         blaVec3 m_lightRotation;
 
-        GameObject* m_cameraObject;
-        GameObject* m_lightObj;
+        GameObjectReference m_cameraObject;
+        GameObjectReference m_lightObj;
         RenderWindow* m_renderWindow;
 
-        MeshEditorControls(GameObject* cameraObject, GameObject* lightObj, RenderWindow* renderWindow) :
+        MeshEditorControls(GameObjectReference cameraObject, GameObjectReference lightObj, RenderWindow* renderWindow) :
             m_prevMouse(glm::vec2(0)),
             m_cameraRotation(blaVec3(0)),
             m_lightRotation(blaVec3(0)),

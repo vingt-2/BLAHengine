@@ -9,7 +9,7 @@ namespace BLAengine
     public:
         virtual vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel) = 0;
         
-        static std::pair<PBRSurfaceComponent*, ColliderComponent::RayCollision> IntersectWithScene(Ray r, vector<PBRSurfaceComponent*> &objects);
+        static std::pair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> IntersectWithScene(Ray r, vector<PBRSurfaceComponent*> &objects);
     };
 
     class PBRExplicitPathTracer : public PBRRenderer
@@ -73,7 +73,7 @@ namespace BLAengine
     {
     public:
 
-        PBRCamera(GameObject* parentObject): GameComponent(parentObject) {};
+        PBRCamera(GameObjectReference parentObject): GameComponent(parentObject) {};
         ~PBRCamera(){};
 
         vector<blaVec3> m_renderedImage;

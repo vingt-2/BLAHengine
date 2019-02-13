@@ -2,6 +2,7 @@
 
 #include <Common/StdInclude.h>
 #include <Engine/EngineInstance.h>
+#include <Engine/Game/GameObject.h>
 
 namespace BLAengine
 {
@@ -14,7 +15,7 @@ namespace BLAengine
     public:
         EditorSession(bool external, bool isFullscreen):
             EngineInstance(external, isFullscreen),
-            m_selectedObject(nullptr),
+            m_selectedObject(GameObjectReference()),
             m_frameIndex(0),
             m_lastTimePlayerInteraction(0.f),
             m_autoPlay(true),
@@ -51,7 +52,7 @@ namespace BLAengine
 
         EditorState* m_editorState;
         CameraController* m_cameraController;
-        GameObject* m_selectedObject;
+        GameObjectReference m_selectedObject;
         float m_frameIndex;
         float m_lastTimePlayerInteraction;
         blaF32 m_lastIkSolveTime;

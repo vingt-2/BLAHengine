@@ -73,7 +73,7 @@ namespace BLAengine
 
         virtual float GetSurfaceArea() = 0;
 
-        PBRSurfaceComponent(GameObject* parentObject);
+        PBRSurfaceComponent(GameObjectReference parentObject);
         ~PBRSurfaceComponent(void);
 
         void Update();
@@ -91,7 +91,7 @@ namespace BLAengine
 
         void CreateAndSetMeshCollider(TriangleMesh* mesh);
 
-        PBRMeshComponent(GameObject* parentObject);
+        PBRMeshComponent(GameObjectReference parentObject);
         ~PBRMeshComponent(void);
     private:
 
@@ -108,7 +108,7 @@ namespace BLAengine
 
         void CreateAndSetSphereCollider(float radius);
 
-        PBRSphereComponent(GameObject* parentObject) : PBRSurfaceComponent(parentObject) {};
+        PBRSphereComponent(GameObjectReference parentObject) : PBRSurfaceComponent(parentObject) {};
         ~PBRSphereComponent(void) {};
     private:
 

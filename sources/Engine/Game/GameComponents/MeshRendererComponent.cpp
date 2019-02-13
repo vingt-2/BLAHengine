@@ -6,7 +6,7 @@
 using namespace BLAengine;
 
 
-MeshRendererComponent::MeshRendererComponent(GameObject* parentObject) : 
+MeshRendererComponent::MeshRendererComponent(GameObjectReference parentObject) : 
     GameComponent(parentObject),
     m_renderType    (GL_TRIANGLES),
     m_renderTicket  (0),
@@ -47,7 +47,7 @@ blaMat4* MeshRendererComponent::GetTransformMatrix() const
 
 void MeshRendererComponent::Update()
 {
-    if (!GetParentObject())
+    if (!GetParentObject().IsValid())
         *m_modelTransformMatrix = blaMat4(0);
     else
         GetParentObject()->GetTransform().GetScaledTransformMatrix(*m_modelTransformMatrix);

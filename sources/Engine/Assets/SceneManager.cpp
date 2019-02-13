@@ -51,7 +51,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
 
     for (auto gObjectSer : objsSer)
     {
-        GameObject* gameObject = newScene->CreateObject(gObjectSer.GetName());
+        GameObjectReference gameObject = newScene->CreateObject(gObjectSer.GetName());
 
         gameObject->SetTransform(gObjectSer.GetTransform());
 

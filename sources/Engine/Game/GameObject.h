@@ -7,6 +7,38 @@
 
 namespace BLAengine
 {
+	class GameObject;
+	class BLACORE_API GameObjectReference
+	{
+		friend class Scene;
+	public:
+		GameObjectReference() : m_objectIndex(0xFFFFFFFF), m_pGameObjectVector(nullptr)
+		{}
+
+		GameObject& GetObject() const { return m_pGameObjectVector->at(m_objectIndex); }
+		blaBool IsValid() const { return m_objectIndex != 0xFFFFFFFF; }
+
+		GameObject* operator->() const { return &(m_pGameObjectVector->at(m_objectIndex)); }
+
+		blaBool operator==(const GameObjectReference& other) const
+		{
+			return (m_objectIndex == other.m_objectIndex) && (m_pGameObjectVector == other.m_pGameObjectVector);
+		}
+
+		blaBool operator!=(const GameObjectReference& other) const
+		{
+			return !(*this == other);
+		}
+
+		static GameObjectReference InvalidReference() { return GameObjectReference(0xFFFFFFFF, nullptr); };
+	private:
+		GameObjectReference(blaU32 idx, std::vector<GameObject>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
+		{}
+
+		blaU32 m_objectIndex;
+		std::vector<GameObject>* m_pGameObjectVector;
+	};
+
     class BLACORE_API GameObject : public IntrusiveTree<GameObject>
     {
         // Game component is a friend class to GameObjects. They call Add Component upon Creation
