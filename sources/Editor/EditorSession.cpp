@@ -12,7 +12,7 @@
 #include <Engine/System/InputManager.h>
 #include <Engine/Gui/GuiManager.h>
 #include <Engine/Gui/GuiMenu.h>
-#include <Engine/Debug/PrimitiveGeometry.h>
+#include <Engine/Geometry/PrimitiveGeometry.h>
 
 #include "EditorSession.h"
 
