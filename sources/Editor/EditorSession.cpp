@@ -157,7 +157,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
          */
 
         m_testCone = MeshAsset("testCone");
-        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(100);
+        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
 
         m_testSphere = MeshAsset("SkySphere");
         m_testSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);

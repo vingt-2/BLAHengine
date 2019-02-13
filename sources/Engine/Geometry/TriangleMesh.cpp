@@ -187,7 +187,7 @@ void TriangleMesh::ComputeFaceTangents()
 
         if (isnan(T.x) || isnan(T.y) || isnan(T.z))
         {
-            //BLA_ASSERT(false)
+            BLA_ASSERT(false)
             T = blaVec3(0);
         }
 
