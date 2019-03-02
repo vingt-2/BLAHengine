@@ -32,8 +32,6 @@ namespace BLAengine
 
         bool SaveWorkingScene(std::string filePath);
 
-        std::vector<string> GetSceneObjects();
-
     private:
 
         // Required Engine Modules

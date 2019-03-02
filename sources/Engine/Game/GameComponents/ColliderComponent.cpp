@@ -122,7 +122,6 @@ void MeshColliderComponent::GenerateCollisionModel()
 
 blaBool SphereColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& outCollision)
 {
-    ColliderComponent::CollisionContact contactPoint;
     ObjectTransform transform = this->GetObjectTransform();
 
     blaVec3 op = transform.GetPosition() - ray.m_origin;

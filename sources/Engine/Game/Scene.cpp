@@ -4,8 +4,6 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 Scene::Scene()
 {
     this->m_enableSimulation = true;
@@ -19,7 +17,7 @@ GameObjectReference Scene::CreateObject(std::string name)
 {
     m_sceneObjectsVector.emplace_back(GameObject(name));
 
-    return GameObjectReference { m_sceneObjectsVector.size() - 1, &m_sceneObjectsVector };
+    return GameObjectReference { m_sceneObjectsVector.size() - (blaIndex)1, &m_sceneObjectsVector };
 }
 
 bool BLAengine::Scene::DeleteObject(std::string name)

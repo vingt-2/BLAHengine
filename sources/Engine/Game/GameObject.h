@@ -31,10 +31,10 @@ namespace BLAengine
 
 		static GameObjectReference InvalidReference() { return GameObjectReference(0xFFFFFFFF, nullptr); };
 	private:
-		GameObjectReference(blaU32 idx, std::vector<GameObject>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
+		GameObjectReference(blaIndex idx, std::vector<GameObject>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
 		{}
 
-		blaU32 m_objectIndex;
+        blaIndex m_objectIndex;
 		std::vector<GameObject>* m_pGameObjectVector;
 	};
 

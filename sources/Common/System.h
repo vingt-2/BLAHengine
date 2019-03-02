@@ -22,6 +22,7 @@ typedef glm::i32 blaS32;
 typedef glm::i64 blaS64;
 typedef glm::f32 blaF32;
 typedef glm::f64 blaF64;
+typedef std::size_t blaIndex;
 #endif
 
 typedef bool blaBool;

@@ -15,7 +15,7 @@ bool Raytracer::InitializeEngine()
     //m_editorRenderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     //m_editorRenderer->m_assetManager = m_assetManager;
 
-    GameObject* cameraObject = m_editorScene->CreateObject("EditorCamera");
+    GameObjectReference cameraObject = m_editorScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
     //m_editorRenderer->SetCamera(cameraComp);
 
@@ -53,10 +53,10 @@ void Raytracer::UpdateEditor()
     m_workingScene->Update();
     m_editorRenderer->Update();
 
-    GameObject* pbrenderObject = m_workingScene->FindObjectByName("PBRCamera");
+    GameObjectReference pbrenderObject = m_workingScene->FindObjectByName("PBRCamera");
     int i = 0;
     vector<Ray> debugRays;
-    if (pbrenderObject)
+    if (pbrenderObject.IsValid())
     {
         if (PBRCamera* renderer = pbrenderObject->GetComponent<PBRCamera>())
         {
@@ -178,14 +178,4 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
 bool Raytracer::SaveWorkingScene(std::string filepath)
 {
     return m_sceneManager->SaveScene(filepath, m_workingScene);
-}
-
-std::vector<string> Raytracer::GetSceneObjects()
-{
-    std::vector<string> objs;
-    for (const auto& go : m_workingScene->GetObjects())
-    {
-        objs.push_back(go.GetName());
-    }
-    return objs;
 }
