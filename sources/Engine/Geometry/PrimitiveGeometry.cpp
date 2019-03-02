@@ -1,7 +1,5 @@
 #include "PrimitiveGeometry.h"
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 TriangleMesh PrimitiveGeometry::MakeCube()

@@ -17,6 +17,8 @@ namespace BLAengine
 
         BlaFileSize m_size;
         BlaFileTime m_lastEditTime;
+
+        std::string GetFullPath() const { return m_path + m_name + m_extention; }
     };
 
     struct DirectoryEntry : FileEntry
@@ -43,4 +45,6 @@ namespace BLAengine
     std::string GetModulePath();
 
     std::string GetWorkingDir();
+
+    FileEntry ParseFilePath(const std::string &filepath);
 }

@@ -10,7 +10,12 @@ GameObject::GameObject(string name):
 
 
 GameObject::~GameObject(void)
-{}
+{
+    for(int i = 0; i < m_componentVector.size(); ++i)
+    {
+        delete m_componentVector[i];
+    }
+}
 
 void GameObject::Update()
 {

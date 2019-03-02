@@ -93,7 +93,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
 
                 MeshColliderComponent* collider = BLA_CREATE_COMPONENT(MeshColliderComponent, gameObject);
 
-                collider->SetColliderMesh((TriangleMesh*)triMeshAsset);
+                collider->SetColliderMesh(&static_cast<MeshAsset*>(triMeshAsset)->m_triangleMesh);
             }
         }
     }

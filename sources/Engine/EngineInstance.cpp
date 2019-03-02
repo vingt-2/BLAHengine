@@ -10,28 +10,17 @@
 
 #include "EngineInstance.h"
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
-
-
-
-void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
-{
-    for (auto path : *dragAndDropInput)
-    {
-        std::cout << path << "\n";
-    }
-}
 
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
     m_inputManager = InputManager::AssignAndReturnSingletonInstance(new InputManager());
 
     this->m_renderWindow = renderWindow;
-    m_assetManager = new AssetManager();
+
+    m_assetManager = AssetManager::AssignAndReturnSingletonInstance(new AssetManager());
 
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
@@ -68,8 +57,6 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     // Finally, load our assets in memory...
     m_assetManager->LoadCookedAssets();
-
-    m_renderWindow->SetDragAndDropCallback((DragAndDropCallback) DragAndDropHandler);
 
     return true;
 }

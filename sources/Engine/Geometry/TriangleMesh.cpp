@@ -4,8 +4,6 @@ using namespace BLAengine;
 
 #define INVALID_HE 0xFFFFFFFF
 
-#pragma optimize("", off)
-
 void TriangleMesh::BuildMeshTopo(
     vector<blaU32> vertPosIndices,
     vector<blaU32> vertNormalIndices,
@@ -187,7 +185,7 @@ void TriangleMesh::ComputeFaceTangents()
 
         if (isnan(T.x) || isnan(T.y) || isnan(T.z))
         {
-            BLA_ASSERT(false)
+            //BLA_ASSERT(false)
             T = blaVec3(0);
         }
 

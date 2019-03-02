@@ -2,8 +2,6 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 GL33Renderer::GL33Renderer():
     m_debugDrawGBuffer(false),
     m_renderDebug(true),

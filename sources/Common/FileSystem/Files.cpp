@@ -190,3 +190,36 @@ std::string BLAengine::GetWorkingDir()
     //TODO : 
     return std::string("");
 }
+
+FileEntry BLAengine::ParseFilePath(const std::string &filepath)
+{
+    FileEntry file;
+
+    blaIndex i = filepath.find_last_of('/');
+    blaIndex j = filepath.find_last_of('\\');
+
+    i = i == std::string::npos ? 0 : i;
+    j = j == std::string::npos ? 0 : j;
+
+    const blaIndex lastSlash = (i > j ? i : j) + 1;
+
+    blaIndex lastDot = filepath.find_last_of('.');
+
+    if(lastDot == std::string::npos)
+    {
+        lastDot = filepath.length();
+        file.m_extention = "";
+    }
+    else
+    {
+        file.m_extention = filepath.substr(lastDot, filepath.length() - lastDot);
+    }
+
+    file.m_path = filepath.substr(0, lastSlash);
+    file.m_name = filepath.substr(lastSlash, lastDot - lastSlash);
+
+    file.m_lastEditTime = 0;
+    file.m_size = 0;
+
+    return file;
+}

@@ -1,10 +1,12 @@
 #pragma once
 #include <Common/StdInclude.h>
 #include <Common/System.h>
+#include <Common/BLASingleton.h>
 
 #include "MeshAsset.h"
 #include "Material.h"
 #include "Texture.h"
+
 
 #define TRIANGLE_MESH_SUBPATH "./Cooked/TriangleMeshs/"
 #define TEXTURE_SUBPATH "./Cooked/Textures/"
@@ -15,6 +17,8 @@ namespace BLAengine
     class BLACORE_API AssetManager
     {
     public:
+
+        BLA_DECLARE_SINGLETON(AssetManager);
 
         enum AssetType
         {
@@ -29,7 +33,7 @@ namespace BLAengine
 
         int LoadCookedAssets();
 
-        AssetType GetAsset(std::string filepath, Asset* &assetPtr);
+        AssetType GetAsset(std::string assetName, Asset* &assetPtr);
 
         bool LoadTriangleMesh(std::string filepath);
         bool LoadTexture(std::string filepath);

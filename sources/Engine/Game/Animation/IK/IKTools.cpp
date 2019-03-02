@@ -10,8 +10,6 @@ using namespace BLAengine;
 
 #define BLA_IK_CONVERGENCE_EPSILON 0.001f
 
-#pragma optimize("", off)
-
 void IKChainJoint::GetEndEffectorRecursive(IKChainJoint* joint, std::vector<IKChainJoint*>& results)
 {
     if (joint->GetNumberChildren() < 1)

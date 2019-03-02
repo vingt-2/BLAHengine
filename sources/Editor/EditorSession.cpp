@@ -14,12 +14,23 @@
 #include <Engine/Gui/GuiMenu.h>
 #include <Engine/Game/GameComponents/ColliderComponent.h>
 #include <Engine/Geometry/PrimitiveGeometry.h>
+#include <Common/FileSystem/Files.h>
 
 #include "EditorSession.h"
+#include "AssetsImport/ExternalFormats/OBJImport.h"
 
 using namespace BLAengine;
 
 GameObjectReference g_selectedObject;
+
+void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
+{
+    for (auto path : *dragAndDropInput)
+    {
+        std::cout << "Dropped file " << path << "\n";
+        static_cast<EditorSession*>(EngineInstance::GetSingletonInstance())->EditorDragAndDropedFile(path); // ``safe'' cast...
+    }
+}
 
 namespace BLAengine
 {
@@ -134,6 +145,8 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 {
     if(EngineInstance::InitializeEngine(renderWindow))
     {
+        m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
+
         m_editorState = new EditorState();
         m_editorState->m_type = EditorState::BLA_EDITOR_EDITING;
 
@@ -158,36 +171,20 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         /*
          * Create and store gizmo meshes
          */
+        LoadNewScene();
 
         m_testCone = MeshAsset("testCone");
         m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
-
-        m_testSphere = MeshAsset("SkySphere");
-        m_testSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);
-
-        LoadNewScene();
-        GameObjectReference discObject = m_workingScene->CreateObject("DiscObject");
-
-        BLA_CREATE_COMPONENT(MeshRendererComponent, discObject);
-        discObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testSphere);
-
-        int matIndex = 0;
-        Asset* materialAsset = nullptr;
-        if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
-        {
-            discObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, matIndex);
-        }
 
 		GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
 
         BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
         coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
 
-        matIndex = 0;
-        materialAsset = nullptr;
+        Asset* materialAsset = nullptr;
         if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
         {
-            coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, matIndex);
+            coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
         }
 
         return true;
@@ -198,6 +195,20 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 bool EditorSession::LoadNewScene()
 {
     EngineInstance::LoadNewScene();
+
+    m_SkyInvertedSphere = MeshAsset("SkySphere");
+    m_SkyInvertedSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);
+
+    GameObjectReference skySphereObject = m_workingScene->CreateObject("SkySphere");
+
+    BLA_CREATE_COMPONENT(MeshRendererComponent, skySphereObject);
+    skySphereObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_SkyInvertedSphere);
+
+    Asset* materialAsset = nullptr;
+    if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+    {
+        skySphereObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
+    }
 
     m_cameraController = new CameraController(
         m_renderWindow,
@@ -243,6 +254,12 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 void EditorSession::TerminateEngine()
 {
     EngineInstance::TerminateEngine();
+}
+
+void EditorSession::EditorDragAndDropedFile(std::string filePath)
+{
+    FileEntry file = ParseFilePath(filePath);
+    ImportMesh(file.GetFullPath(), file.m_name);
 }
 
 void EditorSession::DoTestAnimationDemoStuff()
@@ -521,4 +538,51 @@ void EditorSession::HandleLoadScenePrompt()
     {
         state->m_currentFileBrowser = m_guiManager->CreateOpenFilePrompt("Load Scene File", true);
     }
+}
+
+bool EditorSession::ImportMesh(std::string filepath, std::string name)
+{
+    OBJImport objImporter;
+
+    MeshAsset temporaryMeshAsset(name);
+
+    if (!objImporter.ImportMesh(filepath, temporaryMeshAsset.m_triangleMesh, false, true))
+    {
+        return false;
+    }
+
+    this->m_assetManager->SaveTriangleMesh(&temporaryMeshAsset);
+    this->m_assetManager->LoadTriangleMesh(name);
+
+    m_workingScene->DeleteObject("MeshVisualizer");
+
+    GameObjectReference visualizerObject = m_workingScene->CreateObject("MeshVisualizer");
+    MeshRendererComponent* meshRenderer = BLA_CREATE_COMPONENT(MeshRendererComponent, visualizerObject);
+
+    Asset* triMeshAsset;
+
+    if (m_assetManager->GetAsset(name, triMeshAsset) == AssetManager::AssetType::TriangleMeshAsset)
+    {
+        meshRenderer->AssignTriangleMesh((MeshAsset*)triMeshAsset);
+    }
+    else
+    {
+        BLA_ASSERT(false);
+    }
+
+    Asset* materialAsset = nullptr;
+    if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+    {
+        meshRenderer->AssignMaterial((Material*)materialAsset, 0);
+    }
+    else
+    {
+        cout << "Couldn't find Material: " << "BlankDiffuseMat" << "in AssetManager.\n";
+    }
+
+    ObjectTransform t = visualizerObject->GetTransform();
+    t.SetPosition(blaVec3(0.f, 0.f, -5.f));
+    visualizerObject->SetTransform(t);
+
+    return true;
 }

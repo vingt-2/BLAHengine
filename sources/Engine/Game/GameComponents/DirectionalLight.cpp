@@ -13,9 +13,7 @@ DirectionalLight::DirectionalLight(GameObjectReference parentObject):
 }
 
 DirectionalLight::~DirectionalLight()
-{
-
-}
+{}
 
 void DirectionalLight::Update()
 {

@@ -21,7 +21,7 @@ namespace BLAengine
             m_autoPlay(true),
             m_lastIkSolveTime(0.f),
             m_testCone(MeshAsset("")),
-            m_testSphere(MeshAsset(""))
+            m_SkyInvertedSphere(MeshAsset(""))
         {}
 
         void PreEngineUpdate() override;
@@ -31,6 +31,8 @@ namespace BLAengine
         bool InitializeEngine(RenderWindow* renderWindow) override;
 
         void TerminateEngine() override;
+
+        void EditorDragAndDropedFile(std::string filePath);
 
         ~EditorSession() { EngineInstance::~EngineInstance(); };
 
@@ -78,6 +80,13 @@ namespace BLAengine
         TriangleMesh m_transformOrientationGizmoMesh;
         TriangleMesh m_transformScaleGizmoMesh;*/
         MeshAsset m_testCone;
-        MeshAsset m_testSphere;
+        MeshAsset m_SkyInvertedSphere;
+
+
+        /*
+         *  Mesh Import Stuff...
+         *  
+         */
+        bool ImportMesh(std::string filepath, std::string name);
     };
 };

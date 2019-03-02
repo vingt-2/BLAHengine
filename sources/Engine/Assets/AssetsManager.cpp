@@ -12,6 +12,8 @@
 
 using namespace BLAengine;
 
+BLA_IMPLEMENT_SINGLETON(AssetManager);
+
 AssetManager::AssetManager(void)
 {
 }
@@ -66,19 +68,19 @@ int BLAengine::AssetManager::LoadCookedAssets()
     return triMeshNames.size() + matNames.size() + textureNames.size();
 }
 
-AssetManager::AssetType AssetManager::GetAsset(std::string filepath, Asset* &assetPtr)
+AssetManager::AssetType AssetManager::GetAsset(std::string assetName, Asset* &assetPtr)
 {
     AssetType type;
-    if (!m_resourceMap.count(filepath))
+    if (!m_resourceMap.count(assetName))
     {
         type = InvalidAsset;
         return type;
     }
 
-    std::pair<AssetType, blaU32> asset = m_resourceMap[filepath];
+    std::pair<AssetType, blaU32> asset = m_resourceMap[assetName];
 
     type = asset.first;
-    blaU32 assetIndx = asset.second;
+    const blaU32 assetIndx = asset.second;
 
     switch (type)
     {
