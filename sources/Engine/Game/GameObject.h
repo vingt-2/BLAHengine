@@ -1,9 +1,8 @@
 #pragma once
 #include <Common/StdInclude.h>
 #include <Common/DataStructures/Tree.h>
-#include "GameComponents/GameComponent.h"
-
 #include <Common/Types.h>
+#include "ObjectTransform.h"
 
 namespace BLAengine
 {

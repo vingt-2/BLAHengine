@@ -12,6 +12,7 @@
 #include <Engine/System/InputManager.h>
 #include <Engine/Gui/GuiManager.h>
 #include <Engine/Gui/GuiMenu.h>
+#include <Engine/Game/GameComponents/ColliderComponent.h>
 
 #include "EditorSession.h"
 

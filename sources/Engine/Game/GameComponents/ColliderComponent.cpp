@@ -83,6 +83,11 @@ blaBool MeshColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& 
     return true;
 }
 
+blaBool MeshColliderComponent::CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision)
+{
+	return false;
+}
+
 void MeshColliderComponent::GenerateBoundingRadius()
 {
     blaVec3 maxVert = blaVec3(0);
@@ -152,4 +157,9 @@ blaBool SphereColliderComponent::CollideWithRay(const Ray& ray, CollisionContact
     }
 
     return true;
+}
+
+blaBool SphereColliderComponent::CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision)
+{
+	return false;
 }

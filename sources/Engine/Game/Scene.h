@@ -7,14 +7,18 @@
 #include <Engine/Game/GameComponents/CameraComponent.h>
 #include <Engine/Game/RenderingManager.h>
 #include <Engine/Game/CollisionProcessing/CollisionProcessor.h>
+#include <Engine/Game/GameComponents/ColliderComponent.h>
 #include <Engine/Game/GameAlgebra/Ray.h>
 #include "GameObject.h"
 
+class SceneSerializer;
 namespace BLAengine
 {
     class BLACORE_API Scene
     {
     public:
+		friend class ::SceneSerializer;
+
         Scene();
 
         void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on

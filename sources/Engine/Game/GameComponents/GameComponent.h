@@ -19,7 +19,7 @@ namespace BLAengine
 
         const ObjectTransform& GetObjectTransform() const;
 
-        GameObjectReference GetParentObject() const { return m_parentObject; };
+        GameObjectReference GetParentObject() const { return m_parentObject; }
 
     private:
         GameObjectReference m_parentObject;

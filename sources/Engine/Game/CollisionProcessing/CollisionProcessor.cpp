@@ -1,5 +1,5 @@
 #include <Engine/Game/GameComponents/RigidBodyComponent.h>
-
+#include <Engine/Game/GameComponents/ColliderComponent.h>
 #include "CollisionProcessor.h"
 
 using namespace BLAengine;

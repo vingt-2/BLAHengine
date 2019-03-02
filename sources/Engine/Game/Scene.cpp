@@ -96,7 +96,7 @@ void Scene::Update()
 
     for(size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        GameObjectReference object = &(m_sceneObjectsVector[i]);
+        GameObjectReference object(i, &m_sceneObjectsVector);
 
         object->Update();
 

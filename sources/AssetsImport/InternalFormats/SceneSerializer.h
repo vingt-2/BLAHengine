@@ -265,12 +265,11 @@ private:
 class SceneSerializer
 {
 public:
-
     SceneSerializer() = default;
 
     void FromScene(BLAengine::Scene* scene)
     {
-        for (auto& object : scene->GetObjects())
+        for (auto& object : scene->m_sceneObjectsVector)
         {
             GameObjectSerializer gObjSerializer;
 

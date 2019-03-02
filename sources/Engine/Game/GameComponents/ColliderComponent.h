@@ -7,7 +7,6 @@
 #include <External/libcoldet/coldet.h>
 
 #include "GameComponent.h"
-#include "Engine/Game/Scene.h"
 
 namespace BLAengine
 {

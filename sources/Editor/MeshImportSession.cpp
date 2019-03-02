@@ -133,7 +133,7 @@ void BLAengine::MeshEditorControls::ControlCamera()
 {
     auto inputs = InputManager::GetSingletonInstance();
 
-    GameObjectReference object = nullptr;
+    GameObjectReference object;
     blaVec3* rotation = nullptr;
     bool scale = false;
     bool rotate = false;
@@ -157,7 +157,7 @@ void BLAengine::MeshEditorControls::ControlCamera()
         rotation = &m_lightRotation;
     }
 
-    if (object == nullptr)
+    if (!object.IsValid())
     {
         return;
     }
