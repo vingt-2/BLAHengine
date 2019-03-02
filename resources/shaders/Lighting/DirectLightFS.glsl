@@ -32,15 +32,17 @@ void main(){
 	// This is for the sky rendering ...
     if(length(worldPos) > 3000)
     {
-        float altitude = abs(dot(normalize(worldPos),vec3(0.0,1.0,0.0)));
+        float altitude = dot(normalize(worldPos),vec3(0.0,1.0,0.0));
         
         vec3 skyBottomColor = (1-sunOrientationNoOff) * vec3(0.7,0.8,1)  + sunOrientationNoOff * vec3(1.5,0.4,0);
         vec3 skyTopColor = (1-sunOrientationNoOff) * vec3(0.5,0.6,1.5)  + sunOrientationNoOff * vec3(0.6,0.2,0.2);
-        vec3 skyColor = (1-sunOrientationNoOff) * vec3(0.1) + altitude * skyTopColor + (1-altitude) * skyBottomColor;
+        vec3 skyColor = (1-sunOrientationNoOff) * vec3(0.1) + 
+						clamp(altitude,0,1) * skyTopColor +
+						clamp((1-altitude),0,1) * skyBottomColor;
         
         float sunAligned = clamp(dot(normalize(worldPos),lightDirection),0.0,1.0);
         
-        vec3 sunColor = ((2-sunOrientation) * clamp(pow(sunAligned,700),0,1)) * vec3(3.2,0.8,0.5) +  (0.1f * clamp(pow(sunAligned,3),0,1) * vec3(1));
+        vec3 sunColor = clamp(altitude,0,1) * ((2-sunOrientation) * clamp(pow(sunAligned,700),0,1)) * vec3(3.2,0.8,0.5) +  (0.1f * clamp(pow(sunAligned,3),0,1) * vec3(1));
         
         color = clamp((1-sunOrientation),0,1) * (skyColor + (1-sunOrientation) * (sunColor * (1+overalSunColor))) + clamp((sunOrientation),0,1) * vec3(0,0,0.1);
     }

@@ -9,10 +9,10 @@ public:                                                                         
                    { s_blaSingletonInstance = instance; }                                \
         return s_blaSingletonInstance; }                                                 \
     static CLASSNAME* GetSingletonInstance() { return s_blaSingletonInstance;}           \
-    static const CLASSNAME* GetSingletonInstanceRead() { return s_blaSingletonInstance;}
+    static const CLASSNAME* GetSingletonInstanceRead() { return s_blaSingletonInstance;} 
 
-#define BLA_IMPLEMENT_SINGLETON(CLASSNAME) \
-    CLASSNAME* CLASSNAME::s_blaSingletonInstance = nullptr;
+#define BLA_IMPLEMENT_SINGLETON(CLASSNAME)                                               \
+    CLASSNAME* CLASSNAME::s_blaSingletonInstance = nullptr;                              
 
 //template<class T>
 //class Singleton

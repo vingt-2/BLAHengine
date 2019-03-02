@@ -2,7 +2,6 @@
 #include "ColliderComponent.h"
 
 #include <Engine/Game/GameObject.h>
-#include <Engine/Assets/PolygonalMesh.h>
 
 using namespace BLAengine;
 

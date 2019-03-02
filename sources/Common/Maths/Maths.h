@@ -17,6 +17,7 @@ typedef glm::mat3 blaMat3;
 typedef glm::mat4 blaMat4;
 
 #define M_PI 3.14159265359f
+#define M_TWO_PI 6.28318530718f
 #define P_GRAVITY blaVec3(0.f, -0.9807f, 0.f)
 
 #define MAX_NORMAL_FLOAT 3.4028234664e38

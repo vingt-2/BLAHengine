@@ -13,10 +13,13 @@
 #include <Engine/Gui/GuiManager.h>
 #include <Engine/Gui/GuiMenu.h>
 #include <Engine/Game/GameComponents/ColliderComponent.h>
+#include <Engine/Geometry/PrimitiveGeometry.h>
 
 #include "EditorSession.h"
 
 using namespace BLAengine;
+
+GameObjectReference g_selectedObject;
 
 namespace BLAengine
 {
@@ -133,7 +136,10 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
     {
         m_editorState = new EditorState();
         m_editorState->m_type = EditorState::BLA_EDITOR_EDITING;
-        
+
+        /*
+         * Create The menu
+         */
         BlaGuiMenuTab fileMenu("File");
 
         fileMenu.AddMenu(BlaGuiMenuItem("New Scene", &m_editorStateRequests.m_newSceneRequest));
@@ -149,8 +155,40 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(settingsMenu);
 
+        /*
+         * Create and store gizmo meshes
+         */
+
+        m_testCone = MeshAsset("testCone");
+        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
+
+        m_testSphere = MeshAsset("SkySphere");
+        m_testSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);
 
         LoadNewScene();
+        GameObjectReference discObject = m_workingScene->CreateObject("DiscObject");
+
+        BLA_CREATE_COMPONENT(MeshRendererComponent, discObject);
+        discObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testSphere);
+
+        int matIndex = 0;
+        Asset* materialAsset = nullptr;
+        if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+        {
+            discObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, matIndex);
+        }
+
+		GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
+
+        BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
+        coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
+
+        matIndex = 0;
+        materialAsset = nullptr;
+        if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+        {
+            coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, matIndex);
+        }
 
         return true;
     }
@@ -265,7 +303,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                     Asset* sphereMesh = nullptr;
                     this->m_assetManager->GetAsset("sphere", sphereMesh);
 
-                    meshCmp->AssignTriangleMesh((TriangleMesh*)sphereMesh);
+                    meshCmp->AssignTriangleMesh((MeshAsset*)sphereMesh);
 
                     auto meshCollider = BLA_CREATE_COMPONENT(MeshColliderComponent, object);
 
@@ -385,16 +423,16 @@ void EditorSession::DoTestAnimationDemoStuff()
     auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
     if (leftMouseButton.IsRisingEdge())
     {
-        m_selectedObject = hoverObject;
+        g_selectedObject = hoverObject;
     }
     if (leftMouseButton.IsFallingEdge())
     {
-        m_selectedObject = GameObjectReference();
+        g_selectedObject = GameObjectReference();
     }
 
-    if (m_selectedObject.IsValid())
+    if (g_selectedObject.IsValid())
     {
-        if (m_selectedObject->GetName().find("EffectorHandles_") != string::npos)
+        if (g_selectedObject->GetName().find("EffectorHandles_") != string::npos)
         {
             Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
             GameObjectReference camera = m_workingScene->GetMainCamera()->GetParentObject();
@@ -404,9 +442,9 @@ void EditorSession::DoTestAnimationDemoStuff()
             camUp = camera->GetTransform().GetRotation() * blaVec3(0.f, 1.f, 0.f);
             camLeft = camera->GetTransform().GetRotation() * blaVec3(1.f, 0.f, 0.f);
 
-            RaycastHit hit = screenRay.RayToPlaneIntersection(m_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
+            RaycastHit hit = screenRay.RayToPlaneIntersection(g_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
 
-            ObjectTransform selectedObjectTransform = m_selectedObject->GetTransform();
+            ObjectTransform selectedObjectTransform = g_selectedObject->GetTransform();
 
             if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) > 1.f)
             {
@@ -416,7 +454,7 @@ void EditorSession::DoTestAnimationDemoStuff()
             {
                 selectedObjectTransform.SetPosition(hit.hitPosition);
 
-                m_selectedObject->SetTransform(selectedObjectTransform);
+                g_selectedObject->SetTransform(selectedObjectTransform);
             }
         }
     }

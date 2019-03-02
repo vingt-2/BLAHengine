@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Engine/Assets/PolygonalMesh.h>
+#include <Engine/Geometry/TriangleMesh.h>
 
 namespace BLAengine
 {

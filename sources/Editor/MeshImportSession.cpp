@@ -46,7 +46,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     Asset* skyMeshAsset = nullptr;
     this->m_assetManager->GetAsset("SkyMesh", skyMeshAsset);
 
-    TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
+   /* TriangleMesh* sky = (TriangleMesh*)skyMeshAsset;
 
     GameObjectReference ballObj = m_workingScene->CreateObject("sky");
     ObjectTransform t = ballObj->GetTransform();
@@ -63,7 +63,7 @@ bool MeshImportSession::InitializeEngine(RenderWindow* _renderWindow)
     else
     {
         cout << "Couldn't find Material: " << "BlankDiffuseMat" << "in AssetManager.\n";
-    }
+    }*/
 
 
     m_editorControls = new MeshEditorControls(cameraObject, light, m_renderWindow);
@@ -83,13 +83,13 @@ void MeshImportSession::TerminateEditor()
     //renderWindow->~GLFWRenderWindow();
 }
 
-bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string name)
+bool MeshImportSession::ImportMesh(std::string filepath, std::string name)
 {
     OBJImport objImporter;
 
-    m_importedMesh = new TriangleMesh(name);
+    m_importedMesh = new MeshAsset(name);
 
-    if (!objImporter.ImportMesh(filepath, *m_importedMesh, false, true))
+    if (!objImporter.ImportMesh(filepath, m_importedMesh->m_triangleMesh, false, true))
     {
         return false;
     }
@@ -121,15 +121,16 @@ bool BLAengine::MeshImportSession::ImportMesh(std::string filepath, std::string 
     return true;
 }
 
-bool BLAengine::MeshImportSession::SaveMeshToCooked()
+bool MeshImportSession::SaveMeshToCooked()
 {
     if (!m_importedMesh)
         return false;
-    else
-        return this->m_assetManager->SaveTriangleMesh(m_importedMesh);
+    
+
+    return this->m_assetManager->SaveTriangleMesh(m_importedMesh);
 }
 
-void BLAengine::MeshEditorControls::ControlCamera()
+void MeshEditorControls::ControlCamera()
 {
     auto inputs = InputManager::GetSingletonInstance();
 

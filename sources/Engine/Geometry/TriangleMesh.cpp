@@ -1,10 +1,10 @@
-#include "PolygonalMesh.h"
+#include "TriangleMesh.h"
+
 using namespace BLAengine;
 
 #define INVALID_HE 0xFFFFFFFF
 
-TriangleMesh::TriangleMesh(std::string name): Asset(name) {}
-TriangleMesh::~TriangleMesh() {}
+#pragma optimize("", off)
 
 void TriangleMesh::BuildMeshTopo(
     vector<blaU32> vertPosIndices,
@@ -12,6 +12,8 @@ void TriangleMesh::BuildMeshTopo(
     vector<blaU32> vertUVsIndices,
     bool swapNormals = false)
 {
+    BLA_ASSERT(vertPosIndices.size() == vertNormalIndices.size() && vertNormalIndices.size() == vertUVsIndices.size())
+
     unordered_map<pair<blaU32, blaU32>, blaU32, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
     vector<pair<blaU32, blaU32>> hePairs;
 
@@ -92,9 +94,9 @@ void TriangleMesh::BuildMeshTopo(
         halfEdgesIndices[pair<blaU32, blaU32>(v0, v1)] = i;
         halfEdgesIndices[pair<blaU32, blaU32>(v1, v2)] = i + 1;
         halfEdgesIndices[pair<blaU32, blaU32>(v2, v0)] = i + 2;
-        hePairs.push_back(pair<blaU32, blaU32>(v0, v1));
-        hePairs.push_back(pair<blaU32, blaU32>(v1, v2));
-        hePairs.push_back(pair<blaU32, blaU32>(v2, v0));
+        hePairs.emplace_back(pair<blaU32, blaU32>(v0, v1));
+        hePairs.emplace_back(pair<blaU32, blaU32>(v1, v2));
+        hePairs.emplace_back(pair<blaU32, blaU32>(v2, v0));
 
         // Populates m_vertEmanatingHE
         m_heEmanatingFromVert[v0] = i;
@@ -161,13 +163,13 @@ void TriangleMesh::ComputeFaceTangents()
 {
     for (auto face : m_meshTriangles)
     {
-        HalfEdge edge0 = m_halfEdges[face.firstEdge];
-        HalfEdge edge1 = m_halfEdges[edge0.nextHE];
-        HalfEdge edge2 = m_halfEdges[edge1.nextHE];
+        const HalfEdge& edge0 = m_halfEdges[face.firstEdge];
+        const HalfEdge& edge1 = m_halfEdges[edge0.nextHE];
+        const HalfEdge& edge2 = m_halfEdges[edge1.nextHE];
 
-        DestVertex v0 = edge2.destVertex;
-        DestVertex v1 = edge0.destVertex;
-        DestVertex v2 = edge1.destVertex;
+        const DestVertex& v0 = edge2.destVertex;
+        const DestVertex& v1 = edge0.destVertex;
+        const DestVertex& v2 = edge1.destVertex;
 
         blaVec3 q1 = m_vertexPos[v1.pos] - m_vertexPos[v0.pos];
         blaVec3 q2 = m_vertexPos[v2.pos] - m_vertexPos[v0.pos];
@@ -185,7 +187,7 @@ void TriangleMesh::ComputeFaceTangents()
 
         if (isnan(T.x) || isnan(T.y) || isnan(T.z))
         {
-            //cout << "bla\n";
+            BLA_ASSERT(false)
             T = blaVec3(0);
         }
 
@@ -244,7 +246,7 @@ void TriangleMesh::GenerateRenderData()
 
             vector<FaceIndx> surroundingFaces;
 
-            bool correctQuery = GetSurroundingTriangles(edge.destVertex.pos, surroundingFaces);
+            const bool correctQuery = GetSurroundingTriangles(edge.destVertex.pos, surroundingFaces);
 
             blaVec3 tangent = m_faceTangent[triIndx];
             
@@ -381,7 +383,7 @@ bool TriangleMesh::GetSurroundingVertices(blaU32 vertexIndx, vector<DestVertex> 
         {
             failCount++;
 
-            // Find inward edge along the same face (that we know exists), then take it's opposite so it's out of the vertex
+            // Find inward edge along the same face (that we know exists), then take its opposite so it's out of the vertex
             HeIndx findEdgeIndx = edge.nextHE;
             HalfEdge findEdge = m_halfEdges[findEdgeIndx];
             do

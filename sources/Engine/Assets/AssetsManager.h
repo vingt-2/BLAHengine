@@ -2,7 +2,7 @@
 #include <Common/StdInclude.h>
 #include <Common/System.h>
 
-#include "PolygonalMesh.h"
+#include "MeshAsset.h"
 #include "Material.h"
 #include "Texture.h"
 
@@ -37,13 +37,13 @@ namespace BLAengine
 
         bool SaveMaterial(Material* mat);
         bool SaveTexture(Texture2D* mesh);
-        bool SaveTriangleMesh(TriangleMesh* mesh);
+        bool SaveTriangleMesh(MeshAsset* mesh);
 
     private:
 
         map<std::string, std::pair<AssetType, blaU32>> m_resourceMap;
 
-        vector<TriangleMesh*> m_triangleMeshesInMemory;
+        vector<MeshAsset*> m_triangleMeshesInMemory;
         vector<Material*> m_materialsInMemory;
         vector<Texture2D*> m_textures2DInMemory;
     };

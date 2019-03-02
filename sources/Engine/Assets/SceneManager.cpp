@@ -65,7 +65,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
                 Asset* triMeshAsset = nullptr;
                 if (m_assetManager->GetAsset(meshRenderSer->GetMeshName(), triMeshAsset) == AssetManager::AssetType::TriangleMeshAsset)
                 {
-                    meshRenderer->AssignTriangleMesh((TriangleMesh*)triMeshAsset);
+                    meshRenderer->AssignTriangleMesh((MeshAsset*)triMeshAsset);
                 }
                 else
                 {

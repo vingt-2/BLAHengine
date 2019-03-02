@@ -75,6 +75,6 @@ namespace BLAengine
         bool m_isTerminationRequested;
         int i = 0;
 
-        TriangleMesh* m_importedMesh = nullptr;
+        MeshAsset* m_importedMesh = nullptr;
     };
 };
