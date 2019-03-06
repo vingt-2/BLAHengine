@@ -12,23 +12,23 @@ void RunEditorSession()
 {
     EngineInstance::AssignSingletonInstance(new EditorSession(true, false));
 
-    EngineInstance* demo = EngineInstance::GetSingletonInstance();
+    EngineInstance* editorSession = EngineInstance::GetSingletonInstance();
 
-    auto renderWindow = new GLFWRenderWindow();
+    RenderWindow* renderWindow = new GLFWRenderWindow();
 
     renderWindow->CreateRenderWindow("BLAengine Editor", 1280, 720, false);
 
-    demo->InitializeEngine(renderWindow);
+    editorSession->InitializeEngine(renderWindow);
 
     int framerate = 144;
 
-    while (!demo->ShouldTerminate())
+    while (!editorSession->ShouldTerminate())
     {
         auto frameStartTime = std::chrono::steady_clock::now();
 
-        demo->PreEngineUpdate();
-        demo->EngineUpdate();
-        demo->PostEngineUpdate();
+        editorSession->PreEngineUpdate();
+        editorSession->EngineUpdate();
+        editorSession->PostEngineUpdate();
 
         auto frameEndTime = std::chrono::steady_clock::now();
         int microSecondsFrameTime = (int) (1000000.f / (float)framerate);
@@ -38,7 +38,7 @@ void RunEditorSession()
     }
 
     // Call terminates engine
-    demo->TerminateEngine();
+    editorSession->TerminateEngine();
 }
 
 int main()

@@ -298,6 +298,36 @@ bool GL33Renderer::LoadDebugLines()
     return true;
 }
 
+void GL33Renderer::CleanUpPools()
+{
+    for (auto entry : m_meshRenderPool)
+    {
+        RenderObject* renderObject = entry.second;
+        if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
+        {
+            this->CleanUp(*gl33RenderObject);
+        }
+    }
+    m_meshRenderPool.clear();
+
+    for (auto entry : m_gizmoRenderPool)
+    {
+        RenderObject* renderObject = entry.second;
+        if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
+        {
+            this->CleanUp(*gl33RenderObject);
+        }
+    }
+    m_gizmoRenderPool.clear();
+
+    for(auto dirLight : m_directionalLightPool)
+    {
+        delete dirLight.second;
+    }
+
+    m_directionalLightPool.clear();
+}
+
 bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender)
 {
     // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
@@ -642,8 +672,6 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     if (!m_renderingManager)
         return 0;
 
-
-    // PROBABLY CHANGE THIS TO A MORE OPTIMIZED SYSTEM:
     vector<blaU32> toErase;
     for (auto renderingObject : m_meshRenderPool)
     {
@@ -661,7 +689,6 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     {
         m_meshRenderPool.erase(ticket);
     }
-
 
     int addedObjectsOnCall = 0;
 
@@ -984,25 +1011,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
 
 void BLAengine::GL33Renderer::SwitchRenderingManager(RenderingManager * renderingManager)
 {
-    for (auto entry : m_meshRenderPool)
-    {
-        RenderObject* renderObject = entry.second;
-        if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
-        {
-            this->CleanUp(*gl33RenderObject);
-        }
-    }
-    m_meshRenderPool.clear();
-
-    for (auto entry : m_gizmoRenderPool)
-    {
-        RenderObject* renderObject = entry.second;
-        if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
-        {
-            this->CleanUp(*gl33RenderObject);
-        }
-    }
-    m_gizmoRenderPool.clear();
+    CleanUpPools();
 
     m_renderingManager = renderingManager;
 }

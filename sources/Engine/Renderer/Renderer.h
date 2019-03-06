@@ -41,10 +41,13 @@ namespace BLAengine
         virtual void SwitchRenderingManager(RenderingManager* renderingManager) = 0;
         virtual bool Update() = 0;
         virtual int	 SynchWithRenderManager() = 0;
+
         virtual RenderObject* LoadRenderObject(const MeshRendererComponent& object, int type) = 0;
         virtual bool    CancelRender(const MeshRendererComponent& object) = 0;
         virtual bool	LoadDebugLines() = 0;
         virtual Ray		ScreenToRay(blaVec2 screenSpaceCoord) = 0;
+
+        virtual void CleanUpPools() = 0;
 
         bool GetStatus()        const   { return m_isContextEnabled; }
         glm::vec2 GetRenderSize()    const   { return m_renderSize; }

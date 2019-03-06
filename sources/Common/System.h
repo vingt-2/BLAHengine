@@ -22,9 +22,9 @@ typedef glm::i32 blaS32;
 typedef glm::i64 blaS64;
 typedef glm::f32 blaF32;
 typedef glm::f64 blaF64;
-typedef std::size_t blaIndex;
 #endif
 
+typedef std::size_t blaIndex;
 typedef bool blaBool;
 
 namespace BLAColors
@@ -44,4 +44,10 @@ namespace BLAColors
 if(!(Condition))          \
 {                       \
     __debugbreak();     \
-}                       
+}                     
+
+#ifdef _WIN64
+#define BLA_INVALID_INDEX 0xFFFFFFFFFFFFFFFF
+#else
+#define BLA_INVALID_INDEX 0xFFFFFFFF
+#endif

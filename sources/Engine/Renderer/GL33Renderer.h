@@ -118,6 +118,8 @@ namespace BLAengine
         bool    CancelRender(const MeshRendererComponent& object);
         bool    LoadDebugLines();
 
+        void CleanUpPools();
+
         RenderWindow* GetWindow() const { return m_renderWindow; }
         void        ViewportResize(int width, int height);
         Ray        ScreenToRay(blaVec2 screenSpaceCoord);

@@ -32,6 +32,11 @@ const ObjectTransform& GameObject::GetTransform() const
     return m_transform;
 }
 
+ObjectTransform& GameObject::GetTransform()
+{
+    return m_transform;
+}
+
 //TODO: We might not actually want to recursively update the world transform every time we change a parent
 void GameObject::SetTransform(const ObjectTransform& transform)
 {

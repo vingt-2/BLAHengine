@@ -20,7 +20,8 @@ namespace BLAengine
 
         PointLightComponent(GameObjectReference parentObject);
         
-        ~PointLightComponent();
+        ~PointLightComponent() override
+        {};
     private:
 
         blaVec3 m_radiosity;

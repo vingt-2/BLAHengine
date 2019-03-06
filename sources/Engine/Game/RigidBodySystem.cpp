@@ -98,8 +98,9 @@ void RigidBodySystem::UpdateStates()
         RigidBodyComponent& body = *bodyPtr;
         if (!body.m_isPinned)
         {
-            if (body.m_nextState== nullptr) cout << "Empty state for body, check your calls!\n";
-            else UpdateTransform(body);
+            /*if (body.m_nextState== nullptr) cout << "Empty state for body, check your calls!\n";
+            else UpdateTransform(body);*/
+            UpdateTransform(body);
         }
     }
 }
@@ -117,11 +118,11 @@ void RigidBodySystem::GetNewStates()
             UpdateAcceleration(body);
             UpdateVelocity(body);
 
-            body.m_nextState->m_nextPos = bodyTransform.GetPosition() + m_timeStep * body.m_velocity;
+            body.m_nextState.m_nextPos = bodyTransform.GetPosition() + m_timeStep * body.m_velocity;
         }
         else
         {
-            body.m_nextState = new NextState();
+            body.m_nextState = NextState();
             body.m_invInertiaTensor = blaMat3(0);
             body.m_invMassTensor = blaMat3(0);
             body.ClearForces();
@@ -131,14 +132,14 @@ void RigidBodySystem::GetNewStates()
 
 void RigidBodySystem::UpdateAcceleration(RigidBodyComponent& body)
 {
-    NextState* newState = new NextState();
+    NextState newState;
 
     blaMat3 omegaHat = matrixCross(body.m_angularVelocity);
 
-    newState->m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));
+    newState.m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));
     
     blaVec3 inertia = omegaHat * body.m_inertiaTensor * body.m_angularVelocity;
-    newState->m_angularAcceleration = -body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
+    newState.m_angularAcceleration = -body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
     
     body.m_nextState = newState;
 }
@@ -148,14 +149,14 @@ void RigidBodySystem::UpdateAcceleration(RigidBodyComponent& body)
 */
 void RigidBodySystem::UpdateVelocity(RigidBodyComponent& body)
 {
-    if (body.m_nextState== nullptr) 
-    {
-        cout << "Next State not available, creating it, but you should call UpdateAcceleration First.\n";
-        UpdateAcceleration(body);
-    }
+    //if (body.m_nextState== nullptr) 
+    //{
+    //    cout << "Next State not available, creating it, but you should call UpdateAcceleration First.\n";
+    //    UpdateAcceleration(body);
+    //}
 
-    body.m_nextState->m_velocity = body.m_velocity + (m_timeStep * body.m_nextState->m_acceleration);
-    body.m_nextState->m_angularVelocity = body.m_angularVelocity + (m_timeStep * body.m_nextState->m_angularAcceleration);
+    body.m_nextState.m_velocity = body.m_velocity + (m_timeStep * body.m_nextState.m_acceleration);
+    body.m_nextState.m_angularVelocity = body.m_angularVelocity + (m_timeStep * body.m_nextState.m_angularAcceleration);
 }
 
 /*
@@ -176,20 +177,19 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
         }
         else
         {
-            correctionL = body.m_nextState->m_correctionLinearVelocity;
-            correctionA = body.m_nextState->m_correctionAngularVelocity;
+            correctionL = body.m_nextState.m_correctionLinearVelocity;
+            correctionA = body.m_nextState.m_correctionAngularVelocity;
         }
 
-        body.m_acceleration = body.m_nextState->m_acceleration;
-        body.m_angularAcceleration = body.m_nextState->m_angularAcceleration;
-        body.m_velocity = body.m_nextState->m_velocity + correctionL;
+        body.m_acceleration = body.m_nextState.m_acceleration;
+        body.m_angularAcceleration = body.m_nextState.m_angularAcceleration;
+        body.m_velocity = body.m_nextState.m_velocity + correctionL;
 
-        body.m_angularVelocity = body.m_nextState->m_angularVelocity + transform.WorldDirectionToLocal(correctionA);
+        body.m_angularVelocity = body.m_nextState.m_angularVelocity + transform.WorldDirectionToLocal(correctionA);
 
         // Debug
         body.m_debugCorrectionVelocity = correctionA;
-        delete(body.m_nextState);
-        body.m_nextState = nullptr;
+
         body.ClearForces();
     }
 

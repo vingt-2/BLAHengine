@@ -52,8 +52,8 @@ void CollisionProcessor::BroadPhaseDetection()
 
             if (!(body1 == body2) && body1->m_enableCollision && body2->m_enableCollision)
             {
-                blaVec3* nxtPos1 = &(body1->m_nextState->m_nextPos);
-                blaVec3* nxtPos2 = &(body2->m_nextState->m_nextPos);
+                blaVec3* nxtPos1 = &(body1->m_nextState.m_nextPos);
+                blaVec3* nxtPos2 = &(body2->m_nextState.m_nextPos);
                 if (length(*nxtPos1 - *nxtPos2) < (body1->GetAssociatedCollider()->GetBoundingRadius() + body2->GetAssociatedCollider()->GetBoundingRadius()))
                     NarrowPhaseDetection(body1, body2);
             }
@@ -200,11 +200,11 @@ void CollisionProcessor::SolveContacts()
         Contact contact = m_currentContacts[i];
 
         RigidBodyComponent* body1 = contact.m_body1;
-        blaVec3 vLUpdate1 = (blaVec3) body1->m_nextState->m_velocity;
-        blaVec3 vAUpdate1 = (blaVec3) body1->GetObjectTransform().LocalDirectionToWorld(body1->m_nextState->m_angularVelocity);
+        blaVec3 vLUpdate1 = (blaVec3) body1->m_nextState.m_velocity;
+        blaVec3 vAUpdate1 = (blaVec3) body1->GetObjectTransform().LocalDirectionToWorld(body1->m_nextState.m_angularVelocity);
         RigidBodyComponent* body2 = contact.m_body2;
-        blaVec3 vLUpdate2 = (blaVec3) body2->m_nextState->m_velocity;
-        blaVec3 vAUpdate2 = (blaVec3) body2->GetObjectTransform().LocalDirectionToWorld(body2->m_nextState->m_angularVelocity);
+        blaVec3 vLUpdate2 = (blaVec3) body2->m_nextState.m_velocity;
+        blaVec3 vAUpdate2 = (blaVec3) body2->GetObjectTransform().LocalDirectionToWorld(body2->m_nextState.m_angularVelocity);
 
         vector<blaVec3> nJac = contact.m_normalJacobian;
         vector<blaVec3> t1Jac = contact.m_tangentJacobian1;
@@ -258,10 +258,10 @@ void CollisionProcessor::SolveContacts()
                 else if (i == 2)
                     jacobianEntry = &(contact.m_tangentJacobian2);
 
-                float a = glm::dot((*jacobianEntry)[0], body1->m_nextState->m_correctionLinearVelocity);
-                float b = glm::dot((*jacobianEntry)[2], body2->m_nextState->m_correctionLinearVelocity);
-                float c = glm::dot((*jacobianEntry)[1], body1->m_nextState->m_correctionAngularVelocity);
-                float d = glm::dot((*jacobianEntry)[3], body2->m_nextState->m_correctionAngularVelocity);
+                float a = glm::dot((*jacobianEntry)[0], body1->m_nextState.m_correctionLinearVelocity);
+                float b = glm::dot((*jacobianEntry)[2], body2->m_nextState.m_correctionLinearVelocity);
+                float c = glm::dot((*jacobianEntry)[1], body1->m_nextState.m_correctionAngularVelocity);
+                float d = glm::dot((*jacobianEntry)[3], body2->m_nextState.m_correctionAngularVelocity);
 
                 float correction = a+b+c+d;
 
@@ -281,10 +281,10 @@ void CollisionProcessor::SolveContacts()
 
                 float deltaLambda = newLambda - lambdas[index][i];
 
-                body1->m_nextState->m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][0];
-                body1->m_nextState->m_correctionAngularVelocity += deltaLambda * T[3 * index + i][1];
-                body2->m_nextState->m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][2];
-                body2->m_nextState->m_correctionAngularVelocity += deltaLambda * T[3 * index + i][3];
+                body1->m_nextState.m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][0];
+                body1->m_nextState.m_correctionAngularVelocity += deltaLambda * T[3 * index + i][1];
+                body2->m_nextState.m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][2];
+                body2->m_nextState.m_correctionAngularVelocity += deltaLambda * T[3 * index + i][3];
 
                 lambdas[index][i] = newLambda;
 

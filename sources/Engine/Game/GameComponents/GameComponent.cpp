@@ -13,6 +13,11 @@ GameComponent::GameComponent(GameObjectReference parentObject) : m_parentObject(
     }
 }
 
+GameComponent::~GameComponent()
+{
+    m_parentObject = GameObjectReference::InvalidReference();
+}
+
 
 const ObjectTransform& GameComponent::GetObjectTransform() const
 {

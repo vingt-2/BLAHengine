@@ -23,7 +23,7 @@ namespace BLAengine
         void Update();
 
         CameraComponent(GameObjectReference parentObject);
-        ~CameraComponent(void);
+        ~CameraComponent(void) override;
 
     private:
     };

@@ -16,9 +16,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 20,
-                        "y": 20,
-                        "z": 20
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
                     }
                 },
                 "Components": [
@@ -28,7 +28,7 @@
                         "ptr_wrapper": {
                             "id": 2147483649,
                             "data": {
-                                "TriangleMesh": "cube",
+                                "TriangleMesh": "x-wing",
                                 "Material": [
                                     "BlankDiffuseMat"
                                 ]

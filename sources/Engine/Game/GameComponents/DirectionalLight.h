@@ -11,7 +11,7 @@ namespace BLAengine
     public:
 
         DirectionalLight(GameObjectReference parentObject);
-        ~DirectionalLight(void);
+        ~DirectionalLight(void) override;
 
         void SetDirection(blaVec3 direction);
         blaVec3 GetDirection();

@@ -1,5 +1,5 @@
 #pragma once
-#include <Common/StdInclude.h>
+#include <Common/BLAReference.h>
 #include <Common/DataStructures/Tree.h>
 #include <Common/Types.h>
 #include "ObjectTransform.h"
@@ -7,35 +7,10 @@
 namespace BLAengine
 {
 	class GameObject;
-	class BLACORE_API GameObjectReference
+	class BLACORE_API GameObjectReference : public BLAReference<GameObject>
 	{
+        BLA_DECLARE_REFERENCE(GameObjectReference, GameObject)
 		friend class Scene;
-	public:
-		GameObjectReference() : m_objectIndex(0xFFFFFFFF), m_pGameObjectVector(nullptr)
-		{}
-
-		GameObject& GetObject() const { return m_pGameObjectVector->at(m_objectIndex); }
-		blaBool IsValid() const { return m_objectIndex != 0xFFFFFFFF; }
-
-		GameObject* operator->() const { return &(m_pGameObjectVector->at(m_objectIndex)); }
-
-		blaBool operator==(const GameObjectReference& other) const
-		{
-			return (m_objectIndex == other.m_objectIndex) && (m_pGameObjectVector == other.m_pGameObjectVector);
-		}
-
-		blaBool operator!=(const GameObjectReference& other) const
-		{
-			return !(*this == other);
-		}
-
-		static GameObjectReference InvalidReference() { return GameObjectReference(0xFFFFFFFF, nullptr); };
-	private:
-		GameObjectReference(blaIndex idx, std::vector<GameObject>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
-		{}
-
-        blaIndex m_objectIndex;
-		std::vector<GameObject>* m_pGameObjectVector;
 	};
 
     class BLACORE_API GameObject : public IntrusiveTree<GameObject>
@@ -47,6 +22,7 @@ namespace BLAengine
 
         void Update();
 
+        ObjectTransform& GetTransform();
         const ObjectTransform& GetTransform() const;
         void SetTransform(const ObjectTransform& transform);
 

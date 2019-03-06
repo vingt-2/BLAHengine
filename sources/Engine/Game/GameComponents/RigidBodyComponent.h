@@ -38,7 +38,7 @@ namespace BLAengine
         blaVec3 m_debugCorrectionVelocity;
 
         // Pack the next state if needed to avoid recomputing
-        NextState* m_nextState;
+        NextState m_nextState;
 
         blaMat3 m_massTensor;
         blaMat3 m_invMassTensor;
@@ -68,7 +68,7 @@ namespace BLAengine
         void ClearForces() { m_forcesAccu = blaVec3(0); m_torquesAccu = blaVec3(0); }
 
         RigidBodyComponent(GameObjectReference parentObject);
-        ~RigidBodyComponent(void);
+        ~RigidBodyComponent(void) override;
 
     private:
 

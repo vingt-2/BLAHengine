@@ -22,7 +22,7 @@ namespace BLAengine
         blaU32 m_renderType;
 
         MeshRendererComponent(GameObjectReference parentObject);
-        ~MeshRendererComponent(void);
+        ~MeshRendererComponent(void) override;
 
         bool AssignTriangleMesh(MeshAsset* mesh);
         bool AssignMaterial(Material* material, int matIndx);

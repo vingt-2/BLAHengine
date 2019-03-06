@@ -1,4 +1,7 @@
 #include "ColliderComponent.h"
+
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 inline blaVec3 Barycentric(blaVec3 p, blaVec3 a, blaVec3 b, blaVec3 c)
@@ -21,11 +24,9 @@ MeshColliderComponent::MeshColliderComponent(GameObjectReference parentObject) :
 
 MeshColliderComponent::~MeshColliderComponent()
 {
-    m_collisionMesh->~CollisionModel3D();
-    m_vertPosIndices->clear();
-    m_vertNormalIndices->clear();
-    m_vertPosIndices->~vector();
-    m_vertNormalIndices->~vector();
+    delete m_vertPosIndices;
+    delete m_vertNormalIndices;
+    delete m_collisionMesh;
 }
 
 void MeshColliderComponent::SetColliderMesh(TriangleMesh* mesh)

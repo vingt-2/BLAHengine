@@ -21,7 +21,8 @@ namespace BLAengine
             m_autoPlay(true),
             m_lastIkSolveTime(0.f),
             m_testCone(MeshAsset("")),
-            m_SkyInvertedSphere(MeshAsset(""))
+            m_SkyInvertedSphere(MeshAsset("")),
+            m_cameraController(nullptr)
         {}
 
         void PreEngineUpdate() override;
@@ -32,7 +33,7 @@ namespace BLAengine
 
         void TerminateEngine() override;
 
-        void EditorDragAndDropedFile(std::string filePath);
+        void EditorDragAndDropedFile(const std::string& filePath) const;
 
         ~EditorSession() { EngineInstance::~EngineInstance(); };
 
@@ -41,6 +42,8 @@ namespace BLAengine
         bool LoadNewScene() override;
 
         bool LoadWorkingScene(std::string filepath) override;
+
+        void MakeSkyObject();
 
         struct EditorStateRequests
         {
@@ -87,6 +90,6 @@ namespace BLAengine
          *  Mesh Import Stuff...
          *  
          */
-        bool ImportMesh(std::string filepath, std::string name);
+        bool ImportMesh(std::string filepath, std::string name) const;
     };
 };

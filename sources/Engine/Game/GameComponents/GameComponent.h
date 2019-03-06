@@ -14,7 +14,7 @@ namespace BLAengine
     public:
 
         GameComponent(GameObjectReference parentObject);
-
+        virtual ~GameComponent();
         virtual void Update() = 0;
 
         const ObjectTransform& GetObjectTransform() const;

@@ -37,7 +37,7 @@ namespace BLAengine
     {
     public:
         MeshColliderComponent(GameObjectReference gameObject);
-        ~MeshColliderComponent();
+        ~MeshColliderComponent() override;
 
         void SetColliderMesh(TriangleMesh* mesh);
 

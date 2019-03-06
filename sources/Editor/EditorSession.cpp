@@ -159,7 +159,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         fileMenu.AddMenu(BlaGuiMenuItem("Open Scene", &m_editorStateRequests.m_openSceneRequest, true));
         fileMenu.AddMenu(BlaGuiMenuItem("Save", &m_editorStateRequests.m_saveSceneRequest));
         fileMenu.AddMenu(BlaGuiMenuItem("Save As", &m_editorStateRequests.m_saveSceneAsRequest, true));
-        fileMenu.AddMenu(BlaGuiMenuItem("Exit", &(EngineInstance::m_isTerminationRequested)));
+        fileMenu.AddMenu(BlaGuiMenuItem("Exit", &(m_isTerminationRequested)));
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(fileMenu);
 
@@ -187,6 +187,8 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
             coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
         }
 
+        coneObject->GetTransform().m_scale = blaVec3(1.f,2.f,1.f);
+
         return true;
     }
     return false;
@@ -196,20 +198,11 @@ bool EditorSession::LoadNewScene()
 {
     EngineInstance::LoadNewScene();
 
-    m_SkyInvertedSphere = MeshAsset("SkySphere");
-    m_SkyInvertedSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);
+    g_selectedObject = GameObjectReference::InvalidReference();
 
-    GameObjectReference skySphereObject = m_workingScene->CreateObject("SkySphere");
+    MakeSkyObject();
 
-    BLA_CREATE_COMPONENT(MeshRendererComponent, skySphereObject);
-    skySphereObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_SkyInvertedSphere);
-
-    Asset* materialAsset = nullptr;
-    if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
-    {
-        skySphereObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
-    }
-
+    delete m_cameraController;
     m_cameraController = new CameraController(
         m_renderWindow,
         m_workingScene->GetMainCamera(),
@@ -229,13 +222,17 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
+    g_selectedObject = GameObjectReference::InvalidReference();
+
+    MakeSkyObject();
+
 	GameObjectReference animatedObject = m_workingScene->CreateObject("AnimatedObject");
 
     BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
     //BLA_CREATE_COMPONENT(IKComponent, animatedObject);
 
-    //delete m_cameraController;
+    delete m_cameraController;
     m_cameraController = new CameraController(
         m_renderWindow, 
         m_workingScene->GetMainCamera(),
@@ -245,10 +242,26 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
     m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);
     m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);
 
-
     SetEditorState(new EditorState());
     
     return true;
+}
+
+void EditorSession::MakeSkyObject()
+{
+    m_SkyInvertedSphere = MeshAsset("SkySphere");
+    m_SkyInvertedSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000);
+
+    GameObjectReference skySphereObject = m_workingScene->CreateObject("SkySphere");
+
+    BLA_CREATE_COMPONENT(MeshRendererComponent, skySphereObject);
+    skySphereObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_SkyInvertedSphere);
+
+    Asset* materialAsset = nullptr;
+    if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
+    {
+        skySphereObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
+    }
 }
 
 void EditorSession::TerminateEngine()
@@ -256,7 +269,7 @@ void EditorSession::TerminateEngine()
     EngineInstance::TerminateEngine();
 }
 
-void EditorSession::EditorDragAndDropedFile(std::string filePath)
+void EditorSession::EditorDragAndDropedFile(const std::string& filePath) const
 {
     FileEntry file = ParseFilePath(filePath);
     ImportMesh(file.GetFullPath(), file.m_name);
@@ -540,7 +553,7 @@ void EditorSession::HandleLoadScenePrompt()
     }
 }
 
-bool EditorSession::ImportMesh(std::string filepath, std::string name)
+bool EditorSession::ImportMesh(std::string filepath, std::string name) const
 {
     OBJImport objImporter;
 
