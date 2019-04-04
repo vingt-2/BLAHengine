@@ -89,9 +89,17 @@ void EngineInstance::PostEngineUpdate()
 
 void EngineInstance::TerminateEngine()
 {
-    //TODO: Clean the render window ...
-    //m_renderWindow->~RenderWindow();
+    delete m_inputManager;
+    delete m_debug;
+    delete m_workingScene;
+    delete m_timer;
+    delete m_renderingManager;
+    delete m_debugRenderingManager;
+    delete m_renderer;
+    delete m_sceneManager;
+    delete m_assetManager;
     delete m_guiManager;
+    delete m_renderWindow;
 }
 
 bool EngineInstance::LoadNewScene()
@@ -108,10 +116,12 @@ bool EngineInstance::LoadNewScene()
 
     SetupDirLightAndCamera();
 
+    m_renderWindow->SetWindowTitle("BLA Editor - New Scene");
+
     return true;
 }
 
-bool BLAengine::EngineInstance::LoadWorkingScene(std::string filepath)
+bool EngineInstance::LoadWorkingScene(std::string filepath)
 {
     delete m_renderingManager;
     delete m_workingScene;
@@ -124,6 +134,10 @@ bool BLAengine::EngineInstance::LoadWorkingScene(std::string filepath)
     m_renderer->SwitchRenderingManager(m_renderingManager);
 
     SetupDirLightAndCamera();
+
+    FileEntry sceneFileEntry = ParseFilePath(filepath);
+
+    m_renderWindow->SetWindowTitle("BLA Editor - " + sceneFileEntry.m_name);
 
     return true;
 }

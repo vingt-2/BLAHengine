@@ -3,9 +3,10 @@
 
 using namespace BLAengine;
 
-GameObject::GameObject(string name):
+GameObject::GameObject(string name, const GameObjectReference& parent):
     m_objectName(name),
-    m_transform(ObjectTransform())
+    m_transform(ObjectTransform()),
+    m_parent(parent)
 {}
 
 
@@ -27,26 +28,27 @@ void GameObject::Update()
     }
 }
 
-const ObjectTransform& GameObject::GetTransform() const
+const ObjectTransform& GameObject::GetPotentialDirtyTransform() const
 {
     return m_transform;
 }
 
 ObjectTransform& GameObject::GetTransform()
 {
+    if (m_parent.IsValid() && m_objectState & DIRTY_TRANSFORM)
+    {
+        m_transform.m_transform = m_parent->GetTransform().m_transform * m_transform.m_transform;
+        m_transform.m_scale = m_parent->GetTransform().m_scale * m_transform.m_scale;
+        m_objectState &= ~DIRTY_TRANSFORM;
+    }
     return m_transform;
 }
 
 //TODO: We might not actually want to recursively update the world transform every time we change a parent
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
-    /*GameObjectReference child = GetChild();
-    while(child != nullptr)
-    {
-        ObjectTransform newChildT = child->GetTransform();
-        newChildT.GetPosQuat() = transform.GetPosQuat() * newChildT.GetPosQuat();
-        child->SetTransform(newChildT);
-    }*/
+    m_objectState |= DIRTY_TRANSFORM;
+
     m_transform = transform;
 }
 

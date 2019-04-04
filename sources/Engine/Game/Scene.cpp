@@ -13,14 +13,14 @@ Scene::Scene()
     m_sceneObjectsVector.reserve(1000);
 }
 
-GameObjectReference Scene::CreateObject(std::string name)
+GameObjectReference Scene::CreateObject(std::string name, const GameObjectReference &parentObject)
 {
-    m_sceneObjectsVector.emplace_back(GameObject(name));
+    m_sceneObjectsVector.emplace_back(GameObject(name, GetSceneRoot()));
 
     return GameObjectReference { m_sceneObjectsVector.size() - (blaIndex)1, &m_sceneObjectsVector };
 }
 
-bool BLAengine::Scene::DeleteObject(std::string name)
+bool Scene::DeleteObject(std::string name)
 {
 	//TODO: Keep a bitfield of valid game objects in the vector (don't actually clear it)
     /*GameObjectReference object = this->FindObjectByName(name);
@@ -35,13 +35,13 @@ bool BLAengine::Scene::DeleteObject(std::string name)
     return true;
 }
 
-GameObjectReference BLAengine::Scene::FindObjectByName(std::string name)
+GameObjectReference Scene::FindObjectByName(std::string name)
 {
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
         if (m_sceneObjectsVector[i].GetName().compare(name) == 0)
         {
-            return GameObjectReference(i, &m_sceneObjectsVector);
+            return { i, &m_sceneObjectsVector };
         }
     }
     return GameObjectReference::InvalidReference();
@@ -61,15 +61,17 @@ vector<GameObjectReference> Scene::FindObjectsMatchingName(std::string name)
     return results;
 }
 
-void BLAengine::Scene::SetTimeObject(Timer * time)
+void Scene::SetTimeObject(Timer * time) const
 {
     m_rigidBodySystem->SetTimeObject(time);
 }
 
 
-void BLAengine::Scene::Initialize(RenderingManager* renderingManager)
+void Scene::Initialize(RenderingManager* renderingManager)
 {
     this->m_renderingManager = renderingManager;
+
+    m_sceneObjectsVector.emplace_back(GameObject("Root", GameObjectReference::InvalidReference()));
 }
 
 void Scene::Update()
@@ -184,4 +186,12 @@ GameObjectReference Scene::PickGameObjectInScene(const Ray& inRay, ColliderCompo
     }
 
 	return pickedObject;
+}
+
+void Scene::SetGameObjectParent(const GameObjectReference& parent, const GameObjectReference& child)
+{
+    if(parent.IsValid() && child.IsValid())
+    {
+        child->m_parent = parent;
+    }
 }

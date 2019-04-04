@@ -93,7 +93,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
 
     //GameObject* light = m_workingScene->CreateObject("DirLight");
     //DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
-    //ObjectTransform lightT = light->GetTransform();
+    //ObjectTransform lightT = light->GetPotentialDirtyTransform();
     //lightT.SetEulerAngles(1.07f, 0.f, 0.f);
     //light->SetTransform(lightT);
 
@@ -127,7 +127,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     //        {
     //            if (gobject->GetName() == "sky")
     //            {
-    //                PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetTransform().m_scale.x);
+    //                PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetPotentialDirtyTransform().m_scale.x);
     //                pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
     //                //pbmRender->m_material.m_emissivePower = blaVec3(100000000, 100000000, 100000000);
 
@@ -136,7 +136,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     //            else if(gobject->GetName() == "sphere")
     //            {
     //                PBRSurfaceComponent* pbmRender = new PBRMeshComponent(mRender->m_mesh);
-    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetTransform().m_scale.x);
+    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetPotentialDirtyTransform().m_scale.x);
     //                pbmRender->m_material.m_brdf = new PBRMaterial::MirrorBRDF();
     //                pbmRender->m_material.m_color = blaVec3(0.2, 0.2, 1);
     //                //pbmRender->m_material.m_emissivePower = blaVec3(5, 5, 40);
@@ -145,7 +145,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     //            else if (gobject->GetName() == "redcube1" || gobject->GetName() == "redcube4")
     //            {
     //                PBRSurfaceComponent* pbmRender = new PBRMeshComponent(mRender->m_mesh);
-    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetTransform().m_scale.x);
+    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetPotentialDirtyTransform().m_scale.x);
     //                pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
     //                pbmRender->m_material.m_color = blaVec3(1, 0.1, 0.1);
     //                //pbmRender->m_material.m_emissivePower = blaVec3(5, 5, 40);
@@ -154,7 +154,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     //            else if (gobject->GetName() == "redcube2" || gobject->GetName() == "redcube3")
     //            {
     //                PBRSurfaceComponent* pbmRender = new PBRMeshComponent(mRender->m_mesh);
-    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetTransform().m_scale.x);
+    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetPotentialDirtyTransform().m_scale.x);
     //                pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
     //                pbmRender->m_material.m_color = blaVec3(1, 0.1, 0.1);
     //                //pbmRender->m_material.m_emissivePower = blaVec3(5, 5, 40);
@@ -163,7 +163,7 @@ bool BLAengine::Raytracer::LoadWorkingScene(std::string filepath)
     //            else
     //            {
     //                PBRSurfaceComponent* pbmRender = new PBRMeshComponent(mRender->m_mesh);
-    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetTransform().m_scale.x);
+    //                //PBRSurfaceComponent* pbmRender = new PBRSphereComponent(gobject->GetPotentialDirtyTransform().m_scale.x);
     //                pbmRender->m_material.m_brdf = new PBRMaterial::LambertianBRDF();
     //                pbmRender->m_material.m_color = blaVec3(1, 1, 1);
     //                gobject->AddComponent(pbmRender);

@@ -8,7 +8,10 @@ GL33Renderer::GL33Renderer():
     m_clearColor(blaVec3(0.3,0.3,0.3))
 {}
 
-GL33Renderer::~GL33Renderer() {}
+GL33Renderer::~GL33Renderer()
+{
+    CleanUpPools();
+}
 
 void GL33Renderer::ViewportResize(int width, int height)
 {
@@ -930,6 +933,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     m_debugRenderingManager = debugRenderManager;
 
     bool initialized = false;
+
 #ifdef GLFW_INTERFACE
     if (GLFWRenderWindow* render = dynamic_cast<GLFWRenderWindow*>(window))
     {
@@ -952,7 +956,8 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
 
         initialized = true;        
     }
-#endif
+
+#elif defined(WPF_INTERFACE)
     if (WPFRenderWindow* render = dynamic_cast<WPFRenderWindow*>(window))
     {
         if (!initialized)
@@ -982,6 +987,8 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
             initialized = true;
         }
     }
+#endif
+
     if(!initialized)
     {
         std::cout << "No valid window handle provided to the Renderer\n";

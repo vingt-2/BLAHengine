@@ -12,8 +12,3 @@ Renderer::Renderer()
     m_isContextEnabled = false;
     this->m_renderSize = glm::vec2(0,0);
 }
-
-
-Renderer::~Renderer(void)
-{
-}

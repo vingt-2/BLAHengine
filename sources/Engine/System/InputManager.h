@@ -149,22 +149,22 @@ namespace BLAengine
 
     enum BLAGamepadButtons : blaU32
     {
-        BLA_GAMEPAD_1
-        , BLA_GAMEPAD_2
-        , BLA_GAMEPAD_3
-        , BLA_GAMEPAD_4
-        , BLA_GAMEPAD_5
-        , BLA_GAMEPAD_6
-        , BLA_GAMEPAD_7
-        , BLA_GAMEPAD_8
-        , BLA_GAMEPAD_9
-        , BLA_GAMEPAD_10
-        , BLA_GAMEPAD_11
-        , BLA_GAMEPAD_12
-        , BLA_GAMEPAD_13
-        , BLA_GAMEPAD_14
-        , BLA_GAMEPAD_15
-        , BLA_GAMEPAD_16
+        BLA_GAMEPAD_DPAD_UP
+        , BLA_GAMEPAD_DPAD_RIGHT
+        , BLA_GAMEPAD_DPAD_DOWN
+        , BLA_GAMEPAD_DPAD_LEFT
+        , BLA_GAMEPAD_FACEBUTTON_UP
+        , BLA_GAMEPAD_FACEBUTTON_RIGHT
+        , BLA_GAMEPAD_FACEBUTTON_DOWN
+        , BLA_GAMEPAD_FACEBUTTON_LEFT
+        , BLA_GAMEPAD_LEFT_TRIGGER
+        , BLA_GAMEPAD_LEFT_SHOULDER
+        , BLA_GAMEPAD_LEFT_STICK
+        , BLA_GAMEPAD_RIGHT_TRIGGER
+        , BLA_GAMEPAD_RIGHT_SHOULDER
+        , BLA_GAMEPAD_RIGHT_STICK
+        , BLA_GAMEPAD_START
+        , BLA_GAMEPAD_SELECT
         , BLA_GAMEPAD_ENUM_END
     };
 
@@ -235,7 +235,7 @@ namespace BLAengine
     public:
         static void SetKey(BLAKeyboard key, blaF32 time, blaBool down);
         static void SetMouseButton(BLAMouseButtons mouseButton, blaF32 time, blaBool down);
-        static void SetPad(BLAGamepadButtons pad, blaF32 time, blaBool down);
+        static void SetPad(int index, BLAGamepadButtons pad, blaF32 time, blaBool down);
 
         static void SetMousePointer(const blaVec2& position);
         static void SetMouseScrollDelta(blaF32 mouseScrollDelta);

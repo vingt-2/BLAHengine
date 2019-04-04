@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common/System.h>
+#include <Common/BLAReference.h>
 #include <Iterator>
 
 template<class T>

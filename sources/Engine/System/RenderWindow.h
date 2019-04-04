@@ -16,7 +16,7 @@ namespace BLAengine
     {
     public:
         RenderWindow() = default;
-        ~RenderWindow() {};
+        virtual ~RenderWindow(){};
 
         virtual void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
         virtual string GetMaxGLVersion() const = 0;
@@ -43,61 +43,6 @@ namespace BLAengine
 
 
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
-    };
-
-    //TODO: Implement MousWheel
-    class BLACORE_API WPFRenderWindow : public RenderWindow
-    {
-    public:
-        WPFRenderWindow();
-        ~WPFRenderWindow();
-
-
-        virtual void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen);
-        
-        virtual void UpdateWindowAndBuffers();
-
-        virtual void MakeGLContextCurrent();
-
-        virtual void GetSize(int &width, int &height) const;
-
-        virtual string GetMaxGLVersion() const;
-
-        void WriteSize(int x, int y);
-        void WriteMousePos(int x, int y);
-
-        virtual bool isFullScreen() const;
-
-        virtual void SetWindowTitle(string title);
-        virtual string GetWindowTitle() const;
-
-        bool ShouldUpdateWindow() const;
-        void SetWindowUpdated();
-
-        bool ShouldMakeGLCurrent() const;
-        void SetMadeGLCurrent();
-
-        void SetMouseCursorVisibility(bool visibility) override {};
-
-        virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override {};
-
-        blaVec2 GetMousePointerScreenSpaceCoordinates(){ return blaVec2(0.f); }
-
-        void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) override {};
-    
-        unsigned char m_mouseDownState;
-        bool m_keyPressed[100];
-
-    private:
-
-        int m_width, m_height, m_mousePosX, m_mousePosY;
-        
-        bool m_makeGLCurrentRequest;
-        bool m_updateWindowRequest;
-
-        DragAndDropCallback m_registeredDragAndDropCallback;
-
-        string m_glVersion;
     };
 
 #ifdef GLFW_INTERFACE
@@ -139,7 +84,7 @@ namespace BLAengine
         GLFWwindow* GetWindowPointer() { return m_glfwWindow; }
 
         GLFWRenderWindow();
-        ~GLFWRenderWindow();
+        ~GLFWRenderWindow() override;
 
         static std::vector<GLFWRenderWindow*> ms_glfwRenderWindowInstanced;
 
@@ -157,5 +102,62 @@ namespace BLAengine
 
         std::vector<int> m_mouseButtonsThatKillCursorWhenHeld;
     };
-#endif
+
+#elif defined(WPF_INTERFACE)
+    //TODO: Implement MousWheel
+    class BLACORE_API WPFRenderWindow : public RenderWindow
+    {
+    public:
+        WPFRenderWindow();
+        ~WPFRenderWindow();
+
+
+        virtual void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen);
+
+        virtual void UpdateWindowAndBuffers();
+
+        virtual void MakeGLContextCurrent();
+
+        virtual void GetSize(int &width, int &height) const;
+
+        virtual string GetMaxGLVersion() const;
+
+        void WriteSize(int x, int y);
+        void WriteMousePos(int x, int y);
+
+        virtual bool isFullScreen() const;
+
+        virtual void SetWindowTitle(string title);
+        virtual string GetWindowTitle() const;
+
+        bool ShouldUpdateWindow() const;
+        void SetWindowUpdated();
+
+        bool ShouldMakeGLCurrent() const;
+        void SetMadeGLCurrent();
+
+        void SetMouseCursorVisibility(bool visibility) override {};
+
+        virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override {};
+
+        blaVec2 GetMousePointerScreenSpaceCoordinates() { return blaVec2(0.f); }
+
+        void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) override {};
+
+        unsigned char m_mouseDownState;
+        bool m_keyPressed[100];
+
+    private:
+
+        int m_width, m_height, m_mousePosX, m_mousePosY;
+
+        bool m_makeGLCurrentRequest;
+        bool m_updateWindowRequest;
+
+        DragAndDropCallback m_registeredDragAndDropCallback;
+
+        string m_glVersion;
+    };
+ #endif
+
 }

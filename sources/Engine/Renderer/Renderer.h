@@ -55,7 +55,7 @@ namespace BLAengine
         void SetCamera(CameraComponent* camera);
 
         Renderer();
-        ~Renderer(void);
+        virtual ~Renderer(void){};
 
     protected:
         RenderWindow* m_renderWindow;

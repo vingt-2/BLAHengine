@@ -118,14 +118,14 @@ namespace BLAengine
         bool    CancelRender(const MeshRendererComponent& object);
         bool    LoadDebugLines();
 
-        void CleanUpPools();
+        void CleanUpPools() override;
 
         RenderWindow* GetWindow() const { return m_renderWindow; }
         void        ViewportResize(int width, int height);
         Ray        ScreenToRay(blaVec2 screenSpaceCoord);
 
         GL33Renderer();
-        ~GL33Renderer();
+        ~GL33Renderer() override;
 
         // Debug Vignette;
         GLuint DrawColorBufferPrgmID;

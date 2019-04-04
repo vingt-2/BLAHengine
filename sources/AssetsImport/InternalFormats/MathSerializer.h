@@ -1,6 +1,5 @@
 #pragma once
 #include <cereal\cereal.hpp>
-#include <cereal\archives\binary.hpp>
 #include <cereal\archives\xml.hpp>
 
 #include <Common/Maths/Maths.h>
@@ -159,6 +158,39 @@ private:
             CEREAL_NVP(a), CEREAL_NVP(b), CEREAL_NVP(c),
             CEREAL_NVP(d), CEREAL_NVP(e), CEREAL_NVP(f),
             CEREAL_NVP(g), CEREAL_NVP(h), CEREAL_NVP(i)
+        );
+    }
+};
+
+class ivec2serializer
+{
+public:
+    ivec2serializer() = default;
+
+    void FillData(blaIVec2 &vec)
+    {
+        x = vec.x;
+        y = vec.y;
+    }
+
+    void LoadData(blaIVec2 &vec)
+    {
+        vec.x = x;
+        vec.y = y;
+    }
+
+    blaU32 x, y;
+
+private:
+
+    friend class cereal::access;
+
+    template <class Archive>
+    void serialize(Archive & archive)
+    {
+        archive
+        (
+            CEREAL_NVP(x), CEREAL_NVP(y)
         );
     }
 };

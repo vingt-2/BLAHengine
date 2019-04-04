@@ -24,7 +24,7 @@ namespace BLAengine
         void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
         void Update();
 
-        GameObjectReference CreateObject(std::string name);
+        GameObjectReference CreateObject(std::string name, const GameObjectReference &parentObject = GameObjectReference::InvalidReference());
         bool DeleteObject(std::string name);
 		GameObjectReference FindObjectByName(std::string name);
         vector<GameObjectReference> FindObjectsMatchingName(std::string name);
@@ -40,9 +40,13 @@ namespace BLAengine
         bool GetGravity() const { return m_rigidBodySystem->m_enableGravity; }
         RigidBodySystem* m_rigidBodySystem;
 
-        void SetTimeObject(Timer* time);
+        void SetTimeObject(Timer* time) const;
 
         GameObjectReference PickGameObjectInScene(const Ray& inRay, ColliderComponent::CollisionContact& outContact);
+
+        GameObjectReference GetSceneRoot() { return { 0, &m_sceneObjectsVector }; }
+
+        void SetGameObjectParent(const GameObjectReference& parent, const GameObjectReference& child);
 
     private:
 

@@ -13,21 +13,30 @@ namespace BLAengine
 		friend class Scene;
 	};
 
-    class BLACORE_API GameObject : public IntrusiveTree<GameObject>
+    class BLACORE_API GameObject
     {
         // Game component is a friend class to GameObjects. They call Add Component upon Creation
         friend class GameComponent;
+        friend class Scene;
 
     public:
 
+        enum GameObjectStateBits : blaU32
+        {
+            DIRTY_TRANSFORM = 1 << 0,
+        };
+
+        typedef blaU32 GameObjectState;
+
+        GameObject(string name, const GameObjectReference& parent);
+        ~GameObject(void);
+
         void Update();
 
+        const ObjectTransform& GetPotentialDirtyTransform() const;
+        
         ObjectTransform& GetTransform();
-        const ObjectTransform& GetTransform() const;
         void SetTransform(const ObjectTransform& transform);
-
-        GameObject(string name);
-        ~GameObject(void);
 
         void SetName(std::string name) { m_objectName = name; }
         std::string GetName() const { return m_objectName; }
@@ -50,10 +59,15 @@ namespace BLAengine
 
         void AddComponent(GameComponent* component);
 
+        // Behold the stuff that should die.
         string m_objectName;
-        ObjectTransform m_transform;
-
         vector<GameComponent*> m_componentVector;
+
+        ObjectTransform m_transform;
+        GameObjectState m_objectState;
+        GameObjectReference m_parent;
+
+
     };
     
     inline vector<GameComponent*> GameObject::GetAllComponents() const

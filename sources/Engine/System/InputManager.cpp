@@ -41,7 +41,6 @@ BLAMousePointerState InputManager::GetMousePointerState() const
     return state;
 }
 
-
 void InputManager::Update()
 {
     m_lockInputs = true;
@@ -90,7 +89,7 @@ void InputStateSetter::SetMouseButton(BLAMouseButtons key, blaF32 time, blaBool 
     inputManager->m_mouseButtonTimes[key] = time;
 }
 
-void InputStateSetter::SetPad(BLAGamepadButtons key, blaF32 time, blaBool down)
+void InputStateSetter::SetPad(int index, BLAGamepadButtons key, blaF32 time, blaBool down)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
 

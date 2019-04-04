@@ -302,7 +302,7 @@ void GLFWRenderWindow::SetDragAndDropCallback(DragAndDropCallback dragAndDropCal
 }
 
 
-#endif
+#elif defined(WPF_INTERFACE)
 
 WPFRenderWindow::WPFRenderWindow() :
     m_glVersion(string("NONE")),
@@ -394,3 +394,4 @@ void WPFRenderWindow::GetSize(int &width, int &height) const
 //    x = m_mousePosX;
 //    y = m_mousePosY;
 //}
+#endif
