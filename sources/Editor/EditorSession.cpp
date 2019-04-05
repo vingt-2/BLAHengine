@@ -15,6 +15,7 @@
 #include <Engine/Game/GameComponents/ColliderComponent.h>
 #include <Engine/Geometry/PrimitiveGeometry.h>
 #include <Common/FileSystem/Files.h>
+#include <Engine/Game/GameComponents/TestPlayerComponent.h>
 
 #include "EditorSession.h"
 #include "AssetsImport/ExternalFormats/OBJImport.h"
@@ -186,6 +187,13 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         {
             coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
         }
+
+		BLA_CREATE_COMPONENT(MeshColliderComponent, coneObject);
+		coneObject->GetComponent<MeshColliderComponent>()->SetColliderMesh(&m_testCone.m_triangleMesh);
+
+		BLA_CREATE_COMPONENT(RigidBodyComponent, coneObject);
+
+		BLA_CREATE_COMPONENT(TestPlayerComponent, coneObject);
 
         coneObject->GetTransform().m_scale = blaVec3(1.f,2.f,1.f);
 

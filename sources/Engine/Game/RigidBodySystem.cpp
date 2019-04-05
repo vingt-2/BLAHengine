@@ -5,6 +5,8 @@
 
 #include "RigidBodySystem.h"
 
+#pragma optimize("",off)
+
 using namespace BLAengine;
 
 RigidBodySystem::RigidBodySystem(Timer* time):
@@ -197,19 +199,24 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
     transform.SetPosition( transform.GetPosition() + m_timeStep * body.m_velocity);
     
     //    Evaluate Exponential Map
-    blaMat3 omegaHat = matrixCross(-body.m_angularVelocity);
-    blaMat3 deltaRot = blaMat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
-    blaMat3 newRotation = toMat3(transform.GetRotation()) * deltaRot;
+    //blaMat3 omegaHat = matrixCross(-body.m_angularVelocity);
+    //blaMat3 deltaRot = blaMat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
+    //blaMat3 newRotation = toMat3(transform.GetRotation()) * deltaRot;
 
-    //    Normalize each axis of rotation to avoid scale drift 
-    blaVec3 X = blaVec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
-    blaVec3 Y = blaVec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
-    blaVec3 Z = blaVec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
+    ////    Normalize each axis of rotation to avoid scale drift 
+    //blaVec3 X = blaVec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
+    //blaVec3 Y = blaVec3(newRotation[1][0], newRotation[1][1], newRotation[1][2]);
+    //blaVec3 Z = blaVec3(newRotation[2][0], newRotation[2][1], newRotation[2][2]);
 
 
-    // TODO: Implement conversion in blaQuat class ...
-    glm::quat q = blaMat3(normalize(X), normalize(Y), normalize(Z));
-    transform.SetRotation(blaQuat(q.x,q.y,q.z,q.w));
+    //// TODO: Implement conversion in blaQuat class ...
+    //glm::quat q = blaMat3(normalize(X), normalize(Y), normalize(Z));
+    //transform.SetRotation(blaQuat(q.x,q.y,q.z,q.w));
+
+	blaVec3 logMapAxis = SafeNormalize(body.m_angularVelocity);
+	blaF32 logMapAngle = glm::length(body.m_angularVelocity) * m_timeStep;
+
+	transform.SetRotation(glm::angleAxis(logMapAngle, logMapAxis));
 
     body.GetParentObject()->SetTransform(transform);
 }

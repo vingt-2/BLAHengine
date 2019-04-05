@@ -85,6 +85,7 @@ void Scene::Update()
     if (m_enableSimulation)
     {
         m_rigidBodySystem->EnableSimulation();
+		m_rigidBodySystem->m_enableGravity = false;
     }
     else
     {
@@ -116,6 +117,15 @@ void Scene::Update()
                 m_renderingManager->RegisterDirectionalLight(dirLightComp, shadowCamera);
             }
         }
+
+		for (auto rigidBody: object->GetComponents<RigidBodyComponent>())
+		{
+			//Use ticket system for rigidbody as well
+			if (rigidBody && !rigidBody->m_registered)
+			{
+				m_rigidBodySystem->RegisterRigidBody(*rigidBody);
+			}
+		}
 
         for (auto pbrenderer : object->GetComponents<PBRCamera>())
         {

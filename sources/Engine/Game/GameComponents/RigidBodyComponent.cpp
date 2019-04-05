@@ -63,7 +63,17 @@ void RigidBodyComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
     torque = transform.WorldDirectionToLocal(torque);
 
     AddTorque(torque);
-    AddLinearForce(forceW / length(torque));
+
+	blaF32 torqueMagnitude = length(torque);
+
+	if(torqueMagnitude > BLA_EPSILON)
+	{
+		AddLinearForce(forceW / length(torque));
+	}
+	else
+	{
+		AddLinearForce(forceW);
+	}
 }
 
 void RigidBodyComponent::AddLinearForce(blaVec3 force)

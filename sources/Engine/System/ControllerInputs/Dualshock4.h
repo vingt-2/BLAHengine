@@ -175,7 +175,7 @@ private:
     void UpdateTimeStep();
     void UpdateAHRS(float dt, float gx, float gy, float gz, float ax, float ay, float az);
 
-    hid_device* m_hidDevice;
+    hid_device* m_hidDevice = nullptr;
     unsigned char m_reportBuffer[256];
     unsigned char m_writeBuffer[256];
     int m_resultFlag;

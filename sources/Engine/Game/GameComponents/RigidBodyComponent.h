@@ -70,6 +70,9 @@ namespace BLAengine
         RigidBodyComponent(GameObjectReference parentObject);
         ~RigidBodyComponent(void) override;
 
+		//Todo: MOVE TO TICKET SYSTEM.
+		bool m_registered = false;
+
     private:
 
         blaVec3 m_forcesAccu;
