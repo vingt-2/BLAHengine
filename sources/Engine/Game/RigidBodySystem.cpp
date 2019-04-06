@@ -33,10 +33,11 @@ RigidBodySystem::~RigidBodySystem()
 bool RigidBodySystem::RegisterRigidBody(RigidBodyComponent &body)
 {
     m_rigidBodyList.push_back(&body);
-    
+    body.m_registered = true;
     if (body.GetAssociatedCollider())
     {
         m_collisionProcessor->m_bodiesList.push_back(&body);
+        body.m_registered = true;
         return true;
     }
     else
@@ -83,6 +84,7 @@ void RigidBodySystem::UpdateSystem()
         }
         m_oldTime = time;
 
+        
         ApplyWorldForces();
         for (int i = 0; i < m_substeps; i++)
         {
@@ -128,6 +130,7 @@ void RigidBodySystem::GetNewStates()
             body.m_invInertiaTensor = blaMat3(0);
             body.m_invMassTensor = blaMat3(0);
             body.ClearForces();
+            body.ClearImpulse();
         }
     }
 }
@@ -157,7 +160,7 @@ void RigidBodySystem::UpdateVelocity(RigidBodyComponent& body)
     //    UpdateAcceleration(body);
     //}
 
-    body.m_nextState.m_velocity = body.m_velocity + (m_timeStep * body.m_nextState.m_acceleration);
+    body.m_nextState.m_velocity = body.m_velocity + (m_timeStep * body.m_nextState.m_acceleration) + body.GetImpulseAccu();
     body.m_nextState.m_angularVelocity = body.m_angularVelocity + (m_timeStep * body.m_nextState.m_angularAcceleration);
 }
 
@@ -193,6 +196,7 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
         body.m_debugCorrectionVelocity = correctionA;
 
         body.ClearForces();
+        body.ClearImpulse();
     }
 
     //    Evaluate new Position;

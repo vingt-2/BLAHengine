@@ -19,7 +19,7 @@ void CameraController::UpdateController()
         return;
     }
 
-    ObjectTransform transform = m_controlledCamera->GetObjectTransform();
+    ObjectTransform transform = m_controlledCamera->GetLocalObjectTransform();
     GameObjectReference cameraObject = m_controlledCamera->GetParentObject();
 
     blaVec3 linearAcceleration(0.f);
@@ -122,7 +122,7 @@ void CameraController::UpdateController()
         m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x < -0.45f * M_PI ? -0.45f * M_PI : m_currentCameraEulerAngles.x;
         transform.SetEulerAngles(m_currentCameraEulerAngles);
 
-        cameraObject->SetTransform(transform);
+        cameraObject->SetLocalTransform(transform);
     }
 
     cameraObject->Update();

@@ -2,6 +2,8 @@
 
 using namespace BLAengine;
 
+#pragma optimize("", off)
+
 TriangleMesh PrimitiveGeometry::MakeCube()
 {
     TriangleMesh cube;
@@ -62,7 +64,7 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius)
             sphere.m_vertexPos.push_back(normal * radius );
             sphere.m_vertexNormals.push_back(normal);
 
-            sphere.m_vertexUVs.emplace_back(blaVec2(1.f - float(thetaCount) / (thetaSamples - 1), 1.f - float(phiCount) / (phiSamples - 1)));
+            sphere.m_vertexUVs.push_back(blaVec2(1.f - float(thetaCount) / (thetaSamples - 1), 1.f - float(phiCount) / (phiSamples - 1)));
         }
     }
 

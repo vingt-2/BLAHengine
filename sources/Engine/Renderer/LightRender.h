@@ -17,7 +17,7 @@ namespace BLAengine
 
         GLuint m_pointLightPrgmID;
 
-        ObjectTransform* m_transform;
+        ObjectTransform* m_posQuat;
 
         vector<blaVec3> m_sphereMesh;
     };

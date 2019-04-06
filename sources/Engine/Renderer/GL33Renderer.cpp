@@ -545,7 +545,7 @@ void GL33Renderer::DrawPointLight(PointLightRender pointLight)
     glUseProgram(m_GBuffer.m_drawSphereStencilPgrmID);
 
     blaMat4 modelMatrix;
-    pointLight.m_transform->GetScaledTransformMatrix(modelMatrix);
+    pointLight.m_posQuat->GetScaledTransformMatrix(modelMatrix);
 
     blaMat4 MVP = m_mainRenderCamera.m_ViewProjection * modelMatrix;
 
@@ -581,7 +581,7 @@ void GL33Renderer::DrawPointLight(PointLightRender pointLight)
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
     GLuint lightPrId = glGetUniformLocation(pointLight.m_pointLightPrgmID, "lightPR");
-    blaVec4 lightPr = blaVec4(pointLight.m_transform->GetPosition(), length(pointLight.m_transform->m_scale)/2);
+    blaVec4 lightPr = blaVec4(pointLight.m_posQuat->GetPosition(), length(pointLight.m_posQuat->m_scale)/2);
     glUniform4fv(lightPrId, 1, &(lightPr[0]));
 
     // Use our shader

@@ -108,6 +108,7 @@ bool EngineInstance::LoadNewScene()
     delete m_workingScene;
 
     m_workingScene = new Scene();
+
     m_workingScene->SetTimeObject(m_timer);
 
     m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
@@ -127,8 +128,10 @@ bool EngineInstance::LoadWorkingScene(std::string filepath)
     delete m_workingScene;
 
     Scene* scenePtr = m_sceneManager->LoadScene(filepath);
+
     m_workingScene = scenePtr;
     m_workingScene->SetTimeObject(m_timer);
+
     m_renderingManager = new RenderingManager(RenderingManager::RenderManagerType::Game);
     m_workingScene->Initialize(m_renderingManager);
     m_renderer->SwitchRenderingManager(m_renderingManager);
@@ -161,7 +164,7 @@ void EngineInstance::SetupDirLightAndCamera()
 
     ObjectTransform  cameraStartTransform;
 
-    cameraStartTransform.SetPosition(blaVec3(0.f, 2.f, 2.f));
+    cameraStartTransform.SetPosition(blaVec3(0.f, 2.f, 15.f));
 
     cameraObject->SetTransform(cameraStartTransform);
 

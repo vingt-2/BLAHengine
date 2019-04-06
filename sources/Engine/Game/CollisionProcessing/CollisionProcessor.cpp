@@ -63,10 +63,10 @@ void CollisionProcessor::BroadPhaseDetection()
 
 void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBodyComponent* body2)
 {
-    //blaMat4 t1 = body1->GetObjectTransform().m_transform;
+    //blaMat4 t1 = body1->GetObjectTransform().m_posQuat;
     //body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
 
-    //blaMat4 t2 = body2->GetObjectTransform().m_transform;
+    //blaMat4 t2 = body2->GetObjectTransform().m_posQuat;
     //body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
 
     //vector<pair<int, int>> collidingTriangles;

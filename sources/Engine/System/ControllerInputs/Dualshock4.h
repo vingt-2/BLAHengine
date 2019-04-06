@@ -73,6 +73,11 @@ class Dualshock4
 {
 public:
 
+    ~Dualshock4()
+    {
+        Close();
+    }
+
     bool Setup(ConnectionMode mode);
     void Update();
     void Close();

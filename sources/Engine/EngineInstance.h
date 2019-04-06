@@ -46,6 +46,8 @@ namespace BLAengine
 
         const Timer* GetTimer() const { return m_timer; }
 
+        Scene* GetWorkingScene() const { return m_workingScene; }
+
     protected:
 
         virtual bool LoadNewScene();

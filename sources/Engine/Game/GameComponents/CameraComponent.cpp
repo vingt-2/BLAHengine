@@ -26,7 +26,7 @@ void CameraComponent::UpdateView()
     m_viewTransform.SetPosition(GetParentObject()->GetTransform().GetPosition());
     m_viewTransform.SetRotation(GetParentObject()->GetTransform().GetRotation());
 
-    m_viewTransform.m_transform = m_viewTransform.m_transform.GetInverse();
+    m_viewTransform.m_posQuat = m_viewTransform.m_posQuat.GetInverse();
 }
 
 void CameraComponent::Update()

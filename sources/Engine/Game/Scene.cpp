@@ -85,7 +85,7 @@ void Scene::Update()
     if (m_enableSimulation)
     {
         m_rigidBodySystem->EnableSimulation();
-		m_rigidBodySystem->m_enableGravity = false;
+		m_rigidBodySystem->m_enableGravity = true;
     }
     else
     {
