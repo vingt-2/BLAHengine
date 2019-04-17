@@ -23,3 +23,9 @@ const ObjectTransform& GameComponent::GetObjectTransform() const
 {
     return m_parentObject->GetTransform();
 }
+
+const ObjectTransform& GameComponent::GetLocalObjectTransform() const
+{
+    return m_parentObject->GetLocalTransform();
+}
+

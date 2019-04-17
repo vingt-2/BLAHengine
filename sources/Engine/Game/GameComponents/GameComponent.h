@@ -18,6 +18,7 @@ namespace BLAengine
         virtual void Update() = 0;
 
         const ObjectTransform& GetObjectTransform() const;
+        const ObjectTransform& GetLocalObjectTransform() const;
 
         GameObjectReference GetParentObject() const { return m_parentObject; }
 

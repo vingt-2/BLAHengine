@@ -33,7 +33,7 @@ __CD__BEGIN
 
 CollisionModel3DImpl::CollisionModel3DImpl(bool Static)
 : m_Root(Vector3D::Zero, Vector3D::Zero,0),
-  m_Transform(Matrix3D::Identity),
+  m_transform(Matrix3D::Identity),
   m_InvTransform(Matrix3D::Identity),
   m_ColTri1(Vector3D::Zero,Vector3D::Zero,Vector3D::Zero),
   m_ColTri2(Vector3D::Zero,Vector3D::Zero,Vector3D::Zero),
@@ -55,8 +55,8 @@ void CollisionModel3DImpl::addTriangle(const Vector3D& v1, const Vector3D& v2, c
 
 void CollisionModel3DImpl::setTransform(const Matrix3D& m)
 {
-  m_Transform=m;
-  if (m_Static) m_InvTransform=m_Transform.Inverse();
+  m_transform=m;
+  if (m_Static) m_InvTransform= m_transform.Inverse();
 }
 
 void CollisionModel3DImpl::finalize()

@@ -42,7 +42,7 @@ void Dualshock4::Update()
 
 		UpdateTimeStep();
         
-	    ControllerTest();
+	    //ControllerTest();
 
         WriteHID();
 

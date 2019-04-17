@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Common/StdInclude.h>
-
+#include <Common/BLASingleton.h>
 #include <Engine/Game/RigidBodySystem.h>
 #include <Engine/Game/GameComponents/RigidBodyComponent.h>
 #include <Engine/Game/GameComponents/CameraComponent.h>
@@ -17,7 +17,7 @@ namespace BLAengine
     class BLACORE_API Scene
     {
     public:
-		friend class ::SceneSerializer;
+        friend class ::SceneSerializer;
 
         Scene();
 

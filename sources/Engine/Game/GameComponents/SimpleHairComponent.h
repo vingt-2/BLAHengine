@@ -33,7 +33,7 @@ namespace BLAengine
 
         blaVec3 GetForcesAccu() { return m_forcesAccu; };
         void ClearForces() { m_forcesAccu = blaVec3(0); }
-
+        void ClearImpulse() { m_impulseAccu = blaVec3(0); }
         void AddHairStrand(blaVec3 positionW);
 
         SimpleHairComponent(GameObjectReference parentObject);

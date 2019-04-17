@@ -91,7 +91,7 @@ public:
   /** Root of the hierarchy tree */
   BoxTreeInnerNode           m_Root;
   /** The current transform and its inverse */
-  Matrix3D                   m_Transform,m_InvTransform;
+  Matrix3D                   m_transform, m_InvTransform;
   /** The triangles that last collided */
   Triangle                   m_ColTri1,m_ColTri2;
   /** The indices of the triangles that last collided */

@@ -195,7 +195,10 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 
 		BLA_CREATE_COMPONENT(TestPlayerComponent, coneObject);
 
-        coneObject->GetTransform().m_scale = blaVec3(1.f,2.f,1.f);*/
+        coneObject->GetTransform().m_scale = blaVec3(1.f,1.f,1.f);
+
+        coneObject->GetTransform().m_posQuat.GetTranslation().y = 3.f;
+		*/
 
         return true;
     }
@@ -349,7 +352,7 @@ void EditorSession::DoTestAnimationDemoStuff()
 
                     ObjectTransform transform = object->GetTransform();
                     transform.m_scale = blaVec3(0.3f);
-                    transform.m_transform = endEffector->m_jointTransform;
+                    transform.m_posQuat = endEffector->m_jointTransform;
                     object->SetTransform(transform);
 
                     c++;

@@ -23,7 +23,7 @@ namespace BLAengine
 
         enum GameObjectStateBits : blaU32
         {
-            DIRTY_TRANSFORM = 1 << 0,
+            DIRTY_WORLD_TRANSFORM = 1 << 0,
         };
 
         typedef blaU32 GameObjectState;
@@ -36,7 +36,10 @@ namespace BLAengine
         const ObjectTransform& GetPotentialDirtyTransform() const;
         
         ObjectTransform& GetTransform();
+        ObjectTransform& GetLocalTransform();
+
         void SetTransform(const ObjectTransform& transform);
+        void SetLocalTransform(const ObjectTransform& transform);
 
         void SetName(std::string name) { m_objectName = name; }
         std::string GetName() const { return m_objectName; }
@@ -55,6 +58,14 @@ namespace BLAengine
         template<class ComponentType>
         vector<ComponentType*> GetComponentsInChildren();
 
+        GameObjectReference GetParent() { return m_parent; }
+
+        void SetParent(GameObjectReference parent)
+        {
+            m_parent = parent;
+            m_objectState |= DIRTY_WORLD_TRANSFORM;
+        }
+
     private:
 
         void AddComponent(GameComponent* component);
@@ -63,7 +74,9 @@ namespace BLAengine
         string m_objectName;
         vector<GameComponent*> m_componentVector;
 
-        ObjectTransform m_transform;
+        ObjectTransform m_localTransform;
+        ObjectTransform m_cachedWorldTransform;
+
         GameObjectState m_objectState;
         GameObjectReference m_parent;
 

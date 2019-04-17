@@ -4,7 +4,7 @@ using namespace BLAengine;
 
 ObjectTransform::ObjectTransform(void) :
 m_scale(blaVec3(1.f)),
-m_transform(blaPosQuat::GetIdentity())
+m_posQuat(blaPosQuat::GetIdentity())
 {};
 
 
@@ -13,7 +13,7 @@ ObjectTransform::~ObjectTransform(void)
 
 void ObjectTransform::GetScaledTransformMatrix(blaMat4 &outputMatrix) const
 {
-    outputMatrix = m_transform.ToMat4();
+    outputMatrix = m_posQuat.ToMat4();
 
     outputMatrix[0][0] *= m_scale.x;
     outputMatrix[1][1] *= m_scale.y;
@@ -22,61 +22,61 @@ void ObjectTransform::GetScaledTransformMatrix(blaMat4 &outputMatrix) const
 
 void ObjectTransform::SetRotation(blaQuat rotation)
 {
-    m_transform.SetRotation(rotation);
+    m_posQuat.SetRotation(rotation);
 }
 
 blaQuat ObjectTransform::GetRotation() const
 {
-    return m_transform.GetRotation();
+    return m_posQuat.GetRotation();
 }
 
 void ObjectTransform::SetPosition(blaVec3 position)
 {
-    m_transform.SetTranslation(blaVec4(position,1.f));
+    m_posQuat.SetTranslation(blaVec4(position,1.f));
 }
 
 blaVec3 ObjectTransform::GetPosition() const
 {
-    return blaVec3(m_transform.GetTranslation());
+    return blaVec3(m_posQuat.GetTranslation());
 }
 
 void ObjectTransform::SetEulerAngles(float pitch, float yaw, float roll)
 {
-    m_transform.SetRotation(blaPosQuat::EulerToQuat(pitch, yaw, roll));
+    m_posQuat.SetRotation(blaPosQuat::EulerToQuat(pitch, yaw, roll));
 }
 
 void ObjectTransform::SetEulerAngles(blaVec3 eulerAngles)
 {
-    m_transform.SetRotation(blaPosQuat::EulerToQuat(eulerAngles.x, eulerAngles.y, eulerAngles.z));
+    m_posQuat.SetRotation(blaPosQuat::EulerToQuat(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
 
 blaVec3 ObjectTransform::GetEulerAngles() const
 {
-    blaQuat q = m_transform.GetRotation();
+    blaQuat q = m_posQuat.GetRotation();
 
     return blaVec3(pitch(q), yaw(q), roll(q));
 }
 
 blaVec3 ObjectTransform::LocalDirectionToWorld(const blaVec3& direction) const
 {
-    return m_transform.TransformVector(direction);
+    return m_posQuat.TransformVector(direction);
 }
 
 blaVec3 ObjectTransform::LocalPositionToWorld(const blaVec3& position) const
 {
-    return m_transform.TransformPoint(m_scale * position);
+    return m_posQuat.TransformPoint(m_scale * position);
 }
 
 blaVec3 ObjectTransform::WorldDirectionToLocal(const blaVec3& direction) const
 {
-    blaPosQuat inverseTransform = m_transform.GetInverse();
+    blaPosQuat inverseTransform = m_posQuat.GetInverse();
 
     return inverseTransform.TransformVector(direction);
 }
 
 blaVec3 ObjectTransform::WorldPositionToLocal(const blaVec3& position) const
 {
-    blaPosQuat inverseTransform = m_transform.GetInverse();
+    blaPosQuat inverseTransform = m_posQuat.GetInverse();
 
     return inverseTransform.TransformPoint(position) / m_scale;
 }

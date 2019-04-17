@@ -10,7 +10,7 @@ namespace BLAengine
     public:
         blaVec3 m_scale; 
 
-        blaPosQuat m_transform;
+        blaPosQuat m_posQuat;
 
         void GetScaledTransformMatrix(blaMat4 &outputMatrix) const;
 
@@ -24,8 +24,8 @@ namespace BLAengine
         void SetPosition(blaVec3 newPosition);
         blaVec3 GetPosition() const;
 
-        blaPosQuat& GetPosQuat() { return m_transform; };
-        const blaPosQuat& GetPosQuat() const { return m_transform; };
+        blaPosQuat& GetPosQuat() { return m_posQuat; };
+        const blaPosQuat& GetPosQuat() const { return m_posQuat; };
 
         blaVec3 LocalDirectionToWorld(const blaVec3&  direction) const;
         blaVec3 LocalPositionToWorld(const blaVec3&  position) const;

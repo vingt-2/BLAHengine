@@ -191,7 +191,7 @@ public:
     void FromGameObject(BLAengine::GameObject& gobject)
     {
         BLAengine::ObjectTransform transform = gobject.GetTransform();
-        m_transform.FromTransform(&transform);
+        m_posQuat.FromTransform(&transform);
 
         m_objectName = gobject.GetName();
 
@@ -232,7 +232,7 @@ public:
     BLAengine::ObjectTransform GetTransform()
     {
         BLAengine::ObjectTransform t;
-        m_transform.ToTransform(&t);
+        m_posQuat.ToTransform(&t);
         return t;
     }
 
@@ -243,7 +243,7 @@ public:
 private:
 
     string m_objectName;
-    TransformSerializer m_transform;
+    TransformSerializer m_posQuat;
 
     std::vector<std::shared_ptr<GameComponentSerializer>> m_componentsVector;
 
@@ -255,7 +255,7 @@ private:
         archive
         (
             cereal::make_nvp("Name", m_objectName),
-            cereal::make_nvp("ObjectTransform", m_transform),
+            cereal::make_nvp("ObjectTransform", m_posQuat),
             cereal::make_nvp("Components", m_componentsVector)
         );
     }

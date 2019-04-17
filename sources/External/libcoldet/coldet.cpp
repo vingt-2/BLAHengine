@@ -53,9 +53,9 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
   CollisionModel3DImpl* o=static_cast<CollisionModel3DImpl*>(other);
   if (!m_Final) throw Inconsistency();
   if (!o->m_Final) throw Inconsistency();
-  Matrix3D t=( other_transform==NULL ? o->m_Transform : *((Matrix3D*)other_transform) );
+  Matrix3D t=( other_transform==NULL ? o->m_transform : *((Matrix3D*)other_transform) );
   if (m_Static) t *= m_InvTransform;
-  else          t *= m_Transform.Inverse();
+  else          t *= m_transform.Inverse();
   RotationState rs(t);
 
   if (AccuracyDepth<0) AccuracyDepth=0xFFFFFF;
@@ -114,7 +114,7 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
                 m_intersectedTriangles.push_back(tri);
                 int pointFromTri;
                 Vector3D v = my_tri_tri_intersect(m_ColTri1, m_ColTri2, pointFromTri);
-                v = Transform(v, m_Transform);
+                v = Transform(v, m_transform);
 
                 m_collisionPoints.push_back(v.x);
                 m_collisionPoints.push_back(v.y);
@@ -219,7 +219,7 @@ bool CollisionModel3DImpl::rayCollision(const float origin[3],
   }
   else
   {
-    Matrix3D inv=m_Transform.Inverse();
+    Matrix3D inv=m_transform.Inverse();
     O=Transform(*(Vector3D*)origin,inv);
     D=rotateVector(*(Vector3D*)direction,inv);
   }
@@ -300,7 +300,7 @@ bool CollisionModel3DImpl::threadSafeClosestRayCollision(const float origin[3],
     }
     else
     {
-        Matrix3D inv = m_Transform.Inverse();
+        Matrix3D inv = m_transform.Inverse();
         O = Transform(*(Vector3D*)origin, inv);
         D = rotateVector(*(Vector3D*)direction, inv);
     }
@@ -360,7 +360,7 @@ bool CollisionModel3DImpl::sphereCollision(const float origin[3], float radius)
     O=Transform(*(Vector3D*)origin,m_InvTransform);
   else
   {
-    Matrix3D inv=m_Transform.Inverse();
+    Matrix3D inv=m_transform.Inverse();
     O=Transform(*(Vector3D*)origin,inv);
   }
   std::vector<BoxTreeNode*> checks;
@@ -415,15 +415,15 @@ bool CollisionModel3DImpl::getCollidingTriangles(float t1[9], float t2[9], bool 
   {
     if (t1!=NULL)
     {
-      *((Vector3D*)&t1[0]) = Transform(m_ColTri1.v1,m_Transform);
-      *((Vector3D*)&t1[3]) = Transform(m_ColTri1.v2,m_Transform);
-      *((Vector3D*)&t1[6]) = Transform(m_ColTri1.v3,m_Transform);
+      *((Vector3D*)&t1[0]) = Transform(m_ColTri1.v1,m_transform);
+      *((Vector3D*)&t1[3]) = Transform(m_ColTri1.v2,m_transform);
+      *((Vector3D*)&t1[6]) = Transform(m_ColTri1.v3,m_transform);
     }
     if (t2!=NULL)
     {
-      *((Vector3D*)&t2[0]) = Transform(m_ColTri2.v1,m_Transform);
-      *((Vector3D*)&t2[3]) = Transform(m_ColTri2.v2,m_Transform);
-      *((Vector3D*)&t2[6]) = Transform(m_ColTri2.v3,m_Transform);
+      *((Vector3D*)&t2[0]) = Transform(m_ColTri2.v1,m_transform);
+      *((Vector3D*)&t2[3]) = Transform(m_ColTri2.v2,m_transform);
+      *((Vector3D*)&t2[6]) = Transform(m_ColTri2.v3,m_transform);
     }
   }
   return true;
@@ -483,7 +483,7 @@ bool CollisionModel3DImpl::getCollisionPoint(float p[3], bool ModelSpace)
     case Ray:    v=m_ColPoint; break;
     default:     v=Vector3D::Zero;
   }
-  if (!ModelSpace) v=Transform(v,m_Transform);
+  if (!ModelSpace) v=Transform(v, m_transform);
   return true;
 }
 

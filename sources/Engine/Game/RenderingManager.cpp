@@ -32,7 +32,7 @@ bool RenderingManager::CancelMeshRendererTicket(MeshRendererComponent* meshRende
     return true;
 }
 
-blaU32 BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera)
+blaU32 RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera)
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
@@ -42,7 +42,7 @@ blaU32 BLAengine::RenderingManager::RegisterDirectionalLight(DirectionalLight* d
     return this->currentTicket;
 }
 
-blaU32 BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
+blaU32 RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
 {
     int renderTicket = dirLight->m_renderTicket;
     auto itTicket = m_ticketedDirLights.find(renderTicket);
@@ -50,12 +50,12 @@ blaU32 BLAengine::RenderingManager::CancelDirectionalLightTicket(DirectionalLigh
     return true;
 }
 
-std::unordered_map<blaU32, MeshRendererComponent*>* BLAengine::RenderingManager::GetTicketedMeshRenderers()
+std::unordered_map<blaU32, MeshRendererComponent*>* RenderingManager::GetTicketedMeshRenderers()
 {
     return &(m_ticketedMeshRenderers);
 }
 
-std::unordered_map<blaU32, std::pair<DirectionalLight*, CameraComponent*>>* BLAengine::RenderingManager::GetTicketedDirectionalLights()
+std::unordered_map<blaU32, std::pair<DirectionalLight*, CameraComponent*>>* RenderingManager::GetTicketedDirectionalLights()
 {
     return &(m_ticketedDirLights);
 }

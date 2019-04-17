@@ -65,7 +65,9 @@ namespace BLAengine
 
         blaVec3 GetForcesAccu() const { return m_forcesAccu; };
         blaVec3 GetTorquesAccu() const { return m_torquesAccu; };
+        blaVec3 GetImpulseAccu() const { return m_impulseAccu; }
         void ClearForces() { m_forcesAccu = blaVec3(0); m_torquesAccu = blaVec3(0); }
+        void ClearImpulse() { m_impulseAccu = blaVec3(0); }
 
         RigidBodyComponent(GameObjectReference parentObject);
         ~RigidBodyComponent(void) override;

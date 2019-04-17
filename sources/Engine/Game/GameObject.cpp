@@ -5,9 +5,11 @@ using namespace BLAengine;
 
 GameObject::GameObject(string name, const GameObjectReference& parent):
     m_objectName(name),
-    m_transform(ObjectTransform()),
+    m_localTransform(ObjectTransform()),
     m_parent(parent)
-{}
+{
+    m_objectState |= DIRTY_WORLD_TRANSFORM;
+}
 
 
 GameObject::~GameObject(void)
@@ -30,26 +32,41 @@ void GameObject::Update()
 
 const ObjectTransform& GameObject::GetPotentialDirtyTransform() const
 {
-    return m_transform;
+    return m_cachedWorldTransform;
 }
 
 ObjectTransform& GameObject::GetTransform()
 {
-    if (m_parent.IsValid() && m_objectState & DIRTY_TRANSFORM)
+    if (m_parent.IsValid() && m_objectState & DIRTY_WORLD_TRANSFORM)
     {
-        m_transform.m_transform = m_parent->GetTransform().m_transform * m_transform.m_transform;
-        m_transform.m_scale = m_parent->GetTransform().m_scale * m_transform.m_scale;
-        m_objectState &= ~DIRTY_TRANSFORM;
+        m_cachedWorldTransform.m_posQuat = m_parent->GetTransform().m_posQuat * m_localTransform.m_posQuat;
+        m_cachedWorldTransform.m_scale = m_parent->GetTransform().m_scale * m_localTransform.m_scale;
+        m_objectState &= ~DIRTY_WORLD_TRANSFORM;
     }
-    return m_transform;
+    return m_cachedWorldTransform;
 }
 
-//TODO: We might not actually want to recursively update the world transform every time we change a parent
+ObjectTransform& GameObject::GetLocalTransform()
+{
+    return m_localTransform;
+}
+
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
-    m_objectState |= DIRTY_TRANSFORM;
+    ObjectTransform& parentT = m_parent->GetTransform();
 
-    m_transform = transform;
+    m_localTransform.m_posQuat = parentT.m_posQuat.GetInverse() * transform.m_posQuat;
+    m_localTransform.m_scale = transform.m_scale / parentT.m_scale; //TODO: Make this safe.
+
+    m_cachedWorldTransform = transform;
+    m_objectState &= ~DIRTY_WORLD_TRANSFORM;
+}
+
+void GameObject::SetLocalTransform(const ObjectTransform& transform)
+{
+    m_objectState |= DIRTY_WORLD_TRANSFORM;
+
+    m_localTransform = transform;
 }
 
 void GameObject::AddComponent(GameComponent* component)

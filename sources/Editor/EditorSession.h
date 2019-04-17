@@ -79,9 +79,9 @@ namespace BLAengine
         /*
          *  Editor Data
          */
-        /*TriangleMesh m_transformPositionGizmoMesh;
-        TriangleMesh m_transformOrientationGizmoMesh;
-        TriangleMesh m_transformScaleGizmoMesh;*/
+        /*TriangleMesh m_posQuatPositionGizmoMesh;
+        TriangleMesh m_posQuatOrientationGizmoMesh;
+        TriangleMesh m_posQuatScaleGizmoMesh;*/
         MeshAsset m_testCone;
         MeshAsset m_SkyInvertedSphere;
 
