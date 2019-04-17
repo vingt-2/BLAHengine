@@ -114,7 +114,7 @@ IKChainJoint* IKChainJoint::CreateTestIKChain2EndsConeTwist(int numberOfJoints, 
 
         constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
         constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
-        constraint->m_coneAngleConstraint = 0.25 * M_PI;
+        constraint->m_coneAngleConstraint = 0.5 * M_PI;
 
         joint->m_jointConstraints.push_back(constraint);
 
@@ -136,7 +136,7 @@ IKChainJoint* IKChainJoint::CreateTestIKChain2EndsConeTwist(int numberOfJoints, 
 
         constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
         constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
-        constraint->m_coneAngleConstraint = 0.25 * M_PI;
+        constraint->m_coneAngleConstraint = 0.5 * M_PI;
 
         joint->m_jointConstraints.push_back(constraint);
 
@@ -158,7 +158,7 @@ IKChainJoint* IKChainJoint::CreateTestIKChain2EndsConeTwist(int numberOfJoints, 
 
         constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
         constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
-        constraint->m_coneAngleConstraint = 0.25 * M_PI;
+        constraint->m_coneAngleConstraint = 0.5 * M_PI;
 
         joint->m_jointConstraints.push_back(constraint);
 
@@ -180,7 +180,7 @@ IKChainJoint* IKChainJoint::CreateTestIKChain2EndsConeTwist(int numberOfJoints, 
 
         constraint->m_childConstrainedPositionL = joint->m_jointTransform.GetInverse() * blaVec4(newPos, 1.f);
         constraint->m_restOrientationLocalToParent = blaPosQuat::QuatIdentity();
-        constraint->m_coneAngleConstraint = 0.25f * M_PI;
+        constraint->m_coneAngleConstraint = 0.5f * M_PI;
 
         joint->m_jointConstraints.push_back(constraint);
 

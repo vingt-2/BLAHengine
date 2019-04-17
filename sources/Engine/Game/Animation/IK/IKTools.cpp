@@ -25,6 +25,18 @@ void IKChainJoint::GetEndEffectorRecursive(IKChainJoint* joint, std::vector<IKCh
     }
 }
 
+void BLAengine::IKChainJoint::ResetIKChainRecursive(IKChainJoint* joint)
+{
+	joint->m_jointTransform = joint->m_bindPoseTransform;
+
+	auto child = joint->GetChild();
+	while (child != nullptr)
+	{
+		ResetIKChainRecursive(child);
+		child = child->GetNext();
+	}
+}
+
 std::vector<IKChainJoint*> IKChainJoint::GetEndEffectors()
 {
     std::vector<IKChainJoint*> result;
@@ -128,22 +140,21 @@ void IKChainJoint::GetJointTransforms(vector<blaPosQuat>& jointTransforms, const
 
 void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorDesiredPositions, int iterationCount)
 {
+	ResetIKChainRecursive(root);
+
     for (int i = 0; i < iterationCount; ++i)
     {
-
         blaF32 distanceToEndEffectors = 0.f;
 
         vector<IKChainJoint*> endEffectors = root->GetEndEffectors();
 
-        size_t nbEffectors = 3;
+        size_t nbEffectors = endEffectors.size();
 
-        //size_t nbEffectors = endEffectors.size();
-
-        for (int i = 0; i < nbEffectors; ++i)
+        for (int j = 0; j < nbEffectors; ++j)
         {
-            auto endEffector = endEffectors[i];
+            auto endEffector = endEffectors[j];
 
-            distanceToEndEffectors += glm::length2(endEffector->m_jointTransform.GetTranslation3() - endEffectorDesiredPositions[i]);
+            distanceToEndEffectors += glm::length2(endEffector->m_jointTransform.GetTranslation3() - endEffectorDesiredPositions[j]);
         }
 
         if (distanceToEndEffectors < BLA_IK_CONVERGENCE_EPSILON)
@@ -151,11 +162,11 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorD
             break;
         }
 
-        for (int i = 0; i < nbEffectors; ++i)
+        for (size_t j = 0; j < nbEffectors; ++j)
         {
-            auto endEffector = endEffectors[i];
+            auto endEffector = endEffectors[j];
 
-            endEffector->m_jointTransform.SetTranslation3(endEffectorDesiredPositions[i]);
+            endEffector->m_jointTransform.SetTranslation3(endEffectorDesiredPositions[j]);
 
             IKSolveBackwardPhase(endEffector);
             IKSolveForwardPhase(root);

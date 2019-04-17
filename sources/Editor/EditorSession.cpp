@@ -177,7 +177,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         m_testCone = MeshAsset("testCone");
         m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
 
-		GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
+		/*GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
 
         BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
         coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
@@ -198,6 +198,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         coneObject->GetTransform().m_scale = blaVec3(1.f,1.f,1.f);
 
         coneObject->GetTransform().m_posQuat.GetTranslation().y = 3.f;
+		*/
 
         return true;
     }
@@ -240,7 +241,7 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 
     BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
-    //BLA_CREATE_COMPONENT(IKComponent, animatedObject);
+    BLA_CREATE_COMPONENT(IKComponent, animatedObject);
 
     delete m_cameraController;
     m_cameraController = new CameraController(
@@ -347,7 +348,7 @@ void EditorSession::DoTestAnimationDemoStuff()
 
                     auto meshCollider = BLA_CREATE_COMPONENT(MeshColliderComponent, object);
 
-                    meshCollider->SetColliderMesh((TriangleMesh*)sphereMesh);
+                    meshCollider->SetColliderMesh(&((MeshAsset*)sphereMesh)->m_triangleMesh);
 
                     ObjectTransform transform = object->GetTransform();
                     transform.m_scale = blaVec3(0.3f);
@@ -376,7 +377,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                 {
                     if (m_timer->GetTime() - m_lastIkSolveTime > .005f)
                     {
-                        IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 1);
+						IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 20);
 
                         m_lastIkSolveTime = m_timer->GetTime();
                     }
@@ -459,6 +460,13 @@ void EditorSession::DoTestAnimationDemoStuff()
             }
         }
     }
+	else
+	{
+		animationObject = m_workingScene->CreateObject("AnimatedObject");
+
+		//BLA_CREATE_COMPONENT(AnimationComponent, animationObject);
+		BLA_CREATE_COMPONENT(IKComponent, animationObject);
+	}
 
     auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
     if (leftMouseButton.IsRisingEdge())
