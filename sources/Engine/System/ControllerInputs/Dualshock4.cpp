@@ -1,10 +1,9 @@
 #include "Dualshock4.h"
 #include <iostream>
+#include <Engine/System/InputManager.h>
 
-bool Dualshock4::Setup(ConnectionMode mode)
+bool Dualshock4::Setup()
 {
-    m_mode = mode;
-
     m_hidDevice = hid_open(VENDOR_ID, PRODUCT_ID, NULL);
     if (!m_hidDevice)
     {
@@ -42,9 +41,12 @@ void Dualshock4::Update()
 
 		UpdateTimeStep();
         
-	    //ControllerTest();
+        ReportInputsToManager();
 
-        WriteHID();
+        //ControllerTest();
+
+        if(m_mode == USB)
+            WriteHID();
 
 		//UpdateAHRS(m_timeStep, ax, ay, az, gx, gy, gz);
 	}
@@ -174,6 +176,50 @@ void Dualshock4::SetLightBarColor(float r, float g, float b)
     m_writeBuffer[B_LED_WRITE_INDEX] = 0xFF * b;
 }
 
+void Dualshock4::ReportInputsToManager()
+{
+    float ax, ay, az, gx, gy, gz;
+    ax = GetAccelX();
+    ay = GetAccelY();
+    az = GetAccelZ();
+
+    gx = GetGyroX();
+    gy = GetGyroY();
+    gz = GetGyroZ();
+
+    blaVec2 leftAnalog;
+    blaVec2 rightAnalog;
+
+    GetLeftJoystick(leftAnalog[0], leftAnalog[1]);
+    GetRightJoystick(rightAnalog[0], rightAnalog[1]);
+
+    BLAengine::InputStateSetter::SetGamepadSticks(leftAnalog, rightAnalog);
+
+    int dpad[2];
+    GetDPad(dpad[0], dpad[1]);
+
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN, 0.f, GetCrossButton());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_LEFT, 0.f, GetSquareButton());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_UP, 0.f, GetTriangleButton());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_RIGHT, 0.f, GetCircleButton());
+
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_DPAD_UP, 0.f, dpad[1] == 1);
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_DPAD_DOWN, 0.f, dpad[1] == -1);
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_RIGHT, 0.f, dpad[0] == -1);
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_LEFT, 0.f, dpad[0] == -1);
+
+
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_LEFT_SHOULDER, 0.f, GetL1Button());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_LEFT_TRIGGER, 0.f, GetL2Button());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_LEFT_STICK, 0.f, GetL3Button());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_SHOULDER, 0.f, GetR1Button());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_TRIGGER, 0.f, GetR2Button());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_STICK, 0.f, GetR3Button());
+
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_SELECT, 0.f, GetSquareButton());
+    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_START, 0.f, GetOptionsButton());
+}
+
 int Dualshock4::ReadInt16LE(unsigned char buffer[], int index)
 {
 	unsigned short highByte = buffer[index];	//Byte order swapped in BLADualshock4 io buffer
@@ -204,6 +250,14 @@ void Dualshock4::ReadReport()
         if (m_resultFlag < 0)
         {
             m_hidDevice = nullptr;
+        }
+        else
+        {
+            m_mode = USB;
+            if(m_reportBuffer[0] == 0x11 && m_reportBuffer[1] == 0xc0 && m_reportBuffer[2] == 0x00)
+            {
+                m_mode = BLUETOOTH;
+            }
         }
     }
 }

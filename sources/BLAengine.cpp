@@ -4,6 +4,7 @@
 #include <Engine/System/RenderWindow.h>
 #include <Editor/EditorSession.h>
 #include <Common/DataStructures/StringID.h>
+#include "engine/System/ControllerInputs/Dualshock4.h"
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
@@ -22,9 +23,22 @@ void RunEditorSession()
 
     int framerate = 144;
 
+    Dualshock4 controller;
+
     while (!editorSession->ShouldTerminate())
     {
         auto frameStartTime = std::chrono::steady_clock::now();
+
+        // We should have a controller manager that does that and looks for more periodically
+        if (!controller.GetDS4Found())
+        {
+            controller.Setup();
+        }
+
+        if (controller.GetDS4Found())
+        {
+            controller.Update();
+        }
 
         editorSession->PreEngineUpdate();
         editorSession->EngineUpdate();

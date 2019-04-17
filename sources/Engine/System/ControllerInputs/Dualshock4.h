@@ -78,12 +78,23 @@ public:
         Close();
     }
 
-    bool Setup(ConnectionMode mode);
+    bool Setup();
     void Update();
     void Close();
-    void SetBeta(float beta) { m_beta = beta; }
+
     bool GetDS4Found() const { return m_hidDevice; }
 
+    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = zeroToOne * 0xFF; }
+    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = zeroToOne * 0xFF; }
+
+    void SetLightBarColor(float r, float g, float b);
+
+private:
+
+    void ReportInputsToManager();
+
+    void SetBeta(float beta) { m_beta = beta; }
+    
     int GetRawGyroX() { return ReadInt16LE(m_reportBuffer, GetIndex(GX_INDEX)); }
     int GetRawGyroY() { return ReadInt16LE(m_reportBuffer, GetIndex(GY_INDEX)); }
     int GetRawGyroZ() { return ReadInt16LE(m_reportBuffer, GetIndex(GZ_INDEX)); }
@@ -155,11 +166,6 @@ public:
             x = -1;
         }
     }
-
-    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = zeroToOne * 0xFF; }
-    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = zeroToOne * 0xFF; }
-
-    void SetLightBarColor(float r, float g, float b);
 
     int getArbPair(int index) { return ReadInt16LE(m_reportBuffer, index); }
     int getArbSingle(int index) { return ReadInt8(m_reportBuffer, index); }

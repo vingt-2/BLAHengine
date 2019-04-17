@@ -41,6 +41,22 @@ BLAMousePointerState InputManager::GetMousePointerState() const
     return state;
 }
 
+BLAGamepadAnalogState InputManager::GetGamepadLeftAnalog() const 
+{
+    BLAGamepadAnalogState state;
+    state.m_position = m_gamepadState.m_leftStickPosition;
+    state.m_deltaPosition = m_gamepadState.m_deltaLeftStickPosition;
+    return state;
+}
+
+BLAGamepadAnalogState InputManager::GetGamepadRightAnalog() const
+{
+    BLAGamepadAnalogState state;
+    state.m_position = m_gamepadState.m_rightStickPosition;
+    state.m_deltaPosition = m_gamepadState.m_deltaRightStickPosition;
+    return state;
+}
+
 void InputManager::Update()
 {
     m_lockInputs = true;
@@ -52,6 +68,11 @@ void InputManager::Update()
     m_mouseState.m_deltaMousePointerPosition = m_mouseState.m_mousePointerPosition - m_mouseState.m_previousMousePointerPosition;
     m_mouseState.m_previousMousePointerPosition = m_mouseState.m_mousePointerPosition;
     m_mouseState.m_scrollAxisDelta = 0.f;
+
+    m_gamepadState.m_deltaLeftStickPosition = m_gamepadState.m_leftStickPosition - m_gamepadState.m_previousLeftStickPosition;
+    m_gamepadState.m_previousLeftStickPosition = m_gamepadState.m_leftStickPosition;
+    m_gamepadState.m_deltaRightStickPosition = m_gamepadState.m_rightStickPosition - m_gamepadState.m_previousRightStickPosition;
+    m_gamepadState.m_previousRightStickPosition = m_gamepadState.m_rightStickPosition;
    
     m_lockInputs = false;
 }
@@ -89,7 +110,7 @@ void InputStateSetter::SetMouseButton(BLAMouseButtons key, blaF32 time, blaBool 
     inputManager->m_mouseButtonTimes[key] = time;
 }
 
-void InputStateSetter::SetPad(int index, BLAGamepadButtons key, blaF32 time, blaBool down)
+void InputStateSetter::SetGamepadButton(int index, BLAGamepadButtons key, blaF32 time, blaBool down)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
 
@@ -129,4 +150,19 @@ void InputStateSetter::SetMouseScrollDelta(blaF32 mouseScrollDelta)
     while (inputManager->m_lockInputs);
 
     inputManager->m_mouseState.m_scrollAxisDelta = mouseScrollDelta;
+}
+
+void InputStateSetter::SetGamepadSticks(const blaVec2& leftStick, const blaVec2& rightStick)
+{
+    InputManager* inputManager = InputManager::GetSingletonInstance();
+
+    if (inputManager->m_lockMouse)
+    {
+        return;
+    }
+
+    while (inputManager->m_lockInputs);
+
+    inputManager->m_gamepadState.m_leftStickPosition = leftStick;
+    inputManager->m_gamepadState.m_rightStickPosition = rightStick;
 }

@@ -3,6 +3,7 @@
 #include "TestPlayerComponent.h"
 #include <Engine/Debug/Debug.h>
 #include <Engine/EngineInstance.h>
+#include <Engine/System/InputManager.h>
 #include <Engine/Game/Scene.h>
 
 #pragma optimize("",off)
@@ -20,22 +21,9 @@ TestPlayerComponent::~TestPlayerComponent()
 
 void TestPlayerComponent::Update()
 {
-	if(!m_controller.GetDS4Found())
-	{
-		m_controller.Setup(ConnectionMode::USB);
-	}
+    InputManager* inputs = InputManager::GetSingletonInstance();
 
-	if(!m_controller.GetDS4Found())
-	{
-		return;
-	}
-
-	m_controller.Update();
-
-	blaVec2 jxz;
-	m_controller.GetLeftJoystick(jxz[0], jxz[1]);
-
-	auto rigidBody = GetParentObject()->GetComponent<RigidBodyComponent>();
+    auto rigidBody = GetParentObject()->GetComponent<RigidBodyComponent>();
 
     if (rigidBody)
     {
@@ -55,7 +43,9 @@ void TestPlayerComponent::Update()
             CameraObject->SetParent(GetParentObject());
         }
 
-        blaVec3 controlInput = 10.f * CameraObject->GetTransform().LocalDirectionToWorld(blaVec3(jxz[0], 0.f, -jxz[1]));
+        blaVec2 gxy = inputs->GetGamepadLeftAnalog().GetPosition();
+
+        blaVec3 controlInput = 10.f * CameraObject->GetTransform().LocalDirectionToWorld(blaVec3(gxy.x, 0, -gxy.y));
 
         controlInput.y = 0.f;
 
@@ -63,9 +53,9 @@ void TestPlayerComponent::Update()
 
         debug->DrawRay(Ray(GetObjectTransform().GetPosition(), controlInput, 5.f * glm::length(controlInput)), BLAColors::LIME);
 
-        if (m_controller.GetCircleButton())
+        if (inputs->GetGamepadState(BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN).IsRisingEdge())
         {
-            rigidBody->AddImpulse(blaVec3(0.f, 0.1f, 0.f));
+            rigidBody->AddImpulse(blaVec3(0.f, 10.f, 0.f));
         }
 
         float controlability = 0.05f;
@@ -77,7 +67,7 @@ void TestPlayerComponent::Update()
             debug->DrawLine(GetObjectTransform().GetPosition(), GetObjectTransform().GetPosition() + blaVec3(0.f, abs(15.f * GetObjectTransform().GetPosition().y), 0.f));
             rigidBody->AddLinearForce(blaVec3(0.f, 5, 0.f));
             rigidBody->AddImpulse(blaVec3(0.f, MAX(-rigidBody->m_velocity.y, 0), 0.f));
-            rigidBody->AddImpulse(-0.7f * rigidBody->m_velocity);
+            rigidBody->AddImpulse(-0.7f * blaVec3(rigidBody->m_velocity.x,0.f, rigidBody->m_velocity.z));
         }
 
         rigidBody->AddImpulse(controlability * controlInput);

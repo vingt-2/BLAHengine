@@ -217,6 +217,17 @@ namespace BLAengine
         blaF32 m_scrollAxisDelta = 0.f;
     };
 
+    struct BLAGamepadStateStorage
+    {
+        blaVec2 m_deltaLeftStickPosition = blaVec2(0.f);
+        blaVec2 m_previousLeftStickPosition = blaVec2(0.f);
+        blaVec2 m_leftStickPosition = blaVec2(0.f);
+
+        blaVec2 m_deltaRightStickPosition = blaVec2(0.f);
+        blaVec2 m_previousRightStickPosition = blaVec2(0.f);
+        blaVec2 m_rightStickPosition = blaVec2(0.f);
+    };
+
     typedef BLAButtonState BLAKeyState;
     typedef BLAButtonTimedState BLAKeyTimedState;
 
@@ -228,17 +239,19 @@ namespace BLAengine
     typedef BLAButtonState BLAGamepadState;
     typedef BLAButtonTimedState BLAGamepadTimedState;
 
-    typedef BLAMousePointerState BLAGamepadAxisState;
+    typedef BLAMousePointerState BLAGamepadAnalogState;
 
     class InputStateSetter
     {
     public:
         static void SetKey(BLAKeyboard key, blaF32 time, blaBool down);
         static void SetMouseButton(BLAMouseButtons mouseButton, blaF32 time, blaBool down);
-        static void SetPad(int index, BLAGamepadButtons pad, blaF32 time, blaBool down);
+        static void SetGamepadButton(int index, BLAGamepadButtons pad, blaF32 time, blaBool down);
 
         static void SetMousePointer(const blaVec2& position);
         static void SetMouseScrollDelta(blaF32 mouseScrollDelta);
+
+        static void SetGamepadSticks(const blaVec2& leftStick, const blaVec2& rightStick);
     };
 
     class InputManager
@@ -262,6 +275,7 @@ namespace BLAengine
         blaF32 m_gamepadTimes[BLAGamepadButtons::BLA_GAMEPAD_ENUM_END];
 
         BLAMouseStateStorage m_mouseState;
+        BLAGamepadStateStorage m_gamepadState;
 
         blaBool m_lockInputs;
     
@@ -298,6 +312,9 @@ namespace BLAengine
         BLAMousePointerState GetMousePointerState() const;
 
         blaF32 GetMouseScrollDelta() const { return m_mouseState.m_scrollAxisDelta; };
+
+        BLAGamepadAnalogState GetGamepadLeftAnalog() const;
+        BLAGamepadAnalogState GetGamepadRightAnalog() const;
 
         BLAGamepadState GetGamepadState(BLAGamepadButtons padButton) const;
         BLAGamepadTimedState GetGamepadTimedState(BLAGamepadButtons padButton) const;
