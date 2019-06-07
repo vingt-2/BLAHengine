@@ -16,7 +16,7 @@ set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src)
 
 set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/src/External)
 
-macro(GetDependency dep pathToInclude)
+macro(GetHeaderDependency dep pathToInclude)
 	# we have a submodule setup for dep, assume it is under external/dep
     # now we need to clone this submodule
     execute_process(COMMAND git submodule update --init -- ${PROJECT_EXTERNAL_DIR}/${dep}
@@ -39,6 +39,14 @@ macro(GetDependency dep pathToInclude)
     #install(TARGETS foo EXPORT my_export_set DESTINATION ${some_dest})
 endmacro()
 
+macro(GetCMakeDependency dep)
+	# we have a submodule setup for dep, assume it is under external/dep
+    # now we need to clone this submodule
+    execute_process(COMMAND git submodule update --init -- ${PROJECT_EXTERNAL_DIR}/${dep}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+endmacro()
+
 include_directories( ${PROJECT_INCLUDE_DIR} )
 
 find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
@@ -47,7 +55,14 @@ if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${GLM_INCLUDE_DIR}))
     # we couldn't find the header files for FOO or they don't exist
     message("Unable to find GLM")
 
-    GetDependency(GLM ./glm/)
+    GetHeaderDependency(glm glm/)
+	
+	find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
+		if(NOT GLM_INCLUDE_DIR)
+		message("GLM submodule failed to clone")
+	else()
+		include_directories(GLM_INCLUDE_DIR)
+	endif()	
 else()
 	include_directories(GLM_INCLUDE_DIR)
 endif()
@@ -58,7 +73,16 @@ if(NOT GLFW_LIBRARY OR (NOT EXISTS ${GLFW_LIBRARY}))
     # we couldn't find the header files for FOO or they don't exist
     message("Unable to find GLFW")
 
-    GetDependency(GLM ./glm/)
+    GetCMakeDependency(glfw)
+
+	find_library(GLFW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glfw)
+	
+	if(NOT GLFW_LIBRARY)
+		message("GLFW submodule failed to clone")
+	else()
+		add_subdirectory(GLFW_LIBRARY)
+		include_directories(${GLFW_LIBRARY}/include)
+	endif()
 else()
 	add_subdirectory(GLFW_LIBRARY)
 	include_directories(${GLFW_LIBRARY}/include)
