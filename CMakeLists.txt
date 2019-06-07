@@ -14,7 +14,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src)
 
-set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/src/external)
+set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/src/External)
 
 macro(GetDependency dep pathToInclude)
 	# we have a submodule setup for dep, assume it is under external/dep
@@ -39,23 +39,29 @@ macro(GetDependency dep pathToInclude)
     #install(TARGETS foo EXPORT my_export_set DESTINATION ${some_dest})
 endmacro()
 
-# # Boost configuration
-
-# SET(Boost_USE_STATIC_LIBS ON)
-
-# find_package(Boost REQUIRED COMPONENTS filesystem system thread REQUIRED)
-
 include_directories( ${PROJECT_INCLUDE_DIR} )
 
-find_library(GLM_INCLUDE_DIR glm PROJECT_EXTERNAL_DIR)
+find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
 
-if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${FOO_INCLUDE_DIR}))
+if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${GLM_INCLUDE_DIR}))
     # we couldn't find the header files for FOO or they don't exist
     message("Unable to find GLM")
 
-    GetDependency(glm ./)
+    GetDependency(GLM ./glm/)
 else()
 	include_directories(GLM_INCLUDE_DIR)
+endif()
+
+find_library(GLFW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glfw)
+
+if(NOT GLFW_LIBRARY OR (NOT EXISTS ${GLFW_LIBRARY}))
+    # we couldn't find the header files for FOO or they don't exist
+    message("Unable to find GLFW")
+
+    GetDependency(GLM ./glm/)
+else()
+	add_subdirectory(GLFW_LIBRARY)
+	include_directories(${GLFW_LIBRARY}/include)
 endif()
 
 # I used this for allowing CMake to include all the files,
@@ -64,12 +70,9 @@ endif()
 
 file(GLOB_RECURSE PROJECT_SOURCE_FILES "*.h" "*.hpp" "*.cpp")
 
-
 # I then wrote this Macro, which organize the files in visual studio folders,
 
 # according to the organization in the file systems
-
-
 
 macro(GroupSources curdir)
 
@@ -104,7 +107,5 @@ endmacro()
 # Execute the macro
 
 GroupSources(src)
-
-
 
 add_library(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
