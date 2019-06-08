@@ -14,7 +14,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src)
 
-set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/src/External)
+set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 
 macro(GetHeaderDependency dep pathToInclude)
 	# we have a submodule setup for dep, assume it is under external/dep
@@ -47,8 +47,6 @@ macro(GetCMakeDependency dep)
 
 endmacro()
 
-include_directories( ${PROJECT_INCLUDE_DIR} )
-
 find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
 
 if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${GLM_INCLUDE_DIR}))
@@ -58,16 +56,12 @@ if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${GLM_INCLUDE_DIR}))
     GetHeaderDependency(glm glm/)
 	
 	find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
-		if(NOT GLM_INCLUDE_DIR)
+	if(NOT GLM_INCLUDE_DIR)
 		message("GLM submodule failed to clone")
-	else()
-		include_directories(GLM_INCLUDE_DIR)
-	endif()	
-else()
-	include_directories(GLM_INCLUDE_DIR)
+	endif()
 endif()
 
-find_library(GLFW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glfw)
+find_library(GLFW_LIBRARY "glfw" ${PROJECT_EXTERNAL_DIR}/glfw)
 
 if(NOT GLFW_LIBRARY OR (NOT EXISTS ${GLFW_LIBRARY}))
     # we couldn't find the header files for FOO or they don't exist
@@ -75,17 +69,10 @@ if(NOT GLFW_LIBRARY OR (NOT EXISTS ${GLFW_LIBRARY}))
 
     GetCMakeDependency(glfw)
 
-	find_library(GLFW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glfw)
-	
-	if(NOT GLFW_LIBRARY)
-		message("GLFW submodule failed to clone")
-	else()
-		add_subdirectory(GLFW_LIBRARY)
-		include_directories(${GLFW_LIBRARY}/include)
-	endif()
+	add_subdirectory(${PROJECT_EXTERNAL_DIR}/glfw)
 else()
 	add_subdirectory(GLFW_LIBRARY)
-	include_directories(${GLFW_LIBRARY}/include)
+	set(GLFW_INCLUDE_DIR ${GLFW_LIBRARY}/include)
 endif()
 
 # I used this for allowing CMake to include all the files,
@@ -100,25 +87,23 @@ file(GLOB_RECURSE PROJECT_SOURCE_FILES "*.h" "*.hpp" "*.cpp")
 
 macro(GroupSources curdir)
 
-   file(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/${curdir}
-${PROJECT_SOURCE_DIR}/${curdir}/*)
+   file(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/${curdir} ${PROJECT_SOURCE_DIR}/${curdir}/*)
 
    foreach(child ${children})
 
           if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${curdir}/${child})
 
-                  GroupSources(${curdir}/${child})
+				GroupSources(${curdir}/${child})
 
           else()
 
-                  string(REPLACE "/" "\\" groupname ${curdir})
+				string(REPLACE "/" "\\" groupname ${curdir})
 
-				  # I would like to call the src root folder in a different name, only in visual studio (not mandatory requirement)
+				# I would like to call the src root folder in a different name, only in visual studio (not mandatory requirement)
 
-                   string(REPLACE "src" "Common" groupname ${groupname})
+				string(REPLACE "src" "Common" groupname ${groupname})
 
-            source_group(${groupname} FILES
-${PROJECT_SOURCE_DIR}/${curdir}/${child})
+            source_group(${groupname} FILES ${PROJECT_SOURCE_DIR}/${curdir}/${child})
 
           endif()
 
@@ -132,4 +117,6 @@ endmacro()
 
 GroupSources(src)
 
-add_library(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
+include_directories( ${PROJECT_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES})

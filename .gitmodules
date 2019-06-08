@@ -1,9 +1,9 @@
-[submodule "sources/External/imgui"]
-	path = sources/External/imgui
+[submodule "external/imgui"]
+	path = External/imgui
 	url = https://github.com/ocornut/imgui/
-[submodule "src/External/glm"]
-	path = src/External/glm
+[submodule "external/glm"]
+	path = external/glm
 	url = https://github.com/g-truc/glm
-[submodule "src/External/glfw"]
-	path = src/External/glfw
+[submodule "external/glfw"]
+	path = external/glfw
 	url = https://github.com/glfw/glfw

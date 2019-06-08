@@ -177,7 +177,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         m_testCone = MeshAsset("testCone");
         m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
 
-		/*GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
+        /*GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
 
         BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
         coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
@@ -188,17 +188,17 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
             coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
         }
 
-		BLA_CREATE_COMPONENT(MeshColliderComponent, coneObject);
-		coneObject->GetComponent<MeshColliderComponent>()->SetColliderMesh(&m_testCone.m_triangleMesh);
+        BLA_CREATE_COMPONENT(MeshColliderComponent, coneObject);
+        coneObject->GetComponent<MeshColliderComponent>()->SetColliderMesh(&m_testCone.m_triangleMesh);
 
-		BLA_CREATE_COMPONENT(RigidBodyComponent, coneObject);
+        BLA_CREATE_COMPONENT(RigidBodyComponent, coneObject);
 
-		BLA_CREATE_COMPONENT(TestPlayerComponent, coneObject);
+        BLA_CREATE_COMPONENT(TestPlayerComponent, coneObject);
 
         coneObject->GetTransform().m_scale = blaVec3(1.f,1.f,1.f);
 
         coneObject->GetTransform().m_posQuat.GetTranslation().y = 3.f;
-		*/
+        */
 
         return true;
     }
@@ -237,7 +237,7 @@ bool EditorSession::LoadWorkingScene(std::string filepath)
 
     MakeSkyObject();
 
-	GameObjectReference animatedObject = m_workingScene->CreateObject("AnimatedObject");
+    GameObjectReference animatedObject = m_workingScene->CreateObject("AnimatedObject");
 
     BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
 
@@ -292,8 +292,8 @@ void EditorSession::DoTestAnimationDemoStuff()
 
     Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
 
-	ColliderComponent::CollisionContact contactPoint;
-	GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
+    ColliderComponent::CollisionContact contactPoint;
+    GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
 
     if (hoverObject.IsValid() && inputs->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
     {
@@ -377,7 +377,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                 {
                     if (m_timer->GetTime() - m_lastIkSolveTime > .005f)
                     {
-						IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 20);
+                        IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 20);
 
                         m_lastIkSolveTime = m_timer->GetTime();
                     }
@@ -460,13 +460,13 @@ void EditorSession::DoTestAnimationDemoStuff()
             }
         }
     }
-	else
-	{
-		animationObject = m_workingScene->CreateObject("AnimatedObject");
+    else
+    {
+        animationObject = m_workingScene->CreateObject("AnimatedObject");
 
-		//BLA_CREATE_COMPONENT(AnimationComponent, animationObject);
-		BLA_CREATE_COMPONENT(IKComponent, animationObject);
-	}
+        //BLA_CREATE_COMPONENT(AnimationComponent, animationObject);
+        BLA_CREATE_COMPONENT(IKComponent, animationObject);
+    }
 
     auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
     if (leftMouseButton.IsRisingEdge())
