@@ -7,7 +7,7 @@ bool Dualshock4::Setup()
     m_hidDevice = hid_open(VENDOR_ID, PRODUCT_ID, NULL);
     if (!m_hidDevice)
     {
-        std::cout << "Unable to find a Gyro\n";
+        //std::cout << "Unable to find a Controller\n";
     }
     else
     {
@@ -18,7 +18,7 @@ bool Dualshock4::Setup()
 
         if (m_resultFlag < 0)
         {
-            std::cout << "unable to sent report\n";
+            //std::cout << "unable to sent report\n";
         }
 
         m_time = 0.;												  // starts in low energy mode where IMU data not sent

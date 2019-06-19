@@ -21,7 +21,7 @@ void RunEditorSession()
 
     editorSession->InitializeEngine(renderWindow);
 
-    int framerate = 40;
+    int framerate = 120;
 
     Dualshock4 controller;
 

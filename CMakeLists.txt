@@ -18,18 +18,11 @@ set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src)
 
 set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 
-macro(GetHeaderDependency dep pathToInclude)
+macro(GetHeaderDependency dep)
 	# we have a submodule setup for dep, assume it is under external/dep
     # now we need to clone this submodule
-    execute_process(COMMAND git submodule update --init -- ${PROJECT_EXTERNAL_DIR}/${dep}
+    execute_process(COMMAND git submodule update --recursive --remote ${PROJECT_EXTERNAL_DIR}/${dep}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-    # set dep_INCLUDE_DIR properly
-	
-	string(TOUPPER &{dep} DEP)
-	
-    set(${DEP}_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/${dep}/${pathToInclude}
-        CACHE PATH ${DEP}"include directory")
 
     # # also install it
     # install(DIRECTORY ${FOO_INCLUDE_DIR}/foo DESTINATION ${some_dest})
@@ -47,46 +40,52 @@ endmacro()
 macro(GetCMakeDependency dep)
 	# we have a submodule setup for dep, assume it is under external/dep
     # now we need to clone this submodule
-    execute_process(COMMAND git submodule update --init -- ${PROJECT_EXTERNAL_DIR}/${dep}
+    execute_process(COMMAND git submodule update --recursive --remote ${PROJECT_EXTERNAL_DIR}/${dep}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 endmacro()
 
-find_path(GLM_INCLUDE_DIR glm ${PROJECT_EXTERNAL_DIR}/glm)
+find_path(glm_INCLUDE_DIR glm ${PROJECT_EXTERNAL_DIR}/glm)
 
-if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${GLM_INCLUDE_DIR}))
+if(NOT glm_INCLUDE_DIR OR (NOT EXISTS ${glm_INCLUDE_DIR}))
     # we couldn't find the header files for GLM or they don't exist
-    message("Unable to find GLM")
+    message("Unable to find GLM, fetching the git submodule...")
 
-    GetHeaderDependency(glm glm/)
+    GetHeaderDependency(glm)
 	
-	if(NOT GLM_INCLUDE_DIR)
+	find_path(glm_INCLUDE_DIR glm ${PROJECT_EXTERNAL_DIR}/glm)
+	
+	if(NOT glm_INCLUDE_DIR)
 		message("GLM submodule failed to clone")
 	endif()
 endif()
 
-find_path(CEREAL_INCLUDE_DIR cereal ${PROJECT_EXTERNAL_DIR}/cereal/include)
+find_path(cereal_INCLUDE_DIR cereal ${PROJECT_EXTERNAL_DIR}/cereal/include)
 
-if(NOT CEREAL_INCLUDE_DIR OR (NOT EXISTS ${CEREAL_INCLUDE_DIR}))
+if(NOT cereal_INCLUDE_DIR OR (NOT EXISTS ${cereal_INCLUDE_DIR}))
     # we couldn't find the header files for GLM or they don't exist
-    message("Unable to find CEREAL")
+    message("Unable to find CEREAL, fetching the git submodule...")
 
-    GetHeaderDependency(cereal include/)
+    GetHeaderDependency(cereal)
 	
-	if(NOT CEREAL_INCLUDE_DIR)
+	find_path(cereal_INCLUDE_DIR cereal ${PROJECT_EXTERNAL_DIR}/cereal/include)
+	
+	if(NOT cereal_INCLUDE_DIR)
 		message("CEREAL submodule failed to clone")
 	endif()
 endif()
 
-find_path(IMGUI_INCLUDE_DIR imgui.h ${PROJECT_EXTERNAL_DIR}/imgui)
+find_path(imgui_INCLUDE_DIR imgui.h ${PROJECT_EXTERNAL_DIR}/imgui)
 
-if(NOT IMGUI_INCLUDE_DIR OR (NOT EXISTS ${IMGUI_INCLUDE_DIR}))
+if(NOT imgui_INCLUDE_DIR OR (NOT EXISTS ${imgui_INCLUDE_DIR}))
     # we couldn't find the header files for GLM or they don't exist
-    message("Unable to find CEREAL")
+    message("Unable to find Imgui, fetching the git submodule...")
 
-    GetHeaderDependency(imgui ./)
+    GetHeaderDependency(imgui)
 	
-	if(NOT IMGUI_INCLUDE_DIR)
+	find_path(imgui_INCLUDE_DIR imgui.h ${PROJECT_EXTERNAL_DIR}/imgui)
+	
+	if(NOT imgui_INCLUDE_DIR)
 		message("IMGUI submodule failed to clone")
 	endif()
 endif()
@@ -145,9 +144,9 @@ GroupSources(src)
 include_directories( ${PROJECT_INCLUDE_DIR} 
 ${GLFW_INCLUDE_DIR} 
 ${GLEW_INCLUDE_DIR} 
-${GLM_INCLUDE_DIR} 
-${CEREAL_INCLUDE_DIR}
-${IMGUI_INCLUDE_DIR})
+${glm_INCLUDE_DIR} 
+${cereal_INCLUDE_DIR}
+${imgui_INCLUDE_DIR})
 
 find_package(OpenGL REQUIRED)
 
