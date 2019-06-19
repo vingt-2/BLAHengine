@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 
-project(BLAHEngine CXX)
+project(BLAEngine CXX)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 #set the default path for built executables to the "bin" directory
 
@@ -23,8 +25,11 @@ macro(GetHeaderDependency dep pathToInclude)
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
     # set dep_INCLUDE_DIR properly
-    set(${dep}_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/${dep}/${pathToInclude}
-        CACHE PATH ${dep}"include directory")
+	
+	string(TOUPPER &{dep} DEP)
+	
+    set(${DEP}_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/${dep}/${pathToInclude}
+        CACHE PATH ${DEP}"include directory")
 
     # # also install it
     # install(DIRECTORY ${FOO_INCLUDE_DIR}/foo DESTINATION ${some_dest})
@@ -47,39 +52,62 @@ macro(GetCMakeDependency dep)
 
 endmacro()
 
-find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
+find_path(GLM_INCLUDE_DIR glm ${PROJECT_EXTERNAL_DIR}/glm)
 
 if(NOT GLM_INCLUDE_DIR OR (NOT EXISTS ${GLM_INCLUDE_DIR}))
-    # we couldn't find the header files for FOO or they don't exist
+    # we couldn't find the header files for GLM or they don't exist
     message("Unable to find GLM")
 
     GetHeaderDependency(glm glm/)
 	
-	find_path(GLM_INCLUDE_DIR glm.hpp ${PROJECT_EXTERNAL_DIR}/glm/glm)
 	if(NOT GLM_INCLUDE_DIR)
 		message("GLM submodule failed to clone")
 	endif()
 endif()
 
-find_library(GLFW_LIBRARY "glfw" ${PROJECT_EXTERNAL_DIR}/glfw)
+find_path(CEREAL_INCLUDE_DIR cereal ${PROJECT_EXTERNAL_DIR}/cereal/include)
 
-if(NOT GLFW_LIBRARY OR (NOT EXISTS ${GLFW_LIBRARY}))
-    # we couldn't find the header files for FOO or they don't exist
-    message("Unable to find GLFW")
+if(NOT CEREAL_INCLUDE_DIR OR (NOT EXISTS ${CEREAL_INCLUDE_DIR}))
+    # we couldn't find the header files for GLM or they don't exist
+    message("Unable to find CEREAL")
 
-    GetCMakeDependency(glfw)
-
-	add_subdirectory(${PROJECT_EXTERNAL_DIR}/glfw)
-else()
-	add_subdirectory(GLFW_LIBRARY)
-	set(GLFW_INCLUDE_DIR ${GLFW_LIBRARY}/include)
+    GetHeaderDependency(cereal include/)
+	
+	if(NOT CEREAL_INCLUDE_DIR)
+		message("CEREAL submodule failed to clone")
+	endif()
 endif()
 
-# I used this for allowing CMake to include all the files,
+find_path(IMGUI_INCLUDE_DIR imgui.h ${PROJECT_EXTERNAL_DIR}/imgui)
+
+if(NOT IMGUI_INCLUDE_DIR OR (NOT EXISTS ${IMGUI_INCLUDE_DIR}))
+    # we couldn't find the header files for GLM or they don't exist
+    message("Unable to find CEREAL")
+
+    GetHeaderDependency(imgui ./)
+	
+	if(NOT IMGUI_INCLUDE_DIR)
+		message("IMGUI submodule failed to clone")
+	endif()
+endif()
+
+GetCMakeDependency(glfw)
+set(GLFW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glfw CACHE PATH "GLFW directory")
+add_subdirectory(${GLFW_LIBRARY})
+set(GLFW_INCLUDE_DIR ${GLFW_LIBRARY}/include)
+
+GetCMakeDependency(glew-cmake)
+set(GLEW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glew-cmake CACHE PATH "GLEW directory")
+add_subdirectory(${GLEW_LIBRARY})
+set(GLEW_INCLUDE_DIR ${GLEW_LIBRARY}/include)
 
 # also new ones, without having to touch the CMakeLists.txt
 
-file(GLOB_RECURSE PROJECT_SOURCE_FILES "*.h" "*.hpp" "*.cpp")
+file(GLOB_RECURSE PROJECT_SOURCE_FILES 
+${PROJECT_SOURCE_DIR}/src/*.h 
+${PROJECT_SOURCE_DIR}/src/*.c
+${PROJECT_SOURCE_DIR}/src/*.hpp 
+${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 # I then wrote this Macro, which organize the files in visual studio folders,
 
@@ -101,7 +129,7 @@ macro(GroupSources curdir)
 
 				# I would like to call the src root folder in a different name, only in visual studio (not mandatory requirement)
 
-				string(REPLACE "src" "Common" groupname ${groupname})
+				string(REPLACE "src" "Sources" groupname ${groupname})
 
             source_group(${groupname} FILES ${PROJECT_SOURCE_DIR}/${curdir}/${child})
 
@@ -111,12 +139,25 @@ macro(GroupSources curdir)
 
 endmacro()
 
-
-
-# Execute the macro
-
+# Make groups for all source subfolders
 GroupSources(src)
 
-include_directories( ${PROJECT_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR})
+include_directories( ${PROJECT_INCLUDE_DIR} 
+${GLFW_INCLUDE_DIR} 
+${GLEW_INCLUDE_DIR} 
+${GLM_INCLUDE_DIR} 
+${CEREAL_INCLUDE_DIR}
+${IMGUI_INCLUDE_DIR})
+
+find_package(OpenGL REQUIRED)
+find_package(WinHID REQUIRED)
+
+# Gotta do the following here because glew with glew-cmake will build the target in build/lib which is otherwise unreachable
+	link_directories(${CMAKE_BINARY_DIR}/lib)
+#
+
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME} glfw glew ${OPENGL_LIBRARIES})
+
+set_property(TARGET ${PROJECT_NAME}  PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

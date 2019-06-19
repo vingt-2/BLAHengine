@@ -4,6 +4,8 @@
 #include <ppl.h>
 #include <concurrent_vector.h>
 
+#define PARALLEL_RENDER 1
+
 using namespace BLAengine;
 using namespace concurrency;
 
