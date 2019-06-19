@@ -150,7 +150,6 @@ ${CEREAL_INCLUDE_DIR}
 ${IMGUI_INCLUDE_DIR})
 
 find_package(OpenGL REQUIRED)
-find_package(WinHID REQUIRED)
 
 # Gotta do the following here because glew with glew-cmake will build the target in build/lib which is otherwise unreachable
 	link_directories(${CMAKE_BINARY_DIR}/lib)
@@ -160,4 +159,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} glfw glew ${OPENGL_LIBRARIES})
 
-set_property(TARGET ${PROJECT_NAME}  PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+if(WIN32)
+	set_property(TARGET ${PROJECT_NAME}  PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+	target_link_libraries(${PROJECT_NAME} setupapi.lib)
+endif()
