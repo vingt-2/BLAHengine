@@ -21,6 +21,9 @@ set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 macro(GetHeaderDependency dep)
 	# we have a submodule setup for dep, assume it is under external/dep
     # now we need to clone this submodule
+	execute_process(COMMAND git submodule update --init ${PROJECT_EXTERNAL_DIR}/${dep}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	
     execute_process(COMMAND git submodule update --recursive --remote ${PROJECT_EXTERNAL_DIR}/${dep}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -40,6 +43,9 @@ endmacro()
 macro(GetCMakeDependency dep)
 	# we have a submodule setup for dep, assume it is under external/dep
     # now we need to clone this submodule
+	execute_process(COMMAND git submodule update --init ${PROJECT_EXTERNAL_DIR}/${dep}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+					
     execute_process(COMMAND git submodule update --recursive --remote ${PROJECT_EXTERNAL_DIR}/${dep}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
