@@ -22,35 +22,15 @@ various features, the most prevalent being as of now:
 * BLAH, Blah, blah.
 ![alt tag](https://raw.github.com/vingt-2/BLAengine/master/PBR-VolumetricPhotonMapping.png)
  
-There is more to come ! 
+
+Installation (Windows only):
 ===================================
-The next big construction is a complete rework of the renderer,
-and an implementation of physically based methods with real-time global illumination.
-The engine is intended to be used as a library. There is an external editor on the way, but it's not quite
-there yet, so stay tuned for more :).
-
-MainDemo
-===================================
-
-The demo application "MainDemo" is a quick pot-pourris of the stuff in the engine. 
-It populates a scene with objects and let you interact with it. It's not very pretty
-and changes to help test features quickly.
-
-* W,A,S,D to move the camera around.
-* Right-Click + mouse to rotate the camera.
-* Left-Click on object: Push a force on a rigidbody
-* Space: Enable/Disable Rigidbodies simulation
-* Backspace: Enable/Disable gravity
-* Left/Right: Move Sun left and right
-* CTRL: Move sun auto
-Enjoy !
-
-Installation:
-===================================
-
-To compile and run this code sample, make sure you provide your programming environmment with:
-* GLEW to enable OpenGL 3.0 and extensions
-* GLFW (a GL toolkit library).
-* GLM, a C++ mathematics library for graphics programming that mimics GLSL maths definitions.
-
-Make sure you get all the STD/*.h includes resolved and linked and you should be good to go ! 
+BLAengine uses CMake to generate Visual Studio projects for itself and each dependencies.
+1. Make sure you have both recent releases of CMake and Git.
+2. Clone this git repo in a folder of your choice
+3. Run Cmake either using the GUI or with the command line:  
+  * With CMake-Gui, Select the cloned repo as source path, and select whatever build path **outside** of the source path. Click *Configure*, verify that all paths (and dependencies are set), then *Generate* to genereate the VS Solution.
+  * In the command line, run *cmake path/to/cloned/repo -B desired/path/to/VS/Solution*  
+4. In either case, if you just cloned the repo, CMake should try to retrieve the dependencies' submodules from each of their respective github repositories.
+5. Open the VS solution, **select Release**, and build all(in Debug, glew will output glewd.lib, but BLAengine only tries to link with glew.lib by default. You'll need to change the linker input to link against the debug library).
+6. You can run BLAengine.exe
