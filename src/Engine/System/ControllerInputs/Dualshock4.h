@@ -84,8 +84,8 @@ public:
 
     bool GetDS4Found() const { return m_hidDevice; }
 
-    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = zeroToOne * 0xFF; }
-    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = zeroToOne * 0xFF; }
+    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = zeroToOne * (float)0xFF; }
+    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = zeroToOne * (float)0xFF; }
 
     void SetLightBarColor(float r, float g, float b);
 
