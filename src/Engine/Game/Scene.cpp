@@ -78,7 +78,6 @@ void Scene::Update()
 {
     if (!m_renderingManager) 
     {
-        std::cout << "Scene object not initialized !\n";
         return;
     }
 

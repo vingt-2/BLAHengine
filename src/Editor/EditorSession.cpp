@@ -29,7 +29,7 @@ void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
 {
     for (auto path : *dragAndDropInput)
     {
-        std::cout << "Dropped file " << path << "\n";
+		Console::GetSingletonInstance()->LogMessage("Dropped file " + path);
         static_cast<EditorSession*>(EngineInstance::GetSingletonInstance())->EditorDragAndDropedFile(path); // ``safe'' cast...
     }
 }

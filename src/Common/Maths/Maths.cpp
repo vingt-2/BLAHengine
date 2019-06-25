@@ -1,4 +1,5 @@
 #include "Maths.h"
+#include <string>
 
 blaMat3 matrixCross(blaVec3 v)
 {
@@ -10,9 +11,19 @@ blaMat3 matrixCross(blaVec3 v)
     );
 }
 
-void printVector(blaVec3 vec)
+std::string VecToString(blaVec3 vec)
 {
-    std::cout << vec.x << ", " << vec.y << ", " << vec.z << "\n";
+	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ")";
+}
+
+std::string VecToString(blaVec2 vec)
+{
+	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
+}
+
+std::string VecToString(blaIVec2 vec)
+{
+	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }
 
 void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat)

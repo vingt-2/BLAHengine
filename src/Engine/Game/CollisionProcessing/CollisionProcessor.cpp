@@ -1,6 +1,7 @@
 #include <Engine/Game/GameComponents/RigidBodyComponent.h>
 #include <Engine/Game/GameComponents/ColliderComponent.h>
 #include "CollisionProcessor.h"
+#include "Engine/System/Console.h"
 
 using namespace BLAengine;
 
@@ -293,8 +294,9 @@ void CollisionProcessor::SolveContacts()
         }
         if (isnan(averageDistance) || isnan(-averageDistance) || fabs(averageDistance) > 1000000)
         {
-            cout << "Lambdas blew up: " << iteration << " iterations\n";
-            cout << "Average Distance: " << averageDistance << "\n";
+			Console::GetSingletonInstance()->LogMessage("Lambdas blew up: " + std::to_string(iteration) + " iterations");
+			Console::GetSingletonInstance()->LogMessage("Average Distance: " + std::to_string(averageDistance));
+
             debug_stop = true;
         }
         averageDistance /= 3 * lambdas.size();
@@ -302,7 +304,7 @@ void CollisionProcessor::SolveContacts()
     }
     if (iteration == m_maxIterations)
     {
-        cout << "LCP Solver did not converge after " << m_maxIterations << " iterations\n";
+		Console::GetSingletonInstance()->LogMessage("LCP Solver did not converge after " + std::to_string(m_maxIterations) + " iterations");
     }
     m_iterationCount = iteration;
     m_solveCount++;

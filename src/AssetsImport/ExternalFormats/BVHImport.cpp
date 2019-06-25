@@ -1,11 +1,8 @@
 #include <fstream>
-#include <iostream>
-#include <string.h>
 
 #include "BVHImport.h"
 
 
-#define _HAS_ITERATOR_DEBUGGING 0
 
 #ifndef M_PI
 #define M_PI       float(3.14159265358979323846)
@@ -16,6 +13,9 @@ using namespace BLAengine;
 
 //TODO: Extract asset data to the Asset folder out of Engine/Game
 #include <Engine/Game/Animation/SkeletonAnimationData.h>
+
+// What if we run this code in a non-engine situation ??
+#include <Engine/System/Console.h>
 
 void InvalidBVH()
 {
@@ -220,7 +220,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
         {
             bvhFile.close();
 
-            std::cout << "Could not open " << bvhFilePath << "\n";
+			Console::GetSingletonInstance()->LogError("Could not open " + bvhFilePath);
         }
         bvhFile.close();
 
@@ -259,7 +259,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
     }
 
     // Print the Skeleton to the console
-    std::cout << "Loaded the following Skeleton(s): \n\n";
+	Console::GetSingletonInstance()->LogMessage("Loaded the following Skeleton(s): ");
     for (auto roots : skeletalRoots)
     {
         roots->PrintJoint();

@@ -53,7 +53,7 @@ IKChainJoint * IKChainJoint::BuildFromSkeleton(const SkeletonJoint* skeletonRoot
 {
     if (skeletonRoot->GetJointIndex() > jointTransformsW.size())
     {
-        std::cout << "There is a problem here \n";
+		BLA_ASSERT(false);
     }
 
     IKChainJoint* ikJoint = new IKChainJoint(jointTransformsW[skeletonRoot->GetJointIndex()]);

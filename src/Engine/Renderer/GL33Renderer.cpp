@@ -1,4 +1,5 @@
 #include "GL33Renderer.h"
+#include <Engine/System/Console.h>
 
 using namespace BLAengine;
 
@@ -59,11 +60,9 @@ bool GL33Renderer::Update()
     int width, height;
     m_renderWindow->GetSize(width, height);
 
-    //std::cout << "width: " << width << "height: " << height << "\n";
-
     if (width != m_renderSize.x || height != m_renderSize.y)
     {
-        std::cout << "Resizing Viewport: " << width << "x" << height << "\n";
+		Console::GetSingletonInstance()->LogMessage("Resizing Viewport: " + std::to_string(width) + "*" + std::to_string(height));
 
         ViewportResize(width, height);
     }
@@ -1097,8 +1096,9 @@ bool GBuffer::InitializeGBuffer()
 
     GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-    if (Status != GL_FRAMEBUFFER_COMPLETE) {
-        printf("FB error, status: 0x%x\n", Status);
+    if (Status != GL_FRAMEBUFFER_COMPLETE) 
+	{
+		Console::GetSingletonInstance()->LogMessage("FB error, status: 0x" + Status);
         return false;
     }
 
@@ -1286,7 +1286,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     GLint Result = GL_FALSE;
     int InfoLogLength;
 
-    std::cout << "[SHADER]  Compiling shader: " << shader.m_name << ".\n";
+    Console::GetSingletonInstance()->LogMessage("[SHADER]  Compiling shader: " + shader.m_name + ".");
 
     // Compile Vertex Shader
     //printf("[SHADER] Compiling shader : \"%s\"\n", vertexShader);
@@ -1320,7 +1320,8 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
 
 
     // Link the program
-    std::cout << "[SHADER]  Linking Program: " << shader.m_name << ".\n";
+	Console::GetSingletonInstance()->LogMessage("[SHADER]  Linking Program: " + shader.m_name + ".");
+
     GLuint ProgramID = glCreateProgram();
     glAttachShader(ProgramID, VertexShaderID);
     glAttachShader(ProgramID, FragmentShaderID);

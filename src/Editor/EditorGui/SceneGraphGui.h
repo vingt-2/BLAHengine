@@ -5,7 +5,7 @@
 
 struct BlaSceneGraphElement 
 {
-    GameObjectReference m_object;
+	BLAengine::GameObjectReference m_object;
 };
 
 class BlaGuiTreeElement

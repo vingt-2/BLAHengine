@@ -196,7 +196,5 @@ private:
     float m_time;
 
     float m_quaternion[4];
-    float m_beta;
-
-    void ControllerTest();
+	float m_beta;
 };

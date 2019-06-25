@@ -1,4 +1,5 @@
 #include "GL33Shader.h"
+#include "Engine/System/Console.h"
 using namespace BLAengine;
 
 bool GL33Shader::LoadShaderCode(string vertexCodeFile, string fragmentCodeFile)
@@ -15,7 +16,7 @@ bool GL33Shader::LoadShaderCode(string vertexCodeFile, string fragmentCodeFile)
     }
     else
     {
-        cout << vertexCodeFile << "could not be opened.\n";
+		Console::GetSingletonInstance()->LogError(fragmentCodeFile + " could not be opened.");
         return false;
     }
 
@@ -32,7 +33,6 @@ bool GL33Shader::LoadShaderCode(string vertexCodeFile, string fragmentCodeFile)
     }
     else
     {
-        cout << fragmentCodeFile << "could not be opened.\n";
         return false;
     }
 
