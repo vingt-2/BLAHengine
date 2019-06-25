@@ -35,6 +35,13 @@ namespace BLAengine
             NoDocking = 1 << 21,
         };
 
+        BlaGuiWindow():
+            m_windowName("")
+            , m_windowPosition(blaIVec2(0))
+            , m_windowFlags(0)
+            , m_rootElement(nullptr)
+        {}
+
         BlaGuiWindow(const std::string& windowName, const blaIVec2& windowPosition)
             : m_windowName(windowName)
             , m_windowPosition(windowPosition)

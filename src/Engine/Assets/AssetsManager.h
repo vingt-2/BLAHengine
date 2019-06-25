@@ -16,10 +16,9 @@ namespace BLAengine
 {
     class BLACORE_API AssetManager
     {
-    public:
-
         BLA_DECLARE_SINGLETON(AssetManager);
 
+    public:
         enum AssetType
         {
             TriangleMeshAsset,

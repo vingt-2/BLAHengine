@@ -4,7 +4,7 @@
 #include <Engine/System/RenderWindow.h>
 #include <Editor/EditorSession.h>
 #include <Common/DataStructures/StringID.h>
-#include "engine/System/ControllerInputs/Dualshock4.h"
+#include <Engine/System/ControllerInputs/Dualshock4.h>
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;

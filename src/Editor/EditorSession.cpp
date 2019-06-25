@@ -9,6 +9,7 @@
 #include <AssetsImport/ExternalFormats/BVHImport.h>
 #include <Engine/Game/GameComponents/IKComponent.h>
 #include <Engine/Game/Animation/IK/IKTools.h>
+#include <Engine/System/Console.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/Gui/GuiManager.h>
 #include <Engine/Gui/GuiMenu.h>
@@ -168,6 +169,8 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         settingsMenu.AddMenu(BlaGuiMenuItem("G-Buffer", &m_renderer->m_debugDrawGBuffer));
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(settingsMenu);
+
+        m_guiManager->OpenConsole("Console");
 
         /*
          * Create and store gizmo meshes
@@ -472,6 +475,9 @@ void EditorSession::DoTestAnimationDemoStuff()
     if (leftMouseButton.IsRisingEdge())
     {
         g_selectedObject = hoverObject;
+        
+        if(g_selectedObject.IsValid())
+            Console::GetSingletonInstance()->LogMessage("Picked object: " + g_selectedObject->GetName());
     }
     if (leftMouseButton.IsFallingEdge())
     {

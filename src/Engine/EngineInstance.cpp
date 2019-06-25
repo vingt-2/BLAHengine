@@ -4,6 +4,7 @@
 #include <Engine/Game/RenderingManager.h>
 #include <Engine/Debug/Debug.h>
 #include <Engine/Assets/SceneManager.h>
+#include <Engine/System/Console.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/System/RenderWindow.h>
 #include <Engine/Gui/GuiManager.h>
@@ -16,6 +17,8 @@ BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
+    m_console = Console::AssignAndReturnSingletonInstance(new Console());
+
     m_inputManager = InputManager::AssignAndReturnSingletonInstance(new InputManager());
 
     this->m_renderWindow = renderWindow;

@@ -3,6 +3,7 @@
 
 namespace BLAengine
 {
+    class Console;
     class GL33Renderer;
     class AssetManager;
     class SceneManager;
@@ -15,7 +16,7 @@ namespace BLAengine
     class DebugRenderingManager;
     class InputManager;
     class BlaGuiManager;
-
+   
     class BLACORE_API EngineInstance
     {
         BLA_DECLARE_SINGLETON(EngineInstance)
@@ -57,6 +58,7 @@ namespace BLAengine
         void SetupDirLightAndCamera();
 
         // Required Engine Modules
+        Console*      m_console;
         GL33Renderer* m_renderer;
         AssetManager* m_assetManager;
         SceneManager* m_sceneManager;

@@ -35,7 +35,9 @@ namespace BLAengine
 
         blaBool IsMouseOverGui() const;
 
-        void DrawText(std::string textToDraw, blaIVec2 renderWindowPosition);
+        void DrawText(const std::string& textToDraw, blaIVec2 renderWindowPosition);
+
+        void OpenConsole(const std::string& consoleName);
 
         OpenFilePrompt* CreateOpenFilePrompt(std::string browserName, blaBool disableMultipleSelection);
         

@@ -2,6 +2,7 @@
 #include "GuiWindow.h"
 #include "GuiElements.h"
 #include "GuiMenu.h"
+#include "GuiConsole.h"
 
 #include <imgui.h>
 #include <examples/imgui_impl_glfw.h>
@@ -10,6 +11,8 @@
 #include <Engine/System/RenderWindow.h>
 #include <Engine/System/InputManager.h>
 #include <Common/FileSystem/Files.h>
+#include <Engine/System/Console.h>
+
 
 #include <memory>
 #include <iomanip>
@@ -138,7 +141,7 @@ void BlaGuiWindow::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImVec2 position(m_windowPosition.x, m_windowPosition.y);
-    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags);
     // END OCornut's Dear ImGui Specific Code Now
 
@@ -219,13 +222,17 @@ blaBool BlaGuiManager::IsMouseOverGui() const
     return io.WantCaptureMouse;
 }
 
-void BlaGuiManager::DrawText(std::string textToDraw, blaIVec2 renderWindowPosition)
+void BlaGuiManager::DrawText(const std::string& textToDraw, blaIVec2 renderWindowPosition)
 {
-    BlaGuiWindow textWindow(std::string(""), renderWindowPosition);
-    
     m_oneTimeWindows.emplace_back(BlaGuiWindow(std::string(""), renderWindowPosition));
 
     m_oneTimeWindows.back().SetRootElement(new BlaGuiTextElement(textToDraw));
+}
+
+void BlaGuiManager::OpenConsole(const std::string& consoleName)
+{
+    m_openWindows.insert(std::pair<std::string, BlaGuiWindow>(consoleName, BlaGuiWindow(consoleName, blaIVec2(10,10))));
+    m_openWindows[consoleName].SetRootElement(new BlaGuiConsole(Console::GetSingletonInstance()));
 }
 
 OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(std::string browserName, blaBool disableMultipleSelection)
@@ -700,6 +707,50 @@ void BlaFileBrowser::FileBrowserDisplayDirectoriesRecursive(std::string currentd
 //        }
 //    }
 //}
+
+void BlaGuiConsole::Render()
+{
+    bool copy_to_clipboard = false;
+    std::vector<std::string> consoleLines;
+    
+    m_pConsoleSingleton->GetLastNLines(10, consoleLines);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+    if (copy_to_clipboard)
+        ImGui::LogToClipboard();
+    for (int i = 0; i < consoleLines.size(); i++)
+    {
+        const char* item = consoleLines[i].data();
+        /*if (!Filter.PassFilter(item))
+            continue;
+*/
+
+        // Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
+        bool pop_color = false;
+        if (strstr(item, "[error]")) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true; }
+        else if (strncmp(item, "# ", 2) == 0) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true; }
+        ImGui::TextUnformatted(item);
+        if (pop_color)
+            ImGui::PopStyleColor();
+    }
+    if (copy_to_clipboard)
+        ImGui::LogFinish();
+        ImGui::SetScrollHereY(1.0f);
+    ImGui::PopStyleVar();
+
+    // Command-line
+    bool reclaim_focus = false;
+    /*if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory, &TextEditCallbackStub, (void*)this))
+    {
+        char* s = InputBuf;
+        Strtrim(s);
+        if (s[0])
+            ExecCommand(s);
+        strcpy(s, "");
+        reclaim_focus = true;
+    }*/
+}
+
 
 // You may think I'm a monster for doing this.
 // And perhaps you are right

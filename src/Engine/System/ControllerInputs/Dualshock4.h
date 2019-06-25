@@ -107,9 +107,9 @@ private:
     float GetTimestamp() { return float(GetRawTimestamp() * TIME_FACTOR); }
     float GetTime() { return m_time; }
 
-    float GetGyroX() { return float(GetRawGyroX()) * GYRO_FACTOR; }
-    float GetGyroY() { return float(GetRawGyroY()) * GYRO_FACTOR; }
-    float GetGyroZ() { return float(GetRawGyroZ()) * GYRO_FACTOR; }
+    float GetGyroX() { return float(GetRawGyroX()) * (float)GYRO_FACTOR; }
+    float GetGyroY() { return float(GetRawGyroY()) * (float)GYRO_FACTOR; }
+    float GetGyroZ() { return float(GetRawGyroZ()) * (float)GYRO_FACTOR; }
 
     float GetAccelX() { return GetRawAccelX() * ACC_FACTOR; }
     float GetAccelY() { return GetRawAccelY() * ACC_FACTOR; }
