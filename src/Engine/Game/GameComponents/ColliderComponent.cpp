@@ -1,7 +1,5 @@
 #include "ColliderComponent.h"
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 inline blaVec3 Barycentric(blaVec3 p, blaVec3 a, blaVec3 b, blaVec3 c)

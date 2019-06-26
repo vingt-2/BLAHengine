@@ -219,8 +219,8 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
         if (!bvhFile)
         {
             bvhFile.close();
-
-			Console::GetSingletonInstance()->LogError("Could not open " + bvhFilePath);
+            
+			Console::LogError("Could not open " + bvhFilePath);
         }
         bvhFile.close();
 
@@ -259,7 +259,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
     }
 
     // Print the Skeleton to the console
-	Console::GetSingletonInstance()->LogMessage("Loaded the following Skeleton(s): ");
+	Console::LogMessage("Loaded the following Skeleton(s): ");
     for (auto roots : skeletalRoots)
     {
         roots->PrintJoint();

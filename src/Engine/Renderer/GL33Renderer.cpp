@@ -62,7 +62,7 @@ bool GL33Renderer::Update()
 
     if (width != m_renderSize.x || height != m_renderSize.y)
     {
-		Console::GetSingletonInstance()->LogMessage("Resizing Viewport: " + std::to_string(width) + "*" + std::to_string(height));
+		Console::LogMessage("Resizing Viewport: " + std::to_string(width) + "*" + std::to_string(height));
 
         ViewportResize(width, height);
     }
@@ -1098,7 +1098,7 @@ bool GBuffer::InitializeGBuffer()
 
     if (Status != GL_FRAMEBUFFER_COMPLETE) 
 	{
-		Console::GetSingletonInstance()->LogMessage("FB error, status: 0x" + Status);
+		Console::LogMessage("FB error, status: 0x" + std::to_string(Status));
         return false;
     }
 
@@ -1286,7 +1286,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     GLint Result = GL_FALSE;
     int InfoLogLength;
 
-    Console::GetSingletonInstance()->LogMessage("[SHADER]  Compiling shader: " + shader.m_name + ".");
+    Console::LogMessage("[SHADER]  Compiling shader: " + shader.m_name + ".");
 
     // Compile Vertex Shader
     //printf("[SHADER] Compiling shader : \"%s\"\n", vertexShader);
@@ -1320,7 +1320,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
 
 
     // Link the program
-	Console::GetSingletonInstance()->LogMessage("[SHADER]  Linking Program: " + shader.m_name + ".");
+	Console::LogMessage("[SHADER]  Linking Program: " + shader.m_name + ".");
 
     GLuint ProgramID = glCreateProgram();
     glAttachShader(ProgramID, VertexShaderID);

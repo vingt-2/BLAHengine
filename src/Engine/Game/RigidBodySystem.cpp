@@ -5,8 +5,6 @@
 
 #include "RigidBodySystem.h"
 
-#pragma optimize("",off)
-
 using namespace BLAengine;
 
 RigidBodySystem::RigidBodySystem(Timer* time):

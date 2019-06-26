@@ -2,8 +2,6 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 TriangleMesh PrimitiveGeometry::MakeCube()
 {
     TriangleMesh cube;

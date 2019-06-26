@@ -40,22 +40,21 @@ namespace BLAengine
             , m_windowPosition(blaIVec2(0))
             , m_windowFlags(0)
             , m_rootElement(nullptr)
-        {}
+        {
+            m_bOpenWindow = true;
+        }
 
         BlaGuiWindow(const std::string& windowName, const blaIVec2& windowPosition)
             : m_windowName(windowName)
             , m_windowPosition(windowPosition)
             , m_windowFlags(0)
             , m_rootElement(nullptr)
-        {};
+        {
+            m_bOpenWindow = true;
+        };
 
-        void Render();
+        virtual void Render();
 
-    private:
-
-        BlaGuiElement* m_rootElement;
-
-    public:
         BlaGuiElement* RootElement() const
         {
             return m_rootElement;
@@ -73,10 +72,27 @@ namespace BLAengine
             return m_windowPosition;
         }
 
-    private:
+        bool ShouldClose() { return !m_bOpenWindow; }
+
+    protected:
         blaU32 m_windowFlags;
 
         std::string m_windowName;
         blaIVec2 m_windowPosition;
+        BlaGuiElement* m_rootElement;
+        bool m_bOpenWindow;
+    };
+
+    class BLAOneTimeWindow : public BlaGuiWindow
+    {
+    public:
+        BLAOneTimeWindow() : BlaGuiWindow()
+        {}
+
+        BLAOneTimeWindow(const std::string& windowName, const blaIVec2& windowPosition) :
+            BlaGuiWindow(windowName, windowPosition)
+        {};
+
+        void Render() override;
     };
 }

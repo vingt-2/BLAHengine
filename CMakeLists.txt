@@ -166,5 +166,6 @@ target_link_libraries(${PROJECT_NAME} glfw glew ${OPENGL_LIBRARIES})
 
 if(WIN32)
 	set_property(TARGET ${PROJECT_NAME}  PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 	target_link_libraries(${PROJECT_NAME} setupapi.lib)
 endif()

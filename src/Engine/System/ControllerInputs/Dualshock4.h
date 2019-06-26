@@ -5,6 +5,7 @@
 
 #pragma once
 #include <External\HIDAPI\hidapi.h>
+#include "Common/DataStructures/BitArray.h"
 
 #define VENDOR_ID 1356		// The vendor & product ID of HID device to be used:
 #define PRODUCT_ID 1476		//		(Currently Setup for PS4 controller)
@@ -84,8 +85,8 @@ public:
 
     bool GetDS4Found() const { return m_hidDevice; }
 
-    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = zeroToOne * (float)0xFF; }
-    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = zeroToOne * (float)0xFF; }
+    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = (blaU8) (zeroToOne * (float)0xFF); }
+    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = (blaU8) (zeroToOne * (float)0xFF); }
 
     void SetLightBarColor(float r, float g, float b);
 
@@ -107,13 +108,13 @@ private:
     float GetTimestamp() { return float(GetRawTimestamp() * TIME_FACTOR); }
     float GetTime() { return m_time; }
 
-    float GetGyroX() { return float(GetRawGyroX()) * (float)GYRO_FACTOR; }
-    float GetGyroY() { return float(GetRawGyroY()) * (float)GYRO_FACTOR; }
-    float GetGyroZ() { return float(GetRawGyroZ()) * (float)GYRO_FACTOR; }
+    float GetGyroX() { return (float)GetRawGyroX() * (float) GYRO_FACTOR; }
+    float GetGyroY() { return (float)GetRawGyroY() * (float) GYRO_FACTOR; }
+    float GetGyroZ() { return (float)GetRawGyroZ() * (float) GYRO_FACTOR; }
 
-    float GetAccelX() { return GetRawAccelX() * ACC_FACTOR; }
-    float GetAccelY() { return GetRawAccelY() * ACC_FACTOR; }
-    float GetAccelZ() { return GetRawAccelZ() * ACC_FACTOR; }
+    float GetAccelX() { return (float)GetRawAccelX() * (float) ACC_FACTOR; }
+    float GetAccelY() { return (float)GetRawAccelY() * (float) ACC_FACTOR; }
+    float GetAccelZ() { return (float)GetRawAccelZ() * (float) ACC_FACTOR; }
 
     bool GetSquareButton() { return m_reportBuffer[GetIndex(FACE_BUTTONS_INDEX)] & SQUARE_BUTTON_MASK; }
     bool GetCircleButton() { return m_reportBuffer[GetIndex(FACE_BUTTONS_INDEX)] & CIRCLE_BUTTON_MASK; }

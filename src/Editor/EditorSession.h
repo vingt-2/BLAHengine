@@ -45,17 +45,29 @@ namespace BLAengine
 
         void MakeSkyObject();
 
-        struct EditorStateRequests
-        {
-            blaBool m_newSceneRequest = false;
-            blaBool m_openSceneRequest = false;
-            blaBool m_saveSceneRequest = false;
-            blaBool m_saveSceneAsRequest = false;
-        } m_editorStateRequests;
-
         void SetEditorState(EditorState* state);
 
         void DoTestAnimationDemoStuff();
+
+        /*
+        *  Handle State changing things for the editor
+        *
+        */
+        void HandleEditorStateChangeRequests();
+
+        void HandleLoadScenePrompt();
+
+        void HandleSaveScenePrompt();
+
+        void HandleGuiRequests();
+
+        /*
+         *  Mesh Import Stuff...
+         *
+         */
+        bool ImportMesh(std::string filepath, std::string name) const;
+
+    private:
 
         /*
          * Editor State
@@ -68,13 +80,18 @@ namespace BLAengine
         
         bool m_autoPlay;
 
-        /*
-        *  Handle State changing things for the editor
-        *
-        */
-        void HandleLoadScenePrompt();
+        struct EditorStateRequests
+        {
+            blaBool m_newSceneRequest = false;
+            blaBool m_openSceneRequest = false;
+            blaBool m_saveSceneRequest = false;
+            blaBool m_saveSceneAsRequest = false;
+        } m_editorStateRequests;
 
-        void HandleSaveScenePrompt();
+        struct EditorGuiRequests
+        {
+            blaBool m_openConsoleRequest = false;
+        } m_editorGuiRequests;
 
         /*
          *  Editor Data
@@ -84,12 +101,5 @@ namespace BLAengine
         TriangleMesh m_posQuatScaleGizmoMesh;*/
         MeshAsset m_testCone;
         MeshAsset m_SkyInvertedSphere;
-
-
-        /*
-         *  Mesh Import Stuff...
-         *  
-         */
-        bool ImportMesh(std::string filepath, std::string name) const;
     };
 };

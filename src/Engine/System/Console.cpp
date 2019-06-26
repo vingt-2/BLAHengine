@@ -1,7 +1,8 @@
 #include "Console.h"
 #pragma optimize("", off)
 
-#define MAX(a,b) ((a > b) ? a : b)
+#define MAX(a,b) (a > b) ? a : b
+#define MIN(a,b) (a < b) ? a : b
 
 using namespace BLAengine;
 
@@ -9,9 +10,10 @@ BLA_IMPLEMENT_SINGLETON(Console);
 
 void ConsoleLog::GetLastNLogLines(int n, std::vector<std::string>& outVector)
 {
-    for(int i = MAX((int)m_consoleLineCache.size() - n, 0);  i < m_consoleLineCache.size(); i++)
+    outVector.resize(MIN(n, m_consoleLineCache.size()));
+    for(int i = MAX((int)m_consoleLineCache.size() - n, 0), j = 0;  i < m_consoleLineCache.size(); i++, j++)
     {
-        outVector.push_back(m_consoleLineCache[i]);
+        outVector[j] = m_consoleLineCache[i];
     }
 }
 
@@ -25,25 +27,43 @@ void Console::GetLastNLines(int n, std::vector<std::string> &outVector)
     m_log.GetLastNLogLines(n, outVector);
 }
 
-void Console::LogMessage(const std::string& message)
+void Console::InstanceLogMessage(const std::string& message)
 {
     m_log.AddLine(message);
 }
 
-void Console::LogWarning(const std::string& warning)
+void Console::InstanceLogWarning(const std::string& warning)
 {
     m_log.AddLine(warning);
 }
 
-void Console::LogError(const std::string& error)
+void Console::InstanceLogError(const std::string& error)
 {
     m_log.AddLine(error);
 }
 
-void Console::ExecuteCommand(const std::string& commandAndArguments)
+void Console::ExecuteCurrentCommand()
 {
-    m_log.AddLine(commandAndArguments);
+    std::string currentCommand = std::string(m_currentCommandBuffer);
+    m_commandHistory.emplace_back(currentCommand);
+    m_log.AddLine("> " + currentCommand);
 
-    // Do nothing else
+    //Do Nothing else
 }
 
+void Console::DoCommandCompletion()
+{
+
+}
+
+void Console::DoCommandHistory(blaS32 cursorOffset)
+{
+    if(m_commandHistory.empty())
+    {
+        return;
+    }
+
+    m_historyCursor += cursorOffset;
+    m_historyCursor = MAX(MIN(m_historyCursor, m_commandHistory.size() - 1), 0);
+    strcpy_s(m_currentCommandBuffer, m_commandHistory[m_commandHistory.size() - m_historyCursor - 1].data());
+}

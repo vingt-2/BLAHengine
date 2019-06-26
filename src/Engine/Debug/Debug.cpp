@@ -91,12 +91,3 @@ void Debug::DrawBasis(const blaPosQuat& transform, float size, float opacity)
 	DrawLine(transform.GetTranslation3(), transform.TransformPoint(blaVec3(0.f, size, 0.f)), opacity * blaVec3(0.f, 1.f, 0.f));
 	DrawLine(transform.GetTranslation3(), transform.TransformPoint(blaVec3(0.f, 0.f, size)), opacity * blaVec3(0.f, 0.f, 1.f));
 }
-
-void Debug::OutputToDebug(char* m_debug)
-{
-
-	// WINDOWS SPECIFIC WINDOW HANDLER
-
-	//    OutputDebugString(debug);
-	//    OutputDebugString("\n");
-}

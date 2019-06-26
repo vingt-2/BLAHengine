@@ -29,7 +29,7 @@ void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
 {
     for (auto path : *dragAndDropInput)
     {
-		Console::GetSingletonInstance()->LogMessage("Dropped file " + path);
+		Console::LogMessage("Dropped file " + path);
         static_cast<EditorSession*>(EngineInstance::GetSingletonInstance())->EditorDragAndDropedFile(path); // ``safe'' cast...
     }
 }
@@ -107,37 +107,9 @@ void EditorSession::EngineUpdate()
     {
         EngineInstance::EngineUpdate();
 
-        if (m_editorStateRequests.m_openSceneRequest)
-        {
-            m_editorStateRequests.m_openSceneRequest = false;
-            SetEditorState(new EditorLoadSceneState());
-        }
+        HandleEditorStateChangeRequests();
 
-        if (m_editorStateRequests.m_newSceneRequest)
-        {
-            m_editorStateRequests.m_newSceneRequest = false;
-            LoadNewScene();
-        }
-
-        if (m_editorStateRequests.m_saveSceneAsRequest)
-        {
-            m_editorStateRequests.m_saveSceneAsRequest = false; 
-            SetEditorState(new EditorSaveSceneState());
-        }
-
-        if (m_editorStateRequests.m_saveSceneRequest)
-        {
-            const std::string currentSceneSavePath = m_sceneManager->GetCurrentSceneFilePath();
-            m_editorStateRequests.m_saveSceneRequest = false;
-            if (currentSceneSavePath.empty())
-            {
-                SetEditorState(new EditorSaveSceneState());
-            }
-            else
-            {
-                SaveWorkingScene(currentSceneSavePath);
-            }
-        }
+        HandleGuiRequests();
 
         DoTestAnimationDemoStuff();
     }
@@ -170,7 +142,10 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(settingsMenu);
 
-        m_guiManager->OpenConsole("Console");
+        BlaGuiMenuTab windowsMenu("Windows");
+        windowsMenu.AddMenu(BlaGuiMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest));
+
+        m_guiManager->m_menuBar.m_menuTabs.push_back(windowsMenu);
 
         /*
          * Create and store gizmo meshes
@@ -477,7 +452,7 @@ void EditorSession::DoTestAnimationDemoStuff()
         g_selectedObject = hoverObject;
         
         if(g_selectedObject.IsValid())
-            Console::GetSingletonInstance()->LogMessage("Picked object: " + g_selectedObject->GetName());
+            Console::LogMessage("Picked object: " + g_selectedObject->GetName());
     }
     if (leftMouseButton.IsFallingEdge())
     {
@@ -541,6 +516,50 @@ void EditorSession::HandleSaveScenePrompt()
     else
     {
         saveState->m_currentFileBrowser = m_guiManager->CreateSaveFilePrompt("Save Scene");
+    }
+}
+
+void EditorSession::HandleGuiRequests()
+{
+    if(m_editorGuiRequests.m_openConsoleRequest)
+    {
+        m_guiManager->OpenConsole("Console");
+        m_editorGuiRequests.m_openConsoleRequest = false;
+    }
+}
+
+void EditorSession::HandleEditorStateChangeRequests()
+{
+    if (m_editorStateRequests.m_openSceneRequest)
+    {
+        m_editorStateRequests.m_openSceneRequest = false;
+        SetEditorState(new EditorLoadSceneState());
+    }
+
+    if (m_editorStateRequests.m_newSceneRequest)
+    {
+        m_editorStateRequests.m_newSceneRequest = false;
+        LoadNewScene();
+    }
+
+    if (m_editorStateRequests.m_saveSceneAsRequest)
+    {
+        m_editorStateRequests.m_saveSceneAsRequest = false;
+        SetEditorState(new EditorSaveSceneState());
+    }
+
+    if (m_editorStateRequests.m_saveSceneRequest)
+    {
+        const std::string currentSceneSavePath = m_sceneManager->GetCurrentSceneFilePath();
+        m_editorStateRequests.m_saveSceneRequest = false;
+        if (currentSceneSavePath.empty())
+        {
+            SetEditorState(new EditorSaveSceneState());
+        }
+        else
+        {
+            SaveWorkingScene(currentSceneSavePath);
+        }
     }
 }
 

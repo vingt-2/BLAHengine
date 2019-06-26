@@ -29,20 +29,36 @@ namespace BLAengine
 
     class Console
     {
+        friend class BlaGuiConsole;
+
         BLA_DECLARE_SINGLETON(Console);
-
-        std::string m_currentCommand;
-
-        ConsoleLog m_log;
-
-    public:
 
         void GetLastNLines(int n, std::vector<std::string>& outVector);
 
-        void LogMessage(const std::string& message);
-        void LogWarning(const std::string& warning);
-        void LogError(const std::string& error);
+        void InstanceLogMessage(const std::string& message);
+        void InstanceLogWarning(const std::string& warning);
+        void InstanceLogError(const std::string& error);
 
-        void ExecuteCommand(const std::string& commandAndArguments);
+        void ExecuteCurrentCommand();
+
+        void DoCommandCompletion();
+        void DoCommandHistory(blaS32 cursorOffset);
+
+    public:
+
+        Console():
+            m_historyCursor(0)
+        {}
+
+        static void LogMessage(const std::string& message) { GetSingletonInstance()->InstanceLogMessage(message); }
+        static void LogWarning(const std::string& warning) { GetSingletonInstance()->InstanceLogWarning(warning); }
+        static void LogError(const std::string& error) { GetSingletonInstance()->InstanceLogError(error); }
+
+    private:
+        ConsoleLog m_log;
+
+        char m_currentCommandBuffer[2048];
+        std::vector<std::string> m_commandHistory;
+        blaS32 m_historyCursor;
     };
 }

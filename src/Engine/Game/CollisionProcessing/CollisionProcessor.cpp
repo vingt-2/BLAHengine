@@ -294,8 +294,8 @@ void CollisionProcessor::SolveContacts()
         }
         if (isnan(averageDistance) || isnan(-averageDistance) || fabs(averageDistance) > 1000000)
         {
-			Console::GetSingletonInstance()->LogMessage("Lambdas blew up: " + std::to_string(iteration) + " iterations");
-			Console::GetSingletonInstance()->LogMessage("Average Distance: " + std::to_string(averageDistance));
+			Console::LogMessage("Lambdas blew up: " + std::to_string(iteration) + " iterations");
+			Console::LogMessage("Average Distance: " + std::to_string(averageDistance));
 
             debug_stop = true;
         }
@@ -304,7 +304,7 @@ void CollisionProcessor::SolveContacts()
     }
     if (iteration == m_maxIterations)
     {
-		Console::GetSingletonInstance()->LogMessage("LCP Solver did not converge after " + std::to_string(m_maxIterations) + " iterations");
+		Console::LogMessage("LCP Solver did not converge after " + std::to_string(m_maxIterations) + " iterations");
     }
     m_iterationCount = iteration;
     m_solveCount++;

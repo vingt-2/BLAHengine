@@ -6,8 +6,6 @@
 #include <Engine/System/InputManager.h>
 #include <Engine/Game/Scene.h>
 
-#pragma optimize("",off)
-
 using namespace BLAengine;
 
 #define MAX(a,b) a > b ? a : b

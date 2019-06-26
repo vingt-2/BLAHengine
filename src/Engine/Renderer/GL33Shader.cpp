@@ -16,7 +16,7 @@ bool GL33Shader::LoadShaderCode(string vertexCodeFile, string fragmentCodeFile)
     }
     else
     {
-		Console::GetSingletonInstance()->LogError(fragmentCodeFile + " could not be opened.");
+		Console::LogError(fragmentCodeFile + " could not be opened.");
         return false;
     }
 

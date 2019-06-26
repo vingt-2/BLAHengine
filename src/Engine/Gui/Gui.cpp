@@ -17,6 +17,8 @@
 #include <memory>
 #include <iomanip>
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 void BLAengineStyleColors(ImGuiStyle* dst)
@@ -61,8 +63,8 @@ void BLAengineStyleColors(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive] = ImVec4(0.60f, 0.73f, 0.88f, 1.00f);
     colors[ImGuiCol_TabUnfocused] = ImVec4(0.92f, 0.93f, 0.94f, 0.99f);
     colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.74f, 0.82f, 0.91f, 1.00f);
-    //colors[ImGuiCol_DockingPreview] = ImVec4(0.26f, 0.59f, 0.98f, 0.22f);
-    //colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.26f, 0.59f, 0.98f, 0.22f);
+    colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
     colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -142,7 +144,7 @@ void BlaGuiWindow::Render()
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImVec2 position(m_windowPosition.x, m_windowPosition.y);
     ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
-    ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags);
+    ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
     // END OCornut's Dear ImGui Specific Code Now
 
     if (m_rootElement)
@@ -161,6 +163,24 @@ void BlaGuiWindow::SetRootElement(BlaGuiElement* imGuiElements)
     m_rootElement = imGuiElements;
 }
 
+void BLAOneTimeWindow::Render()
+{
+    // BEGIN OCornut's Dear ImGui Specific Code Now
+    ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+    ImGui::SetNextWindowPos(position);
+    ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags | BlaGuiWindow::WindowFlags::MenuBar | ImGuiWindowFlags_NoTitleBar);
+    // END OCornut's Dear ImGui Specific Code Now
+
+    if (m_rootElement)
+    {
+        m_rootElement->Render();
+    }
+
+    // BEGIN OCornut's Dear ImGui Specific Code Now
+    ImGui::End();
+    // END OCornut's Dear ImGui Specific Code Now
+}
+
 bool g_show_demo_window = false;
 bool g_debugFileBrowser = false;
 
@@ -175,9 +195,19 @@ void BlaGuiManager::Update()
 
     m_menuBar.Render();
 
+    std::vector<std::string> toClose;
     for (auto& window : m_openWindows)
     {
         window.second.Render();
+        if(window.second.ShouldClose())
+        {
+            toClose.push_back(window.first);
+        }
+    }
+
+    for(auto& window : toClose)
+    {
+        m_openWindows.erase(window);
     }
 
     for (auto& window : m_openBrowsers)
@@ -224,7 +254,7 @@ blaBool BlaGuiManager::IsMouseOverGui() const
 
 void BlaGuiManager::DrawText(const std::string& textToDraw, blaIVec2 renderWindowPosition)
 {
-    m_oneTimeWindows.emplace_back(BlaGuiWindow(std::string(""), renderWindowPosition));
+    m_oneTimeWindows.emplace_back(BLAOneTimeWindow(std::string(""), renderWindowPosition));
 
     m_oneTimeWindows.back().SetRootElement(new BlaGuiTextElement(textToDraw));
 }
@@ -713,44 +743,101 @@ void BlaGuiConsole::Render()
     bool copy_to_clipboard = false;
     std::vector<std::string> consoleLines;
     
-    m_pConsoleSingleton->GetLastNLines(10, consoleLines);
+    m_pConsoleSingleton->GetLastNLines(m_maxLineCount, consoleLines);
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-    if (copy_to_clipboard)
-        ImGui::LogToClipboard();
-    for (int i = 0; i < consoleLines.size(); i++)
-    {
-        const char* item = consoleLines[i].data();
-        /*if (!Filter.PassFilter(item))
-            continue;
-*/
+    /*if (copy_to_clipboard)
+        ImGui::LogToClipboard();*/
 
-        // Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
-        bool pop_color = false;
-        if (strstr(item, "[error]")) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true; }
-        else if (strncmp(item, "# ", 2) == 0) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true; }
-        ImGui::TextUnformatted(item);
-        if (pop_color)
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.5f, 0.5f, 0.5f, 0.3f));
+    if (ImGui::BeginChild("ConsoleLogOutput", ImVec2(0, ImGui::GetWindowHeight() - 5.f * ImGui::GetFontSize()), true))
+    {
+        for (int i = 0; i < consoleLines.size(); i++)
+        {
+            if(i%2)
+            {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.55f, 0.55f, 0.55f, 0.05f));
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.5f, 0.5f, 0.5f, 0.0f));
+            }
+
+            char childName[64];
+            strcpy(childName, (std::string("CL:") + std::to_string(i)).data());
+            ImGui::BeginChild(childName, ImVec2(0, ImGui::GetFontSize()), false, ImGuiWindowFlags_NoScrollWithMouse);
+
+            const char* item = consoleLines[i].data();
+            /*if (!Filter.PassFilter(item))
+                continue;
+    */
+
+            // Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
+            bool pop_color = false;
+            if (strstr(item, "[error]")) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true; }
+            else if (strncmp(item, "# ", 2) == 0) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true; }
+            ImGui::TextUnformatted(item);
+
+            ImGui::EndChild();
             ImGui::PopStyleColor();
+        }
+        if (copy_to_clipboard)
+            ImGui::LogFinish();
+
+        ImGui::EndChild();
     }
-    if (copy_to_clipboard)
-        ImGui::LogFinish();
-        ImGui::SetScrollHereY(1.0f);
+
+    ImGui::PopStyleColor();
     ImGui::PopStyleVar();
 
     // Command-line
     bool reclaim_focus = false;
-    /*if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory, &TextEditCallbackStub, (void*)this))
+    if (ImGui::InputText("",
+        m_pConsoleSingleton->m_currentCommandBuffer,
+        2048,
+        ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory,
+        &BlaGuiConsole::HandleCmdCallbacks,
+        (void*)this))
     {
-        char* s = InputBuf;
-        Strtrim(s);
-        if (s[0])
-            ExecCommand(s);
-        strcpy(s, "");
+        m_pConsoleSingleton->ExecuteCurrentCommand();
         reclaim_focus = true;
-    }*/
+        strcpy_s(m_pConsoleSingleton->m_currentCommandBuffer, "");
+    }
+
+    // Auto-focus on window apparition
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus)
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+    
 }
 
+int BlaGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
+{
+    Console* pConsole = ((BlaGuiConsole*)(data->UserData))->m_pConsoleSingleton;
+    switch(data->EventFlag)
+    {
+    case ImGuiInputTextFlags_CallbackCompletion:
+        pConsole->DoCommandCompletion();
+        break;
+    case ImGuiInputTextFlags_CallbackHistory:
+        if (data->EventKey == ImGuiKey_UpArrow)
+        {
+            pConsole->DoCommandHistory(-1);
+            data->DeleteChars(0, data->BufTextLen);
+            data->InsertChars(0, pConsole->m_currentCommandBuffer);
+        }
+        else if (data->EventKey == ImGuiKey_DownArrow)
+        {
+            pConsole->DoCommandHistory(1);
+            data->DeleteChars(0, data->BufTextLen);
+            data->InsertChars(0, pConsole->m_currentCommandBuffer);
+        }
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
 
 // You may think I'm a monster for doing this.
 // And perhaps you are right

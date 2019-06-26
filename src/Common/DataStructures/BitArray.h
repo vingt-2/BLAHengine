@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Common/System.h>
 
 #define INTEGER_SIZE_BITS 32
