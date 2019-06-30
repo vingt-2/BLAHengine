@@ -1,12 +1,14 @@
 #pragma once
+#include <Common/BLASingleton.h>
 #include <Common/StdInclude.h>
 #include <Common/System.h>
 #include <Common/Maths/Maths.h>
-
 namespace BLAengine
 {
     class BLACORE_API Timer
     {
+        BLA_DECLARE_SINGLETON(Timer);
+        
     public:
         Timer(glm::uint8 timeBufferSize);
         ~Timer();

@@ -31,9 +31,9 @@ namespace BLAengine
 
         typedef struct destVert_t
         {
-            blaU32 pos; // Vertex the HE points to.
-            blaU32 normal; // Normals at the destination Vertex (may be unique to this face)
-            blaU32 UV; // UV at the destination Vertex (may be unique to this face)
+            blaU32 posIndex; // Vertex the HE points to.
+            blaU32 normalIndex; // Normals at the destination Vertex (may be unique to this face)
+            blaU32 uvIndex; // UV at the destination Vertex (may be unique to this face)
         } DestVertex;
 
         vector<Face> m_meshTriangles;

@@ -19,7 +19,7 @@ bool Raytracer::InitializeEngine()
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
     //m_editorRenderer->SetCamera(cameraComp);
 
-    m_timer = new Timer(10);
+    //m_timer Timer:: new Timer(10);
 
     m_workingScene = new Scene();
 
@@ -29,7 +29,7 @@ bool Raytracer::InitializeEngine()
 
     m_sceneManager = new SceneManager(m_assetManager);
 
-    m_debug = new Debug(m_debugRenderingManager);
+    m_debug = new DebugDraw(m_debugRenderingManager);
 
     bool terminationRequest = false;
 
@@ -45,7 +45,7 @@ bool Raytracer::InitializeEngine()
 void Raytracer::UpdateEditor()
 {
     m_debug->DrawRay(debugRay, blaVec3(0.f, 1.f, 0.f));
-    m_debug->DrawGrid(1000, 10.f, blaVec3(0.4f));
+    //DrawGrid(1000, 10.f, blaVec3(0.4f));
     m_debug->Update();
 
 

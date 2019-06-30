@@ -105,11 +105,9 @@ void CameraController::UpdateController()
         angularAcceleration.x *= 9.0f/16.0f;
     }
 
-    const EngineInstance* engineInstance = EngineInstance::GetSingletonInstanceRead();
-
     for (int i = 0; i < 3; ++i)
     {
-        blaF32 dt = engineInstance->GetTimer()->GetDelta();
+        blaF32 dt = Timer::GetSingletonInstance()->GetDelta();
 
         dt /= 3;
 

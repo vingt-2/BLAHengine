@@ -3,7 +3,7 @@
 #include <Common/Maths/Maths.h>
 #include <Engine/Renderer/GL33Renderer.h>
 #include <Engine/Game/RenderingManager.h>
-#include <Engine/Debug/Debug.h>
+#include <Engine/Renderer/DebugDraw.h>
 #include <Engine/Assets/SceneManager.h>
 
 namespace BLAengine
@@ -38,7 +38,7 @@ namespace BLAengine
         GL33Renderer* m_editorRenderer;
         AssetManager* m_assetManager;
         SceneManager* m_sceneManager;
-        Debug* m_debug;
+        DebugDraw* m_debug;
         Scene* m_workingScene;
         Scene* m_editorScene;
         RenderWindow* m_renderWindow;

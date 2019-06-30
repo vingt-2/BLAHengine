@@ -126,7 +126,6 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     if (!glfwInit())
     {
         printf("Failed to initialize GLFW\n");
-        //Debug::OutputToDebug("Failed to initialize GLFW\n" );
         return;
     }
 
@@ -171,7 +170,7 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     if (glewInit() != GLEW_OK)
     {
         printf("Failed to initialize GLEW\n");
-        //Debug::OutputToDebug("Failed to initialize GLEW\n");
+        //DebugDraw::OutputToDebug("Failed to initialize GLEW\n");
         return;
     }
 

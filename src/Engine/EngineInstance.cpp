@@ -1,19 +1,68 @@
+#include <thread>
+
 #include <Common/System.h>
 #include <Common/Maths/Maths.h>
 #include <Engine/Renderer/GL33Renderer.h>
 #include <Engine/Game/RenderingManager.h>
-#include <Engine/Debug/Debug.h>
+#include <Engine/Renderer/DebugDraw.h>
 #include <Engine/Assets/SceneManager.h>
 #include <Engine/System/Console.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/System/RenderWindow.h>
 #include <Engine/Gui/GuiManager.h>
+#include <Engine/System/ControllerInputs/Dualshock4.h>
 
 #include "EngineInstance.h"
 
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
+
+blaU32 EngineInstance::LoopEngine()
+{
+    EngineInstance* engineInstance = EngineInstance::GetSingletonInstance();
+
+    RenderWindow* renderWindow = new GLFWRenderWindow();
+
+    renderWindow->CreateRenderWindow("BLAengine Editor", 1280, 720, false);
+
+    engineInstance->InitializeEngine(renderWindow);
+
+    int framerate = 90;
+
+    Dualshock4 controller;
+
+    while (!engineInstance->ShouldTerminate())
+    {
+        auto frameStartTime = std::chrono::steady_clock::now();
+
+        // We should have a controller manager that does that and looks for more periodically
+        if (!controller.GetDS4Found())
+        {
+            controller.Setup();
+        }
+
+        if (controller.GetDS4Found())
+        {
+            controller.Update();
+        }
+
+        engineInstance->PreEngineUpdate();
+        engineInstance->EngineUpdate();
+        engineInstance->PostEngineUpdate();
+
+        auto frameEndTime = std::chrono::steady_clock::now();
+        int microSecondsFrameTime = (int)(1000000.f / (float)framerate);
+        auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStartTime);
+
+        std::this_thread::sleep_for(waitDuration);
+    }
+
+    // Call terminates engine
+    engineInstance->TerminateEngine();
+
+    return 0;
+}
 
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
@@ -33,7 +82,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_renderer->m_assetManager = m_assetManager;
 
-    m_timer = new Timer(10);
+    m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 
     m_editorScene = new Scene();
 
@@ -43,9 +92,9 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_sceneManager = new SceneManager(m_assetManager);
 
-    m_debug = new Debug(m_debugRenderingManager);
+    m_debug = new DebugDraw(m_debugRenderingManager);
 
-    Debug::AssignSingletonInstance(m_debug);
+    DebugDraw::AssignSingletonInstance(m_debug);
 
     m_workingScene->Initialize(m_renderingManager);
 

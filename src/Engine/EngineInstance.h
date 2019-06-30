@@ -7,7 +7,7 @@ namespace BLAengine
     class GL33Renderer;
     class AssetManager;
     class SceneManager;
-    class Debug;
+    class DebugDraw;
     class Scene;
     class Scene;
     class RenderWindow;
@@ -29,27 +29,23 @@ namespace BLAengine
 
         ~EngineInstance() { TerminateEngine(); };
 
+        Scene* GetWorkingScene() const { return m_workingScene; }
+
+        static blaU32 LoopEngine();
+    
+    protected:
+
         virtual bool InitializeEngine(RenderWindow* renderWindow);
-
         virtual void PreEngineUpdate();
-
         virtual void EngineUpdate();
-
         virtual void PostEngineUpdate();
-
         virtual void TerminateEngine();
 
         bool ShouldTerminate() const { return m_isTerminationRequested; };
 
         bool SaveWorkingScene(std::string filePath);
 
-        Debug* GetDebug() const { return m_debug; }
-
         const Timer* GetTimer() const { return m_timer; }
-
-        Scene* GetWorkingScene() const { return m_workingScene; }
-
-    protected:
 
         virtual bool LoadNewScene();
 
@@ -62,7 +58,7 @@ namespace BLAengine
         GL33Renderer* m_renderer;
         AssetManager* m_assetManager;
         SceneManager* m_sceneManager;
-        Debug* m_debug;
+        DebugDraw* m_debug;
         Scene* m_workingScene;
         Scene* m_editorScene;
         RenderWindow* m_renderWindow;

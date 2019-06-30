@@ -1,7 +1,7 @@
 #include <Engine/Game/GameComponents/RigidBodyComponent.h>
 
 #include "TestPlayerComponent.h"
-#include <Engine/Debug/Debug.h>
+#include <Engine/Renderer/DebugDraw.h>
 #include <Engine/EngineInstance.h>
 #include <Engine/System/InputManager.h>
 #include <Engine/Game/Scene.h>
@@ -25,12 +25,7 @@ void TestPlayerComponent::Update()
 
     if (rigidBody)
     {
-        GameObjectReference CameraObject;
-        
-        if (EngineInstance* engineInstance = EngineInstance::GetSingletonInstance())
-        {
-            CameraObject = engineInstance->GetWorkingScene()->GetMainCamera()->GetParentObject();
-        }
+        GameObjectReference CameraObject = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetParentObject();
 
         if (!CameraObject.IsValid())
         {
@@ -46,10 +41,8 @@ void TestPlayerComponent::Update()
         blaVec3 controlInput = 10.f * CameraObject->GetTransform().LocalDirectionToWorld(blaVec3(gxy.x, 0, -gxy.y));
 
         controlInput.y = 0.f;
-
-        Debug* debug = Debug::GetSingletonInstance();
-
-        debug->DrawRay(Ray(GetObjectTransform().GetPosition(), controlInput, 5.f * glm::length(controlInput)), BLAColors::LIME);
+        
+        DebugDraw::DrawRay(Ray(GetObjectTransform().GetPosition(), controlInput, 5.f * glm::length(controlInput)), BLAColors::LIME);
 
         if (inputs->GetGamepadState(BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN).IsRisingEdge())
         {
@@ -62,7 +55,7 @@ void TestPlayerComponent::Update()
         if (GetObjectTransform().GetPosition().y < BLA_EPSILON)
         {
             controlability = 1.f;
-            debug->DrawLine(GetObjectTransform().GetPosition(), GetObjectTransform().GetPosition() + blaVec3(0.f, abs(15.f * GetObjectTransform().GetPosition().y), 0.f));
+            DebugDraw::DrawLine(GetObjectTransform().GetPosition(), GetObjectTransform().GetPosition() + blaVec3(0.f, abs(15.f * GetObjectTransform().GetPosition().y), 0.f));
             rigidBody->AddLinearForce(blaVec3(0.f, 5, 0.f));
             rigidBody->AddImpulse(blaVec3(0.f, MAX(-rigidBody->m_velocity.y, 0), 0.f));
             rigidBody->AddImpulse(-0.7f * blaVec3(rigidBody->m_velocity.x,0.f, rigidBody->m_velocity.z));

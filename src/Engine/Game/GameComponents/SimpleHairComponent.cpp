@@ -1,7 +1,7 @@
 #include "SimpleHairComponent.h"
 #include <Engine/EngineInstance.h>
 #include <Engine/Game/GameObject.h>
-#include <Engine/Debug/Debug.h>
+#include <Engine/Renderer/DebugDraw.h>
 
 #include <random>
 
@@ -46,26 +46,19 @@ void SimpleHairComponent::RenderSimpleHair()
 {
     const EngineInstance* engineInstance = EngineInstance::GetSingletonInstanceRead();
 
-    Debug* debugInstance = engineInstance->GetDebug();
-
-    if (!debugInstance)
-        return;
-
     for (auto hair : m_hairStrands)
     {
         for (int i = 0; i < HAIR_SEGMENT_COUNT; i++)
         {
             blaVec3 color = blaVec3(0.f);
 
-            debugInstance->DrawLine(hair.m_particlePositionsW[i], hair.m_particlePositionsW[i + 1], color);
+            DebugDraw::DrawLine(hair.m_particlePositionsW[i], hair.m_particlePositionsW[i + 1], color);
         }
     }
 }
 
 void SimpleHairComponent::StepHair()
 {
-    extern Debug* g_debugInstance;
-
     sphere s;
     s.origin = GetObjectTransform().GetPosition();
     s.radius = 1.05f; // Add an Epsilon to avoid z-figthing, and give stifness to the first segments...
@@ -89,7 +82,7 @@ void SimpleHairComponent::StepHair()
             blaVec3 repulsion;
             if (collideWithSphere(s, hair->m_particlePositionsW[i], repulsion))
             {
-                //g_debugInstance->DrawLine(hair->m_particlePositionsW[i], hair->m_particlePositionsW[i] + repulsion, blaVec3(1.f, 0.f, 0.f));
+                DebugDraw::GetSingletonInstance()->DrawLine(hair->m_particlePositionsW[i], hair->m_particlePositionsW[i] + repulsion, blaVec3(1.f, 0.f, 0.f));
                 hair->m_particleVelocities[i] += 0.60f * repulsion / m_timestep;
             }
 

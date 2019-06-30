@@ -2,7 +2,7 @@
 
 using namespace BLAengine;
 
-#define INVALID_HE 0xFFFFFFFF
+#define INVALID_INDEX 0xFFFFFFFF
 
 void TriangleMesh::BuildMeshTopo(
     vector<blaU32> vertPosIndices,
@@ -10,7 +10,7 @@ void TriangleMesh::BuildMeshTopo(
     vector<blaU32> vertUVsIndices,
     bool swapNormals = false)
 {
-    BLA_ASSERT(vertPosIndices.size() == vertNormalIndices.size() && vertNormalIndices.size() == vertUVsIndices.size())
+    //BLA_ASSERT(vertPosIndices.size() == vertNormalIndices.size() && vertNormalIndices.size() == vertUVsIndices.size())
 
     unordered_map<pair<blaU32, blaU32>, blaU32, uintPairHash> halfEdgesIndices; // an intermediate Data Structure to keep track of HEs
     vector<pair<blaU32, blaU32>> hePairs;
@@ -38,11 +38,11 @@ void TriangleMesh::BuildMeshTopo(
             vindx2 = vertPosIndices[i + 0];
         }
 
-        if (vertNormalIndices.empty())
+        if (vertNormalIndices.empty() || i >= vertNormalIndices.size())
         {
-            nindx0 = -1;
-            nindx1 = -1;
-            nindx2 = -1;
+            nindx0 = INVALID_INDEX;
+            nindx1 = INVALID_INDEX;
+            nindx2 = INVALID_INDEX;
         }
         else
         {
@@ -51,11 +51,11 @@ void TriangleMesh::BuildMeshTopo(
             nindx2 = vertNormalIndices[i + 0];
         }
 
-        if (vertUVsIndices.empty())
+        if (vertUVsIndices.empty() || i >= vertUVsIndices.size())
         {
-            uvIndx0 = -1;
-            uvIndx1 = -1;
-            uvIndx2 = -1;
+            uvIndx0 = INVALID_INDEX;
+            uvIndx1 = INVALID_INDEX;
+            uvIndx2 = INVALID_INDEX;
         }
         else
         {
@@ -64,9 +64,9 @@ void TriangleMesh::BuildMeshTopo(
             uvIndx2 = vertUVsIndices[i + 0];
         }
 
-        HalfEdge he0 = { { vindx0, nindx0, uvIndx0 }, currentTriangle, i + 1, -1 }; // the -1 value is to be populated later
-        HalfEdge he1 = { { vindx1, nindx1, uvIndx1 }, currentTriangle, i + 2, -1 };
-        HalfEdge he2 = { { vindx2, nindx2, uvIndx2 }, currentTriangle, i + 0, -1 };
+        HalfEdge he0 = { { vindx0, nindx0, uvIndx0 }, currentTriangle, i + 1, INVALID_INDEX }; // this INVALID_INDEX value is to be populated later
+        HalfEdge he1 = { { vindx1, nindx1, uvIndx1 }, currentTriangle, i + 2, INVALID_INDEX };
+        HalfEdge he2 = { { vindx2, nindx2, uvIndx2 }, currentTriangle, i + 0, INVALID_INDEX };
 
         m_halfEdges.push_back(he0);
         m_halfEdges.push_back(he1);
@@ -118,7 +118,7 @@ void TriangleMesh::BuildMeshTopo(
         }
         else
         {
-            edge->oppositeHE = INVALID_HE;
+            edge->oppositeHE = INVALID_INDEX;
             m_manifoldViolationEdges++;
         }
     }
@@ -169,11 +169,21 @@ void TriangleMesh::ComputeFaceTangents()
         const DestVertex& v1 = edge0.destVertex;
         const DestVertex& v2 = edge1.destVertex;
 
-        blaVec3 q1 = m_vertexPos[v1.pos] - m_vertexPos[v0.pos];
-        blaVec3 q2 = m_vertexPos[v2.pos] - m_vertexPos[v0.pos];
+        blaVec3 q1 = m_vertexPos[v1.posIndex] - m_vertexPos[v0.posIndex];
+        blaVec3 q2 = m_vertexPos[v2.posIndex] - m_vertexPos[v0.posIndex];
 
-        blaVec2 st1 = m_vertexUVs[v1.UV] - m_vertexUVs[v0.UV];
-        blaVec2 st2 = m_vertexUVs[v2.UV] - m_vertexUVs[v0.UV];
+        blaVec2 st1;
+        blaVec2 st2;
+        if(v1.uvIndex != INVALID_INDEX && v2.uvIndex != INVALID_INDEX)
+        {
+            st1 = m_vertexUVs[v1.uvIndex] - m_vertexUVs[v0.uvIndex];
+            st2 = m_vertexUVs[v2.uvIndex] - m_vertexUVs[v0.uvIndex];
+        }
+        else
+        {
+            st1 = blaVec2(0.f);
+            st2 = blaVec2(0.f);
+        }
 
         float invScale = 1 / (st1.s*st2.t - st2.s*st1.t);
 
@@ -238,13 +248,29 @@ void TriangleMesh::GenerateRenderData()
 
             RenderVertEntry vert;
 
-            vert.vx = m_vertexPos[edge.destVertex.pos];
-            vert.vn = m_vertexNormals[edge.destVertex.normal];
-            vert.vt = m_vertexUVs[edge.destVertex.UV];
+            vert.vx = m_vertexPos[edge.destVertex.posIndex];
 
+            if(edge.destVertex.normalIndex == INVALID_INDEX)
+            {
+                vert.vn = blaVec3(0.f);
+            }
+            else
+            {
+                vert.vn = m_vertexNormals[edge.destVertex.normalIndex];
+            }
+
+            if(edge.destVertex.uvIndex == INVALID_INDEX)
+            {
+                vert.vt = blaVec2(0.f);
+            }
+            else
+            {
+                vert.vt = m_vertexUVs[edge.destVertex.uvIndex];
+            }
+            
             vector<FaceIndx> surroundingFaces;
 
-            const bool correctQuery = GetSurroundingTriangles(edge.destVertex.pos, surroundingFaces);
+            const bool correctQuery = GetSurroundingTriangles(edge.destVertex.posIndex, surroundingFaces);
 
             blaVec3 tangent = m_faceTangent[triIndx];
             
@@ -301,8 +327,8 @@ void TriangleMesh::GenerateTopoTriangleIndices(vector<blaU32> &posIndices, vecto
             if (i == 1) edge = edge0;
             if (i == 2) edge = edge1;
 
-            posIndices.push_back(edge.destVertex.pos);
-            normalIndices.push_back(edge.destVertex.normal);
+            posIndices.push_back(edge.destVertex.posIndex);
+            normalIndices.push_back(edge.destVertex.normalIndex);
         }
     }
 }
@@ -335,11 +361,11 @@ void TriangleMesh::ReverseEdgesOrder()
 void TriangleMesh::GetHEvertices(HeIndx halfEdge, pair<blaU32, blaU32>* vertexPair)
 {
     HalfEdge edge = m_halfEdges[halfEdge];
-    vertexPair->first = edge.destVertex.pos;
+    vertexPair->first = edge.destVertex.posIndex;
     
-    if (edge.oppositeHE != INVALID_HE)
+    if (edge.oppositeHE != INVALID_INDEX)
     {
-        vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex.pos;
+        vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex.posIndex;
     }
     else
     {
@@ -351,7 +377,7 @@ void TriangleMesh::GetHEvertices(HeIndx halfEdge, pair<blaU32, blaU32>* vertexPa
             findEdgeIndx = findEdge.nextHE;
         } while (m_halfEdges[findEdgeIndx].nextHE != halfEdge);
 
-        vertexPair->second = m_halfEdges[findEdgeIndx].destVertex.pos;
+        vertexPair->second = m_halfEdges[findEdgeIndx].destVertex.posIndex;
     }
 }
 
@@ -373,7 +399,7 @@ bool TriangleMesh::GetSurroundingVertices(blaU32 vertexIndx, vector<DestVertex> 
         edge = m_halfEdges[currentEdgeIndx];
         surroundingVertices.push_back(edge.destVertex);
 
-        if (edge.oppositeHE != INVALID_HE)
+        if (edge.oppositeHE != INVALID_INDEX)
         {
             currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
         }
@@ -390,7 +416,7 @@ bool TriangleMesh::GetSurroundingVertices(blaU32 vertexIndx, vector<DestVertex> 
             } while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
 
             HeIndx emanatingFromOriginalVertex = m_halfEdges[findEdgeIndx].oppositeHE;
-            if (emanatingFromOriginalVertex == INVALID_HE)
+            if (emanatingFromOriginalVertex == INVALID_INDEX)
             {
                 // In that case the triangle is alone starting on that vertex.
                 // Very degenerate case, just drop the query, it's worthless
@@ -425,7 +451,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(blaU32 vertexIndx, vector<HeIndx> &surr
             surroundingEdges.push_back(currentEdgeIndx);
         }
         
-        if (edge.oppositeHE != INVALID_HE)
+        if (edge.oppositeHE != INVALID_INDEX)
         {
             currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
         }
@@ -442,7 +468,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(blaU32 vertexIndx, vector<HeIndx> &surr
             } while (m_halfEdges[findEdgeIndx].nextHE != currentEdgeIndx);
 
             HeIndx emanatingFromOriginalVertex = m_halfEdges[findEdgeIndx].oppositeHE;
-            if (emanatingFromOriginalVertex == INVALID_HE)
+            if (emanatingFromOriginalVertex == INVALID_INDEX)
             {
                 // In that case the triangle is alone starting on that vertex.
                 // Very degenerate case, just drop the query, it's worthless

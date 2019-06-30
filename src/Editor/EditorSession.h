@@ -39,6 +39,8 @@ namespace BLAengine
 
     private:
 
+		void DrawGrid(int size, float spacing, const blaVec3& color);
+
         bool LoadNewScene() override;
 
         bool LoadWorkingScene(std::string filepath) override;

@@ -6,6 +6,7 @@
 #define BLA_CREATE_COMPONENT(ComponentType, parentObject)\
     parentObject.IsValid() ? new ComponentType(parentObject) : nullptr;
 
+
 namespace BLAengine
 {
     class GameObject;
@@ -26,3 +27,4 @@ namespace BLAengine
         GameObjectReference m_parentObject;
     };
 }
+	

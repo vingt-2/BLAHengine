@@ -2,7 +2,7 @@
 #include <Common/Maths/Maths.h>
 #include <Engine/Renderer/GL33Renderer.h>
 #include <Engine/Game/RenderingManager.h>
-#include <Engine/Debug/Debug.h>
+#include <Engine/Renderer/DebugDraw.h>
 #include <Engine/Assets/SceneManager.h>
 #include <Editor/CameraControl.h>
 #include <Engine/Game/GameComponents/AnimationComponent.h>
@@ -96,9 +96,9 @@ void EditorSession::PreEngineUpdate()
         HandleSaveScenePrompt();
     }
     
-    m_debug->DrawGrid(1000, 1, blaVec3(0.85f));
+    DrawGrid(1000, 1, blaVec3(0.85f));
 
-    m_debug->DrawBasis(blaPosQuat::GetIdentity() , 1.f);
+    DebugDraw::DrawBasis(blaPosQuat::GetIdentity() , 1.f);
 }
 
 void EditorSession::EngineUpdate()
@@ -383,7 +383,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                 blaF32 animDt = 1.0f / animCmp->m_animation->GetSamplingRate();
                 const EngineInstance* engine = GetSingletonInstanceRead();
 
-                blaF32 gameDt = engine->GetTimer()->GetDelta();
+                blaF32 gameDt = Timer::GetSingletonInstance()->GetDelta();
                 blaF32 animStep = gameDt / animDt;
 
                 if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown() || inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
@@ -400,16 +400,16 @@ void EditorSession::DoTestAnimationDemoStuff()
                     if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown())
                     {
                         m_frameIndex += animStep;
-                        m_lastTimePlayerInteraction = engine->GetTimer()->GetTime();
+                        m_lastTimePlayerInteraction = Timer::GetSingletonInstance()->GetTime();
                     }
                     if (inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
                     {
                         m_frameIndex -= animStep;
                         m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
-                        m_lastTimePlayerInteraction = engine->GetTimer()->GetTime();
+                        m_lastTimePlayerInteraction = Timer::GetSingletonInstance()->GetTime();
                     }
 
-                    if (engine->GetTimer()->GetTime() - m_lastTimePlayerInteraction > 5.0f)
+                    if (Timer::GetSingletonInstance()->GetTime() - m_lastTimePlayerInteraction > 5.0f)
                     {
                         m_autoPlay = true;
                     }
@@ -422,7 +422,7 @@ void EditorSession::DoTestAnimationDemoStuff()
 
                 for (auto jointW : jointTransformsW)
                 {
-                    GetDebug()->DrawBasis(jointW, 1.f);
+                    DebugDraw::DrawBasis(jointW, 1.f);
                 }
 
                 std::vector<std::pair<blaVec3, blaVec3>> bones;
@@ -641,4 +641,15 @@ bool EditorSession::ImportMesh(std::string filepath, std::string name) const
     visualizerObject->SetTransform(t);
 
     return true;
+}
+
+void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)
+{
+	for (int i = -size / 2; i <= size / 2; i++)
+	{
+		float iSpacing = i * spacing;
+		float sizeSpacing = size * spacing;
+		DebugDraw::DrawLine(blaVec3(sizeSpacing / 2, 0, iSpacing), blaVec3(-sizeSpacing / 2, 0, iSpacing), color);
+		DebugDraw::DrawLine(blaVec3(iSpacing, 0, sizeSpacing / 2), blaVec3(iSpacing, 0, -sizeSpacing / 2), color);
+	}
 }

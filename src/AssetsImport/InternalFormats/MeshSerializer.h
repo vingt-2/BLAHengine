@@ -50,16 +50,16 @@ public:
 
         void FillData(BLAengine::TriangleMesh::DestVertex dvert)
         {
-            pos = dvert.pos;
-            normal = dvert.normal;
-            UV = dvert.UV;
+            pos = dvert.posIndex;
+            normal = dvert.normalIndex;
+            UV = dvert.uvIndex;
         }
 
         void LoadData(BLAengine::TriangleMesh::DestVertex &dvert)
         {
-            dvert.pos = pos;
-            dvert.normal = normal;
-            dvert.UV = UV;
+            dvert.posIndex = pos;
+            dvert.normalIndex = normal;
+            dvert.uvIndex = UV;
         }
 
         blaU32 pos; // Vertex the HE points to.
