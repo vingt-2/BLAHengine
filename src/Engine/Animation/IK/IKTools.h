@@ -63,7 +63,7 @@ namespace BLAengine
         blaPosQuat m_jointTransform;
 		blaPosQuat m_bindPoseTransform;
 
-        std::vector<IKJointConstraint*> m_jointConstraints;
+        blaVector<IKJointConstraint*> m_jointConstraints;
 
     public:
 
@@ -83,29 +83,29 @@ namespace BLAengine
 
         ~IKChainJoint() {};
 
-        std::vector<IKChainJoint*> GetEndEffectors();
+        blaVector<IKChainJoint*> GetEndEffectors();
 
         void AddChild(IKChainJoint* next);
 
 
         // Static members
-        static IKChainJoint* BuildFromSkeleton(const SkeletonJoint* skeletonRoot, const vector<blaPosQuat>& jointTransformsW);
+        static IKChainJoint* BuildFromSkeleton(const SkeletonJoint* skeletonRoot, const blaVector<blaPosQuat>& jointTransformsW);
 
         static IKChainJoint* CreateTestIKChain2EndsFixedConstraint(int numberOfJoints, blaF32 sizeOfBones, blaVec3 origin);
 
         static IKChainJoint* CreateTestIKChain2EndsConeTwist(int numberOfJoints, blaF32 sizeOfBones, blaVec3 origin);
 
-        static void GetBoneArray(vector<pair<blaVec3, blaVec3>>& outputBones, const IKChainJoint& skeleton);
+        static void GetBoneArray(blaVector<blaPair<blaVec3, blaVec3>>& outputBones, const IKChainJoint& skeleton);
 
-        static void GetJointTransforms(vector<blaPosQuat>& jointTransforms, const IKChainJoint& skeleton);
+        static void GetJointTransforms(blaVector<blaPosQuat>& jointTransforms, const IKChainJoint& skeleton);
 
-        static void SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorDesiredPositions, int iterationCount);
+        static void SolveIKChain(IKChainJoint* root, blaVector<blaVec3> endEffectorDesiredPositions, int iterationCount);
 
         static void ComputeForwardKinematic(IKChainJoint) {};
 
     private:
 
-        static void GetEndEffectorRecursive(IKChainJoint* joint, std::vector<IKChainJoint*>& results);
+        static void GetEndEffectorRecursive(IKChainJoint* joint, blaVector<IKChainJoint*>& results);
 
 		static void ResetIKChainRecursive(IKChainJoint* joint);
 

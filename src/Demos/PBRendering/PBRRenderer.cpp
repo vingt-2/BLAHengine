@@ -42,7 +42,7 @@ void BLAengine::PBRCamera::Render()
     m_shouldRender = false;
 }
 
-bool BLAengine::PBRCamera::WriteImageToFile(string filepath, int w, int h)
+bool BLAengine::PBRCamera::WriteImageToFile(blaString filepath, int w, int h)
 {
     // hint: Google the PPM image format
     FILE *f = fopen(filepath.data(), "w");
@@ -59,7 +59,7 @@ bool BLAengine::PBRCamera::WriteImageToFile(string filepath, int w, int h)
     return true;
 }
 
-std::pair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> PBRRenderer::IntersectWithScene(Ray ray, vector<PBRSurfaceComponent*> &surfaceComponents)
+blaPair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> PBRRenderer::IntersectWithScene(Ray ray, blaVector<PBRSurfaceComponent*> &surfaceComponents)
 {
     float minDistance = INFINITY;
     PBRSurfaceComponent* pickedObject = nullptr;
@@ -85,10 +85,10 @@ std::pair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> PBRRenderer
         }
     }
 
-    return std::pair<PBRSurfaceComponent*, ColliderComponent::CollisionContact>(pickedObject, closestContact);
+    return blaPair<PBRSurfaceComponent*, ColliderComponent::CollisionContact>(pickedObject, closestContact);
 }
 
-vector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
+blaVector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
 {
     for (PBRSurfaceComponent* surface : m_sceneObjects)
     {
@@ -112,7 +112,7 @@ vector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform cameraT
 
     blaVec3* concurrent_img_vector = (blaVec3*)malloc(sizeof(blaVec3)*h*w);
 
-    vector<blaVec3> renderedImage;
+    blaVector<blaVec3> renderedImage;
     renderedImage.reserve(w*h);
 
     if (inParallel)
@@ -277,7 +277,7 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, blaU32 numberO
         totalPower += length(lightSurface->m_material.m_emissivePower);
     }
 
-    std::vector<float> lightSamplingPDF;
+    blaVector<float> lightSamplingPDF;
     for (size_t i = 0; i < m_lightObjects.size(); i++)
     {
         PBRSurfaceComponent* lightSurface = m_lightObjects[i];
@@ -434,7 +434,7 @@ blaVec3 BLAengine::PBRPhotonMapping::GatherSurfaceDensity(Ray incidentRay)
     blaVec3 hitPosition = p.second.m_colPositionW;
 
     float gatherAreaRadius;
-    vector<Photon*> photons = m_photonMap.GetPhotons(hitPosition, 100, gatherAreaRadius);
+    blaVector<Photon*> photons = m_photonMap.GetPhotons(hitPosition, 100, gatherAreaRadius);
 
     blaVec3 powerDensity(0);
     for (Photon* photon : photons)
@@ -458,7 +458,7 @@ blaVec3 BLAengine::PBRPhotonMapping::GatherSurfaceDensity(Ray incidentRay)
 blaVec3 BLAengine::PBRPhotonMapping::GatherVolumetricDensity(blaVec3 pos, blaVec3 incomingDir)
 {
     float gatherAreaRadius;
-    vector<Photon*> photons = m_volumetricPhotonMap.GetPhotons(pos, 100, gatherAreaRadius);
+    blaVector<Photon*> photons = m_volumetricPhotonMap.GetPhotons(pos, 100, gatherAreaRadius);
 
     blaVec3 powerDensity(0);
     for (Photon* photon : photons)
@@ -629,7 +629,7 @@ blaVec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
     return ComputeTransmittance(shadeRayCollision.m_t) * (m->m_color * (directRadiance + indirectRadiance)) + volumetricRadiance;
 }
 
-vector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
+blaVector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel)
 {
     for (PBRSurfaceComponent* surface : m_sceneObjects)
     {
@@ -653,7 +653,7 @@ vector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTransf
 
     blaVec3* concurrent_img_vector = (blaVec3*)malloc(sizeof(blaVec3)*h*w);
 
-    vector<blaVec3> renderedImage;
+    blaVector<blaVec3> renderedImage;
     renderedImage.reserve(w*h);
 
     BuildPhotonMap(inParallel, 10000000);

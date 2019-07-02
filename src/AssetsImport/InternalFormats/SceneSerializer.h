@@ -95,15 +95,15 @@ public:
         }
     }
     
-    std::string GetMeshName() { return m_triangleMeshName; }
+    blaString GetMeshName() { return m_triangleMeshName; }
     
-    vector<std::string> GetMaterialNames() { return m_materialNames; }
+    blaVector<blaString> GetMaterialNames() { return m_materialNames; }
 
 private:
     friend class cereal::access;
 
-    string m_triangleMeshName;
-    vector<string> m_materialNames;
+    blaString m_triangleMeshName;
+    blaVector<blaString> m_materialNames;
 
     template <class Archive>
     void serialize(Archive & archive)
@@ -197,7 +197,7 @@ public:
 
         m_objectName = gobject.GetName();
 
-        vector<BLAengine::MeshRendererComponent*> meshRenderers = gobject.GetComponents<BLAengine::MeshRendererComponent>();
+        blaVector<BLAengine::MeshRendererComponent*> meshRenderers = gobject.GetComponents<BLAengine::MeshRendererComponent>();
         for (size_t i = 0; i < meshRenderers.size(); i++)
         {
             BLAengine::MeshRendererComponent* mrenderer = meshRenderers[i];
@@ -208,7 +208,7 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
 
-        vector<BLAengine::DirectionalLight*> dirLights = gobject.GetComponents<BLAengine::DirectionalLight>();
+        blaVector<BLAengine::DirectionalLight*> dirLights = gobject.GetComponents<BLAengine::DirectionalLight>();
         for (size_t i = 0; i < dirLights.size(); i++)
         {
             BLAengine::DirectionalLight* mrenderer = dirLights[i];
@@ -219,7 +219,7 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
 
-        vector<BLAengine::RigidBodyComponent*> rgbs = gobject.GetComponents<BLAengine::RigidBodyComponent>();
+        blaVector<BLAengine::RigidBodyComponent*> rgbs = gobject.GetComponents<BLAengine::RigidBodyComponent>();
         for (size_t i = 0; i < rgbs.size(); i++)
         {
             BLAengine::RigidBodyComponent* mrenderer = rgbs[i];
@@ -238,16 +238,16 @@ public:
         return t;
     }
 
-    std::vector<std::shared_ptr<GameComponentSerializer>> GetComponentVector() { return m_componentsVector; }
+    blaVector<std::shared_ptr<GameComponentSerializer>> GetComponentVector() { return m_componentsVector; }
 
-    std::string GetName() { return m_objectName; }
+    blaString GetName() { return m_objectName; }
 
 private:
 
-    string m_objectName;
+    blaString m_objectName;
     TransformSerializer m_posQuat;
 
-    std::vector<std::shared_ptr<GameComponentSerializer>> m_componentsVector;
+    blaVector<std::shared_ptr<GameComponentSerializer>> m_componentsVector;
 
     friend class cereal::access;
 
@@ -281,13 +281,13 @@ public:
         }
     }
 
-    std::vector<GameObjectSerializer> GetGameObjectVector() { return m_objectsVector; }
-    std::string GetName() { return m_sceneName; }
+    blaVector<GameObjectSerializer> GetGameObjectVector() { return m_objectsVector; }
+    blaString GetName() { return m_sceneName; }
 private:
     friend class cereal::access;
 
-    std::vector<GameObjectSerializer> m_objectsVector;
-    std::string m_sceneName;
+    blaVector<GameObjectSerializer> m_objectsVector;
+    blaString m_sceneName;
 
     template <class Archive>
     void serialize(Archive & archive)

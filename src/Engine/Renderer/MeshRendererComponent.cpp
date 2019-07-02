@@ -20,7 +20,7 @@ MeshRendererComponent::~MeshRendererComponent(void)
     free(m_modelTransformMatrix);
 }
 
-string MeshRendererComponent::ToString()
+blaString MeshRendererComponent::ToString()
 {
     return "MeshRendererComponent ToString PLACEHOLDER";
 }

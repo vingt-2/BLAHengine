@@ -12,14 +12,14 @@ namespace BLAengine
     {
     public:
         //TODO: Add filtering options
-        bool GLLoadTexture(std::string resourcePath, Texture2D texture);
+        bool GLLoadTexture(blaString resourcePath, Texture2D texture);
         bool GLLoadShaderProgram(GL33Shader& shader);
         bool GLLoadSystemShaders();
 
         GL33SystemShaders m_systemShaders;
 
-        std::map<std::string, GLuint> m_glLoadedTextureIds;
-        std::map<std::string, GL33Shader> m_glLoadedProgramsIds;
+        blaMap<blaString, GLuint> m_glLoadedTextureIds;
+        blaMap<blaString, GL33Shader> m_glLoadedProgramsIds;
     };
 
 
@@ -77,14 +77,14 @@ namespace BLAengine
 
         blaMat4* m_modelTransform;
 
-        const vector<blaU32>* m_toMeshTriangles;
-        const vector<blaVec3>* m_toMeshVertices;
-        const vector<blaVec3>* m_toMeshNormals;
-        const vector<blaVec3>* m_toMeshTangents;
-        const vector<blaVec3>* m_toMeshBiTangents;
-        const vector<glm::vec2>* m_toMeshUVs;
+        const blaVector<blaU32>* m_toMeshTriangles;
+        const blaVector<blaVec3>* m_toMeshVertices;
+        const blaVector<blaVec3>* m_toMeshNormals;
+        const blaVector<blaVec3>* m_toMeshTangents;
+        const blaVector<blaVec3>* m_toMeshBiTangents;
+        const blaVector<glm::vec2>* m_toMeshUVs;
 
-        vector <pair<GLuint, GLuint> > m_activeTextures;
+        blaVector <blaPair<GLuint, GLuint> > m_activeTextures;
 
         // ID of an openGL object (VAO) that lists VBOs 
         GLuint m_elementBufferId;
@@ -92,10 +92,10 @@ namespace BLAengine
         GLuint m_sizeOfVertexArray;
 
         // Keeps track of the VBOs we've generated and added to our VAO
-        vector<pair<GLuint, pair<GLuint, GLuint> > > m_vboIDVector;
+        blaVector<blaPair<GLuint, blaPair<GLuint, GLuint> > > m_vboIDVector;
 
         // All our textures samplers passed uniform to the shader
-        vector<pair<GLuint, GLuint> > m_textureSamplersVector;
+        blaVector<blaPair<GLuint, GLuint> > m_textureSamplersVector;
 
         // Constant shader Infos
         GLuint m_programID;
@@ -134,7 +134,7 @@ namespace BLAengine
 
         blaVec3 m_clearColor;
 
-        vector<PointLightRender> m_pointLightsVector;
+        blaVector<PointLightRender> m_pointLightsVector;
 
         GBuffer m_GBuffer;
         ScreenSpaceQuad m_screenSpaceQuad;
@@ -161,7 +161,7 @@ namespace BLAengine
 
         // MOVE?
         bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
-        void SetupPointLightRenderSphere(vector<blaVec3> sphereMeshVertices, vector<GLuint> indices);
+        void SetupPointLightRenderSphere(blaVector<blaVec3> sphereMeshVertices, blaVector<GLuint> indices);
 
     protected:
 
@@ -175,8 +175,8 @@ namespace BLAengine
 
         bool CleanUp(GL33RenderObject& object);
         void CleanUpVBOs(GL33RenderObject& object);
-        bool AssignMaterial(GL33RenderObject& object, string materialName);
-        bool LoadTextureSample(GL33RenderObject& object, string textureName, string sampleName);
+        bool AssignMaterial(GL33RenderObject& object, blaString materialName);
+        bool LoadTextureSample(GL33RenderObject& object, blaString textureName, blaString sampleName);
         void DestroyVertexArrayID(GL33RenderObject& object);
         void CleanUpFrameDebug();
 

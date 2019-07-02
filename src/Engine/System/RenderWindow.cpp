@@ -5,7 +5,7 @@ using namespace BLAengine;
 
 #ifdef GLFW_INTERFACE
 
-std::vector<GLFWRenderWindow*> GLFWRenderWindow::ms_glfwRenderWindowInstanced = std::vector<GLFWRenderWindow*>();
+blaVector<GLFWRenderWindow*> GLFWRenderWindow::ms_glfwRenderWindowInstanced = blaVector<GLFWRenderWindow*>();
 
 void GLFWRenderWindow::GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths)
 {
@@ -25,7 +25,7 @@ void GLFWRenderWindow::GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc,
             DragAndDropPayloadDontStore dragAndDropPayload;
             for (int i = 0; i < argc; ++i)
             {
-                dragAndDropPayload.push_back(std::string(paths[i]));
+                dragAndDropPayload.push_back(blaString(paths[i]));
             }
             renderWindow->m_registeredDragAndDropCallback(&dragAndDropPayload);
         }
@@ -119,7 +119,7 @@ void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
     InputStateSetter::SetMousePointer(blaVec2(xpos, ypos));
 }
 
-void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void GLFWRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
     GLFWwindow* window;
     // Initialise GLFW
@@ -192,9 +192,9 @@ void GLFWRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int siz
     m_glfwWindow = window;
 }
 
-string GLFWRenderWindow::GetMaxGLVersion() const
+blaString GLFWRenderWindow::GetMaxGLVersion() const
 {
-    return string("");
+    return blaString("");
 }
 
 void GLFWRenderWindow::MakeGLContextCurrent()
@@ -241,14 +241,14 @@ bool GLFWRenderWindow::isFullScreen() const
     return m_isFullscreen;
 }
 
-void GLFWRenderWindow::SetWindowTitle(std::string title)
+void GLFWRenderWindow::SetWindowTitle(blaString title)
 {
     glfwSetWindowTitle(m_glfwWindow, title.c_str());
 }
 
-std::string GLFWRenderWindow::GetWindowTitle() const
+blaString GLFWRenderWindow::GetWindowTitle() const
 {
-    return std::string();
+    return blaString();
 }
 
 GLFWRenderWindow::GLFWRenderWindow():
@@ -304,7 +304,7 @@ void GLFWRenderWindow::SetDragAndDropCallback(DragAndDropCallback dragAndDropCal
 #elif defined(WPF_INTERFACE)
 
 WPFRenderWindow::WPFRenderWindow() :
-    m_glVersion(string("NONE")),
+    m_glVersion(blaString("NONE")),
     m_makeGLCurrentRequest(true),
     m_updateWindowRequest(false),
     m_width(0), m_height(0),
@@ -317,7 +317,7 @@ WPFRenderWindow::WPFRenderWindow() :
     }
 }
 
-void WPFRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void WPFRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
     m_width = sizeX;
     m_height = sizeY;
@@ -325,7 +325,7 @@ void WPFRenderWindow::CreateRenderWindow(string windowTitle, int sizeX, int size
     glewExperimental = GL_TRUE;
     glewInit();
 
-    m_glVersion = string((char*)glGetString(GL_VERSION));
+    m_glVersion = blaString((char*)glGetString(GL_VERSION));
 }
 
 void WPFRenderWindow::UpdateWindowAndBuffers()
@@ -366,15 +366,15 @@ void WPFRenderWindow::WriteMousePos(int x, int y)
 //    return (mask & m_mouseDownState) != 0x00;
 //}
 
-string WPFRenderWindow::GetMaxGLVersion() const { return m_glVersion; }
+blaString WPFRenderWindow::GetMaxGLVersion() const { return m_glVersion; }
 
 bool WPFRenderWindow::isFullScreen() const
 {
     return false; 
 }
 
-void WPFRenderWindow::SetWindowTitle(string title) { }
-string WPFRenderWindow::GetWindowTitle() const { return ""; }
+void WPFRenderWindow::SetWindowTitle(blaString title) { }
+blaString WPFRenderWindow::GetWindowTitle() const { return ""; }
 
 bool WPFRenderWindow::ShouldUpdateWindow() const { return m_updateWindowRequest; }
 void WPFRenderWindow::SetWindowUpdated() { m_updateWindowRequest = false; }

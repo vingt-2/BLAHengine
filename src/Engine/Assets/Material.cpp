@@ -1,11 +1,11 @@
 #include "Material.h"
 using namespace BLAengine;
 
-bool Material::AssignTexture(std::string textureName, std::string handleName)
+bool Material::AssignTexture(blaString textureName, blaString handleName)
 {
-    string texture = string(textureName);
-    string handle = string(handleName);
-    pair<string, string> entry = pair<string, string>(texture, handle);
+    blaString texture = blaString(textureName);
+    blaString handle = blaString(handleName);
+    blaPair<blaString, blaString> entry = blaPair<blaString, blaString>(texture, handle);
     m_textureSamplerAttributes.push_back(entry);
 
     return true;

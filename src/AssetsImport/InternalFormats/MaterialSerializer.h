@@ -29,9 +29,9 @@ public:
         
         for (size_t i = 0; i < m_textureHandles.size(); i++)
         {
-            std::string texName = m_textureNames[i];
-            std::string texHandle = m_textureHandles[i];
-            mat->m_textureSamplerAttributes.push_back(std::pair<std::string, std::string>(texName, texHandle));
+            blaString texName = m_textureNames[i];
+            blaString texHandle = m_textureHandles[i];
+            mat->m_textureSamplerAttributes.push_back(blaPair<blaString, blaString>(texName, texHandle));
         }
         return mat;
     }
@@ -39,10 +39,10 @@ public:
 private:
     friend class cereal::access;
 
-    std::string m_name;
+    blaString m_name;
 
-    std::vector<std::string> m_textureNames;
-    std::vector<std::string> m_textureHandles;
+    blaVector<blaString> m_textureNames;
+    blaVector<blaString> m_textureHandles;
 
 
     template <class Archive>

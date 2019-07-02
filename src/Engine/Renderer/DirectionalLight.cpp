@@ -16,7 +16,7 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::Update()
 {
-    vector<CameraComponent*> cameras = GetParentObject()->GetComponents<CameraComponent>();
+    blaVector<CameraComponent*> cameras = GetParentObject()->GetComponents<CameraComponent>();
     if (!cameras.size())
     {
         CameraComponent* shadowCamera = BLA_CREATE_COMPONENT(CameraComponent, GetParentObject());

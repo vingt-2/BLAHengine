@@ -8,7 +8,7 @@ namespace BLAengine
     class BLACORE_API MeshAsset : public Asset
     {
     public:
-        MeshAsset(string name) : Asset(name) {}
+        MeshAsset(blaString name) : Asset(name) {}
 
         TriangleMesh m_triangleMesh;
     };

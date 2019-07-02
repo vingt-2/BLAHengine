@@ -180,7 +180,7 @@ void PBRSphereComponent::CreateAndSetSphereCollider(float radius)
 
 float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(blaVec3& outDir, blaMat3& tangentSpace, blaVec3& inDir)
 {
-    auto randDist = uniform_real_distribution<float>(0, 1);
+    auto randDist = std::uniform_real_distribution<float>(0, 1);
     // Sample the unit disk!
     float r = randDist(gen);
     float theta = 2 * M_PI * randDist(gen);

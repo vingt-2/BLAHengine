@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common/Maths/Maths.h>
+#include <Common/StdInclude.h>
 
 namespace BLAengine
 {
@@ -44,7 +45,7 @@ namespace BLAengine
             m_bOpenWindow = true;
         }
 
-        BlaGuiWindow(const std::string& windowName, const blaIVec2& windowPosition)
+        BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition)
             : m_windowName(windowName)
             , m_windowPosition(windowPosition)
             , m_windowFlags(0)
@@ -62,7 +63,7 @@ namespace BLAengine
 
         void SetRootElement(BlaGuiElement* imGuiElements);
 
-        std::string GetWindowName() const
+        blaString GetWindowName() const
         {
             return m_windowName;
         }
@@ -77,7 +78,7 @@ namespace BLAengine
     protected:
         blaU32 m_windowFlags;
 
-        std::string m_windowName;
+        blaString m_windowName;
         blaIVec2 m_windowPosition;
         BlaGuiElement* m_rootElement;
         bool m_bOpenWindow;
@@ -89,7 +90,7 @@ namespace BLAengine
         BLAOneTimeWindow() : BlaGuiWindow()
         {}
 
-        BLAOneTimeWindow(const std::string& windowName, const blaIVec2& windowPosition) :
+        BLAOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition) :
             BlaGuiWindow(windowName, windowPosition)
         {};
 

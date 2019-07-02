@@ -12,7 +12,7 @@ BLAengine::SceneManager::SceneManager(AssetManager * assetManager)
     m_currentSceneFilePath = "";
 }
 
-bool SceneManager::SaveScene(string filepath, Scene* scene)
+bool SceneManager::SaveScene(blaString filepath, Scene* scene)
 {
     SceneSerializer sceneSerializer;
 
@@ -25,7 +25,7 @@ bool SceneManager::SaveScene(string filepath, Scene* scene)
 
     if (!fs.is_open())
     {
-        cout << "Could not Write on file " << filepath << "\n";
+        std::cout << "Could not Write on file " << filepath << "\n";
     }
 
     cereal::JSONOutputArchive output(fs);
@@ -37,7 +37,7 @@ bool SceneManager::SaveScene(string filepath, Scene* scene)
     return true;
 }
 
-Scene* SceneManager::LoadScene(std::string filepath)
+Scene* SceneManager::LoadScene(blaString filepath)
 {
     SceneSerializer sceneSerializer;
 
@@ -48,7 +48,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
 
     input(sceneSerializer);
 
-    vector<GameObjectSerializer> objsSer = sceneSerializer.GetGameObjectVector();
+    blaVector<GameObjectSerializer> objsSer = sceneSerializer.GetGameObjectVector();
 
     Scene* newScene = new Scene();
 
@@ -58,7 +58,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
 
         gameObject->SetTransform(gObjectSer.GetTransform());
 
-        vector<std::shared_ptr<GameComponentSerializer>> compSers = gObjectSer.GetComponentVector();
+        blaVector<std::shared_ptr<GameComponentSerializer>> compSers = gObjectSer.GetComponentVector();
         for (auto compSer : compSers)
         {
             if (std::shared_ptr<MeshRendererSerializer> meshRenderSer = std::dynamic_pointer_cast<MeshRendererSerializer>(compSer))
@@ -72,7 +72,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
                 }
                 else
                 {
-                    cout << "Couldn't find TriangleMesh: " << meshRenderSer->GetMeshName() << " in AssetManager.\n";
+                    std::cout << "Couldn't find TriangleMesh: " << meshRenderSer->GetMeshName() << " in AssetManager.\n";
                 }
 
                 int matIndex = 0;
@@ -85,7 +85,7 @@ Scene* SceneManager::LoadScene(std::string filepath)
                     }
                     else
                     {
-                        cout << "Couldn't find Material: " << materialName << "in AssetManager.\n";
+                        std::cout << "Couldn't find Material: " << materialName << "in AssetManager.\n";
                     }
                     matIndex++;
                 }

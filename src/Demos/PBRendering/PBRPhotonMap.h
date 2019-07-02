@@ -69,7 +69,7 @@ public:
     
     void BuildKDTree();
 
-    vector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &biggestRadius);
+    blaVector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &biggestRadius);
 
 private:
     PhotonVector m_photonVector;
@@ -99,12 +99,12 @@ inline void PhotonMap::BuildKDTree()
     m_photonTree->buildIndex();
 }
 
-inline vector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &outRadius)
+inline blaVector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &outRadius)
 {
-    std::vector<Photon*> results;
+    blaVector<Photon*> results;
     
-    std::vector<size_t>   ret_index(knnSize);
-    std::vector<float> out_dist_sqr(knnSize);
+    blaVector<size_t>   ret_index(knnSize);
+    blaVector<float> out_dist_sqr(knnSize);
     
     nanoflann::SearchParams params;
     //params.sorted = false;

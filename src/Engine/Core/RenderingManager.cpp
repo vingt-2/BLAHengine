@@ -36,7 +36,7 @@ blaU32 RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, Ca
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
-    this->m_ticketedDirLights[renderTicket] = std::pair<DirectionalLight*, CameraComponent*>(dirLight, shadowCamera);
+    this->m_ticketedDirLights[renderTicket] = blaPair<DirectionalLight*, CameraComponent*>(dirLight, shadowCamera);
 
     dirLight->m_renderTicket = this->currentTicket;
     return this->currentTicket;
@@ -50,12 +50,12 @@ blaU32 RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLigh
     return true;
 }
 
-std::unordered_map<blaU32, MeshRendererComponent*>* RenderingManager::GetTicketedMeshRenderers()
+blaMap<blaU32, MeshRendererComponent*>* RenderingManager::GetTicketedMeshRenderers()
 {
     return &(m_ticketedMeshRenderers);
 }
 
-std::unordered_map<blaU32, std::pair<DirectionalLight*, CameraComponent*>>* RenderingManager::GetTicketedDirectionalLights()
+blaMap<blaU32, blaPair<DirectionalLight*, CameraComponent*>>* RenderingManager::GetTicketedDirectionalLights()
 {
     return &(m_ticketedDirLights);
 }
@@ -64,7 +64,7 @@ void RenderingManager::Update()
 {
 }
 
-void DebugRenderingManager::LoadDebugLineMesh(pair<vector<blaVec3>, vector<blaVec3>>& lineMesh)
+void DebugRenderingManager::LoadDebugLineMesh(blaPair<blaVector<blaVec3>, blaVector<blaVec3>>& lineMesh)
 {
     m_lineMeshes.push_back(lineMesh);
 }

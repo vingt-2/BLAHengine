@@ -33,7 +33,7 @@ namespace BLAengine
 
         void TerminateEngine() override;
 
-        void EditorDragAndDropedFile(const std::string& filePath) const;
+        void EditorDragAndDropedFile(const blaString& filePath) const;
 
         ~EditorSession() { EngineInstance::~EngineInstance(); };
 
@@ -43,7 +43,7 @@ namespace BLAengine
 
         bool LoadNewScene() override;
 
-        bool LoadWorkingScene(std::string filepath) override;
+        bool LoadWorkingScene(blaString filepath) override;
 
         void MakeSkyObject();
 
@@ -67,7 +67,7 @@ namespace BLAengine
          *  Mesh Import Stuff...
          *
          */
-        bool ImportMesh(std::string filepath, std::string name) const;
+        bool ImportMesh(blaString filepath, blaString name) const;
 
     private:
 

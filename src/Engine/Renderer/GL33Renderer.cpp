@@ -46,8 +46,8 @@ Ray BLAengine::GL33Renderer::ScreenToRay(blaVec2 screenSpaceCoord)
 }
 
 GL33RenderObject::GL33RenderObject():
-    m_vboIDVector(vector<pair<GLuint, pair<GLuint, GLuint> > >()),
-    m_textureSamplersVector(vector<pair<GLuint, GLuint> >())
+    m_vboIDVector(blaVector<blaPair<GLuint, blaPair<GLuint, GLuint> > >()),
+    m_textureSamplersVector(blaVector<blaPair<GLuint, GLuint> >())
 {}
 
 GL33RenderObject::~GL33RenderObject() {}
@@ -498,12 +498,12 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender directionalLight)
     blaVec3 eye = m_mainRenderCamera.m_attachedCamera->GetObjectTransform().GetPosition();
     glUniform3f(eyeID, eye.x, eye.y, eye.z);
 
-    GLuint shadowmapHandle = glGetUniformLocation(prgmID, "shadowMap");
+    GLuint shadowblaMapHandle = glGetUniformLocation(prgmID, "shadowMap");
 
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, directionalLight.m_shadowRender.m_depthTexture);
 
-    glUniform1i(shadowmapHandle, 4);
+    glUniform1i(shadowblaMapHandle, 4);
 
     glBindVertexArray(m_screenSpaceQuad.m_vao);
     glEnableVertexAttribArray(0);
@@ -674,7 +674,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     if (!m_renderingManager)
         return 0;
 
-    vector<blaU32> toErase;
+    blaVector<blaU32> toErase;
     for (auto renderingObject : m_meshRenderPool)
     {
         if (m_renderingManager->GetTicketedMeshRenderers()->count(renderingObject.first) == 0)
@@ -712,7 +712,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     {
         if (m_directionalLightPool.count(ticketedObject.first) == 0)
         {
-            std::pair<DirectionalLight*,CameraComponent*> dirLightAndCamera = ticketedObject.second;
+            blaPair<DirectionalLight*,CameraComponent*> dirLightAndCamera = ticketedObject.second;
 
             DirectionalLightRender* dirLightRender = new DirectionalLightRender();
             dirLightRender->m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);
@@ -798,7 +798,7 @@ void GL33Renderer::GenerateBufferObject(GL33RenderObject& object, const objectTy
 
     glBindVertexArray(0);
 
-    pair<GLuint, pair<GLuint, GLuint> > bufferObject = pair<GLuint, pair<GLuint, GLuint> >(bufferObjectID, pair<GLuint, GLuint>(attributeNumber, elementsPerObject));
+    blaPair<GLuint, blaPair<GLuint, GLuint> > bufferObject = blaPair<GLuint, blaPair<GLuint, GLuint> >(bufferObjectID, blaPair<GLuint, GLuint>(attributeNumber, elementsPerObject));
     object.m_vboIDVector.push_back(bufferObject);
 }
 
@@ -826,7 +826,7 @@ void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
 ///// WRONG WRONG WRONG WRONG WRONG
 ///// WRONG WRONG WRONG WRONG WRONG
 ///// WRONG WRONG WRONG WRONG WRONG
-bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
+bool GL33Renderer::AssignMaterial(GL33RenderObject& object, blaString name)
 {
 
     if (m_glResources.m_glLoadedProgramsIds.count(name))
@@ -865,7 +865,7 @@ bool GL33Renderer::AssignMaterial(GL33RenderObject& object, string name)
     return false;
 }
 
-bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, string textureName, string sampleName)
+bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, blaString textureName, blaString sampleName)
 {
     if (object.m_programID != 0)
     {
@@ -874,7 +874,7 @@ bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, string textureNam
             GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[textureName];
             GLuint textureHandleID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
 
-            object.m_textureSamplersVector.push_back(pair<GLuint, GLuint>(textureHandleID, glResourceTextureId));
+            object.m_textureSamplersVector.push_back(blaPair<GLuint, GLuint>(textureHandleID, glResourceTextureId));
 
             return true;
         }
@@ -1166,7 +1166,7 @@ void GL33Renderer::SetupScreenSpaceRenderQuad()
     m_screenSpaceQuad.m_isInit = true;
 }
 
-void GL33Renderer::SetupPointLightRenderSphere(vector<blaVec3> sphereMeshVertices, vector<GLuint> indices)
+void GL33Renderer::SetupPointLightRenderSphere(blaVector<blaVec3> sphereMeshVertices, blaVector<GLuint> indices)
 {
     if (sphereMeshVertices.empty())
     {
@@ -1248,7 +1248,7 @@ void GL33Renderer::RenderDebugLines()
     glUseProgram(0);
 }
 
-bool GL33Resources::GLLoadTexture(std::string resourcePath, Texture2D texture)
+bool GL33Resources::GLLoadTexture(blaString resourcePath, Texture2D texture)
 {
     // Create one OpenGL texture
     GLuint texID;
@@ -1299,7 +1299,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     if (InfoLogLength > 0)
     {
-        std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
+        blaVector<char> VertexShaderErrorMessage(InfoLogLength + 1);
         glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
         printf("%s\n", &VertexShaderErrorMessage[0]);
     }
@@ -1313,7 +1313,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     if (InfoLogLength > 0)
     {
-        std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
+        blaVector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
         glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
         printf("%s\n", &FragmentShaderErrorMessage[0]);
     }
@@ -1331,7 +1331,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
     glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     if (InfoLogLength > 0) {
-        std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
+        blaVector<char> ProgramErrorMessage(InfoLogLength + 1);
         glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
         printf("%s\n", &ProgramErrorMessage[0]);
     }

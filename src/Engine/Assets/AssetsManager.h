@@ -32,11 +32,11 @@ namespace BLAengine
 
         int LoadCookedAssets();
 
-        AssetType GetAsset(std::string assetName, Asset* &assetPtr);
+        AssetType GetAsset(blaString assetName, Asset* &assetPtr);
 
-        bool LoadTriangleMesh(std::string filepath);
-        bool LoadTexture(std::string filepath);
-        bool LoadMaterial(std::string filepath);
+        bool LoadTriangleMesh(blaString filepath);
+        bool LoadTexture(blaString filepath);
+        bool LoadMaterial(blaString filepath);
 
         bool SaveMaterial(Material* mat);
         bool SaveTexture(Texture2D* mesh);
@@ -44,11 +44,11 @@ namespace BLAengine
 
     private:
 
-        map<std::string, std::pair<AssetType, blaU32>> m_resourceMap;
+        blaMap<blaString, blaPair<AssetType, blaU32>> m_resourceMap;
 
-        vector<MeshAsset*> m_triangleMeshesInMemory;
-        vector<Material*> m_materialsInMemory;
-        vector<Texture2D*> m_textures2DInMemory;
+        blaVector<MeshAsset*> m_triangleMeshesInMemory;
+        blaVector<Material*> m_materialsInMemory;
+        blaVector<Texture2D*> m_textures2DInMemory;
     };
 
 }

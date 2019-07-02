@@ -7,32 +7,32 @@ namespace BLAengine
     class PBRRenderer
     {
     public:
-        virtual vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel) = 0;
+        virtual blaVector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel) = 0;
         
-        static std::pair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> IntersectWithScene(Ray r, vector<PBRSurfaceComponent*> &objects);
+        static blaPair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> IntersectWithScene(Ray r, blaVector<PBRSurfaceComponent*> &objects);
     };
 
     class PBRExplicitPathTracer : public PBRRenderer
     {
     public:
-        PBRExplicitPathTracer(vector<PBRSurfaceComponent*> sceneObjects)
+        PBRExplicitPathTracer(blaVector<PBRSurfaceComponent*> sceneObjects)
         {
             m_sceneObjects = sceneObjects;
         }
 
-        vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
+        blaVector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
     private:
 
         blaVec3 PathTraceShade(Ray r, int depth);
 
-        vector<PBRSurfaceComponent*> m_sceneObjects;
-        vector<PBRSurfaceComponent*> m_lightObjects;
+        blaVector<PBRSurfaceComponent*> m_sceneObjects;
+        blaVector<PBRSurfaceComponent*> m_lightObjects;
     };
 
     class PBRPhotonMapping : public PBRRenderer
     {
     public:
-        PBRPhotonMapping(vector<PBRSurfaceComponent*> sceneObjects):
+        PBRPhotonMapping(blaVector<PBRSurfaceComponent*> sceneObjects):
             m_photonMap(PhotonMap(0)),
             m_volumetricPhotonMap(PhotonMap(0))
         {
@@ -42,7 +42,7 @@ namespace BLAengine
             m_volumeScatterCoeff = 0.05f;
         }
 
-        vector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
+        blaVector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel);
     private:
         void BuildPhotonMap(bool inParallel, blaU32 numberOfPhotons);
         Ray GeneratePhoton(PBRSurfaceComponent* surface, float &outEmissionProb);
@@ -65,8 +65,8 @@ namespace BLAengine
         }
 
         int m_photonsShot;
-        vector<PBRSurfaceComponent*> m_sceneObjects;
-        vector<PBRSurfaceComponent*> m_lightObjects;
+        blaVector<PBRSurfaceComponent*> m_sceneObjects;
+        blaVector<PBRSurfaceComponent*> m_lightObjects;
     };
 
     class BLACORE_API PBRCamera : public GameComponent
@@ -76,7 +76,7 @@ namespace BLAengine
         PBRCamera(GameObjectReference parentObject): GameComponent(parentObject) {};
         ~PBRCamera(){};
 
-        vector<blaVec3> m_renderedImage;
+        blaVector<blaVec3> m_renderedImage;
         PBRRenderer* m_renderer;
 
         void AddObject(PBRSurfaceComponent* mesh)
@@ -90,8 +90,8 @@ namespace BLAengine
 
         void Update() {};
     private:
-        vector<PBRSurfaceComponent*> m_sceneObjects;
+        blaVector<PBRSurfaceComponent*> m_sceneObjects;
 
-        bool WriteImageToFile(string filepath, int w, int h);
+        bool WriteImageToFile(blaString filepath, int w, int h);
     };
 }

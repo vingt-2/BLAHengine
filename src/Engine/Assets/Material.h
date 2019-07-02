@@ -10,11 +10,11 @@ namespace BLAengine
     class BLACORE_API Material : public Asset
     {
     public:
-        Material(std::string name) : Asset(name)
+        Material(blaString name) : Asset(name)
         {};
 
-        bool AssignTexture(std::string textureName, std::string handleName);
+        bool AssignTexture(blaString textureName, blaString handleName);
 
-        std::vector<pair<std::string, std::string>> m_textureSamplerAttributes;
+        blaVector<blaPair<blaString, blaString>> m_textureSamplerAttributes;
     };
 }

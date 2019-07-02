@@ -47,7 +47,7 @@ namespace BLAengine
 
         void StepHair();
 
-        vector<HairStrand> m_hairStrands;
+        blaVector<HairStrand> m_hairStrands;
 
         blaVec3 m_forcesAccu;
         blaVec3 m_impulseAccu;

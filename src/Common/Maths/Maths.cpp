@@ -1,5 +1,5 @@
 #include "Maths.h"
-#include <string>
+#include <Common/StdInclude.h>
 
 blaMat3 matrixCross(blaVec3 v)
 {
@@ -11,17 +11,17 @@ blaMat3 matrixCross(blaVec3 v)
     );
 }
 
-std::string VecToString(blaVec3 vec)
+blaString VecToString(blaVec3 vec)
 {
 	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ")";
 }
 
-std::string VecToString(blaVec2 vec)
+blaString VecToString(blaVec2 vec)
 {
 	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }
 
-std::string VecToString(blaIVec2 vec)
+blaString VecToString(blaIVec2 vec)
 {
 	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }

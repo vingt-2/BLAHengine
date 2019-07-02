@@ -8,7 +8,7 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(Console);
 
-void ConsoleLog::GetLastNLogLines(int n, std::vector<std::string>& outVector)
+void ConsoleLog::GetLastNLogLines(int n, blaVector<blaString>& outVector)
 {
     outVector.resize(MIN(n, m_consoleLineCache.size()));
     for(int i = MAX((int)m_consoleLineCache.size() - n, 0), j = 0;  i < m_consoleLineCache.size(); i++, j++)
@@ -17,34 +17,34 @@ void ConsoleLog::GetLastNLogLines(int n, std::vector<std::string>& outVector)
     }
 }
 
-void ConsoleLog::AddLine(const std::string& logLine)
+void ConsoleLog::AddLine(const blaString& logLine)
 {
     m_consoleLineCache.push_back(logLine);
 }
 
-void Console::GetLastNLines(int n, std::vector<std::string> &outVector)
+void Console::GetLastNLines(int n, blaVector<blaString> &outVector)
 {
     m_log.GetLastNLogLines(n, outVector);
 }
 
-void Console::InstanceLogMessage(const std::string& message)
+void Console::InstanceLogMessage(const blaString& message)
 {
     m_log.AddLine(message);
 }
 
-void Console::InstanceLogWarning(const std::string& warning)
+void Console::InstanceLogWarning(const blaString& warning)
 {
     m_log.AddLine(warning);
 }
 
-void Console::InstanceLogError(const std::string& error)
+void Console::InstanceLogError(const blaString& error)
 {
     m_log.AddLine(error);
 }
 
 void Console::ExecuteCurrentCommand()
 {
-    std::string currentCommand = std::string(m_currentCommandBuffer);
+    blaString currentCommand = blaString(m_currentCommandBuffer);
     m_commandHistory.emplace_back(currentCommand);
     m_log.AddLine("> " + currentCommand);
 

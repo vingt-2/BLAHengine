@@ -10,11 +10,10 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#include <map> 
+#include <map>
 #include <utility>
 #include <unordered_map>
-
-using namespace std;
+#include <tuple>
 
 #define BLA_NO_DLL
 //#define EXPORT_DLL
@@ -32,3 +31,10 @@ using namespace std;
 #ifndef WIN32
 #define WIN32
 #endif
+
+typedef std::string blaString;
+
+#define blaVector   std::vector
+#define blaHashMap  std::unordered_map
+#define blaMap      std::map
+#define blaPair     std::pair

@@ -8,7 +8,6 @@
 #define M_PI       float(3.14159265358979323846)
 #endif
 
-using namespace std;
 using namespace BLAengine;
 
 //TODO: Extract asset data to the Asset folder out of Engine/Game
@@ -19,7 +18,7 @@ using namespace BLAengine;
 
 void InvalidBVH()
 {
-    cout << "There were invalid values encountered in your BVH file.\n";
+    std::cout << "There were invalid values encountered in your BVH file.\n";
 }
 
 #define INVALID_BVH_IN_SKEL_DEF \
@@ -28,18 +27,18 @@ void InvalidBVH()
 
 #define INVALID_BVH_IN_DATA_DEF \
     InvalidBVH(); \
-    return vector<SkeletonAnimationData*>();
+    return blaVector<SkeletonAnimationData*>();
 
 // Helper that gets Which rotation matrix we should output for each axis
 blaVec3 GetTranslationForChannel(int axis, float offset);
 blaQuat GetRotationForChannel(int axis, float angle);
-// Helper that turns a bunch of string parameters from a bvh to int values
-int ChannelOrderToInt(string str);
+// Helper that turns a bunch of blaString parameters from a bvh to int values
+int ChannelOrderToInt(blaString str);
 
-// Turns a big string file into a big bunch of tokens (splits with special characters)
-void tokenize(vector<string>& tokens, string str)
+// Turns a big blaString file into a big bunch of tokens (splits with special characters)
+void tokenize(blaVector<blaString>& tokens, blaString str)
 {
-    string token = "";
+    blaString token = "";
     for (int i = 0; i < str.length(); i++)
     {
         if (i == str.length() - 1)
@@ -62,9 +61,9 @@ void tokenize(vector<string>& tokens, string str)
 }
 
 // See BVHImport for explanation
-SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChannelsOrderings, int& currentToken, int& jointIndex)
+SkeletonJoint* ParseJoint(blaVector<blaString> &tokens, blaVector<blaVector<int>>& jointChannelsOrderings, int& currentToken, int& jointIndex)
 {
-    string jointName = tokens[currentToken];
+    blaString jointName = tokens[currentToken];
 
     if (tokens[++currentToken].compare("{"))
     {
@@ -82,7 +81,7 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
     jointLocalOffset.z = (float) atof(tokens[++currentToken].c_str());
 
 
-    vector<SkeletonJoint*> jointChildren;
+    blaVector<SkeletonJoint*> jointChildren;
 
     // Next token should say "Channels". If it don't, we got a problem ...
     if (tokens[++currentToken].compare("CHANNELS"))
@@ -93,7 +92,7 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
     //Next token is the numbero of data channel for this joint
     int dataChannels = atoi(tokens[++currentToken].c_str());
 
-    vector<int> channelOrderForJoint(dataChannels);
+    blaVector<int> channelOrderForJoint(dataChannels);
     for (int i = 0; i < dataChannels; ++i)
     {
         channelOrderForJoint[i] = ChannelOrderToInt(tokens[++currentToken]);
@@ -120,7 +119,7 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
         {
             if (!tokens[currentToken + 2].compare("{") && !tokens[currentToken + 3].compare("OFFSET") && !tokens[currentToken + 7].compare("}"))
             {
-                string endJointName = jointName + "_end";
+                blaString endJointName = jointName + "_end";
 
                 blaVec3 endJointLocalOffset;
                 endJointLocalOffset.x = (float)atof(tokens[currentToken + 4].c_str());
@@ -154,11 +153,11 @@ SkeletonJoint* ParseJoint(vector<string> &tokens, vector<vector<int>>& jointChan
 }
 
 // See BVHImport for explanation
-void ReadFrameRecursive(vector<string>& tokens,
-                        vector<blaPosQuat>& jointTransforms,
+void ReadFrameRecursive(blaVector<blaString>& tokens,
+                        blaVector<blaPosQuat>& jointTransforms,
                         SkeletonJoint* joint,
                         int &currentToken,
-                        vector<vector<int>> &jointsChannelOrderings)
+                        blaVector<blaVector<int>> &jointsChannelOrderings)
 {
     if (joint->GetChild() == nullptr)
         return;
@@ -199,11 +198,11 @@ void ReadFrameRecursive(vector<string>& tokens,
         the tree's joints data and advances in the frames data block.
     4) Profit. Returns a null pointer if there were any issue parsing the data.
 */
-vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
+blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePath)
 {
-    ifstream bvhFile(bvhFilePath, std::ifstream::binary);
+    std::ifstream bvhFile(bvhFilePath, std::ifstream::binary);
 
-    vector<string> tokens;
+    blaVector<blaString> tokens;
     if (bvhFile.is_open())
     {
         // get length of file:
@@ -224,7 +223,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
         }
         bvhFile.close();
 
-        tokenize(tokens, string(buffer));
+        tokenize(tokens, blaString(buffer));
 
         delete[] buffer;
     }
@@ -237,8 +236,8 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
 
     int currentToken = -1;
     
-    vector<SkeletonJoint*>		skeletalRoots;
-    vector<vector<int>>			jointChannelsOrderings;
+    blaVector<SkeletonJoint*>		skeletalRoots;
+    blaVector<blaVector<int>>			jointChannelsOrderings;
     int jointIndex = 0;
     while (tokens[++currentToken] != "MOTION")
     {
@@ -250,7 +249,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
 
         if (!tokens[++currentToken].compare("ROOT"))
         {
-            vector<int> rootOrdering;
+            blaVector<int> rootOrdering;
             SkeletonJoint* rootJoint = ParseJoint(tokens, jointChannelsOrderings, ++currentToken, jointIndex);
 
             if (rootJoint)
@@ -279,7 +278,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
 
     float frameTime = atof(tokens[++currentToken].c_str());
 
-    vector<vector<vector<blaPosQuat>>>	jointTransformsPerFramePerAnimationInBVH(skeletalRoots.size());
+    blaVector<blaVector<blaVector<blaPosQuat>>>	jointTransformsPerFramePerAnimationInBVH(skeletalRoots.size());
 
     // Frame and multiple skeleton are not presented how we want in the file so We'll just build our result vector later
     for (int frame = 0; frame < frameCount; frame++)
@@ -287,7 +286,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
         for (int rootIndex = 0; rootIndex < skeletalRoots.size(); rootIndex++)
         {
             // Add a new data frame in the result...
-            jointTransformsPerFramePerAnimationInBVH[rootIndex].push_back(vector<blaPosQuat>());
+            jointTransformsPerFramePerAnimationInBVH[rootIndex].push_back(blaVector<blaPosQuat>());
 
             SkeletonJoint* root = skeletalRoots[rootIndex];
 
@@ -302,7 +301,7 @@ vector<SkeletonAnimationData*> BVHImport::ImportAnimation(string bvhFilePath)
     }
 
     //Todo: Really don't like that the importer in in charge of allocating the data here ...
-    vector<SkeletonAnimationData*> results;
+    blaVector<SkeletonAnimationData*> results;
     for (int rootIndex = 0; rootIndex < skeletalRoots.size(); ++rootIndex)
     {
         SkeletonAnimationData* skeletonAnimation = new SkeletonAnimationData(bvhFilePath, jointTransformsPerFramePerAnimationInBVH[rootIndex], skeletalRoots[rootIndex], 1.0f / frameTime, frameCount);
@@ -350,8 +349,8 @@ blaVec3 GetTranslationForChannel(int axis, float offset)
     return vec;
 }
 
-// Helper that turns a bunch of string parameters from a bvh to int values
-int ChannelOrderToInt(string str)
+// Helper that turns a bunch of blaString parameters from a bvh to int values
+int ChannelOrderToInt(blaString str)
 {
     if (!str.compare("Xposition"))
     {

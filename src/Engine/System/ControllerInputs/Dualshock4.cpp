@@ -14,7 +14,7 @@ bool Dualshock4::Setup()
         ReadReport();
         m_previousTimestamp = GetTimestamp();
         m_reportBuffer[0] = 0x2;
-        hid_get_feature_report(m_hidDevice, m_reportBuffer, DS4_INPUT_REPORT_LENGTH); // When you first pair a controller via bluetooth 
+        hid_get_feature_report(m_hidDevice, m_reportBuffer, DS4_INPUT_REPORT_LENGTH); // When you first blaPair a controller via bluetooth 
 
         if (m_resultFlag < 0)
         {

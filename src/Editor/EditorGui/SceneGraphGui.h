@@ -10,7 +10,7 @@ struct BlaSceneGraphElement
 
 class BlaGuiTreeElement
 {
-    virtual std::string GetName() = 0;
+    virtual blaString GetName() = 0;
 };
 
 class BlaGuiTree

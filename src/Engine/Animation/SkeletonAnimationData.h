@@ -15,7 +15,7 @@ namespace BLAengine
     {
     public:
 
-        SkeletonJoint(string name, const blaVec3 &localOffset, blaU32 jointIndex)
+        SkeletonJoint(blaString name, const blaVec3 &localOffset, blaU32 jointIndex)
         {
             m_name = name;
             m_localOffset = localOffset;
@@ -24,7 +24,7 @@ namespace BLAengine
 
         ~SkeletonJoint() {};
 
-        string		GetName() const		{ return m_name; }
+        blaString		GetName() const		{ return m_name; }
 
         blaVec3		GetLocalOffset() const { return m_localOffset; }
 
@@ -37,14 +37,14 @@ namespace BLAengine
         Use to retrieve information from the Skeleton without having to do it recursively yourself.
         Careful there... this has to traverse the skeleton, and may therefore be costly!
         */
-        void QuerySkeleton(unordered_map<string, SkeletonJoint*>* jointPointersByNames, vector<pair<string, string>>* bonesByJointNames);
+        void QuerySkeleton(blaMap<blaString, SkeletonJoint*>* jointPointersByNames, blaVector<blaPair<blaString, blaString>>* bonesByJointNames);
 
         void PrintJoint();
 
-        void DiscardJointsByName(string subname);
+        void DiscardJointsByName(blaString subname);
 
     private:
-        string					m_name;
+        blaString					m_name;
         blaVec3					m_localOffset;
         blaU32                  m_jointIndex;
     };
@@ -54,8 +54,8 @@ namespace BLAengine
     public:
 
         SkeletonAnimationData(
-            string name,
-            vector<vector<blaPosQuat>> jointTransforms,
+            blaString name,
+            blaVector<blaVector<blaPosQuat>> jointTransforms,
             SkeletonJoint* skeletonDef,
             float samplingRate,
             int	  frameCount)
@@ -69,7 +69,7 @@ namespace BLAengine
 
         ~SkeletonAnimationData();
 
-        string GetName() const		{ return m_name; }
+        blaString GetName() const		{ return m_name; }
 
         /*
         Returns the sampling rate in secs as specified in the animation file
@@ -96,13 +96,13 @@ namespace BLAengine
             /*Defines the query inputs*/
             int frameIndex,
             /*Main query output*/
-            vector<blaPosQuat>& worldJointTransform
+            blaVector<blaPosQuat>& worldJointTransform
             );
 
         /*
         Queries the local transform of a joint using its name, for a specific frame index.
         */
-        blaPosQuat GetLocalTransformByName(std::string name, int frameIndex)
+        blaPosQuat GetLocalTransformByName(blaString name, int frameIndex)
         {
             if (m_jointIndexByName.empty())
             {
@@ -112,7 +112,7 @@ namespace BLAengine
             return m_jointTransforms[frameIndex][m_jointIndexByName[name]];
         }
 
-        static void GetBoneArrayFromEvalAnim(vector<pair<blaVec3, blaVec3>>& outputBones, const SkeletonJoint* skeleton, vector<blaPosQuat> evalAnim);
+        static void GetBoneArrayFromEvalAnim(blaVector<blaPair<blaVec3, blaVec3>>& outputBones, const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim);
 
     private:
 
@@ -133,16 +133,16 @@ namespace BLAengine
             /*Defines the recursion parameters */
             SkeletonJoint* joint,
             const blaPosQuat& cumulativeTransform,
-            vector<vector<blaPosQuat>>& jointTransforms,
+            blaVector<blaVector<blaPosQuat>>& jointTransforms,
             /*Main query output*/
-            vector<blaPosQuat>& worldJointTransforms
+            blaVector<blaPosQuat>& worldJointTransforms
             );
 
-        string m_name;
+        blaString m_name;
 
-        vector<vector<blaPosQuat>>      m_jointTransforms;
+        blaVector<blaVector<blaPosQuat>>      m_jointTransforms;
 
-        unordered_map<string, blaU32>   m_jointIndexByName;
+        blaMap<blaString, blaU32>   m_jointIndexByName;
 
         //Todo: Make this a pointer to a valid skeleton Asset...
         SkeletonJoint*		            m_skeletonDef;

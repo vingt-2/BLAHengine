@@ -6,9 +6,7 @@
 #include "./GuiMenu.h"
 #include "./GuiFileBrowser.h"
 
-#include <string>
-#include <vector>
-#include <unordered_map>
+#include <Common/StdInclude.h>
 
 struct GLFWwindow;
 
@@ -35,15 +33,15 @@ namespace BLAengine
 
         blaBool IsMouseOverGui() const;
 
-        void DrawText(const std::string& textToDraw, blaIVec2 renderWindowPosition);
+        void DrawText(const blaString& textToDraw, blaIVec2 renderWindowPosition);
 
-        void OpenConsole(const std::string& consoleName);
+        void OpenConsole(const blaString& consoleName);
 
-        OpenFilePrompt* CreateOpenFilePrompt(std::string browserName, blaBool disableMultipleSelection);
+        OpenFilePrompt* CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection);
         
-        SaveFilePrompt* CreateSaveFilePrompt(std::string browserName);
+        SaveFilePrompt* CreateSaveFilePrompt(blaString browserName);
 
-        blaBool CloseFileBrowser(std::string browserName);
+        blaBool CloseFileBrowser(blaString browserName);
 
         BlaGuiMenu m_menuBar;
 
@@ -52,13 +50,13 @@ namespace BLAengine
         void Init();
         void Destroy();
 
-        std::vector<BlaGuiWindow> m_oneTimeWindows;
+        blaVector<BlaGuiWindow> m_oneTimeWindows;
 
-        std::unordered_map<std::string, BlaGuiWindow> m_openWindows;
+        blaMap<blaString, BlaGuiWindow> m_openWindows;
 
-        std::unordered_map<std::string, BlaFileBrowser*> m_openBrowsers;
+        blaMap<blaString, BlaFileBrowser*> m_openBrowsers;
 
-        std::string m_lastFileBrowserOpenDirectory;
+        blaString m_lastFileBrowserOpenDirectory;
 
         GLFWwindow* m_window;
     };

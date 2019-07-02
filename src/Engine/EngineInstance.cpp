@@ -175,7 +175,7 @@ bool EngineInstance::LoadNewScene()
     return true;
 }
 
-bool EngineInstance::LoadWorkingScene(std::string filepath)
+bool EngineInstance::LoadWorkingScene(blaString filepath)
 {
     delete m_renderingManager;
     delete m_workingScene;
@@ -198,7 +198,7 @@ bool EngineInstance::LoadWorkingScene(std::string filepath)
     return true;
 }
 
-bool EngineInstance::SaveWorkingScene(std::string filepath)
+bool EngineInstance::SaveWorkingScene(blaString filepath)
 {
     return m_sceneManager->SaveScene(filepath, m_workingScene);
 }

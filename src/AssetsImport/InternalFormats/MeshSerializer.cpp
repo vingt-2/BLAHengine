@@ -1,7 +1,7 @@
 #include "MeshSerializer.h"
 using namespace BLAengine;
 
-void TriangleMeshSerializer::vec3VectorToSerializer(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector)
+void TriangleMeshSerializer::vec3VectorToSerializer(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector)
 {
     serialVector.resize(actualVector.size());
     for (size_t i = 0; i < actualVector.size(); i++)
@@ -11,7 +11,7 @@ void TriangleMeshSerializer::vec3VectorToSerializer(std::vector<blaVec3> &actual
     }
 }
 
-void TriangleMeshSerializer::vec2VectorToSerializer(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector)
+void TriangleMeshSerializer::vec2VectorToSerializer(blaVector<glm::vec2> &actualVector, blaVector<vec2serializer> &serialVector)
 {
     serialVector.resize(actualVector.size());
     for (size_t i = 0; i < actualVector.size(); i++)
@@ -21,7 +21,7 @@ void TriangleMeshSerializer::vec2VectorToSerializer(std::vector<glm::vec2> &actu
     }
 }
 
-void TriangleMeshSerializer::vec3serializerVectorTovec3(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector)
+void TriangleMeshSerializer::vec3serializerVectorTovec3(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector)
 {
     actualVector.resize(serialVector.size());
     for (size_t i = 0; i < actualVector.size(); i++)
@@ -31,7 +31,7 @@ void TriangleMeshSerializer::vec3serializerVectorTovec3(std::vector<blaVec3> &ac
     }
 }
 
-void TriangleMeshSerializer::vec2serializerVectorTovec2(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector)
+void TriangleMeshSerializer::vec2serializerVectorTovec2(blaVector<glm::vec2> &actualVector, blaVector<vec2serializer> &serialVector)
 {
     actualVector.resize(serialVector.size());
     for (size_t i = 0; i < actualVector.size(); i++)

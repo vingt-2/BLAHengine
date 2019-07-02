@@ -8,10 +8,10 @@ using namespace BLAengine;
 
 void PrintJointRecursive(SkeletonJoint* joint, int depth)
 {
-    string out = "";
+    blaString out = "";
     for (int i = 0; i < depth; i++)
         out += " ";
-    cout << out + joint->GetName() + "\n";
+    std::cout << out + joint->GetName() + "\n";
 
     for (auto& child : *joint)
         PrintJointRecursive(&child, depth + 1);
@@ -22,13 +22,13 @@ void SkeletonJoint::PrintJoint()
     PrintJointRecursive(this, 0);
 }
 
-void SkeletonJoint::DiscardJointsByName(string subname)
+void SkeletonJoint::DiscardJointsByName(blaString subname)
 {
     auto child = GetChild();
 
     if(child != nullptr)
     {
-        if(child->GetName().find(subname) != string::npos)
+        if(child->GetName().find(subname) != blaString::npos)
         {
             m_child = child->GetNext();
             delete child;
@@ -40,7 +40,7 @@ void SkeletonJoint::DiscardJointsByName(string subname)
     while(child != nullptr)
     {
         auto nextChild = child->GetNext();
-        if(child->GetName().find(subname) != string::npos)
+        if(child->GetName().find(subname) != blaString::npos)
         {
             prevChild->m_next = nextChild;
             delete child;
@@ -55,14 +55,14 @@ void SkeletonJoint::DiscardJointsByName(string subname)
     }
 }
 
-void SkeletonAnimationData::GetBoneArrayFromEvalAnim(vector<pair<blaVec3, blaVec3>>& outputBones,
-    const SkeletonJoint* skeleton, vector<blaPosQuat> evalAnim)
+void SkeletonAnimationData::GetBoneArrayFromEvalAnim(blaVector<blaPair<blaVec3, blaVec3>>& outputBones,
+    const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim)
 {
     blaPosQuat transform = evalAnim[skeleton->GetJointIndex()];
 
     for (auto& child : *skeleton)
     {
-        outputBones.emplace_back(pair<blaVec3, blaVec3>(transform.GetTranslation3(), evalAnim[child.GetJointIndex()].GetTranslation3()));
+        outputBones.emplace_back(blaPair<blaVec3, blaVec3>(transform.GetTranslation3(), evalAnim[child.GetJointIndex()].GetTranslation3()));
         GetBoneArrayFromEvalAnim(outputBones, &child, evalAnim);
     }
 }
@@ -74,9 +74,9 @@ void SkeletonAnimationData::ForwardKinematicRecursive
     /*Defines the recursion parameters */
     SkeletonJoint* joint,
     const blaPosQuat& parentWorldTransform,
-    vector<vector<blaPosQuat>>& localJointTransforms,
+    blaVector<blaVector<blaPosQuat>>& localJointTransforms,
     /*Main query output*/
-    vector<blaPosQuat>& worldJointTransforms
+    blaVector<blaPosQuat>& worldJointTransforms
 )
 {
     const blaPosQuat worldJointTransform = parentWorldTransform * localJointTransforms[frameIndex][joint->GetJointIndex()];
@@ -100,7 +100,7 @@ void SkeletonAnimationData::EvaluateAnimation
 /*Defines the query inputs*/
 int frameIndex,
 /*Defines the main query output*/
-vector<blaPosQuat>& worldJointTransforms
+blaVector<blaPosQuat>& worldJointTransforms
 )
 {
     SkeletonJoint* root = m_skeletonDef;
@@ -119,7 +119,7 @@ vector<blaPosQuat>& worldJointTransforms
     );
 }
 
-void SkeletonJoint::QuerySkeleton(unordered_map<string, SkeletonJoint*>* jointPointersByNames, vector<pair<string, string>>* bonesByJointNames)
+void SkeletonJoint::QuerySkeleton(blaMap<blaString, SkeletonJoint*>* jointPointersByNames, blaVector<blaPair<blaString, blaString>>* bonesByJointNames)
 {
     // Traverse skeleton recursively and fill out provided containers.
 
@@ -133,7 +133,7 @@ void SkeletonJoint::QuerySkeleton(unordered_map<string, SkeletonJoint*>* jointPo
     {
         if (bonesByJointNames)
         {
-            bonesByJointNames->push_back(pair<string, string>(m_name, child.GetName()));
+            bonesByJointNames->push_back(blaPair<blaString, blaString>(m_name, child.GetName()));
         }
 
         child.QuerySkeleton(jointPointersByNames, bonesByJointNames);

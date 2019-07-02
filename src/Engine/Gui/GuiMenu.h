@@ -2,8 +2,7 @@
 
 #include <Common/Maths/Maths.h>
 
-#include <string>
-#include <vector>
+#include <Common/StdInclude.h>
 
 namespace BLAengine
 {
@@ -19,7 +18,7 @@ namespace BLAengine
     {
         friend class BlaGuiMenuTab;
     public:
-        BlaGuiMenuItem(std::string name, blaBool* bool_switch, blaBool endWithSeparator = false) :
+        BlaGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false) :
             m_name(name)
            ,m_switch(bool_switch)
            ,m_endWithSeparator(endWithSeparator)
@@ -28,7 +27,7 @@ namespace BLAengine
     private:
         void Render();
         
-        std::string m_name;
+        blaString m_name;
         blaBool* m_switch;
 
         blaBool m_endWithSeparator;
@@ -38,7 +37,7 @@ namespace BLAengine
     {
         friend class BlaGuiMenu;
     public:
-        BlaGuiMenuTab(std::string name):
+        BlaGuiMenuTab(blaString name):
             m_name(name)
         {}
 
@@ -48,14 +47,14 @@ namespace BLAengine
         }
 
     private:
-        std::string m_name;
-        std::vector<BlaGuiMenuItem> m_menuItems;
+        blaString m_name;
+        blaVector<BlaGuiMenuItem> m_menuItems;
         void Render();
     };
 
     struct BlaGuiMenu
     {
-        std::vector<BlaGuiMenuTab> m_menuTabs;
+        blaVector<BlaGuiMenuTab> m_menuTabs;
         void Render();
     };
 }

@@ -27,14 +27,14 @@ namespace BLAengine
         void Initialize(RenderingManager* renderingManager); // TODO: IMPLEMENT! Find camera object and so on
         void Update();
 
-        GameObjectReference CreateObject(std::string name, const GameObjectReference &parentObject = GameObjectReference::InvalidReference());
-        bool DeleteObject(std::string name);
-		GameObjectReference FindObjectByName(std::string name);
-        vector<GameObjectReference> FindObjectsMatchingName(std::string name);
+        GameObjectReference CreateObject(blaString name, const GameObjectReference &parentObject = GameObjectReference::InvalidReference());
+        bool DeleteObject(blaString name);
+		GameObjectReference FindObjectByName(blaString name);
+        blaVector<GameObjectReference> FindObjectsMatchingName(blaString name);
 
         void AddComponent(GameObjectReference object, GameComponent* component);
         CameraComponent* GetMainCamera();
-        vector<Contact>* GetContacts() const;
+        blaVector<Contact>* GetContacts() const;
 
         bool m_enableSimulation;
 
@@ -55,7 +55,7 @@ namespace BLAengine
 
         CameraComponent* m_camera; //TODO: Find in object scene !
         RenderingManager* m_renderingManager;
-        vector<GameObject>  m_sceneObjectsVector;
+        blaVector<GameObject>  m_sceneObjectsVector;
     };
 
 }

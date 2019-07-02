@@ -13,11 +13,11 @@ namespace BLAengine
     public:
         SceneManager(AssetManager* assetManager);
 
-        bool SaveScene(std::string filepath, Scene* scene);
+        bool SaveScene(blaString filepath, Scene* scene);
 
-        Scene* LoadScene(std::string filepath);
+        Scene* LoadScene(blaString filepath);
 
-        std::string GetCurrentSceneFilePath() const
+        blaString GetCurrentSceneFilePath() const
         {
             return m_currentSceneFilePath;
         }
@@ -25,6 +25,6 @@ namespace BLAengine
     private:
         AssetManager* m_assetManager;
 
-        std::string m_currentSceneFilePath;
+        blaString m_currentSceneFilePath;
     };
 }

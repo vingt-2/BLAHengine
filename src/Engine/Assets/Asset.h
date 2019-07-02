@@ -7,18 +7,18 @@ namespace BLAengine
     {
     public:
 
-        Asset(std::string assetname)
+        Asset(blaString assetname)
         {
             m_assetName = assetname;
             m_isDirty = true;
         }
 
-        std::string GetName() { return m_assetName; }
+        blaString GetName() { return m_assetName; }
 
         bool IsDirty() { return m_isDirty; }
     private:
 
         bool m_isDirty;
-        std::string m_assetName;
+        blaString m_assetName;
     };
 }

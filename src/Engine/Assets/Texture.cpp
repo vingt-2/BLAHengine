@@ -8,7 +8,7 @@ using namespace BLAengine;
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
-Texture2D::Texture2D(string name, glm::uint8 dim, vector<glm::uint8> data, blaU32 width, blaU32 height) : Asset(name)
+Texture2D::Texture2D(blaString name, glm::uint8 dim, blaVector<glm::uint8> data, blaU32 width, blaU32 height) : Asset(name)
 {
     this->m_data = data;
     this->m_width = width;
@@ -22,7 +22,7 @@ Texture2D::~Texture2D()
 {}
 
 //TODO: Support nComponent texture
-Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
+Texture2D* TextureImport::LoadBMP(blaString resourceName, blaString filePath)
 {
     printf("Reading image %s\n", filePath.data());
 
@@ -69,7 +69,7 @@ Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
     if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
     
     // Create a buffer Actual RGB data
-    vector<glm::uint8> data = vector<glm::uint8>(imageSize);
+    blaVector<glm::uint8> data = blaVector<glm::uint8>(imageSize);
     
     // Read the actual data from the file into the buffer
     fread(data.data(), 1, imageSize, file);
@@ -80,10 +80,9 @@ Texture2D* TextureImport::LoadBMP(string resourceName, string filePath)
     return new Texture2D(resourceName, 3, data, width, height);
 }
 
-Texture2D* TextureImport::LoadDDS(string name, string imagepath)
+Texture2D* TextureImport::LoadDDS(blaString name, blaString imagepath)
 {
-
-    cout << "UNEMPLEMENTED !!! \n";
+    std::cout << "UNEMPLEMENTED !!! \n";
 
     unsigned char header[124];
 
@@ -114,7 +113,7 @@ Texture2D* TextureImport::LoadDDS(string name, string imagepath)
 
     unsigned char * buffer;
     unsigned int bufsize;
-    /* how big is it going to be including all mipmaps? */
+    /* how big is it going to be including all mipblaMaps? */
     bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
     buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
     fread(buffer, 1, bufsize, fp);

@@ -7,12 +7,12 @@ namespace BLAengine
 {
     struct BLACORE_API RenderData
     {
-        vector<blaU32>  m_triangleIndices;
-        vector<blaVec3> m_vertPos;
-        vector<blaVec3> m_vertNormal;
-        vector<blaVec3> m_vertTangent;
-        vector<blaVec3> m_vertBiTangent;
-        vector<blaVec2> m_vertUVs;
+        blaVector<blaU32>  m_triangleIndices;
+        blaVector<blaVec3> m_vertPos;
+        blaVector<blaVec3> m_vertNormal;
+        blaVector<blaVec3> m_vertTangent;
+        blaVector<blaVec3> m_vertBiTangent;
+        blaVector<blaVec2> m_vertUVs;
     };
 
     class BLACORE_API TriangleMesh
@@ -36,22 +36,22 @@ namespace BLAengine
             blaU32 uvIndex; // UV at the destination Vertex (may be unique to this face)
         } DestVertex;
 
-        vector<Face> m_meshTriangles;
+        blaVector<Face> m_meshTriangles;
 
         /*
         Now for Vertex specific data. Separate lists to simplify loading geometry data for rendering.
         */
-        vector<blaVec3> m_vertexPos;
-        vector<blaVec3> m_vertexNormals;
-        vector<blaVec2> m_vertexUVs;
+        blaVector<blaVec3> m_vertexPos;
+        blaVector<blaVec3> m_vertexNormals;
+        blaVector<blaVec2> m_vertexUVs;
 
         /*
         Tangent information for each face:
         */
-        vector<blaVec3> m_faceTangent;
+        blaVector<blaVec3> m_faceTangent;
 
         /*
-        Now we introduce Half-Edge specific mapping to fasten up adjacency queries
+        Now we introduce Half-Edge specific blaMapping to fasten up adjacency queries
         */
         typedef struct HE_edge_t
         {
@@ -61,18 +61,18 @@ namespace BLAengine
             HeIndx oppositeHE; // opposite Half-Edge
         } HalfEdge;
 
-        vector<HalfEdge> m_halfEdges; // The list of all half edges (should be 2*E)
+        blaVector<HalfEdge> m_halfEdges; // The list of all half edges (should be 2*E)
 
-        vector<HeIndx> m_heEmanatingFromVert; // a list of one HE index (from m_halfEdges) emanating from each vertex Position (should be size of m_vertexPos)
+        blaVector<HeIndx> m_heEmanatingFromVert; // a list of one HE index (from m_halfEdges) emanating from each vertex Position (should be size of m_vertexPos)
 
         int m_manifoldViolationEdges = 0;
 
         RenderData m_renderData;
 
         void BuildMeshTopo(
-            vector<blaU32> vertPosIndices,
-            vector<blaU32> vertNormalIndices,
-            vector<blaU32> vertUVsIndices,
+            blaVector<blaU32> vertPosIndices,
+            blaVector<blaU32> vertNormalIndices,
+            blaVector<blaU32> vertUVsIndices,
             bool swapNormals);
 
         void NormalizeModelCoordinates(bool normalizeScale);
@@ -81,16 +81,16 @@ namespace BLAengine
         void ApplyUVScaling(glm::vec2 scaling);
 
         void GenerateRenderData();
-        void GenerateTopoTriangleIndices(vector<blaU32> &posIndices, vector<blaU32> &normalIndices);
+        void GenerateTopoTriangleIndices(blaVector<blaU32> &posIndices, blaVector<blaU32> &normalIndices);
 
         bool IsMeshValid();
 
         void ReverseEdgesOrder();
-        void GetHEvertices(HeIndx halfEdge, pair<blaU32, blaU32>* vertexPair);
+        void GetHEvertices(HeIndx halfEdge, blaPair<blaU32, blaU32>* vertexPair);
         void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
-        bool GetSurroundingVertices(blaU32 vertexIndx, vector<DestVertex> &surroundingVertices);
-        bool GetSurroundingTriangles(blaU32 vertexIndx, vector<FaceIndx> &surroundingFaces);
-        bool GetEmanatingHalfEdges(blaU32 vertexIndx, vector<HeIndx> &edges);
+        bool GetSurroundingVertices(blaU32 vertexIndx, blaVector<DestVertex> &surroundingVertices);
+        bool GetSurroundingTriangles(blaU32 vertexIndx, blaVector<FaceIndx> &surroundingFaces);
+        bool GetEmanatingHalfEdges(blaU32 vertexIndx, blaVector<HeIndx> &edges);
         void GetTriangleEdges(blaU32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
     };
 
@@ -184,7 +184,7 @@ namespace BLAengine
 
     struct uintPairHash
     {
-        long operator()(const pair<blaU32, blaU32> &key) const
+        long operator()(const blaPair<blaU32, blaU32> &key) const
         {
             return (key.first * 0x1f1f1f1f) ^ key.second;
         }

@@ -17,7 +17,7 @@ namespace BLAengine
 
         MeshAsset* m_mesh;
 
-        vector<Material*> m_materials;
+        blaVector<Material*> m_materials;
 
         blaU32 m_renderType;
 
@@ -29,7 +29,7 @@ namespace BLAengine
         
         blaMat4* GetTransformMatrix() const;
         
-        string ToString(void);
+        blaString ToString(void);
 
         void Update();
 

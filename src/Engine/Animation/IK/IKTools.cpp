@@ -8,7 +8,7 @@ using namespace BLAengine;
 
 #define BLA_IK_CONVERGENCE_EPSILON 0.001f
 
-void IKChainJoint::GetEndEffectorRecursive(IKChainJoint* joint, std::vector<IKChainJoint*>& results)
+void IKChainJoint::GetEndEffectorRecursive(IKChainJoint* joint, blaVector<IKChainJoint*>& results)
 {
     if (joint->GetNumberChildren() < 1)
     {
@@ -35,9 +35,9 @@ void BLAengine::IKChainJoint::ResetIKChainRecursive(IKChainJoint* joint)
 	}
 }
 
-std::vector<IKChainJoint*> IKChainJoint::GetEndEffectors()
+blaVector<IKChainJoint*> IKChainJoint::GetEndEffectors()
 {
-    std::vector<IKChainJoint*> result;
+    blaVector<IKChainJoint*> result;
 
     if (GetNumberChildren() > 0)
     {
@@ -47,7 +47,7 @@ std::vector<IKChainJoint*> IKChainJoint::GetEndEffectors()
     return result;
 }
 
-IKChainJoint * IKChainJoint::BuildFromSkeleton(const SkeletonJoint* skeletonRoot, const vector<blaPosQuat>& jointTransformsW)
+IKChainJoint * IKChainJoint::BuildFromSkeleton(const SkeletonJoint* skeletonRoot, const blaVector<blaPosQuat>& jointTransformsW)
 {
     if (skeletonRoot->GetJointIndex() > jointTransformsW.size())
     {
@@ -112,19 +112,19 @@ void IKChainJoint::AddChild(IKChainJoint* next)
     next->m_parent = this;
 }
 
-void IKChainJoint::GetBoneArray(vector<pair<blaVec3, blaVec3>>& outputBones, const IKChainJoint& skeleton)
+void IKChainJoint::GetBoneArray(blaVector<blaPair<blaVec3, blaVec3>>& outputBones, const IKChainJoint& skeleton)
 {
     auto child = skeleton.GetChild();
 
     while (child != nullptr)
     {
-        outputBones.emplace_back(std::pair<blaVec3, blaVec3>(skeleton.m_jointTransform.GetTranslation3(), child->m_jointTransform.GetTranslation3()));
+        outputBones.emplace_back(blaPair<blaVec3, blaVec3>(skeleton.m_jointTransform.GetTranslation3(), child->m_jointTransform.GetTranslation3()));
         GetBoneArray(outputBones, *child);
         child = child->GetNext();
     }
 }
 
-void IKChainJoint::GetJointTransforms(vector<blaPosQuat>& jointTransforms, const IKChainJoint& skeleton)
+void IKChainJoint::GetJointTransforms(blaVector<blaPosQuat>& jointTransforms, const IKChainJoint& skeleton)
 {
     jointTransforms.emplace_back(skeleton.m_jointTransform);
     auto child = skeleton.GetChild();
@@ -136,7 +136,7 @@ void IKChainJoint::GetJointTransforms(vector<blaPosQuat>& jointTransforms, const
     }
 }
 
-void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorDesiredPositions, int iterationCount)
+void IKChainJoint::SolveIKChain(IKChainJoint* root, blaVector<blaVec3> endEffectorDesiredPositions, int iterationCount)
 {
 	ResetIKChainRecursive(root);
 
@@ -144,7 +144,7 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, vector<blaVec3> endEffectorD
     {
         blaF32 distanceToEndEffectors = 0.f;
 
-        vector<IKChainJoint*> endEffectors = root->GetEndEffectors();
+        blaVector<IKChainJoint*> endEffectors = root->GetEndEffectors();
 
         size_t nbEffectors = endEffectors.size();
 

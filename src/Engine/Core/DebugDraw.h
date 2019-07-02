@@ -46,7 +46,7 @@ namespace BLAengine
 			 
 		void InstanceDrawBasis(const blaPosQuat& transform, float size, float opacity);
 
-		pair<vector<blaVec3>, vector<blaVec3>> m_lineMeshVertsAndColor;
+		blaPair<blaVector<blaVec3>, blaVector<blaVec3>> m_lineMeshVertsAndColor;
 		DebugRenderingManager* m_debugRenderManager;
 
 		bool m_drawDebugRays;

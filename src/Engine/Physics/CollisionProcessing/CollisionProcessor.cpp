@@ -17,7 +17,7 @@ CollisionProcessor::CollisionProcessor(Timer* time, float* timestepPtr) :
     m_iterationCount(0),
     m_solveCount(0)
 {
-    m_bodiesList = vector<RigidBodyComponent*>();
+    m_bodiesList = blaVector<RigidBodyComponent*>();
     m_timeStepPointer = timestepPtr;
     m_time = time;
 
@@ -72,10 +72,10 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
     //blaMat4 t2 = body2->GetObjectTransform().m_posQuat;
     //body2->m_collider->m_collisionMesh->setTransform(&t2[0][0]);
 
-    //vector<pair<int, int>> collidingTriangles;
-    //vector<float> collisionPoints;
-    //vector<int> collidingFaces;
-    //vector<int> colSizes;
+    //blaVector<blaPair<int, int>> collidingTriangles;
+    //blaVector<float> collisionPoints;
+    //blaVector<int> collidingFaces;
+    //blaVector<int> colSizes;
     //bool collision = body1->m_collider->m_collisionMesh->collision(body2->m_collider->m_collisionMesh);
 
     //if (collision)
@@ -191,13 +191,13 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
 
 void CollisionProcessor::SolveContacts()
 {
-    vector<vector<blaVec3>> T(3 * m_currentContacts.size());
+    blaVector<blaVector<blaVec3>> T(3 * m_currentContacts.size());
     ComputeT(T);
 
-    vector<float> D(3 * m_currentContacts.size());
+    blaVector<float> D(3 * m_currentContacts.size());
     GetDiagonalElements(T, D);
 
-    vector<blaVec3> B;
+    blaVector<blaVec3> B;
     for (size_t i = 0; i<m_currentContacts.size(); i++)
     {
         Contact contact = m_currentContacts[i];
@@ -209,9 +209,9 @@ void CollisionProcessor::SolveContacts()
         blaVec3 vLUpdate2 = (blaVec3) body2->m_nextState.m_velocity;
         blaVec3 vAUpdate2 = (blaVec3) body2->GetObjectTransform().LocalDirectionToWorld(body2->m_nextState.m_angularVelocity);
 
-        vector<blaVec3> nJac = contact.m_normalJacobian;
-        vector<blaVec3> t1Jac = contact.m_tangentJacobian1;
-        vector<blaVec3> t2Jac = contact.m_tangentJacobian2;
+        blaVector<blaVec3> nJac = contact.m_normalJacobian;
+        blaVector<blaVec3> t1Jac = contact.m_tangentJacobian1;
+        blaVector<blaVec3> t2Jac = contact.m_tangentJacobian2;
 
         float b_normal = glm::dot(nJac[0], vLUpdate1) + glm::dot(nJac[2], vLUpdate2) + glm::dot(nJac[1], vAUpdate1) + glm::dot(nJac[3], vAUpdate2);
         b_normal += m_bounce * (glm::dot(nJac[0], vLUpdate1) + glm::dot(nJac[2], vLUpdate2) + glm::dot(nJac[1], vAUpdate1) + glm::dot(nJac[3], vAUpdate2));
@@ -226,14 +226,14 @@ void CollisionProcessor::SolveContacts()
     // Gauss-Seidel Solver:
     int iteration = 0;
 
-    vector<blaVec3> lambdas(m_currentContacts.size());
+    blaVector<blaVec3> lambdas(m_currentContacts.size());
     for (size_t i = 0; i < m_currentContacts.size(); i++)
     {
         lambdas[i] = blaVec3(0);
     }
 
     // Randomize contact order for faster convergence
-    vector<int> contactIndices(m_currentContacts.size());
+    blaVector<int> contactIndices(m_currentContacts.size());
     for (size_t i = 0; i < m_currentContacts.size(); i++)
     {
         contactIndices[i] = i;
@@ -253,7 +253,7 @@ void CollisionProcessor::SolveContacts()
                 RigidBodyComponent* body1 = contact.m_body1;
                 RigidBodyComponent* body2 = contact.m_body2;
 
-                vector<blaVec3>* jacobianEntry;
+                blaVector<blaVec3>* jacobianEntry;
                 if (i == 0)
                     jacobianEntry = &(contact.m_normalJacobian);
                 else if (i == 1)
@@ -312,7 +312,7 @@ void CollisionProcessor::SolveContacts()
     m_solveCount++;
 }
 
-void CollisionProcessor::ComputeT(vector<vector<blaVec3>>& T)
+void CollisionProcessor::ComputeT(blaVector<blaVector<blaVec3>>& T)
 {
     for (size_t i = 0; i < 3 * m_currentContacts.size(); i++)
     {
@@ -321,9 +321,9 @@ void CollisionProcessor::ComputeT(vector<vector<blaVec3>>& T)
         RigidBodyComponent* body1 = contact.m_body1;
         RigidBodyComponent* body2 = contact.m_body2;
 
-        vector<blaVec3> Ti(4);
+        blaVector<blaVec3> Ti(4);
 
-        vector<blaVec3> jacobianEntry;
+        blaVector<blaVec3> jacobianEntry;
         if (i % 3 == 0)
             jacobianEntry = contact.m_normalJacobian;
         else if (i % 3 == 1)
@@ -340,7 +340,7 @@ void CollisionProcessor::ComputeT(vector<vector<blaVec3>>& T)
     }
 }
 
-void CollisionProcessor::GetDiagonalElements(vector<vector<blaVec3>> T, vector<float>& D)
+void CollisionProcessor::GetDiagonalElements(blaVector<blaVector<blaVec3>> T, blaVector<float>& D)
 {
     for (size_t i = 0; i < 3 * m_currentContacts.size(); i++)
     {
@@ -349,7 +349,7 @@ void CollisionProcessor::GetDiagonalElements(vector<vector<blaVec3>> T, vector<f
         RigidBodyComponent* body1 = contact.m_body1;
         RigidBodyComponent* body2 = contact.m_body2;
 
-        vector<blaVec3> jacobianEntry;
+        blaVector<blaVec3> jacobianEntry;
         if (i % 3 == 0)
             jacobianEntry = contact.m_normalJacobian;
         else if (i % 3 == 1)
@@ -379,9 +379,9 @@ void CollisionProcessor::ProcessCollisions()
 }
 
 Contact::Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face):
-    m_normalJacobian(vector<blaVec3>(4)),
-    m_tangentJacobian1(vector<blaVec3>(4)),
-    m_tangentJacobian2(vector<blaVec3>(4)),
+    m_normalJacobian(blaVector<blaVec3>(4)),
+    m_tangentJacobian1(blaVector<blaVec3>(4)),
+    m_tangentJacobian2(blaVector<blaVec3>(4)),
     m_faceFrom(face)
 {
     m_body1 = body1;

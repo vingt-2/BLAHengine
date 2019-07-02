@@ -33,7 +33,7 @@ namespace BLAengine
 
 
     private:
-        vector<RigidBodyComponent*> m_rigidBodyList;
+        blaVector<RigidBodyComponent*> m_rigidBodyList;
         Timer* m_time;
 
         float m_timeStep;

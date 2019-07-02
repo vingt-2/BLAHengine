@@ -23,9 +23,9 @@ AssetManager::~AssetManager(void)
 {
 }
 
-static std::vector<string> FilesInDir(string dirname)
+static blaVector<blaString> FilesInDir(blaString dirname)
 {
-    vector<string> result;
+    blaVector<blaString> result;
     DIR *dir;
     struct dirent *ent;
 
@@ -48,9 +48,9 @@ static std::vector<string> FilesInDir(string dirname)
 
 int BLAengine::AssetManager::LoadCookedAssets()
 {
-    std::vector<string> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
-    std::vector<string> matNames     = FilesInDir(MATERIAL_SUBPATH);
-    std::vector<string> textureNames = FilesInDir(TEXTURE_SUBPATH);
+    blaVector<blaString> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
+    blaVector<blaString> matNames     = FilesInDir(MATERIAL_SUBPATH);
+    blaVector<blaString> textureNames = FilesInDir(TEXTURE_SUBPATH);
 
     for (auto n : triMeshNames)
     {
@@ -68,7 +68,7 @@ int BLAengine::AssetManager::LoadCookedAssets()
     return triMeshNames.size() + matNames.size() + textureNames.size();
 }
 
-AssetManager::AssetType AssetManager::GetAsset(std::string assetName, Asset* &assetPtr)
+AssetManager::AssetType AssetManager::GetAsset(blaString assetName, Asset* &assetPtr)
 {
     AssetType type;
     if (!m_resourceMap.count(assetName))
@@ -77,7 +77,7 @@ AssetManager::AssetType AssetManager::GetAsset(std::string assetName, Asset* &as
         return type;
     }
 
-    std::pair<AssetType, blaU32> asset = m_resourceMap[assetName];
+    blaPair<AssetType, blaU32> asset = m_resourceMap[assetName];
 
     type = asset.first;
     const blaU32 assetIndx = asset.second;
@@ -113,7 +113,7 @@ AssetManager::AssetType AssetManager::GetAsset(std::string assetName, Asset* &as
     return type;
 }
 
-bool AssetManager::LoadTriangleMesh(std::string filepath)
+bool AssetManager::LoadTriangleMesh(blaString filepath)
 {
     if (m_resourceMap.count(filepath))
     {
@@ -125,11 +125,11 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 
 
     std::fstream fs;
-    fs.open(std::string(TRIANGLE_MESH_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
+    fs.open(blaString(TRIANGLE_MESH_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
 
     if (!fs.is_open())
     {
-        cout << "Could not load mesh: " << std::string(TRIANGLE_MESH_SUBPATH) + filepath << "\n";
+        cout << "Could not load mesh: " << blaString(TRIANGLE_MESH_SUBPATH) + filepath << "\n";
         return false;
     }
 
@@ -142,12 +142,12 @@ bool AssetManager::LoadTriangleMesh(std::string filepath)
 
     blaU32 indx = m_triangleMeshesInMemory.size() - 1;
 
-    m_resourceMap[filepath] = std::pair<AssetType, blaU32>(AssetType::TriangleMeshAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaU32>(AssetType::TriangleMeshAsset, indx);
 
     return true;
 }
 
-bool AssetManager::LoadTexture(std::string filepath)
+bool AssetManager::LoadTexture(blaString filepath)
 {
     if (m_resourceMap.count(filepath))
     {
@@ -158,11 +158,11 @@ bool AssetManager::LoadTexture(std::string filepath)
     Texture2DSerializer texture2DSerializer;
 
     std::fstream fs;
-    fs.open(std::string(TEXTURE_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
+    fs.open(blaString(TEXTURE_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
 
     if (!fs.is_open())
     {
-        cout << "Could not load Texture file: " << std::string(TEXTURE_SUBPATH) + filepath << "\n";
+        cout << "Could not load Texture file: " << blaString(TEXTURE_SUBPATH) + filepath << "\n";
         return false;
     }
 
@@ -176,12 +176,12 @@ bool AssetManager::LoadTexture(std::string filepath)
 
     blaU32 indx = m_textures2DInMemory.size() - 1;
 
-    m_resourceMap[filepath] = std::pair<AssetType, blaU32>(AssetType::TextureAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaU32>(AssetType::TextureAsset, indx);
 
     return true;
 }
 
-bool AssetManager::LoadMaterial(std::string filepath)
+bool AssetManager::LoadMaterial(blaString filepath)
 {
     if (m_resourceMap.count(filepath))
     {
@@ -192,11 +192,11 @@ bool AssetManager::LoadMaterial(std::string filepath)
     MaterialSerializer matSerializer;
 
     std::fstream fs;
-    fs.open(std::string(MATERIAL_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
+    fs.open(blaString(MATERIAL_SUBPATH) + filepath, std::fstream::in | std::fstream::binary);
 
     if (!fs.is_open())
     {
-        cout << "Could not load Texture file: " << std::string(MATERIAL_SUBPATH) + filepath << "\n";
+        cout << "Could not load Texture file: " << blaString(MATERIAL_SUBPATH) + filepath << "\n";
         return false;
     }
 
@@ -210,7 +210,7 @@ bool AssetManager::LoadMaterial(std::string filepath)
 
     blaU32 indx = m_materialsInMemory.size() - 1;
 
-    m_resourceMap[filepath] = std::pair<AssetType, blaU32>(AssetType::MaterialAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaU32>(AssetType::MaterialAsset, indx);
 
     return true;
 }
@@ -222,11 +222,11 @@ bool BLAengine::AssetManager::SaveMaterial(Material * mat)
     matSerializer.FromMaterial(mat);
 
     std::fstream fs;
-    fs.open(std::string(MATERIAL_SUBPATH) + mat->GetName(), std::fstream::out | std::fstream::binary);
+    fs.open(blaString(MATERIAL_SUBPATH) + mat->GetName(), std::fstream::out | std::fstream::binary);
 
     if (!fs.is_open())
     {
-        cout << "Could not Write on file " << std::string(MATERIAL_SUBPATH) + mat->GetName() << "\n";
+        cout << "Could not Write on file " << blaString(MATERIAL_SUBPATH) + mat->GetName() << "\n";
         return false;
     }
 
@@ -244,11 +244,11 @@ bool BLAengine::AssetManager::SaveTexture(Texture2D * tex)
     texture2DSerializer.FromTexture(tex);
 
     std::fstream fs;
-    fs.open(std::string(TEXTURE_SUBPATH) + tex->GetName(), std::fstream::out | std::fstream::binary);
+    fs.open(blaString(TEXTURE_SUBPATH) + tex->GetName(), std::fstream::out | std::fstream::binary);
 
     if (!fs.is_open())
     {
-        cout << "Could not Write on file " << std::string(TEXTURE_SUBPATH) + tex->GetName() << "\n";
+        cout << "Could not Write on file " << blaString(TEXTURE_SUBPATH) + tex->GetName() << "\n";
         return false;
     }
 
@@ -266,11 +266,11 @@ bool AssetManager::SaveTriangleMesh(MeshAsset* mesh)
     meshSerializer.BuildFromMesh(mesh);
 
     std::fstream fs;
-    fs.open(std::string(TRIANGLE_MESH_SUBPATH) + mesh->GetName(), std::fstream::out | std::fstream::binary);
+    fs.open(blaString(TRIANGLE_MESH_SUBPATH) + mesh->GetName(), std::fstream::out | std::fstream::binary);
     
     if (!fs.is_open())
     {
-        cout << "Could not Write on file " << std::string(TRIANGLE_MESH_SUBPATH) + mesh->GetName() << "\n";
+        cout << "Could not Write on file " << blaString(TRIANGLE_MESH_SUBPATH) + mesh->GetName() << "\n";
         return false;
     }
     

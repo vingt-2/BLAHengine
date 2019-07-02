@@ -16,9 +16,9 @@ TriangleMesh PrimitiveGeometry::MakeCube()
         { { -1, +1, +1 }, { 0, 0, +1 }, { 0, 0 } }, { { -1, -1, +1 }, { 0, 0, +1 }, { 1, 0 } }, { { +1, -1, +1 }, { 0, 0, +1 }, { 1, 1 } }, { { +1, +1, +1 }, { 0, 0, +1 }, { 0, 1 } },
     };
 
-    std::vector<std::vector<blaU32>> quads = { { 0, 1, 2, 3 }, { 4, 5, 6, 7 }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 }, { 16, 17, 18, 19 }, { 20, 21, 22, 23 } };
+    blaVector<blaVector<blaU32>> quads = { { 0, 1, 2, 3 }, { 4, 5, 6, 7 }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 }, { 16, 17, 18, 19 }, { 20, 21, 22, 23 } };
 
-    std::vector<blaU32> triangleIndices;
+    blaVector<blaU32> triangleIndices;
     for (auto & q : quads)
     {
         triangleIndices.push_back(q[0]);
@@ -66,7 +66,7 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius)
         }
     }
 
-    std::vector<blaU32> triangleIndices;
+    blaVector<blaU32> triangleIndices;
     for (blaU32 thetaCount = 0; thetaCount < thetaSamples; ++thetaCount)
     {
         const blaU32 un = (thetaCount + 1) % thetaSamples;
@@ -103,10 +103,10 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius)
         { { -1, -1, -1 },{ -1, 0, 0 },{ 0, 0 } },{ { -1, -1, +1 },{ -1, 0, 0 },{ 1, 0 } },{ { -1, +1, +1 },{ -1, 0, 0 },{ 1, 1 } },{ { -1, +1, -1 },{ -1, 0, 0 },{ 0, 1 } }
     };
 
-    std::vector<std::vector<blaU32>> quads = { { 0, 1, 2, 3 },{ 4, 5, 6, 7 } }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 }, { 16, 17, 18, 19 }, { 20, 21, 22, 23 }
+    blaVector<blaVector<blaU32>> quads = { { 0, 1, 2, 3 },{ 4, 5, 6, 7 } }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 }, { 16, 17, 18, 19 }, { 20, 21, 22, 23 }
 };
 
-    std::vector<blaU32> triangleIndices;
+    blaVector<blaU32> triangleIndices;
     for (auto & q : quads)
     {
         triangleIndices.push_back(q[0]);
@@ -124,8 +124,8 @@ TriangleMesh PrimitiveGeometry::MakeCone(blaU32 resolution)
 {
     TriangleMesh cone;
 
-    std::vector<blaVec3> vertexPos, vertexNormals;
-    std::vector<blaVec2> vertexUVs;
+    blaVector<blaVec3> vertexPos, vertexNormals;
+    blaVector<blaVec2> vertexUVs;
 
     cone.m_vertexPos.emplace_back(blaVec3(0.f, 0.f, 0.f));
     cone.m_vertexPos.emplace_back(blaVec3(0.f, 1.f, 0.f));
@@ -141,8 +141,8 @@ TriangleMesh PrimitiveGeometry::MakeCone(blaU32 resolution)
         cone.m_vertexUVs.emplace_back(blaVec2(cosf(angle), sinf(angle)));
     }
 
-    std::vector<blaU32> triangleIndices;
-    std::vector<blaU32> normalIndices;
+    blaVector<blaU32> triangleIndices;
+    blaVector<blaU32> normalIndices;
     for (blaU32 i = 2; i < resolution + 1; i++)
     {
         triangleIndices.push_back(0);
@@ -192,8 +192,8 @@ TriangleMesh PrimitiveGeometry::MakeDisc(blaU32 resolution)
 {
     TriangleMesh disc;
 
-    std::vector<blaVec3> vertexPos, vertexNormals;
-    std::vector<blaVec2> vertexUVs;
+    blaVector<blaVec3> vertexPos, vertexNormals;
+    blaVector<blaVec2> vertexUVs;
 
     disc.m_vertexPos.emplace_back(blaVec3(0.f, 0.f, 0.f));
     disc.m_vertexNormals.emplace_back(blaVec3(0.f, 1.f, 0.f));
@@ -206,8 +206,8 @@ TriangleMesh PrimitiveGeometry::MakeDisc(blaU32 resolution)
         disc.m_vertexUVs.emplace_back(blaVec2(cosf(angle), sinf(angle)));
     }
 
-    std::vector<blaU32> triangleIndices;
-    std::vector<blaU32> normalIndices;
+    blaVector<blaU32> triangleIndices;
+    blaVector<blaU32> normalIndices;
     for (blaU32 i = 1; i < resolution; i++)
     {
         triangleIndices.push_back(0);

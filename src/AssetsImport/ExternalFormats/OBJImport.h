@@ -7,7 +7,7 @@ namespace BLAengine
     class BLACORE_API OBJImport
     {
     public:
-        bool ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
+        bool ImportMesh(const blaString filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
 
         OBJImport(void);
         ~OBJImport(void) = default;

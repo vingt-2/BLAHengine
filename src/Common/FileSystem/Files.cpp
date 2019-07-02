@@ -8,7 +8,7 @@
 
 using namespace BLAengine;
 
-void BLAengine::GetAllContentInDirectory(std::vector<DirectoryEntry>& directoryContent, const std::string& inDirectoryPath)
+void BLAengine::GetAllContentInDirectory(blaVector<DirectoryEntry>& directoryContent, const blaString& inDirectoryPath)
 {
     cf_dir_t dir;
     cf_dir_open(&dir, inDirectoryPath.c_str());
@@ -32,7 +32,7 @@ void BLAengine::GetAllContentInDirectory(std::vector<DirectoryEntry>& directoryC
             entry.m_entryType = DirectoryEntry::REGULAR_FILE;
             entry.m_name = file.name;
             const size_t posExt = entry.m_name.find_first_of('.');
-            if (posExt != std::string::npos)
+            if (posExt != blaString::npos)
             {
                 entry.m_extention = entry.m_name.substr(posExt);
                 entry.m_name = entry.m_name.substr(0, posExt);
@@ -49,7 +49,7 @@ void BLAengine::GetAllContentInDirectory(std::vector<DirectoryEntry>& directoryC
     cf_dir_close(&dir);
 }
 
-void BLAengine::GetDirectoriesInDirectory(std::vector<DirectoryEntry>& directoryContent, const std::string& inDirectoryPath)
+void BLAengine::GetDirectoriesInDirectory(blaVector<DirectoryEntry>& directoryContent, const blaString& inDirectoryPath)
 {
     cf_dir_t dir;
     cf_dir_open(&dir, inDirectoryPath.c_str());
@@ -76,7 +76,7 @@ void BLAengine::GetDirectoriesInDirectory(std::vector<DirectoryEntry>& directory
     cf_dir_close(&dir);
 }
 
-void BLAengine::GetFilesInDirectory(std::vector<FileEntry>& directoryContent, const std::string& inDirectoryPath)
+void BLAengine::GetFilesInDirectory(blaVector<FileEntry>& directoryContent, const blaString& inDirectoryPath)
 {
     cf_dir_t dir;
     cf_dir_open(&dir, inDirectoryPath.c_str());
@@ -92,7 +92,7 @@ void BLAengine::GetFilesInDirectory(std::vector<FileEntry>& directoryContent, co
         {
             entry.m_name = file.name;
             const size_t posExt = entry.m_name.find_first_of('.');
-            if (posExt != std::string::npos)
+            if (posExt != blaString::npos)
             {
                 entry.m_extention = entry.m_name.substr(posExt);
                 entry.m_name = entry.m_name.substr(0, posExt);
@@ -109,7 +109,7 @@ void BLAengine::GetFilesInDirectory(std::vector<FileEntry>& directoryContent, co
     cf_dir_close(&dir);
 }
 
-std::string BLAengine::BlaFileTimeToString(BlaFileTime& blaFileTime)
+blaString BLAengine::BlaFileTimeToString(BlaFileTime& blaFileTime)
 {
     SYSTEMTIME utc;
     ::FileTimeToSystemTime(std::addressof(*(FILETIME*)&blaFileTime), std::addressof(utc));
@@ -127,7 +127,7 @@ std::string BLAengine::BlaFileTimeToString(BlaFileTime& blaFileTime)
     return stm.str();
 }
 
-std::string BLAengine::BlaFileSizeToString(BlaFileSize& blaFileSize)
+blaString BLAengine::BlaFileSizeToString(BlaFileSize& blaFileSize)
 {
     if (blaFileSize > 10000)
     {
@@ -151,7 +151,7 @@ std::string BLAengine::BlaFileSizeToString(BlaFileSize& blaFileSize)
 
 #include <External/Files/whereami.h>
 
-std::string BLAengine::GetExecutablePath()
+blaString BLAengine::GetExecutablePath()
 {
     int length = wai_getExecutablePath(NULL, 0, NULL);
 
@@ -161,14 +161,14 @@ std::string BLAengine::GetExecutablePath()
 
     path[length] = 0;
 
-    auto r = std::string(path);
+    auto r = blaString(path);
 
     free(path);
 
     return r;
 }
 
-std::string BLAengine::GetModulePath()
+blaString BLAengine::GetModulePath()
 {
     int length = wai_getModulePath(NULL, 0, NULL);
 
@@ -178,34 +178,34 @@ std::string BLAengine::GetModulePath()
 
     path[length] = 0;
 
-    auto r = std::string(path);
+    auto r = blaString(path);
 
     free(path);
 
     return r;
 }
 
-std::string BLAengine::GetWorkingDir()
+blaString BLAengine::GetWorkingDir()
 {
     //TODO : 
-    return std::string("");
+    return blaString("");
 }
 
-FileEntry BLAengine::ParseFilePath(const std::string &filepath)
+FileEntry BLAengine::ParseFilePath(const blaString &filepath)
 {
     FileEntry file;
 
     blaIndex i = filepath.find_last_of('/');
     blaIndex j = filepath.find_last_of('\\');
 
-    i = i == std::string::npos ? 0 : i;
-    j = j == std::string::npos ? 0 : j;
+    i = i == blaString::npos ? 0 : i;
+    j = j == blaString::npos ? 0 : j;
 
     const blaIndex lastSlash = (i > j ? i : j) + 1;
 
     blaIndex lastDot = filepath.find_last_of('.');
 
-    if(lastDot == std::string::npos)
+    if(lastDot == blaString::npos)
     {
         lastDot = filepath.length();
         file.m_extention = "";

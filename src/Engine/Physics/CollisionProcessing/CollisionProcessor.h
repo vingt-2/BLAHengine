@@ -24,9 +24,9 @@ namespace BLAengine
 
         blaVec3 m_contactPositionW;
 
-        vector<blaVec3> m_normalJacobian;
-        vector<blaVec3> m_tangentJacobian1;
-        vector<blaVec3> m_tangentJacobian2;
+        blaVector<blaVec3> m_normalJacobian;
+        blaVector<blaVec3> m_tangentJacobian1;
+        blaVector<blaVec3> m_tangentJacobian2;
 
         void ComputeJacobian();
     private:
@@ -51,8 +51,8 @@ namespace BLAengine
         int m_iterationCount;
         int m_solveCount;
 
-        vector<RigidBodyComponent*> m_bodiesList;
-        vector<Contact> m_currentContacts;
+        blaVector<RigidBodyComponent*> m_bodiesList;
+        blaVector<Contact> m_currentContacts;
 
 
         //Profiling
@@ -65,8 +65,8 @@ namespace BLAengine
     private:
         Timer* m_time;
 
-        void ComputeT(vector<vector<blaVec3>>& T);
-        void GetDiagonalElements(vector<vector<blaVec3>> T, vector<float>& D);
+        void ComputeT(blaVector<blaVector<blaVec3>>& T);
+        void GetDiagonalElements(blaVector<blaVector<blaVec3>> T, blaVector<float>& D);
         void BroadPhaseDetection();
         void NarrowPhaseDetection(RigidBodyComponent* body1, RigidBodyComponent* body2);
         void SolveContacts();
@@ -83,6 +83,6 @@ namespace BLAengine
     private:
 
         float m_resolution;
-        vector<Contact*> m_spatialTable;
+        blaVector<Contact*> m_spatialTable;
     };
 }

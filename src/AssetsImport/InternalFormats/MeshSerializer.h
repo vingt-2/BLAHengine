@@ -126,12 +126,12 @@ public:
 
         RenderDataSerializer() = default;
 
-        std::vector<unsigned int> triangleIndices;
-        std::vector<vec3serializer> vertPos;
-        std::vector<vec3serializer> vertNormal;
-        std::vector<vec3serializer> vertTangent;
-        std::vector<vec3serializer> vertBiTangent;
-        std::vector<vec2serializer> vertUVs;
+        blaVector<unsigned int> triangleIndices;
+        blaVector<vec3serializer> vertPos;
+        blaVector<vec3serializer> vertNormal;
+        blaVector<vec3serializer> vertTangent;
+        blaVector<vec3serializer> vertBiTangent;
+        blaVector<vec2serializer> vertUVs;
 
     private:
         friend class cereal::access;
@@ -148,10 +148,10 @@ public:
         
     TriangleMeshSerializer() = default;
 
-    void vec3VectorToSerializer(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector);
-    void vec2VectorToSerializer(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector);
-    void vec3serializerVectorTovec3(std::vector<blaVec3> &actualVector, std::vector<vec3serializer> &serialVector);
-    void vec2serializerVectorTovec2(std::vector<glm::vec2> &actualVector, std::vector<vec2serializer> &serialVector);
+    void vec3VectorToSerializer(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector);
+    void vec2VectorToSerializer(blaVector<glm::vec2> &actualVector, blaVector<vec2serializer> &serialVector);
+    void vec3serializerVectorTovec3(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector);
+    void vec2serializerVectorTovec2(blaVector<glm::vec2> &actualVector, blaVector<vec2serializer> &serialVector);
 
     void BuildFromMesh(BLAengine::MeshAsset* triangleMesh);
     BLAengine::MeshAsset* BuildMesh();
@@ -160,15 +160,15 @@ private:
 
     friend class cereal::access;
 
-    std::string m_name;
+    blaString m_name;
         
-    std::vector<FaceSerializer> m_meshTriangles;
-    std::vector<HalfEdgeSerializer> m_halfEdges;
-    std::vector<blaU32> m_heEmanatingFromVert;
-    std::vector<vec3serializer> m_vertexPos;
-    std::vector<vec3serializer> m_vertexNormals;
-    std::vector<vec2serializer> m_vertexUVs;
-    std::vector<vec3serializer> m_faceTangent;
+    blaVector<FaceSerializer> m_meshTriangles;
+    blaVector<HalfEdgeSerializer> m_halfEdges;
+    blaVector<blaU32> m_heEmanatingFromVert;
+    blaVector<vec3serializer> m_vertexPos;
+    blaVector<vec3serializer> m_vertexNormals;
+    blaVector<vec2serializer> m_vertexUVs;
+    blaVector<vec3serializer> m_faceTangent;
 
     RenderDataSerializer m_renderData;
 

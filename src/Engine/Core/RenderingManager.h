@@ -22,8 +22,8 @@ namespace BLAengine
         blaU32 RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera);
         blaU32 CancelDirectionalLightTicket(DirectionalLight* dirLight);
 
-        std::unordered_map<blaU32, MeshRendererComponent*>* GetTicketedMeshRenderers();
-        std::unordered_map<blaU32, std::pair<DirectionalLight*, CameraComponent*>>* GetTicketedDirectionalLights();
+        blaMap<blaU32, MeshRendererComponent*>* GetTicketedMeshRenderers();
+        blaMap<blaU32, blaPair<DirectionalLight*, CameraComponent*>>* GetTicketedDirectionalLights();
 
         void Update();
 
@@ -32,8 +32,8 @@ namespace BLAengine
 
         RenderManagerType m_renderManagerType;
 
-        std::unordered_map<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
-        std::unordered_map<blaU32, pair<DirectionalLight*, CameraComponent*>> m_ticketedDirLights;
+        blaMap<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
+        blaMap<blaU32, blaPair<DirectionalLight*, CameraComponent*>> m_ticketedDirLights;
 
         int currentTicket;
 
@@ -46,10 +46,10 @@ namespace BLAengine
         DebugRenderingManager() {};
         ~DebugRenderingManager() {};
 
-        vector<pair<vector<blaVec3>, vector<blaVec3>>> m_lineMeshes;
-        std::unordered_map<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
+        blaVector<blaPair<blaVector<blaVec3>, blaVector<blaVec3>>> m_lineMeshes;
+        blaMap<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
 
-        void LoadDebugLineMesh(pair<vector<blaVec3>, vector<blaVec3>>& lineMesh);
+        void LoadDebugLineMesh(blaPair<blaVector<blaVec3>, blaVector<blaVec3>>& lineMesh);
 
         void Update();
     };

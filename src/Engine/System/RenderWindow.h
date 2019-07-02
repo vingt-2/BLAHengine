@@ -7,7 +7,7 @@
 namespace BLAengine
 {
     
-    typedef std::vector<string> DragAndDropPayloadDontStore;
+    typedef blaVector<blaString> DragAndDropPayloadDontStore;
     
 
     typedef void (*DragAndDropCallback) (const void* DragAndDropPayload);
@@ -18,8 +18,8 @@ namespace BLAengine
         RenderWindow() = default;
         virtual ~RenderWindow(){};
 
-        virtual void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
-        virtual string GetMaxGLVersion() const = 0;
+        virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
+        virtual blaString GetMaxGLVersion() const = 0;
 
         virtual void  MakeGLContextCurrent() = 0;
         virtual void UpdateWindowAndBuffers() = 0;
@@ -28,8 +28,8 @@ namespace BLAengine
 
         virtual bool isFullScreen() const = 0;
 
-        virtual void SetWindowTitle(std::string title) = 0;
-        virtual std::string GetWindowTitle() const = 0;
+        virtual void SetWindowTitle(blaString title) = 0;
+        virtual blaString GetWindowTitle() const = 0;
 
         virtual void SetMouseXY() = 0;
 
@@ -50,9 +50,9 @@ namespace BLAengine
     {
     public:
 
-        void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
+        void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
 
-        string GetMaxGLVersion() const override;
+        blaString GetMaxGLVersion() const override;
 
         void MakeGLContextCurrent() override;
 
@@ -62,8 +62,8 @@ namespace BLAengine
 
         bool isFullScreen() const override;
 
-        void SetWindowTitle(std::string title) override;
-        std::string GetWindowTitle() const override;
+        void SetWindowTitle(blaString title) override;
+        blaString GetWindowTitle() const override;
 
         void SetMouseCursorVisibility(bool visibility) override;
 
@@ -86,7 +86,7 @@ namespace BLAengine
         GLFWRenderWindow();
         ~GLFWRenderWindow() override;
 
-        static std::vector<GLFWRenderWindow*> ms_glfwRenderWindowInstanced;
+        static blaVector<GLFWRenderWindow*> ms_glfwRenderWindowInstanced;
 
         static void GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths);
 
@@ -100,7 +100,7 @@ namespace BLAengine
 
         DragAndDropCallback m_registeredDragAndDropCallback;
 
-        std::vector<int> m_mouseButtonsThatKillCursorWhenHeld;
+        blaVector<int> m_mouseButtonsThatKillCursorWhenHeld;
     };
 
 #elif defined(WPF_INTERFACE)
@@ -112,7 +112,7 @@ namespace BLAengine
         ~WPFRenderWindow();
 
 
-        virtual void CreateRenderWindow(string windowTitle, int sizeX, int sizeY, bool isFullScreen);
+        virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen);
 
         virtual void UpdateWindowAndBuffers();
 
@@ -120,15 +120,15 @@ namespace BLAengine
 
         virtual void GetSize(int &width, int &height) const;
 
-        virtual string GetMaxGLVersion() const;
+        virtual blaString GetMaxGLVersion() const;
 
         void WriteSize(int x, int y);
         void WriteMousePos(int x, int y);
 
         virtual bool isFullScreen() const;
 
-        virtual void SetWindowTitle(string title);
-        virtual string GetWindowTitle() const;
+        virtual void SetWindowTitle(blaString title);
+        virtual blaString GetWindowTitle() const;
 
         bool ShouldUpdateWindow() const;
         void SetWindowUpdated();
@@ -156,7 +156,7 @@ namespace BLAengine
 
         DragAndDropCallback m_registeredDragAndDropCallback;
 
-        string m_glVersion;
+        blaString m_glVersion;
     };
  #endif
 

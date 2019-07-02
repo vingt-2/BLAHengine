@@ -30,7 +30,7 @@ int CALLBACK WinMain(
     __in  int nCmdShow
     )
 {
-    blaU32 stringId = COMPILE_TIME_CRC32_STR("helloworld");
+    blaU32 blaStringId = COMPILE_TIME_CRC32_STR("helloworld");
 
     RunEditorSession();
 }

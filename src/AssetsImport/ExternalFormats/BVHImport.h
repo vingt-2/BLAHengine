@@ -9,6 +9,6 @@ namespace BLAengine
     class BLACORE_API BVHImport
     {
     public:
-        static vector<SkeletonAnimationData*> ImportAnimation(string bvhFilePath);
+        static blaVector<SkeletonAnimationData*> ImportAnimation(blaString bvhFilePath);
     };
 }

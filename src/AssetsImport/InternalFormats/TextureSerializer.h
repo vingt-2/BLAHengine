@@ -36,8 +36,8 @@ private:
     blaU32 m_dataSize;
     blaU32 m_width, m_height;
 
-    std::string m_name;
-    std::vector<glm::uint8> m_data;
+    blaString m_name;
+    blaVector<glm::uint8> m_data;
 
     template <class Archive>
     void serialize(Archive & archive)

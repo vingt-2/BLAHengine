@@ -8,16 +8,16 @@ OBJImport::OBJImport(void) :
     m_currentMaxNormalPos(0)
 {}
 
-bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapNormals, bool normalScale)
+bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool swapNormals, bool normalScale)
 {
     m_currentMaxVertexPos = 0;
     m_currentMaxUVPos = 0;
     m_currentMaxNormalPos = 0;
-    cout << "[OBJ_MESH] Importing " << filename << ".\n";
-    ifstream fileStream (filename,ifstream::in);
-    string lineInFile = " ";
+    std::cout << "[OBJ_MESH] Importing " << filename << ".\n";
+    std::ifstream fileStream (filename, std::ifstream::in);
+    blaString lineInFile = " ";
 
-    vector<blaU32> vertexIndices, uvIndices, normalIndices;
+    blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
 
     int quadsCount = 0;
     int missedFaces = 0;
@@ -27,7 +27,7 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
 
     if(!fileStream.good())
     {
-        cout << "Failed to Import " << filename << ".\n";
+        std::cout << "Failed to Import " << filename << ".\n";
         return false;
     }
 
@@ -154,21 +154,21 @@ bool OBJImport::ImportMesh(const string filename, TriangleMesh& mesh, bool swapN
                 uselessLines++;
             }
         }
-        catch (out_of_range& outOfRangeException)
+        catch (std::out_of_range& outOfRangeException)
         {
             outOfRangeExceptionsCount++;
         }
     }
     fileStream.close();
 
-    cout << "Done reading, building Topology... ";
+    std::cout << "Done reading, building Topology... ";
     mesh.BuildMeshTopo(vertexIndices, normalIndices, uvIndices, swapNormals);
-    cout << "Built, Computing Tangent Spaces...";
+    std::cout << "Built, Computing Tangent Spaces...";
     mesh.ComputeFaceTangents();
-    cout << "Done.\nImported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices, " << mesh.m_manifoldViolationEdges << " non-manifold edges\n";
-    cout << "Normalizing Model Coordinates \n";
+    std::cout << "Done.\nImported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices, " << mesh.m_manifoldViolationEdges << " non-manifold edges\n";
+    std::cout << "Normalizing Model Coordinates \n";
     mesh.NormalizeModelCoordinates(normalScale);
-    cout << "Generating Render Data\n";
+    std::cout << "Generating Render Data\n";
     mesh.GenerateRenderData();
 
     return true;

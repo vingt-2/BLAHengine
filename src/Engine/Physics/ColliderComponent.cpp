@@ -29,8 +29,8 @@ MeshColliderComponent::~MeshColliderComponent()
 
 void MeshColliderComponent::SetColliderMesh(TriangleMesh* mesh)
 {
-    m_vertPosIndices = new vector<blaU32>;
-    m_vertNormalIndices = new vector<blaU32>;
+    m_vertPosIndices = new blaVector<blaU32>;
+    m_vertNormalIndices = new blaVector<blaU32>;
     mesh->GenerateTopoTriangleIndices(*m_vertPosIndices, *m_vertNormalIndices);
     m_triVertices = &(mesh->m_vertexPos);
     m_triNormals = &(mesh->m_vertexNormals);

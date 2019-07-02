@@ -6,9 +6,7 @@
 #include "./GuiWindow.h"
 #include "./GuiMenu.h"
 
-#include <string>
-#include <vector>
-#include <unordered_map>
+#include <Common/StdInclude.h>
 
 struct GLFWwindow;
 
@@ -27,9 +25,9 @@ namespace BLAengine
             CANCELLED
         };
 
-        BlaFileBrowser(std::string browserName, 
-            std::string filesDirectory, 
-            std::string directoryDirectory):
+        BlaFileBrowser(blaString browserName, 
+            blaString filesDirectory, 
+            blaString directoryDirectory):
               m_name(browserName)
             , m_currentFilesDirectory(filesDirectory)
             , m_currentDirectoriesDirectory(directoryDirectory)
@@ -43,15 +41,15 @@ namespace BLAengine
 
         void FileBrowserDisplayAllContentNonRecursive();
 
-        void FileBrowserDisplayDirectoriesRecursive(std::string currentdirectory, blaBool displayEditTime);
+        void FileBrowserDisplayDirectoriesRecursive(blaString currentdirectory, blaBool displayEditTime);
 
         void CurrentFolderGoBack();
 
-        std::string m_currentFilesDirectory;
-        std::string m_currentDirectoriesDirectory;
-        std::string m_name;
+        blaString m_currentFilesDirectory;
+        blaString m_currentDirectoriesDirectory;
+        blaString m_name;
 
-        std::unordered_map<std::string, FileEntry> m_currentSelection;
+        blaMap<blaString, FileEntry> m_currentSelection;
 
         FileBrowserState m_currentState;
 
@@ -62,9 +60,9 @@ namespace BLAengine
     class OpenFilePrompt : public BlaFileBrowser
     {
     public:
-        OpenFilePrompt(std::string browserName,
-            std::string filesDirectory,
-            std::string directoryDirectory,
+        OpenFilePrompt(blaString browserName,
+            blaString filesDirectory,
+            blaString directoryDirectory,
             blaBool disableMultipleSelection):
           BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
         {
@@ -73,16 +71,16 @@ namespace BLAengine
 
         void Render() override;
 
-        blaBool GetConfirmedSelection(std::vector<FileEntry>& selection) const;
+        blaBool GetConfirmedSelection(blaVector<FileEntry>& selection) const;
     private:
     };
 
     class SaveFilePrompt : public BlaFileBrowser
     {
     public:
-        SaveFilePrompt(std::string browserName,
-            std::string filesDirectory,
-            std::string directoryDirectory) :
+        SaveFilePrompt(blaString browserName,
+            blaString filesDirectory,
+            blaString directoryDirectory) :
             BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
         {
             m_disableMultipleSelection = true;
@@ -90,9 +88,9 @@ namespace BLAengine
 
         void Render() override;
 
-        blaBool GetConfirmedSavePath(std::string& savePath) const;
+        blaBool GetConfirmedSavePath(blaString& savePath) const;
     private:
 
-        std::string m_currentSavePath;
+        blaString m_currentSavePath;
     };
 }

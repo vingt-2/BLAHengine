@@ -19,6 +19,6 @@ namespace BLAengine
 
         ObjectTransform* m_posQuat;
 
-        vector<blaVec3> m_sphereMesh;
+        blaVector<blaVec3> m_sphereMesh;
     };
 }

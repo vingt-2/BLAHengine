@@ -28,7 +28,7 @@ namespace BLAengine
 
         typedef blaU32 GameObjectState;
 
-        GameObject(string name, const GameObjectReference& parent);
+        GameObject(blaString name, const GameObjectReference& parent);
         ~GameObject(void);
 
         void Update();
@@ -41,10 +41,10 @@ namespace BLAengine
         void SetTransform(const ObjectTransform& transform);
         void SetLocalTransform(const ObjectTransform& transform);
 
-        void SetName(std::string name) { m_objectName = name; }
-        std::string GetName() const { return m_objectName; }
+        void SetName(blaString name) { m_objectName = name; }
+        blaString GetName() const { return m_objectName; }
 
-        vector<GameComponent*> GetAllComponents() const;
+        blaVector<GameComponent*> GetAllComponents() const;
 
         template<class ComponentType>
         ComponentType* GetComponent();
@@ -53,10 +53,10 @@ namespace BLAengine
         ComponentType* GetComponentInChildren();
 
         template<class ComponentType>
-        vector<ComponentType*> GetComponents();
+        blaVector<ComponentType*> GetComponents();
 
         template<class ComponentType>
-        vector<ComponentType*> GetComponentsInChildren();
+        blaVector<ComponentType*> GetComponentsInChildren();
 
         GameObjectReference GetParent() { return m_parent; }
 
@@ -71,8 +71,8 @@ namespace BLAengine
         void AddComponent(GameComponent* component);
 
         // Behold the stuff that should die.
-        string m_objectName;
-        vector<GameComponent*> m_componentVector;
+        blaString m_objectName;
+        blaVector<GameComponent*> m_componentVector;
 
         ObjectTransform m_localTransform;
         ObjectTransform m_cachedWorldTransform;
@@ -83,7 +83,7 @@ namespace BLAengine
 
     };
     
-    inline vector<GameComponent*> GameObject::GetAllComponents() const
+    inline blaVector<GameComponent*> GameObject::GetAllComponents() const
     {
         return m_componentVector;
     }
@@ -103,9 +103,9 @@ namespace BLAengine
     }
 
     template<class ComponentType>
-    vector<ComponentType*> GameObject::GetComponents()
+    blaVector<ComponentType*> GameObject::GetComponents()
     {
-        vector<ComponentType*> comps;
+        blaVector<ComponentType*> comps;
 
         for (size_t i = 0; i < m_componentVector.size(); i++)
         {

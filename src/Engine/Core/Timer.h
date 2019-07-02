@@ -24,7 +24,7 @@ namespace BLAengine
         float m_time;
         float m_elapsedTime;
 
-        vector<float> m_timeBuffer;
+        blaVector<float> m_timeBuffer;
         glm::uint8 m_timeBufferSize;
     };
 }

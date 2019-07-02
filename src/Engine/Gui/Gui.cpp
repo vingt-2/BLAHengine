@@ -195,7 +195,7 @@ void BlaGuiManager::Update()
 
     m_menuBar.Render();
 
-    std::vector<std::string> toClose;
+    blaVector<blaString> toClose;
     for (auto& window : m_openWindows)
     {
         window.second.Render();
@@ -252,20 +252,20 @@ blaBool BlaGuiManager::IsMouseOverGui() const
     return io.WantCaptureMouse;
 }
 
-void BlaGuiManager::DrawText(const std::string& textToDraw, blaIVec2 renderWindowPosition)
+void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowPosition)
 {
-    m_oneTimeWindows.emplace_back(BLAOneTimeWindow(std::string(""), renderWindowPosition));
+    m_oneTimeWindows.emplace_back(BLAOneTimeWindow(blaString(""), renderWindowPosition));
 
     m_oneTimeWindows.back().SetRootElement(new BlaGuiTextElement(textToDraw));
 }
 
-void BlaGuiManager::OpenConsole(const std::string& consoleName)
+void BlaGuiManager::OpenConsole(const blaString& consoleName)
 {
-    m_openWindows.insert(std::pair<std::string, BlaGuiWindow>(consoleName, BlaGuiWindow(consoleName, blaIVec2(10,10))));
+    m_openWindows.insert(blaPair<blaString, BlaGuiWindow>(consoleName, BlaGuiWindow(consoleName, blaIVec2(10,10))));
     m_openWindows[consoleName].SetRootElement(new BlaGuiConsole(Console::GetSingletonInstance()));
 }
 
-OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(std::string browserName, blaBool disableMultipleSelection)
+OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection)
 {
     OpenFilePrompt* browser = new OpenFilePrompt(browserName, m_lastFileBrowserOpenDirectory, "./", disableMultipleSelection);
 
@@ -275,11 +275,11 @@ OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(std::string browserName, bla
         return dynamic_cast<OpenFilePrompt*>(browserSearch->second);
     }
 
-    m_openBrowsers.insert(std::pair<std::string, BlaFileBrowser*>(browserName, browser));
+    m_openBrowsers.insert(blaPair<blaString, BlaFileBrowser*>(browserName, browser));
     return (OpenFilePrompt*)m_openBrowsers.at(browserName);
 }
 
-SaveFilePrompt* BlaGuiManager::CreateSaveFilePrompt(std::string browserName)
+SaveFilePrompt* BlaGuiManager::CreateSaveFilePrompt(blaString browserName)
 {
     SaveFilePrompt* browser = new SaveFilePrompt(browserName, m_lastFileBrowserOpenDirectory, "./");
 
@@ -289,12 +289,12 @@ SaveFilePrompt* BlaGuiManager::CreateSaveFilePrompt(std::string browserName)
         return dynamic_cast<SaveFilePrompt*>(browserSearch->second);
     }
 
-    m_openBrowsers.insert(std::pair<std::string, BlaFileBrowser*>(browserName, browser));
+    m_openBrowsers.insert(blaPair<blaString, BlaFileBrowser*>(browserName, browser));
     return (SaveFilePrompt*)m_openBrowsers.at(browserName);
 }
 
 
-blaBool BlaGuiManager::CloseFileBrowser(std::string browserName)
+blaBool BlaGuiManager::CloseFileBrowser(blaString browserName)
 {
     auto browserSearch = m_openBrowsers.find(browserName);
     if (browserSearch != m_openBrowsers.end())
@@ -352,9 +352,9 @@ void BlaFileBrowser::CurrentFolderGoBack()
     m_currentFilesDirectory = m_currentFilesDirectory.substr(0, lastSlashPos + 1);
 }
 
-std::string StringSanitize(std::string in)
+blaString StringSanitize(blaString in)
 {
-    std::string out;
+    blaString out;
     for (char c : in)
     {
         if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c == '.' || c == '-' || c == '_')
@@ -397,7 +397,7 @@ void BlaFileBrowser::Render()
     }
 
     ImGui::BeginChild("RecursiveDirs", ImVec2(0.f, 300), true, ImGuiWindowFlags_HorizontalScrollbar);
-    std::vector<DirectoryEntry> dir;
+    blaVector<DirectoryEntry> dir;
     FileBrowserDisplayDirectoriesRecursive(m_currentDirectoriesDirectory, false);
     ImGui::EndChild();
 
@@ -422,7 +422,7 @@ void OpenFilePrompt::Render()
 
     char readonlyTextCpy[500];
 
-    std::string selectedFiles = "";
+    blaString selectedFiles = "";
     for (auto& file : m_currentSelection)
     {
         selectedFiles += "\"" + file.first + "\" ";
@@ -474,7 +474,7 @@ void SaveFilePrompt::Render()
 
     char saveFileTextInput[500];
 
-    std::string selectedFiles = "";
+    blaString selectedFiles = "";
     for (auto& file : m_currentSelection)
     {
         selectedFiles += file.first;
@@ -489,7 +489,7 @@ void SaveFilePrompt::Render()
 
     bool inputReturn = ImGui::InputText("Save Filename", saveFileTextInput, selectedFiles.size() + 1, ImGuiInputTextFlags_EnterReturnsTrue);
 
-    std::string txtInput = std::string(saveFileTextInput);
+    blaString txtInput = blaString(saveFileTextInput);
 
     selectedFileFormSize = ImGui::GetItemRectSize().x;
 
@@ -526,7 +526,7 @@ void SaveFilePrompt::Render()
     ImGui::End();
 }
 
-blaBool OpenFilePrompt::GetConfirmedSelection(std::vector<FileEntry>& selection) const
+blaBool OpenFilePrompt::GetConfirmedSelection(blaVector<FileEntry>& selection) const
 {
     if (m_currentState == FileBrowserState::CONFIRMED_SELECTION)
     {
@@ -539,7 +539,7 @@ blaBool OpenFilePrompt::GetConfirmedSelection(std::vector<FileEntry>& selection)
     return false;
 }
 
-blaBool SaveFilePrompt::GetConfirmedSavePath(std::string& savePath) const
+blaBool SaveFilePrompt::GetConfirmedSavePath(blaString& savePath) const
 {
     if (m_currentState == FileBrowserState::CONFIRMED_SELECTION)
     {
@@ -563,11 +563,11 @@ blaBool IsItemDoubleCliked(int mouse_button = 0)
 
 void BlaFileBrowser::FileBrowserDisplayAllContentNonRecursive()
 {
-    std::vector<DirectoryEntry> dirContent;
+    blaVector<DirectoryEntry> dirContent;
     GetAllContentInDirectory(dirContent, m_currentFilesDirectory);
 
     ImGui::BeginChild("HeaderDisplay", ImVec2(0.f, 20.f), false, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-    ImGui::Columns(4, (m_name + std::string("FBDACNR_title")).c_str(), false);
+    ImGui::Columns(4, (m_name + blaString("FBDACNR_title")).c_str(), false);
 
     ImGui::Text("Name"); ImGui::NextColumn(); ImGui::Text("Date Modified"); ImGui::NextColumn();
     ImGui::Text("Type"); ImGui::NextColumn(); ImGui::Text("Size"); ImGui::NextColumn();
@@ -576,7 +576,7 @@ void BlaFileBrowser::FileBrowserDisplayAllContentNonRecursive()
 
     ImGui::Separator();
     ImGui::BeginChild("FileAndDirectoryBrowserDisplay", ImVec2(0.f, 0.f), false, ImGuiWindowFlags_HorizontalScrollbar);
-    ImGui::Columns(4, (m_name + std::string("FBDACNR")).c_str(), false);
+    ImGui::Columns(4, (m_name + blaString("FBDACNR")).c_str(), false);
 
     for (int i = 0; i < dirContent.size(); i++)
     {
@@ -615,7 +615,7 @@ void BlaFileBrowser::FileBrowserDisplayAllContentNonRecursive()
             }
             else if (dirContent[i].m_entryType == DirectoryEntry::REGULAR_FILE)
             {
-                m_currentSelection.insert(std::pair<std::string, FileEntry>(dirContent[i].m_name + dirContent[i].m_extention, dirContent[i]));
+                m_currentSelection.insert(blaPair<blaString, FileEntry>(dirContent[i].m_name + dirContent[i].m_extention, dirContent[i]));
 
                 // If we double click on a file, we confirm selection.
                 if (IsItemDoubleCliked())
@@ -638,22 +638,22 @@ void BlaFileBrowser::FileBrowserDisplayAllContentNonRecursive()
     ImGui::EndChild();
 }
 
-void BlaFileBrowser::FileBrowserDisplayDirectoriesRecursive(std::string currentdirectory, blaBool displayEditTime)
+void BlaFileBrowser::FileBrowserDisplayDirectoriesRecursive(blaString currentdirectory, blaBool displayEditTime)
 {
-    std::vector<DirectoryEntry> dirContent;
+    blaVector<DirectoryEntry> dirContent;
 
     GetDirectoriesInDirectory(dirContent, currentdirectory);
 
     if (displayEditTime)
     {
-        ImGui::Columns(2, (m_name + std::string("FBDDR")).c_str(), false);
+        ImGui::Columns(2, (m_name + blaString("FBDDR")).c_str(), false);
     }
 
     for (int i = 0; i < dirContent.size(); i++)
     {
-        std::string currentDirectory = currentdirectory + dirContent[i].m_name + "/";
+        blaString currentDirectory = currentdirectory + dirContent[i].m_name + "/";
         //Todo : Dont get entries twice ... No time here but to refactor.
-        std::vector<DirectoryEntry> childEntries;
+        blaVector<DirectoryEntry> childEntries;
         GetDirectoriesInDirectory(childEntries, currentDirectory);
 
         ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -693,11 +693,11 @@ void BlaFileBrowser::FileBrowserDisplayDirectoriesRecursive(std::string currentd
 //    static int selection_mask = (1 << 2); // Dumb representation of what may be user-side selection state. You may carry selection state inside or outside your objects in whatever format you see fit.
 //    int node_clicked = -1;
 //
-//    std::vector<DirectoryEntry> dirContent;
+//    blaVector<DirectoryEntry> dirContent;
 //
 //    GetAllContentInDirectory(dirContent, m_currentFilesDirectory);
 //
-//    ImGui::Columns(4, (m_name + std::string("FBDACR")).c_str(), true);  // 3-ways, no border
+//    ImGui::Columns(4, (m_name + blaString("FBDACR")).c_str(), true);  // 3-ways, no border
 //    //ImGui::Separator();
 //    for (int i = 0; i < dirContent.size(); i++)
 //    {
@@ -741,7 +741,7 @@ void BlaFileBrowser::FileBrowserDisplayDirectoriesRecursive(std::string currentd
 void BlaGuiConsole::Render()
 {
     bool copy_to_clipboard = false;
-    std::vector<std::string> consoleLines;
+    blaVector<blaString> consoleLines;
     
     m_pConsoleSingleton->GetLastNLines(m_maxLineCount, consoleLines);
 
@@ -764,7 +764,7 @@ void BlaGuiConsole::Render()
             }
 
             char childName[64];
-            strcpy(childName, (std::string("CL:") + std::to_string(i)).data());
+            strcpy(childName, (blaString("CL:") + std::to_string(i)).data());
             ImGui::BeginChild(childName, ImVec2(0, ImGui::GetFontSize()), false, ImGuiWindowFlags_NoScrollWithMouse);
 
             const char* item = consoleLines[i].data();

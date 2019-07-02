@@ -3,7 +3,7 @@
 
 using namespace BLAengine;
 
-GameObject::GameObject(string name, const GameObjectReference& parent):
+GameObject::GameObject(blaString name, const GameObjectReference& parent):
     m_objectName(name),
     m_localTransform(ObjectTransform()),
     m_parent(parent)

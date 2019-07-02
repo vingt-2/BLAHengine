@@ -2,8 +2,8 @@
 
 #include <Common/System.h>
 
-#include <string>
-#include <vector>
+#include <Common/StdInclude.h>
+
 namespace BLAengine
 {
     typedef blaU64 BlaFileTime;
@@ -11,14 +11,14 @@ namespace BLAengine
 
     struct FileEntry
     {
-        std::string m_path;
-        std::string m_name;
-        std::string m_extention;
+        blaString m_path;
+        blaString m_name;
+        blaString m_extention;
 
         BlaFileSize m_size;
         BlaFileTime m_lastEditTime;
 
-        std::string GetFullPath() const { return m_path + m_name + m_extention; }
+        blaString GetFullPath() const { return m_path + m_name + m_extention; }
     };
 
     struct DirectoryEntry : FileEntry
@@ -30,21 +30,21 @@ namespace BLAengine
         } m_entryType;
     };
 
-    void GetAllContentInDirectory(std::vector<DirectoryEntry> &directoryContent, const std::string &inDirectoryPath);
+    void GetAllContentInDirectory(blaVector<DirectoryEntry> &directoryContent, const blaString &inDirectoryPath);
 
-    void GetDirectoriesInDirectory(std::vector<DirectoryEntry> &directoryContent, const std::string &inDirectoryPath);
+    void GetDirectoriesInDirectory(blaVector<DirectoryEntry> &directoryContent, const blaString &inDirectoryPath);
 
-    void GetFilesInDirectory(std::vector<FileEntry> &directoryContent, const std::string &inDirectoryPath);
+    void GetFilesInDirectory(blaVector<FileEntry> &directoryContent, const blaString &inDirectoryPath);
 
-    std::string BlaFileTimeToString(BlaFileTime& blaFileTime);
+    blaString BlaFileTimeToString(BlaFileTime& blaFileTime);
 
-    std::string BlaFileSizeToString(BlaFileSize& blaFileSize);
+    blaString BlaFileSizeToString(BlaFileSize& blaFileSize);
 
-    std::string GetExecutablePath();
+    blaString GetExecutablePath();
 
-    std::string GetModulePath();
+    blaString GetModulePath();
 
-    std::string GetWorkingDir();
+    blaString GetWorkingDir();
 
-    FileEntry ParseFilePath(const std::string &filepath);
+    FileEntry ParseFilePath(const blaString &filepath);
 }

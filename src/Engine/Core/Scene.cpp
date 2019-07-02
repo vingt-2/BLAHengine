@@ -15,14 +15,14 @@ Scene::Scene()
     m_sceneObjectsVector.reserve(1000);
 }
 
-GameObjectReference Scene::CreateObject(std::string name, const GameObjectReference &parentObject)
+GameObjectReference Scene::CreateObject(blaString name, const GameObjectReference &parentObject)
 {
     m_sceneObjectsVector.emplace_back(GameObject(name, GetSceneRoot()));
 
     return GameObjectReference { m_sceneObjectsVector.size() - (blaIndex)1, &m_sceneObjectsVector };
 }
 
-bool Scene::DeleteObject(std::string name)
+bool Scene::DeleteObject(blaString name)
 {
 	//TODO: Keep a bitfield of valid game objects in the vector (don't actually clear it)
     /*GameObjectReference object = this->FindObjectByName(name);
@@ -37,7 +37,7 @@ bool Scene::DeleteObject(std::string name)
     return true;
 }
 
-GameObjectReference Scene::FindObjectByName(std::string name)
+GameObjectReference Scene::FindObjectByName(blaString name)
 {
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
@@ -49,13 +49,13 @@ GameObjectReference Scene::FindObjectByName(std::string name)
     return GameObjectReference::InvalidReference();
 }
 
-vector<GameObjectReference> Scene::FindObjectsMatchingName(std::string name)
+blaVector<GameObjectReference> Scene::FindObjectsMatchingName(blaString name)
 {
-    std::vector<GameObjectReference> results;
+    blaVector<GameObjectReference> results;
 
     for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
-        if (m_sceneObjectsVector[i].GetName().find(name) != std::string::npos)
+        if (m_sceneObjectsVector[i].GetName().find(name) != blaString::npos)
         {
             results.emplace_back(GameObjectReference(i, &m_sceneObjectsVector));
         }
@@ -161,7 +161,7 @@ CameraComponent* Scene::GetMainCamera()
     return m_camera;
 }
 
-vector<Contact>* Scene::GetContacts() const
+blaVector<Contact>* Scene::GetContacts() const
 {
     return &(this->m_rigidBodySystem->m_collisionProcessor->m_currentContacts);
 }

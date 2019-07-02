@@ -9,22 +9,22 @@ namespace BLAengine
 {
     class ConsoleCommand
     {
-        std::string m_name;
-        std::vector<std::string> m_arguments;
-        std::string m_commandDescription;
+        blaString m_name;
+        blaVector<blaString> m_arguments;
+        blaString m_commandDescription;
     };
 
     class ConsoleLog
     {
-        std::vector<std::string> m_consoleLineCache;
+        blaVector<blaString> m_consoleLineCache;
         blaU64 m_sessionId;
         blaTime m_sessionTime;
 
         void FlushToFile() {};
     public:
 
-        void GetLastNLogLines(int n, std::vector<std::string> &outVector);
-        void AddLine(const std::string& logLine);
+        void GetLastNLogLines(int n, blaVector<blaString> &outVector);
+        void AddLine(const blaString& logLine);
     };
 
     class Console
@@ -33,11 +33,11 @@ namespace BLAengine
 
         BLA_DECLARE_SINGLETON(Console);
 
-        void GetLastNLines(int n, std::vector<std::string>& outVector);
+        void GetLastNLines(int n, blaVector<blaString>& outVector);
 
-        void InstanceLogMessage(const std::string& message);
-        void InstanceLogWarning(const std::string& warning);
-        void InstanceLogError(const std::string& error);
+        void InstanceLogMessage(const blaString& message);
+        void InstanceLogWarning(const blaString& warning);
+        void InstanceLogError(const blaString& error);
 
         void ExecuteCurrentCommand();
 
@@ -50,15 +50,15 @@ namespace BLAengine
             m_historyCursor(0)
         {}
 
-        static void LogMessage(const std::string& message) { GetSingletonInstance()->InstanceLogMessage(message); }
-        static void LogWarning(const std::string& warning) { GetSingletonInstance()->InstanceLogWarning(warning); }
-        static void LogError(const std::string& error) { GetSingletonInstance()->InstanceLogError(error); }
+        static void LogMessage(const blaString& message) { GetSingletonInstance()->InstanceLogMessage(message); }
+        static void LogWarning(const blaString& warning) { GetSingletonInstance()->InstanceLogWarning(warning); }
+        static void LogError(const blaString& error) { GetSingletonInstance()->InstanceLogError(error); }
 
     private:
         ConsoleLog m_log;
 
         char m_currentCommandBuffer[2048];
-        std::vector<std::string> m_commandHistory;
+        blaVector<blaString> m_commandHistory;
         blaS32 m_historyCursor;
     };
 }

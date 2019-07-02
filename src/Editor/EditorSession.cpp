@@ -208,7 +208,7 @@ bool EditorSession::LoadNewScene()
     return true;
 }
 
-bool EditorSession::LoadWorkingScene(std::string filepath)
+bool EditorSession::LoadWorkingScene(blaString filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
@@ -259,7 +259,7 @@ void EditorSession::TerminateEngine()
     EngineInstance::TerminateEngine();
 }
 
-void EditorSession::EditorDragAndDropedFile(const std::string& filePath) const
+void EditorSession::EditorDragAndDropedFile(const blaString& filePath) const
 {
     FileEntry file = ParseFilePath(filePath);
     ImportMesh(file.GetFullPath(), file.m_name);
@@ -295,7 +295,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                         animCmp->m_animation->GetSkeleton()->DiscardJointsByName("Thumb");
                     }
 
-                    vector<blaPosQuat> jointTransformsW;
+                    blaVector<blaPosQuat> jointTransformsW;
                     animCmp->m_animation->EvaluateAnimation(0, jointTransformsW);
 
                     ikCmp->m_ikChain = IKChainJoint::BuildFromSkeleton(animCmp->m_animation->GetSkeleton(), jointTransformsW);
@@ -315,7 +315,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                     }
                     else
                     {
-                        object = m_workingScene->CreateObject("EffectorHandles_" + to_string(c));
+                        object = m_workingScene->CreateObject("EffectorHandles_" + std::to_string(c));
                     }
 
                     auto meshCmp = BLA_CREATE_COMPONENT(MeshRendererComponent, object);
@@ -339,14 +339,14 @@ void EditorSession::DoTestAnimationDemoStuff()
             }
             else
             {
-                std::vector<std::pair<blaVec3, blaVec3>> bones;
-                std::vector<blaPosQuat> jointTransforms;
+                blaVector<blaPair<blaVec3, blaVec3>> bones;
+                blaVector<blaPosQuat> jointTransforms;
                 IKChainJoint::GetBoneArray(bones, *ikCmp->m_ikChain);
                 IKChainJoint::GetJointTransforms(jointTransforms, *ikCmp->m_ikChain);
 
-                vector<GameObjectReference> effectorHandles = m_workingScene->FindObjectsMatchingName("EffectorHandles_");
+                blaVector<GameObjectReference> effectorHandles = m_workingScene->FindObjectsMatchingName("EffectorHandles_");
 
-                vector<blaVec3> desiredPos;
+                blaVector<blaVec3> desiredPos;
                 for (auto obj : effectorHandles)
                 {
                     desiredPos.push_back(obj->GetTransform().GetPosition());
@@ -418,7 +418,7 @@ void EditorSession::DoTestAnimationDemoStuff()
 
                 m_frameIndex = m_frameIndex >= animCmp->m_animation->GetFrameCount() ? 0.f : m_frameIndex;
 
-                vector<blaPosQuat> jointTransformsW;
+                blaVector<blaPosQuat> jointTransformsW;
                 animCmp->m_animation->EvaluateAnimation(static_cast<int>(m_frameIndex), jointTransformsW);
 
                 for (auto jointW : jointTransformsW)
@@ -426,7 +426,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                     DebugDraw::DrawBasis(jointW, 1.f);
                 }
 
-                std::vector<std::pair<blaVec3, blaVec3>> bones;
+                blaVector<blaPair<blaVec3, blaVec3>> bones;
 
                 SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, animCmp->m_animation->GetSkeleton(), jointTransformsW);
 
@@ -462,7 +462,7 @@ void EditorSession::DoTestAnimationDemoStuff()
 
     if (g_selectedObject.IsValid())
     {
-        if (g_selectedObject->GetName().find("EffectorHandles_") != string::npos)
+        if (g_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
         {
             Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
             GameObjectReference camera = m_workingScene->GetMainCamera()->GetParentObject();
@@ -497,7 +497,7 @@ void EditorSession::HandleSaveScenePrompt()
     if (saveState->m_currentFileBrowser)
     {
         blaBool shouldCloseBrowser = false;
-        std::string savePath;
+        blaString savePath;
         if (saveState->m_currentFileBrowser->GetConfirmedSavePath(savePath))
         {
             SaveWorkingScene(savePath);
@@ -551,7 +551,7 @@ void EditorSession::HandleEditorStateChangeRequests()
 
     if (m_editorStateRequests.m_saveSceneRequest)
     {
-        const std::string currentSceneSavePath = m_sceneManager->GetCurrentSceneFilePath();
+        const blaString currentSceneSavePath = m_sceneManager->GetCurrentSceneFilePath();
         m_editorStateRequests.m_saveSceneRequest = false;
         if (currentSceneSavePath.empty())
         {
@@ -570,7 +570,7 @@ void EditorSession::HandleLoadScenePrompt()
 
     if (state->m_currentFileBrowser)
     {
-        std::vector<FileEntry> selectedFiles;
+        blaVector<FileEntry> selectedFiles;
         blaBool shouldCloseBrowser = false;
         if (state->m_currentFileBrowser->GetConfirmedSelection(selectedFiles))
         {
@@ -597,7 +597,7 @@ void EditorSession::HandleLoadScenePrompt()
     }
 }
 
-bool EditorSession::ImportMesh(std::string filepath, std::string name) const
+bool EditorSession::ImportMesh(blaString filepath, blaString name) const
 {
     OBJImport objImporter;
 
@@ -634,7 +634,7 @@ bool EditorSession::ImportMesh(std::string filepath, std::string name) const
     }
     else
     {
-        cout << "Couldn't find Material: " << "BlankDiffuseMat" << "in AssetManager.\n";
+        std::cout << "Couldn't find Material: " << "BlankDiffuseMat" << "in AssetManager.\n";
     }
 
     ObjectTransform t = visualizerObject->GetTransform();

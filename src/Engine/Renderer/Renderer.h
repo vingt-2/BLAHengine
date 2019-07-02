@@ -32,10 +32,10 @@ namespace BLAengine
     public:
         PerspectiveCamera m_mainRenderCamera;
 
-        std::unordered_map<blaU32, RenderObject*> m_meshRenderPool;
-        std::unordered_map<blaU32, RenderObject*> m_gizmoRenderPool;
+        blaMap<blaU32, RenderObject*> m_meshRenderPool;
+        blaMap<blaU32, RenderObject*> m_gizmoRenderPool;
 
-        std::unordered_map<blaU32, DirectionalLightRender*> m_directionalLightPool;
+        blaMap<blaU32, DirectionalLightRender*> m_directionalLightPool;
 
         // Rendering Related
         virtual void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) = 0;

@@ -43,13 +43,13 @@ namespace BLAengine
 
         bool ShouldTerminate() const { return m_isTerminationRequested; };
 
-        bool SaveWorkingScene(std::string filePath);
+        bool SaveWorkingScene(blaString filePath);
 
         const Timer* GetTimer() const { return m_timer; }
 
         virtual bool LoadNewScene();
 
-        virtual bool LoadWorkingScene(std::string filePath);
+        virtual bool LoadWorkingScene(blaString filePath);
 
         void SetupDirLightAndCamera();
 

@@ -21,13 +21,13 @@ namespace BLAengine
     class BlaGuiTextElement : public BlaGuiElement
     {
     public:
-        explicit BlaGuiTextElement(const std::string& text)
+        explicit BlaGuiTextElement(const blaString& text)
             : m_text(text)
         {}
 
         void Render() override;
 
     private:
-        std::string m_text;
+        blaString m_text;
     };
 }

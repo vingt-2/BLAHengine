@@ -6,19 +6,19 @@ namespace BLAengine
     {
     public:
         GL33Shader() : m_loaded_id(0){};
-        GL33Shader(string name) : m_loaded_id(0), m_name(name) {};
+        GL33Shader(blaString name) : m_loaded_id(0), m_name(name) {};
         ~GL33Shader() {};
 
-        std::string m_name;
+        blaString m_name;
 
         unsigned int m_loaded_id;
 
-        std::string m_vertexShader;
-        std::string m_fragmentShader;
+        blaString m_vertexShader;
+        blaString m_fragmentShader;
 
-        std::vector<pair<std::string, std::string>> m_textureSamplerAttributes;
+        blaVector<blaPair<blaString, blaString>> m_textureSamplerAttributes;
 
-        bool LoadShaderCode(string fragFile, string vertFile);
+        bool LoadShaderCode(blaString fragFile, blaString vertFile);
     };
 
     class GL33SystemShaders
@@ -34,11 +34,11 @@ namespace BLAengine
         GL33Shader m_debugRayPgrm;
         GL33Shader m_shadowMapPgrm;
 
-        bool LoadDebugRaysProgram(string vertFile, string fragFile);
-        bool LoadDrawSphereStencilProgram(string vertFile, string fragFile);
-        bool LoadGeometryPassProgram(string vertFile, string fragFile);
-        bool LoadDrawColorBufferProgram(string vertFile, string fragFile);
-        bool LoadDepthBufferProgram(string vertFile, string fragFile);
-        bool LoadShadowMapProgram(string vertFile, string fragFile);
+        bool LoadDebugRaysProgram(blaString vertFile, blaString fragFile);
+        bool LoadDrawSphereStencilProgram(blaString vertFile, blaString fragFile);
+        bool LoadGeometryPassProgram(blaString vertFile, blaString fragFile);
+        bool LoadDrawColorBufferProgram(blaString vertFile, blaString fragFile);
+        bool LoadDepthBufferProgram(blaString vertFile, blaString fragFile);
+        bool LoadShadowMapProgram(blaString vertFile, blaString fragFile);
     };
 }
