@@ -1,9 +1,9 @@
 #include "CameraControl.h"
 
-#include <Engine/Game/GameComponents/CameraComponent.h>
-#include <Engine/Game/GameObject.h>
+#include <Engine/Core/CameraComponent.h>
+#include <Engine/Core/GameObject.h>
 #include <Engine/EngineInstance.h>
-#include <Engine/Game/Timer.h>
+#include <Engine/Core/Timer.h>
 #include <Engine/System/InputManager.h>
 
 using namespace BLAengine;

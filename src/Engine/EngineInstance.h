@@ -1,5 +1,5 @@
-#include "../Common/StdInclude.h"
-#include "../Common/BLASingleton.h"
+#include <Common/StdInclude.h>
+#include <Common/BLASingleton.h>
 
 namespace BLAengine
 {

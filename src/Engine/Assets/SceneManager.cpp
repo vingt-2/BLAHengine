@@ -1,6 +1,9 @@
 #include "SceneManager.h"
 #include <AssetsImport/InternalFormats/SceneSerializer.h>
-#include <Engine/Game/GameComponents/ColliderComponent.h>
+
+// TODO: Why is this here ??
+#include <Engine/Physics/ColliderComponent.h>
+
 using namespace BLAengine;
 
 BLAengine::SceneManager::SceneManager(AssetManager * assetManager)

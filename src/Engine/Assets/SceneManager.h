@@ -1,6 +1,6 @@
 #pragma once
 #include <Common/StdInclude.h>
-#include <Engine/Game/Scene.h>
+#include <Engine/Core/Scene.h>
 
 #include "AssetsManager.h"
 

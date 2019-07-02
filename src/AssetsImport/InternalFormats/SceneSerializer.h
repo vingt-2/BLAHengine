@@ -7,7 +7,9 @@
 #include <cereal\types\string.hpp>
 #include <cereal\archives\json.hpp>
 
-#include <Engine/Game/Scene.h>
+#include <Engine/Core/Scene.h>
+//Todo: Why is this here ?
+#include <Engine/Physics/RigidBodyComponent.h>
 #include "MathSerializer.h"
 
 class TransformSerializer

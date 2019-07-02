@@ -12,7 +12,7 @@ using namespace std;
 using namespace BLAengine;
 
 //TODO: Extract asset data to the Asset folder out of Engine/Game
-#include <Engine/Game/Animation/SkeletonAnimationData.h>
+#include <Engine/Animation/SkeletonAnimationData.h>
 
 // What if we run this code in a non-engine situation ??
 #include <Engine/System/Console.h>

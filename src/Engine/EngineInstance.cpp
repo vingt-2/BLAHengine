@@ -3,8 +3,9 @@
 #include <Common/System.h>
 #include <Common/Maths/Maths.h>
 #include <Engine/Renderer/GL33Renderer.h>
-#include <Engine/Game/RenderingManager.h>
-#include <Engine/Renderer/DebugDraw.h>
+#include <Engine/Core/Timer.h>
+#include <Engine/Core/RenderingManager.h>
+#include <Engine/Core/DebugDraw.h>
 #include <Engine/Assets/SceneManager.h>
 #include <Engine/System/Console.h>
 #include <Engine/System/InputManager.h>

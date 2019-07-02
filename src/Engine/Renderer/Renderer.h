@@ -1,10 +1,11 @@
 #pragma once
-#include <Common/StdInclude.h>
-#include <Engine/Game/RenderingManager.h>
+
+#include <Engine/Core/RenderingManager.h>
 #include <Engine/System/RenderWindow.h>
-#include <Engine/Game/GameComponents/CameraComponent.h>
-#include <Engine/Game/GameComponents/MeshRendererComponent.h>
-#include <Engine/Game/GameAlgebra/Ray.h>
+#include <Engine/Core/CameraComponent.h>
+#include <Engine/Renderer/MeshRendererComponent.h>
+#include <Common/Maths/Ray.h>
+
 #include "LightRender.h"
 
 namespace BLAengine
