@@ -3,10 +3,12 @@
 #include <Common/StdInclude.h>
 #include <Engine/System/RenderWindow.h>
 #include <Editor/EditorSession.h>
-#include <Common/DataStructures/StringID.h>
+#include <Engine/System/Console.h>
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
+
+#pragma optimize("", off)
 
 void RunEditorSession()
 {
@@ -22,16 +24,24 @@ int main()
 
 #ifdef WIN32
 
+DEFINE_CONSOLE_COMMAND(int, foo, int a, int b)
+{
+    return a + b;
+}
+
+DEFINE_CONSOLE_COMMAND (int, SayHelloToRacha, int a)
+{
+    Console::LogMessage("Hello Racha !!!");
+    return 0;
+}
+
 #include "windows.h"
 int CALLBACK WinMain(
     __in  HINSTANCE hInstance,
     __in  HINSTANCE hPrevInstance,
     __in  LPSTR lpCmdLine,
-    __in  int nCmdShow
-    )
+    __in  int nCmdShow)
 {
-    blaU32 blaStringId = COMPILE_TIME_CRC32_STR("helloworld");
-
     RunEditorSession();
 }
 #endif
