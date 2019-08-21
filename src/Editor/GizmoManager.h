@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Engine/Game/Scene.h>
+#include <Engine/Core/Scene.h>
 #include <Engine/Renderer/Renderer.h>
 
 namespace BLAengine

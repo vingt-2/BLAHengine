@@ -7,9 +7,6 @@
 
 #include <concurrent_vector.h>
 
-using namespace std;
-using namespace nanoflann;
-
 // This is an example of a custom data set class
 struct Photon
 {
@@ -74,7 +71,7 @@ public:
 private:
     PhotonVector m_photonVector;
 
-    typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<float, PhotonVector>, PhotonVector, 3> PhotonTree;
+    typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<float, PhotonVector>, PhotonVector, 3> PhotonTree;
     PhotonTree* m_photonTree;
 };
 
@@ -94,7 +91,7 @@ inline void PhotonMap::AddPhoton(Photon photon)
 
 inline void PhotonMap::BuildKDTree()
 {
-    m_photonTree = new PhotonTree(3, m_photonVector, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+    m_photonTree = new PhotonTree(3, m_photonVector, nanoflann::KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 
     m_photonTree->buildIndex();
 }

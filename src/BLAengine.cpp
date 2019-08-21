@@ -4,6 +4,7 @@
 #include <Engine/System/RenderWindow.h>
 #include <Editor/EditorSession.h>
 #include <Common/DataStructures/StringID.h>
+#include <Engine/Core/InspectableVariable.h>
 
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
@@ -17,11 +18,18 @@ void RunEditorSession()
 
 int main()
 {
+    blaU32 blaStringId = COMPILE_TIME_CRC32_STR("helloworld");
+    EngineInstance a(true, false);
+
+    const char c = 'c';
+    ExposedVar<char> test(c,"test");
+    test.GetValue();
+    std::cout << test.GetName();
+
     RunEditorSession();
 }
 
 #ifdef WIN32
-
 #include "windows.h"
 int CALLBACK WinMain(
     __in  HINSTANCE hInstance,
@@ -30,8 +38,6 @@ int CALLBACK WinMain(
     __in  int nCmdShow
     )
 {
-    blaU32 blaStringId = COMPILE_TIME_CRC32_STR("helloworld");
-
     RunEditorSession();
 }
 #endif
