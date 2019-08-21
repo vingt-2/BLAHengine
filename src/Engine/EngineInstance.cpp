@@ -19,6 +19,13 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
+DEFINE_CONSOLE_COMMAND(int, shutdown, int a)
+{
+    EngineInstance::GetSingletonInstance()->RequestShutdown();
+
+    return 0;
+}
+
 blaU32 EngineInstance::LoopEngine()
 {
     EngineInstance* engineInstance = EngineInstance::GetSingletonInstance();
@@ -65,9 +72,17 @@ blaU32 EngineInstance::LoopEngine()
     return 0;
 }
 
+void EngineInstance::RequestShutdown()
+{
+    m_isTerminationRequested = true;;
+}
+
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
-    m_console = Console::AssignAndReturnSingletonInstance(new Console());
+    m_console = Console::GetSingletonInstance();
+
+    if (!m_console)
+        Console::AssignAndReturnSingletonInstance(new Console());
 
     m_inputManager = InputManager::AssignAndReturnSingletonInstance(new InputManager());
 

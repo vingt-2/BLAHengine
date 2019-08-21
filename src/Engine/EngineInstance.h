@@ -32,6 +32,8 @@ namespace BLAengine
         Scene* GetWorkingScene() const { return m_workingScene; }
 
         static blaU32 LoopEngine();
+
+        void RequestShutdown();
     
     protected:
 

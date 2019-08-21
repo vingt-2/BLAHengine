@@ -4,14 +4,54 @@
 #include <Common/StdInclude.h>
 #include <Common/BLASingleton.h>
 #include <Common/BLAtime.h>
+#include <Common/SillyMacros.h>
+
+#define GET_ARGUMENT_I(i) arguments[i])
+#define TO_STRING_MACRO( i ) blaFromString< EAT_VAR_NAME(i)> LPAREN
+
+// For now, commands required a non void return type and at least one argument, will polish later
+#define DEFINE_CONSOLE_COMMAND(RetType, CommandName, ...) \
+    RetType CommandName(__VA_ARGS__); \
+    struct ConsoleCommandEntry_##CommandName : BLAengine::ConsoleCommandEntry                                                                     \
+    {                                                                                                                                             \
+        ConsoleCommandEntry_##CommandName() : ConsoleCommandEntry(#CommandName) {}                                                                \
+        blaString Call(const blaVector<blaString>& arguments) const override                                                                      \
+        {                                                                                                                                         \
+            if(arguments.size() != SIZE(__VA_ARGS__))                                                                                             \
+            {                                                                                                                                     \
+                Console::LogError("Insufficient number of arguments provided to " + m_name + ", expecting " + std::to_string(SIZE(__VA_ARGS__))); \
+                return "";                                                                                                                        \
+            }                                                                                                                                     \
+            return std::to_string(CommandName(ENUM_WITH_PREFIX_MACRO(TO_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__)));                             \
+        }                                                                                                                                         \
+        static ConsoleCommandEntry_##CommandName Init;                                                                                            \
+    };                                                                                                                                            \
+    ConsoleCommandEntry_##CommandName ConsoleCommandEntry_##CommandName::Init;                                                                    \
+    RetType CommandName(__VA_ARGS__)                                                                                                              
 
 namespace BLAengine
 {
-    class ConsoleCommand
+    /*
+     * Todo: It'll be great if we can have ConsoleCommandDefinition to Component instances (as a seperate type of command) ...
+     */
+
+    template<typename T>
+    T blaFromString(const blaString& str);
+
+    template<template<class> class T, typename S>
+    T<S> blaFromString(const blaString& str);
+
+    class ConsoleCommandEntry
     {
+    protected:
+        ConsoleCommandEntry(blaString name);
+
         blaString m_name;
-        blaVector<blaString> m_arguments;
         blaString m_commandDescription;
+    
+    public:
+        virtual blaString Call(const blaVector<blaString>& arguments) const = 0;
+        const blaString& GetName() const { return m_name; };
     };
 
     class ConsoleLog
@@ -30,6 +70,7 @@ namespace BLAengine
     class Console
     {
         friend class BlaGuiConsole;
+        friend struct ConsoleCommandEntry;
 
         BLA_DECLARE_SINGLETON(Console);
 
@@ -44,6 +85,8 @@ namespace BLAengine
         void DoCommandCompletion();
         void DoCommandHistory(blaS32 cursorOffset);
 
+        void RegisterConsoleCommand(const ConsoleCommandEntry* consoleCommand);
+
     public:
 
         Console():
@@ -56,6 +99,8 @@ namespace BLAengine
 
     private:
         ConsoleLog m_log;
+
+        blaVector<const ConsoleCommandEntry*> m_commandDictionary;
 
         char m_currentCommandBuffer[2048];
         blaVector<blaString> m_commandHistory;

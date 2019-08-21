@@ -17,8 +17,6 @@
 #include <memory>
 #include <iomanip>
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 void BLAengineStyleColors(ImGuiStyle* dst)
@@ -818,6 +816,8 @@ int BlaGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
     {
     case ImGuiInputTextFlags_CallbackCompletion:
         pConsole->DoCommandCompletion();
+        data->DeleteChars(0, data->BufTextLen);
+        data->InsertChars(0, pConsole->m_currentCommandBuffer);
         break;
     case ImGuiInputTextFlags_CallbackHistory:
         if (data->EventKey == ImGuiKey_UpArrow)
