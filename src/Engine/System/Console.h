@@ -6,11 +6,8 @@
 #include <Common/BLAtime.h>
 #include <Common/SillyMacros.h>
 
-#define GET_ARGUMENT_I(i) arguments[i])
-#define TO_STRING_MACRO( i ) blaFromString< EAT_VAR_NAME(i) > LPAREN
-
 //TODO: For now, commands required a non void return type and at least one argument, will polish later
-#define DEFINE_CONSOLE_COMMAND(RetType, CommandName, ...)                                                                                         \
+#define BLA_CONSOLE_COMMAND(RetType, CommandName, ...)                                                                                         \
     RetType CommandName(__VA_ARGS__);                                                                                                             \
     struct ConsoleCommandEntry_##CommandName : BLAengine::ConsoleCommandEntry                                                                     \
     {                                                                                                                                             \
@@ -70,7 +67,7 @@ namespace BLAengine
     class Console
     {
         friend class BlaGuiConsole;
-        friend struct ConsoleCommandEntry;
+        friend class ConsoleCommandEntry;
 
         BLA_DECLARE_SINGLETON(Console);
 

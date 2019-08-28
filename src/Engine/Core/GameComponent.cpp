@@ -56,7 +56,7 @@ GameComponent* GameComponentManager::CreateComponent(const blaString& componentN
 
 BLA_IMPLEMENT_SINGLETON(GameComponentManager);
 
-DEFINE_CONSOLE_COMMAND(int, GetComponentCount, int a)
+BLA_CONSOLE_COMMAND(int, GetComponentCount, int a)
 {
     return GameComponentManager::GetSingletonInstance()->GetComponents().size();
 }

@@ -20,13 +20,6 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
-DEFINE_CONSOLE_COMMAND(int, shutdown, int a)
-{
-    EngineInstance::GetSingletonInstance()->RequestShutdown();
-
-    return 0;
-}
-
 blaU32 EngineInstance::LoopEngine()
 {
     EngineInstance* engineInstance = EngineInstance::GetSingletonInstance();
@@ -238,4 +231,16 @@ void EngineInstance::SetupDirLightAndCamera()
     cameraObject->SetTransform(cameraStartTransform);
 
     m_renderer->SetCamera(cameraComp);
+}
+
+BLA_CONSOLE_COMMAND(int, exit)
+{
+	EngineInstance::GetSingletonInstance()->RequestShutdown();
+	return 0;
+}
+
+BLA_CONSOLE_COMMAND(int, shutdown)
+{
+	EngineInstance::GetSingletonInstance()->RequestShutdown();
+	return 0;
 }

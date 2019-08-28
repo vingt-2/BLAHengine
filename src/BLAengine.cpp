@@ -5,6 +5,8 @@
 #include <Editor/EditorSession.h>
 #include <Engine/System/Console.h>
 
+#pragma optimize("", off)
+
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
@@ -29,6 +31,8 @@ int CALLBACK WinMain(
     __in  LPSTR lpCmdLine,
     __in  int nCmdShow)
 {
+	int a = IS_EMPTY(1);
+
     RunEditorSession();
 }
 #endif
