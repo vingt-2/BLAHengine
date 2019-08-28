@@ -96,7 +96,12 @@ void EditorSession::PreEngineUpdate()
     {
         HandleSaveScenePrompt();
     }
-    
+
+    if(InputManager::GetSingletonInstance()->GetKeyState(BLA_KEY_GRAVE_ACCENT).IsRisingEdge())
+    {
+        m_editorGuiRequests.m_openConsoleRequest = ~m_editorGuiRequests.m_openConsoleRequest;
+    }
+
     DrawGrid(1000, 1, blaVec3(0.85f));
 
     DebugDraw::DrawBasis(blaPosQuat::GetIdentity() , 1.f);
@@ -113,6 +118,31 @@ void EditorSession::EngineUpdate()
         HandleGuiRequests();
 
         DoTestAnimationDemoStuff();
+
+        if(m_inputManager->GetKeyState(BLA_KEY_MINUS).IsFallingEdge())
+        {
+            GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
+            if(light.IsValid())
+            {
+                if(DirectionalLight* dirLight = light->GetComponent<DirectionalLight>())
+                {
+                    ObjectTransform& lightT = light->GetTransform();
+                    lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(-0.2f, 0.f, 0.f));
+                }
+            }
+        }
+        if (m_inputManager->GetKeyState(BLA_KEY_EQUAL).IsFallingEdge())
+        {
+            GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
+            if (light.IsValid())
+            {
+                if (DirectionalLight* dirLight = light->GetComponent<DirectionalLight>())
+                {
+                    ObjectTransform& lightT = light->GetTransform();
+                    lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(0.2f, 0.f, 0.f));
+                }
+            }
+        }
     }
 }
 
@@ -321,7 +351,7 @@ void EditorSession::DoTestAnimationDemoStuff()
                     auto meshCmp = BLA_CREATE_COMPONENT(MeshRendererComponent, object);
 
                     Asset* sphereMesh = nullptr;
-                    this->m_assetManager->GetAsset("sphere", sphereMesh);
+                    this->m_assetManager->GetAsset("cube", sphereMesh);
 
                     meshCmp->AssignTriangleMesh((MeshAsset*)sphereMesh);
 
@@ -346,10 +376,10 @@ void EditorSession::DoTestAnimationDemoStuff()
 
                 blaVector<GameObjectReference> effectorHandles = m_workingScene->FindObjectsMatchingName("EffectorHandles_");
 
-                blaVector<blaVec3> desiredPos;
+                blaVector<blaPosQuat> desiredPos;
                 for (auto obj : effectorHandles)
                 {
-                    desiredPos.push_back(obj->GetTransform().GetPosition());
+                    desiredPos.push_back(obj->GetTransform().GetPosQuat());
                 }
 
                 //if (inputs->GetKeyState(BLA_KEY_SPACE).IsDown())
@@ -474,17 +504,24 @@ void EditorSession::DoTestAnimationDemoStuff()
 
             RaycastHit hit = screenRay.RayToPlaneIntersection(g_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
 
-            ObjectTransform selectedObjectTransform = g_selectedObject->GetTransform();
+            ObjectTransform& selectedObjectTransform = g_selectedObject->GetTransform();
 
-            if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) > 1.f)
+            if(inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsUp())
             {
-
+                if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
+                {
+                    selectedObjectTransform.SetPosition(hit.hitPosition);
+                }
             }
             else
             {
-                selectedObjectTransform.SetPosition(hit.hitPosition);
+                if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
+                {
+                    blaVec3 cameraPosition = camera->GetTransform().GetPosition();
+                    blaQuat rotation = QuatBetweenVectors(hit.hitPosition - cameraPosition, selectedObjectTransform.GetPosition() - cameraPosition);
 
-                g_selectedObject->SetTransform(selectedObjectTransform);
+                    selectedObjectTransform.GetPosQuat().GetRotation() *= inverse(rotation);
+                }
             }
         }
     }

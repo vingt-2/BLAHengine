@@ -20,8 +20,10 @@ public:
 
     void FromTransform(BLAengine::ObjectTransform* transform)
     {
-        m_position.FillData(transform->GetPosition());
-        m_rotation.FillData(transform->GetRotation());
+        blaVec3 pos = transform->GetPosition();
+        blaQuat rot = transform->GetRotation();
+        m_position.FillData(pos);
+        m_rotation.FillData(rot);
         m_scale.FillData(transform->m_scale);
     }
     void ToTransform(BLAengine::ObjectTransform* transform)
@@ -124,8 +126,11 @@ public:
 
     void FromGameComponent(BLAengine::GameComponent* comp)
     {
-        if(BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp))
-            m_lightDirection.FillData(dirLight->GetDirection());
+        if(BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp)) 
+        {
+            blaVec3 dir = dirLight->GetDirection();
+            m_lightDirection.FillData(dir);
+        }
     }
     void ToGameComponent(BLAengine::GameComponent* comp)
     {

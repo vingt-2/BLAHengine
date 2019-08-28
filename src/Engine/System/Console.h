@@ -7,22 +7,22 @@
 #include <Common/SillyMacros.h>
 
 #define GET_ARGUMENT_I(i) arguments[i])
-#define TO_STRING_MACRO( i ) blaFromString< EAT_VAR_NAME(i)> LPAREN
+#define TO_STRING_MACRO( i ) blaFromString< EAT_VAR_NAME(i) > LPAREN
 
-// For now, commands required a non void return type and at least one argument, will polish later
-#define DEFINE_CONSOLE_COMMAND(RetType, CommandName, ...) \
-    RetType CommandName(__VA_ARGS__); \
+//TODO: For now, commands required a non void return type and at least one argument, will polish later
+#define DEFINE_CONSOLE_COMMAND(RetType, CommandName, ...)                                                                                         \
+    RetType CommandName(__VA_ARGS__);                                                                                                             \
     struct ConsoleCommandEntry_##CommandName : BLAengine::ConsoleCommandEntry                                                                     \
     {                                                                                                                                             \
         ConsoleCommandEntry_##CommandName() : ConsoleCommandEntry(#CommandName) {}                                                                \
         blaString Call(const blaVector<blaString>& arguments) const override                                                                      \
         {                                                                                                                                         \
-            if(arguments.size() != SIZE(__VA_ARGS__))                                                                                             \
+            if(arguments.size() != IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__)))                                                                                             \
             {                                                                                                                                     \
-                Console::LogError("Insufficient number of arguments provided to " + m_name + ", expecting " + std::to_string(SIZE(__VA_ARGS__))); \
+                Console::LogError("Insufficient number of arguments provided to " + m_name + ", expecting " + std::to_string(IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__)))); \
                 return "";                                                                                                                        \
             }                                                                                                                                     \
-            return std::to_string(CommandName(ENUM_WITH_PREFIX_MACRO(TO_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__)));                             \
+            return std::to_string(CommandName(IIF(IS_EMPTY(__VA_ARGS__))( ,ENUM_WITH_PREFIX_MACRO(TO_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__)))); \
         }                                                                                                                                         \
         static ConsoleCommandEntry_##CommandName Init;                                                                                            \
     };                                                                                                                                            \
@@ -38,8 +38,8 @@ namespace BLAengine
     template<typename T>
     T blaFromString(const blaString& str);
 
-    template<template<class> class T, typename S>
-    T<S> blaFromString(const blaString& str);
+    //template<template<class> class T, typename S>
+    //T<S> blaFromString(const blaString& str);
 
     class ConsoleCommandEntry
     {

@@ -136,7 +136,7 @@ void IKChainJoint::GetJointTransforms(blaVector<blaPosQuat>& jointTransforms, co
     }
 }
 
-void IKChainJoint::SolveIKChain(IKChainJoint* root, blaVector<blaVec3> endEffectorDesiredPositions, int iterationCount)
+void IKChainJoint::SolveIKChain(IKChainJoint* root, blaVector<blaPosQuat> endEffectorDesiredTransforms, int iterationCount)
 {
 	ResetIKChainRecursive(root);
 
@@ -152,7 +152,7 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, blaVector<blaVec3> endEffect
         {
             auto endEffector = endEffectors[j];
 
-            distanceToEndEffectors += glm::length2(endEffector->m_jointTransform.GetTranslation3() - endEffectorDesiredPositions[j]);
+            distanceToEndEffectors += glm::length2(endEffector->m_jointTransform.GetTranslation3() - endEffectorDesiredTransforms[j].GetTranslation3());
         }
 
         if (distanceToEndEffectors < BLA_IK_CONVERGENCE_EPSILON)
@@ -164,7 +164,7 @@ void IKChainJoint::SolveIKChain(IKChainJoint* root, blaVector<blaVec3> endEffect
         {
             auto endEffector = endEffectors[j];
 
-            endEffector->m_jointTransform.SetTranslation3(endEffectorDesiredPositions[j]);
+            endEffector->m_jointTransform = endEffectorDesiredTransforms[j];
 
             IKSolveBackwardPhase(endEffector);
             IKSolveForwardPhase(root);

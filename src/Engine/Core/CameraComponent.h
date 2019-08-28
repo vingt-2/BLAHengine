@@ -6,9 +6,7 @@
 
 namespace BLAengine
 {
-    class BLACORE_API CameraComponent : public GameComponent
-    {
-    public:
+    BEGIN_COMPONENT_DECLARATION(CameraComponent)
         // Members
         ObjectTransform  m_viewTransform;
         glm::vec2        m_fovSize;
@@ -24,9 +22,5 @@ namespace BLAengine
 
         CameraComponent(GameObjectReference parentObject);
         ~CameraComponent(void) override;
-
-    private:
-    };
-
-
+    END_DECLARATION()
 }

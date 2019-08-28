@@ -8,6 +8,26 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(Console);
 
+template<typename T>
+blaVector<T> SplitString(blaString str, const blaString& delimiter)
+{
+    blaVector<T> ret;
+    size_t i = str.find_first_of(delimiter);
+    while (i != blaString::npos)
+    {
+        ret.push_back(blaFromString<T>(str.substr(0, i)));
+        str = str.substr(i + delimiter.length(), str.length() - 1);
+        i = str.find_first_of(delimiter);
+    }
+
+    if (!str.empty())
+    {
+        ret.push_back(blaFromString<T>(str));
+    }
+
+    return ret;
+}
+
 void ConsoleLog::GetLastNLogLines(int n, blaVector<blaString>& outVector)
 {
     outVector.resize(MIN(n, m_consoleLineCache.size()));
@@ -42,30 +62,11 @@ void Console::InstanceLogError(const blaString& error)
     m_log.AddLine(error);
 }
 
-blaVector<blaString> SplitString(blaString str, blaString delimiter)
-{
-    blaVector<blaString> ret;
-    size_t i = str.find_first_of(delimiter);
-    while (i != blaString::npos)
-    {
-        ret.push_back(str.substr(0, i));
-        str = str.substr(i + delimiter.length(), str.length() - 1);
-        i = str.find_first_of(delimiter);
-    }
-
-    if(!str.empty())
-    {
-        ret.push_back(str);
-    }
-
-    return ret;
-}
-
 void Console::ExecuteCurrentCommand()
 {
     blaString currentCommand = blaString(m_currentCommandBuffer);
 
-    blaVector<blaString> args = SplitString(currentCommand, " ");
+    blaVector<blaString> args = SplitString<blaString>(currentCommand, " ");
 
     const blaString commandName = args[0];
 
@@ -164,19 +165,39 @@ float BLAengine::blaFromString(const blaString& str)
     return std::stof(str);
 }
 
-
-// Now Let's allow implementation of blaFromString for other containers and owner of other primitives types
-template<template<class> class T, typename S>
-T<S> BLAengine::blaFromString(const blaString& str)
+template<>
+blaString BLAengine::blaFromString(const blaString& str) 
 {
-    // unimplemented
-    // static assert here (see code currently on my laptop ...)
-    return T<S>();
+    return str;
 }
 
-//// For example:
-//template<blaVector<S>>
-//blaVector<typename T> BLAengine::blaFromString(const blaString& str)
-//{
-//    
-//}
+//TODO: Find a way to nest that templating ?
+template<>
+blaVector<blaString> BLAengine::blaFromString(const blaString& str)
+{
+    return SplitString<blaString>(str, " ");
+}
+
+template<>
+blaVector<blaU32> BLAengine::blaFromString(const blaString& str)
+{
+    return SplitString<blaU32>(str, " ");
+}
+
+template<>
+blaVector<blaS32> BLAengine::blaFromString(const blaString& str)
+{
+    return SplitString<blaS32>(str, " ");
+}
+
+template<>
+blaVector<blaF32> BLAengine::blaFromString(const blaString& str)
+{
+    return SplitString<blaF32>(str, " ");
+}
+
+template<>
+blaVector<blaBool> BLAengine::blaFromString(const blaString& str)
+{
+    return SplitString<blaBool>(str, " ");
+}

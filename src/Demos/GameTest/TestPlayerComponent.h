@@ -10,10 +10,7 @@
 
 namespace BLAengine
 {
-    class BLACORE_API TestPlayerComponent : public GameComponent
-    {
-    public:
-
+BEGIN_COMPONENT_DECLARATION(TestPlayerComponent)
         void Update() override;
 
 		TestPlayerComponent(GameObjectReference parentObject);
@@ -22,5 +19,5 @@ namespace BLAengine
     private:
 
 		Dualshock4 m_controller;
-    };
+END_DECLARATION()
 }

@@ -41,7 +41,7 @@ namespace BLAengine
             m_name(name)
         {}
 
-        void AddMenu(BlaGuiMenuItem& menu)
+        void AddMenu(BlaGuiMenuItem menu)
         {
             m_menuItems.emplace_back(menu);
         }

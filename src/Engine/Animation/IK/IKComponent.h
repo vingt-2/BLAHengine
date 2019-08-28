@@ -6,17 +6,11 @@ namespace BLAengine
 {
     class IKChainJoint;
 
-    class BLACORE_API IKComponent : public GameComponent
-    {
-    public:
-
+    BEGIN_COMPONENT_DECLARATION(IKComponent)
         void Update() override;
-
         IKChainJoint* m_ikChain;
 
         IKComponent(GameObjectReference parentObject);
         ~IKComponent(void) override;
-
-    private:
-    };
+    END_DECLARATION()
 }

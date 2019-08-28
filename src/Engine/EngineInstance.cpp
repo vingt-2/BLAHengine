@@ -6,6 +6,7 @@
 #include <Engine/Core/Timer.h>
 #include <Engine/Core/RenderingManager.h>
 #include <Engine/Core/DebugDraw.h>
+#include <Engine/Core/GameComponent.h>
 #include <Engine/Assets/SceneManager.h>
 #include <Engine/System/Console.h>
 #include <Engine/System/InputManager.h>
@@ -36,7 +37,7 @@ blaU32 EngineInstance::LoopEngine()
 
     engineInstance->InitializeEngine(renderWindow);
 
-    int framerate = 90;
+    int framerate = 200;
 
     Dualshock4 controller;
 
@@ -80,7 +81,6 @@ void EngineInstance::RequestShutdown()
 bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 {
     m_console = Console::GetSingletonInstance();
-
     if (!m_console)
         Console::AssignAndReturnSingletonInstance(new Console());
 
@@ -168,6 +168,7 @@ void EngineInstance::TerminateEngine()
     delete m_assetManager;
     delete m_guiManager;
     delete m_renderWindow;
+    delete GameComponentManager::GetSingletonInstance();
 }
 
 bool EngineInstance::LoadNewScene()

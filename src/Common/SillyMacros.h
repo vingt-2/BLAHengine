@@ -1,5 +1,3 @@
-// Type your code here, or load an example.
-
 #define LPAREN (
 #define RPAREN )
 #define COMMA ,
@@ -95,17 +93,17 @@
 
 #define EAT_VAR_TYPE(a) EXPAND(CAT(EAT_VAR_TYPE_, a))
 #define EAT_VAR_TYPE_int
-//#define EAT_VAR_NAME_float float
-
-//#define P00_SEP(NAME, I, REC, RES) REC; RES
-
-//#define DEFINE_SOME_FUNCTION(ReturnType, FuncName, ...) \
-//    ReturnType FuncName(EXPAND(__VA_ARGS__));           \
-//    string names = str(COLLECT_TYPES( __VA_ARGS__));    \
-//    string names = str(COLLECT_NAMES(__VA_ARGS__));     \
 
 #define COLLECT_TYPES(...) FOR_EACH(EAT_VAR_NAME, __VA_ARGS__)
 #define COLLECT_NAMES(...) FOR_EACH(EAT_VAR_TYPE, __VA_ARGS__)
 
 #define GET_ARGUMENT_I(i) arguments[i])
 #define TO_STRING_MACRO( i ) blaFromString< EAT_VAR_NAME(i)> LPAREN
+
+#define IIF(c) CAT ( IIF_ , c )
+#define IIF_0(t, ...) __VA_ARGS__
+#define IIF_1(t, ...) t
+
+#define IS_EMPTY(...) GET_MACRO(dummy, ##__VA_ARGS__, 0, 0 , 0 ,0 ,0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)
+
+#define IS_EMPTY_TEST(...) GET_MACRO(dummy, ##__VA_ARGS__, 0, 0 , 0 ,0 ,0 , 0, 0, 0, 0, 0, 0, 4, 3, 2, 1)

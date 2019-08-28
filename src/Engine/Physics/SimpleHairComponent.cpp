@@ -9,6 +9,11 @@ using namespace BLAengine;
 
 std::default_random_engine g_random_generator;
 
+BEGIN_COMPONENT_DESCRIPTION(SimpleHairComponent)
+EXPOSE(m_isPinned)
+EXPOSE(m_applyGravity)
+END_DESCRIPTION()
+
 SimpleHairComponent::SimpleHairComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_forcesAccu(blaVec3(0)),

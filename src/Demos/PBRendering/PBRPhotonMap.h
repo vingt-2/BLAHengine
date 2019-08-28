@@ -69,7 +69,7 @@ public:
     
     void BuildKDTree();
 
-    blaVector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &biggestRadius);
+    blaVector<Photon*> GetPhotons(blaVec3 position, int knnSize, float &biggestRadius);
 
 private:
     PhotonVector m_photonVector;

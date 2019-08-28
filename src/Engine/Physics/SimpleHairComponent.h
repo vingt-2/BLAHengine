@@ -19,10 +19,7 @@ namespace BLAengine
         blaVec3 m_particleVelocities[HAIR_SEGMENT_COUNT + 1];
     };
 
-    class BLACORE_API SimpleHairComponent : public GameComponent
-    {
-    public:
-
+BEGIN_COMPONENT_DECLARATION(SimpleHairComponent)
         bool m_isPinned;
         bool m_applyGravity;
 
@@ -51,6 +48,6 @@ namespace BLAengine
 
         blaVec3 m_forcesAccu;
         blaVec3 m_impulseAccu;
-    };
+END_DECLARATION()
 
 }

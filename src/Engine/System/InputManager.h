@@ -179,7 +179,7 @@ namespace BLAengine
     public:
 
         blaBool IsDown() const { return m_state & 0x01; }
-        blaBool IsUp() const { return m_state ^ 0x01; }
+        blaBool IsUp() const { return !IsDown(); }
 
         blaBool IsRisingEdge() const { return m_state == 0x01; }
         blaBool IsFallingEdge() const { return m_state == 0x02; }

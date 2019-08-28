@@ -219,8 +219,11 @@ blaVec3 BLAengine::PBRExplicitPathTracer::PathTraceShade(Ray incidentRay, int de
             {
                 continue;
             }
+
+            blaVec3 outDir = -incidentRay.m_direction;
+
             // The diffuse Brdf...
-            blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, -incidentRay.m_direction);
+            blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, outDir);
 
             // The geometric term for the change of coordinates (from directions to point on surfaces...)
             float geometricTerm = abs(glm::dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
@@ -436,10 +439,13 @@ blaVec3 BLAengine::PBRPhotonMapping::GatherSurfaceDensity(Ray incidentRay)
     float gatherAreaRadius;
     blaVector<Photon*> photons = m_photonMap.GetPhotons(hitPosition, 100, gatherAreaRadius);
 
+    blaVec3 outDir = -incidentRay.m_direction;
+
     blaVec3 powerDensity(0);
     for (Photon* photon : photons)
     {
-        powerDensity += m->m_brdf->EvaluateBRDF(photon->m_power, p.second.m_colNormalW, photon->m_dir, -incidentRay.m_direction);
+
+        powerDensity += m->m_brdf->EvaluateBRDF(photon->m_power, p.second.m_colNormalW, photon->m_dir, outDir);
     }
 
     blaVec3 toPoint = incidentRay.m_origin - hitPosition;
@@ -594,8 +600,11 @@ blaVec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
             {
                 continue;
             }
+
+            blaVec3 outDir = -incidentRay.m_direction;
+
             // The diffuse Brdf...
-            blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, -incidentRay.m_direction);
+            blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(lightIrradiance, shadeRayCollision.m_colNormalW, directionToLightSample, outDir);
 
             // The geometric term for the change of coordinates (from directions to point on surfaces...)
             float geometricTerm = abs(glm::dot(toLightRayCollision.second.m_colNormalW, directionToLightSample)) / sqrDistToSamplePoint;
@@ -619,7 +628,9 @@ blaVec3 BLAengine::PBRPhotonMapping::Shade(Ray incidentRay)
 
         blaVec3 incomingRadiance = GatherSurfaceDensity(outRay);
 
-        blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(incomingRadiance, shadeRayCollision.m_colNormalW, outDir, -incidentRay.m_direction);
+        blaVec3 _outDir = -incidentRay.m_direction;
+
+        blaVec3 evaluatedBRDF = m->m_brdf->EvaluateBRDF(incomingRadiance, shadeRayCollision.m_colNormalW, outDir, _outDir);
 
         indirectRadiance += evaluatedBRDF;
     }

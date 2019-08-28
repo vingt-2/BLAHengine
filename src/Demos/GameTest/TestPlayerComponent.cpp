@@ -9,6 +9,9 @@ using namespace BLAengine;
 
 #define MAX(a,b) a > b ? a : b
 
+BEGIN_COMPONENT_DESCRIPTION(TestPlayerComponent)
+END_DESCRIPTION()
+
 TestPlayerComponent::TestPlayerComponent(GameObjectReference parentObject) :
     GameComponent(parentObject)
 {}

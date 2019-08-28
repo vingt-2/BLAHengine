@@ -6,9 +6,9 @@
 
 namespace BLAengine
 {
-    class BLACORE_API PBRMaterial
-    {
-    public:
+        class BLACORE_API PBRMaterial
+        {
+        public:
 
         class BRDF
         {

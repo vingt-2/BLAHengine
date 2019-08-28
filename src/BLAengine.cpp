@@ -24,17 +24,6 @@ int main()
 
 #ifdef WIN32
 
-DEFINE_CONSOLE_COMMAND(int, foo, int a, int b)
-{
-    return a + b;
-}
-
-DEFINE_CONSOLE_COMMAND (int, SayHelloToRacha, int a)
-{
-    Console::LogMessage("Hello Racha !!!");
-    return 0;
-}
-
 #include "windows.h"
 int CALLBACK WinMain(
     __in  HINSTANCE hInstance,

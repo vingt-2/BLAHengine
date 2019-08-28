@@ -4,6 +4,13 @@
 
 using namespace BLAengine;
 
+BEGIN_COMPONENT_DESCRIPTION(IKComponent)
+
+END_DESCRIPTION()
+
+//BEGIN_COMPONENT_DESCRIPTION(IKComponent)
+//END_DESCRIPTION()
+
 IKComponent::IKComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_ikChain(nullptr)

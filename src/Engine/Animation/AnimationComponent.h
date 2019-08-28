@@ -5,17 +5,12 @@
 
 namespace BLAengine
 {
-    class BLACORE_API AnimationComponent : public GameComponent
-    {
-    public:
-
+    BEGIN_COMPONENT_DECLARATION(AnimationComponent)
         void Update() override;
 
         SkeletonAnimationData* m_animation;
 
         AnimationComponent(GameObjectReference parentObject);
         ~AnimationComponent(void) override;
-
-    private:
-    };
+    END_DECLARATION()
 }

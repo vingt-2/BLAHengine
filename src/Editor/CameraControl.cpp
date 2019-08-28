@@ -5,10 +5,13 @@
 #include <Engine/EngineInstance.h>
 #include <Engine/Core/Timer.h>
 #include <Engine/System/InputManager.h>
+#include <Engine/System/Console.h>
 
 using namespace BLAengine;
 
 //TODO: Rewrite DT independant if you want high stiffnesses...
+
+#define MAX_MOUSE_DELTA 30.f // <- this will clamp camera sensitivity ...
 
 void CameraController::UpdateController()
 {
@@ -50,7 +53,7 @@ void CameraController::UpdateController()
     if (inputs->GetKeyState(BLA_KEY_E).IsDown())
         linearAcceleration.y = 1.f;
 
-    const blaVec2 mouseDelta = inputs->GetMousePointerState().GetDelta();
+    blaVec2 mouseDelta = inputs->GetMousePointerState().GetDelta();
 
     auto middleMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_MIDDLE);
     if (middleMouseButton.IsDown())
@@ -115,10 +118,27 @@ void CameraController::UpdateController()
         transform.SetPosition(transform.GetPosition() + dt * m_cameraLinearVelocity);
 
         m_cameraAngularVelocity += dt * (angularAcceleration - m_cameraDamping * m_cameraAngularVelocity);
-        m_currentCameraEulerAngles += dt * m_cameraAngularVelocity;
-        m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x > 0.45f * M_PI ? 0.45f * M_PI : m_currentCameraEulerAngles.x;
-        m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x < -0.45f * M_PI ? -0.45f * M_PI : m_currentCameraEulerAngles.x;
-        transform.SetEulerAngles(m_currentCameraEulerAngles);
+
+        mouseDelta.x = mouseDelta.x > MAX_MOUSE_DELTA ? MAX_MOUSE_DELTA : mouseDelta.x;
+        mouseDelta.x = mouseDelta.x < -MAX_MOUSE_DELTA ? -MAX_MOUSE_DELTA : mouseDelta.x;
+
+        mouseDelta.y = mouseDelta.y > MAX_MOUSE_DELTA ? MAX_MOUSE_DELTA : mouseDelta.y;
+        mouseDelta.y = mouseDelta.y < -MAX_MOUSE_DELTA ? -MAX_MOUSE_DELTA : mouseDelta.y;
+
+        if(inputs->GetMouseButtonTimedState(BLA_MOUSE_BUTTON_RIGHT).IsRisingEdge())
+        {
+            return;
+        }
+
+        // Let's keep input integration for controlling the camera with a joystick ...
+        auto rightButtonState = inputs->GetMouseButtonTimedState(BLA_MOUSE_BUTTON_RIGHT);
+        if (rightButtonState.IsDown())
+        {
+            m_currentCameraEulerAngles += dt * -1.0f * blaVec3(9.0f * mouseDelta.y / 16.f, mouseDelta.x, 0.f); // TODO: Get Aspect ratio...
+            m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x > 0.45f * M_PI ? 0.45f * M_PI : m_currentCameraEulerAngles.x;
+            m_currentCameraEulerAngles.x = m_currentCameraEulerAngles.x < -0.45f * M_PI ? -0.45f * M_PI : m_currentCameraEulerAngles.x;
+            transform.SetEulerAngles(m_currentCameraEulerAngles);
+        }
 
         cameraObject->SetLocalTransform(transform);
     }

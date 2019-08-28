@@ -99,7 +99,7 @@ namespace BLAengine
 
         static void GetJointTransforms(blaVector<blaPosQuat>& jointTransforms, const IKChainJoint& skeleton);
 
-        static void SolveIKChain(IKChainJoint* root, blaVector<blaVec3> endEffectorDesiredPositions, int iterationCount);
+        static void SolveIKChain(IKChainJoint* root, blaVector<blaPosQuat> endEffectorDesiredTransform, int iterationCount);
 
         static void ComputeForwardKinematic(IKChainJoint) {};
 

@@ -15,9 +15,9 @@ void ObjectTransform::GetScaledTransformMatrix(blaMat4 &outputMatrix) const
 {
     outputMatrix = m_posQuat.ToMat4();
 
-    outputMatrix[0][0] *= m_scale.x;
-    outputMatrix[1][1] *= m_scale.y;
-    outputMatrix[2][2] *= m_scale.z;
+    outputMatrix[0][0] *= m_scale.x; outputMatrix[0][1] *= m_scale.x; outputMatrix[0][2] *= m_scale.x;
+    outputMatrix[1][0] *= m_scale.y; outputMatrix[1][1] *= m_scale.y; outputMatrix[1][2] *= m_scale.y;
+    outputMatrix[2][0] *= m_scale.z; outputMatrix[2][1] *= m_scale.z; outputMatrix[2][2] *= m_scale.z;
 }
 
 void ObjectTransform::SetRotation(blaQuat rotation)
