@@ -8,8 +8,6 @@
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 void RunEditorSession()
 {
     EngineInstance::AssignSingletonInstance(new EditorSession(true, false));

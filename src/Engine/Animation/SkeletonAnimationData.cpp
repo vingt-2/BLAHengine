@@ -1,17 +1,16 @@
-#include <fstream>
-#include <iostream>
-#include <string.h>
-#include <stack>
 #include "SkeletonAnimationData.h"
+
+#include <Engine/System/Console.h>
 
 using namespace BLAengine;
 
 void PrintJointRecursive(SkeletonJoint* joint, int depth)
 {
-    blaString out = "";
+    blaString indent = "";
     for (int i = 0; i < depth; i++)
-        out += " ";
-    std::cout << out + joint->GetName() + "\n";
+        indent += "-";
+
+    Console::LogMessage(indent + joint->GetName());
 
     for (auto& child : *joint)
         PrintJointRecursive(&child, depth + 1);

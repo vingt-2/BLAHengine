@@ -473,8 +473,8 @@ void EditorSession::DoTestAnimationDemoStuff()
     {
         animationObject = m_workingScene->CreateObject("AnimatedObject");
 
-        //BLA_CREATE_COMPONENT(AnimationComponent, animationObject);
-        BLA_CREATE_COMPONENT(IKComponent, animationObject);
+        BLA_CREATE_COMPONENT(AnimationComponent, animationObject);
+        //BLA_CREATE_COMPONENT(IKComponent, animationObject);
     }
 
     auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);

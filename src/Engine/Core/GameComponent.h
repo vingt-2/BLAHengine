@@ -59,4 +59,14 @@ namespace BLAengine
         GameComponent* CreateComponent(const blaString& componentName, GameObjectReference objRef);
     };
 }
+
+/*
+ *  Component declaration interface:
+ *  BLA_DECLARE_COMPONENT(COMPONENT_NAME)
+ *      blaVec3 m_someValue;
+ *      blaVector<blaU32> m_someVector;
+ *      
+ *      void SomeComponentPrivateFunction();
+ *  END_COMPONENT_DECLARATION()
+ */
 	

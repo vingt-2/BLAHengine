@@ -37,7 +37,7 @@ blaU32 EngineInstance::LoopEngine()
 
     engineInstance->InitializeEngine(renderWindow);
 
-    int framerate = 200;
+    int framerate = 60;
 
     Dualshock4 controller;
 
