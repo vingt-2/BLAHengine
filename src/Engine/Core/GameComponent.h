@@ -12,10 +12,12 @@
 
 namespace BLAengine
 {
-    class GameObject;
+	class GameComponentManager;
+	class GameObject;
     class BLACORE_API GameComponent
     {
     public:
+		friend GameComponentManager;
 
         GameComponent(GameObjectReference parentObject);
         virtual ~GameComponent();
@@ -26,7 +28,12 @@ namespace BLAengine
 
         GameObjectReference GetParentObject() const { return m_parentObject; }
 
+		virtual const ComponentReflection::ComponentDescriptor& GetComponentDescriptor() const;
+		
+    	static void InitReflection(ComponentReflection::ComponentDescriptor* typeDesc) {}
+
     private:
+
         GameObjectReference m_parentObject;
     };
 
@@ -55,7 +62,8 @@ namespace BLAengine
 
     public:
         void __RegisterComponent(const blaString& name, ComponentManagerEntry::ComponentFactory factory);
-        blaVector<blaString> GetComponents();
+        blaVector<blaString> ListComponentNames();
+		const ComponentReflection::ComponentDescriptor& GetComponentDescriptor(blaString name);
         GameComponent* CreateComponent(const blaString& componentName, GameObjectReference objRef);
     };
 }

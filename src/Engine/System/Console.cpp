@@ -8,26 +8,6 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(Console);
 
-template<typename T>
-blaVector<T> SplitString(blaString str, const blaString& delimiter)
-{
-    blaVector<T> ret;
-    size_t i = str.find_first_of(delimiter);
-    while (i != blaString::npos)
-    {
-        ret.push_back(blaFromString<T>(str.substr(0, i)));
-        str = str.substr(i + delimiter.length(), str.length() - 1);
-        i = str.find_first_of(delimiter);
-    }
-
-    if (!str.empty())
-    {
-        ret.push_back(blaFromString<T>(str));
-    }
-
-    return ret;
-}
-
 void ConsoleLog::GetLastNLogLines(int n, blaVector<blaString>& outVector)
 {
     outVector.resize(MIN(n, m_consoleLineCache.size()));
@@ -69,6 +49,8 @@ void Console::ExecuteCurrentCommand()
     blaVector<blaString> args = SplitString<blaString>(currentCommand, " ");
 
     const blaString commandName = args[0];
+	
+	m_log.AddLine("> " + currentCommand);
 
     args.erase(args.begin());
     blaString ret = "";
@@ -79,10 +61,8 @@ void Console::ExecuteCurrentCommand()
             ret = command->Call(args);
         }
     }
-
-    m_commandHistory.emplace_back(currentCommand);
-    m_log.AddLine("> " + currentCommand);
     m_log.AddLine("> " + ret);
+	m_commandHistory.emplace_back(currentCommand);
 }
 
 void Console::DoCommandCompletion()

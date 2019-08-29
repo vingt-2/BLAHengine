@@ -29,7 +29,7 @@ bool Scene::DeleteObject(blaString name)
     if (!object)
         return false;
 
-    for (auto meshRenderer : object->GetComponents<MeshRendererComponent>())
+    for (auto meshRenderer : object->ListComponentNames<MeshRendererComponent>())
     {
         m_renderingManager->CancelMeshRendererTicket(meshRenderer);
     }*/

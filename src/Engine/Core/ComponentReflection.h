@@ -82,7 +82,7 @@ namespace ComponentReflection
         virtual blaString ToString(const void* obj, int indentLevel) const override 
         {
             blaString s = "";
-            s += m_typeName + " {\n";
+            s += m_typeName + "\n{\n";
             for (const ExposedMember& member : m_members) 
             {
                 s += blaString(4 * (indentLevel + 1), ' ') + member.m_name + " = ";
@@ -95,18 +95,20 @@ namespace ComponentReflection
         }
     };
 
-#define BEGIN_COMPONENT_DECLARATION(CompName)                                                                         \
+#define BEGIN_COMPONENT_DECLARATION(CompName)                                                               \
     class BLACORE_API CompName : public GameComponent {                                                     \
     friend struct ComponentReflection::DefaultResolver;                                                     \
     friend class ComponentManager;                                                                          \
     static ComponentReflection::ComponentDescriptor ms_componentDescriptor;                                 \
     static void InitReflection(ComponentReflection::ComponentDescriptor*);                                  \
     static GameComponent* Factory(GameObjectReference objR) { return new CompName(objR); }                  \
+	virtual const ComponentReflection::ComponentDescriptor& GetComponentDescriptor() const {				\
+		return ms_componentDescriptor; }																	\
     public:                                                                                                 \
 
 #define END_DECLARATION() };
 
-#define BEGIN_COMPONENT_DESCRIPTION(type)                                                        \
+#define BEGIN_COMPONENT_DESCRIPTION(type)																	\
     ComponentReflection::ComponentDescriptor type::ms_componentDescriptor{type::InitReflection};            \
     void type::InitReflection(ComponentReflection::ComponentDescriptor* typeDesc) {                         \
         using T = type;                                                                                     \
@@ -117,7 +119,7 @@ namespace ComponentReflection
 #define EXPOSE(name)                                                                                        \
             {#name, offsetof(T, name), ComponentReflection::TypeResolver<decltype(T::name)>::get()},
 
-#define END_DESCRIPTION()                                                                                     \
+#define END_DESCRIPTION()                                                                                   \
         };                                                                                                  \
         GameComponentManager* manager = GameComponentManager::GetSingletonInstance();                       \
         if(!manager)                                                                                        \

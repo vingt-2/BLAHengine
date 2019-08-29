@@ -104,6 +104,7 @@
 #define EAT_VAR_NAME_blaF64 blaF64 EAT LPAREN
 #define EAT_VAR_NAME_int int EAT LPAREN
 #define EAT_VAR_NAME_float float EAT LPAREN
+#define EAT_VAR_NAME_blaString blaString EAT LPAREN
 
 #define EAT_VAR_TYPE(a) EXPAND(CAT(EAT_VAR_TYPE_, a))
 #define EAT_VAR_TYPE_int

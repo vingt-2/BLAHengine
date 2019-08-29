@@ -103,4 +103,25 @@ namespace BLAengine
         blaVector<blaString> m_commandHistory;
         blaS32 m_historyCursor;
     };
+
+	template<typename T>
+	blaVector<T> SplitString(blaString str, const blaString& delimiter)
+	{
+		blaVector<T> ret;
+		size_t i = str.find_first_of(delimiter);
+		while (i != blaString::npos)
+		{
+			ret.push_back(blaFromString<T>(str.substr(0, i)));
+			str = str.substr(i + delimiter.length(), str.length() - 1);
+			i = str.find_first_of(delimiter);
+		}
+
+		if (!str.empty())
+		{
+			ret.push_back(blaFromString<T>(str));
+		}
+
+		return ret;
+	}
+
 }
