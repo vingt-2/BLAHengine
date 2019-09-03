@@ -5,6 +5,8 @@
 
 using namespace BLAengine;
 
+BEGIN_COMPONENT_DESCRIPTION(MeshRendererComponent)
+END_DESCRIPTION()
 
 MeshRendererComponent::MeshRendererComponent(GameObjectReference parentObject) : 
     GameComponent(parentObject),

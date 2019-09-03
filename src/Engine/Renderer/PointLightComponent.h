@@ -5,9 +5,7 @@
 
 namespace BLAengine
 {
-    class BLACORE_API PointLightComponent : public GameComponent
-    {
-    public:
+	BEGIN_COMPONENT_DECLARATION(PointLightComponent)
 
         blaVec3 GetLightPosition() const;
         float   GetLightRadius() const;        
@@ -24,5 +22,5 @@ namespace BLAengine
     private:
 
         blaVec3 m_radiosity;
-    };
+    END_DECLARATION()
 }

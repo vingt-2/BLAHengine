@@ -1,5 +1,7 @@
 #include <Common/StdInclude.h>
 
+#include <Engine/Gui/GuiElements.h>
+
 // Todo: This can all fit in GameComponent.h right ?
 // Todo: Support component extension
 // Todo: Support Abstract Component declarations
@@ -9,16 +11,17 @@ namespace BLAengine
     class GameComponent;
 namespace ComponentReflection
 {
-    struct ExposedVarDescriptor 
-    {
-        blaString m_typeName;
-        size_t size;
+	struct ExposedVarDescriptor
+	{
+		blaString m_typeName;
+		size_t size;
 
-        ExposedVarDescriptor(const blaString& name, size_t size) : m_typeName{ name }, size{ size } {}
-        virtual ~ExposedVarDescriptor() {}
-        virtual const blaString& GetName() const { return m_typeName; }
-        virtual blaString ToString(const void* obj, int indentLevel = 0) const { return ""; };
-    };
+		ExposedVarDescriptor(const blaString& name, size_t size) : m_typeName{ name }, size{ size } {}
+		virtual ~ExposedVarDescriptor() {}
+		virtual const blaString& GetName() const { return m_typeName; }
+		virtual blaString ToString(const void* obj, int indentLevel = 0) const { return ""; };
+		virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, const void* obj);
+	};
 
     // Declare the function template that handles primitive types such as int, std::string, etc.:
     template <typename T>
@@ -79,7 +82,7 @@ namespace ComponentReflection
         ComponentDescriptor(const char* name, size_t size, const std::initializer_list<ExposedMember>& init) : ExposedVarDescriptor{ nullptr, 0 }, m_members{ init } 
         {}
 
-        virtual blaString ToString(const void* obj, int indentLevel) const override 
+        blaString ToString(const void* obj, int indentLevel) const override 
         {
             blaString s = "";
             s += m_typeName + "\n{\n";

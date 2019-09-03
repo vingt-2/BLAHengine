@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common/Maths/Maths.h>
+#include <Common/BLASingleton.h>
 
 #include "./GuiWindow.h"
 #include "./GuiMenu.h"
@@ -14,6 +15,8 @@ namespace BLAengine
 {
     class BlaGuiManager
     {
+		BLA_DECLARE_SINGLETON(BlaGuiManager)
+
     public:
         BlaGuiManager(GLFWwindow* glfwWindow) :
             m_window(glfwWindow)
@@ -44,6 +47,8 @@ namespace BLAengine
         blaBool CloseFileBrowser(blaString browserName);
 
         BlaGuiMenu m_menuBar;
+
+		BlaGuiWindow& OpenWindow(blaString name);
 
     private:
 

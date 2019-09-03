@@ -5,8 +5,6 @@
 #include <Editor/EditorSession.h>
 #include <Engine/System/Console.h>
 
-#pragma optimize("", off)
-
 #ifdef BLA_NO_DLL
 using namespace BLAengine;
 

@@ -13,11 +13,11 @@
 #include <Common/FileSystem/Files.h>
 #include <Engine/System/Console.h>
 
-
-#include <memory>
 #include <iomanip>
 
 using namespace BLAengine;
+
+BLA_IMPLEMENT_SINGLETON(BlaGuiManager);
 
 void BLAengineStyleColors(ImGuiStyle* dst)
 {
@@ -77,6 +77,13 @@ void BLAengineStyleColors(ImGuiStyle* dst)
 
 ImFont* f;
 ImFont* f2;
+
+BlaGuiWindow& BlaGuiManager::OpenWindow(blaString name)
+{
+	m_openWindows.insert(blaPair<blaString, BlaGuiWindow>(name, BlaGuiWindow(name, blaIVec2(10, 10))));
+	return m_openWindows[name];
+}
+
 void BlaGuiManager::Init()
 {
     // Setup Dear ImGui context
@@ -108,33 +115,60 @@ void BlaGuiManager::Destroy()
     ImGui::DestroyContext();
 }
 
-BlaGuiElement::~BlaGuiElement()
-{
-    auto child = GetChild();
-
-    while (child != nullptr)
-    {
-        delete child;
-    }
-}
-
 void BlaGuiElement::Render()
 {
     auto child = GetChild();
 
     while (child != nullptr)
     {
-        child->Render();
+		child->Render();
+		child = child->GetNext();
     }
 }
 
-void BlaGuiTextElement::Render()
+void BlaGuiCollapsibleElement::Render()
+{
+	if (ImGui::TreeNodeEx((void*)(intptr_t)this, ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick, GetName().c_str()))
+	{
+		auto child = GetChild();
+
+		while (child != nullptr)
+		{
+			child->Render();
+			child = child->GetNext();
+		}
+
+		ImGui::TreePop();
+	}
+}
+
+void BlaGuiCollapsibleHeaderElement::Render()
+{
+	if (ImGui::CollapsingHeader(GetName().c_str()))
+	{
+		auto child = GetChild();
+
+		while (child != nullptr)
+		{
+			child->Render();
+			child = child->GetNext();
+		}
+	}
+}
+
+void BlaGuiSimpleTextElement::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImGui::Text(m_text.c_str());
     // END OCornut's Dear ImGui Specific Code Now
 
-    BlaGuiElement::Render();
+	BlaGuiElement::Render();
+}
+
+template<>
+void BlaGuiEditElement<blaF32>::Render()
+{
+	ImGui::SliderFloat(GetName().c_str(), m_pToValue, 0, 10);
 }
 
 void BlaGuiWindow::Render()
@@ -157,7 +191,6 @@ void BlaGuiWindow::Render()
 
 void BlaGuiWindow::SetRootElement(BlaGuiElement* imGuiElements)
 {
-    delete m_rootElement;
     m_rootElement = imGuiElements;
 }
 
@@ -254,13 +287,13 @@ void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowP
 {
     m_oneTimeWindows.emplace_back(BLAOneTimeWindow(blaString(""), renderWindowPosition));
 
-    m_oneTimeWindows.back().SetRootElement(new BlaGuiTextElement(textToDraw));
+    m_oneTimeWindows.back().SetRootElement(new BlaGuiSimpleTextElement("", textToDraw));
 }
 
 void BlaGuiManager::OpenConsole(const blaString& consoleName)
 {
     m_openWindows.insert(blaPair<blaString, BlaGuiWindow>(consoleName, BlaGuiWindow(consoleName, blaIVec2(10,10))));
-    m_openWindows[consoleName].SetRootElement(new BlaGuiConsole(Console::GetSingletonInstance()));
+    m_openWindows[consoleName].SetRootElement(new BlaGuiConsole(consoleName, Console::GetSingletonInstance()));
 }
 
 OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection)

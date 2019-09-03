@@ -30,8 +30,6 @@ blaU32 EngineInstance::LoopEngine()
 
     engineInstance->InitializeEngine(renderWindow);
 
-    int framerate = 60;
-
     Dualshock4 controller;
 
     while (!engineInstance->ShouldTerminate())
@@ -54,7 +52,7 @@ blaU32 EngineInstance::LoopEngine()
         engineInstance->PostEngineUpdate();
 
         auto frameEndTime = std::chrono::steady_clock::now();
-        int microSecondsFrameTime = (int)(1000000.f / (float)framerate);
+        int microSecondsFrameTime = (int)(1000000.f / engineInstance->GetTargetFPS());
         auto waitDuration = std::chrono::microseconds(microSecondsFrameTime) - (frameEndTime - frameStartTime);
 
         std::this_thread::sleep_for(waitDuration);
@@ -107,7 +105,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_workingScene->Initialize(m_renderingManager);
 
-    m_guiManager = new BlaGuiManager((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer());
+    m_guiManager = BlaGuiManager::AssignAndReturnSingletonInstance(new BlaGuiManager((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer()));
 
     // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())
@@ -215,7 +213,7 @@ bool EngineInstance::SaveWorkingScene(blaString filepath)
 void EngineInstance::SetupDirLightAndCamera()
 {
     GameObjectReference light = m_workingScene->CreateObject("DirLight");
-    DirectionalLight* dirLight = BLA_CREATE_COMPONENT(DirectionalLight, light);
+    DirectionalLightComponent* dirLight = BLA_CREATE_COMPONENT(DirectionalLightComponent, light);
     ObjectTransform lightT = light->GetTransform();
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
     lightT.SetEulerAngles(-0.93f, 0.f, 0.f);
@@ -242,5 +240,11 @@ BLA_CONSOLE_COMMAND(int, exit)
 BLA_CONSOLE_COMMAND(int, shutdown)
 {
 	EngineInstance::GetSingletonInstance()->RequestShutdown();
+	return 0;
+}
+
+BLA_CONSOLE_COMMAND(int, SetFPS, int fps) 
+{
+	EngineInstance::GetSingletonInstance()->SetTargetFPS(fps);
 	return 0;
 }

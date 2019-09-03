@@ -18,9 +18,11 @@
 #include <Engine/Geometry/PrimitiveGeometry.h>
 #include <Common/FileSystem/Files.h>
 #include <Demos/GameTest/TestPlayerComponent.h>
+#include <Engine/Physics/RigidBodyComponent.h>
+
+#include "AssetsImport/ExternalFormats/OBJImport.h"
 
 #include "EditorSession.h"
-#include "AssetsImport/ExternalFormats/OBJImport.h"
 
 using namespace BLAengine;
 
@@ -124,7 +126,7 @@ void EditorSession::EngineUpdate()
             GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
             if(light.IsValid())
             {
-                if(DirectionalLight* dirLight = light->GetComponent<DirectionalLight>())
+                if(DirectionalLightComponent* dirLight = light->GetComponent<DirectionalLightComponent>())
                 {
                     ObjectTransform& lightT = light->GetTransform();
                     lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(-0.2f, 0.f, 0.f));
@@ -136,7 +138,7 @@ void EditorSession::EngineUpdate()
             GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
             if (light.IsValid())
             {
-                if (DirectionalLight* dirLight = light->GetComponent<DirectionalLight>())
+                if (DirectionalLightComponent* dirLight = light->GetComponent<DirectionalLightComponent>())
                 {
                     ObjectTransform& lightT = light->GetTransform();
                     lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(0.2f, 0.f, 0.f));
@@ -177,7 +179,6 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         windowsMenu.AddMenu(BlaGuiMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest));
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(windowsMenu);
-
         /*
          * Create and store gizmo meshes
          */
@@ -186,7 +187,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         m_testCone = MeshAsset("testCone");
         m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
 
-        /*GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
+        GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
 
         BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
         coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
@@ -207,7 +208,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         coneObject->GetTransform().m_scale = blaVec3(1.f,1.f,1.f);
 
         coneObject->GetTransform().m_posQuat.GetTranslation().y = 3.f;
-        */
+        
 
         return true;
     }
@@ -492,7 +493,10 @@ void EditorSession::DoTestAnimationDemoStuff()
 
     if (g_selectedObject.IsValid())
     {
-        if (g_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
+		if (!m_componentInspector) m_componentInspector = new ComponentInspector();
+		m_componentInspector->InspectGameObject(g_selectedObject);
+
+        //if (g_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
         {
             Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
             GameObjectReference camera = m_workingScene->GetMainCamera()->GetParentObject();

@@ -126,7 +126,7 @@ public:
 
     void FromGameComponent(BLAengine::GameComponent* comp)
     {
-        if(BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp)) 
+        if(BLAengine::DirectionalLightComponent* dirLight = dynamic_cast<BLAengine::DirectionalLightComponent*>(comp)) 
         {
             blaVec3 dir = dirLight->GetDirection();
             m_lightDirection.FillData(dir);
@@ -137,7 +137,7 @@ public:
         blaVec3 dir;
         m_lightDirection.LoadData(dir);
 
-        if (BLAengine::DirectionalLight* dirLight = dynamic_cast<BLAengine::DirectionalLight*>(comp))
+        if (BLAengine::DirectionalLightComponent* dirLight = dynamic_cast<BLAengine::DirectionalLightComponent*>(comp))
             dirLight->SetDirection(dir);
     }
 
@@ -213,10 +213,10 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
 
-        blaVector<BLAengine::DirectionalLight*> dirLights = gobject.GetComponents<BLAengine::DirectionalLight>();
+        blaVector<BLAengine::DirectionalLightComponent*> dirLights = gobject.GetComponents<BLAengine::DirectionalLightComponent>();
         for (size_t i = 0; i < dirLights.size(); i++)
         {
-            BLAengine::DirectionalLight* mrenderer = dirLights[i];
+            BLAengine::DirectionalLightComponent* mrenderer = dirLights[i];
             DirectionalLightSerializer serializer;
             serializer.FromGameComponent(mrenderer);
 

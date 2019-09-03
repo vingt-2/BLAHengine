@@ -32,17 +32,17 @@ bool RenderingManager::CancelMeshRendererTicket(MeshRendererComponent* meshRende
     return true;
 }
 
-blaU32 RenderingManager::RegisterDirectionalLight(DirectionalLight* dirLight, CameraComponent* shadowCamera)
+blaU32 RenderingManager::RegisterDirectionalLight(DirectionalLightComponent* dirLight, CameraComponent* shadowCamera)
 {
     //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
     int renderTicket = ++(this->currentTicket);
-    this->m_ticketedDirLights[renderTicket] = blaPair<DirectionalLight*, CameraComponent*>(dirLight, shadowCamera);
+    this->m_ticketedDirLights[renderTicket] = blaPair<DirectionalLightComponent*, CameraComponent*>(dirLight, shadowCamera);
 
     dirLight->m_renderTicket = this->currentTicket;
     return this->currentTicket;
 }
 
-blaU32 RenderingManager::CancelDirectionalLightTicket(DirectionalLight * dirLight)
+blaU32 RenderingManager::CancelDirectionalLightTicket(DirectionalLightComponent * dirLight)
 {
     int renderTicket = dirLight->m_renderTicket;
     auto itTicket = m_ticketedDirLights.find(renderTicket);
@@ -55,7 +55,7 @@ blaMap<blaU32, MeshRendererComponent*>* RenderingManager::GetTicketedMeshRendere
     return &(m_ticketedMeshRenderers);
 }
 
-blaMap<blaU32, blaPair<DirectionalLight*, CameraComponent*>>* RenderingManager::GetTicketedDirectionalLights()
+blaMap<blaU32, blaPair<DirectionalLightComponent*, CameraComponent*>>* RenderingManager::GetTicketedDirectionalLights()
 {
     return &(m_ticketedDirLights);
 }

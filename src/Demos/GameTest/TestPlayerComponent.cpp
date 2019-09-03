@@ -4,12 +4,14 @@
 #include <Engine/System/InputManager.h>
 #include <Engine/Core/Scene.h>
 #include <Engine/Physics/RigidBodyComponent.h>
+#include <Engine/Core/Timer.h>
 
 using namespace BLAengine;
 
 #define MAX(a,b) a > b ? a : b
 
 BEGIN_COMPONENT_DESCRIPTION(TestPlayerComponent)
+EXPOSE(m_speed)
 END_DESCRIPTION()
 
 TestPlayerComponent::TestPlayerComponent(GameObjectReference parentObject) :
@@ -39,8 +41,10 @@ void TestPlayerComponent::Update()
         }
 
         blaVec2 gxy = inputs->GetGamepadLeftAnalog().GetPosition();
+		
+		m_speed = 5 + 5.f * sinf(Timer::GetSingletonInstanceRead()->GetTime());
 
-        blaVec3 controlInput = 10.f * CameraObject->GetTransform().LocalDirectionToWorld(blaVec3(gxy.x, 0, -gxy.y));
+        blaVec3 controlInput = m_speed * CameraObject->GetTransform().LocalDirectionToWorld(blaVec3(gxy.x, 0, -gxy.y));
 
         controlInput.y = 0.f;
         
@@ -48,7 +52,7 @@ void TestPlayerComponent::Update()
 
         if (inputs->GetGamepadState(BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN).IsRisingEdge())
         {
-            rigidBody->AddImpulse(blaVec3(0.f, 10.f, 0.f));
+            rigidBody->AddImpulse(blaVec3(0.f, 5.f, 0.f));
         }
 
         float controlability = 0.05f;

@@ -712,7 +712,7 @@ int BLAengine::GL33Renderer::SynchWithRenderManager()
     {
         if (m_directionalLightPool.count(ticketedObject.first) == 0)
         {
-            blaPair<DirectionalLight*,CameraComponent*> dirLightAndCamera = ticketedObject.second;
+            blaPair<DirectionalLightComponent*,CameraComponent*> dirLightAndCamera = ticketedObject.second;
 
             DirectionalLightRender* dirLightRender = new DirectionalLightRender();
             dirLightRender->m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);

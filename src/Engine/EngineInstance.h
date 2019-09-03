@@ -34,8 +34,12 @@ namespace BLAengine
         static blaU32 LoopEngine();
 
         void RequestShutdown();
+
+		void SetTargetFPS(int fps) { m_targetFPS = fps; }
+		blaU32 GetTargetFPS() { return m_targetFPS; }
     
     protected:
+		blaS32 m_targetFPS;
 
         virtual bool InitializeEngine(RenderWindow* renderWindow);
         virtual void PreEngineUpdate();

@@ -4,6 +4,9 @@
 
 using namespace BLAengine;
 
+BEGIN_COMPONENT_DESCRIPTION(PointLightComponent)
+END_DESCRIPTION()
+
 // Norm of the default m_scale for Object Transforms...
 #define BLA_SCALE_NORM 1.73205080757f
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Engine/Gui/GuiWindow.h>
-#include <Engine/Game/GameObject.h>
+#include "Engine/Core/GameObject.h"
 
 struct BlaSceneGraphElement 
 {

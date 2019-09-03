@@ -25,8 +25,7 @@ namespace BLAengine
         blaVec3 m_correctionAngularVelocity;
     };
 
-    class BLACORE_API RigidBodyComponent : public GameComponent
-    {
+	BEGIN_COMPONENT_DECLARATION(RigidBodyComponent)
     public:
         blaVec3 m_previousPosition;
         blaVec3 m_previousRotation;
@@ -85,6 +84,6 @@ namespace BLAengine
         blaVec3 m_angularImpulseAccu;
 
         ColliderComponent* m_associatedCollider;
-    };
 
+    END_DECLARATION()
 }

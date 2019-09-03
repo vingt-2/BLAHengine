@@ -30,7 +30,7 @@ const ObjectTransform& GameComponent::GetLocalObjectTransform() const
     return m_parentObject->GetLocalTransform();
 }
 
-void InitEmptyDesc(ComponentReflection::ComponentDescriptor*) {};
+void InitEmptyDesc(ComponentReflection::ComponentDescriptor* d) { d->m_typeName = "Unknown Component"; };
 ComponentReflection::ComponentDescriptor g_emptyDescriptor{InitEmptyDesc};
 const ComponentReflection::ComponentDescriptor& GameComponent::GetComponentDescriptor() const
 {

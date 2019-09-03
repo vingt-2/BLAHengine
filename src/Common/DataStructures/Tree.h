@@ -35,7 +35,7 @@ public:
         m_child(otherIntrusiveTree.GetChild()), m_next(otherIntrusiveTree.GetNext())
     {};
 
-    ~IntrusiveTree()
+    virtual ~IntrusiveTree()
     {
         auto child = m_child;
         while(child != nullptr)

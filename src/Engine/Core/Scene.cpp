@@ -110,7 +110,7 @@ void Scene::Update()
             }
         }
 
-        for (auto dirLightComp : object->GetComponents<DirectionalLight>())
+        for (auto dirLightComp : object->GetComponents<DirectionalLightComponent>())
         {
             CameraComponent* shadowCamera = dirLightComp->GetParentObject()->GetComponent<CameraComponent>();
             if (dirLightComp->m_renderTicket == 0 && shadowCamera != nullptr)

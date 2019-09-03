@@ -3,6 +3,7 @@
 #include <Common/StdInclude.h>
 #include <Engine/EngineInstance.h>
 #include <Engine/Assets/MeshAsset.h>
+#include <Editor/EditorGui/ComponentInspector.h>
 
 namespace BLAengine
 {
@@ -70,6 +71,8 @@ namespace BLAengine
         bool ImportMesh(blaString filepath, blaString name) const;
 
     private:
+
+		ComponentInspector* m_componentInspector = nullptr;
 
         /*
          * Editor State

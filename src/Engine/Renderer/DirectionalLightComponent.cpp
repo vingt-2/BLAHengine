@@ -1,20 +1,23 @@
-#include "DirectionalLight.h"
+#include "DirectionalLightComponent.h"
 #include <Engine/Core/CameraComponent.h>
 #include <Engine/Core/GameObject.h>
 
 using namespace BLAengine;
 
-DirectionalLight::DirectionalLight(GameObjectReference parentObject):
+BEGIN_COMPONENT_DESCRIPTION(DirectionalLightComponent)
+END_DESCRIPTION()
+
+DirectionalLightComponent::DirectionalLightComponent(GameObjectReference parentObject):
     GameComponent(parentObject)
 {
     m_lightDirection = blaVec3(0.f);
     m_renderTicket = 0;
 }
 
-DirectionalLight::~DirectionalLight()
+DirectionalLightComponent::~DirectionalLightComponent()
 {}
 
-void DirectionalLight::Update()
+void DirectionalLightComponent::Update()
 {
     blaVector<CameraComponent*> cameras = GetParentObject()->GetComponents<CameraComponent>();
     if (!cameras.size())
@@ -26,12 +29,12 @@ void DirectionalLight::Update()
     }
 }
 
-void DirectionalLight::SetDirection(blaVec3 direction)
+void DirectionalLightComponent::SetDirection(blaVec3 direction)
 {
     m_lightDirection = direction;
 }
 
-blaVec3 DirectionalLight::GetDirection()
+blaVec3 DirectionalLightComponent::GetDirection()
 {
     const ObjectTransform& t = GetParentObject()->GetTransform();
     return t.LocalDirectionToWorld(m_lightDirection);

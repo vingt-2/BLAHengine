@@ -9,10 +9,7 @@
 
 namespace BLAengine
 {
-    class BLACORE_API MeshRendererComponent : public GameComponent
-    {
-    public:
-
+	BEGIN_COMPONENT_DECLARATION(MeshRendererComponent)
         int m_renderTicket;
 
         MeshAsset* m_mesh;
@@ -36,5 +33,5 @@ namespace BLAengine
     private:
 
         blaMat4* m_modelTransformMatrix;
-    };
+	END_DECLARATION()
 }

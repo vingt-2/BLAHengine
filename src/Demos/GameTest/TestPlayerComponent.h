@@ -11,13 +11,15 @@
 namespace BLAengine
 {
 BEGIN_COMPONENT_DECLARATION(TestPlayerComponent)
-        void Update() override;
+	void Update() override;
 
-		TestPlayerComponent(GameObjectReference parentObject);
-        ~TestPlayerComponent(void) override;
+	TestPlayerComponent(GameObjectReference parentObject);
+	~TestPlayerComponent(void) override;
 
-    private:
+	float m_speed = 1.f;
+	
+	private:
 
-		Dualshock4 m_controller;
+	Dualshock4 m_controller;
 END_DECLARATION()
 }

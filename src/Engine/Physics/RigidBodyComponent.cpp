@@ -5,6 +5,9 @@
 
 using namespace BLAengine;
 
+BEGIN_COMPONENT_DESCRIPTION(RigidBodyComponent)
+END_DESCRIPTION()
+
 RigidBodyComponent::RigidBodyComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
     m_forcesAccu(blaVec3(0)),

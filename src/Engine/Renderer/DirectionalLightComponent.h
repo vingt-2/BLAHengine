@@ -4,12 +4,10 @@
 
 namespace BLAengine
 {
-    class BLACORE_API DirectionalLight : public GameComponent
-    {
-    public:
+    BEGIN_COMPONENT_DECLARATION(DirectionalLightComponent)
 
-        DirectionalLight(GameObjectReference parentObject);
-        ~DirectionalLight(void) override;
+        DirectionalLightComponent(GameObjectReference parentObject);
+        ~DirectionalLightComponent(void) override;
 
         void SetDirection(blaVec3 direction);
         blaVec3 GetDirection();
@@ -21,5 +19,5 @@ namespace BLAengine
     private:
         blaVec3 m_lightDirection;
 
-    };
+    END_DECLARATION()
 }
