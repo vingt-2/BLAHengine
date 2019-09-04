@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComponentInspector.h"
+#include "ComponentInspectorGui.h"
 #include <Engine/Gui/GuiElements.h>
 #include <Engine/Core/GameComponent.h>
 
@@ -23,7 +23,7 @@ void ComponentInspector::InspectGameObject(GameObjectReference gameObject)
 		for(const ComponentReflection::ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members) 
 		{
 			blaString memberTypeAndName = exposedMember.m_type->GetName() + " " + exposedMember.m_name;
-			BlaGuiElement* editElement = exposedMember.m_type->MakeEditGuiElement(memberTypeAndName, (const char*) comp + exposedMember.m_offset);
+			BlaGuiElement* editElement = exposedMember.m_type->MakeEditGuiElement(memberTypeAndName, (char*) comp + exposedMember.m_offset);
 			compEl->AddChild(editElement);
 		}
 		root->AddChild(compEl);

@@ -17,6 +17,7 @@ BEGIN_COMPONENT_DECLARATION(TestPlayerComponent)
 	~TestPlayerComponent(void) override;
 
 	float m_speed = 1.f;
+	GameObjectReference m_mainCameraObject;
 	
 	private:
 

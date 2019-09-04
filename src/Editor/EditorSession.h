@@ -3,7 +3,7 @@
 #include <Common/StdInclude.h>
 #include <Engine/EngineInstance.h>
 #include <Engine/Assets/MeshAsset.h>
-#include <Editor/EditorGui/ComponentInspector.h>
+#include <Editor/EditorGui/ComponentInspectorGui.h>
 
 namespace BLAengine
 {

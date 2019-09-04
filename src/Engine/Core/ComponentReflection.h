@@ -20,7 +20,7 @@ namespace ComponentReflection
 		virtual ~ExposedVarDescriptor() {}
 		virtual const blaString& GetName() const { return m_typeName; }
 		virtual blaString ToString(const void* obj, int indentLevel = 0) const { return ""; };
-		virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, const void* obj);
+		virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj);
 	};
 
     // Declare the function template that handles primitive types such as int, std::string, etc.:

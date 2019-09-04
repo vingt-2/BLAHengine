@@ -206,3 +206,14 @@ void Scene::SetGameObjectParent(const GameObjectReference& parent, const GameObj
         child->m_parent = parent;
     }
 }
+
+blaVector<GameObjectReference> Scene::GetObjects()
+{
+	blaVector<GameObjectReference> ret;
+	for(int i = 0; i < m_sceneObjectsVector.size(); ++i)
+	{
+		ret.push_back(GameObjectReference(i, &m_sceneObjectsVector));
+	}
+
+	return ret;
+}

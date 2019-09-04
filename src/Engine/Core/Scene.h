@@ -51,6 +51,8 @@ namespace BLAengine
 
         void SetGameObjectParent(const GameObjectReference& parent, const GameObjectReference& child);
 
+		blaVector<GameObjectReference> GetObjects();
+
     private:
 
         CameraComponent* m_camera; //TODO: Find in object scene !

@@ -12,6 +12,7 @@ using namespace BLAengine;
 
 BEGIN_COMPONENT_DESCRIPTION(TestPlayerComponent)
 EXPOSE(m_speed)
+EXPOSE(m_mainCameraObject)
 END_DESCRIPTION()
 
 TestPlayerComponent::TestPlayerComponent(GameObjectReference parentObject) :
@@ -27,24 +28,27 @@ void TestPlayerComponent::Update()
 
     auto rigidBody = GetParentObject()->GetComponent<RigidBodyComponent>();
 
+	if(!m_mainCameraObject.IsValid())
+	{
+		m_mainCameraObject  = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetParentObject();
+	}
+
     if (rigidBody)
     {
-        GameObjectReference CameraObject = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetParentObject();
-
-        if (!CameraObject.IsValid())
+        if (!m_mainCameraObject.IsValid())
         {
             return;
         }
-        if(CameraObject->GetParent()->GetName() == "Root")
+        if(m_mainCameraObject->GetParent()->GetName() == "Root")
         {
-            CameraObject->SetParent(GetParentObject());
+            m_mainCameraObject->SetParent(GetParentObject());
         }
 
         blaVec2 gxy = inputs->GetGamepadLeftAnalog().GetPosition();
 		
 		m_speed = 5 + 5.f * sinf(Timer::GetSingletonInstanceRead()->GetTime());
 
-        blaVec3 controlInput = m_speed * CameraObject->GetTransform().LocalDirectionToWorld(blaVec3(gxy.x, 0, -gxy.y));
+        blaVec3 controlInput = m_speed * m_mainCameraObject->GetTransform().LocalDirectionToWorld(blaVec3(gxy.x, 0, -gxy.y));
 
         controlInput.y = 0.f;
         

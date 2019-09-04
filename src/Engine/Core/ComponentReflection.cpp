@@ -1,4 +1,5 @@
 #include "ComponentReflection.h"
+#include <Engine/Core/GameObject.h>
 #include <Common/System.h>
 
 using namespace BLAengine;
@@ -64,7 +65,7 @@ struct F32Descriptor : ExposedVarDescriptor
 		return s;
 	}
 
-	BlaGuiElement* MakeEditGuiElement(const blaString& name, const void* obj) override
+	BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
 	{
 		return new BlaGuiEditElement<blaF32>(name, (float*)obj);
 	}
@@ -97,4 +98,30 @@ ExposedVarDescriptor* ComponentReflection::GetPrimitiveDescriptor<blaString>()
     return &typeDesc;
 }
 
-BlaGuiElement* ExposedVarDescriptor::MakeEditGuiElement(const blaString& name, const void* obj) { return nullptr; }
+struct GameObjectReferenceDescriptor : ExposedVarDescriptor
+{
+	GameObjectReferenceDescriptor() : ExposedVarDescriptor{ "GameObjectReference", sizeof(GameObjectReference) }
+	{
+	}
+
+	blaString ToString(const void* obj, int /* unused */) const override
+	{
+		blaString s = "";
+		s += "GameObject {" + static_cast<const GameObjectReference*>(obj)->GetObject().GetName() + "}";
+		return s;
+	}
+
+	BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+	{
+		return new BlaGuiEditElement<GameObjectReference>(name, static_cast<GameObjectReference*>(obj));
+	}
+};
+
+template <>
+ExposedVarDescriptor* ComponentReflection::GetPrimitiveDescriptor<GameObjectReference>()
+{
+	static GameObjectReferenceDescriptor typeDesc;
+	return &typeDesc;
+}
+
+BlaGuiElement* ExposedVarDescriptor::MakeEditGuiElement(const blaString& name, void* obj) { return nullptr; }

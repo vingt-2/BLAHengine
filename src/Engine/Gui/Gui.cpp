@@ -12,8 +12,10 @@
 #include <Engine/System/InputManager.h>
 #include <Common/FileSystem/Files.h>
 #include <Engine/System/Console.h>
+#include <Engine/Core/Scene.h>
 
 #include <iomanip>
+#include "Engine/EngineInstance.h"
 
 using namespace BLAengine;
 
@@ -165,10 +167,58 @@ void BlaGuiSimpleTextElement::Render()
 	BlaGuiElement::Render();
 }
 
+//template<>
+//void BlaGuiEditElement<blaF32>::Render()
+//{
+//	ImGui::SliderFloat(GetName().c_str(), m_pToValue, 0, 10);
+//}
+
 template<>
 void BlaGuiEditElement<blaF32>::Render()
 {
-	ImGui::SliderFloat(GetName().c_str(), m_pToValue, 0, 10);
+	ImGui::InputFloat(GetName().c_str(), m_pToValue, 0.1f, 1.f, 3);
+}
+
+template<>
+void BlaGuiEditElement<blaF64>::Render()
+{
+	ImGui::InputDouble(GetName().c_str(), m_pToValue, 0.1, 1.0);
+}
+
+template<>
+void BlaGuiEditElement<blaS32>::Render()
+{
+	ImGui::InputInt(GetName().c_str(), m_pToValue, 1, 10);
+}
+
+template<>
+void BlaGuiEditElement<blaVec2>::Render()
+{
+	ImGui::InputFloat2(GetName().c_str(), &(m_pToValue->x));
+}
+
+template<>
+void BlaGuiEditElement<blaVec3>::Render()
+{
+	ImGui::InputFloat3(GetName().c_str(), &(m_pToValue->x));
+}
+
+template<>
+void BlaGuiEditElement<GameObjectReference>::Render()
+{
+	ImGui::Columns(2);
+	ImGui::Text(GetName().c_str());
+	ImGui::NextColumn();
+	if(m_pToValue->IsValid())
+	{
+		bool Selected = false;
+		ImGui::Selectable(m_pToValue->GetObject().GetName().c_str(), Selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0,0));
+	}
+	else
+	{
+		ImGui::Text("Invalid Object Reference");
+	}
+	ImGui::Columns();
 }
 
 void BlaGuiWindow::Render()

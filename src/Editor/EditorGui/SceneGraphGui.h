@@ -1,19 +1,17 @@
 #pragma once
 
-#include <Engine/Gui/GuiWindow.h>
+#include <Engine/Gui/GuiManager.h>
 #include "Engine/Core/GameObject.h"
 
-struct BlaSceneGraphElement 
+namespace BLAengine
 {
-	BLAengine::GameObjectReference m_object;
-};
+	class SceneGraphGui
+	{
+		BlaGuiWindow& m_window;
 
-class BlaGuiTreeElement
-{
-    virtual blaString GetName() = 0;
-};
+	public:
+		SceneGraphGui() : m_window(BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
 
-class BlaGuiTree
-{
-
-};
+		void Update();
+	};
+}
