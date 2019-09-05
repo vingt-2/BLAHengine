@@ -167,11 +167,11 @@ void BlaGuiSimpleTextElement::Render()
 	BlaGuiElement::Render();
 }
 
-//template<>
-//void BlaGuiEditElement<blaF32>::Render()
-//{
-//	ImGui::SliderFloat(GetName().c_str(), m_pToValue, 0, 10);
-//}
+template<>
+void BlaGuiEditElement<bool>::Render()
+{
+	ImGui::Checkbox(GetName().c_str(), m_pToValue);
+}
 
 template<>
 void BlaGuiEditElement<blaF32>::Render()

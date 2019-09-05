@@ -404,71 +404,9 @@ void EditorSession::DoTestAnimationDemoStuff()
                 }
             }
         }
-        else if (auto animCmp = animationObject->GetComponent<AnimationComponent>())
-        {
-            if (animCmp->m_animation == nullptr)
-            {
-                animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_04.bvh")[0];
-            }
-            else
-            {
-                blaF32 animDt = 1.0f / animCmp->m_animation->GetSamplingRate();
-                const EngineInstance* engine = GetSingletonInstanceRead();
-
-                blaF32 gameDt = Timer::GetSingletonInstance()->GetDelta();
-                blaF32 animStep = gameDt / animDt;
-
-                if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown() || inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
-                {
-                    m_autoPlay = false;
-                }
-
-                if (m_autoPlay)
-                {
-                    m_frameIndex += animStep;
-                }
-                else
-                {
-                    if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown())
-                    {
-                        m_frameIndex += animStep;
-                        m_lastTimePlayerInteraction = Timer::GetSingletonInstance()->GetTime();
-                    }
-                    if (inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
-                    {
-                        m_frameIndex -= animStep;
-                        m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
-                        m_lastTimePlayerInteraction = Timer::GetSingletonInstance()->GetTime();
-                    }
-
-                    if (Timer::GetSingletonInstance()->GetTime() - m_lastTimePlayerInteraction > 5.0f)
-                    {
-                        m_autoPlay = true;
-                    }
-                }
-
-                m_frameIndex = m_frameIndex >= animCmp->m_animation->GetFrameCount() ? 0.f : m_frameIndex;
-
-                blaVector<blaPosQuat> jointTransformsW;
-                animCmp->m_animation->EvaluateAnimation(static_cast<int>(m_frameIndex), jointTransformsW);
-
-                for (auto jointW : jointTransformsW)
-                {
-                    DebugDraw::DrawBasis(jointW, 1.f);
-                }
-
-                blaVector<blaPair<blaVec3, blaVec3>> bones;
-
-                SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, animCmp->m_animation->GetSkeleton(), jointTransformsW);
-
-                blaF32 scaleFactor = 0.1f;
-
-                for (size_t i = 0; i < bones.size(); ++i)
-                {
-                    m_debug->DrawLine(scaleFactor * bones[i].first, scaleFactor * bones[i].second);
-                }
-            }
-        }
+		else if (auto animCmp = animationObject->GetComponent<AnimationComponent>())
+		{
+		}
     }
     else
     {
@@ -694,4 +632,15 @@ void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)
 		DebugDraw::DrawLine(blaVec3(sizeSpacing / 2, 0, iSpacing), blaVec3(-sizeSpacing / 2, 0, iSpacing), color);
 		DebugDraw::DrawLine(blaVec3(iSpacing, 0, sizeSpacing / 2), blaVec3(iSpacing, 0, -sizeSpacing / 2), color);
 	}
+}
+
+BLA_CONSOLE_COMMAND(int, SelectObject, blaString name)
+{
+	GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+
+	if(obj.IsValid())
+	{
+		g_selectedObject = obj;
+	}
+	return 0;
 }
