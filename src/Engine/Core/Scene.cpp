@@ -217,3 +217,4 @@ blaVector<GameObjectReference> Scene::GetObjects()
 
 	return ret;
 }
+

@@ -134,6 +134,7 @@ void EngineInstance::EngineUpdate()
 void EngineInstance::PostEngineUpdate()
 {
     m_debug->Update();
+
     m_renderer->Update();
 
     m_guiManager->Update();
@@ -142,6 +143,8 @@ void EngineInstance::PostEngineUpdate()
     m_inputManager->Update();
 
     m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+	//m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
 }

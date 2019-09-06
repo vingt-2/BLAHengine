@@ -10,7 +10,7 @@ namespace BLAengine
 		BlaGuiWindow& m_window;
 
 	public:
-		SceneGraphGui() : m_window(BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
+		SceneGraphGui() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
 
 		void Update();
 	};

@@ -30,7 +30,7 @@ void TestPlayerComponent::Update()
 
 	if(!m_mainCameraObject.IsValid())
 	{
-		m_mainCameraObject  = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetParentObject();
+		m_mainCameraObject = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetParentObject();
 	}
 
     if (rigidBody)

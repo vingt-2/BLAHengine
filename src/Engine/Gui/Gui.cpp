@@ -13,6 +13,7 @@
 #include <Common/FileSystem/Files.h>
 #include <Engine/System/Console.h>
 #include <Engine/Core/Scene.h>
+#include <Engine/Renderer/GL33Renderer.h>
 
 #include <iomanip>
 #include "Engine/EngineInstance.h"
@@ -80,10 +81,15 @@ void BLAengineStyleColors(ImGuiStyle* dst)
 ImFont* f;
 ImFont* f2;
 
-BlaGuiWindow& BlaGuiManager::OpenWindow(blaString name)
+BlaGuiWindow* BlaGuiManager::OpenWindow(blaString name)
 {
-	m_openWindows.insert(blaPair<blaString, BlaGuiWindow>(name, BlaGuiWindow(name, blaIVec2(10, 10))));
+	m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, new BlaGuiWindow(name, blaIVec2(10, 10))));
 	return m_openWindows[name];
+}
+
+void BlaGuiManager::OpenWindow(blaString name, BlaGuiWindow* window)
+{
+	m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, window));
 }
 
 void BlaGuiManager::Init()
@@ -94,6 +100,8 @@ void BlaGuiManager::Init()
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     f = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-Light.ttf", 16.0f);
     f2 = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-thin.ttf", 18.0f);
@@ -111,6 +119,11 @@ void BlaGuiManager::Init()
 
 void BlaGuiManager::Destroy()
 {
+	for(auto window : m_openWindows)
+	{
+		delete window.second;
+	}
+
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -244,7 +257,7 @@ void BlaGuiWindow::SetRootElement(BlaGuiElement* imGuiElements)
     m_rootElement = imGuiElements;
 }
 
-void BLAOneTimeWindow::Render()
+void BlaOneTimeWindow::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImVec2 position(m_windowPosition.x, m_windowPosition.y);
@@ -262,6 +275,27 @@ void BLAOneTimeWindow::Render()
     // END OCornut's Dear ImGui Specific Code Now
 }
 
+void BlaGuiRenderWindow::Render()
+{
+	if(GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_renderer)) 
+	{
+		// BEGIN OCornut's Dear ImGui Specific Code Now
+		ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+		ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
+		ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
+	
+		ImGui::GetWindowDrawList()->AddImage(
+			(void*)renderer->GetDisplayBufferTexture(), 
+			ImGui::GetWindowPos(),
+			ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(), ImGui::GetWindowPos().y + ImGui::GetWindowHeight()),
+			ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::End();
+
+		m_renderer->SetRenderSize(blaVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
+	}
+}
+
 bool g_show_demo_window = false;
 bool g_debugFileBrowser = false;
 
@@ -270,7 +304,38 @@ void BlaGuiManager::Update()
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
+
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     ImGui::NewFrame();
+
+	if(m_showDockspace)
+	{
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;// | ImGuiWindowFlags_NoDocking;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	
+		bool p_open;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Dockspace", &p_open, window_flags);
+		
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
+
+		// DockSpace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+		}
+	}
 
     ImGui::PushFont(f); // PopFont()
 
@@ -279,8 +344,8 @@ void BlaGuiManager::Update()
     blaVector<blaString> toClose;
     for (auto& window : m_openWindows)
     {
-        window.second.Render();
-        if(window.second.ShouldClose())
+        window.second->Render();
+        if(window.second->ShouldClose())
         {
             toClose.push_back(window.first);
         }
@@ -288,6 +353,7 @@ void BlaGuiManager::Update()
 
     for(auto& window : toClose)
     {
+		delete m_openWindows[window];
         m_openWindows.erase(window);
     }
 
@@ -335,15 +401,15 @@ blaBool BlaGuiManager::IsMouseOverGui() const
 
 void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowPosition)
 {
-    m_oneTimeWindows.emplace_back(BLAOneTimeWindow(blaString(""), renderWindowPosition));
+    m_oneTimeWindows.emplace_back(BlaOneTimeWindow(blaString(""), renderWindowPosition));
 
     m_oneTimeWindows.back().SetRootElement(new BlaGuiSimpleTextElement("", textToDraw));
 }
 
 void BlaGuiManager::OpenConsole(const blaString& consoleName)
 {
-    m_openWindows.insert(blaPair<blaString, BlaGuiWindow>(consoleName, BlaGuiWindow(consoleName, blaIVec2(10,10))));
-    m_openWindows[consoleName].SetRootElement(new BlaGuiConsole(consoleName, Console::GetSingletonInstance()));
+    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(consoleName, new BlaGuiWindow(consoleName, blaIVec2(10,10))));
+    m_openWindows[consoleName]->SetRootElement(new BlaGuiConsole(consoleName, Console::GetSingletonInstance()));
 }
 
 OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection)

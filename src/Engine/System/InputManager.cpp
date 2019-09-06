@@ -81,6 +81,11 @@ void InputStateSetter::SetKey(BLAKeyboard key, blaF32 time, blaBool down)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
 
+	if(inputManager->m_lockKeyboard) 
+	{
+		return;
+	}
+
     while (inputManager->m_lockInputs);
 
     if (down)
@@ -155,11 +160,6 @@ void InputStateSetter::SetMouseScrollDelta(blaF32 mouseScrollDelta)
 void InputStateSetter::SetGamepadSticks(const blaVec2& leftStick, const blaVec2& rightStick)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
-
-    if (inputManager->m_lockMouse)
-    {
-        return;
-    }
 
     while (inputManager->m_lockInputs);
 

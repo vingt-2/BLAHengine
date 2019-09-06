@@ -38,7 +38,7 @@ void AnimationComponent::Update()
 		const EngineInstance* engine = EngineInstance::GetSingletonInstanceRead();
 
 		blaF32 gameDt = Timer::GetSingletonInstance()->GetDelta();
-		blaF32 animStep = gameDt / animDt;
+		blaS32 animStep = (blaS32) gameDt / animDt;
 
 		if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown() || inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
 		{

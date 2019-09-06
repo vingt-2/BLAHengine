@@ -163,6 +163,8 @@ namespace BLAengine
         bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
         void SetupPointLightRenderSphere(blaVector<blaVec3> sphereMeshVertices, blaVector<GLuint> indices);
 
+		GLuint GetDisplayBufferTexture() const { return m_GBuffer.m_displayTextureTarget; }
+
     protected:
 
         int SynchWithRenderManager();

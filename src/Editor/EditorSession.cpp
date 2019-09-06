@@ -152,6 +152,10 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 {
     if(EngineInstance::InitializeEngine(renderWindow))
     {
+		m_renderer->SetRenderToFrameBufferOnly(true);
+
+		m_guiManager->OpenWindow("Game Window", new BlaGuiRenderWindow(m_renderer, "Game Window", blaVec2(0.f,0.f)));
+
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
 
         m_editorState = new EditorState();

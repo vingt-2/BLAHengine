@@ -21,6 +21,7 @@ namespace BLAengine
         BlaGuiManager(GLFWwindow* glfwWindow) :
             m_window(glfwWindow)
         {
+			m_showDockspace = true;
             Init();
             m_lastFileBrowserOpenDirectory = "./";
         }
@@ -48,7 +49,9 @@ namespace BLAengine
 
         BlaGuiMenu m_menuBar;
 
-		BlaGuiWindow& OpenWindow(blaString name);
+		BlaGuiWindow* OpenWindow(blaString name);
+
+		void OpenWindow(blaString name, BlaGuiWindow* window);
 
     private:
 
@@ -57,12 +60,14 @@ namespace BLAengine
 
         blaVector<BlaGuiWindow> m_oneTimeWindows;
 
-        blaMap<blaString, BlaGuiWindow> m_openWindows;
+        blaMap<blaString, BlaGuiWindow*> m_openWindows;
 
         blaMap<blaString, BlaFileBrowser*> m_openBrowsers;
 
         blaString m_lastFileBrowserOpenDirectory;
 
         GLFWwindow* m_window;
+
+		bool m_showDockspace;
     };
 }

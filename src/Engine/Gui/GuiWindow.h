@@ -6,7 +6,7 @@
 namespace BLAengine
 {
     class BlaGuiElement;
-
+	class Renderer;
     class BlaGuiWindow
     {
     public:
@@ -84,16 +84,33 @@ namespace BLAengine
         bool m_bOpenWindow;
     };
 
-    class BLAOneTimeWindow : public BlaGuiWindow
+    class BlaOneTimeWindow : public BlaGuiWindow
     {
     public:
-        BLAOneTimeWindow() : BlaGuiWindow()
+        BlaOneTimeWindow() : BlaGuiWindow()
         {}
 
-        BLAOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition) :
+        BlaOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition) :
             BlaGuiWindow(windowName, windowPosition)
         {};
 
         void Render() override;
     };
+
+	class BlaGuiRenderWindow : public BlaGuiWindow
+	{
+	public:
+		BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow() , m_renderer(renderer)
+		{}
+
+		BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition) :
+			BlaGuiWindow(windowName, windowPosition) , m_renderer(renderer)
+		{};
+
+		void Render() override;
+
+	private:
+
+		Renderer* m_renderer;
+	};
 }

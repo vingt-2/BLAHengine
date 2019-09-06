@@ -25,7 +25,7 @@ void GL33Renderer::ViewportResize(int width, int height)
     m_GBuffer.InitializeGBuffer();
 }
 
-Ray BLAengine::GL33Renderer::ScreenToRay(blaVec2 screenSpaceCoord)
+Ray GL33Renderer::ScreenToRay(blaVec2 screenSpaceCoord)
 {
     blaVec3 rayDirection = blaVec3(1.f);
     rayDirection.x = (2.0f * screenSpaceCoord.x - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[0][0];
@@ -124,9 +124,17 @@ bool GL33Renderer::Update()
             DrawDirectionalLight(*dirLightRender);
         }
 
-        DrawDisplayBuffer();
         RenderDebug();
 
+		if(!m_renderToFrameBufferOnly) 
+		{
+			DrawDisplayBuffer();
+		}
+		else
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		}
     }
 
     CleanUpFrameDebug();
@@ -194,8 +202,8 @@ void GL33Renderer::RenderGBuffer()
             }
         }
     }
-    glUseProgram(0);
 
+    glUseProgram(0);
 }
 
 void GL33Renderer::DrawDisplayBuffer()
@@ -203,7 +211,7 @@ void GL33Renderer::DrawDisplayBuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    DrawColorBufferOnScreen(glm::vec2(0,0), m_renderSize, m_GBuffer.m_displayTextureTarget);
+    DrawColorBufferOnScreen(blaVec2(0,0), m_renderSize, m_GBuffer.m_displayTextureTarget);
 }
 
 RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRenderer, int type)
@@ -1211,7 +1219,7 @@ void GL33Renderer::RenderDebugLines()
 {
     LoadDebugLines();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
 
     glViewport(0, 0, m_renderSize.x, m_renderSize.y);
     

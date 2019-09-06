@@ -51,21 +51,27 @@ namespace BLAengine
         virtual void CleanUpPools() = 0;
 
         bool GetStatus()        const   { return m_isContextEnabled; }
-        glm::vec2 GetRenderSize()    const   { return m_renderSize; }
+        blaVec2 GetRenderSize()    const   { return m_renderSize; }
+
+		//TODO: Remove, improve blaguiwindow design ...
+		void SetRenderSize(blaVec2 renderSize) { m_renderSize = renderSize; }
 
         void SetCamera(CameraComponent* camera);
 
         Renderer();
-        virtual ~Renderer(void){};
+		virtual ~Renderer(void) = default;
+
+		void SetRenderToFrameBufferOnly(bool renderToFrameBuffer) { m_renderToFrameBufferOnly = renderToFrameBuffer; }
 
     protected:
         RenderWindow* m_renderWindow;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
 
-        glm::vec2 m_renderSize;
+		blaVec2 m_renderSize;
         bool m_isContextEnabled;
         bool m_isFullScreen;
+		bool m_renderToFrameBufferOnly;
     };
 
 

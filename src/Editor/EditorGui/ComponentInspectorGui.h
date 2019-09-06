@@ -12,7 +12,7 @@ namespace BLAengine
 		BlaGuiWindow& m_window;
 
 	public:
-		ComponentInspector() : m_window(BlaGuiManager::GetSingletonInstance()->OpenWindow("Component Inspector")) {}
+		ComponentInspector() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Component Inspector")) {}
 
 		void InspectGameObject(GameObjectReference gameObject);
 
