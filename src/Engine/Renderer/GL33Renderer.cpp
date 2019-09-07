@@ -16,7 +16,7 @@ GL33Renderer::~GL33Renderer()
 
 void GL33Renderer::ViewportResize(int width, int height)
 {
-    m_renderSize = glm::vec2(width, height);
+    m_renderSize = blaIVec2(width, height);
 
     m_mainRenderCamera.SetPerspective(m_renderSize);
 
@@ -58,14 +58,18 @@ GL33RenderObject::~GL33RenderObject() {}
 bool GL33Renderer::Update()
 {
     int width, height;
-    m_renderWindow->GetSize(width, height);
 
-    if (width != m_renderSize.x || height != m_renderSize.y)
-    {
-		Console::LogMessage("Resizing Viewport: " + std::to_string(width) + "*" + std::to_string(height));
+	if (!m_renderToFrameBufferOnly)
+	{
+		m_renderWindow->GetSize(width, height);
 
-        ViewportResize(width, height);
-    }
+		if (width != m_renderSize.x || height != m_renderSize.y)
+		{
+			Console::LogMessage("Resizing Viewport: " + std::to_string(width) + "*" + std::to_string(height));
+
+			ViewportResize(width, height);
+		}
+	}
 
     SynchWithRenderManager();
         
@@ -675,6 +679,17 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return true;
+}
+
+void GL33Renderer::SetRenderSize(blaIVec2 renderSize)
+{
+	if (renderSize.x != m_renderSize.x || renderSize.y != m_renderSize.y)
+	{
+		Console::LogMessage("Resizing Viewport: " + std::to_string(renderSize.x) + "*" + std::to_string(renderSize.y));
+
+		ViewportResize(renderSize.x, renderSize.y);
+	}
+	Renderer::SetRenderSize(renderSize);
 }
 
 int BLAengine::GL33Renderer::SynchWithRenderManager()

@@ -69,10 +69,10 @@ void AnimationComponent::Update()
 		blaVector<blaPosQuat> jointTransformsW;
 		m_animation->EvaluateAnimation(static_cast<int>(m_frameIndex), jointTransformsW);
 
-		for (auto jointW : jointTransformsW)
+		/*for (auto jointW : jointTransformsW)
 		{
 			DebugDraw::DrawBasis(jointW, 1.f);
-		}
+		}*/
 
 		blaVector<blaPair<blaVec3, blaVec3>> bones;
 

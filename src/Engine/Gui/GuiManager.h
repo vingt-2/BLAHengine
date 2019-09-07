@@ -53,6 +53,8 @@ namespace BLAengine
 
 		void OpenWindow(blaString name, BlaGuiWindow* window);
 
+		const BlaGuiWindow* GetWindow(const blaString& name) const { return m_openWindows.at(name); }
+
     private:
 
         void Init();

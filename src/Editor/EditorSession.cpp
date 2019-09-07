@@ -26,8 +26,6 @@
 
 using namespace BLAengine;
 
-GameObjectReference g_selectedObject;
-
 void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
 {
     for (auto path : *dragAndDropInput)
@@ -223,7 +221,7 @@ bool EditorSession::LoadNewScene()
 {
     EngineInstance::LoadNewScene();
 
-    g_selectedObject = GameObjectReference::InvalidReference();
+    m_selectedObject = GameObjectReference::InvalidReference();
 
     MakeSkyObject();
 
@@ -247,7 +245,7 @@ bool EditorSession::LoadWorkingScene(blaString filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
-    g_selectedObject = GameObjectReference::InvalidReference();
+    m_selectedObject = GameObjectReference::InvalidReference();
 
     MakeSkyObject();
 
@@ -304,7 +302,12 @@ void EditorSession::DoTestAnimationDemoStuff()
 {
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
-    Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
+	Ray screenRay;
+	if(const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
+	{
+		blaVec2 cursorPos = guiRenderWindow->GetMousePointerScreenSpaceCoordinates();
+		screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+	}
 
     ColliderComponent::CollisionContact contactPoint;
     GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
@@ -423,24 +426,20 @@ void EditorSession::DoTestAnimationDemoStuff()
     auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
     if (leftMouseButton.IsRisingEdge())
     {
-        g_selectedObject = hoverObject;
+        SetSelectedObject(hoverObject);
         
-        if(g_selectedObject.IsValid())
-            Console::LogMessage("Picked object: " + g_selectedObject->GetName());
+        if(m_selectedObject.IsValid())
+            Console::LogMessage("Picked object: " + m_selectedObject->GetName());
     }
     if (leftMouseButton.IsFallingEdge())
     {
-        g_selectedObject = GameObjectReference();
+        m_selectedObject.Reset();
     }
 
-    if (g_selectedObject.IsValid())
-    {
-		if (!m_componentInspector) m_componentInspector = new ComponentInspector();
-		m_componentInspector->InspectGameObject(g_selectedObject);
-
-        //if (g_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
+    if (m_selectedObject.IsValid())
+	{
+        //if (m_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
         {
-            Ray screenRay = m_renderer->ScreenToRay(m_renderWindow->GetMousePointerScreenSpaceCoordinates());
             GameObjectReference camera = m_workingScene->GetMainCamera()->GetParentObject();
 
             blaVec3 camUp, camLeft;
@@ -448,9 +447,9 @@ void EditorSession::DoTestAnimationDemoStuff()
             camUp = camera->GetTransform().GetRotation() * blaVec3(0.f, 1.f, 0.f);
             camLeft = camera->GetTransform().GetRotation() * blaVec3(1.f, 0.f, 0.f);
 
-            RaycastHit hit = screenRay.RayToPlaneIntersection(g_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
+            RaycastHit hit = screenRay.RayToPlaneIntersection(m_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
 
-            ObjectTransform& selectedObjectTransform = g_selectedObject->GetTransform();
+            ObjectTransform& selectedObjectTransform = m_selectedObject->GetTransform();
 
             if(inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsUp())
             {
@@ -627,6 +626,17 @@ bool EditorSession::ImportMesh(blaString filepath, blaString name) const
     return true;
 }
 
+void EditorSession::SetSelectedObject(GameObjectReference selectedObject)
+{
+	if(m_selectedObject != selectedObject)
+	{
+		if (!m_componentInspector) m_componentInspector = new ComponentInspector();
+		m_componentInspector->InspectGameObject(selectedObject);
+	}
+
+	m_selectedObject = selectedObject;
+}
+
 void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)
 {
 	for (int i = -size / 2; i <= size / 2; i++)
@@ -644,7 +654,10 @@ BLA_CONSOLE_COMMAND(int, SelectObject, blaString name)
 
 	if(obj.IsValid())
 	{
-		g_selectedObject = obj;
+		if(EditorSession* editorSession = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance()))
+		{
+			editorSession->SetSelectedObject(obj);
+		}
 	}
 	return 0;
 }

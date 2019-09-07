@@ -21,7 +21,7 @@ namespace BLAengine
         virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
         virtual blaString GetMaxGLVersion() const = 0;
 
-        virtual void  MakeGLContextCurrent() = 0;
+        virtual void MakeGLContextCurrent() = 0;
         virtual void UpdateWindowAndBuffers() = 0;
 
         virtual void GetSize(int &width, int &height) const = 0;

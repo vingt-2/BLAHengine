@@ -142,7 +142,7 @@ void EngineInstance::PostEngineUpdate()
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
-    m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+    //m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
 	//m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
 
     // Final update of the frame

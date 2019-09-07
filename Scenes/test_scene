@@ -1,13 +1,13 @@
 {
     "Scene": {
         "Objects": [
-			{
-                "Name": "sponza",
+            {
+                "Name": "Root",
                 "ObjectTransform": {
                     "position": {
                         "x": 0.0,
-                        "y": 3.6,
-                        "z": -1.0
+                        "y": 0.0,
+                        "z": 0.0
                     },
                     "rotation": {
                         "x": 0.0,
@@ -16,19 +16,100 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 1,
-                        "y": 1,
-                        "z": 1
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": []
+            },
+            {
+                "Name": "DirLight",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 20.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": -0.4484228193759918,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 0.8938215374946594
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
                     }
                 },
                 "Components": [
                     {
                         "polymorphic_id": 2147483649,
-                        "polymorphic_name": "MeshRendererSerializer",
+                        "polymorphic_name": "DirectionalLightSerializer",
                         "ptr_wrapper": {
                             "id": 2147483649,
                             "data": {
-                                "TriangleMesh": "x-wing",
+                                "lightDirection": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "EditorCamera",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.932330310344696,
+                        "y": 1.3885271549224854,
+                        "z": 4.422156810760498
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": []
+            },
+            {
+                "Name": "SkySphere",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2147483650,
+                        "polymorphic_name": "MeshRendererSerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483650,
+                            "data": {
+                                "TriangleMesh": "SkySphere",
                                 "Material": [
                                     "BlankDiffuseMat"
                                 ]
@@ -36,6 +117,83 @@
                         }
                     }
                 ]
+            },
+            {
+                "Name": "coneObject",
+                "ObjectTransform": {
+                    "position": {
+                        "x": -0.42000049352645876,
+                        "y": -0.002128834603354335,
+                        "z": -0.0000019073486328125
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": [
+                    {
+                        "polymorphic_id": 2,
+                        "ptr_wrapper": {
+                            "id": 2147483651,
+                            "data": {
+                                "TriangleMesh": "testCone",
+                                "Material": [
+                                    "BlankDiffuseMat"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "polymorphic_id": 2147483651,
+                        "polymorphic_name": "RigidBodySerializer",
+                        "ptr_wrapper": {
+                            "id": 2147483652,
+                            "data": {
+                                "MassTensor": {
+                                    "a": 1.0,
+                                    "b": 0.0,
+                                    "c": 0.0,
+                                    "d": 0.0,
+                                    "e": 1.0,
+                                    "f": 0.0,
+                                    "g": 0.0,
+                                    "h": 0.0,
+                                    "i": 1.0
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "Name": "AnimatedObject",
+                "ObjectTransform": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "Components": []
             }
         ]
     }

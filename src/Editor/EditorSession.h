@@ -38,6 +38,10 @@ namespace BLAengine
 
         ~EditorSession() { EngineInstance::~EngineInstance(); };
 
+		GameObjectReference GetSelectedObject() { return m_selectedObject; }
+
+		void SetSelectedObject(GameObjectReference selectedObject);
+
     private:
 
 		void DrawGrid(int size, float spacing, const blaVec3& color);
@@ -71,6 +75,8 @@ namespace BLAengine
         bool ImportMesh(blaString filepath, blaString name) const;
 
     private:
+
+		GameObjectReference m_selectedObject;
 
 		ComponentInspector* m_componentInspector = nullptr;
 

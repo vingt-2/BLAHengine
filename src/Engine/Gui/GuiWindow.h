@@ -100,17 +100,19 @@ namespace BLAengine
 	class BlaGuiRenderWindow : public BlaGuiWindow
 	{
 	public:
-		BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow() , m_renderer(renderer)
+		BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow(), m_pRenderer(renderer)
 		{}
 
 		BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition) :
-			BlaGuiWindow(windowName, windowPosition) , m_renderer(renderer)
+			BlaGuiWindow(windowName, windowPosition) , m_pRenderer(renderer)
 		{};
 
 		void Render() override;
 
-	private:
+		blaVec2 GetMousePointerScreenSpaceCoordinates() const { return m_cursorScreenSpacePosition; }
 
-		Renderer* m_renderer;
+	private:
+		blaVec2 m_cursorScreenSpacePosition;
+		Renderer* m_pRenderer;
 	};
 }

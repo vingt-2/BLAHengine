@@ -165,6 +165,8 @@ namespace BLAengine
 
 		GLuint GetDisplayBufferTexture() const { return m_GBuffer.m_displayTextureTarget; }
 
+		virtual void SetRenderSize(blaIVec2 renderSize);
+
     protected:
 
         int SynchWithRenderManager();

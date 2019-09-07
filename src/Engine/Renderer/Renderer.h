@@ -54,7 +54,7 @@ namespace BLAengine
         blaVec2 GetRenderSize()    const   { return m_renderSize; }
 
 		//TODO: Remove, improve blaguiwindow design ...
-		void SetRenderSize(blaVec2 renderSize) { m_renderSize = renderSize; }
+		virtual void SetRenderSize(blaIVec2 renderSize);
 
         void SetCamera(CameraComponent* camera);
 
@@ -68,7 +68,7 @@ namespace BLAengine
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
 
-		blaVec2 m_renderSize;
+		blaIVec2 m_renderSize;
         bool m_isContextEnabled;
         bool m_isFullScreen;
 		bool m_renderToFrameBufferOnly;

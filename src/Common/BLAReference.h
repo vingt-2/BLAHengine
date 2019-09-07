@@ -34,6 +34,8 @@ public:
         return !(*this == other);
     }
 
+	void Reset() { *this = InvalidReference(); }
+
     static BLAReference InvalidReference() { return BLAReference(); };
 protected:
     BLAReference(blaIndex idx, blaVector<Object>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
