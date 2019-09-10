@@ -7,11 +7,19 @@
 namespace BLAengine
 {
 	class GameObject;
+
 	class BLACORE_API GameObjectReference : public BLAReference<GameObject>
 	{
         BLA_DECLARE_REFERENCE(GameObjectReference, GameObject)
 		friend class Scene;
 	};
+
+	//Todo: Need to make const references work ...
+	//class BLACORE_API GameObjectConstReference : public BLAReference<const GameObject>
+	//{
+	//	BLA_DECLARE_REFERENCE(GameObjectConstReference, const GameObject)
+	//	friend class Scene;
+	//};
 
     class BLACORE_API GameObject
     {

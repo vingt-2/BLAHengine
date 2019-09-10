@@ -24,6 +24,8 @@
 
 #include "EditorSession.h"
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
@@ -144,6 +146,37 @@ void EditorSession::EngineUpdate()
             }
         }
     }
+}
+
+void EditorSession::PostEngineUpdate()
+{
+	m_debug->Update();
+
+	m_renderer->Update();
+
+	m_guiManager->Update();
+
+	// Inputs should be the second to last thing to update !
+	m_inputManager->Update();
+
+	m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+	m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+
+	if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
+	{
+		if (renderGuiWindow->HasFocus())
+		{
+			blaVec2 mouseCoord = renderGuiWindow->GetMousePointerScreenSpaceCoordinates();
+			if (mouseCoord.x >= 0.f && mouseCoord.x <= 1.f && mouseCoord.y >= 0.f && mouseCoord.y <= 1.f)
+			{
+				InputManager::GetSingletonInstance()->m_lockKeyboard = false;
+				InputManager::GetSingletonInstance()->m_lockMouse = false;
+			}
+		}
+	}
+
+	// Final update of the frame
+	m_renderWindow->UpdateWindowAndBuffers();
 }
 
 bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
@@ -305,7 +338,6 @@ void EditorSession::DoTestAnimationDemoStuff()
 	Ray screenRay;
 	if(const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
 	{
-		blaVec2 cursorPos = guiRenderWindow->GetMousePointerScreenSpaceCoordinates();
 		screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
 	}
 
@@ -411,9 +443,6 @@ void EditorSession::DoTestAnimationDemoStuff()
                 }
             }
         }
-		else if (auto animCmp = animationObject->GetComponent<AnimationComponent>())
-		{
-		}
     }
     else
     {
@@ -470,6 +499,12 @@ void EditorSession::DoTestAnimationDemoStuff()
             }
         }
     }
+
+	if(!m_sceneGraphGui)
+	{
+		m_sceneGraphGui = new SceneGraphGui();
+		m_sceneGraphGui->UpdateSceneGraph();
+	}
 }
 
 void EditorSession::HandleSaveScenePrompt()
@@ -630,11 +665,14 @@ void EditorSession::SetSelectedObject(GameObjectReference selectedObject)
 {
 	if(m_selectedObject != selectedObject)
 	{
-		if (!m_componentInspector) m_componentInspector = new ComponentInspector();
-		m_componentInspector->InspectGameObject(selectedObject);
+		if (!m_componentInspector) m_componentInspector = new ComponentInspectorGui();
+
+		if(selectedObject.IsValid())
+			m_componentInspector->InspectGameObject(selectedObject);
 	}
 
-	m_selectedObject = selectedObject;
+	if(selectedObject.IsValid())
+		m_selectedObject = selectedObject;
 }
 
 void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)

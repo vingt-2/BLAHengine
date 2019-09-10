@@ -7,6 +7,7 @@ namespace BLAengine
 {
     class BlaGuiElement;
 	class Renderer;
+
     class BlaGuiWindow
     {
     public:
@@ -75,12 +76,14 @@ namespace BLAengine
 
         bool ShouldClose() { return !m_bOpenWindow; }
 
-    protected:
-        blaU32 m_windowFlags;
+		bool HasFocus() const { return m_hasFocus; }
 
+    protected:
+		blaU32 m_windowFlags;
         blaString m_windowName;
         blaIVec2 m_windowPosition;
         BlaGuiElement* m_rootElement;
+		bool m_hasFocus;
         bool m_bOpenWindow;
     };
 

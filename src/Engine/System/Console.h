@@ -88,7 +88,9 @@ namespace BLAengine
 
         Console():
             m_historyCursor(0)
-        {}
+        {
+			m_currentCommandBuffer[0] = 0;
+        }
 
         static void LogMessage(const blaString& message) { GetSingletonInstance()->InstanceLogMessage(message); }
         static void LogWarning(const blaString& warning) { GetSingletonInstance()->InstanceLogWarning(warning); }

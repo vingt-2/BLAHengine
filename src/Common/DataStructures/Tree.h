@@ -78,38 +78,25 @@ public:
 
     blaBool AddChildAfterNode(T* childToAdd, T* previousNode)
     {
-        if (m_child == nullptr)
+        if (this == previousNode)
         {
-            return false;
-        }
-
-        if (m_child == previousNode)
-        {
-            m_next = childToAdd;
-            reinterpret_cast<IntrusiveTree<T>*>(childToAdd)->m_parent = reinterpret_cast<T*>(this);
-
+			AddChild(childToAdd);
             return true;
         }
         
         IntrusiveTree<T>* child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
-        blaBool result = false;
-        while (child->m_next != nullptr)
+        
+    	while (child != nullptr)
         {
-            if (child->m_next == previousNode)
-            {
-                child = reinterpret_cast<IntrusiveTree<T>*>(child->m_next);
+			if(child->AddChildAfterNode(childToAdd, previousNode))
+			{
+				return true;
+			}
 
-                T* previousNext = child->m_next;
-
-                child->m_next = childToAdd;
-
-                IntrusiveTree<T*> addedChild = reinterpret_cast<IntrusiveTree<T*>>(childToAdd);
-                addedChild->m_next = previousNext;
-                addedChild.m_parent = reinterpret_cast<T*>(this);
-            }
+			child = child->GetNext();
         }
 
-        return result;
+        return false;
     }
 
     T* GetNext()

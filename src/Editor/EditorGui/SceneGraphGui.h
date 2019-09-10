@@ -12,6 +12,10 @@ namespace BLAengine
 	public:
 		SceneGraphGui() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
 
-		void Update();
+		void UpdateSceneGraph();
+
+	private:
+		typedef blaMap<blaString, BlaGuiElement*> ElementMap;
+		void AddObjectToTree(ElementMap& elementMap, const GameObjectReference& object);
 	};
 }

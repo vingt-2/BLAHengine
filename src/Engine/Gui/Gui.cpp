@@ -61,9 +61,9 @@ void BLAengineStyleColors(ImGuiStyle* dst)
     colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
     colors[ImGuiCol_Tab] = ImVec4(0.40f, 0.49f, 0.31f, 0.93f);
     colors[ImGuiCol_TabHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-    colors[ImGuiCol_TabActive] = ImVec4(0.60f, 0.73f, 0.88f, 1.00f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.23f, 0.41f, 0.85f, 1.00f);
     colors[ImGuiCol_TabUnfocused] = ImVec4(0.92f, 0.93f, 0.94f, 0.99f);
-    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.74f, 0.82f, 0.91f, 1.00f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.48f, 0.48f, 0.48f, 1.0f);
     //colors[ImGuiCol_DockingPreview] = ImVec4(0.26f, 0.59f, 0.98f, 0.22f);
     //colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
@@ -217,6 +217,15 @@ void BlaGuiEditElement<blaVec3>::Render()
 }
 
 template<>
+void BlaGuiEditElement<blaString>::Render()
+{
+	char inputBuf[2048];
+	strcpy(inputBuf, m_pToValue->c_str());
+	ImGui::InputText(GetName().c_str(), inputBuf, sizeof(inputBuf));
+	*m_pToValue = blaString(inputBuf);
+}
+
+template<>
 void BlaGuiEditElement<GameObjectReference>::Render()
 {
 	ImGui::Columns(2);
@@ -246,7 +255,8 @@ void BlaGuiWindow::Render()
     {
         m_rootElement->Render();
     }
-    
+
+	m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImGui::End();
     // END OCornut's Dear ImGui Specific Code Now
@@ -301,6 +311,8 @@ void BlaGuiRenderWindow::Render()
 		m_cursorScreenSpacePosition = blaVec2(
 			1.0f - (mouse.x - windowPos.x) / ImGui::GetWindowWidth(),
 			1.0f - (mouse.y - windowPos.y) / ImGui::GetWindowHeight());
+
+		m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
 
 		ImGui::End();
 	}
@@ -959,8 +971,8 @@ void BlaGuiConsole::Render()
     ImGui::PopStyleVar();
 
     // Command-line
-    bool reclaim_focus = false;
-    if (ImGui::InputText("",
+    //bool reclaim_focus = false;
+    if (ImGui::InputText("Console Input",
         m_pConsoleSingleton->m_currentCommandBuffer,
         2048,
         ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory,
@@ -968,14 +980,14 @@ void BlaGuiConsole::Render()
         (void*)this))
     {
         m_pConsoleSingleton->ExecuteCurrentCommand();
-        reclaim_focus = true;
+        //reclaim_focus = true;
         strcpy_s(m_pConsoleSingleton->m_currentCommandBuffer, "");
     }
 
     // Auto-focus on window apparition
-    ImGui::SetItemDefaultFocus();
-    if (reclaim_focus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+    //ImGui::SetItemDefaultFocus();
+    //if (reclaim_focus)
+    //    ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
     
 }
 

@@ -4,6 +4,7 @@
 #include <Engine/EngineInstance.h>
 #include <Engine/Assets/MeshAsset.h>
 #include <Editor/EditorGui/ComponentInspectorGui.h>
+#include <Editor/EditorGui/SceneGraphGui.h>
 
 namespace BLAengine
 {
@@ -29,6 +30,8 @@ namespace BLAengine
         void PreEngineUpdate() override;
 
         void EngineUpdate() override;
+
+		void PostEngineUpdate() override;
 
         bool InitializeEngine(RenderWindow* renderWindow) override;
 
@@ -78,8 +81,8 @@ namespace BLAengine
 
 		GameObjectReference m_selectedObject;
 
-		ComponentInspector* m_componentInspector = nullptr;
-
+		ComponentInspectorGui* m_componentInspector = nullptr;
+		SceneGraphGui* m_sceneGraphGui = nullptr;
         /*
          * Editor State
          */

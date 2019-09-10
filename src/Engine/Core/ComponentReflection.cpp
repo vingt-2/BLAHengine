@@ -8,15 +8,16 @@ using namespace ComponentReflection;
 struct BoolDescriptor : ExposedVarDescriptor
 {
     BoolDescriptor() : ExposedVarDescriptor{ "bool", sizeof(bool) }
-    {
-    }
-    virtual blaString ToString(const void* obj, int /* unused */) const override
+    {}
+    
+	blaString ToString(const void* obj, int /* unused */) const override
     {
         blaString s = "";
         blaString tf = ((const bool*)obj ? "true" : "false");
         s += "bool{" + tf + "}";
         return s;
     }
+
 	BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
 	{
 		return new BlaGuiEditElement<bool>(name, (bool*)obj);
@@ -82,18 +83,22 @@ ExposedVarDescriptor* ComponentReflection::GetPrimitiveDescriptor<blaS32>()
 	return &typeDesc;
 }
 
-
 struct StringDescriptor : ExposedVarDescriptor 
 {
-    StringDescriptor() : ExposedVarDescriptor{ "std::string", sizeof(blaString) }
+    StringDescriptor() : ExposedVarDescriptor{ "String", sizeof(blaString) }
     {}
 
-    virtual blaString ToString(const void* obj, int /* unused */) const override
+    blaString ToString(const void* obj, int /* unused */) const override
     {
         blaString s = "";
         s += "String{" + *(const blaString*) obj + "}";
         return s;
     }
+
+	BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+	{
+		return new BlaGuiEditElement<blaString>(name, (blaString*)obj);
+	}
 };
 
 template <>
@@ -105,7 +110,7 @@ ExposedVarDescriptor* ComponentReflection::GetPrimitiveDescriptor<blaString>()
 
 struct GameObjectReferenceDescriptor : ExposedVarDescriptor
 {
-	GameObjectReferenceDescriptor() : ExposedVarDescriptor{ "GameObjectReference", sizeof(GameObjectReference) }
+	GameObjectReferenceDescriptor() : ExposedVarDescriptor{ "GameObject", sizeof(GameObjectReference) }
 	{
 	}
 

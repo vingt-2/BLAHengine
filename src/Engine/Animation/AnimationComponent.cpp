@@ -10,12 +10,13 @@ using namespace BLAengine;
 BEGIN_COMPONENT_DESCRIPTION(AnimationComponent)
 EXPOSE(m_play)
 EXPOSE(m_frameIndex)
+EXPOSE(m_bvhName)
 END_DESCRIPTION()
 
 AnimationComponent::AnimationComponent(GameObjectReference parentObject) :
     GameComponent(parentObject), 
 	m_play(false), 
-	m_frameIndex(0), 
+	m_frameIndex(0.f), 
     m_animation(nullptr),
 	m_lastTimePlayerInteraction(0)
 {}
@@ -38,7 +39,7 @@ void AnimationComponent::Update()
 		const EngineInstance* engine = EngineInstance::GetSingletonInstanceRead();
 
 		blaF32 gameDt = Timer::GetSingletonInstance()->GetDelta();
-		blaS32 animStep = (blaS32) gameDt / animDt;
+		blaF32 animStep = gameDt / animDt;
 
 		if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown() || inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
 		{
@@ -85,4 +86,12 @@ void AnimationComponent::Update()
 			DebugDraw::DrawLine(scaleFactor * bones[i].first, scaleFactor * bones[i].second);
 		}
 	}
+
+	if(m_bvhName != m_prevBVHName)
+	{
+		delete m_animation;
+		m_animation = BVHImport::ImportAnimation(m_bvhName)[0];
+	}
+
+	m_prevBVHName = m_bvhName;
 }

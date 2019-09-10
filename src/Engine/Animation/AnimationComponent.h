@@ -11,11 +11,13 @@ namespace BLAengine
         SkeletonAnimationData* m_animation;
 
 		bool m_play;
-		blaS32 m_frameIndex;
+		blaF32 m_frameIndex;
+		blaString m_bvhName;
 
         AnimationComponent(GameObjectReference parentObject);
         ~AnimationComponent(void) override;
 	private:
 		blaF32 m_lastTimePlayerInteraction;
+		blaString m_prevBVHName;
     END_DECLARATION()
 }

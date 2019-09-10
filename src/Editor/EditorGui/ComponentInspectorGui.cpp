@@ -6,7 +6,7 @@
 
 using namespace BLAengine;
 
-void ComponentInspector::InspectGameObject(GameObjectReference gameObject) 
+void ComponentInspectorGui::InspectGameObject(GameObjectReference gameObject) 
 {
 	delete m_window.RootElement();
 
@@ -32,7 +32,7 @@ void ComponentInspector::InspectGameObject(GameObjectReference gameObject)
 	m_window.SetRootElement(root);
 }
 
-std::vector<blaString> ComponentInspector::GetComponents(GameObjectReference gameObject)
+std::vector<blaString> ComponentInspectorGui::GetComponents(GameObjectReference gameObject)
 {
 	blaVector<blaString> ret;
 

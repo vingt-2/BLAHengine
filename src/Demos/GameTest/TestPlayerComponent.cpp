@@ -41,7 +41,7 @@ void TestPlayerComponent::Update()
         }
         if(m_mainCameraObject->GetParent()->GetName() == "Root")
         {
-            m_mainCameraObject->SetParent(GetParentObject());
+            //m_mainCameraObject->SetParent(GetParentObject());
         }
 
         blaVec2 gxy = inputs->GetGamepadLeftAnalog().GetPosition();

@@ -5,14 +5,14 @@
 
 namespace BLAengine
 {
-	class ComponentInspector
+	class ComponentInspectorGui
 	{
 		GameObjectReference m_selectedGameObject;
 	
 		BlaGuiWindow& m_window;
 
 	public:
-		ComponentInspector() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Component Inspector")) {}
+		ComponentInspectorGui() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Component Inspector")) {}
 
 		void InspectGameObject(GameObjectReference gameObject);
 
