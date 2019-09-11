@@ -20,6 +20,8 @@
 #define DS4_INPUT_REPORT_LENGTH 64
 #define DS4_OUTPUT_REPORT_LENGTH 32
 
+#define DEADZONE_SIZE 0.08f
+
 // Indices for controller connected via USB
 #define GX_INDEX 14		
 #define GY_INDEX 16
@@ -136,12 +138,18 @@ private:
     {
         x = m_reportBuffer[GetIndex(LEFT_ANALOG_X_INDEX)] / 128.f - 1.0f;
         y = -m_reportBuffer[GetIndex(LEFT_ANALOG_Y_INDEX)] / 128.f + 1.0f;
+
+		x = abs(x) < DEADZONE_SIZE ? 0.f : x;
+		y = abs(y) < DEADZONE_SIZE ? 0.f : y;
     }
 
     void GetRightJoystick(float& x, float& y)
     {
         x = m_reportBuffer[GetIndex(RIGHT_ANALOG_X_INDEX)] / 128.f - 1.0f;
         y = -m_reportBuffer[GetIndex(RIGHT_ANALOG_Y_INDEX)] / 128.f + 1.0f;
+
+		x = abs(x) < DEADZONE_SIZE ? 0.f : x;
+		y = abs(y) < DEADZONE_SIZE ? 0.f : y;
     }
 
     void GetDPad(int& x, int& y)

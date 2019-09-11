@@ -76,6 +76,11 @@ void BLAengineStyleColors(ImGuiStyle* dst)
     colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.70f, 0.70f, 0.70f, 0.70f);
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 2.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 18.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 12.0f);
 }
 
 ImFont* f;

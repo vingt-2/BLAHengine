@@ -134,4 +134,29 @@ ExposedVarDescriptor* ComponentReflection::GetPrimitiveDescriptor<GameObjectRefe
 	return &typeDesc;
 }
 
+struct blaVec2Descriptor : ExposedVarDescriptor
+{
+	blaVec2Descriptor() : ExposedVarDescriptor{ "Vector2", sizeof(blaVec2) }
+	{}
+
+	blaString ToString(const void* obj, int /* unused */) const override
+	{
+		blaString s = "";
+		s += "Vector2{" + *(const blaString*)obj + "}";
+		return s;
+	}
+
+	BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+	{
+		return new BlaGuiEditElement<blaVec2>(name, (blaVec2*)obj);
+	}
+};
+
+template <>
+ExposedVarDescriptor* ComponentReflection::GetPrimitiveDescriptor<blaVec2>()
+{
+	static blaVec2Descriptor typeDesc;
+	return &typeDesc;
+}
+
 BlaGuiElement* ExposedVarDescriptor::MakeEditGuiElement(const blaString& name, void* obj) { return nullptr; }

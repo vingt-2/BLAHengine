@@ -104,7 +104,9 @@ namespace BLAengine
 
         struct EditorGuiRequests
         {
-            blaBool m_openConsoleRequest = false;
+            blaBool m_openConsoleRequest = true;
+			blaBool m_openScenGraphGuiRequest = true;
+			blaBool m_openComponentInspectorRequest = true;
         } m_editorGuiRequests;
 
         /*

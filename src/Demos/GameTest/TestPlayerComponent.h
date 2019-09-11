@@ -18,6 +18,11 @@ BEGIN_COMPONENT_DECLARATION(TestPlayerComponent)
 
 	float m_speed = 1.f;
 	GameObjectReference m_mainCameraObject;
+
+	blaVec2 m_stickValue;
+
+	float m_inAirFriction = 1.f;
+	float m_onGroundFriction = 1.f;
 	
 	private:
 

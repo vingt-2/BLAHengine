@@ -212,6 +212,8 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 
         BlaGuiMenuTab windowsMenu("Windows");
         windowsMenu.AddMenu(BlaGuiMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest));
+		windowsMenu.AddMenu(BlaGuiMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest));
+		windowsMenu.AddMenu(BlaGuiMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest));
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(windowsMenu);
         /*
@@ -500,9 +502,8 @@ void EditorSession::DoTestAnimationDemoStuff()
         }
     }
 
-	if(!m_sceneGraphGui)
+	if(m_sceneGraphGui)
 	{
-		m_sceneGraphGui = new SceneGraphGui();
 		m_sceneGraphGui->UpdateSceneGraph();
 	}
 }
@@ -544,6 +545,21 @@ void EditorSession::HandleGuiRequests()
         m_guiManager->OpenConsole("Console");
         m_editorGuiRequests.m_openConsoleRequest = false;
     }
+	if (m_editorGuiRequests.m_openScenGraphGuiRequest)
+	{
+		if (!m_sceneGraphGui)
+		{
+			m_sceneGraphGui = new SceneGraphGui();
+			m_sceneGraphGui->UpdateSceneGraph();
+		}
+		m_editorGuiRequests.m_openScenGraphGuiRequest = false;
+	}
+	if (m_editorGuiRequests.m_openComponentInspectorRequest)
+	{
+		if (!m_componentInspector) m_componentInspector = new ComponentInspectorGui();
+
+		m_editorGuiRequests.m_openComponentInspectorRequest = false;
+	}
 }
 
 void EditorSession::HandleEditorStateChangeRequests()
@@ -665,8 +681,6 @@ void EditorSession::SetSelectedObject(GameObjectReference selectedObject)
 {
 	if(m_selectedObject != selectedObject)
 	{
-		if (!m_componentInspector) m_componentInspector = new ComponentInspectorGui();
-
 		if(selectedObject.IsValid())
 			m_componentInspector->InspectGameObject(selectedObject);
 	}

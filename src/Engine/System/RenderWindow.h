@@ -41,7 +41,6 @@ namespace BLAengine
 
         virtual blaIVec2 GetMousePositionInWindow() = 0;
 
-
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
     };
 
@@ -81,7 +80,7 @@ namespace BLAengine
 
         // GLFW Window specific stuff ...
 
-        GLFWwindow* GetWindowPointer() { return m_glfwWindow; }
+        GLFWwindow* GetWindowPointer() const { return m_glfwWindow; }
 
         GLFWRenderWindow();
         ~GLFWRenderWindow() override;
