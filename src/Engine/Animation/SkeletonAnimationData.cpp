@@ -66,6 +66,18 @@ void SkeletonAnimationData::GetBoneArrayFromEvalAnim(blaVector<blaPair<blaVec3, 
     }
 }
 
+void SkeletonAnimationData::GetBoneArrayFromEvalAnim(blaVector<blaPair<blaPosQuat, blaF32>>& outputBones,
+	const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim)
+{
+	blaPosQuat transform = evalAnim[skeleton->GetJointIndex()];
+
+	for (auto& child : *skeleton)
+	{
+		outputBones.emplace_back(blaPair<blaPosQuat, blaF32>(transform, evalAnim[child.GetJointIndex()].GetTranslation3().length()));
+		GetBoneArrayFromEvalAnim(outputBones, &child, evalAnim);
+	}
+}
+
 void SkeletonAnimationData::ForwardKinematicRecursive
 (
     /*Defines the query inputs*/

@@ -24,8 +24,6 @@
 
 #include "EditorSession.h"
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
@@ -159,18 +157,21 @@ void EditorSession::PostEngineUpdate()
 	// Inputs should be the second to last thing to update !
 	m_inputManager->Update();
 
-	m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
-	m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
-
-	if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
+	if(!m_renderWindow->HasCapturedMouse()) 
 	{
-		if (renderGuiWindow->HasFocus())
+		m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+		m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+
+		if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
 		{
-			blaVec2 mouseCoord = renderGuiWindow->GetMousePointerScreenSpaceCoordinates();
-			if (mouseCoord.x >= 0.f && mouseCoord.x <= 1.f && mouseCoord.y >= 0.f && mouseCoord.y <= 1.f)
+			if (renderGuiWindow->HasFocus())
 			{
-				InputManager::GetSingletonInstance()->m_lockKeyboard = false;
-				InputManager::GetSingletonInstance()->m_lockMouse = false;
+				blaVec2 mouseCoord = renderGuiWindow->GetMousePointerScreenSpaceCoordinates();
+				if (mouseCoord.x >= 0.f && mouseCoord.x <= 1.f && mouseCoord.y >= 0.f && mouseCoord.y <= 1.f)
+				{
+					InputManager::GetSingletonInstance()->m_lockKeyboard = false;
+					InputManager::GetSingletonInstance()->m_lockMouse = false;
+				}
 			}
 		}
 	}
@@ -222,7 +223,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         LoadNewScene();
 
         m_testCone = MeshAsset("testCone");
-        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(400);
+        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(40);
 
         GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
 
@@ -471,7 +472,7 @@ void EditorSession::DoTestAnimationDemoStuff()
 	{
         //if (m_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
         {
-            GameObjectReference camera = m_workingScene->GetMainCamera()->GetParentObject();
+            GameObjectReference camera = m_workingScene->GetMainCamera()->GetOwnerObject();
 
             blaVec3 camUp, camLeft;
 
@@ -502,7 +503,7 @@ void EditorSession::DoTestAnimationDemoStuff()
         }
     }
 
-	if(m_sceneGraphGui)
+	if(m_sceneGraphGui && m_workingScene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE != 0)
 	{
 		m_sceneGraphGui->UpdateSceneGraph();
 	}
@@ -667,7 +668,7 @@ bool EditorSession::ImportMesh(blaString filepath, blaString name) const
     }
     else
     {
-        std::cout << "Couldn't find Material: " << "BlankDiffuseMat" << "in AssetManager.\n";
+       Console::LogError("Couldn't find Material: BlankDiffuseMa in AssetManager.\n");
     }
 
     ObjectTransform t = visualizerObject->GetTransform();

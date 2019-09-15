@@ -16,22 +16,19 @@ namespace BLAengine
 
         blaVector<Material*> m_materials;
 
-        blaU32 m_renderType;
+        blaS32 m_renderType;
 
         MeshRendererComponent(GameObjectReference parentObject);
-        ~MeshRendererComponent(void) override;
 
         bool AssignTriangleMesh(MeshAsset* mesh);
         bool AssignMaterial(Material* material, int matIndx);
         
-        blaMat4* GetTransformMatrix() const;
-        
-        blaString ToString(void);
+		const blaMat4* GetTransformMatrix() const;
 
         void Update();
 
     private:
 
-        blaMat4* m_modelTransformMatrix;
+        blaMat4 m_modelTransformMatrix;
 	END_DECLARATION()
 }

@@ -33,7 +33,6 @@ namespace BLAengine
         PerspectiveCamera m_mainRenderCamera;
 
         blaMap<blaU32, RenderObject*> m_meshRenderPool;
-        blaMap<blaU32, RenderObject*> m_gizmoRenderPool;
 
         blaMap<blaU32, DirectionalLightRender*> m_directionalLightPool;
 

@@ -23,8 +23,8 @@ BEGIN_COMPONENT_DECLARATION(TestPlayerComponent)
 
 	float m_inAirFriction = 1.f;
 	float m_onGroundFriction = 1.f;
-	
-	private:
+
+	bool m_parentTheCamera = true;
 
 	Dualshock4 m_controller;
 END_DECLARATION()

@@ -16,6 +16,7 @@ EXPOSE(m_mainCameraObject)
 EXPOSE(m_stickValue)
 EXPOSE(m_inAirFriction)
 EXPOSE(m_onGroundFriction)
+EXPOSE(m_parentTheCamera)
 END_DESCRIPTION()
 
 TestPlayerComponent::TestPlayerComponent(GameObjectReference parentObject) :
@@ -31,11 +32,11 @@ void TestPlayerComponent::Update()
 {
     InputManager* inputs = InputManager::GetSingletonInstance();
 
-    auto rigidBody = GetParentObject()->GetComponent<RigidBodyComponent>();
+    auto rigidBody = GetOwnerObject()->GetComponent<RigidBodyComponent>();
 
 	if(!m_mainCameraObject.IsValid())
 	{
-		m_mainCameraObject = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetParentObject();
+		m_mainCameraObject = EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetMainCamera()->GetOwnerObject();
 	}
 
     if (rigidBody)
@@ -44,10 +45,15 @@ void TestPlayerComponent::Update()
         {
             return;
         }
-        if(m_mainCameraObject->GetParent()->GetName() == "Root")
-        {
-            //m_mainCameraObject->SetParent(GetParentObject());
-        }
+
+		if(m_parentTheCamera) 
+		{
+			m_mainCameraObject->SetParent(GetOwnerObject());
+		}
+		else
+		{
+			m_mainCameraObject->SetParent(GameObjectReference::InvalidReference());
+		}
 
         m_stickValue = inputs->GetGamepadLeftAnalog().GetPosition();
 
@@ -61,6 +67,8 @@ void TestPlayerComponent::Update()
         {
             rigidBody->AddImpulse(blaVec3(0.f, 5.f, 0.f));
         }
+		
+		DebugDraw::DrawSphere(GetObjectTransform().GetPosition(), 1.f, blaVec3(1,0,0));
 
         float controlability = 0.05f;
 

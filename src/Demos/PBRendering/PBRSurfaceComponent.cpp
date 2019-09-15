@@ -104,7 +104,7 @@ float BLAengine::PBRMeshComponent::GetSurfaceArea()
 
 void PBRMeshComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
 {
-    MeshColliderComponent* collider = BLA_CREATE_COMPONENT(MeshColliderComponent, GetParentObject());
+    MeshColliderComponent* collider = BLA_CREATE_COMPONENT(MeshColliderComponent, GetOwnerObject());
 
     collider->SetColliderMesh(mesh);
     
@@ -172,7 +172,7 @@ float BLAengine::PBRSphereComponent::GetSurfaceArea()
 
 void PBRSphereComponent::CreateAndSetSphereCollider(float radius)
 {
-    SphereColliderComponent* sphereColliderComponent = BLA_CREATE_COMPONENT(SphereColliderComponent, GetParentObject());
+    SphereColliderComponent* sphereColliderComponent = BLA_CREATE_COMPONENT(SphereColliderComponent, GetOwnerObject());
     sphereColliderComponent->SetSize(radius);
 
     m_surfaceArea = (4.0f * M_PI * M_PI) * radius * radius;

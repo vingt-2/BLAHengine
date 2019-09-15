@@ -19,10 +19,10 @@ DirectionalLightComponent::~DirectionalLightComponent()
 
 void DirectionalLightComponent::Update()
 {
-    blaVector<CameraComponent*> cameras = GetParentObject()->GetComponents<CameraComponent>();
+    blaVector<CameraComponent*> cameras = GetOwnerObject()->GetComponents<CameraComponent>();
     if (!cameras.size())
     {
-        CameraComponent* shadowCamera = BLA_CREATE_COMPONENT(CameraComponent, GetParentObject());
+        CameraComponent* shadowCamera = BLA_CREATE_COMPONENT(CameraComponent, GetOwnerObject());
         shadowCamera->m_isShadowMapCamera = true;
 
         shadowCamera->Update();
@@ -36,6 +36,6 @@ void DirectionalLightComponent::SetDirection(blaVec3 direction)
 
 blaVec3 DirectionalLightComponent::GetDirection()
 {
-    const ObjectTransform& t = GetParentObject()->GetTransform();
+    const ObjectTransform& t = GetOwnerObject()->GetTransform();
     return t.LocalDirectionToWorld(m_lightDirection);
 }

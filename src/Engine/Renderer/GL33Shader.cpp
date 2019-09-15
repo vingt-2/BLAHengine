@@ -48,6 +48,12 @@ bool BLAengine::GL33SystemShaders::LoadDebugRaysProgram(blaString vert, blaStrin
     return m_debugRayPgrm.LoadShaderCode(vert, frag);
 }
 
+bool BLAengine::GL33SystemShaders::LoadDebugMeshesProgram(blaString vert, blaString frag)
+{
+	m_debugMeshPgrm = GL33Shader("SystemDebugMeshes");
+	return m_debugMeshPgrm.LoadShaderCode(vert, frag);
+}
+
 bool BLAengine::GL33SystemShaders::LoadDrawSphereStencilProgram(blaString vert, blaString frag)
 {
     m_drawSphereStencilPgrm = GL33Shader("DrawSphereStencil");

@@ -64,9 +64,14 @@ void RenderingManager::Update()
 {
 }
 
-void DebugRenderingManager::LoadDebugLineMesh(blaPair<blaVector<blaVec3>, blaVector<blaVec3>>& lineMesh)
+void DebugRenderingManager::LoadDebugLineMesh(const blaPair<blaVector<blaVec3>, blaVector<blaVec3>>& lineMesh)
 {
     m_lineMeshes.push_back(lineMesh);
+}
+
+void DebugRenderingManager::LoadDebugFilledMesh(const blaPair<blaVector<blaVec3>, blaVector<blaVec4>>& mesh)
+{
+	m_filledMeshes.push_back(mesh);
 }
 
 void DebugRenderingManager::Update()

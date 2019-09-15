@@ -65,8 +65,6 @@ bool GL33Renderer::Update()
 
 		if (width != m_renderSize.x || height != m_renderSize.y)
 		{
-			Console::LogMessage("Resizing Viewport: " + std::to_string(width) + "*" + std::to_string(height));
-
 			ViewportResize(width, height);
 		}
 	}
@@ -251,11 +249,6 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRe
 
     object->m_renderType = meshRenderer.m_renderType;
 
-    //if (type == 0)
-    //    m_meshRenderPool.push_back(object);
-    //else if (type == 1)
-    //    m_gizmoRenderPool.push_back(object);
-
     return object;
 }
 
@@ -312,6 +305,54 @@ bool GL33Renderer::LoadDebugLines()
     return true;
 }
 
+bool GL33Renderer::LoadDebugMeshes()
+{
+	for (auto debugFilledMesh : m_debugRenderingManager->m_filledMeshes)
+	{
+		if (debugFilledMesh.first.size() == 0 || debugFilledMesh.second.size() != debugFilledMesh.first.size())
+		{
+			m_debugMeshesInfo = { 0, 0, 0, 0 };
+			return false;
+		}
+
+		m_debugMeshesInfo.size = debugFilledMesh.first.size();
+
+		glGenBuffers(1, &(m_debugMeshesInfo.vertBuffer));
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugMeshesInfo.vertBuffer);
+		glBufferData(GL_ARRAY_BUFFER, m_debugMeshesInfo.size * sizeof(blaVec3), &(debugFilledMesh.first[0]), GL_STATIC_DRAW);
+
+		glGenBuffers(1, &(m_debugMeshesInfo.colorBuffer));
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugMeshesInfo.colorBuffer);
+		glBufferData(GL_ARRAY_BUFFER, m_debugMeshesInfo.size * sizeof(blaVec4), &(debugFilledMesh.second[0]), GL_STATIC_DRAW);
+
+		// 1rst attribute buffer : vertices
+		glGenVertexArrays(1, &(m_debugMeshesInfo.vao));
+		glBindVertexArray(m_debugMeshesInfo.vao);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugMeshesInfo.vertBuffer);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugMeshesInfo.colorBuffer);
+		glVertexAttribPointer(
+			1,                  // attribute 1. No particular reason for 1, but must match the layout in the shader.
+			4,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+	}
+
+	return true;
+}
+
 void GL33Renderer::CleanUpPools()
 {
     for (auto entry : m_meshRenderPool)
@@ -323,16 +364,6 @@ void GL33Renderer::CleanUpPools()
         }
     }
     m_meshRenderPool.clear();
-
-    for (auto entry : m_gizmoRenderPool)
-    {
-        RenderObject* renderObject = entry.second;
-        if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
-        {
-            this->CleanUp(*gl33RenderObject);
-        }
-    }
-    m_gizmoRenderPool.clear();
 
     for(auto dirLight : m_directionalLightPool)
     {
@@ -389,8 +420,8 @@ void GL33Renderer::DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRi
     glViewport(topLeft.x, topLeft.y, bottomRight.x-topLeft.x, bottomRight.y-topLeft.y);
 
     // Use our shader
-    glUseProgram(DrawColorBufferPrgmID);
-    GLuint texID = glGetUniformLocation(DrawColorBufferPrgmID, "colorTexture");
+    glUseProgram(m_drawColorBufferPrgmID);
+    GLuint texID = glGetUniformLocation(m_drawColorBufferPrgmID, "colorTexture");
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureTarget);
@@ -685,8 +716,6 @@ void GL33Renderer::SetRenderSize(blaIVec2 renderSize)
 {
 	if (renderSize.x != m_renderSize.x || renderSize.y != m_renderSize.y)
 	{
-		Console::LogMessage("Resizing Viewport: " + std::to_string(renderSize.x) + "*" + std::to_string(renderSize.y));
-
 		ViewportResize(renderSize.x, renderSize.y);
 	}
 	Renderer::SetRenderSize(renderSize);
@@ -947,6 +976,13 @@ void GL33Renderer::CleanUpFrameDebug()
         glDeleteBuffers(1, &(m_debugLinesInfo.colorBuffer));
         glDeleteVertexArrays(1, &(m_debugLinesInfo.vao));
     }
+
+	if (m_debugMeshesInfo.size != 0)
+	{
+		glDeleteBuffers(1, &(m_debugMeshesInfo.vertBuffer));
+		glDeleteBuffers(1, &(m_debugMeshesInfo.colorBuffer));
+		glDeleteVertexArrays(1, &(m_debugMeshesInfo.vao));
+	}
 }
 
 void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* renderManager, DebugRenderingManager* debugRenderManager)
@@ -1020,6 +1056,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     // Hardcode system shaders loading
     this->m_glResources.m_systemShaders.LoadGeometryPassProgram("./resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
     this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
+	this->m_glResources.m_systemShaders.LoadDebugMeshesProgram("./resources/shaders/Engine/DebugMeshShaderVS.glsl", "./resources/shaders/Engine/DebugMeshShaderFS.glsl");
     this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
     this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
     this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
@@ -1029,8 +1066,9 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
 
     m_GBuffer.m_drawSphereStencilPgrmID = this->m_glResources.m_systemShaders.m_drawSphereStencilPgrm.m_loaded_id;
     m_GBuffer.m_geometryPassPrgmID = this->m_glResources.m_systemShaders.m_geometryPassPrgm.m_loaded_id;
-    DrawColorBufferPrgmID = this->m_glResources.m_systemShaders.m_drawColorBufferPrgm.m_loaded_id;
+    m_drawColorBufferPrgmID = this->m_glResources.m_systemShaders.m_drawColorBufferPrgm.m_loaded_id;
     m_debugRayPgrmID = this->m_glResources.m_systemShaders.m_debugRayPgrm.m_loaded_id;
+	m_debugMeshesPgrmID = this->m_glResources.m_systemShaders.m_debugMeshPgrm.m_loaded_id;
 
     GL33Shader dirLightShader = GL33Shader("DirectionalLight");
     dirLightShader.LoadShaderCode("./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
@@ -1244,7 +1282,7 @@ void GL33Renderer::RenderDebugLines()
 
     glUseProgram(m_debugRayPgrmID);
 
-    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection;
+    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection; // model space is identity as it's loaded everything is loaded in worldspace
 
     GLuint MVPid = glGetUniformLocation(m_debugRayPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
@@ -1269,6 +1307,56 @@ void GL33Renderer::RenderDebugLines()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(0);
     glUseProgram(0);
+}
+
+void GL33Renderer::RenderDebugMeshes()
+{
+	LoadDebugMeshes();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.m_frameBufferObject);
+
+	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
+
+	glDisable(GL_DEPTH_TEST);
+
+	glBindVertexArray(m_debugMeshesInfo.vao);
+
+	glUseProgram(m_debugMeshesPgrmID);
+
+	blaMat4 MVP = m_mainRenderCamera.m_ViewProjection; // model space is identity as it's loaded everything is loaded in worldspace
+
+	GLuint MVPid = glGetUniformLocation(m_debugMeshesPgrmID, "MVP");
+	glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
+
+	GLuint worldPosMapID = glGetUniformLocation(m_debugMeshesPgrmID, "worldPosMap");
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_worldPosTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(worldPosMapID, 0);
+
+	GLuint displayBufferID = glGetUniformLocation(m_debugMeshesPgrmID, "displayBuffer");
+	// Bind our texture in Texture Unit 1
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_displayTextureTarget);
+	// Set our "renderedTexture" sampler to user Texture Unit 1
+	glUniform1i(displayBufferID, 1);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_debugMeshesInfo.size);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
+
+void GL33Renderer::RenderDebug()
+{
+	if(m_renderDebug) 
+	{
+		RenderDebugLines();
+		RenderDebugMeshes();
+	}
 }
 
 bool GL33Resources::GLLoadTexture(blaString resourcePath, Texture2D texture)
@@ -1376,6 +1464,7 @@ bool GL33Resources::GLLoadSystemShaders()
     this->GLLoadShaderProgram(this->m_systemShaders.m_geometryPassPrgm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_drawSphereStencilPgrm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_debugRayPgrm);
+	this->GLLoadShaderProgram(this->m_systemShaders.m_debugMeshPgrm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_shadowMapPgrm);
 
     return true;

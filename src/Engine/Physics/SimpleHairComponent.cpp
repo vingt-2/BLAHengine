@@ -128,7 +128,7 @@ void SimpleHairComponent::Update()
 
 void SimpleHairComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
 {
-    ObjectTransform transform = GetParentObject()->GetTransform();
+    ObjectTransform transform = GetOwnerObject()->GetTransform();
     blaVec3 contactInBody = pushAtW - transform.GetPosition();
 
     blaVec3 torque = cross(forceW, contactInBody);

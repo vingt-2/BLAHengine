@@ -13,6 +13,7 @@ namespace BLAengine
 		bool m_play;
 		blaF32 m_frameIndex;
 		blaString m_bvhName;
+		blaF32 m_playbackMultiplier;
 
         AnimationComponent(GameObjectReference parentObject);
         ~AnimationComponent(void) override;

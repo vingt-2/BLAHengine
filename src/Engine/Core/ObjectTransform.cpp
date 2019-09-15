@@ -52,7 +52,7 @@ void ObjectTransform::SetEulerAngles(blaVec3 eulerAngles)
 
 blaVec3 ObjectTransform::GetEulerAngles() const
 {
-    blaQuat q = m_posQuat.GetRotation();
+    const blaQuat& q = m_posQuat.GetRotation();
 
     return blaVec3(pitch(q), yaw(q), roll(q));
 }

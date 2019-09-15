@@ -42,6 +42,8 @@ namespace BLAengine
         virtual blaIVec2 GetMousePositionInWindow() = 0;
 
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
+
+		virtual bool HasCapturedMouse() = 0;
     };
 
 #ifdef GLFW_INTERFACE
@@ -89,11 +91,15 @@ namespace BLAengine
 
         static void GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths);
 
+		bool HasCapturedMouse() override { return !m_cursorVisibility; }
+
     private:
 
         GLFWwindow* m_glfwWindow;
 
         int m_width, m_height;
+
+		bool m_cursorVisibility;
 
         bool m_isFullscreen;
 

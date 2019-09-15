@@ -6,26 +6,16 @@
 using namespace BLAengine;
 
 BEGIN_COMPONENT_DESCRIPTION(MeshRendererComponent)
+EXPOSE(m_renderType)
 END_DESCRIPTION()
 
 MeshRendererComponent::MeshRendererComponent(GameObjectReference parentObject) : 
     GameComponent(parentObject),
     m_renderType    (GL_TRIANGLES),
-    m_renderTicket  (0),
-    m_modelTransformMatrix(new blaMat4(0))
+    m_renderTicket  (0)
 {
     this->m_mesh = nullptr;
 } 
-
-MeshRendererComponent::~MeshRendererComponent(void)
-{
-    free(m_modelTransformMatrix);
-}
-
-blaString MeshRendererComponent::ToString()
-{
-    return "MeshRendererComponent ToString PLACEHOLDER";
-}
 
 bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 {
@@ -41,16 +31,15 @@ bool MeshRendererComponent::AssignMaterial(Material* material, int matIndx)
     return true;
 }
 
-blaMat4* MeshRendererComponent::GetTransformMatrix() const
+const blaMat4* MeshRendererComponent::GetTransformMatrix() const
 {
-    blaMat4* a = m_modelTransformMatrix;
-    return a;
+    return &m_modelTransformMatrix;
 }
 
 void MeshRendererComponent::Update()
 {
-    if (!GetParentObject().IsValid())
-        *m_modelTransformMatrix = blaMat4(0);
+    if (!GetOwnerObject().IsValid())
+        m_modelTransformMatrix = blaMat4(0);
     else
-        GetParentObject()->GetTransform().GetScaledTransformMatrix(*m_modelTransformMatrix);
+        GetOwnerObject()->GetTransform().GetScaledTransformMatrix(m_modelTransformMatrix);
 }

@@ -220,7 +220,7 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
 
 	transform.SetRotation(glm::angleAxis(logMapAngle, logMapAxis));
 
-    body.GetParentObject()->SetTransform(transform);
+    body.GetOwnerObject()->SetTransform(transform);
 }
 
 void RigidBodySystem::ApplyWorldForces()

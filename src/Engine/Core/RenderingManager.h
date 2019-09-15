@@ -47,9 +47,12 @@ namespace BLAengine
         ~DebugRenderingManager() {};
 
         blaVector<blaPair<blaVector<blaVec3>, blaVector<blaVec3>>> m_lineMeshes;
+		blaVector<blaPair<blaVector<blaVec3>, blaVector<blaVec4>>> m_filledMeshes;
+
         blaMap<blaU32, MeshRendererComponent*> m_ticketedMeshRenderers;
 
-        void LoadDebugLineMesh(blaPair<blaVector<blaVec3>, blaVector<blaVec3>>& lineMesh);
+        void LoadDebugLineMesh(const blaPair<blaVector<blaVec3>, blaVector<blaVec3>>& lineMesh);
+		void LoadDebugFilledMesh(const blaPair<blaVector<blaVec3>, blaVector<blaVec4>>& mesh);
 
         void Update();
     };

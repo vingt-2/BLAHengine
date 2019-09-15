@@ -18,6 +18,8 @@
 
 using namespace BLAengine;
 
+#pragma optimize("", off)
+
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
 blaU32 EngineInstance::LoopEngine()
@@ -142,9 +144,12 @@ void EngineInstance::PostEngineUpdate()
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
-	m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
-	m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
-
+	if(!m_renderWindow->HasCapturedMouse()) 
+	{
+		m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+		m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+	}
+	
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
 }

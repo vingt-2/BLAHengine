@@ -17,7 +17,9 @@ Scene::Scene()
 
 GameObjectReference Scene::CreateObject(blaString name, const GameObjectReference &parentObject)
 {
-    m_sceneObjectsVector.emplace_back(GameObject(name, GetSceneRoot()));
+    m_sceneObjectsVector.emplace_back(GameObject(name, GameObjectReference::InvalidReference()));
+
+	m_sceneFlags |= ESceneFlags::DIRTY_SCENE_STRUCTURE;
 
     return GameObjectReference { m_sceneObjectsVector.size() - (blaIndex)1, &m_sceneObjectsVector };
 }
@@ -72,12 +74,11 @@ void Scene::SetTimeObject(Timer * time) const
 void Scene::Initialize(RenderingManager* renderingManager)
 {
     this->m_renderingManager = renderingManager;
-
-    m_sceneObjectsVector.emplace_back(GameObject("Root", GameObjectReference::InvalidReference()));
 }
 
 void Scene::Update()
 {
+	m_sceneFlags = 0;
     if (!m_renderingManager) 
     {
         return;
@@ -94,7 +95,6 @@ void Scene::Update()
     }
 
     m_rigidBodySystem->UpdateSystem();
-    //m_camera->m_rigidBody->Update();
 
     for(size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
@@ -112,7 +112,7 @@ void Scene::Update()
 
         for (auto dirLightComp : object->GetComponents<DirectionalLightComponent>())
         {
-            CameraComponent* shadowCamera = dirLightComp->GetParentObject()->GetComponent<CameraComponent>();
+            CameraComponent* shadowCamera = dirLightComp->GetOwnerObject()->GetComponent<CameraComponent>();
             if (dirLightComp->m_renderTicket == 0 && shadowCamera != nullptr)
             {
                 m_renderingManager->RegisterDirectionalLight(dirLightComp, shadowCamera);

@@ -26,7 +26,7 @@ namespace BLAengine
         const ObjectTransform& GetObjectTransform() const;
         const ObjectTransform& GetLocalObjectTransform() const;
 
-        GameObjectReference GetParentObject() const { return m_parentObject; }
+        GameObjectReference GetOwnerObject() const { return m_parentObject; }
 
 		virtual const ComponentReflection::ComponentDescriptor& GetComponentDescriptor() const;
 		

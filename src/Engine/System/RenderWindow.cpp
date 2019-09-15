@@ -204,16 +204,16 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
-    bool cursorVisibility = true;
+	m_cursorVisibility = true;
     for (auto mouseButton : m_mouseButtonsThatKillCursorWhenHeld)
     {
         if (glfwGetMouseButton(m_glfwWindow, mouseButton) == GLFW_PRESS)
         {
-            cursorVisibility = false;
+			m_cursorVisibility = false;
             break;
         }
     }
-    SetMouseCursorVisibility(cursorVisibility);
+    SetMouseCursorVisibility(m_cursorVisibility);
     
     glfwSwapInterval(0);
 
@@ -256,7 +256,8 @@ GLFWRenderWindow::GLFWRenderWindow():
     m_width(0),
     m_height(0),
     m_glfwWindow(nullptr),
-    m_registeredDragAndDropCallback(nullptr)
+    m_registeredDragAndDropCallback(nullptr),
+	m_cursorVisibility(true)
 {};
 
 GLFWRenderWindow::~GLFWRenderWindow()

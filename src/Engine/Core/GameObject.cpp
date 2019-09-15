@@ -53,10 +53,13 @@ ObjectTransform& GameObject::GetLocalTransform()
 
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
-    ObjectTransform& parentT = m_parent->GetTransform();
+	if(m_parent.IsValid()) 
+	{
+		ObjectTransform& parentT = m_parent->GetTransform();
 
-    m_localTransform.m_posQuat = parentT.m_posQuat.GetInverse() * transform.m_posQuat;
-    m_localTransform.m_scale = transform.m_scale / parentT.m_scale; //TODO: Make this safe.
+		m_localTransform.m_posQuat = parentT.m_posQuat.GetInverse() * transform.m_posQuat;
+		m_localTransform.m_scale = transform.m_scale / parentT.m_scale; //TODO: Make this safe.
+	}
 
     m_cachedWorldTransform = transform;
     m_objectState &= ~DIRTY_WORLD_TRANSFORM;

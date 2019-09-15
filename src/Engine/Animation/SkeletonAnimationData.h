@@ -113,6 +113,7 @@ namespace BLAengine
         }
 
         static void GetBoneArrayFromEvalAnim(blaVector<blaPair<blaVec3, blaVec3>>& outputBones, const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim);
+		static void GetBoneArrayFromEvalAnim(blaVector<blaPair<blaPosQuat, blaF32>>& outputBones, const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim);
 
     private:
 

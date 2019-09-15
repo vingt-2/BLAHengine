@@ -22,12 +22,11 @@ namespace BLAengine
         blaMap<blaString, GL33Shader> m_glLoadedProgramsIds;
     };
 
-
     class BLACORE_API GBuffer
     {
     public:
 
-        glm::vec2 m_GbufferSize;
+        blaIVec2 m_GbufferSize;
 
         GLuint m_frameBufferObject;
 
@@ -75,14 +74,14 @@ namespace BLAengine
         GL33RenderObject();
         ~GL33RenderObject();
 
-        blaMat4* m_modelTransform;
+        const blaMat4* m_modelTransform;
 
         const blaVector<blaU32>* m_toMeshTriangles;
         const blaVector<blaVec3>* m_toMeshVertices;
         const blaVector<blaVec3>* m_toMeshNormals;
         const blaVector<blaVec3>* m_toMeshTangents;
         const blaVector<blaVec3>* m_toMeshBiTangents;
-        const blaVector<glm::vec2>* m_toMeshUVs;
+        const blaVector<blaVec2>* m_toMeshUVs;
 
         blaVector <blaPair<GLuint, GLuint> > m_activeTextures;
 
@@ -102,8 +101,6 @@ namespace BLAengine
         GLuint m_matrixID;
 
         GLuint m_renderType;
-
-    private:
     };
 
     class BLACORE_API GL33Renderer : public virtual Renderer
@@ -117,6 +114,7 @@ namespace BLAengine
         RenderObject* LoadRenderObject(const MeshRendererComponent& meshRenderer, int type);
         bool    CancelRender(const MeshRendererComponent& object);
         bool    LoadDebugLines();
+		bool	LoadDebugMeshes();
 
         void CleanUpPools() override;
 
@@ -128,7 +126,7 @@ namespace BLAengine
         ~GL33Renderer() override;
 
         // Debug Vignette;
-        GLuint DrawColorBufferPrgmID;
+        GLuint m_drawColorBufferPrgmID;
         GLuint DrawDepthBufferPrgmID;
         //
 
@@ -156,8 +154,18 @@ namespace BLAengine
             GLuint vao;
             GLuint size;
         } m_debugLinesInfo;
+		
+    	GLuint m_debugRayPgrmID;
 
-        GLuint m_debugRayPgrmID;
+		struct debugMeshesInfo
+		{
+			GLuint vertBuffer;
+			GLuint colorBuffer;
+			GLuint vao;
+			GLuint size;
+		} m_debugMeshesInfo;
+
+		GLuint m_debugMeshesPgrmID;
 
         // MOVE?
         bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
@@ -191,13 +199,8 @@ namespace BLAengine
         //void RenderDefferedLights();
 
         void RenderDebugLines();
-        void RenderDebug()
-        {
-            if (m_renderDebug)
-            {
-                RenderDebugLines();
-            }
-        }
+		void RenderDebugMeshes();
+        void RenderDebug();
 
         void DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
         void DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);

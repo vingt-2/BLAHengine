@@ -47,17 +47,24 @@ namespace BLAengine
 
         GameObjectReference PickGameObjectInScene(const Ray& inRay, ColliderComponent::CollisionContact& outContact);
 
-        GameObjectReference GetSceneRoot() { return { 0, &m_sceneObjectsVector }; }
-
         void SetGameObjectParent(const GameObjectReference& parent, const GameObjectReference& child);
 
 		blaVector<GameObjectReference> GetObjects();
+
+		enum ESceneFlags
+		{
+			DIRTY_SCENE_STRUCTURE = 1 << 0,
+		};
+
+		blaU32 GetSceneFlags() const { return m_sceneFlags; }
 
     private:
 
         CameraComponent* m_camera; //TODO: Find in object scene !
         RenderingManager* m_renderingManager;
         blaVector<GameObject>  m_sceneObjectsVector;
+
+		blaU32 m_sceneFlags;
     };
 
 }

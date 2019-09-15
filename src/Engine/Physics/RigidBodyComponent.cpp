@@ -36,7 +36,7 @@ RigidBodyComponent::~RigidBodyComponent(void)
 
 void RigidBodyComponent::SetCollider(ColliderComponent* collider)
 {
-    if (collider->GetParentObject() != GetParentObject())
+    if (collider->GetOwnerObject() != GetOwnerObject())
     {
         //TODO: Say something sassy about the programmer that programmed that
         return;
@@ -47,7 +47,7 @@ void RigidBodyComponent::SetCollider(ColliderComponent* collider)
 
 void RigidBodyComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
 {
-    MeshColliderComponent* newMeshColliderComponent = BLA_CREATE_COMPONENT(MeshColliderComponent, GetParentObject());
+    MeshColliderComponent* newMeshColliderComponent = BLA_CREATE_COMPONENT(MeshColliderComponent, GetOwnerObject());
     newMeshColliderComponent->SetColliderMesh(mesh);
     m_associatedCollider = newMeshColliderComponent;
 }
@@ -59,7 +59,7 @@ void RigidBodyComponent::Update()
 
 void RigidBodyComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
 {
-    ObjectTransform transform = GetParentObject()->GetTransform();
+    ObjectTransform transform = GetOwnerObject()->GetTransform();
     blaVec3 contactInBody = pushAtW - transform.GetPosition();
 
     blaVec3 torque = cross(forceW, contactInBody);

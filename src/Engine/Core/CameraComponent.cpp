@@ -24,11 +24,11 @@ CameraComponent::~CameraComponent(void)
 
 void CameraComponent::UpdateView()
 {
-    if (!GetParentObject().IsValid())
+    if (!GetOwnerObject().IsValid())
         return;
 
-    m_viewTransform.SetPosition(GetParentObject()->GetTransform().GetPosition());
-    m_viewTransform.SetRotation(GetParentObject()->GetTransform().GetRotation());
+    m_viewTransform.SetPosition(GetOwnerObject()->GetTransform().GetPosition());
+    m_viewTransform.SetRotation(GetOwnerObject()->GetTransform().GetRotation());
 
     m_viewTransform.m_posQuat = m_viewTransform.m_posQuat.GetInverse();
 }
