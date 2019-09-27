@@ -6,6 +6,8 @@
 using namespace BLAengine;
 
 BEGIN_COMPONENT_DESCRIPTION(RigidBodyComponent)
+EXPOSE(m_applyGravity)
+EXPOSE(m_velocity)
 END_DESCRIPTION()
 
 RigidBodyComponent::RigidBodyComponent(GameObjectReference parentObject) :

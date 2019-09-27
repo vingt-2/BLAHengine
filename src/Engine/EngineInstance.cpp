@@ -124,8 +124,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
 void EngineInstance::PreEngineUpdate()
 {
-    m_timer->Update(glfwGetTime());
-    //TODO: Build an Input Manager and scan inputs here...
+	m_timer->Update(glfwGetTime());
 }
 
 void EngineInstance::EngineUpdate()
@@ -226,6 +225,8 @@ void EngineInstance::SetupDirLightAndCamera()
     lightT.SetPosition(blaVec3(0.f, 20.f, 0.f));
     lightT.SetEulerAngles(-0.93f, 0.f, 0.f);
     light->SetTransform(lightT);
+
+	GameComponentManager::GetSingletonInstance()->CreateComponent("SunComponent", light);
 
     GameObjectReference cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);

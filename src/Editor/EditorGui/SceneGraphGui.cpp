@@ -5,8 +5,6 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObjectReference& object)
 {
 	auto root = m_window.RootElement();
@@ -19,18 +17,20 @@ void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObjectRefe
 	}
 
 	BlaGuiElement* element = new BlaGuiCollapsibleElement(object->GetName());
+	BlaGuiRegisteredEvents eventListener = { BlaGuiElementEventPayload::EventType::SELECTED, StaticOnGuiElementSelected, this };
+
+	element->RegisterEvents(eventListener);
+	
 	if (object->GetParent().IsValid())
 	{
 		ElementMap::iterator parentIt = elementMap.find(object->GetParent()->GetName());
 
-		if (parentIt != elementMap.end())
-		{
-			root->AddChildAfterNode(element, parentIt->second);
-		}
-		else
+		if (parentIt == elementMap.end())
 		{
 			AddObjectToTree(elementMap, object->GetParent());
 		}
+		parentIt = elementMap.find(object->GetParent()->GetName());
+		root->AddChildAfterNode(element, parentIt->second);
 	}
 	else
 	{
@@ -40,13 +40,22 @@ void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObjectRefe
 	elementMap.insert(blaPair<blaString, BlaGuiElement*>(object->GetName(), element));
 }
 
+extern int SelectObject(blaString name);
+void SceneGraphGui::OnGuiElementSelected(const BlaGuiElementEventPayload& event)
+{
+	if(event.m_eventType == BlaGuiElementEventPayload::EventType::SELECTED) 
+	{
+		SelectObject(event.m_pGuiElement->GetName());
+	}
+}
+
 void SceneGraphGui::UpdateSceneGraph()
 {
 	Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
 	delete m_window.RootElement();
 
-	BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", "Scene Objects: ");
+	BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", "");
 
 	m_window.SetRootElement(root);
 

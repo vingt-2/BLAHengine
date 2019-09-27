@@ -1,6 +1,8 @@
 #include "GL33Renderer.h"
 #include <Engine/System/Console.h>
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 GL33Renderer::GL33Renderer():

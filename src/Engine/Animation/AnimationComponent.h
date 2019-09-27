@@ -14,7 +14,7 @@ namespace BLAengine
 		blaF32 m_frameIndex;
 		blaString m_bvhName;
 		blaF32 m_playbackMultiplier;
-
+		blaF32 m_scaleFactor;
         AnimationComponent(GameObjectReference parentObject);
         ~AnimationComponent(void) override;
 	private:

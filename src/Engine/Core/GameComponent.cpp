@@ -20,6 +20,16 @@ GameComponent::~GameComponent()
     m_parentObject = GameObjectReference::InvalidReference();
 }
 
+ObjectTransform& GameComponent::GetObjectTransform()
+{
+	return m_parentObject->GetTransform();
+}
+
+ObjectTransform& GameComponent::GetLocalObjectTransform() 
+{
+	return m_parentObject->GetLocalTransform();
+}
+
 const ObjectTransform& GameComponent::GetObjectTransform() const
 {
     return m_parentObject->GetTransform();

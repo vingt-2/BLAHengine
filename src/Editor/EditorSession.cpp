@@ -24,6 +24,8 @@
 
 #include "EditorSession.h"
 
+#pragma optimize("",off)
+
 using namespace BLAengine;
 
 void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
@@ -111,13 +113,13 @@ void EditorSession::EngineUpdate()
 {
     if (m_editorState->m_type == EditorState::BLA_EDITOR_EDITING)
     {
+		DoTestAnimationDemoStuff();
+
         EngineInstance::EngineUpdate();
 
         HandleEditorStateChangeRequests();
 
         HandleGuiRequests();
-
-        DoTestAnimationDemoStuff();
 
         if(m_inputManager->GetKeyState(BLA_KEY_MINUS).IsFallingEdge())
         {
@@ -143,11 +145,17 @@ void EditorSession::EngineUpdate()
                 }
             }
         }
+		if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsRisingEdge())
+		{
+			m_selectedObject = GameObjectReference::InvalidReference();
+		}
     }
 }
 
 void EditorSession::PostEngineUpdate()
 {
+	m_gizmoManager.Update();
+
 	m_debug->Update();
 
 	m_renderer->Update();
@@ -162,7 +170,7 @@ void EditorSession::PostEngineUpdate()
 		m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
 		m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
 
-		if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
+		if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
 		{
 			if (renderGuiWindow->HasFocus())
 			{
@@ -186,7 +194,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
     {
 		m_renderer->SetRenderToFrameBufferOnly(true);
 
-		m_guiManager->OpenWindow("Game Window", new BlaGuiRenderWindow(m_renderer, "Game Window", blaVec2(0.f,0.f)));
+		m_guiManager->OpenWindow("Editor Window", new BlaGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f,0.f)));
 
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
 
@@ -334,16 +342,25 @@ void EditorSession::EditorDragAndDropedFile(const blaString& filePath) const
     ImportMesh(file.GetFullPath(), file.m_name);
 }
 
+blaVector<Ray> rays;
+
 void EditorSession::DoTestAnimationDemoStuff()
 {
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
 	Ray screenRay;
-	if(const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Game Window")))
+	if(const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
 	{
 		screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
 	}
 
+	if(inputs->GetKeyState(BLA_KEY_0).IsFallingEdge())
+		rays.push_back(screenRay);
+
+	for(auto ray : rays) {
+		DebugDraw::DrawRay(ray);
+	}
+	
     ColliderComponent::CollisionContact contactPoint;
     GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
 
@@ -463,45 +480,41 @@ void EditorSession::DoTestAnimationDemoStuff()
         if(m_selectedObject.IsValid())
             Console::LogMessage("Picked object: " + m_selectedObject->GetName());
     }
-    if (leftMouseButton.IsFallingEdge())
-    {
-        m_selectedObject.Reset();
-    }
 
-    if (m_selectedObject.IsValid())
-	{
-        //if (m_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
-        {
-            GameObjectReference camera = m_workingScene->GetMainCamera()->GetOwnerObject();
+ //   if (m_selectedObject.IsValid() && leftMouseButton.IsDown())
+	//{
+ //       //if (m_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
+ //       {
+ //           GameObjectReference camera = m_workingScene->GetMainCamera()->GetOwnerObject();
 
-            blaVec3 camUp, camLeft;
+ //           blaVec3 camUp, camLeft;
 
-            camUp = camera->GetTransform().GetRotation() * blaVec3(0.f, 1.f, 0.f);
-            camLeft = camera->GetTransform().GetRotation() * blaVec3(1.f, 0.f, 0.f);
+ //           camUp = camera->GetTransform().GetRotation() * blaVec3(0.f, 1.f, 0.f);
+ //           camLeft = camera->GetTransform().GetRotation() * blaVec3(1.f, 0.f, 0.f);
 
-            RaycastHit hit = screenRay.RayToPlaneIntersection(m_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
+ //           RaycastHit hit = screenRay.RayToPlaneIntersection(m_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
 
-            ObjectTransform& selectedObjectTransform = m_selectedObject->GetTransform();
+ //           ObjectTransform& selectedObjectTransform = m_selectedObject->GetTransform();
 
-            if(inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsUp())
-            {
-                if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
-                {
-                    selectedObjectTransform.SetPosition(hit.hitPosition);
-                }
-            }
-            else
-            {
-                if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
-                {
-                    blaVec3 cameraPosition = camera->GetTransform().GetPosition();
-                    blaQuat rotation = QuatBetweenVectors(hit.hitPosition - cameraPosition, selectedObjectTransform.GetPosition() - cameraPosition);
+ //           if(inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsUp())
+ //           {
+ //               //if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
+ //               {
+ //                   selectedObjectTransform.SetPosition(hit.hitPosition);
+ //               }
+ //           }
+ //           else
+ //           {
+ //               if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
+ //               {
+ //                   blaVec3 cameraPosition = camera->GetTransform().GetPosition();
+ //                   blaQuat rotation = QuatBetweenVectors(hit.hitPosition - cameraPosition, selectedObjectTransform.GetPosition() - cameraPosition);
 
-                    selectedObjectTransform.GetPosQuat().GetRotation() *= inverse(rotation);
-                }
-            }
-        }
-    }
+ //                   selectedObjectTransform.GetPosQuat().GetRotation() *= inverse(rotation);
+ //               }
+ //           }
+ //       }
+ //   }
 
 	if(m_sceneGraphGui && m_workingScene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE != 0)
 	{
@@ -711,6 +724,17 @@ BLA_CONSOLE_COMMAND(int, SelectObject, blaString name)
 		{
 			editorSession->SetSelectedObject(obj);
 		}
+	}
+	return 0;
+}
+
+int SelectScale(blaString name, float scalex, float scaley, float scalez); struct ConsoleCommandEntry_SelectScale : BLAengine::ConsoleCommandEntry { ConsoleCommandEntry_SelectScale() : ConsoleCommandEntry("SelectScale") {} blaString Call(const std::vector<blaString>& arguments) const override { if(arguments.size() != 4) { Console::LogError("Insufficient number of arguments provided to " + m_name + ", expecting " + std::to_string(4)); return ""; } return std::to_string(SelectScale(blaFromString< blaString > ( arguments[(-1) * (4 - 4)]), blaFromString< float > ( arguments[(-1) * (3 - 4)]), blaFromString< float > ( arguments[(-1) * (2 - 4)]), blaFromString< float > ( arguments[(-1) * (1 - 4)]))); } static ConsoleCommandEntry_SelectScale Init; }; ConsoleCommandEntry_SelectScale ConsoleCommandEntry_SelectScale::Init; int SelectScale(blaString name, float scalex, float scaley, float scalez)
+{
+	GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+
+	if (obj.IsValid())
+	{
+		obj->GetTransform().m_scale = blaVec3(scalex, scaley, scalez);
 	}
 	return 0;
 }

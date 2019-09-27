@@ -5,6 +5,7 @@
 #include <Engine/Assets/MeshAsset.h>
 #include <Editor/EditorGui/ComponentInspectorGui.h>
 #include <Editor/EditorGui/SceneGraphGui.h>
+#include "GizmoManager.h"
 
 namespace BLAengine
 {
@@ -81,6 +82,7 @@ namespace BLAengine
 
 		GameObjectReference m_selectedObject;
 
+		GizmoManager m_gizmoManager;
 		ComponentInspectorGui* m_componentInspector = nullptr;
 		SceneGraphGui* m_sceneGraphGui = nullptr;
         /*

@@ -12,6 +12,7 @@ EXPOSE(m_play)
 EXPOSE(m_frameIndex)
 EXPOSE(m_bvhName)
 EXPOSE(m_playbackMultiplier)
+EXPOSE(m_scaleFactor)
 END_DESCRIPTION()
 
 AnimationComponent::AnimationComponent(GameObjectReference parentObject) :
@@ -20,7 +21,8 @@ AnimationComponent::AnimationComponent(GameObjectReference parentObject) :
 	m_frameIndex(0.f), 
     m_animation(nullptr),
 	m_lastTimePlayerInteraction(0),
-	m_playbackMultiplier(1.f)
+	m_playbackMultiplier(1.f),
+	m_scaleFactor(0.1f)
 {}
 
 AnimationComponent::~AnimationComponent()
@@ -31,11 +33,7 @@ AnimationComponent::~AnimationComponent()
 void AnimationComponent::Update()
 {
 	InputManager* inputs = InputManager::GetSingletonInstance();
-	if (m_animation == nullptr)
-	{
-		m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_04.bvh")[0];
-	}
-	else
+	if(m_animation != nullptr)
 	{
 		blaF32 animDt = 1.0f / m_animation->GetSamplingRate();
 		const EngineInstance* engine = EngineInstance::GetSingletonInstanceRead();
@@ -81,15 +79,15 @@ void AnimationComponent::Update()
 
 		SkeletonAnimationData::GetBoneArrayFromEvalAnim(bones, m_animation->GetSkeleton(), jointTransformsW);
 
-		blaF32 scaleFactor = 0.1f;
+		blaVec3 origin = GetObjectTransform().GetPosition();
 
 		for (size_t i = 0; i < bones.size(); ++i)
 		{
 			blaPosQuat t = bones[i].first;
 			blaF32 h = bones[i].second;
 
-			t.SetTranslation3(scaleFactor * t.GetTranslation3());
-			h *= scaleFactor;
+			t.SetTranslation3(origin + m_scaleFactor * t.GetTranslation3());
+			h = 0.3f;
 
 			DebugDraw::DrawPlainOBB(t, blaVec3(0.5f * h, 0.1f, 0.1f), blaVec4(BLAColors::ORANGE, 0.6f));
 			DebugDraw::DrawOBB(t, blaVec3(0.5f * h, 0.1f, 0.1f), blaVec3(0));
@@ -99,7 +97,13 @@ void AnimationComponent::Update()
 	if(m_bvhName != m_prevBVHName)
 	{
 		delete m_animation;
-		m_animation = BVHImport::ImportAnimation(m_bvhName)[0];
+
+		blaVector<SkeletonAnimationData*> anims = BVHImport::ImportAnimation(m_bvhName);
+
+		if (!anims.empty())
+			m_animation = anims[0];
+		else
+			m_animation = nullptr;
 	}
 
 	m_prevBVHName = m_bvhName;

@@ -23,6 +23,9 @@ namespace BLAengine
         virtual ~GameComponent();
         virtual void Update() = 0;
 
+		ObjectTransform& GetObjectTransform();
+		ObjectTransform& GetLocalObjectTransform();
+
         const ObjectTransform& GetObjectTransform() const;
         const ObjectTransform& GetLocalObjectTransform() const;
 

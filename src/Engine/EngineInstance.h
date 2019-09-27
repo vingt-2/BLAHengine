@@ -37,9 +37,11 @@ namespace BLAengine
 
 		void SetTargetFPS(int fps) { m_targetFPS = fps; }
 		blaU32 GetTargetFPS() { return m_targetFPS; }
+
+		GL33Renderer& GetRenderer() { return *m_renderer; }
     
     protected:
-		blaS32 m_targetFPS;
+		blaS32 m_targetFPS = 60;
 
         virtual bool InitializeEngine(RenderWindow* renderWindow);
         virtual void PreEngineUpdate();

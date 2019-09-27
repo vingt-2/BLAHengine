@@ -22,6 +22,8 @@ using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(BlaGuiManager);
 
+blaBool IsItemDoubleCliked(int mouse_button = 0);
+
 void BLAengineStyleColors(ImGuiStyle* dst)
 {
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
@@ -135,6 +137,40 @@ void BlaGuiManager::Destroy()
     ImGui::DestroyContext();
 }
 
+void BlaGuiElement::SendEvent(BlaGuiElementEventPayload::EventType eventType)
+{
+	for(const auto& cb : m_registeredCallbacks) 
+	{
+		if(cb.m_eventTriggerFlags & eventType != 0) 
+		{
+			BlaGuiElementEventPayload callbackPayload { eventType, this };
+			cb.m_callback(cb.m_callerPtr, callbackPayload);
+		}
+	}
+}
+
+void BlaGuiElement::RegisterEvents(BlaGuiRegisteredEvents& cb)
+{
+	blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
+		[cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
+
+	if(it == m_registeredCallbacks.end()) 
+	{
+		m_registeredCallbacks.push_back(cb);
+	}
+}
+
+void BlaGuiElement::UnRegisterEvents(BlaGuiRegisteredEvents& cb)
+{
+	blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
+		[cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
+
+	if (it != m_registeredCallbacks.end())
+	{
+		m_registeredCallbacks.erase(it);
+	}
+}
+
 void BlaGuiElement::Render()
 {
     auto child = GetChild();
@@ -148,8 +184,20 @@ void BlaGuiElement::Render()
 
 void BlaGuiCollapsibleElement::Render()
 {
-	if (ImGui::TreeNodeEx((void*)(intptr_t)this, ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick, GetName().c_str()))
+	int flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+	if(!m_child)
 	{
+		flags |= ImGuiTreeNodeFlags_Leaf;
+	}
+
+	if (ImGui::TreeNodeEx((void*)(intptr_t)this, flags, GetName().c_str()))
+	{
+		if(ImGui::IsItemClicked()) 
+		{
+			SendEvent(BlaGuiElementEventPayload::EventType::SELECTED);
+		}
+
 		auto child = GetChild();
 
 		while (child != nullptr)
@@ -194,7 +242,7 @@ void BlaGuiEditElement<bool>::Render()
 template<>
 void BlaGuiEditElement<blaF32>::Render()
 {
-	ImGui::InputFloat(GetName().c_str(), m_pToValue, 0.1f, 1.f, 3);
+	ImGui::InputFloat(GetName().c_str(), m_pToValue, 0.1f, 1.f, 7);
 }
 
 template<>
@@ -228,6 +276,16 @@ void BlaGuiEditElement<blaString>::Render()
 	strcpy(inputBuf, m_pToValue->c_str());
 	ImGui::InputText(GetName().c_str(), inputBuf, sizeof(inputBuf));
 	*m_pToValue = blaString(inputBuf);
+}
+
+template <typename T>
+void BlaGuiEditElementVector<T>::Render()
+{
+	for(int i = 0; i < m_pToVector->size(); i++) 
+	{
+		BlaGuiEditElement<T> toRender = BlaGuiEditElement<T>(GetName() + std::to_string(i), (&m_pToVector[0]) + i * sizeof(T));
+		toRender.Render();
+	}
 }
 
 template<>
@@ -741,7 +799,7 @@ blaBool BlaFileBrowser::IsBrowsingCancelled() const
     return m_currentState == CANCELLED;
 }
 
-blaBool IsItemDoubleCliked(int mouse_button = 0)
+blaBool IsItemDoubleCliked(int mouse_button)
 {
     return ImGui::IsMouseDoubleClicked(mouse_button) && ImGui::IsItemHovered(ImGuiHoveredFlags_None);
 }

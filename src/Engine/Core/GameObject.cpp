@@ -37,13 +37,17 @@ const ObjectTransform& GameObject::GetPotentialDirtyTransform() const
 
 ObjectTransform& GameObject::GetTransform()
 {
-    if (m_parent.IsValid() && m_objectState & DIRTY_WORLD_TRANSFORM)
+    if (m_parent.IsValid())
     {
-        m_cachedWorldTransform.m_posQuat = m_parent->GetTransform().m_posQuat * m_localTransform.m_posQuat;
-        m_cachedWorldTransform.m_scale = m_parent->GetTransform().m_scale * m_localTransform.m_scale;
-        m_objectState &= ~DIRTY_WORLD_TRANSFORM;
+		if (m_objectState & DIRTY_WORLD_TRANSFORM)
+		{
+			m_cachedWorldTransform.m_posQuat = m_parent->GetTransform().m_posQuat * m_localTransform.m_posQuat;
+			m_cachedWorldTransform.m_scale = m_parent->GetTransform().m_scale * m_localTransform.m_scale;
+			m_objectState &= ~DIRTY_WORLD_TRANSFORM;
+		}
+		return m_cachedWorldTransform;
     }
-    return m_cachedWorldTransform;
+	return m_localTransform;
 }
 
 ObjectTransform& GameObject::GetLocalTransform()

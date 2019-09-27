@@ -12,7 +12,7 @@ void ComponentInspectorGui::InspectGameObject(GameObjectReference gameObject)
 
 	m_selectedGameObject = gameObject;
 
-	BlaGuiElement* root = new BlaGuiSimpleTextElement("", "Components: ");
+	BlaGuiElement* root = new BlaGuiSimpleTextElement("", "");
 
 	std::vector<blaString> componentNames = GetComponents(gameObject);
 

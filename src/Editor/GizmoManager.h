@@ -8,11 +8,15 @@ namespace BLAengine
     class GizmoManager
     {
     public:
-        GizmoManager() {};
+		GizmoManager();
+
+		void Update();
 
     private:
-        void CreateManipulationGizmo();
 
-        GameObjectReference m_selectedObjectManipulationGizmo; 
+		blaF32 m_sizeMultiplier;
+		blaF32 m_arrowThickness;
+		blaF32 m_arrowLengths;
+		blaF32 m_distanceToCenter;
     };
 }

@@ -20,7 +20,7 @@ TriangleMesh PrimitiveGeometry::MakeCube()
 
     blaVector<blaU32> triangleIndices;
     for (auto & q : quads)
-    {
+    { 
         triangleIndices.push_back(q[0]);
         triangleIndices.push_back(q[1]);
         triangleIndices.push_back(q[2]);

@@ -68,8 +68,7 @@ void TestPlayerComponent::Update()
             rigidBody->AddImpulse(blaVec3(0.f, 5.f, 0.f));
         }
 		
-		DebugDraw::DrawSphere(GetObjectTransform().GetPosition(), 1.f, blaVec3(1,0,0));
-
+		
         float controlability = 0.05f;
 
         // On the ground ...
