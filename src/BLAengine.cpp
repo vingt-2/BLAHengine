@@ -29,9 +29,11 @@ int CALLBACK WinMain(
     __in  LPSTR lpCmdLine,
     __in  int nCmdShow)
 {
-	int a = IS_EMPTY(1);
-
     RunEditorSession();
+}
+
+extern "C" {
+	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 }
 #endif
 

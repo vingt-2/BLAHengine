@@ -8,7 +8,7 @@ Ray::Ray(blaVec3 origin, blaVec3 direction, float length)
     this->m_length = length;
 }
 
-blaVec3 Ray::GaussSolver(blaMat3 inMat, blaVec3 equal)
+blaVec3 Ray::GaussSolver(blaMat3 inMat, blaVec3 equal) const
 {
     glm::mat4x3 mat;
     mat[0] = inMat[0];
@@ -32,7 +32,7 @@ blaVec3 Ray::GaussSolver(blaMat3 inMat, blaVec3 equal)
     return blaVec3(-row0[3], -row1[3], -row2[3]);
 };
 
-RaycastHit Ray::RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeVec1, blaVec3 planeVec2)
+RaycastHit Ray::RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeVec1, blaVec3 planeVec2) const
 {
     blaVec3 solved = GaussSolver(blaMat3(-this->m_direction, planeVec1, planeVec2), (this->m_origin - planeOrigin));
 

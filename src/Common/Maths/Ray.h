@@ -24,10 +24,10 @@ namespace BLAengine
 		Ray() : m_origin(blaVec3(0.f)), m_direction(blaVec3(0.f)), m_length(0.f) {}
         Ray(blaVec3 origin, blaVec3 direction, float length);
 
-        RaycastHit RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeVec1, blaVec3 planevec2);
+        RaycastHit RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeVec1, blaVec3 planevec2) const;
 
     private:
-        blaVec3 GaussSolver(blaMat3 inMat, blaVec3 equal);
+        blaVec3 GaussSolver(blaMat3 inMat, blaVec3 equal) const;
     };
 
 }

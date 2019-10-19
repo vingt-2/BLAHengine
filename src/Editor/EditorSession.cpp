@@ -481,41 +481,6 @@ void EditorSession::DoTestAnimationDemoStuff()
             Console::LogMessage("Picked object: " + m_selectedObject->GetName());
     }
 
- //   if (m_selectedObject.IsValid() && leftMouseButton.IsDown())
-	//{
- //       //if (m_selectedObject->GetName().find("EffectorHandles_") != blaString::npos)
- //       {
- //           GameObjectReference camera = m_workingScene->GetMainCamera()->GetOwnerObject();
-
- //           blaVec3 camUp, camLeft;
-
- //           camUp = camera->GetTransform().GetRotation() * blaVec3(0.f, 1.f, 0.f);
- //           camLeft = camera->GetTransform().GetRotation() * blaVec3(1.f, 0.f, 0.f);
-
- //           RaycastHit hit = screenRay.RayToPlaneIntersection(m_selectedObject->GetTransform().GetPosition(), camUp, camLeft);
-
- //           ObjectTransform& selectedObjectTransform = m_selectedObject->GetTransform();
-
- //           if(inputs->GetKeyState(BLA_KEY_LEFT_ALT).IsUp())
- //           {
- //               //if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
- //               {
- //                   selectedObjectTransform.SetPosition(hit.hitPosition);
- //               }
- //           }
- //           else
- //           {
- //               if (glm::length(hit.hitPosition - selectedObjectTransform.GetPosition()) < 1.f)
- //               {
- //                   blaVec3 cameraPosition = camera->GetTransform().GetPosition();
- //                   blaQuat rotation = QuatBetweenVectors(hit.hitPosition - cameraPosition, selectedObjectTransform.GetPosition() - cameraPosition);
-
- //                   selectedObjectTransform.GetPosQuat().GetRotation() *= inverse(rotation);
- //               }
- //           }
- //       }
- //   }
-
 	if(m_sceneGraphGui && m_workingScene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE != 0)
 	{
 		m_sceneGraphGui->UpdateSceneGraph();
