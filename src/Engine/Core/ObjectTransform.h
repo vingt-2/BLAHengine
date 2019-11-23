@@ -8,7 +8,7 @@ namespace BLAengine
     class BLACORE_API ObjectTransform
     {
     public:
-        blaVec3 m_scale; 
+        blaVec3 m_scale;
 
         blaPosQuat m_posQuat;
 

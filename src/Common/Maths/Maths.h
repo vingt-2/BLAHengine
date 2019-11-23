@@ -126,12 +126,12 @@ private:
     blaVec4 m_p;
     blaQuat m_q;
 
-public:    
-    blaPosQuat(blaVec4 p, blaQuat q):
+public:
+    blaPosQuat(blaVec4 p, blaQuat q) :
         m_p(p), m_q(q)
     {}
 
-    blaPosQuat(blaVec3 p, blaQuat q):
+    blaPosQuat(blaVec3 p, blaQuat q) :
         m_q(q),
         m_p(blaVec4(p[0], p[1], p[2], 1.f))
     {}
@@ -168,7 +168,7 @@ public:
     {
         blaPosQuat pq = *this;
         pq.Inverse();
-        
+
         return pq;
     }
 
@@ -252,7 +252,7 @@ public:
         return m_p;
     }
 
-    blaVec4& GetTranslation() 
+    blaVec4& GetTranslation()
     {
         return m_p;
     }
@@ -278,7 +278,7 @@ public:
         q.z = syaw * cp * cr - cyaw * sp * sr;
         return q;
     }
-    
+
     //TODO: The order of inputs here is probably wrong
     static blaMat4 EulerToMat3(float pitch, float yaw, float roll)
     {
@@ -292,9 +292,9 @@ public:
 
         return blaMat3
         (
-            blaVec3(cosyaw*cosroll, -cosyaw*sinroll, sinyaw),
-            blaVec3(cospitch*sinroll + sinpitch*sinyaw*cosroll, cospitch*cosroll - sinpitch*sinyaw*sinroll, -sinpitch*cosyaw),
-            blaVec3(sinpitch*sinroll - cospitch*sinyaw*cosroll, sinpitch*cosroll + cospitch*sinyaw*sinroll, cospitch*cosyaw)
+            blaVec3(cosyaw*cosroll, -cosyaw * sinroll, sinyaw),
+            blaVec3(cospitch*sinroll + sinpitch * sinyaw*cosroll, cospitch*cosroll - sinpitch * sinyaw*sinroll, -sinpitch * cosyaw),
+            blaVec3(sinpitch*sinroll - cospitch * sinyaw*cosroll, sinpitch*cosroll + cospitch * sinyaw*sinroll, cospitch*cosyaw)
         );
     }
 
@@ -313,9 +313,9 @@ public:
 
 blaQuat inline QuatBetweenVectors(const blaVec3& u, const blaVec3& v)
 {
-    blaVec3 w = cross(u, v); 
-    blaQuat q = blaQuat(glm::dot(u, v), w.x, w.y, w.z); 
-    q.w += glm::length(q); 
+    blaVec3 w = cross(u, v);
+    blaQuat q = blaQuat(glm::dot(u, v), w.x, w.y, w.z);
+    q.w += glm::length(q);
     return normalize(q);
 
 }
@@ -342,4 +342,3 @@ inline blaVec4 SafeNormalize(const blaVec4& v)
 
 void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat);
 blaMat3 matrixCross(blaVec3 vector);
-void printVector(blaVec3 vec);

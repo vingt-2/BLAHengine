@@ -12,28 +12,28 @@
 
 namespace BLAengine
 {
-	class GameComponentManager;
-	class GameObject;
+    class GameComponentManager;
+    class GameObject;
     class BLACORE_API GameComponent
     {
     public:
-		friend GameComponentManager;
+        friend GameComponentManager;
 
         GameComponent(GameObjectReference parentObject);
         virtual ~GameComponent();
         virtual void Update() = 0;
 
-		ObjectTransform& GetObjectTransform();
-		ObjectTransform& GetLocalObjectTransform();
+        ObjectTransform& GetObjectTransform();
+        ObjectTransform& GetLocalObjectTransform();
 
         const ObjectTransform& GetObjectTransform() const;
         const ObjectTransform& GetLocalObjectTransform() const;
 
         GameObjectReference GetOwnerObject() const { return m_parentObject; }
 
-		virtual const ComponentReflection::ComponentDescriptor& GetComponentDescriptor() const;
-		
-    	static void InitReflection(ComponentReflection::ComponentDescriptor* typeDesc) {}
+        virtual const ComponentReflection::ComponentDescriptor& GetComponentDescriptor() const;
+
+        static void InitReflection(ComponentReflection::ComponentDescriptor* typeDesc) {}
 
     private:
 
@@ -45,7 +45,7 @@ namespace BLAengine
     {
         BLA_DECLARE_SINGLETON(GameComponentManager)
 
-        friend GameComponent;
+            friend GameComponent;
         class ComponentManagerEntry
         {
         public:
@@ -66,7 +66,7 @@ namespace BLAengine
     public:
         void __RegisterComponent(const blaString& name, ComponentManagerEntry::ComponentFactory factory);
         blaVector<blaString> ListComponentNames();
-		const ComponentReflection::ComponentDescriptor& GetComponentDescriptor(blaString name);
+        const ComponentReflection::ComponentDescriptor& GetComponentDescriptor(blaString name);
         GameComponent* CreateComponent(const blaString& componentName, GameObjectReference objRef);
     };
 }
@@ -76,8 +76,7 @@ namespace BLAengine
  *  BLA_DECLARE_COMPONENT(COMPONENT_NAME)
  *      blaVec3 m_someValue;
  *      blaVector<blaU32> m_someVector;
- *      
+ *
  *      void SomeComponentPrivateFunction();
  *  END_COMPONENT_DECLARATION()
  */
-	

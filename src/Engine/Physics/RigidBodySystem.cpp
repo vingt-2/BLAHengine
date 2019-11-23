@@ -7,7 +7,7 @@
 
 using namespace BLAengine;
 
-RigidBodySystem::RigidBodySystem(Timer* time):
+RigidBodySystem::RigidBodySystem(Timer* time) :
     m_timeStep(0.01f),
     m_uniformViscosity(0.01f),
     m_gravity(blaVec3(0.f, -5.f, 0.f)),
@@ -19,7 +19,7 @@ RigidBodySystem::RigidBodySystem(Timer* time):
 {
     m_collisionProcessor = new CollisionProcessor(time, &m_timeStep);
     m_time = time;
-    m_timeStep /= sqrtf((float) m_substeps);
+    m_timeStep /= sqrtf((float)m_substeps);
 }
 
 
@@ -75,14 +75,14 @@ void RigidBodySystem::UpdateSystem()
             float timeStep = 2.f * (time - m_oldTime) / 1.f;
             if (timeStep < 0.1f)
                 m_timeStep = timeStep;
-            
+
             if (m_timeStep == 0)
                 m_timeStep = 0.01f;
 
         }
         m_oldTime = time;
 
-        
+
         ApplyWorldForces();
         for (int i = 0; i < m_substeps; i++)
         {
@@ -100,8 +100,6 @@ void RigidBodySystem::UpdateStates()
         RigidBodyComponent& body = *bodyPtr;
         if (!body.m_isPinned)
         {
-            /*if (body.m_nextState== nullptr) cout << "Empty state for body, check your calls!\n";
-            else UpdateTransform(body);*/
             UpdateTransform(body);
         }
     }
@@ -140,10 +138,10 @@ void RigidBodySystem::UpdateAcceleration(RigidBodyComponent& body)
     blaMat3 omegaHat = matrixCross(body.m_angularVelocity);
 
     newState.m_acceleration = body.m_invMassTensor * ((body.GetForcesAccu()));
-    
+
     blaVec3 inertia = omegaHat * body.m_inertiaTensor * body.m_angularVelocity;
     newState.m_angularAcceleration = -body.m_invInertiaTensor * (body.GetTorquesAccu() - inertia);
-    
+
     body.m_nextState = newState;
 }
 
@@ -168,7 +166,7 @@ void RigidBodySystem::UpdateVelocity(RigidBodyComponent& body)
 void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
 {
     ObjectTransform transform = body.GetObjectTransform();
-    
+
     //    Update State, delete NextState entry;
     {
         blaVec3 correctionL;
@@ -198,12 +196,13 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
     }
 
     //    Evaluate new Position;
-    transform.SetPosition( transform.GetPosition() + m_timeStep * body.m_velocity);
-    
+    blaVec3 newPos = transform.GetPosition() + m_timeStep * body.m_velocity;
+    transform.SetPosition(newPos);
+
     //    Evaluate Exponential Map
-    //blaMat3 omegaHat = matrixCross(-body.m_angularVelocity);
-    //blaMat3 deltaRot = blaMat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
-    //blaMat3 newRotation = toMat3(transform.GetRotation()) * deltaRot;
+    blaMat3 omegaHat = matrixCross(-body.m_angularVelocity);
+    blaMat3 deltaRot = blaMat3(1) + sin(m_timeStep) * omegaHat + (1 - cos(m_timeStep)) * (omegaHat*omegaHat);
+    blaMat3 newRotation = toMat3(transform.GetRotation()) * deltaRot;
 
     ////    Normalize each axis of rotation to avoid scale drift 
     //blaVec3 X = blaVec3(newRotation[0][0], newRotation[0][1], newRotation[0][2]);
@@ -215,10 +214,10 @@ void RigidBodySystem::UpdateTransform(RigidBodyComponent& body)
     //glm::quat q = blaMat3(normalize(X), normalize(Y), normalize(Z));
     //transform.SetRotation(blaQuat(q.x,q.y,q.z,q.w));
 
-	blaVec3 logMapAxis = SafeNormalize(body.m_angularVelocity);
-	blaF32 logMapAngle = glm::length(body.m_angularVelocity) * m_timeStep;
+    blaVec3 logMapAxis = SafeNormalize(body.m_angularVelocity);
+    blaF32 logMapAngle = glm::length(body.m_angularVelocity) * m_timeStep;
 
-	transform.SetRotation(glm::angleAxis(logMapAngle, logMapAxis));
+    transform.SetRotation(glm::angleAxis(logMapAngle, logMapAxis));
 
     body.GetOwnerObject()->SetTransform(transform);
 }

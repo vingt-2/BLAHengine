@@ -6,8 +6,8 @@
 
 namespace BLAengine
 {
-	class TriangleMesh;
-	class ColliderComponent;
+    class TriangleMesh;
+    class ColliderComponent;
     class BLACORE_API NextState
     {
     public:
@@ -25,7 +25,7 @@ namespace BLAengine
         blaVec3 m_correctionAngularVelocity;
     };
 
-	BEGIN_COMPONENT_DECLARATION(RigidBodyComponent)
+    BEGIN_COMPONENT_DECLARATION(RigidBodyComponent)
     public:
         blaVec3 m_previousPosition;
         blaVec3 m_previousRotation;
@@ -71,8 +71,8 @@ namespace BLAengine
         RigidBodyComponent(GameObjectReference parentObject);
         ~RigidBodyComponent(void) override;
 
-		//Todo: MOVE TO TICKET SYSTEM.
-		bool m_registered = false;
+        //Todo: MOVE TO TICKET SYSTEM.
+        bool m_registered = false;
 
     private:
 

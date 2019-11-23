@@ -7,27 +7,25 @@
 
 namespace BLAengine
 {
-	BEGIN_COMPONENT_DECLARATION(SunComponent)
-		
-		void Update() override;
+    BEGIN_COMPONENT_DECLARATION(SunComponent)
 
-		SunComponent(GameObjectReference parentObject) : GameComponent(parentObject) {}
-		~SunComponent(void) override {}
+        void Update() override;
 
-		float m_speed = 0.0002f;
+        SunComponent(GameObjectReference parentObject) : GameComponent(parentObject) {}
+        ~SunComponent(void) override {}
 
-	END_DECLARATION()
+        float m_speed = -0.0002f;
 
-	BEGIN_COMPONENT_DESCRIPTION(SunComponent)
-	EXPOSE(m_speed)
-	END_DESCRIPTION()
+    END_DECLARATION()
 
-	void SunComponent::Update()
-	{
-		ObjectTransform& lightT = GetObjectTransform();
-		
-		lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(m_speed, 0.f, 0.f));
-	}
+    BEGIN_COMPONENT_DESCRIPTION(SunComponent)
+        EXPOSE(m_speed)
+    END_DESCRIPTION()
 
+    void SunComponent::Update()
+    {
+        ObjectTransform& lightT = GetObjectTransform();
 
+        lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(m_speed, 0.f, 0.f));
+    }
 }

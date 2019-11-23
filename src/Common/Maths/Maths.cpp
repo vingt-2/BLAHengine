@@ -13,17 +13,17 @@ blaMat3 matrixCross(blaVec3 v)
 
 blaString VecToString(blaVec3 vec)
 {
-	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ")";
+    return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ")";
 }
 
 blaString VecToString(blaVec2 vec)
 {
-	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
+    return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }
 
 blaString VecToString(blaIVec2 vec)
 {
-	return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
+    return "(" + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }
 
 void ComputeQuatDerivative(blaQuat& outQuat, const blaVec3& angularVelocity, const blaQuat& inputQuat)

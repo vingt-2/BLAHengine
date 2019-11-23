@@ -32,9 +32,9 @@ static blaVector<blaString> FilesInDir(blaString dirname)
     dir = opendir(dirname.data());
     if (dir != NULL)
     {
-        while ((ent = readdir(dir)) != NULL) 
+        while ((ent = readdir(dir)) != NULL)
         {
-            switch (ent->d_type) 
+            switch (ent->d_type)
             {
             case DT_REG:
                 result.push_back(ent->d_name);
@@ -49,7 +49,7 @@ static blaVector<blaString> FilesInDir(blaString dirname)
 int BLAengine::AssetManager::LoadCookedAssets()
 {
     blaVector<blaString> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
-    blaVector<blaString> matNames     = FilesInDir(MATERIAL_SUBPATH);
+    blaVector<blaString> matNames = FilesInDir(MATERIAL_SUBPATH);
     blaVector<blaString> textureNames = FilesInDir(TEXTURE_SUBPATH);
 
     for (auto n : triMeshNames)
@@ -84,30 +84,30 @@ AssetManager::AssetType AssetManager::GetAsset(blaString assetName, Asset* &asse
 
     switch (type)
     {
-        case AssetType::TriangleMeshAsset:
+    case AssetType::TriangleMeshAsset:
+    {
+        MeshAsset* meshPtr = m_triangleMeshesInMemory.at(assetIndx);
+        if (assetPtr = (Asset*) dynamic_cast<Asset*>(meshPtr))
         {
-            MeshAsset* meshPtr = m_triangleMeshesInMemory.at(assetIndx);
-            if (assetPtr = (Asset*) dynamic_cast<Asset*>(meshPtr))
-            {
-                return TriangleMeshAsset;
-            }
+            return TriangleMeshAsset;
         }
-        case AssetType::TextureAsset:
+    }
+    case AssetType::TextureAsset:
+    {
+        Texture2D* texturePtr = m_textures2DInMemory.at(assetIndx);
+        if (assetPtr = (Asset*) dynamic_cast<Asset*>(texturePtr))
         {
-            Texture2D* texturePtr = m_textures2DInMemory.at(assetIndx);
-            if (assetPtr = (Asset*) dynamic_cast<Asset*>(texturePtr))
-            {
-                return TextureAsset;
-            }
+            return TextureAsset;
         }
-        case AssetType::MaterialAsset:
+    }
+    case AssetType::MaterialAsset:
+    {
+        Material* matPtr = m_materialsInMemory.at(assetIndx);
+        if (assetPtr = (Asset*) dynamic_cast<Asset*>(matPtr))
         {
-            Material* matPtr = m_materialsInMemory.at(assetIndx);
-            if (assetPtr = (Asset*) dynamic_cast<Asset*>(matPtr))
-            {
-                return MaterialAsset;
-            }
+            return MaterialAsset;
         }
+    }
     }
 
     return type;
@@ -267,17 +267,17 @@ bool AssetManager::SaveTriangleMesh(MeshAsset* mesh)
 
     std::fstream fs;
     fs.open(blaString(TRIANGLE_MESH_SUBPATH) + mesh->GetName(), std::fstream::out | std::fstream::binary);
-    
+
     if (!fs.is_open())
     {
         cout << "Could not Write on file " << blaString(TRIANGLE_MESH_SUBPATH) + mesh->GetName() << "\n";
         return false;
     }
-    
+
     cereal::BinaryOutputArchive output(fs);
-    
+
     output(meshSerializer);
-    
+
     return true;
 }
 

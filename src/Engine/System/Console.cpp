@@ -10,7 +10,7 @@ BLA_IMPLEMENT_SINGLETON(Console);
 void ConsoleLog::GetLastNLogLines(int n, blaVector<blaString>& outVector)
 {
     outVector.resize(MIN(n, m_consoleLineCache.size()));
-    for(int i = MAX((int)m_consoleLineCache.size() - n, 0), j = 0;  i < m_consoleLineCache.size(); i++, j++)
+    for (int i = MAX((int)m_consoleLineCache.size() - n, 0), j = 0; i < m_consoleLineCache.size(); i++, j++)
     {
         outVector[j] = m_consoleLineCache[i];
     }
@@ -48,12 +48,12 @@ void Console::ExecuteCurrentCommand()
     blaVector<blaString> args = SplitString<blaString>(currentCommand, " ");
 
     const blaString commandName = args[0];
-	
-	m_log.AddLine("> " + currentCommand);
+
+    m_log.AddLine("> " + currentCommand);
 
     args.erase(args.begin());
     blaString ret = "";
-    for(auto command : m_commandDictionary)
+    for (auto command : m_commandDictionary)
     {
         if (command->GetName() == commandName)
         {
@@ -61,31 +61,31 @@ void Console::ExecuteCurrentCommand()
         }
     }
     m_log.AddLine("> " + ret);
-	m_commandHistory.emplace_back(currentCommand);
+    m_commandHistory.emplace_back(currentCommand);
 }
 
 void Console::DoCommandCompletion()
 {
     blaPair<int, const ConsoleCommandEntry*> bestMatch(0, nullptr);
-    
+
     for (const ConsoleCommandEntry* command : m_commandDictionary)
     {
         int matchLength = 0;
         const blaString& commandName = command->GetName();
-        for(int c = 0; c < commandName.length() && c < sizeof(m_currentCommandBuffer); ++c)
+        for (int c = 0; c < commandName.length() && c < sizeof(m_currentCommandBuffer); ++c)
         {
             if (commandName.at(c) != m_currentCommandBuffer[c])
                 break;
             ++matchLength;
         }
-        if(matchLength > bestMatch.first)
+        if (matchLength > bestMatch.first)
         {
             bestMatch.first = matchLength;
             bestMatch.second = command;
         }
     }
 
-    if(bestMatch.second != nullptr)
+    if (bestMatch.second != nullptr)
     {
         strcpy(m_currentCommandBuffer, bestMatch.second->GetName().data());
     }
@@ -93,7 +93,7 @@ void Console::DoCommandCompletion()
 
 void Console::DoCommandHistory(blaS32 cursorOffset)
 {
-    if(m_commandHistory.empty())
+    if (m_commandHistory.empty())
     {
         return;
     }
@@ -145,7 +145,7 @@ float BLAengine::blaFromString(const blaString& str)
 }
 
 template<>
-blaString BLAengine::blaFromString(const blaString& str) 
+blaString BLAengine::blaFromString(const blaString& str)
 {
     return str;
 }

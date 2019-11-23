@@ -6,17 +6,17 @@
 
 namespace BLAengine
 {
-    
-    typedef blaVector<blaString> DragAndDropPayloadDontStore;
-    
 
-    typedef void (*DragAndDropCallback) (const void* DragAndDropPayload);
+    typedef blaVector<blaString> DragAndDropPayloadDontStore;
+
+
+    typedef void(*DragAndDropCallback) (const void* DragAndDropPayload);
 
     class BLACORE_API RenderWindow
     {
     public:
         RenderWindow() = default;
-        virtual ~RenderWindow(){};
+        virtual ~RenderWindow() {};
 
         virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
         virtual blaString GetMaxGLVersion() const = 0;
@@ -43,7 +43,7 @@ namespace BLAengine
 
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
 
-		virtual bool HasCapturedMouse() = 0;
+        virtual bool HasCapturedMouse() = 0;
     };
 
 #ifdef GLFW_INTERFACE
@@ -91,7 +91,7 @@ namespace BLAengine
 
         static void GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths);
 
-		bool HasCapturedMouse() override { return !m_cursorVisibility; }
+        bool HasCapturedMouse() override { return !m_cursorVisibility; }
 
     private:
 
@@ -99,7 +99,7 @@ namespace BLAengine
 
         int m_width, m_height;
 
-		bool m_cursorVisibility;
+        bool m_cursorVisibility;
 
         bool m_isFullscreen;
 
@@ -163,6 +163,6 @@ namespace BLAengine
 
         blaString m_glVersion;
     };
- #endif
+#endif
 
 }

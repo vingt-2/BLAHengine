@@ -9,9 +9,9 @@
             static REFERENCE_NAME InvalidReference()                        \
                 { return REFERENCE_NAME(); }                                \
     private:                                                                \
-        REFERENCE_NAME(blaIndex idx, blaVector<REFERENCE_TYPE>* pVector) :\
+        REFERENCE_NAME(blaIndex idx, blaVector<REFERENCE_TYPE>* pVector) :	\
             BLAReference<REFERENCE_TYPE>(idx, pVector) {}                   \
-        
+
 template<class Object>
 class BLAReference
 {
@@ -34,7 +34,7 @@ public:
         return !(*this == other);
     }
 
-	void Reset() { *this = InvalidReference(); }
+    void Reset() { *this = InvalidReference(); }
 
     static BLAReference InvalidReference() { return BLAReference(); };
 protected:

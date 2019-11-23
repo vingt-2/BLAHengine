@@ -8,10 +8,11 @@ namespace BLAengine
     {
     public:
         blaVec3 hitPosition;
-
-        RaycastHit(blaVec3 hit)
+        bool hasHit;
+        RaycastHit(blaVec3 hit, bool hasHit)
         {
             hitPosition = hit;
+            hasHit = hasHit;
         }
     };
 
@@ -21,10 +22,10 @@ namespace BLAengine
         blaVec3 m_origin;
         blaVec3 m_direction;
         float m_length;
-		Ray() : m_origin(blaVec3(0.f)), m_direction(blaVec3(0.f)), m_length(0.f) {}
+        Ray() : m_origin(blaVec3(0.f)), m_direction(blaVec3(0.f)), m_length(0.f) {}
         Ray(blaVec3 origin, blaVec3 direction, float length);
 
-        RaycastHit RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeVec1, blaVec3 planevec2) const;
+        RaycastHit RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeNormal, blaF32& t) const;
 
     private:
         blaVec3 GaussSolver(blaMat3 inMat, blaVec3 equal) const;

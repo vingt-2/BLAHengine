@@ -9,7 +9,7 @@ namespace BLAengine
 
     enum BLAKeyboard : blaU32
     {
-          BLA_KEY_SPACE
+        BLA_KEY_SPACE
         , BLA_KEY_APOSTROPHE
         , BLA_KEY_COMMA
         , BLA_KEY_MINUS
@@ -255,7 +255,7 @@ namespace BLAengine
     };
 
     class InputManager
-    { 
+    {
         friend InputStateSetter;
 
         BLA_DECLARE_SINGLETON(InputManager)
@@ -278,13 +278,13 @@ namespace BLAengine
         BLAGamepadStateStorage m_gamepadState;
 
         blaBool m_lockInputs;
-    
+
     public:
 
         InputManager() :
             m_lockInputs(false)
-			, m_lockMouse(false)
-			, m_lockKeyboard(false)
+            , m_lockMouse(false)
+            , m_lockKeyboard(false)
         {
             for (blaU32 i = 0; i < BLAKeyboard::BLA_KEY_ENUM_END; ++i)
             {

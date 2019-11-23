@@ -6,22 +6,22 @@
 
 namespace BLAengine
 {
-	class SceneGraphGui
-	{
-		BlaGuiWindow& m_window;
+    class SceneGraphGui
+    {
+        BlaGuiWindow& m_window;
 
-	public:
-		SceneGraphGui() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
+    public:
+        SceneGraphGui() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
 
-		void UpdateSceneGraph();
+        void UpdateSceneGraph();
 
-	private:
-		typedef blaMap<blaString, BlaGuiElement*> ElementMap;
-		void AddObjectToTree(ElementMap& elementMap, const GameObjectReference& object);
+    private:
+        typedef blaMap<blaString, BlaGuiElement*> ElementMap;
+        void AddObjectToTree(ElementMap& elementMap, const GameObjectReference& object);
 
-		void OnGuiElementSelected(const BlaGuiElementEventPayload& event);
+        void OnGuiElementSelected(const BlaGuiElementEventPayload& event);
 
-		static void StaticOnGuiElementSelected(void* thisPtr, const BlaGuiElementEventPayload& event) { ((SceneGraphGui*)thisPtr)->OnGuiElementSelected(event); }
+        static void StaticOnGuiElementSelected(void* thisPtr, const BlaGuiElementEventPayload& event) { ((SceneGraphGui*)thisPtr)->OnGuiElementSelected(event); }
 
-	};
+    };
 }

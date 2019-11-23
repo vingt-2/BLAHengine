@@ -5,7 +5,7 @@
 
 /*
     Class SkeletonJoint:
-    
+
     This is the tree node that holds information about a specific joint. A skeleton is a tree of these things.
 */
 
@@ -24,13 +24,13 @@ namespace BLAengine
 
         ~SkeletonJoint() {};
 
-        blaString		GetName() const		{ return m_name; }
+        blaString		GetName() const { return m_name; }
 
         blaVec3		GetLocalOffset() const { return m_localOffset; }
 
         blaU32      GetJointIndex() const { return m_jointIndex; }
 
-        void ApplyOffsetNormalization(float normalizer)	{ m_localOffset /= normalizer; }
+        void ApplyOffsetNormalization(float normalizer) { m_localOffset /= normalizer; }
 
         /*
         QuerySkeleton:
@@ -69,7 +69,7 @@ namespace BLAengine
 
         ~SkeletonAnimationData();
 
-        blaString GetName() const		{ return m_name; }
+        blaString GetName() const { return m_name; }
 
         /*
         Returns the sampling rate in secs as specified in the animation file
@@ -92,12 +92,12 @@ namespace BLAengine
         Careful there... this traverses the skeleton and assembles the full pose. Call only once a frame if possible <3.
         */
         void EvaluateAnimation
-            (
+        (
             /*Defines the query inputs*/
             int frameIndex,
             /*Main query output*/
             blaVector<blaPosQuat>& worldJointTransform
-            );
+        );
 
         /*
         Queries the local transform of a joint using its name, for a specific frame index.
@@ -113,7 +113,7 @@ namespace BLAengine
         }
 
         static void GetBoneArrayFromEvalAnim(blaVector<blaPair<blaVec3, blaVec3>>& outputBones, const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim);
-		static void GetBoneArrayFromEvalAnim(blaVector<blaPair<blaPosQuat, blaF32>>& outputBones, const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim);
+        static void GetBoneArrayFromEvalAnim(blaVector<blaPair<blaPosQuat, blaF32>>& outputBones, const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim);
 
     private:
 
@@ -128,7 +128,7 @@ namespace BLAengine
         }
 
         static void ForwardKinematicRecursive
-            (
+        (
             /*Defines the query inputs*/
             int frameIndex,
             /*Defines the recursion parameters */
@@ -137,7 +137,7 @@ namespace BLAengine
             blaVector<blaVector<blaPosQuat>>& jointTransforms,
             /*Main query output*/
             blaVector<blaPosQuat>& worldJointTransforms
-            );
+        );
 
         blaString m_name;
 

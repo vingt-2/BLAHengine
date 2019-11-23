@@ -3,7 +3,7 @@
 #include <Common/StdInclude.h>
 #include <Engine/EngineInstance.h>
 #include <Engine/Assets/MeshAsset.h>
-#include <Editor/EditorGui/ComponentInspectorGui.h>
+#include <Editor/EditorGui/GameObjectInspectorGui.h>
 #include <Editor/EditorGui/SceneGraphGui.h>
 #include "GizmoManager.h"
 
@@ -17,7 +17,7 @@ namespace BLAengine
     class BLACORE_API EditorSession : public EngineInstance
     {
     public:
-        EditorSession(bool external, bool isFullscreen):
+        EditorSession(bool external, bool isFullscreen) :
             EngineInstance(external, isFullscreen),
             m_frameIndex(0),
             m_lastTimePlayerInteraction(0.f),
@@ -32,7 +32,7 @@ namespace BLAengine
 
         void EngineUpdate() override;
 
-		void PostEngineUpdate() override;
+        void PostEngineUpdate() override;
 
         bool InitializeEngine(RenderWindow* renderWindow) override;
 
@@ -42,13 +42,13 @@ namespace BLAengine
 
         ~EditorSession() { EngineInstance::~EngineInstance(); };
 
-		GameObjectReference GetSelectedObject() { return m_selectedObject; }
+        GameObjectReference GetSelectedObject() { return m_selectedObject; }
 
-		void SetSelectedObject(GameObjectReference selectedObject);
+        void SetSelectedObject(GameObjectReference selectedObject);
 
     private:
 
-		void DrawGrid(int size, float spacing, const blaVec3& color);
+        void DrawGrid(int size, float spacing, const blaVec3& color);
 
         bool LoadNewScene() override;
 
@@ -58,7 +58,7 @@ namespace BLAengine
 
         void SetEditorState(EditorState* state);
 
-        void DoTestAnimationDemoStuff();
+        void EditorUpdate();
 
         /*
         *  Handle State changing things for the editor
@@ -80,11 +80,11 @@ namespace BLAengine
 
     private:
 
-		GameObjectReference m_selectedObject;
+        GameObjectReference m_selectedObject;
 
-		GizmoManager m_gizmoManager;
-		ComponentInspectorGui* m_componentInspector = nullptr;
-		SceneGraphGui* m_sceneGraphGui = nullptr;
+        GizmoManager m_gizmoManager;
+        GameObjectInspector* m_componentInspector = nullptr;
+        SceneGraphGui* m_sceneGraphGui = nullptr;
         /*
          * Editor State
          */
@@ -93,7 +93,7 @@ namespace BLAengine
         float m_frameIndex;
         float m_lastTimePlayerInteraction;
         blaF32 m_lastIkSolveTime;
-        
+
         bool m_autoPlay;
 
         struct EditorStateRequests
@@ -107,16 +107,16 @@ namespace BLAengine
         struct EditorGuiRequests
         {
             blaBool m_openConsoleRequest = true;
-			blaBool m_openScenGraphGuiRequest = true;
-			blaBool m_openComponentInspectorRequest = true;
+            blaBool m_openScenGraphGuiRequest = true;
+            blaBool m_openComponentInspectorRequest = true;
         } m_editorGuiRequests;
 
         /*
          *  Editor Data
          */
-        /*TriangleMesh m_posQuatPositionGizmoMesh;
-        TriangleMesh m_posQuatOrientationGizmoMesh;
-        TriangleMesh m_posQuatScaleGizmoMesh;*/
+         /*TriangleMesh m_posQuatPositionGizmoMesh;
+         TriangleMesh m_posQuatOrientationGizmoMesh;
+         TriangleMesh m_posQuatScaleGizmoMesh;*/
         MeshAsset m_testCone;
         MeshAsset m_SkyInvertedSphere;
     };

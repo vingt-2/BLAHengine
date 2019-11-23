@@ -6,15 +6,15 @@
 
 namespace BLAengine
 {
-        class BLACORE_API PBRMaterial
-        {
-        public:
+    class BLACORE_API PBRMaterial
+    {
+    public:
 
         class BRDF
         {
         public:
             virtual ~BRDF() {}
-            
+
             /*
                 Returns outgoing Radiance as a function of incoming and inDir, outDir
             */
@@ -24,7 +24,7 @@ namespace BLAengine
                 Returns the sample probability and outDir from input argument
             */
             virtual float SampleBRDF(blaVec3 &outDir, blaMat3 &tangentSpace, blaVec3 &inDir) = 0;
-            
+
             virtual bool IsSpecular() = 0;
         };
 
@@ -38,7 +38,7 @@ namespace BLAengine
 
             float SampleBRDF(blaVec3 &outDir, blaMat3&tangentSpace, blaVec3 &inDir);
 
-            bool IsSpecular() { return false;  }
+            bool IsSpecular() { return false; }
         };
 
         class MirrorBRDF : public BRDF
@@ -54,10 +54,10 @@ namespace BLAengine
 
             bool IsSpecular() { return true; }
         };
-        
+
         BRDF* m_brdf;
-    
-    //private:
+
+        //private:
         blaVec3 m_color;
         blaVec3 m_emissivePower;
     };

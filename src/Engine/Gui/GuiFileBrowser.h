@@ -25,10 +25,10 @@ namespace BLAengine
             CANCELLED
         };
 
-        BlaFileBrowser(blaString browserName, 
-            blaString filesDirectory, 
-            blaString directoryDirectory):
-              m_name(browserName)
+        BlaFileBrowser(blaString browserName,
+            blaString filesDirectory,
+            blaString directoryDirectory) :
+            m_name(browserName)
             , m_currentFilesDirectory(filesDirectory)
             , m_currentDirectoriesDirectory(directoryDirectory)
             , m_currentState(BROWSING_FIRST_RENDER)
@@ -63,8 +63,8 @@ namespace BLAengine
         OpenFilePrompt(blaString browserName,
             blaString filesDirectory,
             blaString directoryDirectory,
-            blaBool disableMultipleSelection):
-          BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+            blaBool disableMultipleSelection) :
+            BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
         {
             m_disableMultipleSelection = disableMultipleSelection;
         }

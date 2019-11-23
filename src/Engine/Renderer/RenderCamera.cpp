@@ -16,7 +16,7 @@ void PerspectiveCamera::SetPerspective(glm::vec2 renderSize)
 void PerspectiveCamera::Update()
 {
     this->m_attachedCamera->Update();
-    
+
     blaMat4 cameraTransformMat;
     m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(cameraTransformMat);
 

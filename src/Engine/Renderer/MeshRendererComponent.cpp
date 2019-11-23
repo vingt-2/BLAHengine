@@ -9,13 +9,13 @@ BEGIN_COMPONENT_DESCRIPTION(MeshRendererComponent)
 EXPOSE(m_renderType)
 END_DESCRIPTION()
 
-MeshRendererComponent::MeshRendererComponent(GameObjectReference parentObject) : 
+MeshRendererComponent::MeshRendererComponent(GameObjectReference parentObject) :
     GameComponent(parentObject),
-    m_renderType    (GL_TRIANGLES),
-    m_renderTicket  (0)
+    m_renderType(GL_TRIANGLES),
+    m_renderTicket(0)
 {
     this->m_mesh = nullptr;
-} 
+}
 
 bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 {

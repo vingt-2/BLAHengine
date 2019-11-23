@@ -3,7 +3,7 @@
 
 using namespace BLAengine;
 
-GameObject::GameObject(blaString name, const GameObjectReference& parent):
+GameObject::GameObject(blaString name, const GameObjectReference& parent) :
     m_objectName(name),
     m_localTransform(ObjectTransform()),
     m_parent(parent)
@@ -14,7 +14,7 @@ GameObject::GameObject(blaString name, const GameObjectReference& parent):
 
 GameObject::~GameObject(void)
 {
-    for(int i = 0; i < m_componentVector.size(); ++i)
+    for (int i = 0; i < m_componentVector.size(); ++i)
     {
         delete m_componentVector[i];
     }
@@ -39,15 +39,15 @@ ObjectTransform& GameObject::GetTransform()
 {
     if (m_parent.IsValid())
     {
-		if (m_objectState & DIRTY_WORLD_TRANSFORM)
-		{
-			m_cachedWorldTransform.m_posQuat = m_parent->GetTransform().m_posQuat * m_localTransform.m_posQuat;
-			m_cachedWorldTransform.m_scale = m_parent->GetTransform().m_scale * m_localTransform.m_scale;
-			m_objectState &= ~DIRTY_WORLD_TRANSFORM;
-		}
-		return m_cachedWorldTransform;
+        if (m_objectState & DIRTY_WORLD_TRANSFORM)
+        {
+            m_cachedWorldTransform.m_posQuat = m_parent->GetTransform().m_posQuat * m_localTransform.m_posQuat;
+            m_cachedWorldTransform.m_scale = m_parent->GetTransform().m_scale * m_localTransform.m_scale;
+            m_objectState &= ~DIRTY_WORLD_TRANSFORM;
+        }
+        return m_cachedWorldTransform;
     }
-	return m_localTransform;
+    return m_localTransform;
 }
 
 ObjectTransform& GameObject::GetLocalTransform()
@@ -57,14 +57,17 @@ ObjectTransform& GameObject::GetLocalTransform()
 
 void GameObject::SetTransform(const ObjectTransform& transform)
 {
-	if(m_parent.IsValid()) 
-	{
-		ObjectTransform& parentT = m_parent->GetTransform();
+    if (m_parent.IsValid())
+    {
+        ObjectTransform& parentT = m_parent->GetTransform();
 
-		m_localTransform.m_posQuat = parentT.m_posQuat.GetInverse() * transform.m_posQuat;
-		m_localTransform.m_scale = transform.m_scale / parentT.m_scale; //TODO: Make this safe.
-	}
-
+        m_localTransform.m_posQuat = parentT.m_posQuat.GetInverse() * transform.m_posQuat;
+        m_localTransform.m_scale = transform.m_scale / parentT.m_scale; //TODO: Make this safe.
+    }
+    else
+    {
+        m_localTransform = transform;
+    }
     m_cachedWorldTransform = transform;
     m_objectState &= ~DIRTY_WORLD_TRANSFORM;
 }

@@ -12,6 +12,7 @@
 #include <Engine/System/InputManager.h>
 #include <Engine/System/RenderWindow.h>
 #include <Engine/Gui/GuiManager.h>
+#include <Engine/Renderer/DirectionalLightComponent.h>
 #include <Engine/System/ControllerInputs/Dualshock4.h>
 
 #include "EngineInstance.h"
@@ -124,11 +125,11 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
 void EngineInstance::PreEngineUpdate()
 {
-	m_timer->Update(glfwGetTime());
+    m_timer->Update(glfwGetTime());
 }
 
 void EngineInstance::EngineUpdate()
-{    
+{
     m_workingScene->Update();
 }
 
@@ -143,12 +144,12 @@ void EngineInstance::PostEngineUpdate()
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
-	if(!m_renderWindow->HasCapturedMouse()) 
-	{
-		m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
-		m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
-	}
-	
+    if (!m_renderWindow->HasCapturedMouse())
+    {
+        m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+        m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+    }
+
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
 }
@@ -226,7 +227,7 @@ void EngineInstance::SetupDirLightAndCamera()
     lightT.SetEulerAngles(-0.93f, 0.f, 0.f);
     light->SetTransform(lightT);
 
-	GameComponentManager::GetSingletonInstance()->CreateComponent("SunComponent", light);
+    GameComponentManager::GetSingletonInstance()->CreateComponent("SunComponent", light);
 
     GameObjectReference cameraObject = m_workingScene->CreateObject("EditorCamera");
     CameraComponent* cameraComp = BLA_CREATE_COMPONENT(CameraComponent, cameraObject);
@@ -242,18 +243,18 @@ void EngineInstance::SetupDirLightAndCamera()
 
 BLA_CONSOLE_COMMAND(int, exit)
 {
-	EngineInstance::GetSingletonInstance()->RequestShutdown();
-	return 0;
+    EngineInstance::GetSingletonInstance()->RequestShutdown();
+    return 0;
 }
 
 BLA_CONSOLE_COMMAND(int, shutdown)
 {
-	EngineInstance::GetSingletonInstance()->RequestShutdown();
-	return 0;
+    EngineInstance::GetSingletonInstance()->RequestShutdown();
+    return 0;
 }
 
-BLA_CONSOLE_COMMAND(int, SetFPS, int fps) 
+BLA_CONSOLE_COMMAND(int, SetFPS, int fps)
 {
-	EngineInstance::GetSingletonInstance()->SetTargetFPS(fps);
-	return 0;
+    EngineInstance::GetSingletonInstance()->SetTargetFPS(fps);
+    return 0;
 }

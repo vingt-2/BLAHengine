@@ -1,6 +1,7 @@
 #include <Common/System.h>
 #include <Common/Maths/Maths.h>
 #include <Engine/Renderer/GL33Renderer.h>
+#include <Engine/Renderer/PointLightComponent.h>
 #include <Engine/Core/Timer.h>
 #include <Engine/Core/RenderingManager.h>
 #include <Engine/Core/DebugDraw.h>
@@ -19,12 +20,12 @@
 #include <Common/FileSystem/Files.h>
 #include <Demos/GameTest/TestPlayerComponent.h>
 #include <Engine/Physics/RigidBodyComponent.h>
+#include <Engine/Renderer/MeshRendererComponent.h>
+#include <Engine/Renderer/DirectionalLightComponent.h>
 
 #include "AssetsImport/ExternalFormats/OBJImport.h"
 
 #include "EditorSession.h"
-
-#pragma optimize("",off)
 
 using namespace BLAengine;
 
@@ -32,7 +33,7 @@ void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
 {
     for (auto path : *dragAndDropInput)
     {
-		Console::LogMessage("Dropped file " + path);
+        Console::LogMessage("Dropped file " + path);
         static_cast<EditorSession*>(EngineInstance::GetSingletonInstance())->EditorDragAndDropedFile(path); // ``safe'' cast...
     }
 }
@@ -99,21 +100,26 @@ void EditorSession::PreEngineUpdate()
         HandleSaveScenePrompt();
     }
 
-    if(InputManager::GetSingletonInstance()->GetKeyState(BLA_KEY_GRAVE_ACCENT).IsRisingEdge())
+    if (InputManager::GetSingletonInstance()->GetKeyState(BLA_KEY_GRAVE_ACCENT).IsRisingEdge())
     {
         m_editorGuiRequests.m_openConsoleRequest = ~m_editorGuiRequests.m_openConsoleRequest;
     }
 
-    DrawGrid(1000, 1, blaVec3(0.85f));
+    //DrawGrid(1000, 1, blaVec3(0.85f));
 
-    DebugDraw::DrawBasis(blaPosQuat::GetIdentity() , 1.f);
+    DebugDraw::DrawBasis(blaPosQuat::GetIdentity(), 1.f);
 }
 
 void EditorSession::EngineUpdate()
 {
     if (m_editorState->m_type == EditorState::BLA_EDITOR_EDITING)
     {
-		DoTestAnimationDemoStuff();
+        EditorUpdate();
+
+        if (m_sceneGraphGui && m_workingScene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE != 0)
+        {
+            m_sceneGraphGui->UpdateSceneGraph();
+        }
 
         EngineInstance::EngineUpdate();
 
@@ -121,80 +127,56 @@ void EditorSession::EngineUpdate()
 
         HandleGuiRequests();
 
-        if(m_inputManager->GetKeyState(BLA_KEY_MINUS).IsFallingEdge())
+        if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsRisingEdge())
         {
-            GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
-            if(light.IsValid())
-            {
-                if(DirectionalLightComponent* dirLight = light->GetComponent<DirectionalLightComponent>())
-                {
-                    ObjectTransform& lightT = light->GetTransform();
-                    lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(-0.2f, 0.f, 0.f));
-                }
-            }
+            m_selectedObject = GameObjectReference::InvalidReference();
         }
-        if (m_inputManager->GetKeyState(BLA_KEY_EQUAL).IsFallingEdge())
-        {
-            GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
-            if (light.IsValid())
-            {
-                if (DirectionalLightComponent* dirLight = light->GetComponent<DirectionalLightComponent>())
-                {
-                    ObjectTransform& lightT = light->GetTransform();
-                    lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(0.2f, 0.f, 0.f));
-                }
-            }
-        }
-		if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsRisingEdge())
-		{
-			m_selectedObject = GameObjectReference::InvalidReference();
-		}
     }
 }
 
 void EditorSession::PostEngineUpdate()
 {
-	m_gizmoManager.Update();
+    m_gizmoManager.Update();
 
-	m_debug->Update();
+    m_debug->Update();
 
-	m_renderer->Update();
+    m_renderer->Update();
 
-	m_guiManager->Update();
+    m_guiManager->Update();
 
-	// Inputs should be the second to last thing to update !
-	m_inputManager->Update();
+    // Inputs should be the second to last thing to update !
+    m_inputManager->Update();
 
-	if(!m_renderWindow->HasCapturedMouse()) 
-	{
-		m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
-		m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+    if (!m_renderWindow->HasCapturedMouse())
+    {
+        m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
+        m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
 
-		if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
-		{
-			if (renderGuiWindow->HasFocus())
-			{
-				blaVec2 mouseCoord = renderGuiWindow->GetMousePointerScreenSpaceCoordinates();
-				if (mouseCoord.x >= 0.f && mouseCoord.x <= 1.f && mouseCoord.y >= 0.f && mouseCoord.y <= 1.f)
-				{
-					InputManager::GetSingletonInstance()->m_lockKeyboard = false;
-					InputManager::GetSingletonInstance()->m_lockMouse = false;
-				}
-			}
-		}
-	}
+        if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
+        {
+            if (renderGuiWindow->HasFocus())
+            {
+                blaVec2 mouseCoord = renderGuiWindow->GetMousePointerScreenSpaceCoordinates();
+                if (mouseCoord.x >= 0.f && mouseCoord.x <= 1.f && mouseCoord.y >= 0.f && mouseCoord.y <= 1.f)
+                {
+                    InputManager::GetSingletonInstance()->m_lockKeyboard = false;
+                    InputManager::GetSingletonInstance()->m_lockMouse = false;
+                }
+            }
+        }
+    }
 
-	// Final update of the frame
-	m_renderWindow->UpdateWindowAndBuffers();
+    // Final update of the frame
+    m_renderWindow->UpdateWindowAndBuffers();
 }
 
 bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 {
-    if(EngineInstance::InitializeEngine(renderWindow))
+    if (EngineInstance::InitializeEngine(renderWindow))
     {
-		m_renderer->SetRenderToFrameBufferOnly(true);
+        m_renderer->SetRenderToFrameBufferOnly(true);
 
-		m_guiManager->OpenWindow("Editor Window", new BlaGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f,0.f)));
+        m_guiManager->OpenWindow("Editor Window", new BlaGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
 
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
 
@@ -221,40 +203,12 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
 
         BlaGuiMenuTab windowsMenu("Windows");
         windowsMenu.AddMenu(BlaGuiMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest));
-		windowsMenu.AddMenu(BlaGuiMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest));
-		windowsMenu.AddMenu(BlaGuiMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest));
+        windowsMenu.AddMenu(BlaGuiMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest));
+        windowsMenu.AddMenu(BlaGuiMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest));
 
         m_guiManager->m_menuBar.m_menuTabs.push_back(windowsMenu);
-        /*
-         * Create and store gizmo meshes
-         */
+
         LoadNewScene();
-
-        m_testCone = MeshAsset("testCone");
-        m_testCone.m_triangleMesh = PrimitiveGeometry::MakeCone(40);
-
-        GameObjectReference coneObject = m_workingScene->CreateObject("coneObject");
-
-        BLA_CREATE_COMPONENT(MeshRendererComponent, coneObject);
-        coneObject->GetComponent<MeshRendererComponent>()->AssignTriangleMesh(&m_testCone);
-
-        Asset* materialAsset = nullptr;
-        if (m_assetManager->GetAsset("BlankDiffuseMat", materialAsset) == AssetManager::AssetType::MaterialAsset)
-        {
-            coneObject->GetComponent<MeshRendererComponent>()->AssignMaterial((Material*)materialAsset, 0);
-        }
-
-        BLA_CREATE_COMPONENT(MeshColliderComponent, coneObject);
-        coneObject->GetComponent<MeshColliderComponent>()->SetColliderMesh(&m_testCone.m_triangleMesh);
-
-        BLA_CREATE_COMPONENT(RigidBodyComponent, coneObject);
-
-        BLA_CREATE_COMPONENT(TestPlayerComponent, coneObject);
-
-        coneObject->GetTransform().m_scale = blaVec3(1.f,1.f,1.f);
-
-        coneObject->GetTransform().m_posQuat.GetTranslation().y = 3.f;
-        
 
         return true;
     }
@@ -293,15 +247,9 @@ bool EditorSession::LoadWorkingScene(blaString filepath)
 
     MakeSkyObject();
 
-    GameObjectReference animatedObject = m_workingScene->CreateObject("AnimatedObject");
-
-    BLA_CREATE_COMPONENT(AnimationComponent, animatedObject);
-
-    BLA_CREATE_COMPONENT(IKComponent, animatedObject);
-
     delete m_cameraController;
     m_cameraController = new CameraController(
-        m_renderWindow, 
+        m_renderWindow,
         m_workingScene->GetMainCamera(),
         30.f,
         10.0f);
@@ -310,7 +258,7 @@ bool EditorSession::LoadWorkingScene(blaString filepath)
     m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);
 
     SetEditorState(new EditorState());
-    
+
     return true;
 }
 
@@ -342,149 +290,49 @@ void EditorSession::EditorDragAndDropedFile(const blaString& filePath) const
     ImportMesh(file.GetFullPath(), file.m_name);
 }
 
-blaVector<Ray> rays;
-
-void EditorSession::DoTestAnimationDemoStuff()
+void EditorSession::EditorUpdate()
 {
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
-	Ray screenRay;
-	if(const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
-	{
-		screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
-	}
-
-	if(inputs->GetKeyState(BLA_KEY_0).IsFallingEdge())
-		rays.push_back(screenRay);
-
-	for(auto ray : rays) {
-		DebugDraw::DrawRay(ray);
-	}
-	
-    ColliderComponent::CollisionContact contactPoint;
-    GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
-
-    if (hoverObject.IsValid() && inputs->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
+    Ray screenRay;
+    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
     {
-        m_guiManager->DrawText(hoverObject->GetName(), m_renderWindow->GetMousePositionInWindow());
+        screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+
+        ColliderComponent::CollisionContact contactPoint;
+        GameObjectReference hoverObject = m_workingScene->PickGameObjectInScene(screenRay, contactPoint);
+
+        auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
+        if (leftMouseButton.IsRisingEdge())
+        {
+            SetSelectedObject(hoverObject);
+        }
     }
 
-    GameObjectReference animationObject = m_workingScene->FindObjectByName("AnimatedObject");
-
-    if (animationObject.IsValid())
+    if (m_inputManager->GetKeyState(BLA_KEY_MINUS).IsFallingEdge())
     {
-        if (auto ikCmp = animationObject->GetComponent<IKComponent>())
+        GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
+        if (light.IsValid())
         {
-            if (ikCmp->m_ikChain == nullptr)
+            if (DirectionalLightComponent* dirLight = light->GetComponent<DirectionalLightComponent>())
             {
-                if (auto animCmp = animationObject->GetComponent<AnimationComponent>())
-                {
-                    if (animCmp->m_animation == nullptr)
-                    {
-                        animCmp->m_animation = BVHImport::ImportAnimation("./resources/animations/bvh/01_04.bvh")[0];
-                        animCmp->m_animation->GetSkeleton()->DiscardJointsByName("Thumb");
-                    }
-
-                    blaVector<blaPosQuat> jointTransformsW;
-                    animCmp->m_animation->EvaluateAnimation(0, jointTransformsW);
-
-                    ikCmp->m_ikChain = IKChainJoint::BuildFromSkeleton(animCmp->m_animation->GetSkeleton(), jointTransformsW);
-                }
-                else
-                {
-                    ikCmp->m_ikChain = IKChainJoint::CreateTestIKChain2EndsConeTwist(4, 1.f, blaVec3(1.f, 2.f, 0.f));
-                }
-
-                int c = 0;
-                for (auto endEffector : ikCmp->m_ikChain->GetEndEffectors())
-                {
-                    GameObjectReference object;
-                    if (endEffector->m_joint != nullptr)
-                    {
-                        object = m_workingScene->CreateObject("EffectorHandles_" + endEffector->m_joint->GetName());
-                    }
-                    else
-                    {
-                        object = m_workingScene->CreateObject("EffectorHandles_" + std::to_string(c));
-                    }
-
-                    auto meshCmp = BLA_CREATE_COMPONENT(MeshRendererComponent, object);
-
-                    Asset* sphereMesh = nullptr;
-                    this->m_assetManager->GetAsset("cube", sphereMesh);
-
-                    meshCmp->AssignTriangleMesh((MeshAsset*)sphereMesh);
-
-                    auto meshCollider = BLA_CREATE_COMPONENT(MeshColliderComponent, object);
-
-                    meshCollider->SetColliderMesh(&((MeshAsset*)sphereMesh)->m_triangleMesh);
-
-                    ObjectTransform transform = object->GetTransform();
-                    transform.m_scale = blaVec3(0.3f);
-                    transform.m_posQuat = endEffector->m_jointTransform;
-                    object->SetTransform(transform);
-
-                    c++;
-                }
-            }
-            else
-            {
-                blaVector<blaPair<blaVec3, blaVec3>> bones;
-                blaVector<blaPosQuat> jointTransforms;
-                IKChainJoint::GetBoneArray(bones, *ikCmp->m_ikChain);
-                IKChainJoint::GetJointTransforms(jointTransforms, *ikCmp->m_ikChain);
-
-                blaVector<GameObjectReference> effectorHandles = m_workingScene->FindObjectsMatchingName("EffectorHandles_");
-
-                blaVector<blaPosQuat> desiredPos;
-                for (auto obj : effectorHandles)
-                {
-                    desiredPos.push_back(obj->GetTransform().GetPosQuat());
-                }
-
-                //if (inputs->GetKeyState(BLA_KEY_SPACE).IsDown())
-                {
-                    if (m_timer->GetTime() - m_lastIkSolveTime > .005f)
-                    {
-                        IKChainJoint::SolveIKChain(ikCmp->m_ikChain, desiredPos, 20);
-
-                        m_lastIkSolveTime = m_timer->GetTime();
-                    }
-                }
-
-                for (size_t i = 0; i < jointTransforms.size(); ++i)
-                {
-                    m_debug->DrawBasis(jointTransforms[i], 1.f);
-                }
-
-                for (size_t i = 0; i < bones.size(); ++i)
-                {
-                    m_debug->DrawLine(bones[i].first, bones[i].second, blaVec3(1.f, 0.f, 1.f));
-                }
+                ObjectTransform& lightT = light->GetTransform();
+                lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(-0.2f, 0.f, 0.f));
             }
         }
     }
-    else
+    if (m_inputManager->GetKeyState(BLA_KEY_EQUAL).IsFallingEdge())
     {
-        animationObject = m_workingScene->CreateObject("AnimatedObject");
-
-        BLA_CREATE_COMPONENT(AnimationComponent, animationObject);
-        //BLA_CREATE_COMPONENT(IKComponent, animationObject);
+        GameObjectReference light = m_workingScene->FindObjectByName("DirLight");
+        if (light.IsValid())
+        {
+            if (DirectionalLightComponent* dirLight = light->GetComponent<DirectionalLightComponent>())
+            {
+                ObjectTransform& lightT = light->GetTransform();
+                lightT.SetEulerAngles(lightT.GetEulerAngles() + blaVec3(0.2f, 0.f, 0.f));
+            }
+        }
     }
-
-    auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
-    if (leftMouseButton.IsRisingEdge())
-    {
-        SetSelectedObject(hoverObject);
-        
-        if(m_selectedObject.IsValid())
-            Console::LogMessage("Picked object: " + m_selectedObject->GetName());
-    }
-
-	if(m_sceneGraphGui && m_workingScene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE != 0)
-	{
-		m_sceneGraphGui->UpdateSceneGraph();
-	}
 }
 
 void EditorSession::HandleSaveScenePrompt()
@@ -519,26 +367,26 @@ void EditorSession::HandleSaveScenePrompt()
 
 void EditorSession::HandleGuiRequests()
 {
-    if(m_editorGuiRequests.m_openConsoleRequest)
+    if (m_editorGuiRequests.m_openConsoleRequest)
     {
         m_guiManager->OpenConsole("Console");
         m_editorGuiRequests.m_openConsoleRequest = false;
     }
-	if (m_editorGuiRequests.m_openScenGraphGuiRequest)
-	{
-		if (!m_sceneGraphGui)
-		{
-			m_sceneGraphGui = new SceneGraphGui();
-			m_sceneGraphGui->UpdateSceneGraph();
-		}
-		m_editorGuiRequests.m_openScenGraphGuiRequest = false;
-	}
-	if (m_editorGuiRequests.m_openComponentInspectorRequest)
-	{
-		if (!m_componentInspector) m_componentInspector = new ComponentInspectorGui();
+    if (m_editorGuiRequests.m_openScenGraphGuiRequest)
+    {
+        if (!m_sceneGraphGui)
+        {
+            m_sceneGraphGui = new SceneGraphGui();
+            m_sceneGraphGui->UpdateSceneGraph();
+        }
+        m_editorGuiRequests.m_openScenGraphGuiRequest = false;
+    }
+    if (m_editorGuiRequests.m_openComponentInspectorRequest)
+    {
+        if (!m_componentInspector) m_componentInspector = new GameObjectInspector();
 
-		m_editorGuiRequests.m_openComponentInspectorRequest = false;
-	}
+        m_editorGuiRequests.m_openComponentInspectorRequest = false;
+    }
 }
 
 void EditorSession::HandleEditorStateChangeRequests()
@@ -623,16 +471,15 @@ bool EditorSession::ImportMesh(blaString filepath, blaString name) const
     this->m_assetManager->SaveTriangleMesh(&temporaryMeshAsset);
     this->m_assetManager->LoadTriangleMesh(name);
 
-    m_workingScene->DeleteObject("MeshVisualizer");
-
-    GameObjectReference visualizerObject = m_workingScene->CreateObject("MeshVisualizer");
+    GameObjectReference visualizerObject = m_workingScene->CreateObject(name);
     MeshRendererComponent* meshRenderer = BLA_CREATE_COMPONENT(MeshRendererComponent, visualizerObject);
-
+    MeshColliderComponent* colliderComp = BLA_CREATE_COMPONENT(MeshColliderComponent, visualizerObject);
     Asset* triMeshAsset;
 
     if (m_assetManager->GetAsset(name, triMeshAsset) == AssetManager::AssetType::TriangleMeshAsset)
     {
         meshRenderer->AssignTriangleMesh((MeshAsset*)triMeshAsset);
+        colliderComp->SetColliderMesh(&((MeshAsset*)triMeshAsset)->m_triangleMesh);
     }
     else
     {
@@ -646,7 +493,7 @@ bool EditorSession::ImportMesh(blaString filepath, blaString name) const
     }
     else
     {
-       Console::LogError("Couldn't find Material: BlankDiffuseMa in AssetManager.\n");
+        Console::LogError("Couldn't find Material: BlankDiffuseMa in AssetManager.\n");
     }
 
     ObjectTransform t = visualizerObject->GetTransform();
@@ -658,48 +505,57 @@ bool EditorSession::ImportMesh(blaString filepath, blaString name) const
 
 void EditorSession::SetSelectedObject(GameObjectReference selectedObject)
 {
-	if(m_selectedObject != selectedObject)
-	{
-		if(selectedObject.IsValid())
-			m_componentInspector->InspectGameObject(selectedObject);
-	}
+    if (m_selectedObject != selectedObject)
+    {
+        if (selectedObject.IsValid())
+            m_componentInspector->InspectGameObject(selectedObject);
+    }
 
-	if(selectedObject.IsValid())
-		m_selectedObject = selectedObject;
+    if (selectedObject.IsValid())
+        m_selectedObject = selectedObject;
 }
 
 void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)
 {
-	for (int i = -size / 2; i <= size / 2; i++)
-	{
-		float iSpacing = i * spacing;
-		float sizeSpacing = size * spacing;
-		DebugDraw::DrawLine(blaVec3(sizeSpacing / 2, 0, iSpacing), blaVec3(-sizeSpacing / 2, 0, iSpacing), color);
-		DebugDraw::DrawLine(blaVec3(iSpacing, 0, sizeSpacing / 2), blaVec3(iSpacing, 0, -sizeSpacing / 2), color);
-	}
+    for (int i = -size / 2; i <= size / 2; i++)
+    {
+        float iSpacing = i * spacing;
+        float sizeSpacing = size * spacing;
+        DebugDraw::DrawLine(blaVec3(sizeSpacing / 2, 0, iSpacing), blaVec3(-sizeSpacing / 2, 0, iSpacing), color);
+        DebugDraw::DrawLine(blaVec3(iSpacing, 0, sizeSpacing / 2), blaVec3(iSpacing, 0, -sizeSpacing / 2), color);
+    }
 }
 
 BLA_CONSOLE_COMMAND(int, SelectObject, blaString name)
 {
-	GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+    GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
-	if(obj.IsValid())
-	{
-		if(EditorSession* editorSession = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance()))
-		{
-			editorSession->SetSelectedObject(obj);
-		}
-	}
-	return 0;
+    if (obj.IsValid())
+    {
+        if (EditorSession* editorSession = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance()))
+        {
+            editorSession->SetSelectedObject(obj);
+        }
+    }
+    return 0;
 }
 
-int SelectScale(blaString name, float scalex, float scaley, float scalez); struct ConsoleCommandEntry_SelectScale : BLAengine::ConsoleCommandEntry { ConsoleCommandEntry_SelectScale() : ConsoleCommandEntry("SelectScale") {} blaString Call(const std::vector<blaString>& arguments) const override { if(arguments.size() != 4) { Console::LogError("Insufficient number of arguments provided to " + m_name + ", expecting " + std::to_string(4)); return ""; } return std::to_string(SelectScale(blaFromString< blaString > ( arguments[(-1) * (4 - 4)]), blaFromString< float > ( arguments[(-1) * (3 - 4)]), blaFromString< float > ( arguments[(-1) * (2 - 4)]), blaFromString< float > ( arguments[(-1) * (1 - 4)]))); } static ConsoleCommandEntry_SelectScale Init; }; ConsoleCommandEntry_SelectScale ConsoleCommandEntry_SelectScale::Init; int SelectScale(blaString name, float scalex, float scaley, float scalez)
+int SelectScale(blaString name, float scalex, float scaley, float scalez); struct ConsoleCommandEntry_SelectScale : BLAengine::ConsoleCommandEntry { ConsoleCommandEntry_SelectScale() : ConsoleCommandEntry("SelectScale") {} blaString Call(const std::vector<blaString>& arguments) const override { if (arguments.size() != 4) { Console::LogError("Insufficient number of arguments provided to " + m_name + ", expecting " + std::to_string(4)); return ""; } return std::to_string(SelectScale(blaFromString< blaString >(arguments[(-1) * (4 - 4)]), blaFromString< float >(arguments[(-1) * (3 - 4)]), blaFromString< float >(arguments[(-1) * (2 - 4)]), blaFromString< float >(arguments[(-1) * (1 - 4)]))); } static ConsoleCommandEntry_SelectScale Init; }; ConsoleCommandEntry_SelectScale ConsoleCommandEntry_SelectScale::Init; int SelectScale(blaString name, float scalex, float scaley, float scalez)
 {
-	GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+    GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
-	if (obj.IsValid())
-	{
-		obj->GetTransform().m_scale = blaVec3(scalex, scaley, scalez);
-	}
-	return 0;
+    if (obj.IsValid())
+    {
+        obj->GetTransform().m_scale = blaVec3(scalex, scaley, scalez);
+    }
+    return 0;
+}
+
+BLA_CONSOLE_COMMAND(int, CreatePointLight, blaString name)
+{
+    GameObjectReference obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->CreateObject(name);
+
+    BLA_CREATE_COMPONENT(PointLightComponent, obj);
+
+    return 0;
 }

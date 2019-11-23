@@ -29,7 +29,7 @@ namespace BLAengine
 
         GameObjectReference CreateObject(blaString name, const GameObjectReference &parentObject = GameObjectReference::InvalidReference());
         bool DeleteObject(blaString name);
-		GameObjectReference FindObjectByName(blaString name);
+        GameObjectReference FindObjectByName(blaString name);
         blaVector<GameObjectReference> FindObjectsMatchingName(blaString name);
 
         void AddComponent(GameObjectReference object, GameComponent* component);
@@ -49,14 +49,14 @@ namespace BLAengine
 
         void SetGameObjectParent(const GameObjectReference& parent, const GameObjectReference& child);
 
-		blaVector<GameObjectReference> GetObjects();
+        blaVector<GameObjectReference> GetObjects();
 
-		enum ESceneFlags
-		{
-			DIRTY_SCENE_STRUCTURE = 1 << 0,
-		};
+        enum ESceneFlags
+        {
+            DIRTY_SCENE_STRUCTURE = 1 << 0,
+        };
 
-		blaU32 GetSceneFlags() const { return m_sceneFlags; }
+        blaU32 GetSceneFlags() const { return m_sceneFlags; }
 
     private:
 
@@ -64,7 +64,7 @@ namespace BLAengine
         RenderingManager* m_renderingManager;
         blaVector<GameObject>  m_sceneObjectsVector;
 
-		blaU32 m_sceneFlags;
+        blaU32 m_sceneFlags;
     };
 
 }

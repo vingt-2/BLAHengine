@@ -3,8 +3,8 @@
 using namespace BLAengine;
 
 ObjectTransform::ObjectTransform(void) :
-m_scale(blaVec3(1.f)),
-m_posQuat(blaPosQuat::GetIdentity())
+    m_scale(blaVec3(1.f)),
+    m_posQuat(blaPosQuat::GetIdentity())
 {};
 
 
@@ -32,7 +32,7 @@ blaQuat ObjectTransform::GetRotation() const
 
 void ObjectTransform::SetPosition(blaVec3 position)
 {
-    m_posQuat.SetTranslation(blaVec4(position,1.f));
+    m_posQuat.SetTranslation(blaVec4(position, 1.f));
 }
 
 blaVec3 ObjectTransform::GetPosition() const

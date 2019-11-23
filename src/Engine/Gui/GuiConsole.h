@@ -17,7 +17,7 @@ namespace BLAengine
         blaU32 m_maxLineCount;
 
     public:
-        BlaGuiConsole(const blaString& name, Console* pConsoleSingleton):
+        BlaGuiConsole(const blaString& name, Console* pConsoleSingleton) :
             BlaGuiElement(name),
             m_pConsoleSingleton(pConsoleSingleton)
         {

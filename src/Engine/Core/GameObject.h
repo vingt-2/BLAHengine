@@ -6,20 +6,20 @@
 
 namespace BLAengine
 {
-	class GameObject;
+    class GameObject;
 
-	class BLACORE_API GameObjectReference : public BLAReference<GameObject>
-	{
+    class BLACORE_API GameObjectReference : public BLAReference<GameObject>
+    {
         BLA_DECLARE_REFERENCE(GameObjectReference, GameObject)
-		friend class Scene;
-	};
+            friend class Scene;
+    };
 
-	//Todo: Need to make const references work ...
-	//class BLACORE_API GameObjectConstReference : public BLAReference<const GameObject>
-	//{
-	//	BLA_DECLARE_REFERENCE(GameObjectConstReference, const GameObject)
-	//	friend class Scene;
-	//};
+    //Todo: Need to make const references work ...
+    //class BLACORE_API GameObjectConstReference : public BLAReference<const GameObject>
+    //{
+    //	BLA_DECLARE_REFERENCE(GameObjectConstReference, const GameObject)
+    //	friend class Scene;
+    //};
 
     class BLACORE_API GameObject
     {
@@ -42,7 +42,7 @@ namespace BLAengine
         void Update();
 
         const ObjectTransform& GetPotentialDirtyTransform() const;
-        
+
         ObjectTransform& GetTransform();
         ObjectTransform& GetLocalTransform();
 
@@ -87,10 +87,8 @@ namespace BLAengine
 
         GameObjectState m_objectState;
         GameObjectReference m_parent;
-
-
     };
-    
+
     inline blaVector<GameComponent*> GameObject::GetAllComponents() const
     {
         return m_componentVector;
@@ -120,10 +118,10 @@ namespace BLAengine
             GameComponent* baseComp = m_componentVector[i];
 
             ComponentType* comp;
-            
+
             BLA_DYNAMIC_CAST(ComponentType, baseComp, comp);
 
-            if(comp != nullptr)
+            if (comp != nullptr)
             {
                 comps.push_back(comp);
             }

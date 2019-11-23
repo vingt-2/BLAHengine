@@ -19,7 +19,7 @@ namespace BLAengine
         blaVec3 m_particleVelocities[HAIR_SEGMENT_COUNT + 1];
     };
 
-BEGIN_COMPONENT_DECLARATION(SimpleHairComponent)
+    BEGIN_COMPONENT_DECLARATION(SimpleHairComponent)
         bool m_isPinned;
         bool m_applyGravity;
 
@@ -48,6 +48,5 @@ BEGIN_COMPONENT_DECLARATION(SimpleHairComponent)
 
         blaVec3 m_forcesAccu;
         blaVec3 m_impulseAccu;
-END_DECLARATION()
-
+    END_DECLARATION()
 }

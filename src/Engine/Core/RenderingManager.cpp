@@ -1,5 +1,10 @@
 #include "RenderingManager.h"
 
+#include <Engine/Core/CameraComponent.h>
+#include <Engine/Renderer/DirectionalLightComponent.h>
+#include <Engine/Renderer/MeshRendererComponent.h>
+#include <Engine/Renderer/PointLightComponent.h>
+
 using namespace BLAengine;
 
 RenderingManager::RenderingManager(RenderManagerType type)
@@ -50,6 +55,24 @@ blaU32 RenderingManager::CancelDirectionalLightTicket(DirectionalLightComponent 
     return true;
 }
 
+blaU32 RenderingManager::RegisterPointLight(PointLightComponent* pointLight)
+{
+    //CHANGE THE WAY WE ASSIGN TICKET NUMBERS !
+    int renderTicket = ++(this->currentTicket);
+    this->m_ticketedPointLights[renderTicket] = pointLight;
+
+    pointLight->m_renderTicket = this->currentTicket;
+    return this->currentTicket;
+}
+
+blaU32 RenderingManager::CancelPointLightTicket(PointLightComponent * pointLight)
+{
+    int renderTicket = pointLight->m_renderTicket;
+    auto itTicket = m_ticketedPointLights.find(renderTicket);
+    this->m_ticketedPointLights.erase(itTicket);
+    return true;
+}
+
 blaMap<blaU32, MeshRendererComponent*>* RenderingManager::GetTicketedMeshRenderers()
 {
     return &(m_ticketedMeshRenderers);
@@ -58,6 +81,11 @@ blaMap<blaU32, MeshRendererComponent*>* RenderingManager::GetTicketedMeshRendere
 blaMap<blaU32, blaPair<DirectionalLightComponent*, CameraComponent*>>* RenderingManager::GetTicketedDirectionalLights()
 {
     return &(m_ticketedDirLights);
+}
+
+blaMap<blaU32, PointLightComponent*>* RenderingManager::GetTicketedPointLights()
+{
+    return &(m_ticketedPointLights);
 }
 
 void RenderingManager::Update()
@@ -71,7 +99,7 @@ void DebugRenderingManager::LoadDebugLineMesh(const blaPair<blaVector<blaVec3>, 
 
 void DebugRenderingManager::LoadDebugFilledMesh(const blaPair<blaVector<blaVec3>, blaVector<blaVec4>>& mesh)
 {
-	m_filledMeshes.push_back(mesh);
+    m_filledMeshes.push_back(mesh);
 }
 
 void DebugRenderingManager::Update()

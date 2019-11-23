@@ -67,7 +67,7 @@ void SimpleHairComponent::StepHair()
     sphere s;
     s.origin = GetObjectTransform().GetPosition();
     s.radius = 1.05f; // Add an Epsilon to avoid z-figthing, and give stifness to the first segments...
-    
+
     for (size_t h = 0; h < m_hairStrands.size(); h++)
     {
         HairStrand* hair = &m_hairStrands[h];
@@ -75,7 +75,7 @@ void SimpleHairComponent::StepHair()
         blaVec3 newP0Position = GetObjectTransform().LocalPositionToWorld(hair->m_attachementPointLocal);
         blaVec3 newP0Velocity = (newP0Position - hair->m_particlePositionsW[0]) / m_timestep;
         hair->m_particlePositionsW[0] = newP0Position;
-        
+
         //hair->m_particleVelocities[0] = newP0Velocity;
 
         blaVec3 correctionDisplacement[HAIR_SEGMENT_COUNT + 1];
@@ -93,7 +93,7 @@ void SimpleHairComponent::StepHair()
 
             // Add additional stiffness...
             blaVec3 parentToPos = normalize(hair->m_particlePositionsW[1] - hair->m_particlePositionsW[0]);
-            hair->m_particleVelocities[i] +=  (float)exp(-0.05f * (float)i) * hair->m_stiffness * parentToPos;
+            hair->m_particleVelocities[i] += (float)exp(-0.05f * (float)i) * hair->m_stiffness * parentToPos;
             //g_debugInstance->DrawLine(hair->m_particlePositionsW[i], hair->m_particlePositionsW[i] + hair->m_particleVelocities[i] , blaVec3(1.f, 0.f, 0.f));
 
             /*float stifnessCoeff = 10.0f;
@@ -109,7 +109,7 @@ void SimpleHairComponent::StepHair()
             correctionDisplacement[i] = projectedNewPos - newPosition;
 
             hair->m_particleVelocities[i] = (projectedNewPos - hair->m_particlePositionsW[i]) / m_timestep;
-            
+
             hair->m_particlePositionsW[i] = projectedNewPos;
         }
 
@@ -146,7 +146,7 @@ void SimpleHairComponent::AddHairStrand(blaVec3 positionW)
 {
     HairStrand hairStrand;
     hairStrand.m_attachementPointLocal = GetObjectTransform().WorldPositionToLocal(positionW);
-    
+
     blaVec3 upDir = blaVec3(0.f, 1.f, 0.f);
 
     std::uniform_real_distribution<float> g_float_distribution(0.2f, 1.f);
@@ -156,7 +156,7 @@ void SimpleHairComponent::AddHairStrand(blaVec3 positionW)
         const float hairLength = g_float_distribution(g_random_generator);
         const float stiffness = 10.f * g_float_distribution(g_random_generator);
         const float segmentLength = hairLength / (float)HAIR_SEGMENT_COUNT;
-        
+
         hairStrand.m_segmentLength = segmentLength;
         hairStrand.m_stiffness = stiffness;
         hairStrand.m_particlePositionsW[i] = positionW + i * segmentLength * upDir;

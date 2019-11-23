@@ -25,14 +25,14 @@ void IKChainJoint::GetEndEffectorRecursive(IKChainJoint* joint, blaVector<IKChai
 
 void BLAengine::IKChainJoint::ResetIKChainRecursive(IKChainJoint* joint)
 {
-	joint->m_jointTransform = joint->m_bindPoseTransform;
+    joint->m_jointTransform = joint->m_bindPoseTransform;
 
-	auto child = joint->GetChild();
-	while (child != nullptr)
-	{
-		ResetIKChainRecursive(child);
-		child = child->GetNext();
-	}
+    auto child = joint->GetChild();
+    while (child != nullptr)
+    {
+        ResetIKChainRecursive(child);
+        child = child->GetNext();
+    }
 }
 
 blaVector<IKChainJoint*> IKChainJoint::GetEndEffectors()
@@ -51,7 +51,7 @@ IKChainJoint * IKChainJoint::BuildFromSkeleton(const SkeletonJoint* skeletonRoot
 {
     if (skeletonRoot->GetJointIndex() > jointTransformsW.size())
     {
-		BLA_ASSERT(false);
+        BLA_ASSERT(false);
     }
 
     IKChainJoint* ikJoint = new IKChainJoint(jointTransformsW[skeletonRoot->GetJointIndex()]);
@@ -138,7 +138,7 @@ void IKChainJoint::GetJointTransforms(blaVector<blaPosQuat>& jointTransforms, co
 
 void IKChainJoint::SolveIKChain(IKChainJoint* root, blaVector<blaPosQuat> endEffectorDesiredTransforms, int iterationCount)
 {
-	ResetIKChainRecursive(root);
+    ResetIKChainRecursive(root);
 
     for (int i = 0; i < iterationCount; ++i)
     {
@@ -217,16 +217,16 @@ void IKJointConstraint::BackwardClampToConstraint(const IKJointConstraint* const
 {
     switch (constraint->m_constraintType)
     {
-        case IKJointConstraintType::IKFixedLengthConstraint:
-        {
-            FixedChildPositionConstraint::BackwardClampToConstraint(static_cast<const FixedChildPositionConstraint*>(constraint), parentJoint, childJoint);
-            break;
-        }
-        case IKJointConstraintType::IKConeTwistConstraint:
-        {
-            ConeTwistConstraint::BackwardClampToConstraint(static_cast<const ConeTwistConstraint*>(constraint), parentJoint, childJoint);
-            break;
-        }
+    case IKJointConstraintType::IKFixedLengthConstraint:
+    {
+        FixedChildPositionConstraint::BackwardClampToConstraint(static_cast<const FixedChildPositionConstraint*>(constraint), parentJoint, childJoint);
+        break;
+    }
+    case IKJointConstraintType::IKConeTwistConstraint:
+    {
+        ConeTwistConstraint::BackwardClampToConstraint(static_cast<const ConeTwistConstraint*>(constraint), parentJoint, childJoint);
+        break;
+    }
     }
 }
 
@@ -234,16 +234,16 @@ void IKJointConstraint::ForwardClampToConstraint(const IKJointConstraint* constr
 {
     switch (constraint->m_constraintType)
     {
-        case IKJointConstraintType::IKFixedLengthConstraint:
-        {
-            FixedChildPositionConstraint::ForwardClampToConstraint(static_cast<const FixedChildPositionConstraint*>(constraint), parentJoint, childJoint);
-            break;
-        }
-        case IKJointConstraintType::IKConeTwistConstraint:
-        {
-            ConeTwistConstraint::ForwardClampToConstraint(static_cast<const ConeTwistConstraint*>(constraint), parentJoint, childJoint);
-            break;
-        }
+    case IKJointConstraintType::IKFixedLengthConstraint:
+    {
+        FixedChildPositionConstraint::ForwardClampToConstraint(static_cast<const FixedChildPositionConstraint*>(constraint), parentJoint, childJoint);
+        break;
+    }
+    case IKJointConstraintType::IKConeTwistConstraint:
+    {
+        ConeTwistConstraint::ForwardClampToConstraint(static_cast<const ConeTwistConstraint*>(constraint), parentJoint, childJoint);
+        break;
+    }
     }
 }
 
@@ -305,7 +305,7 @@ void ConeTwistConstraint::BackwardClampToConstraint(const ConeTwistConstraint* c
 
         const blaVec3 newToChildW = parentJoint->m_jointTransform.TransformVector(constraint->m_childConstrainedPositionL);
 
-        blaF32 angleRestToNew = acosf(glm::dot(restToChildW, newToChildW) / glm::pow(glm::length(restToChildW),2.f));
+        blaF32 angleRestToNew = acosf(glm::dot(restToChildW, newToChildW) / glm::pow(glm::length(restToChildW), 2.f));
 
         blaF32 clampedAngle = angleRestToNew > constraint->m_coneAngleConstraint ? constraint->m_coneAngleConstraint : angleRestToNew;
 

@@ -11,7 +11,7 @@ namespace BLAengine
     struct MenuCallback
     {
         void* m_objectPtr;
-        void (*m_functionPtr)(void*);
+        void(*m_functionPtr)(void*);
     };
 
     class BlaGuiMenuItem
@@ -20,13 +20,13 @@ namespace BLAengine
     public:
         BlaGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false) :
             m_name(name)
-           ,m_switch(bool_switch)
-           ,m_endWithSeparator(endWithSeparator)
+            , m_switch(bool_switch)
+            , m_endWithSeparator(endWithSeparator)
         {}
 
     private:
         void Render();
-        
+
         blaString m_name;
         blaBool* m_switch;
 
@@ -37,7 +37,7 @@ namespace BLAengine
     {
         friend class BlaGuiMenu;
     public:
-        BlaGuiMenuTab(blaString name):
+        BlaGuiMenuTab(blaString name) :
             m_name(name)
         {}
 

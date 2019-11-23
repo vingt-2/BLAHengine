@@ -45,7 +45,7 @@ namespace BLAengine
 
         blaString m_name;
         blaString m_commandDescription;
-    
+
     public:
         virtual blaString Call(const blaVector<blaString>& arguments) const = 0;
         const blaString& GetName() const { return m_name; };
@@ -86,10 +86,10 @@ namespace BLAengine
 
     public:
 
-        Console():
+        Console() :
             m_historyCursor(0)
         {
-			m_currentCommandBuffer[0] = 0;
+            m_currentCommandBuffer[0] = 0;
         }
 
         static void LogMessage(const blaString& message) { GetSingletonInstance()->InstanceLogMessage(message); }
@@ -106,24 +106,24 @@ namespace BLAengine
         blaS32 m_historyCursor;
     };
 
-	template<typename T>
-	blaVector<T> SplitString(blaString str, const blaString& delimiter)
-	{
-		blaVector<T> ret;
-		size_t i = str.find_first_of(delimiter);
-		while (i != blaString::npos)
-		{
-			ret.push_back(blaFromString<T>(str.substr(0, i)));
-			str = str.substr(i + delimiter.length(), str.length() - 1);
-			i = str.find_first_of(delimiter);
-		}
+    template<typename T>
+    blaVector<T> SplitString(blaString str, const blaString& delimiter)
+    {
+        blaVector<T> ret;
+        size_t i = str.find_first_of(delimiter);
+        while (i != blaString::npos)
+        {
+            ret.push_back(blaFromString<T>(str.substr(0, i)));
+            str = str.substr(i + delimiter.length(), str.length() - 1);
+            i = str.find_first_of(delimiter);
+        }
 
-		if (!str.empty())
-		{
-			ret.push_back(blaFromString<T>(str));
-		}
+        if (!str.empty())
+        {
+            ret.push_back(blaFromString<T>(str));
+        }
 
-		return ret;
-	}
+        return ret;
+    }
 
 }

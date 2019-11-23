@@ -79,10 +79,10 @@ void BLAengineStyleColors(ImGuiStyle* dst)
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 2.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 18.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 12.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 2.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 18.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 12.0f);
 }
 
 ImFont* f;
@@ -90,13 +90,13 @@ ImFont* f2;
 
 BlaGuiWindow* BlaGuiManager::OpenWindow(blaString name)
 {
-	m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, new BlaGuiWindow(name, blaIVec2(10, 10))));
-	return m_openWindows[name];
+    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, new BlaGuiWindow(name, blaIVec2(10, 10))));
+    return m_openWindows[name];
 }
 
 void BlaGuiManager::OpenWindow(blaString name, BlaGuiWindow* window)
 {
-	m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, window));
+    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, window));
 }
 
 void BlaGuiManager::Init()
@@ -107,8 +107,8 @@ void BlaGuiManager::Init()
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     f = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-Light.ttf", 16.0f);
     f2 = io.Fonts->AddFontFromFileTTF("./resources/fonts/roboto-thin.ttf", 18.0f);
@@ -126,10 +126,10 @@ void BlaGuiManager::Init()
 
 void BlaGuiManager::Destroy()
 {
-	for(auto window : m_openWindows)
-	{
-		delete window.second;
-	}
+    for (auto window : m_openWindows)
+    {
+        delete window.second;
+    }
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
@@ -139,36 +139,36 @@ void BlaGuiManager::Destroy()
 
 void BlaGuiElement::SendEvent(BlaGuiElementEventPayload::EventType eventType)
 {
-	for(const auto& cb : m_registeredCallbacks) 
-	{
-		if(cb.m_eventTriggerFlags & eventType != 0) 
-		{
-			BlaGuiElementEventPayload callbackPayload { eventType, this };
-			cb.m_callback(cb.m_callerPtr, callbackPayload);
-		}
-	}
+    for (const auto& cb : m_registeredCallbacks)
+    {
+        if (cb.m_eventTriggerFlags & eventType != 0)
+        {
+            BlaGuiElementEventPayload callbackPayload{ eventType, this };
+            cb.m_callback(cb.m_callerPtr, callbackPayload);
+        }
+    }
 }
 
 void BlaGuiElement::RegisterEvents(BlaGuiRegisteredEvents& cb)
 {
-	blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
-		[cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
+    blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
+        [cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
 
-	if(it == m_registeredCallbacks.end()) 
-	{
-		m_registeredCallbacks.push_back(cb);
-	}
+    if (it == m_registeredCallbacks.end())
+    {
+        m_registeredCallbacks.push_back(cb);
+    }
 }
 
 void BlaGuiElement::UnRegisterEvents(BlaGuiRegisteredEvents& cb)
 {
-	blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
-		[cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
+    blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
+        [cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
 
-	if (it != m_registeredCallbacks.end())
-	{
-		m_registeredCallbacks.erase(it);
-	}
+    if (it != m_registeredCallbacks.end())
+    {
+        m_registeredCallbacks.erase(it);
+    }
 }
 
 void BlaGuiElement::Render()
@@ -177,51 +177,51 @@ void BlaGuiElement::Render()
 
     while (child != nullptr)
     {
-		child->Render();
-		child = child->GetNext();
+        child->Render();
+        child = child->GetNext();
     }
 }
 
 void BlaGuiCollapsibleElement::Render()
 {
-	int flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    int flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-	if(!m_child)
-	{
-		flags |= ImGuiTreeNodeFlags_Leaf;
-	}
+    if (!m_child)
+    {
+        flags |= ImGuiTreeNodeFlags_Leaf;
+    }
 
-	if (ImGui::TreeNodeEx((void*)(intptr_t)this, flags, GetName().c_str()))
-	{
-		if(ImGui::IsItemClicked()) 
-		{
-			SendEvent(BlaGuiElementEventPayload::EventType::SELECTED);
-		}
+    if (ImGui::TreeNodeEx((void*)(intptr_t)this, flags, GetName().c_str()))
+    {
+        if (ImGui::IsItemClicked())
+        {
+            SendEvent(BlaGuiElementEventPayload::EventType::SELECTED);
+        }
 
-		auto child = GetChild();
+        auto child = GetChild();
 
-		while (child != nullptr)
-		{
-			child->Render();
-			child = child->GetNext();
-		}
+        while (child != nullptr)
+        {
+            child->Render();
+            child = child->GetNext();
+        }
 
-		ImGui::TreePop();
-	}
+        ImGui::TreePop();
+    }
 }
 
 void BlaGuiCollapsibleHeaderElement::Render()
 {
-	if (ImGui::CollapsingHeader(GetName().c_str()))
-	{
-		auto child = GetChild();
+    if (ImGui::CollapsingHeader(GetName().c_str()))
+    {
+        auto child = GetChild();
 
-		while (child != nullptr)
-		{
-			child->Render();
-			child = child->GetNext();
-		}
-	}
+        while (child != nullptr)
+        {
+            child->Render();
+            child = child->GetNext();
+        }
+    }
 }
 
 void BlaGuiSimpleTextElement::Render()
@@ -230,80 +230,80 @@ void BlaGuiSimpleTextElement::Render()
     ImGui::Text(m_text.c_str());
     // END OCornut's Dear ImGui Specific Code Now
 
-	BlaGuiElement::Render();
+    BlaGuiElement::Render();
 }
 
 template<>
 void BlaGuiEditElement<bool>::Render()
 {
-	ImGui::Checkbox(GetName().c_str(), m_pToValue);
+    ImGui::Checkbox(GetName().c_str(), m_pToValue);
 }
 
 template<>
 void BlaGuiEditElement<blaF32>::Render()
 {
-	ImGui::InputFloat(GetName().c_str(), m_pToValue, 0.1f, 1.f, 7);
+    ImGui::InputFloat(GetName().c_str(), m_pToValue, 0.1f, 1.f, 7);
 }
 
 template<>
 void BlaGuiEditElement<blaF64>::Render()
 {
-	ImGui::InputDouble(GetName().c_str(), m_pToValue, 0.1, 1.0);
+    ImGui::InputDouble(GetName().c_str(), m_pToValue, 0.1, 1.0);
 }
 
 template<>
 void BlaGuiEditElement<blaS32>::Render()
 {
-	ImGui::InputInt(GetName().c_str(), m_pToValue, 1, 10);
+    ImGui::InputInt(GetName().c_str(), m_pToValue, 1, 10);
 }
 
 template<>
 void BlaGuiEditElement<blaVec2>::Render()
 {
-	ImGui::InputFloat2(GetName().c_str(), &(m_pToValue->x));
+    ImGui::InputFloat2(GetName().c_str(), &(m_pToValue->x));
 }
 
 template<>
 void BlaGuiEditElement<blaVec3>::Render()
 {
-	ImGui::InputFloat3(GetName().c_str(), &(m_pToValue->x));
+    ImGui::InputFloat3(GetName().c_str(), &(m_pToValue->x));
 }
 
 template<>
 void BlaGuiEditElement<blaString>::Render()
 {
-	char inputBuf[2048];
-	strcpy(inputBuf, m_pToValue->c_str());
-	ImGui::InputText(GetName().c_str(), inputBuf, sizeof(inputBuf));
-	*m_pToValue = blaString(inputBuf);
+    char inputBuf[2048];
+    strcpy(inputBuf, m_pToValue->c_str());
+    ImGui::InputText(GetName().c_str(), inputBuf, sizeof(inputBuf));
+    *m_pToValue = blaString(inputBuf);
 }
 
 template <typename T>
 void BlaGuiEditElementVector<T>::Render()
 {
-	for(int i = 0; i < m_pToVector->size(); i++) 
-	{
-		BlaGuiEditElement<T> toRender = BlaGuiEditElement<T>(GetName() + std::to_string(i), (&m_pToVector[0]) + i * sizeof(T));
-		toRender.Render();
-	}
+    for (int i = 0; i < m_pToVector->size(); i++)
+    {
+        BlaGuiEditElement<T> toRender = BlaGuiEditElement<T>(GetName() + std::to_string(i), (&m_pToVector[0]) + i * sizeof(T));
+        toRender.Render();
+    }
 }
 
 template<>
 void BlaGuiEditElement<GameObjectReference>::Render()
 {
-	ImGui::Columns(2);
-	ImGui::Text(GetName().c_str());
-	ImGui::NextColumn();
-	if(m_pToValue->IsValid())
-	{
-		bool Selected = false;
-		ImGui::Selectable(m_pToValue->GetObject().GetName().c_str(), Selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0,0));
-	}
-	else
-	{
-		ImGui::Text("Invalid Object Reference");
-	}
-	ImGui::Columns();
+    ImGui::Columns(2);
+    ImGui::Text(GetName().c_str());
+    ImGui::NextColumn();
+    if (m_pToValue->IsValid())
+    {
+        bool Selected = false;
+        ImGui::Selectable(m_pToValue->GetObject().GetName().c_str(), Selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0, 0));
+    }
+    else
+    {
+        ImGui::Text("Invalid Object Reference");
+    }
+    ImGui::Columns();
 }
 
 void BlaGuiWindow::Render()
@@ -319,7 +319,7 @@ void BlaGuiWindow::Render()
         m_rootElement->Render();
     }
 
-	m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
+    m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImGui::End();
     // END OCornut's Dear ImGui Specific Code Now
@@ -350,35 +350,35 @@ void BlaOneTimeWindow::Render()
 
 void BlaGuiRenderWindow::Render()
 {
-	if(GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer)) 
-	{
-		// BEGIN OCornut's Dear ImGui Specific Code Now
-		ImVec2 position(m_windowPosition.x, m_windowPosition.y);
-		ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
-		ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
+    if (GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer))
+    {
+        // BEGIN OCornut's Dear ImGui Specific Code Now
+        ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+        ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
+        ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
 
-		ImVec2 windowPos = ImGui::GetWindowPos();
+        ImVec2 windowPos = ImGui::GetWindowPos();
 
-		ImGui::GetWindowDrawList()->AddImage(
-			(void*)renderer->GetDisplayBufferTexture(), 
-			windowPos,
-			ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight()),
-			ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::GetWindowDrawList()->AddImage(
+            (void*)renderer->GetDisplayBufferTexture(),
+            windowPos,
+            ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight()),
+            ImVec2(0, 1), ImVec2(1, 0));
 
-		ImVec2 cursorInWindow = ImGui::GetCursorPos();
+        ImVec2 cursorInWindow = ImGui::GetCursorPos();
 
-		m_pRenderer->SetRenderSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
+        m_pRenderer->SetRenderSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
 
-		ImVec2 mouse = ImGui::GetMousePos();
+        ImVec2 mouse = ImGui::GetMousePos();
 
-		m_cursorScreenSpacePosition = blaVec2(
-			1.0f - (mouse.x - windowPos.x) / ImGui::GetWindowWidth(),
-			1.0f - (mouse.y - windowPos.y) / ImGui::GetWindowHeight());
+        m_cursorScreenSpacePosition = blaVec2(
+            1.0f - (mouse.x - windowPos.x) / ImGui::GetWindowWidth(),
+            1.0f - (mouse.y - windowPos.y) / ImGui::GetWindowHeight());
 
-		m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
+        m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
 
-		ImGui::End();
-	}
+        ImGui::End();
+    }
 }
 
 bool g_show_demo_window = false;
@@ -390,37 +390,38 @@ void BlaGuiManager::Update()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui::NewFrame();
 
-	if(m_showDockspace)
-	{
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;// | ImGuiWindowFlags_NoDocking;
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-	
-		bool p_open;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Dockspace", &p_open, window_flags);
-		
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar(2);
+    if (m_showDockspace)
+    {
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;// | ImGuiWindowFlags_NoDocking;
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-		// DockSpace
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-		}
-	}
+        bool p_open;
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::Begin("Dockspace", &p_open, window_flags);
+
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(2);
+
+        // DockSpace
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        {
+            ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+        }
+        ImGui::End();
+    }
 
     ImGui::PushFont(f); // PopFont()
 
@@ -430,15 +431,15 @@ void BlaGuiManager::Update()
     for (auto& window : m_openWindows)
     {
         window.second->Render();
-        if(window.second->ShouldClose())
+        if (window.second->ShouldClose())
         {
             toClose.push_back(window.first);
         }
     }
 
-    for(auto& window : toClose)
+    for (auto& window : toClose)
     {
-		delete m_openWindows[window];
+        delete m_openWindows[window];
         m_openWindows.erase(window);
     }
 
@@ -477,16 +478,16 @@ void BlaGuiManager::Update()
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	// Update and Render additional Platform Windows
-	   // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-	   //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
-	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		GLFWwindow* backup_current_context = glfwGetCurrentContext();
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		glfwMakeContextCurrent(backup_current_context);
-	}
+    // Update and Render additional Platform Windows
+       // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+       //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
+    }
 }
 
 blaBool BlaGuiManager::IsMouseOverGui() const
@@ -504,7 +505,7 @@ void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowP
 
 void BlaGuiManager::OpenConsole(const blaString& consoleName)
 {
-    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(consoleName, new BlaGuiWindow(consoleName, blaIVec2(10,10))));
+    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(consoleName, new BlaGuiWindow(consoleName, blaIVec2(10, 10))));
     m_openWindows[consoleName]->SetRootElement(new BlaGuiConsole(consoleName, Console::GetSingletonInstance()));
 }
 
@@ -543,9 +544,9 @@ blaBool BlaGuiManager::CloseFileBrowser(blaString browserName)
     if (browserSearch != m_openBrowsers.end())
     {
         m_lastFileBrowserOpenDirectory = browserSearch->second->m_currentFilesDirectory;
-        
+
         delete browserSearch->second;
-        
+
         m_openBrowsers.erase(browserSearch);
     }
     return false;
@@ -554,7 +555,7 @@ blaBool BlaGuiManager::CloseFileBrowser(blaString browserName)
 void BlaGuiMenuItem::Render()
 {
     ImGui::MenuItem(m_name.c_str(), NULL, m_switch);
-    
+
     if (m_endWithSeparator)
     {
         ImGui::Separator();
@@ -563,7 +564,7 @@ void BlaGuiMenuItem::Render()
 
 void BlaGuiMenuTab::Render()
 {
-    if (ImGui::BeginMenu(m_name.c_str(),true))
+    if (ImGui::BeginMenu(m_name.c_str(), true))
     {
         for (int i = 0; i < m_menuItems.size(); ++i)
         {
@@ -752,7 +753,7 @@ void SaveFilePrompt::Render()
         static float openButtonSize = 100.0f; //The 100.0f is just a guess size for the first frame.
         pos += openButtonSize + 10;
         ImGui::SameLine(ImGui::GetWindowWidth() - pos);
-        
+
         if (ImGui::Button("Save") || inputReturn)
         {
             if (StringSanitize(txtInput).length() > 0)
@@ -985,7 +986,7 @@ void BlaGuiConsole::Render()
 {
     bool copy_to_clipboard = false;
     blaVector<blaString> consoleLines;
-    
+
     m_pConsoleSingleton->GetLastNLines(m_maxLineCount, consoleLines);
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
@@ -997,7 +998,7 @@ void BlaGuiConsole::Render()
     {
         for (int i = 0; i < consoleLines.size(); i++)
         {
-            if(i%2)
+            if (i % 2)
             {
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.55f, 0.55f, 0.55f, 0.05f));
             }
@@ -1015,7 +1016,7 @@ void BlaGuiConsole::Render()
                 continue;
     */
 
-            // Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
+    // Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
             bool pop_color = false;
             if (strstr(item, "[error]")) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true; }
             else if (strncmp(item, "# ", 2) == 0) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true; }
@@ -1051,13 +1052,13 @@ void BlaGuiConsole::Render()
     //ImGui::SetItemDefaultFocus();
     //if (reclaim_focus)
     //    ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-    
+
 }
 
 int BlaGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
 {
     Console* pConsole = ((BlaGuiConsole*)(data->UserData))->m_pConsoleSingleton;
-    switch(data->EventFlag)
+    switch (data->EventFlag)
     {
     case ImGuiInputTextFlags_CallbackCompletion:
         pConsole->DoCommandCompletion();

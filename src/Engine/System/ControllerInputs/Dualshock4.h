@@ -87,8 +87,8 @@ public:
 
     bool GetDS4Found() const { return m_hidDevice; }
 
-    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = (blaU8) (zeroToOne * (float)0xFF); }
-    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = (blaU8) (zeroToOne * (float)0xFF); }
+    void SetLeftLFRumble(float zeroToOne) { m_writeBuffer[GetIndex(LEFT_RUMBLE_WRITE_INDEX)] = (blaU8)(zeroToOne * (float)0xFF); }
+    void SetRightHFRumble(float zeroToOne) { m_writeBuffer[GetIndex(RIGHT_RUMBLE_WRITE_INDEX)] = (blaU8)(zeroToOne * (float)0xFF); }
 
     void SetLightBarColor(float r, float g, float b);
 
@@ -97,7 +97,7 @@ private:
     void ReportInputsToManager();
 
     void SetBeta(float beta) { m_beta = beta; }
-    
+
     int GetRawGyroX() { return ReadInt16LE(m_reportBuffer, GetIndex(GX_INDEX)); }
     int GetRawGyroY() { return ReadInt16LE(m_reportBuffer, GetIndex(GY_INDEX)); }
     int GetRawGyroZ() { return ReadInt16LE(m_reportBuffer, GetIndex(GZ_INDEX)); }
@@ -110,13 +110,13 @@ private:
     float GetTimestamp() { return float(GetRawTimestamp() * TIME_FACTOR); }
     float GetTime() { return m_time; }
 
-    float GetGyroX() { return (float)GetRawGyroX() * (float) GYRO_FACTOR; }
-    float GetGyroY() { return (float)GetRawGyroY() * (float) GYRO_FACTOR; }
-    float GetGyroZ() { return (float)GetRawGyroZ() * (float) GYRO_FACTOR; }
+    float GetGyroX() { return (float)GetRawGyroX() * (float)GYRO_FACTOR; }
+    float GetGyroY() { return (float)GetRawGyroY() * (float)GYRO_FACTOR; }
+    float GetGyroZ() { return (float)GetRawGyroZ() * (float)GYRO_FACTOR; }
 
-    float GetAccelX() { return (float)GetRawAccelX() * (float) ACC_FACTOR; }
-    float GetAccelY() { return (float)GetRawAccelY() * (float) ACC_FACTOR; }
-    float GetAccelZ() { return (float)GetRawAccelZ() * (float) ACC_FACTOR; }
+    float GetAccelX() { return (float)GetRawAccelX() * (float)ACC_FACTOR; }
+    float GetAccelY() { return (float)GetRawAccelY() * (float)ACC_FACTOR; }
+    float GetAccelZ() { return (float)GetRawAccelZ() * (float)ACC_FACTOR; }
 
     bool GetSquareButton() { return m_reportBuffer[GetIndex(FACE_BUTTONS_INDEX)] & SQUARE_BUTTON_MASK; }
     bool GetCircleButton() { return m_reportBuffer[GetIndex(FACE_BUTTONS_INDEX)] & CIRCLE_BUTTON_MASK; }
@@ -139,8 +139,8 @@ private:
         x = m_reportBuffer[GetIndex(LEFT_ANALOG_X_INDEX)] / 128.f - 1.0f;
         y = -m_reportBuffer[GetIndex(LEFT_ANALOG_Y_INDEX)] / 128.f + 1.0f;
 
-		x = abs(x) < DEADZONE_SIZE ? 0.f : x;
-		y = abs(y) < DEADZONE_SIZE ? 0.f : y;
+        x = abs(x) < DEADZONE_SIZE ? 0.f : x;
+        y = abs(y) < DEADZONE_SIZE ? 0.f : y;
     }
 
     void GetRightJoystick(float& x, float& y)
@@ -148,8 +148,8 @@ private:
         x = m_reportBuffer[GetIndex(RIGHT_ANALOG_X_INDEX)] / 128.f - 1.0f;
         y = -m_reportBuffer[GetIndex(RIGHT_ANALOG_Y_INDEX)] / 128.f + 1.0f;
 
-		x = abs(x) < DEADZONE_SIZE ? 0.f : x;
-		y = abs(y) < DEADZONE_SIZE ? 0.f : y;
+        x = abs(x) < DEADZONE_SIZE ? 0.f : x;
+        y = abs(y) < DEADZONE_SIZE ? 0.f : y;
     }
 
     void GetDPad(int& x, int& y)
@@ -205,5 +205,5 @@ private:
     float m_time;
 
     float m_quaternion[4];
-	float m_beta;
+    float m_beta;
 };

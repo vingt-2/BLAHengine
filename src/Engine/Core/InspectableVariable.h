@@ -10,11 +10,11 @@ namespace BLAengine
 {
     class InspectableClass
     {  };
-    
+
     class InspectableInt : public InspectableClass
     {
     public:
-        InspectableInt(int value): m_value(value) {};
+        InspectableInt(int value) : m_value(value) {};
         int m_value;
     };
 
@@ -27,10 +27,10 @@ namespace BLAengine
     public:
 
         template <typename U = T, typename std::enable_if<IS_INSPECTABLE_TEMPLATE(U), int>::type = 0>
-        ExposedVar(const U& value, const blaString& name) : m_value(value), m_name(name) 
+        ExposedVar(const U& value, const blaString& name) : m_value(value), m_name(name)
         {};
         template <typename U = T, typename std::enable_if<!IS_INSPECTABLE_TEMPLATE(U), int>::type = 0>
-        ExposedVar(const U & value, const blaString & name) : m_value(value), m_name(name) { static_assert(NON_INSPECTABLE_TYPE_ERROR);};
+        ExposedVar(const U & value, const blaString & name) : m_value(value), m_name(name) { static_assert(NON_INSPECTABLE_TYPE_ERROR); };
 
         template <typename U = T, typename std::enable_if<IS_INSPECTABLE_TEMPLATE(U), int>::type = 0>
         U GetValue()

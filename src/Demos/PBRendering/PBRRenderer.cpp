@@ -32,7 +32,7 @@ std::uniform_real_distribution<float> zeroToOneDist(0, 1);
 
 void BLAengine::PBRCamera::Render()
 {
-    glm::vec2 resolution(1000,1000);
+    glm::vec2 resolution(1000, 1000);
     if (m_renderer == nullptr)
     {
         m_renderer = new PBRPhotonMapping(m_sceneObjects);
@@ -71,8 +71,8 @@ blaPair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> PBRRenderer::
         if (collider == nullptr)
             continue;
 
-		ColliderComponent::CollisionContact contactPoint;
-    	if (!collider->CollideWithRay(ray, contactPoint))
+        ColliderComponent::CollisionContact contactPoint;
+        if (!collider->CollideWithRay(ray, contactPoint))
             continue;
 
         float distance = glm::dot(contactPoint.m_colPositionW - ray.m_origin, ray.m_direction);
@@ -120,21 +120,21 @@ blaVector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform came
         size_t ht = h;
         int progress = 0;
         parallel_for(size_t(0), ht, [&](size_t yp)
-        {
-            int y = (int)yp;
-            fprintf(stderr, "\r%5.2f%%", 100.*progress / (h - 1));
-
-            for (int x = 0; x < w; x++)
             {
-                int idx = (h - y - 1) * w + x;
-                blaVec3 pixelValue(0);
-                blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
-                Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
-                pixelValue = this->PathTraceShade(ray, 0);
-                concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
-            }
-            progress++;
-        });
+                int y = (int)yp;
+                fprintf(stderr, "\r%5.2f%%", 100.*progress / (h - 1));
+
+                for (int x = 0; x < w; x++)
+                {
+                    int idx = (h - y - 1) * w + x;
+                    blaVec3 pixelValue(0);
+                    blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
+                    Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
+                    pixelValue = this->PathTraceShade(ray, 0);
+                    concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
+                }
+                progress++;
+            });
     }
     else
     {
@@ -154,7 +154,7 @@ blaVector<blaVec3> BLAengine::PBRExplicitPathTracer::Render(ObjectTransform came
 
     fprintf(stderr, "\n");
 
-    for (int i = 0; i <h*w; i++)
+    for (int i = 0; i < h*w; i++)
     {
         renderedImage[i] = concurrent_img_vector[i];
     }
@@ -313,24 +313,24 @@ void BLAengine::PBRPhotonMapping::BuildPhotonMap(bool inParallel, blaU32 numberO
         size_t ht = numberOfPhotons;
         int progress = 0;
         parallel_for(size_t(0), ht, [&](size_t yp)
-        {
-            fprintf(stderr, "\r%5.2f%%", 100.*progress / (float)numberOfPhotons);
-            for (size_t i = 0; i < m_lightObjects.size(); i++)
             {
-                if (zeroToOneDist(dgen) >= lightSamplingPDF[i])
-                    continue;
+                fprintf(stderr, "\r%5.2f%%", 100.*progress / (float)numberOfPhotons);
+                for (size_t i = 0; i < m_lightObjects.size(); i++)
+                {
+                    if (zeroToOneDist(dgen) >= lightSamplingPDF[i])
+                        continue;
 
-                PBRSurfaceComponent* lightSurface = m_lightObjects[i];
+                    PBRSurfaceComponent* lightSurface = m_lightObjects[i];
 
-                float emissionProb;
-                Ray ray = GeneratePhoton(lightSurface, emissionProb);
+                    float emissionProb;
+                    Ray ray = GeneratePhoton(lightSurface, emissionProb);
 
-                TracePhoton(ray, lightSurface->m_material.m_emissivePower / lightSamplingPDF[i], 0);
-                break;
-            }
-            m_photonsShot++;
-            progress++;
-        });
+                    TracePhoton(ray, lightSurface->m_material.m_emissivePower / lightSamplingPDF[i], 0);
+                    break;
+                }
+                m_photonsShot++;
+                progress++;
+            });
     }
 
     m_photonMap.BuildKDTree();
@@ -492,7 +492,7 @@ blaVec3 BLAengine::PBRPhotonMapping::MarchIndirectVolumetric(Ray ray, float endO
 
 blaVec3 BLAengine::PBRPhotonMapping::MarchDirectEquiAngular(Ray ray, float endOfRay, int numberOfSamples)
 {
-    float dt = endOfRay / (float) numberOfSamples;
+    float dt = endOfRay / (float)numberOfSamples;
     float marchedDistance = dt;
     blaVec3 indirectRadiance(0);
     while (marchedDistance < endOfRay && m_volumeExtinctionCoeff > 0)
@@ -675,21 +675,21 @@ blaVector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTra
         size_t ht = h;
         int progress = 0;
         parallel_for(size_t(0), ht, [&](size_t yp)
-        {
-            int y = (int)yp;
-            fprintf(stderr, "\r%5.2f%%", 100.*progress / (h - 1));
-
-            for (int x = 0; x < w; x++)
             {
-                int idx = (h - y - 1) * w + x;
-                blaVec3 pixelValue(0);
-                blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
-                Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
-                pixelValue = Shade(ray);
-                concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
-            }
-            progress++;
-        });
+                int y = (int)yp;
+                fprintf(stderr, "\r%5.2f%%", 100.*progress / (h - 1));
+
+                for (int x = 0; x < w; x++)
+                {
+                    int idx = (h - y - 1) * w + x;
+                    blaVec3 pixelValue(0);
+                    blaVec3 cameraRayDir = cx * (x / (float)w - 0.5f) + cy * (y / (float)h - 0.5f) + cameraForward;
+                    Ray ray = Ray(cameraTransform.GetPosition(), cameraRayDir, INFINITY);
+                    pixelValue = Shade(ray);
+                    concurrent_img_vector[idx] = blaVec3(ClampOne(pixelValue.x), ClampOne(pixelValue.y), ClampOne(pixelValue.z));
+                }
+                progress++;
+            });
     }
     else
     {
@@ -709,7 +709,7 @@ blaVector<blaVec3> BLAengine::PBRPhotonMapping::Render(ObjectTransform cameraTra
 
     fprintf(stderr, "\n");
 
-    for (int i = 0; i <h*w; i++)
+    for (int i = 0; i < h*w; i++)
     {
         renderedImage[i] = concurrent_img_vector[i];
     }

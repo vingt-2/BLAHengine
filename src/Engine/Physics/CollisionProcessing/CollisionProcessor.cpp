@@ -31,13 +31,13 @@ CollisionProcessor::~CollisionProcessor()
     m_currentContacts.clear();
 }
 
-void HelperShuffleArray(int* array,int size)
+void HelperShuffleArray(int* array, int size)
 {
-    srand((int) time(NULL));
+    srand((int)time(NULL));
 
     for (int i = size - 1; i > 0; i--)
     {
-        int index = rand() % (i+1);
+        int index = rand() % (i + 1);
         int a = array[index];
         array[index] = array[i];
         array[i] = a;
@@ -198,16 +198,16 @@ void CollisionProcessor::SolveContacts()
     GetDiagonalElements(T, D);
 
     blaVector<blaVec3> B;
-    for (size_t i = 0; i<m_currentContacts.size(); i++)
+    for (size_t i = 0; i < m_currentContacts.size(); i++)
     {
         Contact contact = m_currentContacts[i];
 
         RigidBodyComponent* body1 = contact.m_body1;
-        blaVec3 vLUpdate1 = (blaVec3) body1->m_nextState.m_velocity;
-        blaVec3 vAUpdate1 = (blaVec3) body1->GetObjectTransform().LocalDirectionToWorld(body1->m_nextState.m_angularVelocity);
+        blaVec3 vLUpdate1 = (blaVec3)body1->m_nextState.m_velocity;
+        blaVec3 vAUpdate1 = (blaVec3)body1->GetObjectTransform().LocalDirectionToWorld(body1->m_nextState.m_angularVelocity);
         RigidBodyComponent* body2 = contact.m_body2;
-        blaVec3 vLUpdate2 = (blaVec3) body2->m_nextState.m_velocity;
-        blaVec3 vAUpdate2 = (blaVec3) body2->GetObjectTransform().LocalDirectionToWorld(body2->m_nextState.m_angularVelocity);
+        blaVec3 vLUpdate2 = (blaVec3)body2->m_nextState.m_velocity;
+        blaVec3 vAUpdate2 = (blaVec3)body2->GetObjectTransform().LocalDirectionToWorld(body2->m_nextState.m_angularVelocity);
 
         blaVector<blaVec3> nJac = contact.m_normalJacobian;
         blaVector<blaVec3> t1Jac = contact.m_tangentJacobian1;
@@ -220,7 +220,7 @@ void CollisionProcessor::SolveContacts()
 
         float b_tangent2 = glm::dot(t2Jac[0], vLUpdate1) + glm::dot(t2Jac[1], vAUpdate1) + glm::dot(t2Jac[2], vLUpdate2) + glm::dot(t2Jac[3], vAUpdate2);
 
-        B.push_back(blaVec3(b_normal/D[3*i + 0], b_tangent1 / D[3 * i + 1], b_tangent2 / D[3 * i + 2]));
+        B.push_back(blaVec3(b_normal / D[3 * i + 0], b_tangent1 / D[3 * i + 1], b_tangent2 / D[3 * i + 2]));
     }
 
     // Gauss-Seidel Solver:
@@ -245,7 +245,7 @@ void CollisionProcessor::SolveContacts()
     while (iteration < m_maxIterations && averageDistance > m_epsilon)
     {
         averageDistance = 0;
-        for(auto index : contactIndices)
+        for (auto index : contactIndices)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -266,7 +266,7 @@ void CollisionProcessor::SolveContacts()
                 float c = glm::dot((*jacobianEntry)[1], body1->m_nextState.m_correctionAngularVelocity);
                 float d = glm::dot((*jacobianEntry)[3], body2->m_nextState.m_correctionAngularVelocity);
 
-                float correction = a+b+c+d;
+                float correction = a + b + c + d;
 
                 float Bd = (B[index][i]);
                 float Cd = (correction / D[3 * index + i]);
@@ -284,9 +284,9 @@ void CollisionProcessor::SolveContacts()
 
                 float deltaLambda = newLambda - lambdas[index][i];
 
-                body1->m_nextState.m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][0];
+                body1->m_nextState.m_correctionLinearVelocity += deltaLambda * T[3 * index + i][0];
                 body1->m_nextState.m_correctionAngularVelocity += deltaLambda * T[3 * index + i][1];
-                body2->m_nextState.m_correctionLinearVelocity  += deltaLambda * T[3 * index + i][2];
+                body2->m_nextState.m_correctionLinearVelocity += deltaLambda * T[3 * index + i][2];
                 body2->m_nextState.m_correctionAngularVelocity += deltaLambda * T[3 * index + i][3];
 
                 lambdas[index][i] = newLambda;
@@ -296,8 +296,8 @@ void CollisionProcessor::SolveContacts()
         }
         if (isnan(averageDistance) || isnan(-averageDistance) || fabs(averageDistance) > 1000000)
         {
-			Console::LogMessage("Lambdas blew up: " + std::to_string(iteration) + " iterations");
-			Console::LogMessage("Average Distance: " + std::to_string(averageDistance));
+            Console::LogMessage("Lambdas blew up: " + std::to_string(iteration) + " iterations");
+            Console::LogMessage("Average Distance: " + std::to_string(averageDistance));
 
             debug_stop = true;
         }
@@ -306,7 +306,7 @@ void CollisionProcessor::SolveContacts()
     }
     if (iteration == m_maxIterations)
     {
-		Console::LogMessage("LCP Solver did not converge after " + std::to_string(m_maxIterations) + " iterations");
+        Console::LogMessage("LCP Solver did not converge after " + std::to_string(m_maxIterations) + " iterations");
     }
     m_iterationCount = iteration;
     m_solveCount++;
@@ -316,7 +316,7 @@ void CollisionProcessor::ComputeT(blaVector<blaVector<blaVec3>>& T)
 {
     for (size_t i = 0; i < 3 * m_currentContacts.size(); i++)
     {
-        Contact contact = m_currentContacts[(int)(i/3)];
+        Contact contact = m_currentContacts[(int)(i / 3)];
 
         RigidBodyComponent* body1 = contact.m_body1;
         RigidBodyComponent* body2 = contact.m_body2;
@@ -330,7 +330,7 @@ void CollisionProcessor::ComputeT(blaVector<blaVector<blaVec3>>& T)
             jacobianEntry = contact.m_tangentJacobian1;
         else if (i % 3 == 2)
             jacobianEntry = contact.m_tangentJacobian2;
-        
+
         Ti[0] = body1->m_invMassTensor * jacobianEntry[0];
         Ti[1] = body1->m_invInertiaTensor * jacobianEntry[1];
         Ti[2] = body2->m_invMassTensor * jacobianEntry[2];
@@ -357,10 +357,10 @@ void CollisionProcessor::GetDiagonalElements(blaVector<blaVector<blaVec3>> T, bl
         else if (i % 3 == 2)
             jacobianEntry = contact.m_tangentJacobian2;
 
-        D[i] =  glm::dot(jacobianEntry[0], T[i][0]) + 
-                glm::dot(jacobianEntry[1], T[i][1]) + 
-                glm::dot(jacobianEntry[2], T[i][2]) + 
-                glm::dot(jacobianEntry[3], T[i][3]);
+        D[i] = glm::dot(jacobianEntry[0], T[i][0]) +
+            glm::dot(jacobianEntry[1], T[i][1]) +
+            glm::dot(jacobianEntry[2], T[i][2]) +
+            glm::dot(jacobianEntry[3], T[i][3]);
     }
 }
 
@@ -373,12 +373,12 @@ void CollisionProcessor::ProcessCollisions()
     m_detectionTime = m_time->GetTime() - startTime;
 
     startTime = m_time->GetTime();
-    if(m_currentContacts.size() != 0)
+    if (m_currentContacts.size() != 0)
         SolveContacts();
     m_processingTime = m_time->GetTime() - startTime;
 }
 
-Contact::Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face):
+Contact::Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face) :
     m_normalJacobian(blaVector<blaVec3>(4)),
     m_tangentJacobian1(blaVector<blaVec3>(4)),
     m_tangentJacobian2(blaVector<blaVec3>(4)),
@@ -412,7 +412,7 @@ void Contact::ComputeJacobian()
 
     blaVec3 crossTangent11 = cross(radialBody1, m_contactTangent1W);
     blaVec3 crossTangent12 = cross(radialBody2, m_contactTangent1W);
-    
+
     m_tangentJacobian1[0] = -sign * m_contactTangent1W;
     m_tangentJacobian1[1] = -sign * crossTangent11;
     m_tangentJacobian1[2] = sign * m_contactTangent1W;

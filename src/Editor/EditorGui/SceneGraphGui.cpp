@@ -7,62 +7,62 @@ using namespace BLAengine;
 
 void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObjectReference& object)
 {
-	auto root = m_window.RootElement();
+    auto root = m_window.RootElement();
 
-	ElementMap::iterator it = elementMap.find(object->GetName());
+    ElementMap::iterator it = elementMap.find(object->GetName());
 
-	if(it != elementMap.end())
-	{
-		return;
-	}
+    if (it != elementMap.end())
+    {
+        return;
+    }
 
-	BlaGuiElement* element = new BlaGuiCollapsibleElement(object->GetName());
-	BlaGuiRegisteredEvents eventListener = { BlaGuiElementEventPayload::EventType::SELECTED, StaticOnGuiElementSelected, this };
+    BlaGuiElement* element = new BlaGuiCollapsibleElement(object->GetName());
+    BlaGuiRegisteredEvents eventListener = { BlaGuiElementEventPayload::EventType::SELECTED, StaticOnGuiElementSelected, this };
 
-	element->RegisterEvents(eventListener);
-	
-	if (object->GetParent().IsValid())
-	{
-		ElementMap::iterator parentIt = elementMap.find(object->GetParent()->GetName());
+    element->RegisterEvents(eventListener);
 
-		if (parentIt == elementMap.end())
-		{
-			AddObjectToTree(elementMap, object->GetParent());
-		}
-		parentIt = elementMap.find(object->GetParent()->GetName());
-		root->AddChildAfterNode(element, parentIt->second);
-	}
-	else
-	{
-		root->AddChild(element);
-	}
+    if (object->GetParent().IsValid())
+    {
+        ElementMap::iterator parentIt = elementMap.find(object->GetParent()->GetName());
 
-	elementMap.insert(blaPair<blaString, BlaGuiElement*>(object->GetName(), element));
+        if (parentIt == elementMap.end())
+        {
+            AddObjectToTree(elementMap, object->GetParent());
+        }
+        parentIt = elementMap.find(object->GetParent()->GetName());
+        root->AddChildAfterNode(element, parentIt->second);
+    }
+    else
+    {
+        root->AddChild(element);
+    }
+
+    elementMap.insert(blaPair<blaString, BlaGuiElement*>(object->GetName(), element));
 }
 
 extern int SelectObject(blaString name);
 void SceneGraphGui::OnGuiElementSelected(const BlaGuiElementEventPayload& event)
 {
-	if(event.m_eventType == BlaGuiElementEventPayload::EventType::SELECTED) 
-	{
-		SelectObject(event.m_pGuiElement->GetName());
-	}
+    if (event.m_eventType == BlaGuiElementEventPayload::EventType::SELECTED)
+    {
+        SelectObject(event.m_pGuiElement->GetName());
+    }
 }
 
 void SceneGraphGui::UpdateSceneGraph()
 {
-	Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
+    Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
-	delete m_window.RootElement();
+    delete m_window.RootElement();
 
-	BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", "");
+    BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", "");
 
-	m_window.SetRootElement(root);
+    m_window.SetRootElement(root);
 
-	ElementMap elementMap;
+    ElementMap elementMap;
 
-	for(const GameObjectReference& object : scene->GetObjects())
-	{
-		AddObjectToTree(elementMap, object);
-	}
+    for (const GameObjectReference& object : scene->GetObjects())
+    {
+        AddObjectToTree(elementMap, object);
+    }
 }

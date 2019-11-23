@@ -110,24 +110,24 @@ namespace nanoflann
         inline void addPoint(DistanceType dist, IndexType index)
         {
             CountType i;
-            for (i = count; i>0; --i) {
+            for (i = count; i > 0; --i) {
 #ifdef NANOFLANN_FIRST_MATCH   // If defined and two points have the same distance, the one with the lowest-index will be returned first.
-                if ((dists[i - 1]>dist) || ((dist == dists[i - 1]) && (indices[i - 1]>index))) {
+                if ((dists[i - 1] > dist) || ((dist == dists[i - 1]) && (indices[i - 1] > index))) {
 #else
-                if (dists[i - 1]>dist) {
+                if (dists[i - 1] > dist) {
 #endif
-                    if (i<capacity) {
+                    if (i < capacity) {
                         dists[i] = dists[i - 1];
                         indices[i] = indices[i - 1];
                     }
                 }
                 else break;
                 }
-            if (i<capacity) {
+            if (i < capacity) {
                 dists[i] = dist;
                 indices[i] = index;
             }
-            if (count<capacity) count++;
+            if (count < capacity) count++;
             }
 
         inline DistanceType worstDist() const
@@ -164,7 +164,7 @@ namespace nanoflann
 
         inline void addPoint(DistanceType dist, IndexType index)
         {
-            if (dist<radius)
+            if (dist < radius)
                 m_indices_dists.push_back(std::make_pair(index, dist));
         }
 
@@ -279,7 +279,7 @@ namespace nanoflann
                 const DistanceType diff3 = std::abs(a[3] - data_source.kdtree_get_pt(b_idx, d++));
                 result += diff0 + diff1 + diff2 + diff3;
                 a += 4;
-                if ((worst_dist>0) && (result>worst_dist)) {
+                if ((worst_dist > 0) && (result > worst_dist)) {
                     return result;
                 }
             }
@@ -327,7 +327,7 @@ namespace nanoflann
                 const DistanceType diff3 = a[3] - data_source.kdtree_get_pt(b_idx, d++);
                 result += diff0 * diff0 + diff1 * diff1 + diff2 * diff2 + diff3 * diff3;
                 a += 4;
-                if ((worst_dist>0) && (result>worst_dist)) {
+                if ((worst_dist > 0) && (result > worst_dist)) {
                     return result;
                 }
             }
@@ -674,9 +674,9 @@ namespace nanoflann
             return *this;
         }
         // assign one value to all elements
-        inline void assign(const T& value) { for (size_t i = 0; i<N; i++) elems[i] = value; }
+        inline void assign(const T& value) { for (size_t i = 0; i < N; i++) elems[i] = value; }
         // assign (compatible with std::vector's one) (by JLBC for MRPT)
-        void assign(const size_t n, const T& value) { assert(N == n); for (size_t i = 0; i<N; i++) elems[i] = value; }
+        void assign(const size_t n, const T& value) { assert(N == n); for (size_t i = 0; i < N; i++) elems[i] = value; }
     private:
         // check range (may be private because it is static)
         static void rangecheck(size_type i) { if (i >= size()) { throw std::out_of_range("CArray<>: index out of range"); } }
@@ -834,7 +834,7 @@ namespace nanoflann
             m_size = dataset.kdtree_get_point_count();
             m_size_at_index_build = m_size;
             dim = dimensionality;
-            if (DIM>0) dim = DIM;
+            if (DIM > 0) dim = DIM;
             m_leaf_max_size = params.leaf_max_size;
 
             // Create a permutable array of indices to the input vectors.
@@ -870,7 +870,7 @@ namespace nanoflann
 
         /** Returns the length of each point in the dataset */
         size_t veclen() const {
-            return static_cast<size_t>(DIM>0 ? DIM : dim);
+            return static_cast<size_t>(DIM > 0 ? DIM : dim);
         }
 
         /**
@@ -908,7 +908,7 @@ namespace nanoflann
             float epsError = 1 + searchParams.eps;
 
             distance_vector_t dists; // fixed or variable-sized container (depending on DIM)
-            dists.assign((DIM>0 ? DIM : dim), 0); // Fill it with zeros.
+            dists.assign((DIM > 0 ? DIM : dim), 0); // Fill it with zeros.
             DistanceType distsq = computeInitialDistances(vec, dists);
             searchLevel(result, vec, root_node, distsq, dists, epsError);  // "count_leaf" parameter removed since was neither used nor returned to the user.
             return result.full();
@@ -1008,7 +1008,7 @@ namespace nanoflann
 
         void computeBoundingBox(BoundingBox& bbox)
         {
-            bbox.resize((DIM>0 ? DIM : dim));
+            bbox.resize((DIM > 0 ? DIM : dim));
             if (dataset.kdtree_get_bbox(bbox))
             {
                 // Done! It was implemented in derived class
@@ -1017,14 +1017,14 @@ namespace nanoflann
             {
                 const size_t N = dataset.kdtree_get_point_count();
                 if (!N) throw std::runtime_error("[nanoflann] computeBoundingBox() called but no data points found.");
-                for (int i = 0; i<(DIM>0 ? DIM : dim); ++i) {
+                for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
                     bbox[i].low =
                         bbox[i].high = dataset_get(0, i);
                 }
-                for (size_t k = 1; k<N; ++k) {
-                    for (int i = 0; i<(DIM>0 ? DIM : dim); ++i) {
-                        if (dataset_get(k, i)<bbox[i].low) bbox[i].low = dataset_get(k, i);
-                        if (dataset_get(k, i)>bbox[i].high) bbox[i].high = dataset_get(k, i);
+                for (size_t k = 1; k < N; ++k) {
+                    for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
+                        if (dataset_get(k, i) < bbox[i].low) bbox[i].low = dataset_get(k, i);
+                        if (dataset_get(k, i) > bbox[i].high) bbox[i].high = dataset_get(k, i);
                     }
                 }
             }
@@ -1049,14 +1049,14 @@ namespace nanoflann
                 node->node_type.lr.right = right;
 
                 // compute bounding-box of leaf points
-                for (int i = 0; i<(DIM>0 ? DIM : dim); ++i) {
+                for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
                     bbox[i].low = dataset_get(vind[left], i);
                     bbox[i].high = dataset_get(vind[left], i);
                 }
-                for (IndexType k = left + 1; k<right; ++k) {
-                    for (int i = 0; i<(DIM>0 ? DIM : dim); ++i) {
-                        if (bbox[i].low>dataset_get(vind[k], i)) bbox[i].low = dataset_get(vind[k], i);
-                        if (bbox[i].high<dataset_get(vind[k], i)) bbox[i].high = dataset_get(vind[k], i);
+                for (IndexType k = left + 1; k < right; ++k) {
+                    for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
+                        if (bbox[i].low > dataset_get(vind[k], i)) bbox[i].low = dataset_get(vind[k], i);
+                        if (bbox[i].high < dataset_get(vind[k], i)) bbox[i].high = dataset_get(vind[k], i);
                     }
                 }
             }
@@ -1079,7 +1079,7 @@ namespace nanoflann
                 node->node_type.sub.divlow = left_bbox[cutfeat].high;
                 node->node_type.sub.divhigh = right_bbox[cutfeat].low;
 
-                for (int i = 0; i<(DIM>0 ? DIM : dim); ++i) {
+                for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
                     bbox[i].low = std::min(left_bbox[i].low, right_bbox[i].low);
                     bbox[i].high = std::max(left_bbox[i].high, right_bbox[i].high);
                 }
@@ -1093,10 +1093,10 @@ namespace nanoflann
         {
             min_elem = dataset_get(ind[0], element);
             max_elem = dataset_get(ind[0], element);
-            for (IndexType i = 1; i<count; ++i) {
+            for (IndexType i = 1; i < count; ++i) {
                 ElementType val = dataset_get(ind[i], element);
-                if (val<min_elem) min_elem = val;
-                if (val>max_elem) max_elem = val;
+                if (val < min_elem) min_elem = val;
+                if (val > max_elem) max_elem = val;
             }
         }
 
@@ -1104,21 +1104,21 @@ namespace nanoflann
         {
             const DistanceType EPS = static_cast<DistanceType>(0.0001);
             ElementType max_span = bbox[0].high - bbox[0].low;
-            for (int i = 1; i<(DIM>0 ? DIM : dim); ++i) {
+            for (int i = 1; i < (DIM > 0 ? DIM : dim); ++i) {
                 ElementType span = bbox[i].high - bbox[i].low;
-                if (span>max_span) {
+                if (span > max_span) {
                     max_span = span;
                 }
             }
             ElementType max_spread = -1;
             cutfeat = 0;
-            for (int i = 0; i<(DIM>0 ? DIM : dim); ++i) {
+            for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
                 ElementType span = bbox[i].high - bbox[i].low;
-                if (span>(1 - EPS)*max_span) {
+                if (span > (1 - EPS)*max_span) {
                     ElementType min_elem, max_elem;
                     computeMinMax(ind, count, cutfeat, min_elem, max_elem);
                     ElementType spread = max_elem - min_elem;;
-                    if (spread>max_spread) {
+                    if (spread > max_spread) {
                         cutfeat = i;
                         max_spread = spread;
                     }
@@ -1129,15 +1129,15 @@ namespace nanoflann
             ElementType min_elem, max_elem;
             computeMinMax(ind, count, cutfeat, min_elem, max_elem);
 
-            if (split_val<min_elem) cutval = min_elem;
-            else if (split_val>max_elem) cutval = max_elem;
+            if (split_val < min_elem) cutval = min_elem;
+            else if (split_val > max_elem) cutval = max_elem;
             else cutval = split_val;
 
             IndexType lim1, lim2;
             planeSplit(ind, count, cutfeat, cutval, lim1, lim2);
 
-            if (lim1>count / 2) index = lim1;
-            else if (lim2<count / 2) index = lim2;
+            if (lim1 > count / 2) index = lim1;
+            else if (lim2 < count / 2) index = lim2;
             else index = count / 2;
         }
 
@@ -1157,9 +1157,9 @@ namespace nanoflann
             IndexType left = 0;
             IndexType right = count - 1;
             for (;; ) {
-                while (left <= right && dataset_get(ind[left], cutfeat)<cutval) ++left;
+                while (left <= right && dataset_get(ind[left], cutfeat) < cutval) ++left;
                 while (right && left <= right && dataset_get(ind[right], cutfeat) >= cutval) --right;
-                if (left>right || !right) break;  // "!right" was added to support unsigned Index types
+                if (left > right || !right) break;  // "!right" was added to support unsigned Index types
                 std::swap(ind[left], ind[right]);
                 ++left;
                 --right;
@@ -1171,8 +1171,8 @@ namespace nanoflann
             right = count - 1;
             for (;; ) {
                 while (left <= right && dataset_get(ind[left], cutfeat) <= cutval) ++left;
-                while (right && left <= right && dataset_get(ind[right], cutfeat)>cutval) --right;
-                if (left>right || !right) break;  // "!right" was added to support unsigned Index types
+                while (right && left <= right && dataset_get(ind[right], cutfeat) > cutval) --right;
+                if (left > right || !right) break;  // "!right" was added to support unsigned Index types
                 std::swap(ind[left], ind[right]);
                 ++left;
                 --right;
@@ -1185,7 +1185,7 @@ namespace nanoflann
             assert(vec);
             DistanceType distsq = DistanceType();
 
-            for (int i = 0; i < (DIM>0 ? DIM : dim); ++i) {
+            for (int i = 0; i < (DIM > 0 ? DIM : dim); ++i) {
                 if (vec[i] < root_bbox[i].low) {
                     dists[i] = distance.accum_dist(vec[i], root_bbox[i].low, i);
                     distsq += dists[i];
@@ -1211,10 +1211,10 @@ namespace nanoflann
             if ((node->child1 == NULL) && (node->child2 == NULL)) {
                 //count_leaf += (node->lr.right-node->lr.left);  // Removed since was neither used nor returned to the user.
                 DistanceType worst_dist = result_set.worstDist();
-                for (IndexType i = node->node_type.lr.left; i<node->node_type.lr.right; ++i) {
+                for (IndexType i = node->node_type.lr.left; i < node->node_type.lr.right; ++i) {
                     const IndexType index = vind[i];// reorder... : i;
-                    DistanceType dist = distance(vec, index, (DIM>0 ? DIM : dim));
-                    if (dist<worst_dist) {
+                    DistanceType dist = distance(vec, index, (DIM > 0 ? DIM : dim));
+                    if (dist < worst_dist) {
                         result_set.addPoint(dist, vind[i]);
                     }
                 }
@@ -1230,7 +1230,7 @@ namespace nanoflann
             NodePtr bestChild;
             NodePtr otherChild;
             DistanceType cut_dist;
-            if ((diff1 + diff2)<0) {
+            if ((diff1 + diff2) < 0) {
                 bestChild = node->child1;
                 otherChild = node->child2;
                 cut_dist = distance.accum_dist(val, node->node_type.sub.divhigh, idx);
@@ -1319,7 +1319,7 @@ namespace nanoflann
         {
             const IndexType dims = mat.cols();
             if (dims != dimensionality) throw std::runtime_error("Error: 'dimensionality' must match column count in data matrix");
-            if (DIM>0 && static_cast<int>(dims) != DIM)
+            if (DIM > 0 && static_cast<int>(dims) != DIM)
                 throw std::runtime_error("Data set dimensionality does not match the 'DIM' template argument");
             index = new index_t(dims, *this /* adaptor */, nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
             index->buildIndex();
@@ -1366,9 +1366,9 @@ namespace nanoflann
         inline num_t kdtree_distance(const num_t *p1, const IndexType idx_p2, IndexType size) const
         {
             num_t s = 0;
-            for (IndexType i = 0; i<size; i++) {
+            for (IndexType i = 0; i < size; i++) {
                 const num_t d = p1[i] - m_data_matrix.coeff(idx_p2, i);
-                s += d*d;
+                s += d * d;
             }
             return s;
         }

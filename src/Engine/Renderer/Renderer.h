@@ -2,19 +2,18 @@
 
 #include <Engine/Core/RenderingManager.h>
 #include <Engine/System/RenderWindow.h>
-#include <Engine/Core/CameraComponent.h>
-#include <Engine/Renderer/MeshRendererComponent.h>
 #include <Common/Maths/Ray.h>
 
-#include "LightRender.h"
+#include "RenderCamera.h"
 
 namespace BLAengine
 {
-
+    class DirectionalLightRender;
+    class PointLightRender;
     class BLACORE_API  RenderObject
     {
     public:
-        virtual ~RenderObject(){};
+        virtual ~RenderObject() {};
     private:
 
     };
@@ -35,6 +34,7 @@ namespace BLAengine
         blaMap<blaU32, RenderObject*> m_meshRenderPool;
 
         blaMap<blaU32, DirectionalLightRender*> m_directionalLightPool;
+        blaMap<blaU32, PointLightRender*> m_pointLightPool;
 
         // Rendering Related
         virtual void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) = 0;
@@ -49,28 +49,28 @@ namespace BLAengine
 
         virtual void CleanUpPools() = 0;
 
-        bool GetStatus()        const   { return m_isContextEnabled; }
-        blaVec2 GetRenderSize()    const   { return m_renderSize; }
+        bool GetStatus()        const { return m_isContextEnabled; }
+        blaVec2 GetRenderSize()    const { return m_renderSize; }
 
-		//TODO: Remove, improve blaguiwindow design ...
-		virtual void SetRenderSize(blaIVec2 renderSize);
+        //TODO: Remove, improve blaguiwindow design ...
+        virtual void SetRenderSize(blaIVec2 renderSize);
 
         void SetCamera(CameraComponent* camera);
 
         Renderer();
-		virtual ~Renderer(void) = default;
+        virtual ~Renderer(void) = default;
 
-		void SetRenderToFrameBufferOnly(bool renderToFrameBuffer) { m_renderToFrameBufferOnly = renderToFrameBuffer; }
+        void SetRenderToFrameBufferOnly(bool renderToFrameBuffer) { m_renderToFrameBufferOnly = renderToFrameBuffer; }
 
     protected:
         RenderWindow* m_renderWindow;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
 
-		blaIVec2 m_renderSize;
+        blaIVec2 m_renderSize;
         bool m_isContextEnabled;
         bool m_isFullScreen;
-		bool m_renderToFrameBufferOnly;
+        bool m_renderToFrameBufferOnly;
     };
 
 

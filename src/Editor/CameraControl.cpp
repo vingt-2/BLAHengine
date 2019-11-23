@@ -105,7 +105,7 @@ void CameraController::UpdateController()
 
         angularAcceleration *= 200.f;
 
-        angularAcceleration.x *= 9.0f/16.0f;
+        angularAcceleration.x *= 9.0f / 16.0f;
     }
 
     for (int i = 0; i < 3; ++i)
@@ -125,7 +125,7 @@ void CameraController::UpdateController()
         mouseDelta.y = mouseDelta.y > MAX_MOUSE_DELTA ? MAX_MOUSE_DELTA : mouseDelta.y;
         mouseDelta.y = mouseDelta.y < -MAX_MOUSE_DELTA ? -MAX_MOUSE_DELTA : mouseDelta.y;
 
-        if(inputs->GetMouseButtonTimedState(BLA_MOUSE_BUTTON_RIGHT).IsRisingEdge())
+        if (inputs->GetMouseButtonTimedState(BLA_MOUSE_BUTTON_RIGHT).IsRisingEdge())
         {
             return;
         }

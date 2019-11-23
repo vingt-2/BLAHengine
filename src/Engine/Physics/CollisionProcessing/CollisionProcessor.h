@@ -5,10 +5,10 @@
 
 namespace BLAengine
 {
-	class RigidBodyComponent;
+    class RigidBodyComponent;
     class Timer;
 
-	class BLACORE_API Contact
+    class BLACORE_API Contact
     {
     public:
         Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face);

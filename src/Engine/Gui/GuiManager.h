@@ -15,13 +15,13 @@ namespace BLAengine
 {
     class BlaGuiManager
     {
-		BLA_DECLARE_SINGLETON(BlaGuiManager)
+        BLA_DECLARE_SINGLETON(BlaGuiManager)
 
     public:
         BlaGuiManager(GLFWwindow* glfwWindow) :
             m_window(glfwWindow)
         {
-			m_showDockspace = true;
+            m_showDockspace = true;
             Init();
             m_lastFileBrowserOpenDirectory = "./";
         }
@@ -42,18 +42,18 @@ namespace BLAengine
         void OpenConsole(const blaString& consoleName);
 
         OpenFilePrompt* CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection);
-        
+
         SaveFilePrompt* CreateSaveFilePrompt(blaString browserName);
 
         blaBool CloseFileBrowser(blaString browserName);
 
         BlaGuiMenu m_menuBar;
 
-		BlaGuiWindow* OpenWindow(blaString name);
+        BlaGuiWindow* OpenWindow(blaString name);
 
-		void OpenWindow(blaString name, BlaGuiWindow* window);
+        void OpenWindow(blaString name, BlaGuiWindow* window);
 
-		const BlaGuiWindow* GetWindow(const blaString& name) const { return m_openWindows.at(name); }
+        const BlaGuiWindow* GetWindow(const blaString& name) const { return m_openWindows.at(name); }
 
     private:
 
@@ -70,6 +70,6 @@ namespace BLAengine
 
         GLFWwindow* m_window;
 
-		bool m_showDockspace;
+        bool m_showDockspace;
     };
 }

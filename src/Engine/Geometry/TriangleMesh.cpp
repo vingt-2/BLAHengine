@@ -141,7 +141,7 @@ void TriangleMesh::NormalizeModelCoordinates(bool normalizeScale)
     {
         m_vertexPos[i] -= centroid;
     }
-    
+
     if (normalizeScale)
     {
         for (auto v : this->m_vertexPos)
@@ -174,7 +174,7 @@ void TriangleMesh::ComputeFaceTangents()
 
         blaVec2 st1;
         blaVec2 st2;
-        if(v1.uvIndex != INVALID_INDEX && v2.uvIndex != INVALID_INDEX)
+        if (v1.uvIndex != INVALID_INDEX && v2.uvIndex != INVALID_INDEX)
         {
             st1 = m_vertexUVs[v1.uvIndex] - m_vertexUVs[v0.uvIndex];
             st2 = m_vertexUVs[v2.uvIndex] - m_vertexUVs[v0.uvIndex];
@@ -189,7 +189,7 @@ void TriangleMesh::ComputeFaceTangents()
 
         if (isnan(invScale))
             invScale = 0.0f;
-        
+
         blaVec3 T = invScale * glm::mat2x3(q1, q2) * glm::vec2(st2.t, -st1.t);
         //blaVec3 B = invScale * mat2x3(q1, q2) * glm::vec2(-st2.s, st1.s);
 
@@ -210,7 +210,7 @@ void TriangleMesh::ApplyGeomScaling(blaVec3 scaling)
         blaVec3(0, scaling.y, 0),
         blaVec3(0, 0, scaling.z));
 
-    for (auto &v : m_vertexPos) 
+    for (auto &v : m_vertexPos)
     {
         v = scaleMat * v;
     }
@@ -220,7 +220,7 @@ void TriangleMesh::ApplyUVScaling(glm::vec2 scaling)
 {
     glm::mat2 scaleMat(glm::vec2(scaling.x, 0), glm::vec2(0, scaling.y));
 
-    for (auto &v : m_vertexUVs) 
+    for (auto &v : m_vertexUVs)
     {
         v = scaleMat * v;
     }
@@ -229,10 +229,10 @@ void TriangleMesh::ApplyUVScaling(glm::vec2 scaling)
 void TriangleMesh::GenerateRenderData()
 {
     blaHashMap<RenderVertEntry, blaU32, vertEntryHasher> vertexMap;
-    
-    m_renderData.m_triangleIndices.resize(3*this->m_meshTriangles.size());
 
-    for (blaU32 triIndx = 0; triIndx < m_meshTriangles.size(); triIndx ++)
+    m_renderData.m_triangleIndices.resize(3 * this->m_meshTriangles.size());
+
+    for (blaU32 triIndx = 0; triIndx < m_meshTriangles.size(); triIndx++)
     {
         HalfEdge edge0 = m_halfEdges[m_meshTriangles[triIndx].firstEdge];
         HalfEdge edge1 = m_halfEdges[edge0.nextHE];
@@ -250,7 +250,7 @@ void TriangleMesh::GenerateRenderData()
 
             vert.vx = m_vertexPos[edge.destVertex.posIndex];
 
-            if(edge.destVertex.normalIndex == INVALID_INDEX)
+            if (edge.destVertex.normalIndex == INVALID_INDEX)
             {
                 vert.vn = blaVec3(0.f);
             }
@@ -259,7 +259,7 @@ void TriangleMesh::GenerateRenderData()
                 vert.vn = m_vertexNormals[edge.destVertex.normalIndex];
             }
 
-            if(edge.destVertex.uvIndex == INVALID_INDEX)
+            if (edge.destVertex.uvIndex == INVALID_INDEX)
             {
                 vert.vt = blaVec2(0.f);
             }
@@ -267,13 +267,13 @@ void TriangleMesh::GenerateRenderData()
             {
                 vert.vt = m_vertexUVs[edge.destVertex.uvIndex];
             }
-            
+
             blaVector<FaceIndx> surroundingFaces;
 
             const bool correctQuery = GetSurroundingTriangles(edge.destVertex.posIndex, surroundingFaces);
 
             blaVec3 tangent = m_faceTangent[triIndx];
-            
+
             if (correctQuery)
             {
                 for (auto face : surroundingFaces)
@@ -282,8 +282,8 @@ void TriangleMesh::GenerateRenderData()
                 }
             }
             tangent = tangent - (vert.vn * glm::dot(tangent, vert.vn));
-            
-            if(length(tangent) > 0)
+
+            if (length(tangent) > 0)
                 tangent = normalize(tangent);
 
             if (isnan(tangent.x) || isnan(tangent.y) || isnan(tangent.z))
@@ -362,7 +362,7 @@ void TriangleMesh::GetHEvertices(HeIndx halfEdge, blaPair<blaU32, blaU32>* verte
 {
     HalfEdge edge = m_halfEdges[halfEdge];
     vertexPair->first = edge.destVertex.posIndex;
-    
+
     if (edge.oppositeHE != INVALID_INDEX)
     {
         vertexPair->second = m_halfEdges[edge.oppositeHE].destVertex.posIndex;
@@ -450,7 +450,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(blaU32 vertexIndx, blaVector<HeIndx> &s
         {
             surroundingEdges.push_back(currentEdgeIndx);
         }
-        
+
         if (edge.oppositeHE != INVALID_INDEX)
         {
             currentEdgeIndx = m_halfEdges[edge.oppositeHE].nextHE;
@@ -484,7 +484,7 @@ bool TriangleMesh::GetEmanatingHalfEdges(blaU32 vertexIndx, blaVector<HeIndx> &s
 bool TriangleMesh::GetSurroundingTriangles(blaU32 vertexIndx, blaVector<FaceIndx> &surroundingFaces)
 {
     blaVector<HeIndx> emanatingEdges;
-    
+
     bool problem = !GetEmanatingHalfEdges(vertexIndx, emanatingEdges);
 
     for (auto edgeIndx : emanatingEdges)
@@ -492,7 +492,7 @@ bool TriangleMesh::GetSurroundingTriangles(blaU32 vertexIndx, blaVector<FaceIndx
         HalfEdge edge = m_halfEdges[edgeIndx];
         surroundingFaces.push_back(edge.borderingFace);
     }
-    
+
     return problem;
 }
 

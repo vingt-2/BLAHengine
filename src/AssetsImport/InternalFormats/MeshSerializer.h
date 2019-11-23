@@ -145,7 +145,7 @@ public:
             );
         }
     };
-        
+
     TriangleMeshSerializer() = default;
 
     void vec3VectorToSerializer(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector);
@@ -161,7 +161,7 @@ private:
     friend class cereal::access;
 
     blaString m_name;
-        
+
     blaVector<FaceSerializer> m_meshTriangles;
     blaVector<HalfEdgeSerializer> m_halfEdges;
     blaVector<blaU32> m_heEmanatingFromVert;

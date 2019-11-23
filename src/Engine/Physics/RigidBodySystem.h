@@ -4,9 +4,9 @@
 
 namespace BLAengine
 {
-	class CollisionProcessor;
-	class Timer;
-	class RigidBodyComponent;
+    class CollisionProcessor;
+    class Timer;
+    class RigidBodyComponent;
 
     class BLACORE_API RigidBodySystem
     {

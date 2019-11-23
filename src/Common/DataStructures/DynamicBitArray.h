@@ -7,10 +7,10 @@ private:
     blaU32 m_size;
 
 public:
-    DynamicBitArray(blaU32 size):
+    DynamicBitArray(blaU32 size) :
         m_size(size)
     {
-        m_buffer = (blaU32*) malloc(size / sizeof(blaU32));
+        m_buffer = (blaU32*)malloc(size / sizeof(blaU32));
 
         ClearAll();
     }

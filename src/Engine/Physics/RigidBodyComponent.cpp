@@ -43,7 +43,7 @@ void RigidBodyComponent::SetCollider(ColliderComponent* collider)
         //TODO: Say something sassy about the programmer that programmed that
         return;
     }
-    
+
     m_associatedCollider = collider;
 }
 
@@ -56,7 +56,7 @@ void RigidBodyComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
 
 void RigidBodyComponent::Update()
 {
-// TODO: Eventually do some stuff here ?
+    // TODO: Eventually do some stuff here ?
 }
 
 void RigidBodyComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
@@ -69,16 +69,16 @@ void RigidBodyComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)
 
     AddTorque(torque);
 
-	blaF32 torqueMagnitude = length(torque);
+    blaF32 torqueMagnitude = length(torque);
 
-	if(torqueMagnitude > BLA_EPSILON)
-	{
-		AddLinearForce(forceW / length(torque));
-	}
-	else
-	{
-		AddLinearForce(forceW);
-	}
+    if (torqueMagnitude > BLA_EPSILON)
+    {
+        AddLinearForce(forceW / length(torque));
+    }
+    else
+    {
+        AddLinearForce(forceW);
+    }
 }
 
 void RigidBodyComponent::AddLinearForce(blaVec3 force)
@@ -96,7 +96,7 @@ void RigidBodyComponent::AddImpulse(blaVec3 impulse)
     m_impulseAccu += impulse;
 }
 
-NextState::NextState():
+NextState::NextState() :
     m_acceleration(blaVec3(0)),
     m_velocity(blaVec3(0)),
     m_angularAcceleration(blaVec3(0)),

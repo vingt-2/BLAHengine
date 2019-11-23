@@ -16,7 +16,7 @@ namespace BLAengine
     class DebugRenderingManager;
     class InputManager;
     class BlaGuiManager;
-   
+
     class BLACORE_API EngineInstance
     {
         BLA_DECLARE_SINGLETON(EngineInstance)
@@ -35,13 +35,13 @@ namespace BLAengine
 
         void RequestShutdown();
 
-		void SetTargetFPS(int fps) { m_targetFPS = fps; }
-		blaU32 GetTargetFPS() { return m_targetFPS; }
+        void SetTargetFPS(int fps) { m_targetFPS = fps; }
+        blaU32 GetTargetFPS() { return m_targetFPS; }
 
-		GL33Renderer& GetRenderer() { return *m_renderer; }
-    
+        GL33Renderer& GetRenderer() { return *m_renderer; }
+
     protected:
-		blaS32 m_targetFPS = 60;
+        blaS32 m_targetFPS = 144;
 
         virtual bool InitializeEngine(RenderWindow* renderWindow);
         virtual void PreEngineUpdate();

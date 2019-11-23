@@ -4,7 +4,7 @@ using namespace BLAengine;
 
 void Renderer::SetRenderSize(blaIVec2 renderSize)
 {
-	m_renderSize = renderSize;
+    m_renderSize = renderSize;
 }
 
 void Renderer::SetCamera(CameraComponent * camera)
@@ -14,7 +14,7 @@ void Renderer::SetCamera(CameraComponent * camera)
 
 Renderer::Renderer()
 {
-	m_renderToFrameBufferOnly = false;
+    m_renderToFrameBufferOnly = false;
     m_isContextEnabled = false;
-    this->m_renderSize = glm::vec2(0,0);
+    this->m_renderSize = glm::vec2(0, 0);
 }

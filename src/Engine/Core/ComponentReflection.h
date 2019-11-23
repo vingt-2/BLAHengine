@@ -6,97 +6,97 @@
 // Todo: Support component extension
 // Todo: Support Abstract Component declarations
 
-namespace BLAengine 
+namespace BLAengine
 {
     class GameComponent;
-namespace ComponentReflection
-{
-	struct ExposedVarDescriptor
-	{
-		blaString m_typeName;
-		size_t size;
-
-		ExposedVarDescriptor(const blaString& name, size_t size) : m_typeName{ name }, size{ size } {}
-		virtual ~ExposedVarDescriptor() {}
-		virtual const blaString& GetName() const { return m_typeName; }
-		virtual blaString ToString(const void* obj, int indentLevel = 0) const { return ""; };
-		virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj);
-	};
-
-    // Declare the function template that handles primitive types such as int, std::string, etc.:
-    template <typename T>
-    ExposedVarDescriptor* GetPrimitiveDescriptor();
-
-    // A helper class to find TypeDescriptors in different ways:
-    struct DefaultResolver 
+    namespace ComponentReflection
     {
-        template <typename T> static char func(decltype(&T::Reflection));
-        template <typename T> static int func(...);
+        struct ExposedVarDescriptor
+        {
+            blaString m_typeName;
+            size_t size;
+
+            ExposedVarDescriptor(const blaString& name, size_t size) : m_typeName{ name }, size{ size } {}
+            virtual ~ExposedVarDescriptor() {}
+            virtual const blaString& GetName() const { return m_typeName; }
+            virtual blaString ToString(const void* obj, int indentLevel = 0) const { return ""; };
+            virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj);
+        };
+
+        // Declare the function template that handles primitive types such as int, std::string, etc.:
         template <typename T>
-        struct IsReflected 
+        ExposedVarDescriptor* GetPrimitiveDescriptor();
+
+        // A helper class to find TypeDescriptors in different ways:
+        struct DefaultResolver
         {
-            enum { value = (sizeof(func<T>(nullptr)) == sizeof(char)) };
-        };
-
-        // This version is called if T has a static member named "Reflection":
-        template <typename T, typename std::enable_if<IsReflected<T>::value, int>::type = 0>
-        static ExposedVarDescriptor* get() 
-        {
-            return &T::Reflection;
-        }
-
-        // This version is called otherwise:
-        template <typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0>
-        static ExposedVarDescriptor* get() 
-        {
-            return GetPrimitiveDescriptor<T>();
-        }
-    };
-
-    // This is the primary class template for finding all TypeDescriptors:
-    template <typename T>
-    struct TypeResolver 
-    {
-        static ExposedVarDescriptor* get() 
-        {
-            return DefaultResolver::get<T>();
-        }
-    };
-
-    struct ComponentDescriptor : ExposedVarDescriptor 
-    {
-        struct ExposedMember
-        {
-            blaString m_name;
-            size_t m_offset;
-            ExposedVarDescriptor* m_type;
-        };
-
-        std::vector<ExposedMember> m_members;
-
-        ComponentDescriptor(void(*init)(ComponentDescriptor*)) : ExposedVarDescriptor{ "", 0 } 
-        {
-            init(this);
-        }
-
-        ComponentDescriptor(const char* name, size_t size, const std::initializer_list<ExposedMember>& init) : ExposedVarDescriptor{ nullptr, 0 }, m_members{ init } 
-        {}
-
-        blaString ToString(const void* obj, int indentLevel) const override 
-        {
-            blaString s = "";
-            s += m_typeName + "\n{\n";
-            for (const ExposedMember& member : m_members) 
+            template <typename T> static char func(decltype(&T::Reflection));
+            template <typename T> static int func(...);
+            template <typename T>
+            struct IsReflected
             {
-                s += blaString(4 * (indentLevel + 1), ' ') + member.m_name + " = ";
-                s += member.m_type->ToString((char*)obj + member.m_offset, indentLevel + 1);
-                s += "\n";
-            }
-            s += blaString(4 * indentLevel, ' ') + "}";
+                enum { value = (sizeof(func<T>(nullptr)) == sizeof(char)) };
+            };
 
-            return s;
-        }
-    };
+            // This version is called if T has a static member named "Reflection":
+            template <typename T, typename std::enable_if<IsReflected<T>::value, int>::type = 0>
+            static ExposedVarDescriptor* get()
+            {
+                return &T::Reflection;
+            }
+
+            // This version is called otherwise:
+            template <typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0>
+            static ExposedVarDescriptor* get()
+            {
+                return GetPrimitiveDescriptor<T>();
+            }
+        };
+
+        // This is the primary class template for finding all TypeDescriptors:
+        template <typename T>
+        struct TypeResolver
+        {
+            static ExposedVarDescriptor* get()
+            {
+                return DefaultResolver::get<T>();
+            }
+        };
+
+        struct ComponentDescriptor : ExposedVarDescriptor
+        {
+            struct ExposedMember
+            {
+                blaString m_name;
+                size_t m_offset;
+                ExposedVarDescriptor* m_type;
+            };
+
+            std::vector<ExposedMember> m_members;
+
+            ComponentDescriptor(void(*init)(ComponentDescriptor*)) : ExposedVarDescriptor{ "", 0 }
+            {
+                init(this);
+            }
+
+            ComponentDescriptor(const char* name, size_t size, const std::initializer_list<ExposedMember>& init) : ExposedVarDescriptor{ nullptr, 0 }, m_members{ init }
+            {}
+
+            blaString ToString(const void* obj, int indentLevel) const override
+            {
+                blaString s = "";
+                s += m_typeName + "\n{\n";
+                for (const ExposedMember& member : m_members)
+                {
+                    s += blaString(4 * (indentLevel + 1), ' ') + member.m_name + " = ";
+                    s += member.m_type->ToString((char*)obj + member.m_offset, indentLevel + 1);
+                    s += "\n";
+                }
+                s += blaString(4 * indentLevel, ' ') + "}";
+
+                return s;
+            }
+        };
 
 #define BEGIN_COMPONENT_DECLARATION(CompName)                                                               \
     class BLACORE_API CompName : public GameComponent {                                                     \
@@ -129,5 +129,5 @@ namespace ComponentReflection
             manager = GameComponentManager::AssignAndReturnSingletonInstance(new GameComponentManager());   \
         manager->__RegisterComponent(typeDesc->m_typeName, T::Factory);                                     \
     }
+    }
 }
-} // namespace reflect

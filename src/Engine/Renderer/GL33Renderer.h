@@ -6,8 +6,10 @@
 #include "Renderer.h"
 #include "GL33Shader.h"
 
-namespace BLAengine 
+namespace BLAengine
 {
+    class DirectionalShadowRender;
+
     class BLACORE_API GL33Resources
     {
     public:
@@ -114,7 +116,7 @@ namespace BLAengine
         RenderObject* LoadRenderObject(const MeshRendererComponent& meshRenderer, int type);
         bool    CancelRender(const MeshRendererComponent& object);
         bool    LoadDebugLines();
-		bool	LoadDebugMeshes();
+        bool	LoadDebugMeshes();
 
         void CleanUpPools() override;
 
@@ -132,8 +134,6 @@ namespace BLAengine
 
         blaVec3 m_clearColor;
 
-        blaVector<PointLightRender> m_pointLightsVector;
-
         GBuffer m_GBuffer;
         ScreenSpaceQuad m_screenSpaceQuad;
         PointLightSphere m_pointLightSphereMesh;
@@ -142,7 +142,7 @@ namespace BLAengine
 
         // External References 
         AssetManager* m_assetManager;
-        
+
         bool m_debugDrawGBuffer;
 
         bool m_renderDebug;
@@ -154,26 +154,26 @@ namespace BLAengine
             GLuint vao;
             GLuint size;
         } m_debugLinesInfo;
-		
-    	GLuint m_debugRayPgrmID;
 
-		struct debugMeshesInfo
-		{
-			GLuint vertBuffer;
-			GLuint colorBuffer;
-			GLuint vao;
-			GLuint size;
-		} m_debugMeshesInfo;
+        GLuint m_debugRayPgrmID;
 
-		GLuint m_debugMeshesPgrmID;
+        struct debugMeshesInfo
+        {
+            GLuint vertBuffer;
+            GLuint colorBuffer;
+            GLuint vao;
+            GLuint size;
+        } m_debugMeshesInfo;
+
+        GLuint m_debugMeshesPgrmID;
 
         // MOVE?
         bool SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender);
         void SetupPointLightRenderSphere(blaVector<blaVec3> sphereMeshVertices, blaVector<GLuint> indices);
 
-		GLuint GetDisplayBufferTexture() const { return m_GBuffer.m_displayTextureTarget; }
+        GLuint GetDisplayBufferTexture() const { return m_GBuffer.m_displayTextureTarget; }
 
-		virtual void SetRenderSize(blaIVec2 renderSize);
+        virtual void SetRenderSize(blaIVec2 renderSize);
 
     protected:
 
@@ -199,15 +199,15 @@ namespace BLAengine
         //void RenderDefferedLights();
 
         void RenderDebugLines();
-		void RenderDebugMeshes();
+        void RenderDebugMeshes();
         void RenderDebug();
 
         void DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
         void DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
 
-        void DrawDirectionalLight(DirectionalLightRender directionalLight);
+        void DrawDirectionalLight(DirectionalLightRender* directionalLight);
 
-        void DrawPointLight(PointLightRender pointLight);
+        void DrawPointLight(PointLightRender* pointLight);
 
         bool RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender);
 

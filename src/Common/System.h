@@ -37,10 +37,10 @@ namespace BLAColors
     static const glm::vec3 MAGENTA = glm::vec3(1.f, 0.f, 1.f);
     static const glm::vec3 PURPLE = glm::vec3(0.5f, 0.f, 0.5f);
     static const glm::vec3 ORANGE = glm::vec3(1.f, 0.3f, 0.f);
-	static const glm::vec3 WHITE = glm::vec3(1.f, 1.f, 1.f);
-	static const glm::vec3 BLACK = glm::vec3(0.f, 0.f, 0.f);
-	static const glm::vec3 GREY = glm::vec3(0.5f, 0.5f, 0.5f);
-	
+    static const glm::vec3 WHITE = glm::vec3(1.f, 1.f, 1.f);
+    static const glm::vec3 BLACK = glm::vec3(0.f, 0.f, 0.f);
+    static const glm::vec3 GREY = glm::vec3(0.5f, 0.5f, 0.5f);
+
 };
 
 #define BLA_ASSERT(Condition) \

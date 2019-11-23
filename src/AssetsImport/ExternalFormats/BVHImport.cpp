@@ -76,9 +76,9 @@ SkeletonJoint* ParseJoint(blaVector<blaString> &tokens, blaVector<blaVector<int>
     }
 
     blaVec3 jointLocalOffset;
-    jointLocalOffset.x = (float) atof(tokens[++currentToken].c_str());
-    jointLocalOffset.y = (float) atof(tokens[++currentToken].c_str());
-    jointLocalOffset.z = (float) atof(tokens[++currentToken].c_str());
+    jointLocalOffset.x = (float)atof(tokens[++currentToken].c_str());
+    jointLocalOffset.y = (float)atof(tokens[++currentToken].c_str());
+    jointLocalOffset.z = (float)atof(tokens[++currentToken].c_str());
 
 
     blaVector<SkeletonJoint*> jointChildren;
@@ -99,7 +99,7 @@ SkeletonJoint* ParseJoint(blaVector<blaString> &tokens, blaVector<blaVector<int>
     }
 
     jointChannelsOrderings.push_back(channelOrderForJoint);
- 
+
     // Now to read the child joints ...
 
     const blaU32 currentJointIndex = jointIndex;
@@ -142,9 +142,9 @@ SkeletonJoint* ParseJoint(blaVector<blaString> &tokens, blaVector<blaVector<int>
         }
     }
 
-    auto joint =  new SkeletonJoint(jointName, jointLocalOffset, currentJointIndex);
+    auto joint = new SkeletonJoint(jointName, jointLocalOffset, currentJointIndex);
 
-    for(auto c : jointChildren)
+    for (auto c : jointChildren)
     {
         joint->AddChild(c);
     }
@@ -154,10 +154,10 @@ SkeletonJoint* ParseJoint(blaVector<blaString> &tokens, blaVector<blaVector<int>
 
 // See BVHImport for explanation
 void ReadFrameRecursive(blaVector<blaString>& tokens,
-                        blaVector<blaPosQuat>& jointTransforms,
-                        SkeletonJoint* joint,
-                        int &currentToken,
-                        blaVector<blaVector<int>> &jointsChannelOrderings)
+    blaVector<blaPosQuat>& jointTransforms,
+    SkeletonJoint* joint,
+    int &currentToken,
+    blaVector<blaVector<int>> &jointsChannelOrderings)
 {
     if (joint->GetChild() == nullptr)
         return;
@@ -172,7 +172,7 @@ void ReadFrameRecursive(blaVector<blaString>& tokens,
 
         if (channel < 3)
         {
-            localJointTransform.SetTranslation3(localJointTransform.GetTranslation3() +  
+            localJointTransform.SetTranslation3(localJointTransform.GetTranslation3() +
                 GetTranslationForChannel(channel, atof(tokens[++currentToken].c_str())));
         }
         else
@@ -194,7 +194,7 @@ void ReadFrameRecursive(blaVector<blaString>& tokens,
 
     1) Opens the file.
     2) Calls a recursive joint parser to parse the tree structure
-    3) for each frame, calls a recursive frame data reader that recusrively populates 
+    3) for each frame, calls a recursive frame data reader that recusrively populates
         the tree's joints data and advances in the frames data block.
     4) Profit. Returns a null pointer if there were any issue parsing the data.
 */
@@ -218,8 +218,8 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
         if (!bvhFile)
         {
             bvhFile.close();
-            
-			Console::LogError("Could not open " + bvhFilePath);
+
+            Console::LogError("Could not open " + bvhFilePath);
         }
         bvhFile.close();
 
@@ -235,7 +235,7 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
     }
 
     int currentToken = -1;
-    
+
     blaVector<SkeletonJoint*>		skeletalRoots;
     blaVector<blaVector<int>>			jointChannelsOrderings;
     int jointIndex = 0;
@@ -258,7 +258,7 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
     }
 
     // Print the Skeleton to the console
-	Console::LogMessage("Loaded the following Skeleton(s): ");
+    Console::LogMessage("Loaded the following Skeleton(s): ");
     for (auto roots : skeletalRoots)
     {
         roots->PrintJoint();
@@ -271,7 +271,7 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
 
     int frameCount = atoi(tokens[++currentToken].c_str());
 
-    if(tokens[++currentToken].compare("Frame") || tokens[++currentToken].compare("Time:"))
+    if (tokens[++currentToken].compare("Frame") || tokens[++currentToken].compare("Time:"))
     {
         INVALID_BVH_IN_DATA_DEF
     }
@@ -331,7 +331,7 @@ blaQuat GetRotationForChannel(int axis, float angle)
     else
     {
         //std::cout << "Warning: Invalid rotation axis provided in bvh file...\n";
-        return blaQuat(0.f,0.f,0.f,1.f);
+        return blaQuat(0.f, 0.f, 0.f, 1.f);
     }
 }
 

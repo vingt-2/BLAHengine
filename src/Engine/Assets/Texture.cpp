@@ -43,7 +43,7 @@ Texture2D* TextureImport::LoadBMP(blaString resourceName, blaString filePath)
     // Read the header, i.e. the 54 first bytes
 
     // If less than 54 bytes are read, problem
-    if (fread(header, 1, 54, file) != 54) 
+    if (fread(header, 1, 54, file) != 54)
     {
         printf("Not a correct BMP file\n");
         return nullptr;
@@ -65,12 +65,12 @@ Texture2D* TextureImport::LoadBMP(blaString resourceName, blaString filePath)
     height = *(int*)&(header[0x16]);
 
     // Some BMP files are misformatted, guess missing information
-    if (imageSize == 0)    imageSize = width*height * 3; // 3 : one byte for each Red, Green and Blue component
+    if (imageSize == 0)    imageSize = width * height * 3; // 3 : one byte for each Red, Green and Blue component
     if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
-    
+
     // Create a buffer Actual RGB data
     blaVector<glm::uint8> data = blaVector<glm::uint8>(imageSize);
-    
+
     // Read the actual data from the file into the buffer
     fread(data.data(), 1, imageSize, file);
 
@@ -90,7 +90,7 @@ Texture2D* TextureImport::LoadDDS(blaString name, blaString imagepath)
 
     /* try to open the file */
     fp = fopen(imagepath.data(), "rb");
-    if (fp== nullptr)
+    if (fp == nullptr)
         return nullptr;
 
     /* verify the type of file */
@@ -124,18 +124,18 @@ Texture2D* TextureImport::LoadDDS(blaString name, blaString imagepath)
     unsigned int format;
     switch (fourCC)
     {
-        case FOURCC_DXT1:
-            format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-            break;
-        case FOURCC_DXT3:
-            format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-            break;
-        case FOURCC_DXT5:
-            format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-            break;
-        default:
-            free(buffer);
-            return nullptr;
+    case FOURCC_DXT1:
+        format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+        break;
+    case FOURCC_DXT3:
+        format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+        break;
+    case FOURCC_DXT5:
+        format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+        break;
+    default:
+        free(buffer);
+        return nullptr;
     }
     return nullptr;
 }

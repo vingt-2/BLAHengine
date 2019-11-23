@@ -25,21 +25,21 @@ void SkeletonJoint::DiscardJointsByName(blaString subname)
 {
     auto child = GetChild();
 
-    if(child != nullptr)
+    if (child != nullptr)
     {
-        if(child->GetName().find(subname) != blaString::npos)
+        if (child->GetName().find(subname) != blaString::npos)
         {
             m_child = child->GetNext();
             delete child;
         }
-        
+
     }
     SkeletonJoint* prevChild = nullptr;
 
-    while(child != nullptr)
+    while (child != nullptr)
     {
         auto nextChild = child->GetNext();
-        if(child->GetName().find(subname) != blaString::npos)
+        if (child->GetName().find(subname) != blaString::npos)
         {
             prevChild->m_next = nextChild;
             delete child;
@@ -67,15 +67,15 @@ void SkeletonAnimationData::GetBoneArrayFromEvalAnim(blaVector<blaPair<blaVec3, 
 }
 
 void SkeletonAnimationData::GetBoneArrayFromEvalAnim(blaVector<blaPair<blaPosQuat, blaF32>>& outputBones,
-	const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim)
+    const SkeletonJoint* skeleton, blaVector<blaPosQuat> evalAnim)
 {
-	blaPosQuat transform = evalAnim[skeleton->GetJointIndex()];
+    blaPosQuat transform = evalAnim[skeleton->GetJointIndex()];
 
-	for (auto& child : *skeleton)
-	{
-		outputBones.emplace_back(blaPair<blaPosQuat, blaF32>(transform, evalAnim[child.GetJointIndex()].GetTranslation3().length()));
-		GetBoneArrayFromEvalAnim(outputBones, &child, evalAnim);
-	}
+    for (auto& child : *skeleton)
+    {
+        outputBones.emplace_back(blaPair<blaPosQuat, blaF32>(transform, evalAnim[child.GetJointIndex()].GetTranslation3().length()));
+        GetBoneArrayFromEvalAnim(outputBones, &child, evalAnim);
+    }
 }
 
 void SkeletonAnimationData::ForwardKinematicRecursive
@@ -102,16 +102,16 @@ void SkeletonAnimationData::ForwardKinematicRecursive
             worldJointTransform,
             localJointTransforms,
             worldJointTransforms);
-        
+
     }
 }
 
 void SkeletonAnimationData::EvaluateAnimation
 (
-/*Defines the query inputs*/
-int frameIndex,
-/*Defines the main query output*/
-blaVector<blaPosQuat>& worldJointTransforms
+    /*Defines the query inputs*/
+    int frameIndex,
+    /*Defines the main query output*/
+    blaVector<blaPosQuat>& worldJointTransforms
 )
 {
     SkeletonJoint* root = m_skeletonDef;

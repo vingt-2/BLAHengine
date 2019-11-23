@@ -8,11 +8,11 @@ using namespace BLAengine;
 std::random_device rd;
 std::mt19937 gen(rd());
 
-PBRSurfaceComponent::PBRSurfaceComponent(GameObjectReference parentObject):
+PBRSurfaceComponent::PBRSurfaceComponent(GameObjectReference parentObject) :
     GameComponent(parentObject)
 {
     this->m_associatedCollider = nullptr;
-} 
+}
 
 PBRSurfaceComponent::~PBRSurfaceComponent(void)
 {}
@@ -27,7 +27,7 @@ void PBRSurfaceComponent::Update()
     }*/
 }
 
-PBRMeshComponent::PBRMeshComponent(GameObjectReference parentObject):
+PBRMeshComponent::PBRMeshComponent(GameObjectReference parentObject) :
     PBRSurfaceComponent(parentObject)
 {
     m_surfaceArea = BLA_EPSILON;
@@ -37,8 +37,8 @@ void BLAengine::PBRMeshComponent::SampleSurface(blaVec3 &pos, float& prob)
 {
     if (MeshColliderComponent* mesh = dynamic_cast<MeshColliderComponent*>(m_associatedCollider))
     {
-        std::uniform_int_distribution<> randIndx(0, (mesh->m_vertPosIndices->size() / 3)-1);
-        
+        std::uniform_int_distribution<> randIndx(0, (mesh->m_vertPosIndices->size() / 3) - 1);
+
         blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
 
         int randomIndex = randIndx(gen);
@@ -51,7 +51,7 @@ void BLAengine::PBRMeshComponent::SampleSurface(blaVec3 &pos, float& prob)
 
         std::uniform_real_distribution<float> randDist(0.f, 1.f);
         float s = randDist(gen);
-        blaVec3 sample = s*(contactVertices[1] - contactVertices[0]) + (1.f-s)*(contactVertices[2] - contactVertices[0]);
+        blaVec3 sample = s * (contactVertices[1] - contactVertices[0]) + (1.f - s)*(contactVertices[2] - contactVertices[0]);
 
         pos = GetObjectTransform().LocalPositionToWorld(sample);
         prob = 1.0f / m_surfaceArea;
@@ -84,7 +84,7 @@ void BLAengine::PBRMeshComponent::SampleSurfaceWithNormal(blaVec3 & position, bl
 
         std::uniform_real_distribution<float> randDist(0.f, 1.f);
         float s = randDist(gen);
-        blaVec3 sample = s*(contactVertices[1] - contactVertices[0]) + (1 - s)*(contactVertices[2] - contactVertices[0]);
+        blaVec3 sample = s * (contactVertices[1] - contactVertices[0]) + (1 - s)*(contactVertices[2] - contactVertices[0]);
 
         position = GetObjectTransform().LocalPositionToWorld(sample);
         prob = 1.0f / m_surfaceArea;
@@ -107,7 +107,7 @@ void PBRMeshComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
     MeshColliderComponent* collider = BLA_CREATE_COMPONENT(MeshColliderComponent, GetOwnerObject());
 
     collider->SetColliderMesh(mesh);
-    
+
     m_associatedCollider = collider;
 
     ComputeSurfaceArea();
@@ -189,7 +189,7 @@ float BLAengine::PBRMaterial::LambertianBRDF::SampleBRDF(blaVec3& outDir, blaMat
     float y = r * sinf(theta);
 
     // Project it on the unit sphere
-    blaVec3 directionL = blaVec3(sqrt(1 - (x*x + y*y)), x, y); // positive z cap
+    blaVec3 directionL = blaVec3(sqrt(1 - (x*x + y * y)), x, y); // positive z cap
 
     //Convert to World Direction
     outDir = tangentSpace * directionL;

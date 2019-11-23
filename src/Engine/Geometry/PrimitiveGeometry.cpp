@@ -20,7 +20,7 @@ TriangleMesh PrimitiveGeometry::MakeCube()
 
     blaVector<blaU32> triangleIndices;
     for (auto & q : quads)
-    { 
+    {
         triangleIndices.push_back(q[0]);
         triangleIndices.push_back(q[1]);
         triangleIndices.push_back(q[2]);
@@ -57,9 +57,9 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius)
         for (blaU32 phiCount = 0; phiCount < phiSamples; ++phiCount)
         {
             const float phi = float(phiCount) / (phiSamples - 1) * 2 * float(M_PI);
-            
+
             const blaVec3 normal(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
-            sphere.m_vertexPos.push_back(normal * radius );
+            sphere.m_vertexPos.push_back(normal * radius);
             sphere.m_vertexNormals.push_back(normal);
 
             sphere.m_vertexUVs.push_back(blaVec2(1.f - float(thetaCount) / (thetaSamples - 1), 1.f - float(phiCount) / (phiSamples - 1)));
@@ -97,7 +97,7 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius)
     {
         return TriangleMesh("InvalidTriangle");
     }
-    
+
     const struct CubeVertex { blaVec3 position, normal; blaVec2 texCoord; } verts[] =
     {
         { { -1, -1, -1 },{ -1, 0, 0 },{ 0, 0 } },{ { -1, -1, +1 },{ -1, 0, 0 },{ 1, 0 } },{ { -1, +1, +1 },{ -1, 0, 0 },{ 1, 1 } },{ { -1, +1, -1 },{ -1, 0, 0 },{ 0, 1 } }
@@ -131,6 +131,9 @@ TriangleMesh PrimitiveGeometry::MakeCone(blaU32 resolution)
     cone.m_vertexPos.emplace_back(blaVec3(0.f, 1.f, 0.f));
     cone.m_vertexNormals.emplace_back(blaVec3(0.f, -1.f, 0.f));
     cone.m_vertexNormals.emplace_back(blaVec3(0.f, 1.f, 0.f));
+    cone.m_vertexUVs.emplace_back(blaVec2(0.f, 0.f));
+    cone.m_vertexUVs.emplace_back(blaVec2(0.f, 0.f));
+
 
     for (blaU32 i = 0; i < resolution; i++)
     {

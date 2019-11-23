@@ -7,7 +7,7 @@ using namespace BLAengine;
 BEGIN_COMPONENT_DESCRIPTION(DirectionalLightComponent)
 END_DESCRIPTION()
 
-DirectionalLightComponent::DirectionalLightComponent(GameObjectReference parentObject):
+DirectionalLightComponent::DirectionalLightComponent(GameObjectReference parentObject) :
     GameComponent(parentObject)
 {
     m_lightDirection = blaVec3(0.f);

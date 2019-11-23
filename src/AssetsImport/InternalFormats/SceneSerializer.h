@@ -10,6 +10,8 @@
 #include <Engine/Core/Scene.h>
 //Todo: Why is this here ?
 #include <Engine/Physics/RigidBodyComponent.h>
+#include "Engine/Renderer/DirectionalLightComponent.h"
+#include "Engine/Renderer/MeshRendererComponent.h"
 #include "MathSerializer.h"
 
 class TransformSerializer
@@ -96,9 +98,9 @@ public:
             }
         }
     }
-    
+
     blaString GetMeshName() { return m_triangleMeshName; }
-    
+
     blaVector<blaString> GetMaterialNames() { return m_materialNames; }
 
 private:
@@ -126,7 +128,7 @@ public:
 
     void FromGameComponent(BLAengine::GameComponent* comp)
     {
-        if(BLAengine::DirectionalLightComponent* dirLight = dynamic_cast<BLAengine::DirectionalLightComponent*>(comp)) 
+        if (BLAengine::DirectionalLightComponent* dirLight = dynamic_cast<BLAengine::DirectionalLightComponent*>(comp))
         {
             blaVec3 dir = dirLight->GetDirection();
             m_lightDirection.FillData(dir);
@@ -235,7 +237,7 @@ public:
             m_componentsVector.push_back(gCompSerializer);
         }
     }
-    
+
     BLAengine::ObjectTransform GetTransform()
     {
         BLAengine::ObjectTransform t;

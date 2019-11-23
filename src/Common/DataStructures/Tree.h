@@ -27,18 +27,18 @@ public:
         T* ptr_;
     };
 
-    IntrusiveTree():
+    IntrusiveTree() :
         m_child(nullptr), m_next(nullptr)
     {};
 
-    IntrusiveTree(IntrusiveTree<T>& otherIntrusiveTree):
+    IntrusiveTree(IntrusiveTree<T>& otherIntrusiveTree) :
         m_child(otherIntrusiveTree.GetChild()), m_next(otherIntrusiveTree.GetNext())
     {};
 
     virtual ~IntrusiveTree()
     {
         auto child = m_child;
-        while(child != nullptr)
+        while (child != nullptr)
         {
             auto nextChild = child->m_next;
             delete child;
@@ -80,20 +80,20 @@ public:
     {
         if (this == previousNode)
         {
-			AddChild(childToAdd);
+            AddChild(childToAdd);
             return true;
         }
-        
-        IntrusiveTree<T>* child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
-        
-    	while (child != nullptr)
-        {
-			if(child->AddChildAfterNode(childToAdd, previousNode))
-			{
-				return true;
-			}
 
-			child = child->GetNext();
+        IntrusiveTree<T>* child = reinterpret_cast<IntrusiveTree<T>*>(m_child);
+
+        while (child != nullptr)
+        {
+            if (child->AddChildAfterNode(childToAdd, previousNode))
+            {
+                return true;
+            }
+
+            child = child->GetNext();
         }
 
         return false;

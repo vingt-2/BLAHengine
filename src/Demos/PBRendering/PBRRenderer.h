@@ -8,7 +8,7 @@ namespace BLAengine
     {
     public:
         virtual blaVector<blaVec3> Render(ObjectTransform cameraTransform, glm::vec2 resolution, bool inParallel) = 0;
-        
+
         static blaPair<PBRSurfaceComponent*, ColliderComponent::CollisionContact> IntersectWithScene(Ray r, blaVector<PBRSurfaceComponent*> &objects);
     };
 
@@ -32,7 +32,7 @@ namespace BLAengine
     class PBRPhotonMapping : public PBRRenderer
     {
     public:
-        PBRPhotonMapping(blaVector<PBRSurfaceComponent*> sceneObjects):
+        PBRPhotonMapping(blaVector<PBRSurfaceComponent*> sceneObjects) :
             m_photonMap(PhotonMap(0)),
             m_volumetricPhotonMap(PhotonMap(0))
         {
@@ -46,7 +46,7 @@ namespace BLAengine
     private:
         void BuildPhotonMap(bool inParallel, blaU32 numberOfPhotons);
         Ray GeneratePhoton(PBRSurfaceComponent* surface, float &outEmissionProb);
-        void TracePhoton(Ray incidentRay, blaVec3 photonPower,int bounce);
+        void TracePhoton(Ray incidentRay, blaVec3 photonPower, int bounce);
 
         blaVec3 GatherSurfaceDensity(Ray incidentRay);
         blaVec3 GatherVolumetricDensity(blaVec3 pos, blaVec3 incomingDir);
@@ -73,8 +73,8 @@ namespace BLAengine
     {
     public:
 
-        PBRCamera(GameObjectReference parentObject): GameComponent(parentObject) {};
-        ~PBRCamera(){};
+        PBRCamera(GameObjectReference parentObject) : GameComponent(parentObject) {};
+        ~PBRCamera() {};
 
         blaVector<blaVec3> m_renderedImage;
         PBRRenderer* m_renderer;

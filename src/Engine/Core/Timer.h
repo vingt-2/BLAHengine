@@ -8,7 +8,7 @@ namespace BLAengine
     class BLACORE_API Timer
     {
         BLA_DECLARE_SINGLETON(Timer);
-        
+
     public:
         Timer(glm::uint8 timeBufferSize);
         ~Timer();

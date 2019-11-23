@@ -60,7 +60,7 @@ void BLAengine::GetDirectoriesInDirectory(blaVector<DirectoryEntry>& directoryCo
         cf_read_file(&dir, &file);
 
         DirectoryEntry entry;
-        
+
         if (file.is_dir && file.name[0] != '.')
         {
             entry.m_entryType = DirectoryEntry::DIRECTORY;
@@ -70,7 +70,7 @@ void BLAengine::GetDirectoriesInDirectory(blaVector<DirectoryEntry>& directoryCo
             directoryContent.push_back(entry);
         }
 
-          cf_dir_next(&dir);
+        cf_dir_next(&dir);
     }
 
     cf_dir_close(&dir);
@@ -87,7 +87,7 @@ void BLAengine::GetFilesInDirectory(blaVector<FileEntry>& directoryContent, cons
         cf_read_file(&dir, &file);
 
         FileEntry entry;
-        
+
         if (file.is_reg)
         {
             entry.m_name = file.name;
@@ -145,7 +145,7 @@ blaString BLAengine::BlaFileSizeToString(BlaFileSize& blaFileSize)
     {
         return std::to_string(blaFileSize / 10e12) + " Tb";
     }
-    
+
     return std::to_string(blaFileSize) + " bytes";
 }
 
@@ -205,7 +205,7 @@ FileEntry BLAengine::ParseFilePath(const blaString &filepath)
 
     blaIndex lastDot = filepath.find_last_of('.');
 
-    if(lastDot == blaString::npos)
+    if (lastDot == blaString::npos)
     {
         lastDot = filepath.length();
         file.m_extention = "";

@@ -1,4 +1,5 @@
 #include "Ray.h"
+#include "Engine/System/Console.h"
 using namespace BLAengine;
 
 Ray::Ray(blaVec3 origin, blaVec3 direction, float length)
@@ -32,9 +33,17 @@ blaVec3 Ray::GaussSolver(blaMat3 inMat, blaVec3 equal) const
     return blaVec3(-row0[3], -row1[3], -row2[3]);
 };
 
-RaycastHit Ray::RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeVec1, blaVec3 planeVec2) const
+RaycastHit Ray::RayToPlaneIntersection(blaVec3 planeOrigin, blaVec3 planeNormal, blaF32& t) const
 {
-    blaVec3 solved = GaussSolver(blaMat3(-this->m_direction, planeVec1, planeVec2), (this->m_origin - planeOrigin));
+    float denom = abs(glm::dot(planeNormal, m_direction));
+    if (denom > 1e-4)
+    {
+        blaVec3 p0l0 = planeOrigin - m_origin;
+        t = abs(glm::dot(p0l0, planeNormal)) / denom;
 
-    return RaycastHit(this->m_origin - solved.x * this->m_direction);
+        RaycastHit r(m_origin + t * m_direction, true);
+        return r;
+    }
+
+    return RaycastHit(blaVec3(0), false);
 }

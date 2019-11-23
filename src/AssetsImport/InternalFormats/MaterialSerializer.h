@@ -26,7 +26,7 @@ public:
             return nullptr;
 
         BLAengine::Material* mat = new BLAengine::Material(m_name);
-        
+
         for (size_t i = 0; i < m_textureHandles.size(); i++)
         {
             blaString texName = m_textureNames[i];

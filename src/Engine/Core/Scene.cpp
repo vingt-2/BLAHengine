@@ -3,6 +3,9 @@
 //Todo: fix me, remove indivudual component logic ...
 #include <Demos/PBRendering/PBRRenderer.h>
 #include <Engine/Physics/RigidBodyComponent.h>
+#include "Engine/Renderer/MeshRendererComponent.h"
+#include "Engine/Renderer/DirectionalLightComponent.h"
+#include "Engine/Renderer/PointLightComponent.h"
 
 using namespace BLAengine;
 
@@ -19,14 +22,14 @@ GameObjectReference Scene::CreateObject(blaString name, const GameObjectReferenc
 {
     m_sceneObjectsVector.emplace_back(GameObject(name, GameObjectReference::InvalidReference()));
 
-	m_sceneFlags |= ESceneFlags::DIRTY_SCENE_STRUCTURE;
+    m_sceneFlags |= ESceneFlags::DIRTY_SCENE_STRUCTURE;
 
-    return GameObjectReference { m_sceneObjectsVector.size() - (blaIndex)1, &m_sceneObjectsVector };
+    return GameObjectReference{ m_sceneObjectsVector.size() - (blaIndex)1, &m_sceneObjectsVector };
 }
 
 bool Scene::DeleteObject(blaString name)
 {
-	//TODO: Keep a bitfield of valid game objects in the vector (don't actually clear it)
+    //TODO: Keep a bitfield of valid game objects in the vector (don't actually clear it)
     /*GameObjectReference object = this->FindObjectByName(name);
     if (!object)
         return false;
@@ -78,8 +81,8 @@ void Scene::Initialize(RenderingManager* renderingManager)
 
 void Scene::Update()
 {
-	m_sceneFlags = 0;
-    if (!m_renderingManager) 
+    m_sceneFlags = 0;
+    if (!m_renderingManager)
     {
         return;
     }
@@ -87,7 +90,7 @@ void Scene::Update()
     if (m_enableSimulation)
     {
         m_rigidBodySystem->EnableSimulation();
-		m_rigidBodySystem->m_enableGravity = true;
+        m_rigidBodySystem->m_enableGravity = true;
     }
     else
     {
@@ -96,7 +99,7 @@ void Scene::Update()
 
     m_rigidBodySystem->UpdateSystem();
 
-    for(size_t i = 0; i < m_sceneObjectsVector.size(); i++)
+    for (size_t i = 0; i < m_sceneObjectsVector.size(); i++)
     {
         GameObjectReference object(i, &m_sceneObjectsVector);
 
@@ -119,14 +122,22 @@ void Scene::Update()
             }
         }
 
-		for (auto rigidBody: object->GetComponents<RigidBodyComponent>())
-		{
-			//Use ticket system for rigidbody as well
-			if (rigidBody && !rigidBody->m_registered)
-			{
-				m_rigidBodySystem->RegisterRigidBody(*rigidBody);
-			}
-		}
+        for (auto pointLightComp : object->GetComponents<PointLightComponent>())
+        {
+            if (pointLightComp->m_renderTicket == 0)
+            {
+                m_renderingManager->RegisterPointLight(pointLightComp);
+            }
+        }
+
+        for (auto rigidBody : object->GetComponents<RigidBodyComponent>())
+        {
+            //Use ticket system for rigidbody as well
+            if (rigidBody && !rigidBody->m_registered)
+            {
+                m_rigidBodySystem->RegisterRigidBody(*rigidBody);
+            }
+        }
 
         for (auto pbrenderer : object->GetComponents<PBRCamera>())
         {
@@ -169,12 +180,12 @@ blaVector<Contact>* Scene::GetContacts() const
 GameObjectReference Scene::PickGameObjectInScene(const Ray& inRay, ColliderComponent::CollisionContact& outContact)
 {
     float minDistance = MAX_NORMAL_FLOAT;
-	GameObjectReference pickedObject;
-	ColliderComponent::CollisionContact contactPoint;
+    GameObjectReference pickedObject;
+    ColliderComponent::CollisionContact contactPoint;
 
     for (blaU32 i = 0; i < m_sceneObjectsVector.size(); ++i)
     {
-		GameObject& obj = m_sceneObjectsVector[i];
+        GameObject& obj = m_sceneObjectsVector[i];
 
         ColliderComponent* collider = obj.GetComponent<ColliderComponent>();
 
@@ -196,12 +207,12 @@ GameObjectReference Scene::PickGameObjectInScene(const Ray& inRay, ColliderCompo
         }
     }
 
-	return pickedObject;
+    return pickedObject;
 }
 
 void Scene::SetGameObjectParent(const GameObjectReference& parent, const GameObjectReference& child)
 {
-    if(parent.IsValid() && child.IsValid())
+    if (parent.IsValid() && child.IsValid())
     {
         child->m_parent = parent;
     }
@@ -209,12 +220,12 @@ void Scene::SetGameObjectParent(const GameObjectReference& parent, const GameObj
 
 blaVector<GameObjectReference> Scene::GetObjects()
 {
-	blaVector<GameObjectReference> ret;
-	for(int i = 0; i < m_sceneObjectsVector.size(); ++i)
-	{
-		ret.push_back(GameObjectReference(i, &m_sceneObjectsVector));
-	}
+    blaVector<GameObjectReference> ret;
+    for (int i = 0; i < m_sceneObjectsVector.size(); ++i)
+    {
+        ret.push_back(GameObjectReference(i, &m_sceneObjectsVector));
+    }
 
-	return ret;
+    return ret;
 }
 

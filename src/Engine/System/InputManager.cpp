@@ -41,7 +41,7 @@ BLAMousePointerState InputManager::GetMousePointerState() const
     return state;
 }
 
-BLAGamepadAnalogState InputManager::GetGamepadLeftAnalog() const 
+BLAGamepadAnalogState InputManager::GetGamepadLeftAnalog() const
 {
     BLAGamepadAnalogState state;
     state.m_position = m_gamepadState.m_leftStickPosition;
@@ -60,7 +60,7 @@ BLAGamepadAnalogState InputManager::GetGamepadRightAnalog() const
 void InputManager::Update()
 {
     m_lockInputs = true;
-    
+
     m_previousKeysSet = m_keysSet;
     m_previousMouseButtonSet = m_mouseButtonSet;
     m_previousGamePadSet = m_gamePadSet;
@@ -73,7 +73,7 @@ void InputManager::Update()
     m_gamepadState.m_previousLeftStickPosition = m_gamepadState.m_leftStickPosition;
     m_gamepadState.m_deltaRightStickPosition = m_gamepadState.m_rightStickPosition - m_gamepadState.m_previousRightStickPosition;
     m_gamepadState.m_previousRightStickPosition = m_gamepadState.m_rightStickPosition;
-   
+
     m_lockInputs = false;
 }
 
@@ -81,10 +81,10 @@ void InputStateSetter::SetKey(BLAKeyboard key, blaF32 time, blaBool down)
 {
     InputManager* inputManager = InputManager::GetSingletonInstance();
 
-	if(inputManager->m_lockKeyboard) 
-	{
-		return;
-	}
+    if (inputManager->m_lockKeyboard)
+    {
+        return;
+    }
 
     while (inputManager->m_lockInputs);
 

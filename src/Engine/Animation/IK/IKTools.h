@@ -16,7 +16,7 @@ namespace BLAengine
             IKFixedLengthConstraint,
             IKConeTwistConstraint
         } m_constraintType;
-    
+
     public:
         IKJointConstraint(IKJointConstraintType type) :
             m_constraintType(type)
@@ -33,7 +33,7 @@ namespace BLAengine
         blaVec4 m_childConstrainedPositionL;
 
         FixedChildPositionConstraint() :
-            IKJointConstraint(IKJointConstraintType::IKFixedLengthConstraint){};
+            IKJointConstraint(IKJointConstraintType::IKFixedLengthConstraint) {};
 
         static void BackwardClampToConstraint(const FixedChildPositionConstraint* constraint, IKChainJoint* currentJoint, const IKChainJoint* childJoint);
         static void ForwardClampToConstraint(const FixedChildPositionConstraint* constraint, const IKChainJoint* currentJoint, IKChainJoint* childJoint);
@@ -48,7 +48,7 @@ namespace BLAengine
         blaF32 m_coneAngleConstraint = 0.f;
 
         ConeTwistConstraint() :
-            IKJointConstraint(IKJointConstraintType::IKConeTwistConstraint){};
+            IKJointConstraint(IKJointConstraintType::IKConeTwistConstraint) {};
 
         static void BackwardClampToConstraint(const ConeTwistConstraint* constraint, IKChainJoint* currentJoint, const IKChainJoint* childJoint);
         static void ForwardClampToConstraint(const ConeTwistConstraint* constraint, const IKChainJoint* currentJoint, IKChainJoint* childJoint);
@@ -61,7 +61,7 @@ namespace BLAengine
         IKChainJoint* m_parent;
 
         blaPosQuat m_jointTransform;
-		blaPosQuat m_bindPoseTransform;
+        blaPosQuat m_bindPoseTransform;
 
         blaVector<IKJointConstraint*> m_jointConstraints;
 
@@ -69,14 +69,14 @@ namespace BLAengine
 
         IKChainJoint() :
             m_jointTransform(blaPosQuat::GetIdentity()),
-			m_bindPoseTransform(m_jointTransform),
+            m_bindPoseTransform(m_jointTransform),
             m_parent(nullptr),
             m_joint(nullptr)
-		{};
+        {};
 
         IKChainJoint(blaPosQuat jointTransform) :
             m_jointTransform(jointTransform),
-			m_bindPoseTransform(m_jointTransform),
+            m_bindPoseTransform(m_jointTransform),
             m_parent(nullptr),
             m_joint(nullptr)
         {};
@@ -107,7 +107,7 @@ namespace BLAengine
 
         static void GetEndEffectorRecursive(IKChainJoint* joint, blaVector<IKChainJoint*>& results);
 
-		static void ResetIKChainRecursive(IKChainJoint* joint);
+        static void ResetIKChainRecursive(IKChainJoint* joint);
 
         static void IKSolveForwardPhase(IKChainJoint* currentJoint);
 

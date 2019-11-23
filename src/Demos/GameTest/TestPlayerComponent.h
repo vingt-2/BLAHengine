@@ -15,7 +15,7 @@ BEGIN_COMPONENT_DECLARATION(TestPlayerComponent)
 
 	TestPlayerComponent(GameObjectReference parentObject);
 	~TestPlayerComponent(void) override;
-
+	
 	float m_speed = 1.f;
 	GameObjectReference m_mainCameraObject;
 

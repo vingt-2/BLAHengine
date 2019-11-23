@@ -6,7 +6,7 @@
 namespace BLAengine
 {
     class BlaGuiElement;
-	class Renderer;
+    class Renderer;
 
     class BlaGuiWindow
     {
@@ -37,7 +37,7 @@ namespace BLAengine
             NoDocking = 1 << 21,
         };
 
-        BlaGuiWindow():
+        BlaGuiWindow() :
             m_windowName("")
             , m_windowPosition(blaIVec2(0))
             , m_windowFlags(0)
@@ -76,14 +76,14 @@ namespace BLAengine
 
         bool ShouldClose() { return !m_bOpenWindow; }
 
-		bool HasFocus() const { return m_hasFocus; }
+        bool HasFocus() const { return m_hasFocus; }
 
     protected:
-		blaU32 m_windowFlags;
+        blaU32 m_windowFlags;
         blaString m_windowName;
         blaIVec2 m_windowPosition;
         BlaGuiElement* m_rootElement;
-		bool m_hasFocus;
+        bool m_hasFocus;
         bool m_bOpenWindow;
     };
 
@@ -100,22 +100,22 @@ namespace BLAengine
         void Render() override;
     };
 
-	class BlaGuiRenderWindow : public BlaGuiWindow
-	{
-	public:
-		BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow(), m_pRenderer(renderer)
-		{}
+    class BlaGuiRenderWindow : public BlaGuiWindow
+    {
+    public:
+        BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow(), m_pRenderer(renderer)
+        {}
 
-		BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition) :
-			BlaGuiWindow(windowName, windowPosition) , m_pRenderer(renderer)
-		{};
+        BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition) :
+            BlaGuiWindow(windowName, windowPosition), m_pRenderer(renderer)
+        {};
 
-		void Render() override;
+        void Render() override;
 
-		blaVec2 GetMousePointerScreenSpaceCoordinates() const { return m_cursorScreenSpacePosition; }
+        blaVec2 GetMousePointerScreenSpaceCoordinates() const { return m_cursorScreenSpacePosition; }
 
-	private:
-		blaVec2 m_cursorScreenSpacePosition;
-		Renderer* m_pRenderer;
-	};
+    private:
+        blaVec2 m_cursorScreenSpacePosition;
+        Renderer* m_pRenderer;
+    };
 }

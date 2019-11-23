@@ -31,10 +31,10 @@ struct PhotonVector
     // Returns the distance between the vector "p1[0:size-1]" and the data point with index "idx_p2" stored in the class:
     inline float kdtree_distance(const float *p1, const size_t idx_p2, size_t) const
     {
-        const float d0=p1[0]- m_photons[idx_p2].m_pos.x;
-        const float d1=p1[1] - m_photons[idx_p2].m_pos.y;
-        const float d2=p1[2] - m_photons[idx_p2].m_pos.z;
-        return d0*d0+d1*d1+d2*d2;
+        const float d0 = p1[0] - m_photons[idx_p2].m_pos.x;
+        const float d1 = p1[1] - m_photons[idx_p2].m_pos.y;
+        const float d2 = p1[2] - m_photons[idx_p2].m_pos.z;
+        return d0 * d0 + d1 * d1 + d2 * d2;
     }
 
     // Returns the dim'th component of the idx'th point in the class:
@@ -42,8 +42,8 @@ struct PhotonVector
     //  "if/else's" are actually solved at compile time.
     inline float kdtree_get_pt(const size_t idx, int dim) const
     {
-        if (dim==0) return m_photons[idx].m_pos.x;
-        else if (dim==1) return m_photons[idx].m_pos.y;
+        if (dim == 0) return m_photons[idx].m_pos.x;
+        else if (dim == 1) return m_photons[idx].m_pos.y;
         else return m_photons[idx].m_pos.z;
     }
 
@@ -63,7 +63,7 @@ public:
     ~PhotonMap();
 
     void AddPhoton(Photon photon);
-    
+
     void BuildKDTree();
 
     blaVector<Photon*> GetPhotons(blaVec3 position, int knnSize, float &biggestRadius);
@@ -99,17 +99,17 @@ inline void PhotonMap::BuildKDTree()
 inline blaVector<Photon*> PhotonMap::GetPhotons(blaVec3 position, int knnSize, float &outRadius)
 {
     blaVector<Photon*> results;
-    
+
     blaVector<size_t>   ret_index(knnSize);
     blaVector<float> out_dist_sqr(knnSize);
-    
+
     nanoflann::SearchParams params;
     //params.sorted = false;
 
     const size_t nMatches = m_photonTree->knnSearch(&position[0], knnSize, &(ret_index[0]), &(out_dist_sqr[0]));
 
     results.reserve(nMatches);
-    
+
     outRadius = 0;
     for (size_t i = 0; i < ret_index.size(); i++)
     {

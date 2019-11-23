@@ -111,7 +111,7 @@ void GLFWMouseButtonCallBack(GLFWwindow* window, int button, int action, int mod
         return;
     }
 
-    InputStateSetter::SetMouseButton((BLAMouseButtons) button, glfwGetTime(), action == GLFW_PRESS);
+    InputStateSetter::SetMouseButton((BLAMouseButtons)button, glfwGetTime(), action == GLFW_PRESS);
 }
 
 void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
@@ -134,6 +134,7 @@ void GLFWRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     //glfwWindowHint(GLFW_DECORATED, false);
 
@@ -146,7 +147,7 @@ void GLFWRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int 
         const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
 
         // Set window size to screen proportions
-        m_width  = videoMode->width; 
+        m_width = videoMode->width;
         m_height = videoMode->height;
 
         m_isFullscreen = true;
@@ -185,8 +186,8 @@ void GLFWRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int 
     glfwSetMouseButtonCallback(window, GLFWMouseButtonCallBack);
     glfwSetCursorPosCallback(window, GLFWMouseCursorPosCallBack);
     glfwSetKeyCallback(window, GLFWKeyboardCallBack);
-    glfwSetScrollCallback(window, (GLFWscrollfun) GLFWMouseWheelCallback);
-    
+    glfwSetScrollCallback(window, (GLFWscrollfun)GLFWMouseWheelCallback);
+
     glfwSetDropCallback(window, (GLFWdropfun)GLFWDragAndDropCallBack);
 
     m_glfwWindow = window;
@@ -204,17 +205,17 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
-	m_cursorVisibility = true;
+    m_cursorVisibility = true;
     for (auto mouseButton : m_mouseButtonsThatKillCursorWhenHeld)
     {
         if (glfwGetMouseButton(m_glfwWindow, mouseButton) == GLFW_PRESS)
         {
-			m_cursorVisibility = false;
+            m_cursorVisibility = false;
             break;
         }
     }
     SetMouseCursorVisibility(m_cursorVisibility);
-    
+
     glfwSwapInterval(0);
 
     glfwSwapBuffers(m_glfwWindow);
@@ -251,13 +252,13 @@ blaString GLFWRenderWindow::GetWindowTitle() const
     return blaString();
 }
 
-GLFWRenderWindow::GLFWRenderWindow():
+GLFWRenderWindow::GLFWRenderWindow() :
     m_isFullscreen(false),
     m_width(0),
     m_height(0),
     m_glfwWindow(nullptr),
     m_registeredDragAndDropCallback(nullptr),
-	m_cursorVisibility(true)
+    m_cursorVisibility(true)
 {};
 
 GLFWRenderWindow::~GLFWRenderWindow()
@@ -371,7 +372,7 @@ blaString WPFRenderWindow::GetMaxGLVersion() const { return m_glVersion; }
 
 bool WPFRenderWindow::isFullScreen() const
 {
-    return false; 
+    return false;
 }
 
 void WPFRenderWindow::SetWindowTitle(blaString title) { }

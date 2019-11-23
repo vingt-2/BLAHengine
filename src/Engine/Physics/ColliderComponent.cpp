@@ -18,7 +18,7 @@ inline blaVec3 Barycentric(blaVec3 p, blaVec3 a, blaVec3 b, blaVec3 c)
     return r;
 }
 
-MeshColliderComponent::MeshColliderComponent(GameObjectReference parentObject) : ColliderComponent(parentObject){}
+MeshColliderComponent::MeshColliderComponent(GameObjectReference parentObject) : ColliderComponent(parentObject) {}
 
 MeshColliderComponent::~MeshColliderComponent()
 {
@@ -56,11 +56,11 @@ blaBool MeshColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& 
 
     if (!collision)
     {
-		return false;
+        return false;
     }
-      
+
     outCollision.m_colPositionL = colPointL;
-	outCollision.m_colPositionW = transform.LocalPositionToWorld(colPointL);
+    outCollision.m_colPositionW = transform.LocalPositionToWorld(colPointL);
 
     blaVec3 contactNormals[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
     blaVec3 contactVertices[3] = { blaVec3(0), blaVec3(0), blaVec3(0) };
@@ -74,9 +74,9 @@ blaBool MeshColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& 
     }
     blaVec3 bar = Barycentric(outCollision.m_colPositionL, contactVertices[0], contactVertices[1], contactVertices[2]);
     //contactPoint.m_colNormalL = 0.3333333333f * (contactNormals[0] + contactNormals[1] + contactNormals[2]);
-	outCollision.m_colNormalL = bar.x * contactNormals[0] + bar.y * contactNormals[1] + bar.z * contactNormals[2];
-	outCollision.m_colNormalW = transform.LocalDirectionToWorld(outCollision.m_colNormalL);
-	outCollision.m_t = colT;
+    outCollision.m_colNormalL = bar.x * contactNormals[0] + bar.y * contactNormals[1] + bar.z * contactNormals[2];
+    outCollision.m_colNormalW = transform.LocalDirectionToWorld(outCollision.m_colNormalL);
+    outCollision.m_t = colT;
 
 
     return true;
@@ -84,7 +84,7 @@ blaBool MeshColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& 
 
 blaBool MeshColliderComponent::CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision)
 {
-	return false;
+    return false;
 }
 
 void MeshColliderComponent::GenerateBoundingRadius()
@@ -126,32 +126,32 @@ blaBool SphereColliderComponent::CollideWithRay(const Ray& ray, CollisionContact
     blaVec3 op = transform.GetPosition() - ray.m_origin;
     float t, eps = 1e-4f;
     float b = glm::dot(op, ray.m_direction);
-    float det = b * b - glm::dot(op,op) + this->m_boundingRadius * this->m_boundingRadius;
+    float det = b * b - glm::dot(op, op) + this->m_boundingRadius * this->m_boundingRadius;
 
     if (det < 0)
     {
-		return false;
+        return false;
     }
-    
+
     det = sqrt(det);
     t = (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
 
     if (t == 0)
     {
-		return false;
+        return false;
     }
     else
     {
-        outCollision.m_colPositionW = ray.m_origin + ((float) t) * ray.m_direction;
-		outCollision.m_colPositionL = transform.WorldPositionToLocal(outCollision.m_colPositionW);
-        
+        outCollision.m_colPositionW = ray.m_origin + ((float)t) * ray.m_direction;
+        outCollision.m_colPositionL = transform.WorldPositionToLocal(outCollision.m_colPositionW);
+
         //printVector(contactPoint.m_colPositionW);
 
-		outCollision.m_colNormalW = (outCollision.m_colPositionW - transform.GetPosition()) / m_boundingRadius;
+        outCollision.m_colNormalW = (outCollision.m_colPositionW - transform.GetPosition()) / m_boundingRadius;
 
-		outCollision.m_colNormalL = (outCollision.m_colPositionL - transform.GetPosition());
+        outCollision.m_colNormalL = (outCollision.m_colPositionL - transform.GetPosition());
 
-		outCollision.m_t = t;
+        outCollision.m_t = t;
     }
 
     return true;
@@ -159,5 +159,5 @@ blaBool SphereColliderComponent::CollideWithRay(const Ray& ray, CollisionContact
 
 blaBool SphereColliderComponent::CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision)
 {
-	return false;
+    return false;
 }

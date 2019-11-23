@@ -14,7 +14,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     m_currentMaxUVPos = 0;
     m_currentMaxNormalPos = 0;
     std::cout << "[OBJ_MESH] Importing " << filename << ".\n";
-    std::ifstream fileStream (filename, std::ifstream::in);
+    std::ifstream fileStream(filename, std::ifstream::in);
     blaString lineInFile = " ";
 
     blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
@@ -25,7 +25,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
 
     int outOfRangeExceptionsCount = 0;
 
-    if(!fileStream.good())
+    if (!fileStream.good())
     {
         std::cout << "Failed to Import " << filename << ".\n";
         return false;
@@ -176,20 +176,20 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
 
 long OBJImport::FindVertexAtIndex(long index)
 {
-    if(index >= 0)
+    if (index >= 0)
     {
         // .OBJ vertex indexing starts at 1 not 0, so substract 1 to each index
-        return index - 1 ;
+        return index - 1;
     }
     else
     {
         // .OBJ vertex Relative position. When negative value, the index references: ("total number of element of type X so far" - index)
-        return m_currentMaxVertexPos+index;
+        return m_currentMaxVertexPos + index;
     }
 }
 long OBJImport::FindUVAtIndex(long index)
 {
-    if(index >= 0)
+    if (index >= 0)
     {
         // .OBJ vertex indexing starts at 1 not 0, so substract 1 to each index
         return index - 1;
@@ -197,12 +197,12 @@ long OBJImport::FindUVAtIndex(long index)
     else
     {
         // .OBJ vertex Relative position. When negative value, the index references: ("total number of element of type X so far" - index)
-        return m_currentMaxUVPos+index;
+        return m_currentMaxUVPos + index;
     }
 }
 long OBJImport::FindNormalAtIndex(long index)
 {
-    if(index >= 0)
+    if (index >= 0)
     {
         // .OBJ vertex indexing starts at 1 not 0, so substract 1 to each index
         return index - 1;
@@ -210,6 +210,6 @@ long OBJImport::FindNormalAtIndex(long index)
     else
     {
         // .OBJ vertex Relative position. When negative value, the index references: ("total number of element of type X so far" - index)
-        return m_currentMaxNormalPos+index;
+        return m_currentMaxNormalPos + index;
     }
 }
