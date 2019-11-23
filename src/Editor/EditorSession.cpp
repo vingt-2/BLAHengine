@@ -333,6 +333,14 @@ void EditorSession::EditorUpdate()
             }
         }
     }
+
+    if (m_selectedObject.IsValid())
+    {
+        if (MeshRendererComponent* meshRenderer = m_selectedObject->GetComponent<MeshRendererComponent>())
+        {
+            DebugDraw::DrawArbitraryGeometry(m_selectedObject->GetTransform().GetPosQuat(), m_selectedObject->GetTransform().GetScale(), meshRenderer->m_mesh->m_triangleMesh, blaVec4(BLAColors::ORANGE, 0.3f));
+        }
+    }
 }
 
 void EditorSession::HandleSaveScenePrompt()

@@ -26,6 +26,10 @@
     ConsoleCommandEntry_##CommandName ConsoleCommandEntry_##CommandName::Init;                                                                    \
     RetType CommandName(__VA_ARGS__)                                                                                                              
 
+#define BLA_CONSOLE_VAR(name, type, defaultValue)                                   \
+    type g_##name = defaultValue;                                                   \
+    BLA_CONSOLE_COMMAND(int, name, type value) { g_##name = value; return 0; }      \
+
 namespace BLAengine
 {
     /*

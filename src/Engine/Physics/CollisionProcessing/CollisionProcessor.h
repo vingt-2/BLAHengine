@@ -6,6 +6,7 @@
 namespace BLAengine
 {
     class RigidBodyComponent;
+    class ColliderComponent;
     class Timer;
 
     class BLACORE_API Contact
@@ -68,7 +69,7 @@ namespace BLAengine
         void ComputeT(blaVector<blaVector<blaVec3>>& T);
         void GetDiagonalElements(blaVector<blaVector<blaVec3>> T, blaVector<float>& D);
         void BroadPhaseDetection();
-        void NarrowPhaseDetection(RigidBodyComponent* body1, RigidBodyComponent* body2);
+        void NarrowPhaseDetection(ColliderComponent* body1, ColliderComponent* body2);
         void SolveContacts();
     };
 

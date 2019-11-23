@@ -48,23 +48,30 @@ void CollisionProcessor::BroadPhaseDetection()
 {
     for (size_t i = 0; i < m_bodiesList.size(); i++)
     {
+        if (!m_bodiesList[i]->m_enableCollision) continue;
+
+        ColliderComponent* body1 = m_bodiesList[i]->GetOwnerObject()->GetComponent<ColliderComponent>();
+        if (!body1) continue;
+
         for (size_t j = i; j < m_bodiesList.size(); j++)
         {
-            RigidBodyComponent* body1 = m_bodiesList[i];
-            RigidBodyComponent* body2 = m_bodiesList[j];
+            if (!m_bodiesList[j]->m_enableCollision) continue;
 
-            if (!(body1 == body2) && body1->m_enableCollision && body2->m_enableCollision)
+            ColliderComponent* body2 = m_bodiesList[j]->GetOwnerObject()->GetComponent<ColliderComponent>();
+            if (!body2) continue;
+
+            if (!(body1 == body2))
             {
-                blaVec3* nxtPos1 = &(body1->m_nextState.m_nextPos);
-                blaVec3* nxtPos2 = &(body2->m_nextState.m_nextPos);
-                if (length(*nxtPos1 - *nxtPos2) < (body1->GetAssociatedCollider()->GetBoundingRadius() + body2->GetAssociatedCollider()->GetBoundingRadius()))
-                    NarrowPhaseDetection(body1, body2);
+                blaVec3* nxtPos1 = &(m_bodiesList[i]->m_nextState.m_nextPos);
+                blaVec3* nxtPos2 = &(m_bodiesList[j]->m_nextState.m_nextPos);
+                //if (length(*nxtPos1 - *nxtPos2) < (body1->GetAssociatedCollider()->GetBoundingRadius() + body2->GetAssociatedCollider()->GetBoundingRadius()))
+                NarrowPhaseDetection(body1, body2);
             }
         }
     }
 }
 
-void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBodyComponent* body2)
+void CollisionProcessor::NarrowPhaseDetection(ColliderComponent* body1, ColliderComponent* body2)
 {
     //blaMat4 t1 = body1->GetObjectTransform().m_posQuat;
     //body1->m_collider->m_collisionMesh->setTransform(&t1[0][0]);
@@ -80,9 +87,9 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
 
     //if (collision)
     //{
-    //    body1->m_collider->m_collisionMesh->getCollisionPoints(&collisionPoints);
-    //    body1->m_collider->m_collisionMesh->getCollidingTriangles(&collidingTriangles);
-    //    body1->m_collider->m_collisionMesh->getPointsFromTri(&collidingFaces);
+    //    body1->m_collisionMesh->getCollisionPoints(&collisionPoints);
+    //    body1->m_collisionMesh->getCollidingTriangles(&collidingTriangles);
+    //    body1->m_collisionMesh->getPointsFromTri(&collidingFaces);
 
     //    for (int col = 0; col < collidingTriangles.size(); col++)
     //    {
@@ -94,7 +101,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
     //        int collidingFace = collidingFaces[col];
 
     //        //Degenerate collision cases may be detected
-    //        if (length(collisionPoint) < 0.0f1)
+    //        if (length(collisionPoint) < 0.01f)
     //            continue;
 
     //        blaVec3 body1ContactNormal(0);
@@ -153,7 +160,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
     //        {
     //            normal = normalBody1W;
 
-    //            blaVec3 body1to2 = body2->GetObjectTransform().m_position - collisionPoint;
+    //            blaVec3 body1to2 = body2->GetObjectTransform().GetPosition() - collisionPoint;
     //            if (glm::dot(normal, body1to2) < 0)
     //                normal = -normal;
 
@@ -163,7 +170,7 @@ void CollisionProcessor::NarrowPhaseDetection(RigidBodyComponent* body1, RigidBo
     //        {
     //            normal = normalBody2W;
 
-    //            blaVec3 body2to1 = body1->GetObjectTransform().m_position - collisionPoint;
+    //            blaVec3 body2to1 = body1->GetObjectTransform().GetPosition() - collisionPoint;
     //            if (glm::dot(normal, body2to1) < 0)
     //                normal = -normal;
 

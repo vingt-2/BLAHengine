@@ -67,14 +67,14 @@ void DebugDraw::DrawCameraHalfCircle(const blaVec3& origin, const blaVec3& norma
     GetSingletonInstance()->InstanceDrawCameraHalfCircle(origin, normal, cameraForward, radius, color);
 }
 
-void DebugDraw::DrawSphere(const blaVec3& origin, blaF32 radius)
+void DebugDraw::DrawSphere(const blaVec3& origin, blaF32 radius, int resolution)
 {
-    GetSingletonInstance()->InstanceDrawSphere(origin, radius, blaVec3(0.f));
+    GetSingletonInstance()->InstanceDrawSphere(origin, radius, blaVec3(0.f), resolution);
 }
 
-void DebugDraw::DrawSphere(const blaVec3& origin, blaF32 radius, const blaVec3& color)
+void DebugDraw::DrawSphere(const blaVec3& origin, blaF32 radius, const blaVec3& color, int resolution)
 {
-    GetSingletonInstance()->InstanceDrawSphere(origin, radius, color);
+    GetSingletonInstance()->InstanceDrawSphere(origin, radius, color, resolution);
 }
 
 void DebugDraw::DrawAABB(const blaVec3& origin, const blaVec3& halfExtent, const blaVec3& color)

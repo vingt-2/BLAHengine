@@ -2,6 +2,8 @@
 
 #include <Engine/System/Console.h>
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 ComponentReflection::ComponentDescriptor ms_emptyDescriptor{ GameComponent::InitReflection };
@@ -77,7 +79,7 @@ const ComponentReflection::ComponentDescriptor& GameComponentManager::GetCompone
 
 GameComponent* GameComponentManager::CreateComponent(const blaString& componentName, GameObjectReference objRef)
 {
-    CompEntries::iterator findIt = std::find_if(m_componentEntries.begin(), m_componentEntries.begin(), [componentName](ComponentManagerEntry e) { return e.GetName() == componentName; });
+    CompEntries::iterator findIt = std::find_if(m_componentEntries.begin(), m_componentEntries.end(), [componentName](ComponentManagerEntry e) { return e.GetName() == componentName; });
     if (findIt != m_componentEntries.end())
     {
         return findIt->CreateComponent(objRef);

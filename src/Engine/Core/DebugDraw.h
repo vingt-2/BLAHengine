@@ -35,8 +35,8 @@ namespace BLAengine
         static void DrawCircle(const blaVec3& origin, const blaVec3& normal, blaF32 radius, const blaVec3& color);
         static void DrawCameraHalfCircle(const blaVec3& origin, const blaVec3& normal, blaVec3& cameraForward, blaF32 radius, const blaVec3& color);
 
-        static void DrawSphere(const blaVec3& origin, blaF32 radius);
-        static void DrawSphere(const blaVec3& origin, blaF32 radius, const blaVec3& color);
+        static void DrawSphere(const blaVec3& origin, blaF32 radius, int resolution = 12);
+        static void DrawSphere(const blaVec3& origin, blaF32 radius, const blaVec3& color, int resolution = 12);
 
         static void DrawAABB(const blaVec3& origin, const blaVec3& halfExtent, const blaVec3& color);
         static void DrawOBB(const blaPosQuat& transform, const blaVec3& halfExtent, const blaVec3& color);

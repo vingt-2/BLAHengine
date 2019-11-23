@@ -15,7 +15,7 @@ Scene::Scene()
     this->m_rigidBodySystem = new RigidBodySystem(nullptr);
     this->m_camera = nullptr;
     this->m_renderingManager = nullptr;
-    m_sceneObjectsVector.reserve(1000);
+    m_sceneObjectsVector.reserve(10000); // Reference will break when moving the pool...
 }
 
 GameObjectReference Scene::CreateObject(blaString name, const GameObjectReference &parentObject)

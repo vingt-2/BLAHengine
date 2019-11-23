@@ -57,6 +57,11 @@ blaVec3 ObjectTransform::GetEulerAngles() const
     return blaVec3(pitch(q), yaw(q), roll(q));
 }
 
+blaVec3 BLAengine::ObjectTransform::GetScale() const
+{
+    return m_scale;
+}
+
 blaVec3 ObjectTransform::LocalDirectionToWorld(const blaVec3& direction) const
 {
     return m_posQuat.TransformVector(direction);

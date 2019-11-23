@@ -19,8 +19,6 @@
 
 using namespace BLAengine;
 
-#pragma optimize("", off)
-
 BLA_IMPLEMENT_SINGLETON(EngineInstance)
 
 blaU32 EngineInstance::LoopEngine()
