@@ -7,14 +7,17 @@
 #include <Engine/System/Console.h>
 #include <Engine/Physics/RigidBodyComponent.h>
 #include <Engine/Core/DebugDraw.h>
+#include <Common/DataStructures/CircularBuffer.h>
 
 #include <random>
 
+#pragma optimize("", off)
+
 namespace BLAengine
 {
-    BLA_CONSOLE_VAR(BoidStiffness, float, 10.f)
-    BLA_CONSOLE_VAR(InterBoidStiffness, float, 0.2f)
-    BLA_CONSOLE_VAR(InterBoidDistance, float, 10.f)
+    BLA_CONSOLE_VAR(BoidStiffness, float, 20.f)
+    BLA_CONSOLE_VAR(InterBoidStiffness, float, 0.05f)
+    BLA_CONSOLE_VAR(InterBoidDistance, float, 100.f)
     BLA_CONSOLE_VAR(BoidDamping, float, 3.f)
 
     BEGIN_COMPONENT_DECLARATION(BoidComponent)
@@ -28,10 +31,13 @@ namespace BLAengine
         blaVec3 m_color;
         blaF32 m_hominStiffnessMult;
         blaF32 m_interBoidStiffnessMult;
+        blaF32 m_distanceMult;
+        int m_framesSinceLastPush = 0;
 
     private:
         blaVector<GameObjectReference> m_otherBoids;
-    
+        CircularBuffer<blaVec3, 100> m_pastPositions;
+
     END_DECLARATION()
 
     BEGIN_COMPONENT_DESCRIPTION(BoidComponent)
@@ -70,11 +76,18 @@ namespace BLAengine
 
             blaF32 toBoidL = glm::length(toBoid) + 0.001f;
 
-            //if(toBoidL < g_InterBoidDistance)
-                rigidBody->AddLinearForce(g_InterBoidStiffness * m_interBoidStiffnessMult * (toBoidL - g_InterBoidDistance) / toBoidL * toBoid);
+            rigidBody->AddLinearForce(g_InterBoidStiffness * m_interBoidStiffnessMult * (toBoidL - m_distanceMult * g_InterBoidDistance) / toBoidL * toBoid);
         }
 
         DebugDraw::DrawSphere(GetObjectTransform().GetPosition(), 0.2f, blaVec4(m_color, 1.f), 4);
+
+        m_pastPositions.Push(GetObjectTransform().GetPosition());
+
+        int size = m_pastPositions.GetCount();
+        for (int i = 0; i < size - 1; i++)
+        {
+            DebugDraw::DrawLine(m_pastPositions.Peek(i), m_pastPositions.Peek(i + 1), m_color);
+        }
     }
 
     BLA_CONSOLE_COMMAND(int, CreateBoidSystem, int numberOfBoids)
@@ -86,6 +99,7 @@ namespace BLAengine
         std::random_device rd2;
         std::mt19937 dgen(rd2());
         std::uniform_real_distribution<float> dist(0, 1);
+        std::normal_distribution<float> normalDist(0.7f, 0.3f);
 
         for (int i = 0; i < numberOfBoids; i++)
         {
@@ -96,6 +110,8 @@ namespace BLAengine
             boidComponent->m_color = blaVec3(dist(dgen), dist(dgen), dist(dgen));
             boidComponent->m_hominStiffnessMult = dist(dgen);
             boidComponent->m_interBoidStiffnessMult = dist(dgen);
+            boidComponent->m_distanceMult = normalDist(dgen);
+
             ref->GetTransform().SetPosition(blaVec3(dist(dgen), dist(dgen), dist(dgen)));
         }
 
