@@ -12,11 +12,11 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-#Specify my Include Directory
-
-set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src)
 
 set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
+
+
+set(COMMON_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Common)
 
 macro(GetHeaderDependency dep)
 	# we have a submodule setup for dep, assume it is under external/dep
@@ -106,66 +106,30 @@ set(GLEW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glew-cmake CACHE PATH "GLEW directory")
 add_subdirectory(${GLEW_LIBRARY})
 set(GLEW_INCLUDE_DIR ${GLEW_LIBRARY}/include)
 
-# also new ones, without having to touch the CMakeLists.txt
+find_path(VulkanHeaders_PATH vulkan.h ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include/vulkan)
 
-file(GLOB_RECURSE PROJECT_SOURCE_FILES 
-${PROJECT_SOURCE_DIR}/src/*.h 
-${PROJECT_SOURCE_DIR}/src/*.c
-${PROJECT_SOURCE_DIR}/src/*.hpp 
-${PROJECT_SOURCE_DIR}/src/*.cpp)
+if(NOT VulkanHeaders_PATH OR (NOT EXISTS ${VulkanHeaders_PATH}))
+    # we couldn't find the header files for GLM or they don't exist
+    message("Unable to find Vulkan-Headers, fetching the git submodule...")
 
-# I then wrote this Macro, which organize the files in visual studio folders,
-
-# according to the organization in the file systems
-
-macro(GroupSources curdir)
-
-   file(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/${curdir} ${PROJECT_SOURCE_DIR}/${curdir}/*)
-
-   foreach(child ${children})
-
-          if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${curdir}/${child})
-
-				GroupSources(${curdir}/${child})
-
-          else()
-
-				string(REPLACE "/" "\\" groupname ${curdir})
-
-				# I would like to call the src root folder in a different name, only in visual studio (not mandatory requirement)
-
-				string(REPLACE "src" "Sources" groupname ${groupname})
-
-            source_group(${groupname} FILES ${PROJECT_SOURCE_DIR}/${curdir}/${child})
-
-          endif()
-
-   endforeach()
-
-endmacro()
-
-# Make groups for all source subfolders
-GroupSources(src)
-
-include_directories( ${PROJECT_INCLUDE_DIR} 
-${GLFW_INCLUDE_DIR} 
-${GLEW_INCLUDE_DIR} 
-${glm_INCLUDE_DIR} 
-${cereal_INCLUDE_DIR}
-${imgui_INCLUDE_DIR})
-
-find_package(OpenGL REQUIRED)
-
-# Gotta do the following here because glew with glew-cmake will build the target in build/lib which is otherwise unreachable
-	link_directories(${CMAKE_BINARY_DIR}/lib)
-#
-
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
-
-target_link_libraries(${PROJECT_NAME} glfw glew ${OPENGL_LIBRARIES})
-
-if(WIN32)
-	set_property(TARGET ${PROJECT_NAME}  PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
-	target_link_libraries(${PROJECT_NAME} setupapi.lib)
+    GetHeaderDependency(Vulkan-Headers)
+	
+	find_path(VulkanHeaders_PATH vulkan.h ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include/vulkan)
+	
+	if(NOT VulkanHeaders_PATH)
+		message("Vulkan-Headers submodule failed to clone")
+	endif()
 endif()
+
+set(VulkanHeaders_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include CACHE PATH "Vulkan Headers directory")
+set(VulkanRegistry_DIR ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/registry CACHE PATH "Vulkan Registry directory")
+
+GetCMakeDependency(Vulkan-Loader)
+set(VULKAN_LOADER_LIBRARY ${PROJECT_EXTERNAL_DIR}/Vulkan-Loader CACHE PATH "Vulkan-Loader directory")
+add_subdirectory(${VULKAN_LOADER_LIBRARY}) 
+
+link_directories(${LIBRARY_OUTPUT_PATH})
+
+add_subdirectory(./Engine)
+add_subdirectory(./Demos)
+add_subdirectory(./Editor)
