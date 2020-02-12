@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2016, Vincent Petrella
+Copyright (c) 2020, Vincent Petrella
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
