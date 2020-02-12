@@ -24,7 +24,7 @@ namespace BLAengine
         DebugDraw(DebugRenderingManager* renderManager);
         ~DebugDraw();
 
-        void Update();
+        void BLACORE_API Update(); //TODO: Do not expose Update()...
 
         static void BLACORE_API DrawLine(const blaVec3& origin, const blaVec3& destination);
         static void BLACORE_API DrawLine(const blaVec3& origin, const blaVec3& destination, const blaVec3& color);

@@ -149,6 +149,8 @@ void EditorSession::PostEngineUpdate()
 {
     m_gizmoManager.Update();
 
+    m_debug->Update();
+
     m_renderer->Update();
 
     m_guiManager->Update();
@@ -529,4 +531,9 @@ BLA_CONSOLE_COMMAND(void, CreateObject, blaString objectName)
 {
     Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
     scene->CreateObject(GenerateBlaStringId(objectName));
+}
+
+BLA_CONSOLE_COMMAND(void, PrintWorkingDirectory)
+{
+    Console::LogMessage(GetWorkingDir());
 }

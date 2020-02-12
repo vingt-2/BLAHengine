@@ -1081,13 +1081,13 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     }
 
     // Hardcode system shaders loading
-    this->m_glResources.m_systemShaders.LoadGeometryPassProgram("./resources/shaders/GeomPassVS.glsl", "./resources/shaders/GeomPassFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/DebugRaysShaderVS.glsl", "./resources/shaders/DebugRaysShaderFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDebugMeshesProgram("./resources/shaders/DebugMeshShaderVS.glsl", "./resources/shaders/DebugMeshShaderFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/DrawDepthTextureVS.glsl", "./resources/shaders/DrawDepthTextureFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/DrawColorTextureVS.glsl", "./resources/shaders/DrawColorTextureFS.glsl");
+    this->m_glResources.m_systemShaders.LoadGeometryPassProgram("resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDebugMeshesProgram("./resources/shaders/Engine/DebugMeshShaderVS.glsl", "./resources/shaders/Engine/DebugMeshShaderFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
     this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
-    this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/ShadowMapVS.glsl", "./resources/shaders/ShadowMapFS.glsl");
+    this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
 
     this->m_glResources.GLLoadSystemShaders();
 
