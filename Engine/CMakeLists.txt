@@ -29,7 +29,7 @@ macro(GroupSources curdir)
 
 endmacro()
 
-GroupSources(.)
+GroupSources(./)
 
 if(MSVC)
     add_definitions(/FI"${CMAKE_CURRENT_SOURCE_DIR}/GeneratedProjectDefinition.h")
@@ -58,10 +58,6 @@ add_library(BLAEngine SHARED ${ENGINE_SOURCE_FILES})
 
 target_link_libraries(BLAEngine PRIVATE glfw PRIVATE glew PRIVATE ${OPENGL_LIBRARIES} PRIVATE vulkan-1.lib)
 
-# add_custom_command(TARGET BLAEngine POST_BUILD      # Adds a post-build event to MyTest
-    # COMMAND ${CMAKE_COMMAND} -E copy_if_different  	# which executes "cmake - E copy_if_different..."
-        # "${LIBRARY_OUTPUT_PATH}/BLAengine.dll" 		# <--this is in-file
-        # ${EXECUTABLE_OUTPUT_PATH})                 	# <--this is out-file path
 
 if(WIN32)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")

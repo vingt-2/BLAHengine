@@ -52,6 +52,11 @@ add_executable(BLAEditor ${EDITOR_SOURCE_FILES})
 
 target_link_libraries(BLAEditor BLAEngine)
 
+add_custom_command ( TARGET BLAEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:BLAEngine> $<TARGET_FILE_DIR:BLAEditor>
+)
+
 if(WIN32)
 	set_property(TARGET BLAEditor PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
