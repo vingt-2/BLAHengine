@@ -31,7 +31,7 @@ namespace BLAengine
 
 		void InitializeComponentLibrariesManager() override;
 
-        void EditorDragAndDropedFile(const blaString& filePath) const;
+        void EditorDragAndDropedFile(const blaString& filePath);
 
         ~EditorSession() { EngineInstance::~EngineInstance(); };
 

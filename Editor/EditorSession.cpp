@@ -278,10 +278,21 @@ void EditorSession::InitializeComponentLibrariesManager()
 	m_componentLibrariesManager = new EditorComponentLibrariesManager();
 }
 
-void EditorSession::EditorDragAndDropedFile(const blaString& filePath) const
+void EditorSession::EditorDragAndDropedFile(const blaString& filePath)
 {
     FileEntry file = ParseFilePath(filePath);
-    ImportMesh(file.GetFullPath(), file.m_name);
+
+    if(file.m_extension == ".obj") 
+    {
+        ImportMesh(file.GetFullPath(), file.m_name);
+        return;
+    }
+
+    if (file.m_extension == ".blascene")
+    {
+        LoadWorkingScene(filePath);
+        return;
+    }
 }
 
 void EditorSession::EditorUpdate()
