@@ -13,3 +13,6 @@
 [submodule "external/cereal"]
 	path = external/cereal
 	url = https://github.com/USCiLab/cereal
+[submodule "external/Vulkan-Loader"]
+	path = external/Vulkan-Loader
+	url = https://github.com/KhronosGroup/Vulkan-Loader
