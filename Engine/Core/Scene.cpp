@@ -147,7 +147,7 @@ CameraComponent* Scene::GetMainCamera()
 //
 //    for (blaU32 i = 0; i < m_sceneObjectsVector.size(); ++i)
 //    {
-//        GameObject& obj = m_sceneObjectsVector[i];
+//        GameObject& obj = m_sceneObjectsVector[i]     ;
 //
 //        ColliderComponent* collider = obj.GetComponent<ColliderComponent>();
 //

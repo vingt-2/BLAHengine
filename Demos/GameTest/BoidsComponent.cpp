@@ -99,7 +99,7 @@ namespace BLAengine
         }
     }
 
-    BLA_CONSOLE_COMMAND(int, CreateBoidSystem, int numberOfBoids)
+    BLA_CONSOLE_COMMAND(void, CreateBoidSystem, int numberOfBoids)
     {
         Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
@@ -124,7 +124,5 @@ namespace BLAengine
 
             ref.GetComponent<TransformComponent>()->SetTransform(s);
         }
-
-        return 0;
     }
 }

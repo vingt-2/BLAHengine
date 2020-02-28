@@ -130,6 +130,31 @@ add_subdirectory(${VULKAN_LOADER_LIBRARY})
 
 link_directories(${LIBRARY_OUTPUT_PATH})
 
+# Organize the files in folders according to the organization in the file systems
+macro(GroupSources curdir)
+
+   file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${curdir} ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/*)
+
+   foreach(child ${children})
+
+          if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+
+				GroupSources(${curdir}/${child})
+
+          else()
+
+				string(REPLACE "/" "\\" groupname ${curdir})
+
+				string(REPLACE "." "Sources" groupname ${groupname})
+
+            source_group(${groupname} FILES ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+
+          endif()
+
+   endforeach()
+
+endmacro()
+
 add_subdirectory(./Engine)
 add_subdirectory(./Demos)
 add_subdirectory(./Editor)

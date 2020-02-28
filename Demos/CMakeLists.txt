@@ -6,31 +6,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/*.c
 ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-# Organize the files in folders according to the organization in the file systems
-macro(GroupSources curdir)
-
-   file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${curdir} ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/*)
-
-   foreach(child ${children})
-
-          if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
-
-				GroupSources(${curdir}/${child})
-
-          else()
-
-				string(REPLACE "/" "\\" groupname ${curdir})
-				
-				string(REPLACE "." "Sources" groupname ${groupname})
-
-            source_group(${groupname} FILES ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
-
-          endif()
-
-   endforeach()
-
-endmacro()
-
 GroupSources(./)
 
 if(MSVC)
