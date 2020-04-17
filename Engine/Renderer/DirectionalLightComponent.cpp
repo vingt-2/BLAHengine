@@ -8,8 +8,8 @@
 
 using namespace BLAengine;
 
-BEGIN_COMPONENT_DESCRIPTION(DirectionalLightComponent)
-END_DESCRIPTION()
+BeginComponentDescription(DirectionalLightComponent)
+EndComponentDescription()
 
 void DirectionalLightComponent::Update()
 {

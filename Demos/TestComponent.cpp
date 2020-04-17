@@ -13,16 +13,16 @@ DLL_PROJECT_DECLARE
 
 namespace BLAengine
 {
-	BEGIN_COMPONENT_DECLARATION(DemosLibrary, TestBlaComponent)
+	BeginComponentDeclaration(DemosLibrary, TestBlaComponent)
 		void Update() override;
 
         blaVec3 color;
 
-	END_DECLARATION()
+	EndComponentDeclaration()
 
-	BEGIN_COMPONENT_DESCRIPTION(TestBlaComponent)
-        EXPOSE(color)
-	END_DESCRIPTION()
+	BeginComponentDescription(TestBlaComponent)
+        Expose(color)
+	EndComponentDescription()
 
 	void TestBlaComponent::Update()
 	{
@@ -30,7 +30,7 @@ namespace BLAengine
         DebugDraw::DrawOBB(t.GetPosQuat(), t.GetScale() * 0.5f, blaVec3(color));
 	}
 
-    BLA_CONSOLE_COMMAND(void, SayHi)
+    DefineConsoleCommand(void, SayHi)
 	{
         Console::LogMessage("Hi folks !");
 	}

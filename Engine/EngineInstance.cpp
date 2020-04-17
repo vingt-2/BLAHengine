@@ -14,6 +14,7 @@
 #include <Gui/GuiManager.h>
 #include <System/ControllerInputs/Dualshock4.h>
 #include <Core/ComponentLibraries.h>
+#include "Core/ComponentSystems.h"
 #include "EngineInstance.h"
 
 using namespace BLAengine;
@@ -115,6 +116,8 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     }
 
 	m_componentLibrariesManager->LoadLibraries();
+
+    ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
 
     // Finally, load our assets in memory...
     m_assetManager->LoadCookedAssets();
@@ -220,17 +223,17 @@ void EngineInstance::SetupDirLightAndCamera()
     m_renderer->SetCamera(cameraComp);
 }
 
-BLA_CONSOLE_COMMAND(void, exit)
+DefineConsoleCommand(void, exit)
 {
     EngineInstance::GetSingletonInstance()->RequestShutdown();
 }
 
-BLA_CONSOLE_COMMAND(void, shutdown)
+DefineConsoleCommand(void, shutdown)
 {
     EngineInstance::GetSingletonInstance()->RequestShutdown();
 }
 
-BLA_CONSOLE_COMMAND(void, SetFPS, float fps)
+DefineConsoleCommand(void, SetFPS, float fps)
 {
     EngineInstance::GetSingletonInstance()->SetTargetFPS(fps);
 }

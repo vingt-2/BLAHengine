@@ -9,7 +9,7 @@
 
 namespace BLAengine
 {
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, MeshRendererComponent)
+    BeginComponentDeclaration(BLAEngineNative, MeshRendererComponent)
         friend class Renderer;
         int m_renderTicket = 0;
 
@@ -34,5 +34,5 @@ namespace BLAengine
 
         MeshAsset* m_mesh = nullptr;
         blaMat4 m_modelTransformMatrix;
-	END_DECLARATION()
+	EndComponentDeclaration()
 }

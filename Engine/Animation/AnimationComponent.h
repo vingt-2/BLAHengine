@@ -5,7 +5,7 @@
 
 namespace BLAengine
 {
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, AnimationComponent)
+    BeginComponentDeclaration(BLAEngineNative, AnimationComponent)
         void Update() override;
         void Shutdown() override;
 
@@ -20,5 +20,5 @@ namespace BLAengine
 	private:
 		blaF32 m_lastTimePlayerInteraction = 0.f;
 		blaString m_prevBVHName;
-    END_DECLARATION()
+    EndComponentDeclaration()
 }

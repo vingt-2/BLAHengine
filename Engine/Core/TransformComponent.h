@@ -4,7 +4,7 @@
 
 namespace BLAengine
 {
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, TransformComponent)
+    BeginComponentDeclaration(BLAEngineNative, TransformComponent)
 
         blaScaledTransform GetTransform();
         blaScaledTransform GetLocalTransform();
@@ -20,5 +20,5 @@ namespace BLAengine
         blaS32 m_cachedParentSetCounter = -1;
         blaBool m_dirtyCachedTransform = true;
 
-    END_DECLARATION();
+    EndComponentDeclaration();
 }

@@ -6,17 +6,17 @@
 
 namespace BLAengine
 {
-    BEGIN_COMPONENT_DECLARATION(DemosLibrary, SunComponent)
+    BeginComponentDeclaration(DemosLibrary, SunComponent)
 
         void Update() override;
 
         float m_speed = -0.0002f;
 
-    END_DECLARATION()
+    EndComponentDeclaration()
 
-    BEGIN_COMPONENT_DESCRIPTION(SunComponent)
-        EXPOSE(m_speed)
-    END_DESCRIPTION()
+    BeginComponentDescription(SunComponent)
+        Expose(m_speed)
+    EndComponentDescription()
 
     void SunComponent::Update()
     {

@@ -4,23 +4,31 @@ using namespace BLAengine;
 
 #define SAFE_SIGNED_INC(i) (i < 0x7FFFFFFF) ? i++ : 0;
 
-BeginComponentDescription(TransformComponent)
-    Expose(m_localTransform)
-EndComponentDescription()
+BEGIN_COMPONENT_DESCRIPTION(TransformComponent)
+END_DESCRIPTION()
+
+TransformComponent::TransformComponent(GameObjectReference parent) : 
+    GameComponent(parent),
+    m_setCounter(0),
+    m_cachedParentSetCounter(-1)
+{};
+
+TransformComponent::~TransformComponent(void)
+{}
 
 blaScaledTransform TransformComponent::GetTransform()
 {
     // Todo: If I don't rewrite this whole mess soon. at least cache the parent ?
-    GameObject parent = GetOwnerObject().GetParent(); 
+    GameObjectReference parent = GetOwnerObject()->GetParent(); 
     if (parent.IsValid())
     {
-        TransformComponent* parentTransformComponent = parent.GetComponent<TransformComponent>();
+        TransformComponent* parentTransformComponent = parent->GetComponent<TransformComponent>();
         if (parentTransformComponent != nullptr)
         {
             blaS32 parentCounter = parentTransformComponent->m_setCounter;
             if (m_cachedParentSetCounter != parentCounter || m_dirtyCachedTransform)
             {
-                const blaScaledTransform parentTransform = parentTransformComponent->GetTransform();
+                blaScaledTransform& parentTransform = parentTransformComponent->GetTransform();
                 m_cachedWorldTransform.m_posQuat = parentTransform.m_posQuat * m_localTransform.m_posQuat;
                 m_cachedWorldTransform.m_scale = parentTransform.m_scale * m_localTransform.m_scale;
                 SAFE_SIGNED_INC(m_setCounter);
@@ -41,10 +49,10 @@ blaScaledTransform TransformComponent::GetLocalTransform()
 void TransformComponent::SetTransform(const blaScaledTransform& transform)
 {
     // Todo: If I don't rewrite this whole mess soon. at least cache the parent ?
-    GameObject parent = GetOwnerObject().GetParent();
+    GameObjectReference parent = GetOwnerObject()->GetParent();
     if (parent.IsValid())
     {
-        TransformComponent* parentTransformComponent = parent.GetComponent<TransformComponent>();
+        TransformComponent* parentTransformComponent = parent->GetComponent<TransformComponent>();
         if (parentTransformComponent != nullptr)
         {
             blaScaledTransform& parentT = parentTransformComponent->GetTransform();
@@ -67,4 +75,8 @@ void TransformComponent::SetLocalTransform(const blaScaledTransform& transform)
 
     m_localTransform = transform;
     m_dirtyCachedTransform = true;
+}
+
+void TransformComponent::Update()
+{
 }

@@ -84,12 +84,12 @@ void GameComponentRegistry::UnloadLibraryComponent(blaStringId libraryId)
 
 BLA_IMPLEMENT_SINGLETON(GameComponentRegistry);
 
-BLA_CONSOLE_COMMAND(int, GetComponentCount)
+DefineConsoleCommand(int, GetComponentCount)
 {
     return GameComponentRegistry::GetSingletonInstance()->ListComponentNames().size();
 }
 
-BLA_CONSOLE_COMMAND(void, GetComponentList)
+DefineConsoleCommand(void, GetComponentList)
 {
 	for (auto componentName : GameComponentRegistry::GetSingletonInstance()->ListComponentNames())
 	{

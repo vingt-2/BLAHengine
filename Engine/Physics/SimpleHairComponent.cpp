@@ -10,11 +10,11 @@ using namespace BLAengine;
 
 std::default_random_engine g_random_generator;
 
-BEGIN_COMPONENT_DESCRIPTION(SimpleHairComponent)
-EXPOSE(m_isPinned)
-EXPOSE(m_applyGravity)
-EXPOSE(m_renderDebug)
-END_DESCRIPTION()
+BeginComponentDescription(SimpleHairComponent)
+Expose(m_isPinned)
+Expose(m_applyGravity)
+Expose(m_renderDebug)
+EndComponentDescription()
 
 typedef struct sphere_t
 {

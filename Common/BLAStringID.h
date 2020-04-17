@@ -82,6 +82,10 @@ class blaStringId
 public:
     blaStringId(const blaString& str, blaU32 strCrc) :
         m_str(str), m_crc(strCrc) {};
+    
+    //blaStringId(const blaStringId& strId) = default;
+    //blaStringId(blaStringId&& strId) = default;
+    //blaStringId& operator=(const blaStringId& strId) = default;
 
     blaStringId() :
         m_str(""), m_crc(0) {};
@@ -134,7 +138,7 @@ inline blaU32  _crc32(const char* buf, blaU32 len)
         crc = (crc >> 8) ^ crc_table[(crc & 0xff) ^ octet];
     }
     return ~crc;
-}
+};
 
 // Use only when necessary at runtime. I don't want to see this function used where it shouldn't !! 
 inline blaStringId GenerateBlaStringId(blaString string)

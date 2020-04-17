@@ -3,9 +3,9 @@
 #include "Core/TransformComponent.h"
 using namespace BLAengine;
 
-BEGIN_COMPONENT_DESCRIPTION(CameraComponent)
-EXPOSE(m_isShadowMapCamera)
-END_DESCRIPTION()
+BeginComponentDescription(CameraComponent)
+Expose(m_isShadowMapCamera)
+EndComponentDescription()
 
 void CameraComponent::Init()
 {

@@ -22,7 +22,7 @@ using namespace BLAengine;
 
 BLA_CONSOLE_VAR(bool, shouldReloadLibraries, false)
 
-BLA_CONSOLE_COMMAND(void, MakeSkyObject)
+DefineConsoleCommand(void, MakeSkyObject)
 {
     Asset* m;
     if (AssetManager::GetSingletonInstance()->GetAsset("SkySphere", m) != AssetManager::TriangleMeshAsset)
@@ -496,7 +496,7 @@ void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)
     }
 }
 
-BLA_CONSOLE_COMMAND(void, SelectObject, blaString name)
+DefineConsoleCommand(void, SelectObject, blaString name)
 {
     GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
@@ -509,7 +509,7 @@ BLA_CONSOLE_COMMAND(void, SelectObject, blaString name)
     }
 }
 
-BLA_CONSOLE_COMMAND(int, SelectScale, blaString name, blaF32 scalex, blaF32 scaley, blaF32 scalez)
+DefineConsoleCommand(int, SelectScale, blaString name, blaF32 scalex, blaF32 scaley, blaF32 scalez)
 {
     GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
@@ -522,14 +522,14 @@ BLA_CONSOLE_COMMAND(int, SelectScale, blaString name, blaF32 scalex, blaF32 scal
     return 0;
 }
 
-BLA_CONSOLE_COMMAND(void, CreatePointLight, blaString name)
+DefineConsoleCommand(void, CreatePointLight, blaString name)
 {
     GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->CreateObject(GenerateBlaStringId(name));
     obj.CreateComponent(BlaStringId("PointLightComponent"));
 }
 
 
-BLA_CONSOLE_COMMAND(void, AddComponent, blaString objectName, blaString componentName)
+DefineConsoleCommand(void, AddComponent, blaString objectName, blaString componentName)
 {
 	GameObject obj(GenerateBlaStringId(objectName));
 	if(obj.IsValid()) 
@@ -538,13 +538,13 @@ BLA_CONSOLE_COMMAND(void, AddComponent, blaString objectName, blaString componen
 	}
 }
 
-BLA_CONSOLE_COMMAND(void, CreateObject, blaString objectName)
+DefineConsoleCommand(void, CreateObject, blaString objectName)
 {
     Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
     scene->CreateObject(GenerateBlaStringId(objectName));
 }
 
-BLA_CONSOLE_COMMAND(void, PrintWorkingDirectory)
+DefineConsoleCommand(void, PrintWorkingDirectory)
 {
     Console::LogMessage(GetWorkingDir());
 }

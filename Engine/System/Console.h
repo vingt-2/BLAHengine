@@ -18,7 +18,7 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
 #define __BLA_CC_DECLARATION_MACRO_SELECT_RETTYPE(RetType) \
     __SILLY_MACRO__CAT(__BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_,__SILLY_MACRO__NOT_EQUAL(RetType, void))
 
-#define BLA_CONSOLE_COMMAND(RetType, CommandName, ...)                                                         \
+#define DefineConsoleCommand(RetType, CommandName, ...)                                                        \
     RetType CommandName(__VA_ARGS__);                                                                          \
     struct ConsoleCommandEntry_##CommandName : BLAengine::ConsoleCommandEntry                                  \
     {                                                                                                          \
@@ -40,7 +40,7 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
 
 #define BLA_CONSOLE_VAR(type, name, defaultValue)                                   \
     type g_##name = defaultValue;                                                   \
-    BLA_CONSOLE_COMMAND(int, name, type value) { g_##name = value; return 0; }      \
+    DefineConsoleCommand(int, name, type value) { g_##name = value; return 0; }      \
 
 namespace BLAengine
 {

@@ -10,7 +10,7 @@
 
 namespace BLAengine
 {
-BEGIN_COMPONENT_DECLARATION(DemosLibrary, TestPlayerComponent)
+BeginComponentDeclaration(DemosLibrary, TestPlayerComponent)
 
     void Init() override;
     void Update() override;
@@ -26,5 +26,5 @@ BEGIN_COMPONENT_DECLARATION(DemosLibrary, TestPlayerComponent)
 	bool m_parentTheCamera = true;
 
 	Dualshock4 m_controller;
-END_DECLARATION()
+EndComponentDeclaration()
 }

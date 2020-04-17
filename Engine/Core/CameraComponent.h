@@ -6,7 +6,7 @@
 
 namespace BLAengine
 {
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, CameraComponent)
+    BeginComponentDeclaration(BLAEngineNative, CameraComponent)
         void Init() override;
 
         blaScaledTransform  m_viewTransform;
@@ -17,5 +17,5 @@ namespace BLAengine
         void UpdateView();
         void Update();
 
-    END_DECLARATION()
+    EndComponentDeclaration()
 }

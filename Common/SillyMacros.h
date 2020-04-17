@@ -8,6 +8,7 @@
 #define CAT(A, B) _CAT(A,B)
 #define _CAT(A, B) A ## B
 #define EXPAND(...) __VA_ARGS__
+#define STR(A) #A
 
 #define EAT(a)
 

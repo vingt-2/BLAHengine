@@ -8,13 +8,13 @@
 
 using namespace BLAengine;
 
-BEGIN_COMPONENT_DESCRIPTION(AnimationComponent)
-EXPOSE(m_play)
-EXPOSE(m_frameIndex)
-EXPOSE(m_bvhName)
-EXPOSE(m_playbackMultiplier)
-EXPOSE(m_scaleFactor)
-END_DESCRIPTION()
+BeginComponentDescription(AnimationComponent)
+Expose(m_play)
+Expose(m_frameIndex)
+Expose(m_bvhName)
+Expose(m_playbackMultiplier)
+Expose(m_scaleFactor)
+EndComponentDescription()
 
 void AnimationComponent::Update()
 {

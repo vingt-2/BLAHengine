@@ -53,16 +53,15 @@ namespace BLAengine
 
     class GameComponentRegistry;
     class GameObject;
-    class BLACORE_API GameComponent
+    class BLACORE_API GameComponent // TODO: Make it an interface and make sure all components implement it
     {
         //TODO: Remove friend class Scene , used to call the private destructor
         friend class Scene;
     public:
-        friend GameComponentRegistry;
+        friend class GameComponentRegistry;
 
         virtual void Init() {};
         virtual void Shutdown() {};
-        virtual void Update() {};
 
         GameObject GetOwnerObject() const { return m_parentObject; }
 
@@ -84,20 +83,20 @@ namespace BLAengine
 #define BLA_COMPONENT_API_IMPORT_EXPORT_SELECT(ProjectName) \
     __SILLY_MACRO__CAT(IF_INCLUDING_EXTERN_COMPONENT_,__SILLY_MACRO__NOT_EQUAL(ProjectName, BLA_PROJECT_NAME))
 
-#define BEGIN_COMPONENT_DECLARATION(ProjectName, ComponentName)                                             \
+#define BeginComponentDeclaration(ProjectName, ComponentName)                                             \
     class BLA_COMPONENT_API_IMPORT_EXPORT_SELECT(ProjectName) ComponentName : public GameComponent {        \
     friend struct BLAInspectableVariables::DefaultResolver;                                                 \
     static void InitReflection(ComponentDescriptor*);														\
     static GameComponent* Factory(GameObject objR) { return new ComponentName(objR); }                      \
-	virtual const ComponentDescriptor& GetComponentDescriptor() const {										\
-		return ms_componentDescriptor; }																	\
     ComponentName(GameObject parentObject);                                                                 \
     public:                                                                                                 \
-    static const ComponentDescriptor ms_componentDescriptor;
+	virtual const ComponentDescriptor& GetComponentDescriptor() const {										\
+		return ms_componentDescriptor; }                                                                    \
+    static const ComponentDescriptor ms_componentDescriptor;                                                
 
-#define END_DECLARATION() };
+#define EndComponentDeclaration() };
 
-#define BEGIN_COMPONENT_DESCRIPTION(ComponentName)														    \
+#define BeginComponentDescription(ComponentName)														    \
     ComponentName::ComponentName(GameObject parentObject) : GameComponent(parentObject) {}                  \
     const ComponentDescriptor ComponentName::ms_componentDescriptor{ComponentName::InitReflection};		    \
     void ComponentName::InitReflection(ComponentDescriptor* typeDesc) {									    \
@@ -106,10 +105,10 @@ namespace BLAengine
         typeDesc->size = sizeof(T);                                                                         \
         typeDesc->m_members = {
 
-#define EXPOSE(name)																			            \
+#define Expose(name)																			            \
             {BlaStringId(#name), offsetof(T, name), BLAInspectableVariables::TypeResolver<decltype(T::name)>::get()},
 
-#define END_DESCRIPTION()                                                                                   \
+#define EndComponentDescription()                                                                                   \
         };                                                                                                  \
         GameComponentRegistry* manager = GameComponentRegistry::GetSingletonInstance();                     \
         if(!manager)                                                                                        \

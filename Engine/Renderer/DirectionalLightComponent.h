@@ -4,7 +4,7 @@
 
 namespace BLAengine
 {
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, DirectionalLightComponent)
+    BeginComponentDeclaration(BLAEngineNative, DirectionalLightComponent)
         void SetDirection(blaVec3 direction);
         blaVec3 GetDirection();
 
@@ -17,5 +17,5 @@ namespace BLAengine
     private:
         blaVec3 m_lightDirection = blaVec3(0.f);
 
-    END_DECLARATION()
+    EndComponentDeclaration()
 }

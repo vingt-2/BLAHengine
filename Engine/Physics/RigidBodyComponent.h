@@ -25,7 +25,7 @@ namespace BLAengine
         blaVec3 m_correctionAngularVelocity;
     };
 
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, RigidBodyComponent)
+    BeginComponentDeclaration(BLAEngineNative, RigidBodyComponent)
     public:
         blaVec3 m_previousPosition;
         blaVec3 m_previousRotation;
@@ -83,5 +83,5 @@ namespace BLAengine
 
         ColliderComponent* m_associatedCollider;
 
-    END_DECLARATION()
+    EndComponentDeclaration()
 }

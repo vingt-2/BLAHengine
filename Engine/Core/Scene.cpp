@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include "Core/TransformComponent.h"
+#include "Core/ComponentSystems.h"
 
 using namespace BLAengine;
 
@@ -85,13 +86,21 @@ void Scene::Update()
     }
     m_toInitialize.clear();
 
-    for (auto c : m_components)
+    const ComponentSystemsRegistry* r = ComponentSystemsRegistry::GetSingletonInstanceRead();
+
+    for(auto cs : r->m_componentSystems)
+    {
+        const ComponentSystem* system = cs.second;
+        system->ExecuteSystem(m_validObjects);
+    }
+
+    /*for (auto c : m_components)
     {
         for(auto o : c.second) 
         {
             o.second->Update();
         }
-    }
+    }*/
 }
 
 void Scene::Clear()

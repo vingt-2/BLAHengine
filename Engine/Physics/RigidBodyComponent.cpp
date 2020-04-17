@@ -6,10 +6,10 @@
 
 using namespace BLAengine;
 
-BEGIN_COMPONENT_DESCRIPTION(RigidBodyComponent)
-EXPOSE(m_applyGravity)
-EXPOSE(m_velocity)
-END_DESCRIPTION()
+BeginComponentDescription(RigidBodyComponent)
+Expose(m_applyGravity)
+Expose(m_velocity)
+EndComponentDescription()
 
 void RigidBodyComponent::SetCollider(ColliderComponent* collider)
 {

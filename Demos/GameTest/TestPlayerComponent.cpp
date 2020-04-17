@@ -11,14 +11,14 @@ using namespace BLAengine;
 
 #define MAX(a,b) a > b ? a : b
 
-BEGIN_COMPONENT_DESCRIPTION(TestPlayerComponent)
-    EXPOSE(m_speed)
-    EXPOSE(m_mainCameraObject)
-    EXPOSE(m_stickValue)
-    EXPOSE(m_inAirFriction)
-    EXPOSE(m_onGroundFriction)
-    EXPOSE(m_parentTheCamera)
-END_DESCRIPTION()
+BeginComponentDescription(TestPlayerComponent)
+    Expose(m_speed)
+    Expose(m_mainCameraObject)
+    Expose(m_stickValue)
+    Expose(m_inAirFriction)
+    Expose(m_onGroundFriction)
+    Expose(m_parentTheCamera)
+EndComponentDescription()
 
 void TestPlayerComponent::Init()
 {

@@ -18,7 +18,7 @@ namespace BLAengine
     BLA_CONSOLE_VAR(float, InterBoidDistance, 100.f)
     BLA_CONSOLE_VAR(float, BoidDamping, 3.f)
 
-    BEGIN_COMPONENT_DECLARATION(DemosLibrary, BoidComponent)
+    BeginComponentDeclaration(DemosLibrary, BoidComponent)
 
         void Update() override;
 
@@ -33,12 +33,12 @@ namespace BLAengine
         blaVector<GameObject> m_otherBoids;
         CircularBuffer<blaVec3, 20> m_pastPositions;
 
-    END_DECLARATION()
+    EndComponentDeclaration()
 
-    BEGIN_COMPONENT_DESCRIPTION(BoidComponent)
-        EXPOSE(m_target)
-        EXPOSE(m_color)
-    END_DESCRIPTION()
+    BeginComponentDescription(BoidComponent)
+        Expose(m_target)
+        Expose(m_color)
+    EndComponentDescription()
 
 	std::random_device g_rd2;
 	std::mt19937 g_dgen(g_rd2());
@@ -99,7 +99,7 @@ namespace BLAengine
         }
     }
 
-    BLA_CONSOLE_COMMAND(void, CreateBoidSystem, int numberOfBoids)
+    DefineConsoleCommand(void, CreateBoidSystem, int numberOfBoids)
     {
         Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 

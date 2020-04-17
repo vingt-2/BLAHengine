@@ -5,7 +5,7 @@
 
 namespace BLAengine
 {
-	BEGIN_COMPONENT_DECLARATION(BLAEngineNative, PointLightComponent)      
+	BeginComponentDeclaration(BLAEngineNative, PointLightComponent)      
         void    SetRadiosity(const blaVec3& radiosity) { m_radiosity = radiosity; };
         blaVec3   GetRadiosity() const     { return m_radiosity; };
 
@@ -24,5 +24,5 @@ namespace BLAengine
 		blaF32 m_radius;
 		blaVec3 m_position;
         blaVec3 m_radiosity;
-    END_DECLARATION()
+    EndComponentDeclaration()
 }

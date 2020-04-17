@@ -4,7 +4,7 @@
 #include "Core/GameComponent.h"
 #include "ComponentLibraries.h"
 
-//TODO: Cmake handles that ...
+//TODO: Cmake should handle that ...
 #define BLA_CONFIGURATION "Release"
 
 using namespace BLAengine;

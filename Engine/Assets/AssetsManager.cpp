@@ -282,7 +282,7 @@ bool AssetManager::SaveTriangleMesh(MeshAsset* mesh)
     return true;
 }
 
-BLA_CONSOLE_COMMAND(void, LoadTextureBMP, blaString name, blaString path)
+DefineConsoleCommand(void, LoadTextureBMP, blaString name, blaString path)
 {
     Texture2D* texture;
     texture = TextureImport::LoadBMP(name, path);

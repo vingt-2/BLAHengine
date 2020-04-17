@@ -19,7 +19,7 @@ namespace BLAengine
         blaVec3 m_particleVelocities[HAIR_SEGMENT_COUNT + 1];
     };
 
-    BEGIN_COMPONENT_DECLARATION(BLAEngineNative, SimpleHairComponent)
+    BeginComponentDeclaration(BLAEngineNative, SimpleHairComponent)
         bool m_isPinned = false;
         bool m_applyGravity = true;
 		bool m_renderDebug = false;
@@ -46,5 +46,5 @@ namespace BLAengine
 
         blaVec3 m_forcesAccu = blaVec3(0);
         blaVec3 m_impulseAccu = blaVec3(0);
-    END_DECLARATION()
+    EndComponentDeclaration()
 }
