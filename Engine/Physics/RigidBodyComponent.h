@@ -2,7 +2,7 @@
 #include <Maths/Maths.h>
 #include <StdInclude.h>
 
-#include <Core/GameComponent.h>
+#include <Core/BehaviorComponent.h>
 
 namespace BLAengine
 {
@@ -25,7 +25,7 @@ namespace BLAengine
         blaVec3 m_correctionAngularVelocity;
     };
 
-    BeginComponentDeclaration(BLAEngineNative, RigidBodyComponent)
+    BeginBehaviorDeclaration(BLAEngineNative, RigidBodyComponent)
     public:
         blaVec3 m_previousPosition;
         blaVec3 m_previousRotation;
@@ -55,7 +55,6 @@ namespace BLAengine
         ColliderComponent* GetAssociatedCollider() const { return m_associatedCollider; }
 
         void Init() override;
-        void Update() override;
 
         void PushForceWorld(blaVec3 pushAtW, blaVec3 forceW);
 
@@ -83,5 +82,5 @@ namespace BLAengine
 
         ColliderComponent* m_associatedCollider;
 
-    EndComponentDeclaration()
+    EndBehaviorDeclaration()
 }

@@ -8,6 +8,7 @@
 #include <Core/TransformComponent.h>
 #include <Core/DebugDraw.h>
 #include <DataStructures/CircularBuffer.h>
+#include <Core/BehaviorComponent.h>
 
 #include <random>
 
@@ -18,10 +19,7 @@ namespace BLAengine
     BLA_CONSOLE_VAR(float, InterBoidDistance, 100.f)
     BLA_CONSOLE_VAR(float, BoidDamping, 3.f)
 
-    BeginComponentDeclaration(DemosLibrary, BoidComponent)
-
-        void Update() override;
-
+    BeginBehaviorDeclaration(DemosLibrary, BoidComponent)
         GameObject m_target;
         blaVec3 m_color;
         blaF32 m_hominStiffnessMult;
@@ -33,12 +31,12 @@ namespace BLAengine
         blaVector<GameObject> m_otherBoids;
         CircularBuffer<blaVec3, 20> m_pastPositions;
 
-    EndComponentDeclaration()
+    EndBehaviorDeclaration()
 
-    BeginComponentDescription(BoidComponent)
+    BeginBehaviorDescription(BoidComponent, Dependencies(RootSystem))
         Expose(m_target)
         Expose(m_color)
-    EndComponentDescription()
+    EndBehaviorDescription()
 
 	std::random_device g_rd2;
 	std::mt19937 g_dgen(g_rd2());

@@ -4,8 +4,8 @@
 
 using namespace BLAengine;
 
-BeginComponentDescription(IKComponent)
-EndComponentDescription()
+BeginBehaviorDescription(IKComponent, Dependencies(RootSystem))
+EndBehaviorDescription()
 
 void IKComponent::Update()
 {

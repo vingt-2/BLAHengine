@@ -1,28 +1,26 @@
 #include <windows.h>
 
-#include <Maths/Maths.h>
-#include "Core/GameComponent.h"
-#include <System/Console.h>
-#include <Core/DebugDraw.h>
-#include <Core/TransformComponent.h>
+#include "Maths/Maths.h"
+#include "System/Console.h"
+#include "Core/DebugDraw.h"
+#include "Core/TransformComponent.h"
+#include "Core/BehaviorComponent.h"
 
-
-// Must include include EngineInstance.h
-#include <EngineInstance.h>
+// Must include include EngineInstance.h before BLA_PROJECT_DECLARE
+#include "EngineInstance.h"
 DLL_PROJECT_DECLARE
 
 namespace BLAengine
 {
-	BeginComponentDeclaration(DemosLibrary, TestBlaComponent)
-		void Update() override;
+	BeginBehaviorDeclaration(DemosLibrary, TestBlaComponent)
 
         blaVec3 color;
 
-	EndComponentDeclaration()
+	EndBehaviorDeclaration()
 
-	BeginComponentDescription(TestBlaComponent)
+	BeginBehaviorDescription(TestBlaComponent, Dependencies(RootSystem))
         Expose(color)
-	EndComponentDescription()
+	EndBehaviorDescription()
 
 	void TestBlaComponent::Update()
 	{

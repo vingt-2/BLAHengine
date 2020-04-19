@@ -10,11 +10,11 @@
 
 using namespace BLAengine;
 
-BeginComponentDescription(MeshRendererComponent)
+BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_renderType)
 Expose(MeshAssetName)
 Expose(MaterialName)
-EndComponentDescription()
+EndBehaviorDescription()
 
 bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 {

@@ -7,7 +7,7 @@
 #include "EditorComponentLibrariesManager.h"
 
 //TODO: Cmake handles that ...
-#define BLA_CONFIGURATION "Release"
+#define BLA_CONFIGURATION "RelWithDebInfo"
 
 using namespace BLAengine;
 

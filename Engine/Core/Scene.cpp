@@ -3,6 +3,8 @@
 #include "Core/TransformComponent.h"
 #include "Core/ComponentSystems.h"
 
+#pragma optimize("", off)
+
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(Scene)
@@ -38,8 +40,6 @@ GameObject Scene::FindObjectByName(blaString name)
 
 GameComponent* Scene::AddComponent(GameObject object, GameComponentID componentId)
 {
-    GameComponent* gc = GameComponentRegistry::GetSingletonInstance()->__CreateComponent(componentId, object);
-
     // TODO: Obviously make this a bit better
     auto oit = std::find(m_validObjects.begin(), m_validObjects.end(), object);
     if(oit == m_validObjects.end()) 
@@ -47,17 +47,12 @@ GameComponent* Scene::AddComponent(GameObject object, GameComponentID componentI
         CreateObject(object);
     }
 
-    auto it = m_components.find(componentId);
+    GameComponent* gc = m_components.AddComponent(object, componentId);
 
-    if(it == m_components.end()) 
-    {
-        m_components[componentId] = blaHashMap<GameObjectID, GameComponent*, GameObjectID::Hasher>();
-    }
+    BLA_ASSERT(gc);
 
-    // TODO: Obviously will have to check we don't already have one ...
-    m_components[componentId][object] = gc;
-
-    m_toInitialize.push_back(gc);
+    if(gc)
+        m_toInitialize.push_back(gc);
 
     return gc;
 }
@@ -91,39 +86,26 @@ void Scene::Update()
     for(auto cs : r->m_componentSystems)
     {
         const ComponentSystem* system = cs.second;
-        system->ExecuteSystem(m_validObjects);
-    }
 
-    /*for (auto c : m_components)
-    {
-        for(auto o : c.second) 
-        {
-            o.second->Update();
-        }
-    }*/
+        //// Validate component availability for system:
+        //blaVector<blaStringId> iSystem = system->GetInputComponents();
+        //blaVector<blaStringId> oSystem = system->GetOutputComponents();
+
+        //bool validCall = true;
+
+        //for(blaStringId c : iSystem) 
+        //{
+        //    if()
+        //}
+
+        system->ExecuteSystem(m_validObjects, m_components.GetComponentSystemIOInterface());
+    }
 }
 
 void Scene::Clear()
 {
-    for (auto c : m_components)
-    {
-        for (auto o : c.second)
-        {
-            o.second->Shutdown();
-        }
-    }
+    m_components.Clear();
 
-    for (auto c : m_components)
-    {
-        for (auto o : c.second)
-        {
-            delete o.second;
-        }
-
-        c.second.clear();
-    }
-
-    m_components.clear();
     m_validObjects.clear();
 
     m_camera = nullptr;
@@ -135,16 +117,19 @@ CameraComponent* Scene::GetMainCamera()
 {
     if (m_camera == nullptr)
     {
-        for (auto c : m_components[BlaStringId("CameraComponent")])
+        for(GameObject o : m_validObjects) 
         {
-            CameraComponent* camera = static_cast<CameraComponent*>(c.second); // TODO: Can we find a better way other than do a static_cast everytime we ask ?
-            if (camera != nullptr && !camera->m_isShadowMapCamera)
+            if(CameraComponent* camera = GetComponentPerObject<CameraComponent>(o)) 
             {
-                m_camera = camera;
-                break;
+                if (!camera->m_isShadowMapCamera)
+                {
+                    m_camera = camera;
+                    break;
+                }
             }
         }
     }
+    BLA_ASSERT(m_camera);
     return m_camera;
 }
 
@@ -214,29 +199,10 @@ const blaVector<GameObjectID>& Scene::GetObjectsID() const
 
 GameComponent* Scene::GetComponentPerObject(GameComponentID componentId, GameObject obj)
 {
-    auto& componentPool = m_components[componentId];
-
-    auto it = componentPool.find(obj);
-
-    if (it != componentPool.end())
-    {
-        return it->second;
-    }
-    return nullptr;
+    return m_components.GetComponentPerObject(componentId, obj);
 }
 
 blaVector<GameComponent*> Scene::GetComponentsPerObject(GameObject obj)
 {
-    blaVector<GameComponent*> ret;
-
-    for(auto c : m_components) 
-    {
-        auto it = c.second.find(obj);
-
-        if(it != c.second.end()) 
-        {
-            ret.push_back(it->second);
-        }
-    }
-    return ret;
+    return m_components.GetComponentsPerObject(obj);
 }

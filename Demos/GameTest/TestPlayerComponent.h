@@ -5,15 +5,12 @@
 
 //TODO: Replace with contorller implementation from the input manager ...
 #include <System/ControllerInputs/Dualshock4.h>
-
-#include <Core/GameComponent.h>
+#include <Core/BehaviorComponent.h>
 
 namespace BLAengine
 {
-BeginComponentDeclaration(DemosLibrary, TestPlayerComponent)
-
+BeginBehaviorDeclaration(DemosLibrary, TestPlayerComponent)
     void Init() override;
-    void Update() override;
 	
 	float m_speed = 1.f;
 	GameObject m_mainCameraObject;
@@ -26,5 +23,5 @@ BeginComponentDeclaration(DemosLibrary, TestPlayerComponent)
 	bool m_parentTheCamera = true;
 
 	Dualshock4 m_controller;
-EndComponentDeclaration()
+EndBehaviorDeclaration()
 }

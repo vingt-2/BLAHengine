@@ -3,14 +3,18 @@
 #include <StdInclude.h>
 #include <BLASingleton.h>
 
+// TODO: TODO: Remove this TODO
+
 //TODO: Create a ''system'' abstraction and the scene will enumarate and update all systems
 //TODO: Systems should register themselves if they are compiled and only the non empty systems are updated
 //TODO: This way I don't have to include non Core stuff in core ... (it's bad)
-#include <Core/CameraComponent.h>
-#include <Core/RenderingManager.h>
-#include <Core/Timer.h>
-#include <Maths/Ray.h>
-#include "GameObject.h"
+#include "Core/RenderingManager.h"
+#include "Core/Timer.h"
+#include "Core/GameObject.h"
+#include "Core/ComponentContainers.h"
+
+// TODO: mmm how about no ?
+#include "Core/CameraComponent.h"
 
 namespace BLAengine
 {
@@ -36,6 +40,7 @@ namespace BLAengine
         template<class T>
         T* AddComponent(GameObject object);
 
+        // TODO: mmm how about no ?
         CameraComponent* GetMainCamera();
 
         void UpdateSceneTimer(blaF32 time);
@@ -75,11 +80,13 @@ namespace BLAengine
         GameObjectFlagMap m_gameObjectsFlags;
         GameObjectHierarchyMap m_gameObjectHierarchy;
 
+        // TODO: mmm how about no ?
         CameraComponent* m_camera;
+
         RenderingManager* m_renderingManager;
 
-        // TODO: Temp structures, this is to improve into a proper system down the line
-        blaHashMap<blaStringId, blaHashMap<GameObjectID, GameComponent*, GameObjectID::Hasher>, blaStringId::Hasher> m_components;
+        ComponentContainer m_components;
+
         blaVector<GameObjectID> m_validObjects;
 
         blaVector<GameComponent*> m_toInitialize;
@@ -90,16 +97,12 @@ namespace BLAengine
     template <class T>
     T* Scene::AddComponent(GameObject object)
     {
-        T* gc = GameComponentRegistry::GetSingletonInstance()->__CreateComponent<T>(object);
-
-        m_components[T::ms_componentDescriptor.GetName()][object] = gc;
-
-        return gc;
+        return static_cast<T*>(AddComponent(object, T::ms_componentDescriptor.GetName()));
     }
 
     template <class T>
-    T* Scene::GetComponentPerObject(GameObject obj)
+    T* Scene::GetComponentPerObject(GameObject object)
     {
-        return static_cast<T*>(GetComponentPerObject(T::ms_componentDescriptor.GetName(), obj));
+        return static_cast<T*>(GetComponentPerObject(T::ms_componentDescriptor.GetName(), object));
     }
 }

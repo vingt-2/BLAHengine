@@ -27,7 +27,7 @@ target_link_libraries(BLADemos BLAEngine)
 
 set_target_properties(BLADemos
   PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Cooked/Libraries/Release" #TODO: Set according to configuration
+  RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Cooked/Libraries/"
 )
 
 if(WIN32)

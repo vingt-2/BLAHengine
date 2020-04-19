@@ -10,7 +10,7 @@ namespace BLAengine
 
         void Init() override;
         void Shutdown() override;
-        void Update() override;
+        void Update();
 
         blaU32 m_renderTicket = 0;
 

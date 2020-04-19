@@ -3,13 +3,13 @@
 #include <Assets/MeshAsset.h>
 #include <Assets/Material.h>
 
-#include <Core/GameComponent.h>
+#include <Core/BehaviorComponent.h>
 
 #define BLA_LINE_RENDER 0x0003
 
 namespace BLAengine
 {
-    BeginComponentDeclaration(BLAEngineNative, MeshRendererComponent)
+    BeginBehaviorDeclaration(BLAEngineNative, MeshRendererComponent)
         friend class Renderer;
         int m_renderTicket = 0;
 
@@ -24,7 +24,6 @@ namespace BLAengine
 
         void Init() override;
         void Shutdown() override;
-        void Update() override;
 
         const MeshAsset* GetMeshAsset() const { return m_mesh; }
 
@@ -34,5 +33,5 @@ namespace BLAengine
 
         MeshAsset* m_mesh = nullptr;
         blaMat4 m_modelTransformMatrix;
-	EndComponentDeclaration()
+	EndBehaviorDeclaration()
 }

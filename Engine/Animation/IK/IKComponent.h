@@ -1,15 +1,14 @@
 #pragma once
 
-#include <Core/GameComponent.h>
+#include <Core/BehaviorComponent.h>
 
 namespace BLAengine
 {
     class IKChainJoint;
 
-    BeginComponentDeclaration(BLAEngineNative, IKComponent)
-        void Update() override;
+    BeginBehaviorDeclaration(BLAEngineNative, IKComponent)
         void Shutdown() override;
 
         IKChainJoint* m_ikChain = nullptr;
-    EndComponentDeclaration()
+    EndBehaviorDeclaration()
 }

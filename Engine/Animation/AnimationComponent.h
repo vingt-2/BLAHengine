@@ -5,8 +5,7 @@
 
 namespace BLAengine
 {
-    BeginComponentDeclaration(BLAEngineNative, AnimationComponent)
-        void Update() override;
+    BeginBehaviorDeclaration(BLAEngineNative, AnimationComponent)
         void Shutdown() override;
 
         SkeletonAnimationData* m_animation = nullptr;
@@ -20,5 +19,5 @@ namespace BLAengine
 	private:
 		blaF32 m_lastTimePlayerInteraction = 0.f;
 		blaString m_prevBVHName;
-    EndComponentDeclaration()
+    EndBehaviorDeclaration()
 }

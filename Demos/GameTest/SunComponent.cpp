@@ -3,20 +3,19 @@
 #include <Maths/Maths.h>
 #include <Animation/SkeletonAnimationData.h>
 #include <Core/TransformComponent.h>
+#include <Core/BehaviorComponent.h>
 
 namespace BLAengine
 {
-    BeginComponentDeclaration(DemosLibrary, SunComponent)
-
-        void Update() override;
+    BeginBehaviorDeclaration(DemosLibrary, SunComponent)
 
         float m_speed = -0.0002f;
 
-    EndComponentDeclaration()
+    EndBehaviorDeclaration()
 
-    BeginComponentDescription(SunComponent)
+    BeginBehaviorDescription(SunComponent, Dependencies(RootSystem))
         Expose(m_speed)
-    EndComponentDescription()
+    EndBehaviorDescription()
 
     void SunComponent::Update()
     {

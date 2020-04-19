@@ -1,4 +1,4 @@
-#include "BehaviorComponent.h"
+#include "Core/BehaviorComponent.h"
 
 #include "System/Console.h"
 

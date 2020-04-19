@@ -8,13 +8,13 @@
 
 using namespace BLAengine;
 
-BeginComponentDescription(AnimationComponent)
+BeginBehaviorDescription(AnimationComponent, Dependencies(RootSystem))
 Expose(m_play)
 Expose(m_frameIndex)
 Expose(m_bvhName)
 Expose(m_playbackMultiplier)
 Expose(m_scaleFactor)
-EndComponentDescription()
+EndBehaviorDescription()
 
 void AnimationComponent::Update()
 {

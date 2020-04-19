@@ -3,6 +3,7 @@
 #include "BLAStringID.h"
 #include "Core/GameComponent.h"
 #include "Core/GameObject.h"
+#include "Core/ComponentContainers.h"
 
 #define NOTHING(i)
 #define InputComponents(...) __VA_ARGS__
@@ -18,26 +19,20 @@
 
 namespace BLAengine
 {
-    template <class T>
-    using InputComponents = blaHashMap<GameObjectID, const GameComponent*, GameObjectID::Hasher>;
-
-    template <class T>
-    using OutputComponents = blaHashMap<GameObjectID, GameComponent*, GameObjectID::Hasher>;
-
     typedef const blaVector<blaStringId> SystemObjectsIterator;
 
     template <class T>
-    constexpr std::tuple<InputComponents<T>> GetInputComponentsIterator()
+    constexpr std::tuple<InputComponents<T>> GetInputComponentsIterator(ComponentSystemIOInterface& systemIOInterface)
     {   
-        InputComponents<T> componentIterator; // = Get it somewhere ?
+        InputComponents<T> componentIterator = systemIOInterface.GetInputComponents<T>();
 
         return std::make_tuple(componentIterator);
     }
 
     template <class T>
-    constexpr std::tuple<OutputComponents<T>> GetOutputComponentsIterator()
+    constexpr std::tuple<OutputComponents<T>> GetOutputComponentsIterator(ComponentSystemIOInterface& systemIOInterface)
     {
-        OutputComponents<T> componentIterator; // = Get it somewhere ?
+        OutputComponents<T> componentIterator = systemIOInterface.GetOutputComponents<T>();
 
         return std::make_tuple(componentIterator);
     }
@@ -56,10 +51,10 @@ namespace BLAengine
         return O::ms_componentDescriptor.GetName();
     }
 
-    class ComponentSystem
+    class BLACORE_API ComponentSystem
     {
     public:
-        virtual void ExecuteSystem(SystemObjectsIterator&) const = 0;
+        virtual void ExecuteSystem(SystemObjectsIterator&, ComponentSystemIOInterface&) const = 0;
 
         blaStringId GetName() const { return m_systemName; }
 
@@ -76,7 +71,7 @@ namespace BLAengine
         blaVector<blaStringId> m_systemDependencies;
     };
 
-    class ComponentSystemsRegistry
+    class BLACORE_API ComponentSystemsRegistry
     {
         BLA_DECLARE_SINGLETON(ComponentSystemsRegistry);
     public:
@@ -121,9 +116,9 @@ namespace BLAengine
         static_assert(std::conjunction_v<std::is_base_of<GameComponent, Is>..., std::is_base_of<GameComponent, Os>...>,
             "Not all inputs/outputs to this Component System derive from GameComponents");
 
-        void ExecuteSystem(SystemObjectsIterator& systemObjects) const override
+        void ExecuteSystem(SystemObjectsIterator& systemObjects, ComponentSystemIOInterface& systemIOInterface) const override
         {
-            auto executeArguments = std::tuple_cat(std::make_tuple(systemObjects), GetSystemIOIterators());
+            auto executeArguments = std::tuple_cat(std::make_tuple(systemObjects), GetSystemIOIterators(systemIOInterface));
             std::apply(&Execute, executeArguments);
         }
 
@@ -131,9 +126,9 @@ namespace BLAengine
 
         static void Execute(SystemObjectsIterator& systemObjects, InputComponents<Is>..., OutputComponents<Os> ...);
 
-        constexpr std::tuple<InputComponents<Is>..., OutputComponents<Os>...> GetSystemIOIterators()
+        constexpr std::tuple<InputComponents<Is>..., OutputComponents<Os>...> GetSystemIOIterators(ComponentSystemIOInterface& systemIOInterface) const
         {
-            return std::tuple_cat(GetInputComponentsIterator<Is>()..., GetOutputComponentsIterator<Os>()...);
+            return std::tuple_cat(GetInputComponentsIterator<Is>(systemIOInterface)..., GetOutputComponentsIterator<Os>(systemIOInterface)...);
         }
         constexpr void RegisterInputComponents()
         {
@@ -153,7 +148,7 @@ namespace BLAengine
 //
 // This whole component system shenanigan can also be implemented exclusively with macros.
 // It would actually be a little more powerful and would end up generating less code
-// I like the idea of not having to create a specific class for each system though,
+// I like the idea of not having to create a specific polymorphic class for each system though,
 // No two system can have the same combination of I/O/D, so not relying on inheritence forces disambiguity and uniqueness
 // Systems are stateless. Add a state object parameter to a system ?
 // 

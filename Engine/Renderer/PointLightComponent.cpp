@@ -15,6 +15,11 @@ EndComponentDescription()
 // Norm of the default m_scale for Object Transforms...
 #define BLA_SCALE_NORM 1.73205080757f
 
+void PointLightComponent::Update()
+{
+    m_position = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
+}
+
 void PointLightComponent::Init()
 {
     m_radius = 1.f;
@@ -24,9 +29,4 @@ void PointLightComponent::Init()
 void PointLightComponent::Shutdown()
 {
     Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
-}
-
-void PointLightComponent::Update()
-{
-    m_position = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
 }
