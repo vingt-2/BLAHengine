@@ -1,7 +1,7 @@
 #include <windows.h> // <-- Obviously needs to be abstracted away... Especially in Core. The editor version can stay windows specific
 #include "System/FileSystem/Files.h"
 #include "System/Console.h"
-#include "Core/GameComponent.h"
+#include "Core/ComponentSystems.h"
 #include "ComponentLibraries.h"
 
 //TODO: Cmake should handle that ...
@@ -30,15 +30,15 @@ void ComponentLibrariesManager::UnloadLibraries()
 {
 }
 
-void ComponentLibrariesManager::SetLoadingLibrary(GameComponentRegistry* componentRegistry, Console* console, blaStringId libraryId)
+void ComponentLibrariesManager::SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
 {
     componentRegistry->m_currentRegisteringLibrary = libraryId;
-
+	systemsRegistry->m_currentRegisteringLibrary = libraryId;
     console->m_currentRegisteringLibrary = libraryId;
 }
 
-void ComponentLibrariesManager::UnloadLibrary(GameComponentRegistry* componentRegistry, Console* console, blaStringId libraryId)
+void ComponentLibrariesManager::UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
 {
-    componentRegistry->UnloadLibraryComponent(libraryId);
+    componentRegistry->UnloadLibraryComponents(libraryId);
     console->UnloadConsoleCommandsForLibrary(libraryId);
 }

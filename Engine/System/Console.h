@@ -38,9 +38,9 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
     ConsoleCommandEntry_##CommandName ConsoleCommandEntry_##CommandName::Init;                                 \
     RetType CommandName(__VA_ARGS__)                                                                                                              
 
-#define BLA_CONSOLE_VAR(type, name, defaultValue)                                   \
-    type g_##name = defaultValue;                                                   \
-    DefineConsoleCommand(int, name, type value) { g_##name = value; return 0; }      \
+#define DeclareConsoleVariable(type, name, defaultValue)                        \
+    type g_##name = defaultValue;                                               \
+    DefineConsoleCommand(int, name, type value) { g_##name = value; return 0; } \
 
 namespace BLAengine
 {

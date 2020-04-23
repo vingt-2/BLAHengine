@@ -1,28 +1,28 @@
 #pragma once
 
-#include <StdInclude.h>
-#include <BLASingleton.h>
+#include "StdInclude.h"
+#include "BLASingleton.h"
+#include "DataStructures/Tree.h"
 
 // TODO: TODO: Remove this TODO
-
-//TODO: Create a ''system'' abstraction and the scene will enumarate and update all systems
-//TODO: Systems should register themselves if they are compiled and only the non empty systems are updated
-//TODO: This way I don't have to include non Core stuff in core ... (it's bad)
 #include "Core/RenderingManager.h"
 #include "Core/Timer.h"
 #include "Core/GameObject.h"
 #include "Core/ComponentContainers.h"
+#include "Core/ComponentSystemsScheduler.h"
 
-// TODO: mmm how about no ?
+// TODO: mmm how about no ? + CameraComponent should be moved out of Core
 #include "Core/CameraComponent.h"
 
 namespace BLAengine
 {
+    class ComponentSystem;
     class BLACORE_API Scene
     {
         BLA_DECLARE_SINGLETON(Scene)
 
     public:
+
         friend class GameObject;
 
         Scene();
@@ -80,12 +80,14 @@ namespace BLAengine
         GameObjectFlagMap m_gameObjectsFlags;
         GameObjectHierarchyMap m_gameObjectHierarchy;
 
+        ComponentSystemsScheduler m_componentSystemsScheduler;
+
         // TODO: mmm how about no ?
         CameraComponent* m_camera;
 
         RenderingManager* m_renderingManager;
 
-        ComponentContainer m_components;
+        ComponentContainer m_componentContainer;
 
         blaVector<GameObjectID> m_validObjects;
 

@@ -7,7 +7,7 @@ namespace BLAengine
     BeginComponentDeclaration(BLAEngineNative, TransformComponent)
 
         blaScaledTransform GetTransform();
-        blaScaledTransform GetLocalTransform();
+        blaScaledTransform GetLocalTransform() const;
 
         void SetTransform(const blaScaledTransform& transform);
         void SetLocalTransform(const blaScaledTransform& transform);

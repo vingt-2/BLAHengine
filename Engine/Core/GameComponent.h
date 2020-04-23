@@ -115,7 +115,6 @@ namespace BLAengine
         manager->__RegisterComponent(typeDesc->m_typeName, T::Factory);                                     \
     }
 
-    //Todo: Don't return GameComponent raw pointers... but references ?
     class BLACORE_API GameComponentRegistry
     {
         BLA_DECLARE_SINGLETON(GameComponentRegistry)
@@ -140,10 +139,10 @@ namespace BLAengine
 
         typedef blaVector<GameComponentRegistryEntry> CompEntries;
 
-        blaHashMap<blaStringId, CompEntries, blaStringId::Hasher> m_componentsPerLibraries;
+        blaMap<blaStringId, CompEntries> m_componentsPerLibraries;
         blaStringId m_currentRegisteringLibrary;
 
-        void UnloadLibraryComponent(blaStringId libraryId);
+        void UnloadLibraryComponents(blaStringId libraryId);
 
     public:
 

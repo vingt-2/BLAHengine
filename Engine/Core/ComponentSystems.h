@@ -74,9 +74,19 @@ namespace BLAengine
     class BLACORE_API ComponentSystemsRegistry
     {
         BLA_DECLARE_SINGLETON(ComponentSystemsRegistry);
+        friend class ComponentLibrariesManager;
+        friend class ComponentSystemsScheduler;
+
+        blaStringId m_currentRegisteringLibrary;
+
+        typedef blaMap<blaStringId, ComponentSystem*> SystemsInLibraries;
+
+        blaMap<blaStringId, SystemsInLibraries> m_componentSystemsPerLibrary;
+
     public:
         void FinalizeLoad();
-        blaHashMap<blaStringId, ComponentSystem*, blaStringId::Hasher> m_componentSystems;
+        blaVector<blaPair<blaStringId, const ComponentSystem*>> GetAllAvailableSystems() const;
+        const ComponentSystem* GetSystemPointer(blaStringId system) const;
         void __RegisterComponentSystem(ComponentSystem* componentSystem);
     };
 

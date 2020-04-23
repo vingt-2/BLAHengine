@@ -8,6 +8,8 @@ BeginComponentDescription(TransformComponent)
     Expose(m_localTransform)
 EndComponentDescription()
 
+// TODO: Make a binding component that is updated individually as a system to allow const GetTransform
+
 blaScaledTransform TransformComponent::GetTransform()
 {
     // Todo: If I don't rewrite this whole mess soon. at least cache the parent ?
@@ -33,7 +35,7 @@ blaScaledTransform TransformComponent::GetTransform()
     return m_localTransform;
 }
 
-blaScaledTransform TransformComponent::GetLocalTransform()
+blaScaledTransform TransformComponent::GetLocalTransform() const
 {
     return m_localTransform;
 }

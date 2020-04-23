@@ -20,7 +20,7 @@
 
 using namespace BLAengine;
 
-BLA_CONSOLE_VAR(bool, shouldReloadLibraries, false)
+DeclareConsoleVariable(bool, shouldReloadLibraries, false)
 
 DefineConsoleCommand(void, MakeSkyObject)
 {

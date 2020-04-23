@@ -104,6 +104,9 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     DebugDraw::AssignSingletonInstance(m_debug);
 
+    m_componentLibrariesManager->LoadLibraries();
+    ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
+
     m_scene->Initialize(m_renderingManager);
 
     m_guiManager = BlaGuiManager::AssignAndReturnSingletonInstance(new BlaGuiManager((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer()));
@@ -114,10 +117,6 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
         printf("Failed to initiate renderer and / or render window... Terminating.\n");
         return false;
     }
-
-	m_componentLibrariesManager->LoadLibraries();
-
-    ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
 
     // Finally, load our assets in memory...
     m_assetManager->LoadCookedAssets();

@@ -69,7 +69,7 @@ GameComponent* GameComponentRegistry::__CreateComponent(GameComponentID componen
     return nullptr;
 }
 
-void GameComponentRegistry::UnloadLibraryComponent(blaStringId libraryId)
+void GameComponentRegistry::UnloadLibraryComponents(blaStringId libraryId)
 {
     // TODO: Obviously, we need to clean the scene as well ...
     for (auto p : m_componentsPerLibraries)

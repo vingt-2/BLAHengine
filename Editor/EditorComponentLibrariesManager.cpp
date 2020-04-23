@@ -1,7 +1,7 @@
 #include <windows.h>
 #include "System/FileSystem/Files.h"
 #include "System/Console.h"
-#include "Core/GameComponent.h"
+#include "core/ComponentSystems.h"
 #include "Core/Scene.h"
 
 #include "EditorComponentLibrariesManager.h"
@@ -24,12 +24,13 @@ void EditorComponentLibrariesManager::LoadLibraries()
 	for(FileEntry& file : files)
 	{
         GameComponentRegistry* componentRegistry = GameComponentRegistry::GetSingletonInstance();
+        ComponentSystemsRegistry* systemsRegistry = ComponentSystemsRegistry::GetSingletonInstance();
         Console* console = Console::GetSingletonInstance();
 
         blaStringId libraryId = GenerateBlaStringId(file.m_name);
 
         // We need to inform the component registry and the console that the component declaration and console command / var declarations belong to this specific library
-        SetLoadingLibrary(componentRegistry, console, libraryId);
+        SetLoadingLibrary(componentRegistry, systemsRegistry, console, libraryId);
 
 		if(file.m_extension == ".dll")
 		{
@@ -42,24 +43,26 @@ void EditorComponentLibrariesManager::LoadLibraries()
 
             if(!load) // We might have loaded components, we must presume that they are invalid, need to unload everything
             {
-                UnloadLibrary(componentRegistry, console, libraryId);
+                UnloadLibrary(componentRegistry, systemsRegistry, console, libraryId);
             }
             else 
             {
                 m_loadedLibraries.push_back(blaPair<blaStringId, void*>(libraryId, load));
             }
 		}
+        systemsRegistry->FinalizeLoad();
 	}
 }
 
 void EditorComponentLibrariesManager::UnloadLibraries()
 {
     GameComponentRegistry* componentRegistry = GameComponentRegistry::GetSingletonInstance();
+    ComponentSystemsRegistry* systemsRegistry = ComponentSystemsRegistry::GetSingletonInstance();
     Console* console = Console::GetSingletonInstance();
 
     for (auto library : m_loadedLibraries)
     {
-        UnloadLibrary(componentRegistry, console, library.first);
+        UnloadLibrary(componentRegistry, systemsRegistry, console, library.first);
         FreeLibrary((HMODULE)library.second);
     }
 }

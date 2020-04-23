@@ -3,8 +3,6 @@
 #include "Core/TransformComponent.h"
 #include "Core/ComponentSystems.h"
 
-#pragma optimize("", off)
-
 using namespace BLAengine;
 
 BLA_IMPLEMENT_SINGLETON(Scene)
@@ -47,7 +45,7 @@ GameComponent* Scene::AddComponent(GameObject object, GameComponentID componentI
         CreateObject(object);
     }
 
-    GameComponent* gc = m_components.AddComponent(object, componentId);
+    GameComponent* gc = m_componentContainer.AddComponent(object, componentId);
 
     BLA_ASSERT(gc);
 
@@ -65,6 +63,8 @@ void Scene::UpdateSceneTimer(blaF32 time)
 void Scene::Initialize(RenderingManager* renderingManager)
 {
     this->m_renderingManager = renderingManager;
+
+    m_componentSystemsScheduler.RebuildScheduler(ComponentSystemsRegistry::GetSingletonInstanceRead());
 }
 
 void Scene::Update()
@@ -81,30 +81,55 @@ void Scene::Update()
     }
     m_toInitialize.clear();
 
-    const ComponentSystemsRegistry* r = ComponentSystemsRegistry::GetSingletonInstanceRead();
+    m_componentSystemsScheduler.RefreshSchedulerState();
 
-    for(auto cs : r->m_componentSystems)
+    const ComponentSystemsRegistry* systemsRegistry = ComponentSystemsRegistry::GetSingletonInstanceRead();
+
+    blaStringId systemToExecute;
+    while(m_componentSystemsScheduler.GetNextJob(systemToExecute))
     {
-        const ComponentSystem* system = cs.second;
+        const ComponentSystem* system = systemsRegistry->GetSystemPointer(systemToExecute);
 
-        //// Validate component availability for system:
-        //blaVector<blaStringId> iSystem = system->GetInputComponents();
-        //blaVector<blaStringId> oSystem = system->GetOutputComponents();
+        // System validation
+        blaVector<blaStringId> iSystem = system->GetInputComponents();
+        blaVector<blaStringId> oSystem = system->GetOutputComponents();
 
-        //bool validCall = true;
+        blaVector<GameObjectID> systemValidObjs;
 
-        //for(blaStringId c : iSystem) 
-        //{
-        //    if()
-        //}
+        for (GameObjectID object : m_validObjects)
+        {
+            bool validCall = true;
 
-        system->ExecuteSystem(m_validObjects, m_components.GetComponentSystemIOInterface());
+            for (blaStringId c : iSystem)
+            {
+                if (!m_componentContainer.GetComponentPerObject(c, object))
+                {
+                    validCall = false;
+                    break;
+                }
+            }
+            if (!validCall) continue;
+            for (blaStringId c : oSystem)
+            {
+                if (!m_componentContainer.GetComponentPerObject(c, object))
+                {
+                    validCall = false;
+                    break;
+                }
+            }
+            if (!validCall) continue;
+
+            systemValidObjs.push_back(object);
+        }
+
+        system->ExecuteSystem(systemValidObjs, m_componentContainer.GetComponentSystemIOInterface());
+        m_componentSystemsScheduler.NotifyCompletion(systemToExecute);
     }
 }
 
 void Scene::Clear()
 {
-    m_components.Clear();
+    m_componentContainer.Clear();
 
     m_validObjects.clear();
 
@@ -199,10 +224,10 @@ const blaVector<GameObjectID>& Scene::GetObjectsID() const
 
 GameComponent* Scene::GetComponentPerObject(GameComponentID componentId, GameObject obj)
 {
-    return m_components.GetComponentPerObject(componentId, obj);
+    return m_componentContainer.GetComponentPerObject(componentId, obj);
 }
 
 blaVector<GameComponent*> Scene::GetComponentsPerObject(GameObject obj)
 {
-    return m_components.GetComponentsPerObject(obj);
+    return m_componentContainer.GetComponentsPerObject(obj);
 }

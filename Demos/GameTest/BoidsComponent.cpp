@@ -14,12 +14,13 @@
 
 namespace BLAengine
 {
-    BLA_CONSOLE_VAR(float, BoidStiffness, 20.f)
-    BLA_CONSOLE_VAR(float, InterBoidStiffness, 0.05f)
-    BLA_CONSOLE_VAR(float, InterBoidDistance, 100.f)
-    BLA_CONSOLE_VAR(float, BoidDamping, 3.f)
+    DeclareConsoleVariable(float, BoidStiffness, 20.f)
+    DeclareConsoleVariable(float, InterBoidStiffness, 0.05f)
+    DeclareConsoleVariable(float, InterBoidDistance, 100.f)
+    DeclareConsoleVariable(float, BoidDamping, 3.f)
 
-    BeginBehaviorDeclaration(DemosLibrary, BoidComponent)
+    // Target should be system unique for example ... To store in a system state ?
+    BeginComponentDeclaration(DemosLibrary, BoidComponent)
         GameObject m_target;
         blaVec3 m_color;
         blaF32 m_hominStiffnessMult;
@@ -27,73 +28,76 @@ namespace BLAengine
         blaF32 m_distanceMult;
         int m_framesSinceLastPush = 0;
 
-    private:
-        blaVector<GameObject> m_otherBoids;
         CircularBuffer<blaVec3, 20> m_pastPositions;
+    EndComponentDeclaration()
 
-    EndBehaviorDeclaration()
-
-    BeginBehaviorDescription(BoidComponent, Dependencies(RootSystem))
+    BeginComponentDescription(BoidComponent)
         Expose(m_target)
         Expose(m_color)
-    EndBehaviorDescription()
+    EndComponentDescription()
 
-	std::random_device g_rd2;
-	std::mt19937 g_dgen(g_rd2());
+    DeclareComponentSystem(DemosLibrary, IntegrateBoidSystem, InputComponents(BoidComponent, TransformComponent), OutputComponents(RigidBodyComponent));
+    RegisterComponentSystem(IntegrateBoidSystem, Dependencies(RootSystem));
 
-    void BoidComponent::Update()
+    std::random_device g_rd2;
+    std::mt19937 g_dgen(g_rd2());
+
+    template <>
+    void IntegrateBoidSystem::Execute(SystemObjectsIterator& systemObjects, InputComponents<BoidComponent> iBoids, InputComponents<TransformComponent> iTransforms, OutputComponents<RigidBodyComponent> iRigids)
     {
-        if(!m_target.IsValid()) 
+        for (const GameObjectID& systemObject : systemObjects)
         {
-            m_target = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName("BoidTarget");
-        }
+            RigidBodyComponent* rigidBody = iRigids[systemObject];
+            const TransformComponent* transform = iTransforms[systemObject];
+            const BoidComponent* boidComponent = iBoids[systemObject];
 
-        RigidBodyComponent* rigidBody = GetOwnerObject().GetComponent<RigidBodyComponent>();
+            blaVec3 myPosition = transform->GetLocalTransform().GetPosition();
 
-        if (!rigidBody) return;
+            GameObject target = boidComponent->m_target;
 
-        blaVec3 myPosition = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
-
-        if (m_target.IsValid()) 
-        {
-            TransformComponent* tComp = m_target.GetComponent<TransformComponent>();
-
-            rigidBody->AddLinearForce(g_BoidStiffness *  m_hominStiffnessMult * (tComp->GetTransform().GetPosition() - myPosition) - g_BoidDamping * rigidBody->m_velocity);
-        }
-
-        if(m_otherBoids.empty()) 
-        {
-            for (GameObject& obj : EngineInstance::GetSingletonInstance()->GetWorkingScene()->GetObjects()) 
+            if (target.IsValid())
             {
-                if (BoidComponent* boid = obj.GetComponent<BoidComponent>())
-                    m_otherBoids.push_back(obj);
+                const TransformComponent* targetTransform = iTransforms[target];
+
+                rigidBody->AddLinearForce(g_BoidStiffness * boidComponent->m_hominStiffnessMult * (targetTransform->GetLocalTransform().GetPosition() - myPosition) - g_BoidDamping * rigidBody->m_velocity);
             }
+
+            std::uniform_int_distribution<> dist(0, systemObjects.size());
+
+            int slice = dist(g_dgen);
+
+            for (size_t i = slice; i < systemObjects.size() && i < slice + 300; i++)
+            {
+                const TransformComponent* tComp = iTransforms[systemObjects[i]];
+
+                blaVec3 toBoid = tComp->GetLocalTransform().GetPosition() - myPosition;
+
+                blaF32 toBoidL = glm::length(toBoid) + 0.001f;
+
+                rigidBody->AddLinearForce(g_InterBoidStiffness * boidComponent->m_interBoidStiffnessMult * (toBoidL - boidComponent->m_distanceMult * g_InterBoidDistance) / toBoidL * toBoid);
+            }
+
+            DebugDraw::DrawSphere(myPosition, 0.2f, blaVec4(boidComponent->m_color, 1.f), 4);
         }
+    }
 
-		std::uniform_int_distribution<> dist(0, m_otherBoids.size());
+    DeclareComponentSystem(DemosLibrary, UpdateBoidTracers, InputComponents(TransformComponent), OutputComponents(BoidComponent));
+    RegisterComponentSystem(UpdateBoidTracers, Dependencies(IntegrateBoidSystem));
 
-		int slice = dist(g_dgen);
-
-        for(size_t i = slice; i < m_otherBoids.size() && i < slice + 300; i++) 
+    template <>
+    void UpdateBoidTracers::Execute(SystemObjectsIterator& systemObjects, InputComponents<TransformComponent> iTransforms, OutputComponents<BoidComponent> oBoids)
+    {
+        for(auto systemObject : systemObjects) 
         {
-			GameObject& boid = m_otherBoids[i];
-            TransformComponent* tComp = boid.GetComponent<TransformComponent>();
+            BoidComponent* boid = oBoids[systemObject];
 
-            blaVec3 toBoid = tComp->GetTransform().GetPosition() - myPosition;
+            boid->m_pastPositions.Push(iTransforms[systemObject]->GetLocalTransform().GetPosition());
 
-            blaF32 toBoidL = glm::length(toBoid) + 0.001f;
-
-            rigidBody->AddLinearForce(g_InterBoidStiffness * m_interBoidStiffnessMult * (toBoidL - m_distanceMult * g_InterBoidDistance) / toBoidL * toBoid);
-        }
-
-        DebugDraw::DrawSphere(myPosition, 0.2f, blaVec4(m_color, 1.f), 4);
-
-        m_pastPositions.Push(myPosition);
-
-        int size = m_pastPositions.GetCount();
-        for (int i = 0; i < size - 1; i++)
-        {
-            //DebugDraw::DrawLine(m_pastPositions.Peek(i), m_pastPositions.Peek(i + 1), m_color);
+            int size = boid->m_pastPositions.GetCount();
+            for (int i = 0; i < size - 1; i++)
+            {
+                DebugDraw::DrawLine(boid->m_pastPositions.Peek(i), boid->m_pastPositions.Peek(i + 1), boid->m_color);
+            }
         }
     }
 
