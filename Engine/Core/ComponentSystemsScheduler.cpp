@@ -84,7 +84,8 @@ bool ComponentSystemsScheduler::GetNextJob(blaStringId id, blaStringId& job)
 
     for (blaStringId child : node.m_children)
     {
-        return GetNextJob(child, job);
+        if (GetNextJob(child, job))
+            return true;
     }
 
     return false;
