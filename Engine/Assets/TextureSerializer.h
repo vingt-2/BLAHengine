@@ -15,7 +15,7 @@ public:
 
     Texture2DSerializer() = default;
 
-    void FromTexture(BLAengine::Texture2D* texture)
+    void FromTexture(BLA::Texture2D* texture)
     {
         m_name = texture->GetName();
         m_nComponents = texture->m_nComponents;
@@ -24,9 +24,9 @@ public:
         m_height = texture->m_height;
         m_data = texture->m_data;
     }
-    BLAengine::Texture2D* BuildTexture()
+    BLA::Texture2D* BuildTexture()
     {
-        return new BLAengine::Texture2D(m_name, m_nComponents, m_data, m_width, m_height);
+        return new BLA::Texture2D(m_name, m_nComponents, m_data, m_width, m_height);
     }
 
 private:

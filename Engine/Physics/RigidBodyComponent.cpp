@@ -4,7 +4,7 @@
 
 #include <Core/GameObject.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 BeginBehaviorDescription(RigidBodyComponent, Dependencies(RootSystem))
 Expose(m_applyGravity)
@@ -24,9 +24,9 @@ void RigidBodyComponent::SetCollider(ColliderComponent* collider)
 
 void RigidBodyComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
 {
-    MeshColliderComponent* newMeshColliderComponent = nullptr;// BLA_CREATE_COMPONENT(MeshColliderComponent, GetOwnerObject());
+    MeshCollider* newMeshColliderComponent = nullptr;// BLA_CREATE_COMPONENT(MeshCollider, GetOwnerObject());
     newMeshColliderComponent->SetColliderMesh(mesh);
-    m_associatedCollider = newMeshColliderComponent;
+    // m_associatedCollider = newMeshColliderComponent;
 }
 
 void RigidBodyComponent::Init()

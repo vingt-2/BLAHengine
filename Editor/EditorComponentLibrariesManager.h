@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/ComponentLibraries.h"
 
-namespace BLAengine
+namespace BLA
 {
 	class EditorComponentLibrariesManager : public ComponentLibrariesManager
 	{

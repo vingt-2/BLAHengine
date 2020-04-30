@@ -118,31 +118,31 @@ void Dualshock4::ReportInputsToManager()
     GetLeftJoystick(leftAnalog[0], leftAnalog[1]);
     GetRightJoystick(rightAnalog[0], rightAnalog[1]);
 
-    BLAengine::InputStateSetter::SetGamepadSticks(leftAnalog, rightAnalog);
+    BLA::InputStateSetter::SetGamepadSticks(leftAnalog, rightAnalog);
 
     int dpad[2];
     GetDPad(dpad[0], dpad[1]);
 
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN, 0.f, GetCrossButton());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_LEFT, 0.f, GetSquareButton());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_UP, 0.f, GetTriangleButton());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_RIGHT, 0.f, GetCircleButton());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN, 0.f, GetCrossButton());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_LEFT, 0.f, GetSquareButton());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_UP, 0.f, GetTriangleButton());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_RIGHT, 0.f, GetCircleButton());
 
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_DPAD_UP, 0.f, dpad[1] == 1);
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_DPAD_DOWN, 0.f, dpad[1] == -1);
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_RIGHT, 0.f, dpad[0] == -1);
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_LEFT, 0.f, dpad[0] == -1);
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_DPAD_UP, 0.f, dpad[1] == 1);
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_DPAD_DOWN, 0.f, dpad[1] == -1);
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_RIGHT, 0.f, dpad[0] == -1);
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_LEFT, 0.f, dpad[0] == -1);
 
 
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_LEFT_SHOULDER, 0.f, GetL1Button());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_LEFT_TRIGGER, 0.f, GetL2Button());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_LEFT_STICK, 0.f, GetL3Button());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_SHOULDER, 0.f, GetR1Button());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_TRIGGER, 0.f, GetR2Button());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_STICK, 0.f, GetR3Button());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_LEFT_SHOULDER, 0.f, GetL1Button());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_LEFT_TRIGGER, 0.f, GetL2Button());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_LEFT_STICK, 0.f, GetL3Button());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_SHOULDER, 0.f, GetR1Button());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_TRIGGER, 0.f, GetR2Button());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_RIGHT_STICK, 0.f, GetR3Button());
 
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_SELECT, 0.f, GetSquareButton());
-    BLAengine::InputStateSetter::SetGamepadButton(0, BLAengine::BLAGamepadButtons::BLA_GAMEPAD_START, 0.f, GetOptionsButton());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_SELECT, 0.f, GetSquareButton());
+    BLA::InputStateSetter::SetGamepadButton(0, BLA::BLAGamepadButtons::BLA_GAMEPAD_START, 0.f, GetOptionsButton());
 }
 
 int Dualshock4::ReadInt16LE(unsigned char buffer[], int index)

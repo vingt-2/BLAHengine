@@ -7,7 +7,7 @@
 //TODO: Cmake should handle that ...
 #define BLA_CONFIGURATION "Release"
 
-using namespace BLAengine;
+using namespace BLA;
 
 void ComponentLibrariesManager::LoadLibraries()
 {

@@ -8,10 +8,12 @@
 // Collision detection Library !
 #include "External/libcoldet/coldet.h"
 
-namespace BLAengine
+namespace BLA
 {
-    class BLACORE_API ColliderComponent : public GameComponent
-    {
+    class MeshCollider;
+    class SphereCollider;
+
+    BeginComponentDeclaration(BLAEngine, ColliderComponent)
     public:
         struct CollisionContact
         {
@@ -22,29 +24,24 @@ namespace BLAengine
             float m_t;
         };
 
-        ColliderComponent(GameObject parentObject) :
-            GameComponent(parentObject)
-        {};
-
         ~ColliderComponent() {};
 
-        virtual blaBool CollideWithRay(const Ray& ray, CollisionContact& outCollision) = 0;
-        virtual blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision) = 0;
-        virtual float GetBoundingRadius() = 0;
-    };
+        virtual blaBool CollideWithRay(const Ray& ray, CollisionContact& outCollision) { return false; };
+        virtual blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision) { return false; };
+        virtual float GetBoundingRadius() { return 0; };
+    EndComponentDeclaration()
 
-    class BLACORE_API MeshColliderComponent : public ColliderComponent
+    class BLACORE_API MeshCollider
     {
     public:
-        MeshColliderComponent(GameObject gameObject);
-        ~MeshColliderComponent() override;
+        ~MeshCollider();
 
         void SetColliderMesh(TriangleMesh* mesh);
 
         void Update() {};
 
-        blaBool CollideWithRay(const Ray &ray, CollisionContact& outCollision);
-        blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision);
+        blaBool CollideWithRay(const blaScaledTransform& transform, const Ray& ray, ColliderComponent::CollisionContact& outCollision);
+        blaBool CollideWithCollider(const ColliderComponent& collider, ColliderComponent::CollisionContact& outCollision);
 
         float GetBoundingRadius() { return m_boundingRadius; }
 
@@ -60,21 +57,21 @@ namespace BLAengine
         void GenerateCollisionModel();
     };
 
-    class BLACORE_API SphereColliderComponent : public ColliderComponent
+    class BLACORE_API SphereCollider
     {
     public:
-        SphereColliderComponent(GameObject parentObject) : ColliderComponent(parentObject) {}
+        SphereCollider(GameObject parentObject) {}
 
         void SetSize(float size) { m_boundingRadius = size; }
 
-        ~SphereColliderComponent() {};
+        ~SphereCollider() {};
 
         void Update() {};
 
         float GetBoundingRadius() { return m_boundingRadius; }
 
-        blaBool CollideWithRay(const Ray &ray, CollisionContact& outCollision);
-        blaBool CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision);
+        blaBool CollideWithRay(const blaScaledTransform& transform, const Ray& ray, ColliderComponent::CollisionContact& outCollision);
+        blaBool CollideWithCollider(const ColliderComponent& collider, ColliderComponent::CollisionContact& outCollision);
 
     private:
         float m_boundingRadius;

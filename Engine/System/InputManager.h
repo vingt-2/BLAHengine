@@ -4,7 +4,7 @@
 #include <BLASingleton.h>
 #include <Maths/Maths.h>
 
-namespace BLAengine
+namespace BLA
 {
     class InputManager;
 

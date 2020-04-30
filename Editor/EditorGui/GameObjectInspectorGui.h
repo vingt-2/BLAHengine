@@ -3,7 +3,7 @@
 #include "Core/GameObject.h"
 #include "Gui/GuiManager.h"
 
-namespace BLAengine
+namespace BLA
 {
     class GameObjectInspector
     {

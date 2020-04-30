@@ -11,7 +11,7 @@
 
 struct GLFWwindow;
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API BlaGuiManager
     {

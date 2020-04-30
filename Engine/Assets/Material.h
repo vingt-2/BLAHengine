@@ -5,7 +5,7 @@
 
 #include "Texture.h"
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API Material : public Asset
     {

@@ -2,7 +2,7 @@
 #include <utility>
 #include <vector>
 
-using namespace BLAengine;
+using namespace BLA;
 
 #define BLA_IK_CONVERGENCE_EPSILON 0.001f
 

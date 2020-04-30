@@ -10,7 +10,7 @@
     This is the tree node that holds information about a specific joint. A skeleton is a tree of these things.
 */
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API SkeletonJoint : public IntrusiveTree<SkeletonJoint>
     {

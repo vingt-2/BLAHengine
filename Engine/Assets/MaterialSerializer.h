@@ -11,7 +11,7 @@ public:
 
     MaterialSerializer() = default;
 
-    void FromMaterial(BLAengine::Material* material)
+    void FromMaterial(BLA::Material* material)
     {
         m_name = material->GetName();
         for (auto texturePair : material->m_textureSamplerAttributes)
@@ -20,12 +20,12 @@ public:
             m_textureHandles.push_back(texturePair.second);
         }
     }
-    BLAengine::Material* BuildMaterial()
+    BLA::Material* BuildMaterial()
     {
         if (m_textureNames.size() != m_textureHandles.size())
             return nullptr;
 
-        BLAengine::Material* mat = new BLAengine::Material(m_name);
+        BLA::Material* mat = new BLA::Material(m_name);
 
         for (size_t i = 0; i < m_textureHandles.size(); i++)
         {

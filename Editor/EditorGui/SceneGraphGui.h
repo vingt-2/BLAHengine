@@ -4,7 +4,7 @@
 #include "Core/GameObject.h"
 #include "Gui/GuiElements.h"
 
-namespace BLAengine
+namespace BLA
 {
     class SceneGraphGui
     {

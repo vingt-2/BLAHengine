@@ -3,7 +3,7 @@
 
 #include <Geometry/TriangleMesh.h>
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API MeshAsset : public Asset
     {

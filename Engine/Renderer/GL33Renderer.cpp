@@ -7,7 +7,7 @@
 #include "Core/TransformComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 TriangleMesh g_PointLightRenderSphere = PrimitiveGeometry::MakeSphere(1.f);
 
@@ -733,7 +733,7 @@ void GL33Renderer::SetRenderSize(blaIVec2 renderSize)
     Renderer::SetRenderSize(renderSize);
 }
 
-int BLAengine::GL33Renderer::SynchWithRenderManager()
+int BLA::GL33Renderer::SynchWithRenderManager()
 {
     if (!m_renderingManager)
         return 0;
@@ -1108,7 +1108,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     m_glResources.GLLoadShaderProgram(pointLightShader);
 }
 
-void BLAengine::GL33Renderer::SwitchRenderingManager(RenderingManager * renderingManager)
+void BLA::GL33Renderer::SwitchRenderingManager(RenderingManager * renderingManager)
 {
     CleanUpPools();
 

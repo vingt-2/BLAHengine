@@ -1,7 +1,7 @@
 #pragma once
 #include "StdInclude.h"
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API Asset
     {

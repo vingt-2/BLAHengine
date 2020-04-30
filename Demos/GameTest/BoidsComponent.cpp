@@ -12,7 +12,7 @@
 
 #include <random>
 
-namespace BLAengine
+namespace BLA
 {
     DeclareConsoleVariable(float, BoidStiffness, 20.f)
     DeclareConsoleVariable(float, InterBoidStiffness, 0.05f)
@@ -20,7 +20,7 @@ namespace BLAengine
     DeclareConsoleVariable(float, BoidDamping, 3.f)
 
     // Target should be system unique for example ... To store in a system state ?
-    BeginComponentDeclaration(DemosLibrary, BoidComponent)
+    BeginComponentDeclaration(BLADemos, BoidComponent)
         GameObject m_target;
         blaVec3 m_color;
         blaF32 m_hominStiffnessMult;
@@ -36,7 +36,7 @@ namespace BLAengine
         Expose(m_color)
     EndComponentDescription()
 
-    DeclareComponentSystem(DemosLibrary, IntegrateBoidSystem, InputComponents(BoidComponent, TransformComponent), OutputComponents(RigidBodyComponent));
+    DeclareComponentSystem(BLADemos, IntegrateBoidSystem, InputComponents(BoidComponent, TransformComponent), OutputComponents(RigidBodyComponent));
     RegisterComponentSystem(IntegrateBoidSystem, Dependencies(RootSystem));
 
     std::random_device g_rd2;
@@ -81,7 +81,7 @@ namespace BLAengine
         }
     }
 
-    DeclareComponentSystem(DemosLibrary, UpdateBoidTracers, InputComponents(TransformComponent), OutputComponents(BoidComponent));
+    DeclareComponentSystem(BLADemos, UpdateBoidTracers, InputComponents(TransformComponent), OutputComponents(BoidComponent));
     RegisterComponentSystem(UpdateBoidTracers, Dependencies(IntegrateBoidSystem));
 
     template <>
@@ -121,6 +121,7 @@ namespace BLAengine
             boidComponent->m_hominStiffnessMult = dist(g_dgen);
             boidComponent->m_interBoidStiffnessMult = dist(g_dgen);
             boidComponent->m_distanceMult = normalDist(g_dgen);
+            boidComponent->m_target = GameObject(BlaStringId("BoidTarget"));
 
             blaScaledTransform s(blaVec3(1.f), blaPosQuat(blaVec3(dist(g_dgen), dist(g_dgen), dist(g_dgen)), blaPosQuat::QuatIdentity()));
 

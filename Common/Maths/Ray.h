@@ -2,7 +2,7 @@
 #include "Maths.h"
 #include "../StdInclude.h"
 
-namespace BLAengine
+namespace BLA
 {
     class RaycastHit
     {

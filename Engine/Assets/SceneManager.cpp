@@ -7,9 +7,9 @@
 
 #pragma optimize("", off)
 
-using namespace BLAengine;
+using namespace BLA;
 
-BLAengine::SceneManager::SceneManager()
+BLA::SceneManager::SceneManager()
 {
     m_currentSceneFilePath = "";
 }

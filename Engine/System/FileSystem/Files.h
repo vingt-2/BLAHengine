@@ -4,7 +4,7 @@
 
 #include <StdInclude.h>
 
-namespace BLAengine
+namespace BLA
 {
     typedef blaU64 BlaFileTime;
     typedef blaU64 BlaFileSize;

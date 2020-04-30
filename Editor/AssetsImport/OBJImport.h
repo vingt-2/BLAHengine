@@ -2,7 +2,7 @@
 
 #include <Geometry/TriangleMesh.h>
 
-namespace BLAengine
+namespace BLA
 {
     class OBJImport
     {

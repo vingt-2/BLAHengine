@@ -14,7 +14,7 @@
 
 #define MIN_SCALE_VALUE -999999999.f// Wanna not let people make inverted scales ? use 0.0001f
 
-using namespace BLAengine;
+using namespace BLA;
 
 GizmoManager::GizmoManager() : m_gizmoController(nullptr)
 {}
@@ -346,20 +346,20 @@ void TranslationGizmoControl::Update()
         }
     }
 
-    blaVec3 color = currentScreenAxis == X_AXIS ? BLAColors::WHITE : BLAColors::RED;
+    blaVec3 color = currentScreenAxis == X_AXIS ? BLA::WHITE : BLA::RED;
     DebugDraw::DrawLine(transform.GetPosition(), transform.GetPosition() + objectX * d, color);
     blaVec3 coneSize = coneVerticalScaling * halfArrowThickness;
     DebugDraw::DrawArbitraryGeometry(xT, coneSize, cone, blaVec4(color, 0.8f));
 
-    color = currentScreenAxis == Y_AXIS ? BLAColors::WHITE : BLAColors::GREEN;
+    color = currentScreenAxis == Y_AXIS ? BLA::WHITE : BLA::GREEN;
     DebugDraw::DrawLine(transform.GetPosition(), transform.GetPosition() + objectY * d, color);
     DebugDraw::DrawArbitraryGeometry(yT, coneSize, cone, blaVec4(color, 0.8f));
 
-    color = currentScreenAxis == Z_AXIS ? BLAColors::WHITE : BLAColors::BLUE;
+    color = currentScreenAxis == Z_AXIS ? BLA::WHITE : BLA::BLUE;
     DebugDraw::DrawLine(transform.GetPosition(), transform.GetPosition() + objectZ * d, color);
     DebugDraw::DrawArbitraryGeometry(zT, coneSize, cone, blaVec4(color, 0.8f));
 
-    color = currentScreenAxis == CENTER_AXIS ? BLAColors::WHITE : BLAColors::YELLOW;
+    color = currentScreenAxis == CENTER_AXIS ? BLA::WHITE : BLA::YELLOW;
     DebugDraw::DrawPlainOBB(transform.GetPosQuat(), blaVec3(0.94f * halfArrowThickness), blaVec4(color, 0.8f));
     DebugDraw::DrawOBB(transform.GetPosQuat(), blaVec3(0.95f * halfArrowThickness), color);
 
@@ -515,22 +515,22 @@ void ScaleGizmoControl::Update()
         }
     }
 
-    blaVec3 color = currentScreenAxis == X_AXIS ? BLAColors::WHITE : BLAColors::RED;
+    blaVec3 color = currentScreenAxis == X_AXIS ? BLA::WHITE : BLA::RED;
     DebugDraw::DrawLine(transform.GetPosition(), xT.GetTranslation3() - objectX * halfScale, color);
     DebugDraw::DrawPlainOBB(xT, 0.99f * blaVec3(halfScale), blaVec4(color, 0.8f));
     DebugDraw::DrawOBB(xT, blaVec3(halfScale), color);
 
-    color = currentScreenAxis == Y_AXIS ? BLAColors::WHITE : BLAColors::GREEN;
+    color = currentScreenAxis == Y_AXIS ? BLA::WHITE : BLA::GREEN;
     DebugDraw::DrawLine(transform.GetPosition(), yT.GetTranslation3() - objectY * halfScale, color);
     DebugDraw::DrawPlainOBB(yT, 0.99f * blaVec3(halfScale), blaVec4(color, 0.8f));
     DebugDraw::DrawOBB(yT, blaVec3(halfScale), color);
 
-    color = currentScreenAxis == Z_AXIS ? BLAColors::WHITE : BLAColors::BLUE;
+    color = currentScreenAxis == Z_AXIS ? BLA::WHITE : BLA::BLUE;
     DebugDraw::DrawLine(transform.GetPosition(), zT.GetTranslation3() - objectZ * halfScale, color);
     DebugDraw::DrawPlainOBB(zT, 0.99f * blaVec3(halfScale), blaVec4(color, 0.8f));
     DebugDraw::DrawOBB(zT, blaVec3(halfScale), color);
 
-    color = currentScreenAxis == CENTER_AXIS ? BLAColors::WHITE : BLAColors::YELLOW;
+    color = currentScreenAxis == CENTER_AXIS ? BLA::WHITE : BLA::YELLOW;
     DebugDraw::DrawPlainOBB(transform.GetPosQuat(), blaVec3(halfScale), blaVec4(color, 0.8f));
     DebugDraw::DrawOBB(transform.GetPosQuat(), blaVec3(halfScale), color);
 
@@ -651,13 +651,13 @@ void RotationGizmoControl::Update()
     blaScaledTransform cameraTransform = camera->GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
     blaVec3 camForward = cameraTransform.GetRotation() * blaVec3(0.f, 0.f, 1.f);
 
-    blaVec3 color = currentScreenAxis == X_AXIS ? BLAColors::WHITE : BLAColors::RED;
+    blaVec3 color = currentScreenAxis == X_AXIS ? BLA::WHITE : BLA::RED;
     DebugDraw::DrawCircle(transform.GetPosition(), objectX, radius, color);
 
-    color = currentScreenAxis == Y_AXIS ? BLAColors::WHITE : BLAColors::GREEN;
+    color = currentScreenAxis == Y_AXIS ? BLA::WHITE : BLA::GREEN;
     DebugDraw::DrawCircle(transform.GetPosition(), objectY, radius, color);
 
-    color = currentScreenAxis == Z_AXIS ? BLAColors::WHITE : BLAColors::BLUE;
+    color = currentScreenAxis == Z_AXIS ? BLA::WHITE : BLA::BLUE;
     DebugDraw::DrawCircle(transform.GetPosition(), objectZ, radius, color);
 
 	// Fix the plain spheres maybe ?

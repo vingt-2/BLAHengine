@@ -3,7 +3,7 @@
 #include <Geometry/TriangleMesh.h>
 #include <glm/common.hpp>
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API PrimitiveGeometry
     {

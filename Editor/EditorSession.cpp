@@ -18,7 +18,7 @@
 #include "Core/TransformComponent.h"
 #include "EditorSession.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 DeclareConsoleVariable(bool, shouldReloadLibraries, false)
 
@@ -46,7 +46,7 @@ void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
     }
 }
 
-namespace BLAengine
+namespace BLA
 {
     struct EditorState
     {
@@ -318,7 +318,7 @@ void EditorSession::EditorUpdate()
     {
         if (MeshRendererComponent* meshRenderer = m_selectedObject.GetComponent<MeshRendererComponent>())
         {
-            //DebugDraw::DrawArbitraryGeometry(m_selectedObject->GetTransform().GetPosQuat(), m_selectedObject->GetTransform().GetScale(), meshRenderer->m_mesh->m_triangleMesh, blaVec4(BLAColors::ORANGE, 0.3f));
+            //DebugDraw::DrawArbitraryGeometry(m_selectedObject->GetTransform().GetPosQuat(), m_selectedObject->GetTransform().GetScale(), meshRenderer->m_mesh->m_triangleMesh, blaVec4(BLA::ORANGE, 0.3f));
         }
     }
 
@@ -465,7 +465,7 @@ bool EditorSession::ImportMesh(blaString filepath, blaString name) const
 
     GameObject visualizerObject = m_scene->CreateObject(GenerateBlaStringId(name));
     MeshRendererComponent* meshRenderer = visualizerObject.CreateComponent<MeshRendererComponent>();
-    //MeshColliderComponent* colliderComp = visualizerObject.CreateComponent<MeshColliderComponent>();
+    //MeshCollider* colliderComp = visualizerObject.CreateComponent<MeshCollider>();
 
     meshRenderer->MeshAssetName = name;
     meshRenderer->MaterialName = "BlankDiffuseMat";

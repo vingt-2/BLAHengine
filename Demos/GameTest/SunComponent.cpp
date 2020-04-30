@@ -5,9 +5,9 @@
 #include <Core/TransformComponent.h>
 #include <Core/BehaviorComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
-    BeginBehaviorDeclaration(DemosLibrary, SunComponent)
+    BeginBehaviorDeclaration(BLADemos, SunComponent)
 
         float m_speed = -0.0002f;
 

@@ -8,12 +8,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 GroupSources(./)
 
-if(MSVC)
-    add_definitions(/FI"${CMAKE_CURRENT_SOURCE_DIR}/GeneratedProjectDefinition.h")
-else()
-    # GCC or Clang
-    add_definitions(-include ${CMAKE_CURRENT_SOURCE_DIR}/GeneratedProjectDefinition.h)
-endif()
+GenerateProjectDefinitionFile(BLADemos)
 
 include_directories(
 ${CMAKE_CURRENT_SOURCE_DIR} 
@@ -29,6 +24,9 @@ set_target_properties(BLADemos
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Cooked/Libraries/"
 )
+
+#TODO: It'd be great to take that down to 11 ... (to of my mind we need to get rid of std::apply)
+set_property(TARGET BLADemos PROPERTY CXX_STANDARD 17)
 
 if(WIN32)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")

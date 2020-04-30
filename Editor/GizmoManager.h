@@ -3,7 +3,7 @@
 #include "Core/GameObject.h"
 #include "Maths/Maths.h"
 
-namespace BLAengine
+namespace BLA
 {
     class Scene;
     class GizmoControl;

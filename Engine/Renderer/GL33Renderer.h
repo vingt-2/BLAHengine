@@ -6,7 +6,7 @@
 #include "Renderer.h"
 #include "GL33Shader.h"
 
-namespace BLAengine
+namespace BLA
 {
     class DirectionalShadowRender;
 

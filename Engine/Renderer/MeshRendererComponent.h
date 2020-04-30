@@ -7,9 +7,9 @@
 
 #define BLA_LINE_RENDER 0x0003
 
-namespace BLAengine
+namespace BLA
 {
-    BeginBehaviorDeclaration(BLAEngineNative, MeshRendererComponent)
+    BeginBehaviorDeclaration(BLAEngine, MeshRendererComponent)
         friend class Renderer;
         int m_renderTicket = 0;
 

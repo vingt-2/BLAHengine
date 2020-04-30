@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 void Renderer::SetRenderSize(blaIVec2 renderSize)
 {

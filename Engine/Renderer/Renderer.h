@@ -6,7 +6,7 @@
 
 #include "RenderCamera.h"
 
-namespace BLAengine
+namespace BLA
 {
     class DirectionalLightRender;
     class PointLightRender;

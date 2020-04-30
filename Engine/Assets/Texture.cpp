@@ -2,7 +2,7 @@
 
 #include <RenderBackend.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 #define FOURCC_DXT1 0x31545844 // "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII

@@ -1,7 +1,7 @@
 #pragma once
 #include "ShadowRender.h"
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API DirectionalLightRender
     {

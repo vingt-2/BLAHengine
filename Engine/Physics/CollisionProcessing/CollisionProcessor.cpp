@@ -6,7 +6,7 @@
 
 #include "CollisionProcessor.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 CollisionProcessor::CollisionProcessor(Timer* time, float* timestepPtr) :
     m_flagInterpolateNormals(false),

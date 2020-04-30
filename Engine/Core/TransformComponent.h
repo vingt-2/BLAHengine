@@ -2,9 +2,9 @@
 #include <Maths/Maths.h>
 #include "Core/GameComponent.h"
 
-namespace BLAengine
+namespace BLA
 {
-    BeginComponentDeclaration(BLAEngineNative, TransformComponent)
+    BeginComponentDeclaration(BLAEngine, TransformComponent)
 
         blaScaledTransform GetTransform();
         blaScaledTransform GetLocalTransform() const;

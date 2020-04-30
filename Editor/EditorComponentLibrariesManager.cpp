@@ -1,15 +1,15 @@
 #include <windows.h>
 #include "System/FileSystem/Files.h"
 #include "System/Console.h"
-#include "core/ComponentSystems.h"
+#include "Core/ComponentSystems.h"
 #include "Core/Scene.h"
 
 #include "EditorComponentLibrariesManager.h"
 
-//TODO: Cmake handles that ...
+//TODO: Cmake should handle that ...
 #define BLA_CONFIGURATION "RelWithDebInfo"
 
-using namespace BLAengine;
+using namespace BLA;
 
 void EditorComponentLibrariesManager::LoadLibraries()
 {

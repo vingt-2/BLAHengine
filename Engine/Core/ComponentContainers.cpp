@@ -1,6 +1,6 @@
 #include "ComponentContainers.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 GameComponent* ComponentContainer::AddComponent(GameObjectID object, blaStringId componentId)
 {

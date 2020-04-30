@@ -4,9 +4,9 @@
 
 #include "GameComponent.h"
 
-namespace BLAengine
+namespace BLA
 {
-    BeginComponentDeclaration(BLAEngineNative, CameraComponent)
+    BeginComponentDeclaration(BLAEngine, CameraComponent)
         void Init() override;
 
         blaScaledTransform  m_viewTransform;

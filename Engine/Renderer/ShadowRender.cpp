@@ -1,7 +1,7 @@
 #include "ShadowRender.h"
 #include "Core/TransformComponent.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 blaMat4 DirectionalShadowRender::getShadowViewProjection()
 {

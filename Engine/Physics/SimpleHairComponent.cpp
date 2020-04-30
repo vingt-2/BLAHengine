@@ -6,7 +6,7 @@
 
 #include <random>
 
-using namespace BLAengine;
+using namespace BLA;
 
 std::default_random_engine g_random_generator;
 

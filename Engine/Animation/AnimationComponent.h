@@ -3,9 +3,9 @@
 
 #include "SkeletonAnimationData.h"
 
-namespace BLAengine
+namespace BLA
 {
-    BeginBehaviorDeclaration(BLAEngineNative, AnimationComponent)
+    BeginBehaviorDeclaration(BLAEngine, AnimationComponent)
         void Shutdown() override;
 
         SkeletonAnimationData* m_animation = nullptr;

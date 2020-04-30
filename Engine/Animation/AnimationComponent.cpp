@@ -6,7 +6,7 @@
 #include "Core/DebugDraw.h"
 #include "Core/Scene.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 BeginBehaviorDescription(AnimationComponent, Dependencies(RootSystem))
 Expose(m_play)
@@ -75,7 +75,7 @@ void AnimationComponent::Update()
             t.SetTranslation3(origin + m_scaleFactor * t.GetTranslation3());
             h = 0.3f;
 
-            DebugDraw::DrawPlainOBB(t, blaVec3(0.5f * h, 0.1f, 0.1f), blaVec4(BLAColors::ORANGE, 0.6f));
+            DebugDraw::DrawPlainOBB(t, blaVec3(0.5f * h, 0.1f, 0.1f), blaVec4(BLA::ORANGE, 0.6f));
             DebugDraw::DrawOBB(t, blaVec3(0.5f * h, 0.1f, 0.1f), blaVec3(0));
         }
     }

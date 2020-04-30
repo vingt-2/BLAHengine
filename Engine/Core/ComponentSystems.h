@@ -14,10 +14,15 @@
 #define DeclareComponentSystem(ProjectName, SystemName, input_list, output_list)   \
     typedef TypedComponentSystem<IOTS<EXPAND(input_list)>, IOTS<EXPAND(output_list)>> SystemName;
 
+#define BeginComponentSystemDeclaration(ProjectName, SystemName, input_list, output_list)   \
+    class BLA_COMPONENT_API_IMPORT_EXPORT_SELECT(ProjectName) SystemName : public TypedComponentSystem<IOTS<EXPAND(input_list)>, IOTS<EXPAND(output_list)>> {
+
+#define EndComponentSystemDeclaration() };
+
 #define RegisterComponentSystem(SystemName, ...) \
     SystemName g_##SystemName(BlaStringId(#SystemName), blaVector<blaStringId>({ ENUM_WITH_PREFIX_MACRO(IND_DEP, NOTHING, EXPAND(__VA_ARGS__))}));
 
-namespace BLAengine
+namespace BLA
 {
     typedef const blaVector<blaStringId> SystemObjectsIterator;
 
@@ -152,7 +157,7 @@ namespace BLAengine
     };
 
     // The root system does nothing. A system that has no dependencies on any actual system depends on the root
-    DeclareComponentSystem(BLAEngineNative, RootSystem, InputComponents(), OutputComponents())
+    DeclareComponentSystem(BLAEngine, RootSystem, InputComponents(), OutputComponents())
 }
 
 //

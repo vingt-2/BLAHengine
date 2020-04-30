@@ -3,7 +3,7 @@
 #include <StdInclude.h>
 #include <BLASingleton.h>
 
-namespace BLAengine
+namespace BLA
 {
     class Console;
     class GL33Renderer;

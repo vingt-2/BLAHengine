@@ -2,7 +2,7 @@
 
 #include "Geometry/TriangleMesh.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(DebugDraw)
 

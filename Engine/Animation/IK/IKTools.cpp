@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-using namespace BLAengine;
+using namespace BLA;
 
 #define BLA_IK_CONVERGENCE_EPSILON 0.001f
 
@@ -23,7 +23,7 @@ void IKChainJoint::GetEndEffectorRecursive(IKChainJoint* joint, blaVector<IKChai
     }
 }
 
-void BLAengine::IKChainJoint::ResetIKChainRecursive(IKChainJoint* joint)
+void BLA::IKChainJoint::ResetIKChainRecursive(IKChainJoint* joint)
 {
     joint->m_jointTransform = joint->m_bindPoseTransform;
 

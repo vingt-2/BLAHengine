@@ -8,7 +8,7 @@
 #define M_PI       float(3.14159265358979323846)
 #endif
 
-using namespace BLAengine;
+using namespace BLA;
 
 //TODO: Extract asset data to the Asset folder out of Game
 #include <Animation/SkeletonAnimationData.h>

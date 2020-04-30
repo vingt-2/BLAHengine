@@ -4,7 +4,7 @@
 
 #include <StdInclude.h>
 
-namespace BLAengine
+namespace BLA
 {
     class BlaGuiElement;
 

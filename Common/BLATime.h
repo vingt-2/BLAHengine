@@ -2,7 +2,7 @@
 
 #include "External/date.h"
 
-namespace BLAengine
+namespace BLA
 {
     typedef std::chrono::system_clock::time_point blaTime;
 }

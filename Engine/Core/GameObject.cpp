@@ -4,7 +4,7 @@
 
 #define SCENE Scene::GetSingletonInstance()
 
-using namespace BLAengine;
+using namespace BLA;
 
 void GameObject::SetParent(GameObject parent) const
 {

@@ -1,6 +1,6 @@
 #include "TriangleMesh.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 #define INVALID_INDEX 0xFFFFFFFF
 

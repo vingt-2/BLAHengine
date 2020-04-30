@@ -1,7 +1,7 @@
 #include "RenderWindow.h"
 #include "InputManager.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 #ifdef GLFW_INTERFACE
 

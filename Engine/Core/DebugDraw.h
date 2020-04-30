@@ -11,7 +11,7 @@ SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and
 And Common m_debug asserts
 */
 
-namespace BLAengine
+namespace BLA
 {
     class TriangleMesh;
 

@@ -1,6 +1,6 @@
 #include "RenderCamera.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 void RenderCamera::AttachCamera(CameraComponent* camera)
 {

@@ -7,9 +7,9 @@
 #include <System/ControllerInputs/Dualshock4.h>
 #include <Core/BehaviorComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
-BeginBehaviorDeclaration(DemosLibrary, TestPlayerComponent)
+BeginBehaviorDeclaration(BLADemos, TestPlayerComponent)
     void Init() override;
 	
 	float m_speed = 1.f;

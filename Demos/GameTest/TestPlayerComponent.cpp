@@ -7,7 +7,7 @@
 #include <Core/TransformComponent.h>
 #include <Core/Timer.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 #define MAX(a,b) a > b ? a : b
 
@@ -62,7 +62,7 @@ void TestPlayerComponent::Update()
 
         blaVec3 myPosition = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
 
-        DebugDraw::DrawRay(Ray(myPosition, controlInput, 5.f * glm::length(controlInput)), BLAColors::LIME);
+        DebugDraw::DrawRay(Ray(myPosition, controlInput, 5.f * glm::length(controlInput)), BLA::LIME);
 
         if (inputs->GetGamepadState(BLAGamepadButtons::BLA_GAMEPAD_FACEBUTTON_DOWN).IsRisingEdge())
         {

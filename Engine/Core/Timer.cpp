@@ -1,5 +1,5 @@
 #include "Timer.h"
-using namespace BLAengine;
+using namespace BLA;
 
 Timer::Timer(glm::uint8 timeBufferSize)
 {

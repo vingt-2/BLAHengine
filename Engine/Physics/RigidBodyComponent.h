@@ -4,7 +4,7 @@
 
 #include <Core/BehaviorComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
     class TriangleMesh;
     class ColliderComponent;
@@ -25,7 +25,7 @@ namespace BLAengine
         blaVec3 m_correctionAngularVelocity;
     };
 
-    BeginBehaviorDeclaration(BLAEngineNative, RigidBodyComponent)
+    BeginBehaviorDeclaration(BLAEngine, RigidBodyComponent)
     public:
         blaVec3 m_previousPosition;
         blaVec3 m_previousRotation;

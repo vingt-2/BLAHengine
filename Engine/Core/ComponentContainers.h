@@ -7,7 +7,7 @@
 // TODO: Use per component pool and use placement constructor for instantiation
 // TODO
 
-namespace BLAengine
+namespace BLA
 {
     template <class T>
     using InputComponents = blaHashMap<GameObjectID, const T*, GameObjectID::Hasher>;

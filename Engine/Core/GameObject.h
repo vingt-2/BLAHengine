@@ -4,7 +4,7 @@
 
 #define INVALID_OBJECT_ID GameObjectID("", 0)
 
-namespace BLAengine
+namespace BLA
 {
     class GameComponent;
 

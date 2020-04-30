@@ -9,7 +9,7 @@
 #define INVALID_COMPONENT_ID GameComponentID("", 0)
 
 // Todo: Support component polymorphism ?
-namespace BLAengine
+namespace BLA
 {
     struct ComponentDescriptor : BLAInspectableVariables::ExposedVarTypeDescriptor
     {

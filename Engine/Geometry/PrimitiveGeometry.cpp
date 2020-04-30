@@ -1,6 +1,6 @@
 #include "PrimitiveGeometry.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 TriangleMesh PrimitiveGeometry::MakeCube()
 {

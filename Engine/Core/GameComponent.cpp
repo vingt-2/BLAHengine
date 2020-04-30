@@ -2,7 +2,7 @@
 
 #include <System/Console.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 ComponentDescriptor ms_emptyDescriptor{ GameComponent::InitReflection };
 

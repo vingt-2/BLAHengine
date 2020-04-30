@@ -4,7 +4,7 @@
 #define MAX(a,b) (a > b) ? a : b
 #define MIN(a,b) (a < b) ? a : b
 
-using namespace BLAengine;
+using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(Console);
 
@@ -143,7 +143,7 @@ ConsoleCommandEntry::ConsoleCommandEntry(blaString name) : m_name(name)
 }
 
 template<typename T>
-BLACORE_API T BLAengine::blaFromString(const blaString& str)
+BLACORE_API T BLA::blaFromString(const blaString& str)
 {
     // unimplemented
     // static assert here (see code currently on my laptop ...)
@@ -151,31 +151,31 @@ BLACORE_API T BLAengine::blaFromString(const blaString& str)
 }
 
 template<>
-BLACORE_API int BLAengine::blaFromString(const blaString& str)
+BLACORE_API int BLA::blaFromString(const blaString& str)
 {
     return std::stoi(str);
 }
 
 template<>
-BLACORE_API blaU32 BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaU32 BLA::blaFromString(const blaString& str)
 {
     return std::stoi(str);
 }
 
 template<>
-BLACORE_API float BLAengine::blaFromString(const blaString& str)
+BLACORE_API float BLA::blaFromString(const blaString& str)
 {
     return std::stof(str);
 }
 
 template<>
-BLACORE_API blaString BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaString BLA::blaFromString(const blaString& str)
 {
     return str;
 }
 
 template<>
-BLACORE_API bool BLAengine::blaFromString(const blaString& str)
+BLACORE_API bool BLA::blaFromString(const blaString& str)
 {
     if (str == "true") return true;
     if (str == "1") return true;
@@ -184,31 +184,31 @@ BLACORE_API bool BLAengine::blaFromString(const blaString& str)
 
 //TODO: Find a way to nest that templating ?
 template<>
-BLACORE_API blaVector<blaString> BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaVector<blaString> BLA::blaFromString(const blaString& str)
 {
     return SplitString<blaString>(str, " ");
 }
 
 template<>
-BLACORE_API blaVector<blaU32> BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaVector<blaU32> BLA::blaFromString(const blaString& str)
 {
     return SplitString<blaU32>(str, " ");
 }
 
 template<>
-BLACORE_API blaVector<blaS32> BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaVector<blaS32> BLA::blaFromString(const blaString& str)
 {
     return SplitString<blaS32>(str, " ");
 }
 
 template<>
-BLACORE_API blaVector<blaF32> BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaVector<blaF32> BLA::blaFromString(const blaString& str)
 {
     return SplitString<blaF32>(str, " ");
 }
 
 template<>
-BLACORE_API blaVector<blaBool> BLAengine::blaFromString(const blaString& str)
+BLACORE_API blaVector<blaBool> BLA::blaFromString(const blaString& str)
 {
     return SplitString<blaBool>(str, " ");
 }

@@ -6,7 +6,7 @@
 #include "Core/RenderingManager.h"
 #include "Core/TransformComponent.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 BeginComponentDescription(PointLightComponent)
 Expose(m_radius)

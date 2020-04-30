@@ -8,7 +8,7 @@
 // TODO: Find a better way to register the rendering components ...
 #include "Core/Scene.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_renderType)

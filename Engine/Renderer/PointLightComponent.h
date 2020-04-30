@@ -3,9 +3,9 @@
 #include <Maths/Maths.h>
 #include <Core/BehaviorComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
-    BeginBehaviorDeclaration(BLAEngineNative, PointLightComponent)
+    BeginBehaviorDeclaration(BLAEngine, PointLightComponent)
         void    SetRadiosity(const blaVec3& radiosity) { m_radiosity = radiosity; };
         blaVec3   GetRadiosity() const     { return m_radiosity; };
 

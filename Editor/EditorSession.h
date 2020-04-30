@@ -7,7 +7,7 @@
 #include <EditorGui/SceneGraphGui.h>
 #include "GizmoManager.h"
 
-namespace BLAengine
+namespace BLA
 {
     class CameraController;
     class GameObject;

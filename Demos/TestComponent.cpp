@@ -10,12 +10,12 @@
 #include "EngineInstance.h"
 DLL_PROJECT_DECLARE
 
-namespace BLAengine
+namespace BLA
 {
-	BeginBehaviorDeclaration(DemosLibrary, TestBlaComponent)
+	BeginBehaviorDeclaration(BLADemos, TestBlaComponent)
 
         blaVec3 color;
-
+	
 	EndBehaviorDeclaration()
 
 	BeginBehaviorDescription(TestBlaComponent, Dependencies(RootSystem))

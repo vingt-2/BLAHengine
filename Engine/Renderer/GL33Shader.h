@@ -1,6 +1,6 @@
 #include <StdInclude.h>
 
-namespace BLAengine
+namespace BLA
 {
     class GL33Shader
     {

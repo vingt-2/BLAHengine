@@ -11,7 +11,7 @@
 #define FOURCC_DXT3 0x33545844 // "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // "DXT5" in ASCII
 
-using namespace BLAengine;
+using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(AssetManager);
 
@@ -47,7 +47,7 @@ static blaVector<blaString> FilesInDir(blaString dirname)
     return result;
 }
 
-int BLAengine::AssetManager::LoadCookedAssets()
+int BLA::AssetManager::LoadCookedAssets()
 {
     blaVector<blaString> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
     blaVector<blaString> matNames = FilesInDir(MATERIAL_SUBPATH);
@@ -216,7 +216,7 @@ bool AssetManager::LoadMaterial(blaString filepath)
     return true;
 }
 
-bool BLAengine::AssetManager::SaveMaterial(Material * mat)
+bool BLA::AssetManager::SaveMaterial(Material * mat)
 {
     MaterialSerializer matSerializer;
 
@@ -238,7 +238,7 @@ bool BLAengine::AssetManager::SaveMaterial(Material * mat)
     return true;
 }
 
-bool BLAengine::AssetManager::SaveTexture(Texture2D * tex)
+bool BLA::AssetManager::SaveTexture(Texture2D * tex)
 {
     Texture2DSerializer texture2DSerializer;
 

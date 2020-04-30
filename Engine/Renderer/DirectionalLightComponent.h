@@ -2,9 +2,9 @@
 #include <Maths/Maths.h>
 #include <Core/GameComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
-    BeginComponentDeclaration(BLAEngineNative, DirectionalLightComponent)
+    BeginComponentDeclaration(BLAEngine, DirectionalLightComponent)
         void SetDirection(blaVec3 direction);
         blaVec3 GetDirection();
 

@@ -27,7 +27,7 @@ typedef glm::f64 blaF64;
 typedef std::size_t blaIndex;
 typedef bool blaBool;
 
-namespace BLAColors
+namespace BLA
 {
     static const glm::vec3 RED = glm::vec3(1.f, 0.f, 0.f);
     static const glm::vec3 GREEN = glm::vec3(0.f, 0.5f, 0.f);

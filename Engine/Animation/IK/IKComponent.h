@@ -2,11 +2,11 @@
 
 #include <Core/BehaviorComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
     class IKChainJoint;
 
-    BeginBehaviorDeclaration(BLAEngineNative, IKComponent)
+    BeginBehaviorDeclaration(BLAEngine, IKComponent)
         void Shutdown() override;
 
         IKChainJoint* m_ikChain = nullptr;

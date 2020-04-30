@@ -7,7 +7,7 @@
 // Todo: Move serialization out of here.
 #include "External/rapidjson/prettywriter.h"
 
-using namespace BLAengine;
+using namespace BLA;
 using namespace BLAInspectableVariables;
 
 

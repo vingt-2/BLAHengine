@@ -6,12 +6,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 GroupSources(./)
 
-if(MSVC)
-    add_definitions(/FI"${CMAKE_CURRENT_SOURCE_DIR}/GeneratedProjectDefinition.h")
-else()
-    # GCC or Clang
-    add_definitions(-include ${CMAKE_CURRENT_SOURCE_DIR}/GeneratedProjectDefinition.h)
-endif()
+GenerateProjectDefinitionFile(BLAEditor)
 
 include_directories(
 ${COMMON_INCLUDE_DIR}
@@ -31,6 +26,9 @@ add_custom_command ( TARGET BLAEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:BLAEngine> $<TARGET_FILE_DIR:BLAEditor>
 )
+
+#TODO: It'd be great to take that down to 11 ... (to of my mind we need to get rid of std::apply)
+set_property(TARGET BLAEditor PROPERTY CXX_STANDARD 17)
 
 if(WIN32)
 	set_property(TARGET BLAEditor PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

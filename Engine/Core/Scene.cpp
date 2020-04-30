@@ -3,7 +3,7 @@
 #include "Core/TransformComponent.h"
 #include "Core/ComponentSystems.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(Scene)
 

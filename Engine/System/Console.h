@@ -20,7 +20,7 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
 
 #define DefineConsoleCommand(RetType, CommandName, ...)                                                        \
     RetType CommandName(__VA_ARGS__);                                                                          \
-    struct ConsoleCommandEntry_##CommandName : BLAengine::ConsoleCommandEntry                                  \
+    struct ConsoleCommandEntry_##CommandName : BLA::ConsoleCommandEntry                                  \
     {                                                                                                          \
         ConsoleCommandEntry_##CommandName() : ConsoleCommandEntry(#CommandName) {}                             \
         blaString Call(const blaVector<blaString>& arguments) const override                                   \
@@ -42,7 +42,7 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
     type g_##name = defaultValue;                                               \
     DefineConsoleCommand(int, name, type value) { g_##name = value; return 0; } \
 
-namespace BLAengine
+namespace BLA
 {
     /*
      * Todo: It'll be great if we can have ConsoleCommandDefinition to Component instances (as a seperate type of command) ...

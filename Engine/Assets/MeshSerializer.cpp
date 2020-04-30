@@ -1,5 +1,5 @@
 #include "MeshSerializer.h"
-using namespace BLAengine;
+using namespace BLA;
 
 void TriangleMeshSerializer::vec3VectorToSerializer(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector)
 {

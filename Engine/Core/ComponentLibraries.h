@@ -2,7 +2,7 @@
 #include "StdInclude.h"
 #include "BLAStringID.h"
 
-namespace BLAengine
+namespace BLA
 {
     class GameComponentRegistry;
 	class ComponentSystemsRegistry;

@@ -7,7 +7,7 @@
 #define HAIR_SEGMENT_COUNT 50
 #define HAIR_LENGTH 0.2f
 
-namespace BLAengine
+namespace BLA
 {
     // Should make a big matrix and store everything more contiguous 
     struct HairStrand
@@ -19,7 +19,7 @@ namespace BLAengine
         blaVec3 m_particleVelocities[HAIR_SEGMENT_COUNT + 1];
     };
 
-    BeginComponentDeclaration(BLAEngineNative, SimpleHairComponent)
+    BeginComponentDeclaration(BLAEngine, SimpleHairComponent)
         bool m_isPinned = false;
         bool m_applyGravity = true;
 		bool m_renderDebug = false;

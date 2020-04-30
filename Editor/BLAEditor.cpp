@@ -5,7 +5,7 @@
 #include "System/Console.h"
 #include "BLAStringID.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 void RunEditorSession()
 {

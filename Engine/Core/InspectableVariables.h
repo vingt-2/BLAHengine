@@ -10,7 +10,7 @@
 // Todo: Move MakeEditGuiElement and the JSON serializer stuff outside of here, and even more, outside of Engine...
 // Todo: Make deserializer work either for JSON or binary serialization 
 class BLASerializeWriter;
-namespace BLAengine
+namespace BLA
 {
     class GameObject;
     class GameComponent;

@@ -5,4 +5,4 @@
 
 #include "Physics/SoftBodies/SolftBodiesSystem.h"
 
-using namespace BLAengine;
+using namespace BLA;

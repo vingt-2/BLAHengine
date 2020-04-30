@@ -1,5 +1,5 @@
 #include "Material.h"
-using namespace BLAengine;
+using namespace BLA;
 
 bool Material::AssignTexture(blaString textureName, blaString handleName)
 {

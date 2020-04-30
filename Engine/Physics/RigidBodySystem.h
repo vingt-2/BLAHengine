@@ -1,27 +1,30 @@
 #pragma once
-#include <StdInclude.h>
-#include <Maths/Maths.h>
+#include "StdInclude.h"
+#include "Maths/Maths.h"
+#include "Core/ComponentSystems.h"
 
-namespace BLAengine
+#include "Physics/ColliderComponent.h"
+#include "Physics/RigidBodyComponent.h"
+
+namespace BLA
 {
     class CollisionProcessor;
     class Timer;
     class RigidBodyComponent;
 
-    class BLACORE_API RigidBodySystem
-    {
+    BeginComponentSystemDeclaration(BLAEngine, RigidBodySystem, InputComponents(ColliderComponent), OutputComponents(RigidBodyComponent))
     public:
+        // Todo autogenerate constructor declaration in macro
+        RigidBodySystem(blaStringId name, blaVector<blaStringId> systemDependencies);
+        ~RigidBodySystem() {}
+
         int m_substeps;
         float m_uniformViscosity;
         blaVec3 m_gravity;
         bool m_enableGravity;
         bool m_tieToTime;
 
-        RigidBodySystem(Timer* time);
-        ~RigidBodySystem();
-
         void UpdateSystem();
-        bool RegisterRigidBody(RigidBodyComponent &body);
         float GetTimeStep() { return m_timeStep; };
 
         void EnableSimulation();
@@ -47,5 +50,5 @@ namespace BLAengine
         void UpdateAcceleration(RigidBodyComponent& body);
         void UpdateVelocity(RigidBodyComponent& body);
         void UpdateTransform(RigidBodyComponent& body);
-    };
+    EndComponentSystemDeclaration()
 }

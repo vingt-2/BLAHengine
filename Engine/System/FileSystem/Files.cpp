@@ -6,9 +6,9 @@
 #include <sstream>
 #include "External/Files/dirent.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
-void BLAengine::GetAllContentInDirectory(blaVector<DirectoryEntry>& directoryContent, const blaString& inDirectoryPath)
+void BLA::GetAllContentInDirectory(blaVector<DirectoryEntry>& directoryContent, const blaString& inDirectoryPath)
 {
     cf_dir_t dir;
     cf_dir_open(&dir, inDirectoryPath.c_str());
@@ -49,7 +49,7 @@ void BLAengine::GetAllContentInDirectory(blaVector<DirectoryEntry>& directoryCon
     cf_dir_close(&dir);
 }
 
-void BLAengine::GetDirectoriesInDirectory(blaVector<DirectoryEntry>& directoryContent, const blaString& inDirectoryPath)
+void BLA::GetDirectoriesInDirectory(blaVector<DirectoryEntry>& directoryContent, const blaString& inDirectoryPath)
 {
     cf_dir_t dir;
     cf_dir_open(&dir, inDirectoryPath.c_str());
@@ -76,7 +76,7 @@ void BLAengine::GetDirectoriesInDirectory(blaVector<DirectoryEntry>& directoryCo
     cf_dir_close(&dir);
 }
 
-void BLAengine::GetFilesInDirectory(blaVector<FileEntry>& directoryContent, const blaString& inDirectoryPath)
+void BLA::GetFilesInDirectory(blaVector<FileEntry>& directoryContent, const blaString& inDirectoryPath)
 {
     cf_dir_t dir;
     cf_dir_open(&dir, inDirectoryPath.c_str());
@@ -101,7 +101,7 @@ void BLAengine::GetFilesInDirectory(blaVector<FileEntry>& directoryContent, cons
     cf_dir_close(&dir);
 }
 
-blaString BLAengine::BlaFileTimeToString(BlaFileTime& blaFileTime)
+blaString BLA::BlaFileTimeToString(BlaFileTime& blaFileTime)
 {
     SYSTEMTIME utc;
     ::FileTimeToSystemTime(std::addressof(*(FILETIME*)&blaFileTime), std::addressof(utc));
@@ -119,7 +119,7 @@ blaString BLAengine::BlaFileTimeToString(BlaFileTime& blaFileTime)
     return stm.str();
 }
 
-blaString BLAengine::BlaFileSizeToString(BlaFileSize& blaFileSize)
+blaString BLA::BlaFileSizeToString(BlaFileSize& blaFileSize)
 {
     if (blaFileSize > 10000)
     {
@@ -143,7 +143,7 @@ blaString BLAengine::BlaFileSizeToString(BlaFileSize& blaFileSize)
 
 #include "External/Files/whereami.h"
 
-blaString BLAengine::GetExecutablePath()
+blaString BLA::GetExecutablePath()
 {
     int length = wai_getExecutablePath(NULL, 0, NULL);
 
@@ -160,7 +160,7 @@ blaString BLAengine::GetExecutablePath()
     return r;
 }
 
-blaString BLAengine::GetModulePath()
+blaString BLA::GetModulePath()
 {
     int length = wai_getModulePath(NULL, 0, NULL);
 
@@ -177,7 +177,7 @@ blaString BLAengine::GetModulePath()
     return r;
 }
 
-blaString BLAengine::GetWorkingDir()
+blaString BLA::GetWorkingDir()
 {
 	char buf[256];
 	GetCurrentDirectoryA(256, buf);
@@ -186,7 +186,7 @@ blaString BLAengine::GetWorkingDir()
 	return s + "/";
 }
 
-FileEntry BLAengine::ParseFilePath(const blaString &filepath)
+FileEntry BLA::ParseFilePath(const blaString &filepath)
 {
     FileEntry file;
 

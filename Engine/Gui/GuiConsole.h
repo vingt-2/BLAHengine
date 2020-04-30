@@ -4,7 +4,7 @@
 #include "GuiElements.h"
 
 struct ImGuiInputTextCallbackData;
-namespace BLAengine
+namespace BLA
 {
     class BlaGuiElement;
     class Console;

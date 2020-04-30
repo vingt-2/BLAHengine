@@ -2,7 +2,7 @@
 
 #include <Animation/IK/IKTools.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 BeginBehaviorDescription(IKComponent, Dependencies(RootSystem))
 EndBehaviorDescription()

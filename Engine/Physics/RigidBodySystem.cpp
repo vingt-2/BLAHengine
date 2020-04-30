@@ -6,9 +6,12 @@
 
 #include "RigidBodySystem.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
-RigidBodySystem::RigidBodySystem(Timer* time) :
+RegisterComponentSystem(RigidBodySystem, Dependencies(RootSystem))
+
+RigidBodySystem::RigidBodySystem(blaStringId name, blaVector<blaStringId> systemDependencies) :
+TypedComponentSystem<IOTS<ColliderComponent>, IOTS<RigidBodyComponent>>(name, systemDependencies),
     m_timeStep(0.01f),
     m_uniformViscosity(0.01f),
     m_gravity(blaVec3(0.f, -5.f, 0.f)),
@@ -18,32 +21,33 @@ RigidBodySystem::RigidBodySystem(Timer* time) :
     m_enableGravity(true),
     m_tieToTime(true)
 {
-    m_collisionProcessor = new CollisionProcessor(time, &m_timeStep);
-    m_time = time;
+    m_collisionProcessor = new CollisionProcessor(m_time, &m_timeStep);
     m_timeStep /= sqrtf((float)m_substeps);
 }
 
-
-RigidBodySystem::~RigidBodySystem()
+template <>
+void TypedComponentSystem<IOTS<ColliderComponent>, IOTS<RigidBodyComponent>>::
+Execute(SystemObjectsIterator& systemObjects, InputComponents<ColliderComponent>, OutputComponents<RigidBodyComponent>)
 {
-
+    
 }
 
-bool RigidBodySystem::RegisterRigidBody(RigidBodyComponent &body)
-{
-    m_rigidBodyList.push_back(&body);
-    body.m_registered = true;
-    if (body.GetAssociatedCollider())
-    {
-        m_collisionProcessor->m_bodiesList.push_back(&body);
-        body.m_registered = true;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+
+//bool RigidBodySystem::RegisterRigidBody(RigidBodyComponent &body)
+//{
+//    m_rigidBodyList.push_back(&body);
+//    body.m_registered = true;
+//    if (body.GetAssociatedCollider())
+//    {
+//        m_collisionProcessor->m_bodiesList.push_back(&body);
+//        body.m_registered = true;
+//        return true;
+//    }
+//    else
+//    {
+//        return false;
+//    }
+//}
 
 void RigidBodySystem::EnableSimulation()
 {
@@ -59,7 +63,7 @@ void RigidBodySystem::DisableSimulation()
     m_isSimulating = false;
 }
 
-void BLAengine::RigidBodySystem::SetTimeObject(Timer * time)
+void RigidBodySystem::SetTimeObject(Timer * time)
 {
     m_collisionProcessor->setTimeObject(time);
     m_time = time;

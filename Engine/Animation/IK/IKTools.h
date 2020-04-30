@@ -3,7 +3,7 @@
 #include <StdInclude.h>
 #include <Maths/Maths.h>
 
-namespace BLAengine
+namespace BLA
 {
     class IKChainJoint;
     class SkeletonJoint;

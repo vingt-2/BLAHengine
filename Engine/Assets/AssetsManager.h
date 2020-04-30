@@ -12,7 +12,7 @@
 #define TEXTURE_SUBPATH "./Cooked/Textures/"
 #define MATERIAL_SUBPATH "./Cooked/Materials/"
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API AssetManager
     {

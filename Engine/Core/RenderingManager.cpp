@@ -7,7 +7,7 @@
 
 #pragma optimize("", off)
 
-using namespace BLAengine;
+using namespace BLA;
 
 RenderingManager::RenderingManager(RenderManagerType type)
 {

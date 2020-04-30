@@ -3,7 +3,7 @@
 #include <Maths/Maths.h>
 #include <StdInclude.h>
 
-namespace BLAengine
+namespace BLA
 {
     struct BLACORE_API RenderData
     {

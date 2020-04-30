@@ -18,18 +18,18 @@ public:
     public:
         FaceSerializer() = default;
 
-        void FillData(BLAengine::TriangleMesh::Face f)
+        void FillData(BLA::TriangleMesh::Face f)
         {
             firstEdge = f.firstEdge;
         }
 
-        void LoadData(BLAengine::TriangleMesh::Face &f)
+        void LoadData(BLA::TriangleMesh::Face &f)
         {
             f.firstEdge = firstEdge;
         }
 
     private:
-        BLAengine::TriangleMesh::HeIndx firstEdge;
+        BLA::TriangleMesh::HeIndx firstEdge;
 
         friend class cereal::access;
 
@@ -48,14 +48,14 @@ public:
     public:
         DestVertexSerializer() = default;
 
-        void FillData(BLAengine::TriangleMesh::DestVertex dvert)
+        void FillData(BLA::TriangleMesh::DestVertex dvert)
         {
             pos = dvert.posIndex;
             normal = dvert.normalIndex;
             UV = dvert.uvIndex;
         }
 
-        void LoadData(BLAengine::TriangleMesh::DestVertex &dvert)
+        void LoadData(BLA::TriangleMesh::DestVertex &dvert)
         {
             dvert.posIndex = pos;
             dvert.normalIndex = normal;
@@ -84,7 +84,7 @@ public:
     public:
         HalfEdgeSerializer() = default;
 
-        void FillData(BLAengine::TriangleMesh::HalfEdge he)
+        void FillData(BLA::TriangleMesh::HalfEdge he)
         {
             destVertex = DestVertexSerializer();
             destVertex.FillData(he.destVertex);
@@ -94,7 +94,7 @@ public:
             oppositeHE = he.oppositeHE;
         }
 
-        void LoadData(BLAengine::TriangleMesh::HalfEdge &he)
+        void LoadData(BLA::TriangleMesh::HalfEdge &he)
         {
             destVertex.LoadData(he.destVertex);
             he.borderingFace = borderingFace;
@@ -103,9 +103,9 @@ public:
         }
 
         DestVertexSerializer destVertex;
-        BLAengine::TriangleMesh::FaceIndx borderingFace;
-        BLAengine::TriangleMesh::HeIndx nextHE;
-        BLAengine::TriangleMesh::HeIndx oppositeHE;
+        BLA::TriangleMesh::FaceIndx borderingFace;
+        BLA::TriangleMesh::HeIndx nextHE;
+        BLA::TriangleMesh::HeIndx oppositeHE;
 
     private:
         friend class cereal::access;
@@ -153,8 +153,8 @@ public:
     void vec3serializerVectorTovec3(blaVector<blaVec3> &actualVector, blaVector<vec3serializer> &serialVector);
     void vec2serializerVectorTovec2(blaVector<glm::vec2> &actualVector, blaVector<vec2serializer> &serialVector);
 
-    void BuildFromMesh(BLAengine::MeshAsset* triangleMesh);
-    BLAengine::MeshAsset* BuildMesh();
+    void BuildFromMesh(BLA::MeshAsset* triangleMesh);
+    BLA::MeshAsset* BuildMesh();
 
 private:
 

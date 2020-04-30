@@ -3,7 +3,7 @@
 #include <Core/Scene.h>
 #include <EngineInstance.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObject& object)
 {

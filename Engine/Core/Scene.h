@@ -14,7 +14,7 @@
 // TODO: mmm how about no ? + CameraComponent should be moved out of Core
 #include "Core/CameraComponent.h"
 
-namespace BLAengine
+namespace BLA
 {
     class ComponentSystem;
     class BLACORE_API Scene

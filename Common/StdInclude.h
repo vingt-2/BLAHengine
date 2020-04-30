@@ -49,7 +49,7 @@ using blaPair = std::pair<T, V>;
     )                                                                                   \
     {                                                                                   \
         int engineVersion =                                                             \
-            BLAengine::EngineInstance::GetSingletonInstanceRead()->GetEngineVersion();  \
+            BLA::EngineInstance::GetSingletonInstanceRead()->GetEngineVersion();        \
         if(engineVersion != BLA_ENGINE_VERSION)                                         \
         {                                                                               \
             return false;                                                               \

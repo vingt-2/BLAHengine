@@ -4,7 +4,7 @@
 
 #define SCENE_SUBPATH "./Scenes/"
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API SceneManager
     {

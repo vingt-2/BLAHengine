@@ -2,7 +2,7 @@
 #include <StdInclude.h>
 #include <Maths/Maths.h>
 
-namespace BLAengine
+namespace BLA
 {
     class SkeletonAnimationData;
 

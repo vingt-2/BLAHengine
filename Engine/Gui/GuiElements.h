@@ -5,7 +5,7 @@
 
 //TODO: Hide Render() from the element managers
 
-namespace BLAengine
+namespace BLA
 {
     class BlaGuiElement;
     struct BlaGuiElementEventPayload

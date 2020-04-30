@@ -1,7 +1,10 @@
 #include "ColliderComponent.h"
 #include "Core/TransformComponent.h"
 
-using namespace BLAengine;
+using namespace BLA;
+
+BeginComponentDescription(ColliderComponent)
+EndComponentDescription()
 
 inline blaVec3 Barycentric(blaVec3 p, blaVec3 a, blaVec3 b, blaVec3 c)
 {
@@ -19,16 +22,14 @@ inline blaVec3 Barycentric(blaVec3 p, blaVec3 a, blaVec3 b, blaVec3 c)
     return r;
 }
 
-MeshColliderComponent::MeshColliderComponent(GameObject parentObject) : ColliderComponent(parentObject) {}
-
-MeshColliderComponent::~MeshColliderComponent()
+MeshCollider::~MeshCollider()
 {
     delete m_vertPosIndices;
     delete m_vertNormalIndices;
     delete m_collisionMesh;
 }
 
-void MeshColliderComponent::SetColliderMesh(TriangleMesh* mesh)
+void MeshCollider::SetColliderMesh(TriangleMesh* mesh)
 {
     m_vertPosIndices = new blaVector<blaU32>;
     m_vertNormalIndices = new blaVector<blaU32>;
@@ -40,9 +41,9 @@ void MeshColliderComponent::SetColliderMesh(TriangleMesh* mesh)
     GenerateCollisionModel();
 }
 
-blaBool MeshColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& outCollision)
+blaBool MeshCollider::CollideWithRay(const blaScaledTransform& transform, const Ray& ray, ColliderComponent::CollisionContact& outCollision)
 {
-    blaScaledTransform transform = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
+    // blaScaledTransform transform = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
     
     blaMat4 TransformComponentForCollider;
     transform.GetScaledTransformMatrix(TransformComponentForCollider);
@@ -83,12 +84,12 @@ blaBool MeshColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& 
     return true;
 }
 
-blaBool MeshColliderComponent::CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision)
+blaBool MeshCollider::CollideWithCollider(const ColliderComponent& collider, ColliderComponent::CollisionContact& outCollision)
 {
     return false;
 }
 
-void MeshColliderComponent::GenerateBoundingRadius()
+void MeshCollider::GenerateBoundingRadius()
 {
     blaVec3 maxVert = blaVec3(0);
 
@@ -103,7 +104,7 @@ void MeshColliderComponent::GenerateBoundingRadius()
     m_boundingRadius = length(maxVert);
 }
 
-void MeshColliderComponent::GenerateCollisionModel()
+void MeshCollider::GenerateCollisionModel()
 {
     m_collisionMesh = newCollisionModel3D();
     for (size_t i = 0; i < m_vertPosIndices->size(); i += 3)
@@ -120,9 +121,9 @@ void MeshColliderComponent::GenerateCollisionModel()
     m_collisionMesh->finalize();
 }
 
-blaBool SphereColliderComponent::CollideWithRay(const Ray& ray, CollisionContact& outCollision)
+blaBool SphereCollider::CollideWithRay(const blaScaledTransform& transform, const Ray& ray, ColliderComponent::CollisionContact& outCollision)
 {
-    blaScaledTransform transform = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
+    //blaScaledTransform transform = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
 
     blaVec3 op = transform.GetPosition() - ray.m_origin;
     float t, eps = 1e-4f;
@@ -158,7 +159,7 @@ blaBool SphereColliderComponent::CollideWithRay(const Ray& ray, CollisionContact
     return true;
 }
 
-blaBool SphereColliderComponent::CollideWithCollider(const ColliderComponent& collider, CollisionContact& outCollision)
+blaBool SphereCollider::CollideWithCollider(const ColliderComponent& collider, ColliderComponent::CollisionContact& outCollision)
 {
     return false;
 }

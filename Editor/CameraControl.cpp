@@ -7,7 +7,7 @@
 #include <System/InputManager.h>
 #include <Core/Scene.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 //TODO: Rewrite DT independant if you want high stiffnesses...
 

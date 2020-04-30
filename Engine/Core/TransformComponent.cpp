@@ -1,6 +1,6 @@
 #include "TransformComponent.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 #define SAFE_SIGNED_INC(i) (i < 0x7FFFFFFF) ? i++ : 0;
 

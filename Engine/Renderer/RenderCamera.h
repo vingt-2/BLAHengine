@@ -2,7 +2,7 @@
 
 #include <Core/CameraComponent.h>
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API RenderCamera
     {

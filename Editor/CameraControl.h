@@ -1,7 +1,7 @@
 #pragma once
 #include "Maths/Maths.h"
 
-namespace BLAengine
+namespace BLA
 {
     class RenderWindow;
     class CameraComponent;

@@ -4,7 +4,7 @@
 #include "BLAStringID.h"
 #include <mutex>
 
-namespace BLAengine
+namespace BLA
 {
     class ComponentSystemsRegistry;
     class ComponentSystem;

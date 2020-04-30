@@ -5,7 +5,7 @@
 #include <System.h>
 #include <Maths/Maths.h>
 
-namespace BLAengine
+namespace BLA
 {
     class BLACORE_API Texture2D : public Asset
     {

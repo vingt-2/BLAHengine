@@ -1,7 +1,7 @@
 #include "CameraComponent.h"
 #include <Core/GameObject.h>
 #include "Core/TransformComponent.h"
-using namespace BLAengine;
+using namespace BLA;
 
 BeginComponentDescription(CameraComponent)
 Expose(m_isShadowMapCamera)

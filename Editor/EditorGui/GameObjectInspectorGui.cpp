@@ -5,7 +5,7 @@
 #include <Gui/GuiElements.h>
 #include <Core/GameComponent.h>
 
-using namespace BLAengine;
+using namespace BLA;
 
 void GameObjectInspector::InspectGameObject(GameObject gameObject)
 {

@@ -4,7 +4,7 @@
 #include <RenderBackend.h>
 #include <Maths/Maths.h>
 
-namespace BLAengine
+namespace BLA
 {
     typedef blaVector<blaString> DragAndDropPayloadDontStore;
 

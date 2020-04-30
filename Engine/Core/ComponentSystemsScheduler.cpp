@@ -2,7 +2,7 @@
 
 #include "core/ComponentSystems.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 void ComponentSystemsScheduler::RebuildScheduler(const ComponentSystemsRegistry* registry)
 {

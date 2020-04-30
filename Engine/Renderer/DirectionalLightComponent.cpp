@@ -6,7 +6,7 @@
 #include "Core/Scene.h"
 #include "Core/RenderingManager.h"
 
-using namespace BLAengine;
+using namespace BLA;
 
 BeginComponentDescription(DirectionalLightComponent)
 EndComponentDescription()
