@@ -140,6 +140,7 @@ namespace BLA
         Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
         scene->CreateObject(BlaStringId("BoidTarget"));
+        GameObject boidsGroup = scene->CreateObject(BlaStringId("Boids"));
 
         std::uniform_real_distribution<float> dist(0.2f, 1.f);
         std::normal_distribution<float> normalDist(0.7f, 0.3f);
@@ -152,6 +153,7 @@ namespace BLA
         for (int i = 0; i < numberOfBoids; i++)
         {
             GameObject ref = scene->CreateObject(GenerateBlaStringId("Boid" + std::to_string(i))); // TODO: Please don't ...
+            scene->SetGameObjectParent(boidsGroup, ref);
 
             BoidComponent* boidComponent = ref.CreateComponent<BoidComponent>();
             ref.CreateComponent<ParticleComponent>();
