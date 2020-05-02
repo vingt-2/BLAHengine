@@ -1,7 +1,7 @@
 #pragma once
 
-#include <StdInclude.h>
-#include <BLASingleton.h>
+#include "StdInclude.h"
+#include "BLASingleton.h"
 
 namespace BLA
 {
@@ -26,7 +26,8 @@ namespace BLA
     public:
         EngineInstance(bool external, bool isFullscreen) :
             m_isFullScreen(isFullscreen),
-            m_isTerminationRequested(false)
+            m_isTerminationRequested(false),
+            m_isCapturedMouse(false)
         {};
 
         ~EngineInstance() { TerminateEngine(); };
@@ -67,6 +68,8 @@ namespace BLA
 
         void SetupDirLightAndCamera();
 
+        void ToggleCaptureMouse();
+
         // Required Engine Modules
         Console*      m_console;
         GL33Renderer* m_renderer;
@@ -84,6 +87,7 @@ namespace BLA
 
         bool m_isFullScreen;
         bool m_isTerminationRequested;
+        bool m_isCapturedMouse;
         int m_engineVersion;
     };
 };

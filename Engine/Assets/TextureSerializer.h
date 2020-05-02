@@ -1,13 +1,13 @@
 using namespace std;
 
-#include <cereal\cereal.hpp>
-#include <cereal\types\vector.hpp>
-#include <cereal\types\string.hpp>
-#include <cereal\archives\binary.hpp>    
+#include "cereal\cereal.hpp"
+#include "cereal\types\vector.hpp"
+#include "cereal\types\string.hpp"
+#include "cereal\archives\binary.hpp"    
 
 
 
-#include <Assets/Texture.h>
+#include "Assets/Texture.h"
 
 class Texture2DSerializer
 {

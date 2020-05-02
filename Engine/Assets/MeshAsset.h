@@ -1,7 +1,7 @@
 #pragma once
 #include "Asset.h"
 
-#include <Geometry/TriangleMesh.h>
+#include "Geometry/TriangleMesh.h"
 
 namespace BLA
 {

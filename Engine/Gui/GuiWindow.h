@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Maths/Maths.h>
-#include <StdInclude.h>
+#include "Maths/Maths.h"
+#include "StdInclude.h"
 
 namespace BLA
 {
@@ -10,6 +10,7 @@ namespace BLA
 
     class BLACORE_API BlaGuiWindow
     {
+        friend class BlaGuiManager;
     public:
         enum WindowFlags
         {
@@ -42,18 +43,16 @@ namespace BLA
             , m_windowPosition(blaIVec2(0))
             , m_windowFlags(0)
             , m_rootElement(nullptr)
-        {
-            m_bOpenWindow = true;
-        }
+            , m_bOpenWindow(true)
+        {}
 
         BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition)
             : m_windowName(windowName)
             , m_windowPosition(windowPosition)
             , m_windowFlags(0)
             , m_rootElement(nullptr)
-        {
-            m_bOpenWindow = true;
-        };
+            , m_bOpenWindow(true)
+        {};
 
         virtual void Render();
 
@@ -73,8 +72,6 @@ namespace BLA
         {
             return m_windowPosition;
         }
-
-        bool ShouldClose() { return !m_bOpenWindow; }
 
         bool HasFocus() const { return m_hasFocus; }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/BehaviorComponent.h>
+#include "Core/BehaviorComponent.h"
 
 namespace BLA
 {

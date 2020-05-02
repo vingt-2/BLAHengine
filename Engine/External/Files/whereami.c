@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #if !defined(WAI_MALLOC) || !defined(WAI_FREE) || !defined(WAI_REALLOC)
-#include <stdlib.h>
+#include "stdlib.h"
 #endif
 
 #if !defined(WAI_MALLOC)
@@ -52,8 +52,8 @@ extern "C" {
 #if defined(_MSC_VER)
 #pragma warning(push, 3)
 #endif
-#include <windows.h>
-#include <intrin.h>
+#include "windows.h"
+#include "intrin.h"
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
@@ -159,18 +159,18 @@ extern "C" {
 
 #elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun) || defined(WAI_USE_PROC_SELF_EXE)
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 #if defined(__linux__)
-#include <linux/limits.h>
+#include "linux/limits.h"
 #else
-#include <limits.h>
+#include "limits.h"
 #endif
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
-#include <inttypes.h>
+#include "inttypes.h"
 
 #if !defined(WAI_PROC_SELF_EXE)
 #if defined(__sun)
@@ -232,9 +232,9 @@ extern "C" {
 #endif
 
 #if defined(__ANDROID__) || defined(ANDROID)
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <unistd.h>
+#include "fcntl.h"
+#include "sys/mman.h"
+#include "unistd.h"
 #endif
 
     WAI_NOINLINE WAI_FUNCSPEC
@@ -351,11 +351,11 @@ extern "C" {
 #elif defined(__APPLE__)
 
 #define _DARWIN_BETTER_REALPATH
-#include <mach-o/dyld.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dlfcn.h>
+#include "mach-o/dyld.h"
+#include "limits.h"
+#include "stdlib.h"
+#include "string.h"
+#include "dlfcn.h"
 
     WAI_FUNCSPEC
         int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
@@ -455,11 +455,11 @@ extern "C" {
 
 #elif defined(__QNXNTO__)
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dlfcn.h>
+#include "limits.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "dlfcn.h"
 
 #if !defined(WAI_PROC_SELF_EXE)
 #define WAI_PROC_SELF_EXE "/proc/self/exefile"
@@ -562,12 +562,12 @@ extern "C" {
 #elif defined(__DragonFly__) || defined(__FreeBSD__) || \
       defined(__FreeBSD_kernel__) || defined(__NetBSD__)
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <dlfcn.h>
+#include "limits.h"
+#include "stdlib.h"
+#include "string.h"
+#include "sys/types.h"
+#include "sys/sysctl.h"
+#include "dlfcn.h"
 
     WAI_FUNCSPEC
         int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)

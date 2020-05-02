@@ -1,5 +1,5 @@
 #pragma once
-#include <BLAReference.h>
+#include "BLAReference.h"
 #include "BLAStringID.h"
 
 #define INVALID_OBJECT_ID GameObjectID("", 0)

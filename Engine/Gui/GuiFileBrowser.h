@@ -6,7 +6,7 @@
 #include "./GuiWindow.h"
 #include "./GuiMenu.h"
 
-#include <StdInclude.h>
+#include "StdInclude.h"
 
 struct GLFWwindow;
 

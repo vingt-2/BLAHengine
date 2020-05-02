@@ -1,5 +1,5 @@
 #include "InspectableVariables.h"
-#include <Core/GameObject.h>
+#include "Core/GameObject.h"
 #include "Maths/Maths.h"
 #include "System.h"
 #include "System/Console.h"
@@ -19,9 +19,9 @@ struct BoolDescriptor : ExposedVarTypeDescriptor
     BoolDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("bool"), sizeof(bool) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<bool>(name, (bool*)obj);
+        return new BlaGuiEditElement<bool>(name, groupId, (bool*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -67,9 +67,9 @@ struct F32Descriptor : ExposedVarTypeDescriptor
     {
     }
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaF32>(name, (float*)obj);
+        return new BlaGuiEditElement<blaF32>(name, groupId, (float*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -127,9 +127,9 @@ struct S32Descriptor : ExposedVarTypeDescriptor
     {
     }
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaS32>(name, (blaS32*)obj);
+        return new BlaGuiEditElement<blaS32>(name, groupId, (blaS32*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -185,9 +185,9 @@ struct StringDescriptor : ExposedVarTypeDescriptor
     StringDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("String"), sizeof(blaString) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaString>(name, (blaString*)obj);
+        return new BlaGuiEditElement<blaString>(name, groupId, (blaString*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -233,9 +233,9 @@ struct GameObjectReferenceDescriptor : ExposedVarTypeDescriptor
     {
     }
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<GameObject>(name, static_cast<GameObject*>(obj));
+        return new BlaGuiEditElement<GameObject>(name, groupId, static_cast<GameObject*>(obj));
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -280,9 +280,9 @@ struct blaVec2Descriptor : ExposedVarTypeDescriptor
     blaVec2Descriptor() : ExposedVarTypeDescriptor{ BlaStringId("Vector2"), sizeof(blaVec2) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaVec2>(name, (blaVec2*)obj);
+        return new BlaGuiEditElement<blaVec2>(name, groupId, (blaVec2*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -357,9 +357,9 @@ struct blaVec3Descriptor : ExposedVarTypeDescriptor
     blaVec3Descriptor() : ExposedVarTypeDescriptor{ BlaStringId("Vector3"), sizeof(blaVec3) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaVec3>(name, (blaVec3*)obj);
+        return new BlaGuiEditElement<blaVec3>(name, groupId, (blaVec3*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -440,9 +440,9 @@ struct blaQuatDescriptor : ExposedVarTypeDescriptor
     blaQuatDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("Quaternion"), sizeof(blaQuat) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaQuat>(name, static_cast<blaQuat*>(obj));
+        return new BlaGuiEditElement<blaQuat>(name, groupId, static_cast<blaQuat*>(obj));
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -529,9 +529,9 @@ struct blaPosQuatDescriptor : ExposedVarTypeDescriptor
     blaPosQuatDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("Rigid Transform"), sizeof(blaPosQuat) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaPosQuat>(name, static_cast<blaPosQuat*>(obj));
+        return new BlaGuiEditElement<blaPosQuat>(name, groupId, static_cast<blaPosQuat*>(obj));
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -637,9 +637,9 @@ struct blaScaledTransformDescriptor : ExposedVarTypeDescriptor
     blaScaledTransformDescriptor(): ExposedVarTypeDescriptor{ BlaStringId("Scaled Rigid Transform"), sizeof(blaScaledTransform) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
-        return new BlaGuiEditElement<blaScaledTransform>(name, static_cast<blaScaledTransform*>(obj));
+        return new BlaGuiEditElement<blaScaledTransform>(name, groupId, static_cast<blaScaledTransform*>(obj));
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -787,7 +787,7 @@ struct VectorDescriptor : ExposedVarTypeDescriptor
         return GenerateBlaStringId("blaVector<" + blaString(m_itemType->GetName()) + ">"); // TODO: It's pretty dumb to call a runtime CRC in here... Gotta find a solution
     }
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) override
+    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
     {
         return new BlaGuiEditElement<blaVec3>(name, (blaVec3*)obj);
     }

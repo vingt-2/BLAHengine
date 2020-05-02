@@ -1,6 +1,6 @@
 #include "PointLightComponent.h"
 
-#include <Core/GameObject.h>
+#include "Core/GameObject.h"
 
 #include "Core/Scene.h"
 #include "Core/RenderingManager.h"

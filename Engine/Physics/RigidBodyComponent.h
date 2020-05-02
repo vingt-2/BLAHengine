@@ -1,8 +1,8 @@
 #pragma once
-#include <Maths/Maths.h>
-#include <StdInclude.h>
+#include "Maths/Maths.h"
+#include "StdInclude.h"
 
-#include <Core/BehaviorComponent.h>
+#include "Core/BehaviorComponent.h"
 
 namespace BLA
 {
@@ -67,9 +67,6 @@ namespace BLA
         blaVec3 GetImpulseAccu() const { return m_impulseAccu; }
         void ClearForces() { m_forcesAccu = blaVec3(0); m_torquesAccu = blaVec3(0); }
         void ClearImpulse() { m_impulseAccu = blaVec3(0); }
-
-        //Todo: MOVE TO TICKET SYSTEM.
-        bool m_registered = false;
 
     private:
 

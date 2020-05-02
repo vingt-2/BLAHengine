@@ -1,8 +1,8 @@
 #pragma once
-#include <StdInclude.h>
-#include <Gui/GuiElements.h>
-#include <Maths/Maths.h>
-#include <BLAStringID.h>
+#include "StdInclude.h"
+#include "Gui/GuiElements.h"
+#include "Maths/Maths.h"
+#include "BLAStringID.h"
 
 #define DESERIALIZE_ERROR reinterpret_cast<Deserializer*>(-2)
 #define POP_DESERIALIZER reinterpret_cast<Deserializer*>(-1)
@@ -28,7 +28,7 @@ namespace BLA
 			virtual blaStringId GetName() const { return m_typeName; }
 
 			//Todo: This does not need to be here for non editor builds... Find a way to take it out without disgusting macros
-		    virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, void* obj) { return nullptr; };
+		    virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) { return nullptr; };
 
 			virtual void Serialize(void* obj, BLASerializeWriter* writer) const {};
 

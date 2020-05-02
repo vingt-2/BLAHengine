@@ -2,7 +2,7 @@
 #include "ColliderComponent.h"
 #include "Core/TransformComponent.h"
 
-#include <Core/GameObject.h>
+#include "Core/GameObject.h"
 
 using namespace BLA;
 

@@ -20,19 +20,19 @@
         http://github.com/signal11/hidapi .
 ********************************************************/
 
-#include <windows.h>
+#include "windows.h"
 
 #ifndef _NTDEF_
 typedef LONG NTSTATUS;
 #endif
 
 #ifdef __MINGW32__
-#include <ntdef.h>
-#include <winbase.h>
+#include "ntdef.h"
+#include "winbase.h"
 #endif
 
 #ifdef __CYGWIN__
-#include <ntdef.h>
+#include "ntdef.h"
 #define _wcsdup wcsdup
 #endif
 
@@ -41,10 +41,10 @@ typedef LONG NTSTATUS;
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <setupapi.h>
-#include <winioctl.h>
+#include "setupapi.h"
+#include "winioctl.h"
 #ifdef HIDAPI_USE_DDK
-#include <hidsdi.h>
+#include "hidsdi.h"
 #endif
 
     /* Copied from inc/ddk/hidclass.h, part of the Windows DDK. */
@@ -56,8 +56,8 @@ extern "C" {
 } /* extern "C" */
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "stdio.h"
+#include "stdlib.h"
 
 
 #include "hidapi.h"

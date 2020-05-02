@@ -1,7 +1,7 @@
 #include "DirectionalLightComponent.h"
 #include "Core/CameraComponent.h"
 #include "Core/TransformComponent.h"
-#include <Core/GameObject.h>
+#include "Core/GameObject.h"
 
 #include "Core/Scene.h"
 #include "Core/RenderingManager.h"

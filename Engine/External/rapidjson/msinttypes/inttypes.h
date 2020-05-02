@@ -49,7 +49,7 @@
 
 // miloyip: VC supports inttypes.h since VC2013
 #if _MSC_VER >= 1800
-#include <inttypes.h>
+#include "inttypes.h"
 #else
 
 // 7.8 Format conversion of integer types

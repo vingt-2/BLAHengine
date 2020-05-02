@@ -1,6 +1,8 @@
 #include "Timer.h"
 using namespace BLA;
 
+BLA_IMPLEMENT_SINGLETON(Timer)
+
 Timer::Timer(glm::uint8 timeBufferSize)
 {
     m_timeBufferSize = m_timeBufferSize;

@@ -47,7 +47,7 @@
 
 // miloyip: Originally Visual Studio 2010 uses its own stdint.h. However it generates warning with INT64_C(), so change to use this file for vs2010.
 #if _MSC_VER >= 1600 // [
-#include <stdint.h>
+#include "stdint.h"
 
 #if !defined(__cplusplus) || defined(__STDC_CONSTANT_MACROS) // [   See footnote 224 at page 260
 
@@ -86,16 +86,16 @@
 
 #else // ] _MSC_VER >= 1700 [
 
-#include <limits.h>
+#include "limits.h"
 
 // For Visual Studio 6 in C++ mode and for many Visual Studio versions when
-// compiling for ARM we have to wrap <wchar.h> include with 'extern "C++" {}'
+// compiling for ARM we have to wrap <wchar.h" include with 'extern "C++" {}'
 // or compiler would give many errors like this:
 //   error C2733: second C linkage of overloaded function 'wmemchr' not allowed
 #if defined(__cplusplus) && !defined(_M_ARM)
 extern "C" {
 #endif
-#  include <wchar.h>
+#  include <wchar.h"
 #if defined(__cplusplus) && !defined(_M_ARM)
 }
 #endif
@@ -253,7 +253,7 @@ typedef uint64_t  uintmax_t;
 #  endif // _WIN64 ]
 #endif // SIZE_MAX ]
 
-// WCHAR_MIN and WCHAR_MAX are also defined in <wchar.h>
+// WCHAR_MIN and WCHAR_MAX are also defined in <wchar.h"
 #ifndef WCHAR_MIN // [
 #  define WCHAR_MIN  0
 #endif  // WCHAR_MIN ]

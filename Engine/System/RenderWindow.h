@@ -1,8 +1,8 @@
 #pragma once
-#include <System.h>
-#include <StdInclude.h>
-#include <RenderBackend.h>
-#include <Maths/Maths.h>
+#include "System.h"
+#include "StdInclude.h"
+#include "RenderBackend.h"
+#include "Maths/Maths.h"
 
 namespace BLA
 {
@@ -31,8 +31,6 @@ namespace BLA
 
         virtual void SetMouseXY() = 0;
 
-        virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) = 0;
-
         virtual void SetMouseCursorVisibility(bool visibility) = 0;
 
         virtual blaVec2 GetMousePointerScreenSpaceCoordinates() = 0;
@@ -40,8 +38,6 @@ namespace BLA
         virtual blaIVec2 GetMousePositionInWindow() = 0;
 
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
-
-        virtual bool HasCapturedMouse() = 0;
     };
 
 #ifdef GLFW_INTERFACE
@@ -68,8 +64,6 @@ namespace BLA
 
         void SetMouseXY() override {};
 
-        void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override;
-
         void SetDragAndDropCallback(DragAndDropCallback dragAndDropCallback) override;
 
         //static void InternalDragAndDropCallback
@@ -89,8 +83,6 @@ namespace BLA
 
         static void GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths);
 
-        bool HasCapturedMouse() override { return !m_cursorVisibility; }
-
     private:
 
         GLFWwindow* m_glfwWindow;
@@ -102,12 +94,10 @@ namespace BLA
         bool m_isFullscreen;
 
         DragAndDropCallback m_registeredDragAndDropCallback;
-
-        blaVector<int> m_mouseButtonsThatKillCursorWhenHeld;
     };
 
 #elif defined(WPF_INTERFACE)
-    //TODO: Implement MousWheel
+    //TODO: Implement Mouse Wheel
     class BLACORE_API WPFRenderWindow : public RenderWindow
     {
     public:

@@ -1,6 +1,6 @@
 #include "SkeletonAnimationData.h"
 
-#include <System/Console.h>
+#include "System/Console.h"
 
 using namespace BLA;
 

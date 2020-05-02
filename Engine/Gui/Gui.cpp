@@ -15,8 +15,9 @@
 #include "Core/Scene.h"
 #include "Renderer/GL33Renderer.h"
 
-#include <iomanip>
 #include "EngineInstance.h"
+
+#include <iomanip>
 
 using namespace BLA;
 
@@ -90,8 +91,20 @@ ImFont* f2;
 
 BlaGuiWindow* BlaGuiManager::OpenWindow(blaString name)
 {
+    auto w = m_openWindows.find(name);
+    if (w != m_openWindows.end())
+        return w->second;
+    
     m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, new BlaGuiWindow(name, blaIVec2(10, 10))));
     return m_openWindows[name];
+}
+
+BlaGuiWindow* BlaGuiManager::GetWindow(blaString name)
+{
+    auto w = m_openWindows.find(name);
+    if (w != m_openWindows.end())
+        return w->second;
+    return nullptr;
 }
 
 void BlaGuiManager::OpenWindow(blaString name, BlaGuiWindow* window)
@@ -137,15 +150,44 @@ void BlaGuiManager::Destroy()
     ImGui::DestroyContext();
 }
 
-void BlaGuiElement::SendEvent(BlaGuiElementEventPayload::EventType eventType)
+void BlaGuiElement::SendEvent(BlaGuiElementEventPayload::EventType eventType, void* pEventPayload)
 {
     for (const auto& cb : m_registeredCallbacks)
     {
-        if (cb.m_eventTriggerFlags & eventType != 0)
+        if ((cb.m_eventTriggerFlags & eventType) != 0)
         {
-            BlaGuiElementEventPayload callbackPayload{ eventType, this };
+            BlaGuiElementEventPayload callbackPayload{ eventType, pEventPayload };
             cb.m_callback(cb.m_callerPtr, callbackPayload);
         }
+    }
+}
+
+void BlaGuiElement::HandleDragDropOfElements()
+{
+    struct DragPtrPayload
+    {
+        BlaGuiElement* sender;
+    };
+
+    // Our buttons are both drag sources and drag targets here!
+    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+    {
+        DragPtrPayload p = { this };
+        ImGui::SetDragDropPayload("drag_drop_elements", &p, sizeof(DragPtrPayload));
+        ImGui::Text("%s", GetName());
+        ImGui::EndDragDropSource();
+    }
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("drag_drop_elements"))
+        {
+            IM_ASSERT(payload->DataSize == sizeof(DragPtrPayload));
+
+            BlaGuiElement* payloadPtr = (BlaGuiElement*)((DragPtrPayload*)payload->Data)->sender;
+            BlaDroppablePayload p = { this, payloadPtr };
+            SendEvent(BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED, (void*)&p);
+        }
+        ImGui::EndDragDropTarget();
     }
 }
 
@@ -191,12 +233,23 @@ void BlaGuiCollapsibleElement::Render()
         flags |= ImGuiTreeNodeFlags_Leaf;
     }
 
+    if(m_isSelected) 
+    {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+
     if (ImGui::TreeNodeEx((void*)(intptr_t)this, flags, GetName().c_str()))
     {
-        if (ImGui::IsItemClicked())
+        if (IsItemDoubleCliked(ImGuiMouseButton_Left))
         {
-            SendEvent(BlaGuiElementEventPayload::EventType::SELECTED);
+            SendEvent(BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED, this);
         }
+        else if (ImGui::IsItemClicked()) 
+        {
+            SendEvent(BlaGuiElementEventPayload::EventType::SELECTED, this);
+        }
+
+        HandleDragDropOfElements();
 
         auto child = GetChild();
 
@@ -229,6 +282,7 @@ void BlaGuiSimpleTextElement::Render()
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImGui::Text(m_text.c_str());
     // END OCornut's Dear ImGui Specific Code Now
+    HandleDragDropOfElements();
 
     BlaGuiElement::Render();
 }
@@ -452,7 +506,7 @@ void BlaGuiManager::Update()
     for (auto& window : m_openWindows)
     {
         window.second->Render();
-        if (window.second->ShouldClose())
+        if (!window.second->m_bOpenWindow)
         {
             toClose.push_back(window.first);
         }
@@ -521,7 +575,7 @@ void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowP
 {
     m_oneTimeWindows.emplace_back(BlaOneTimeWindow(blaString(""), renderWindowPosition));
 
-    m_oneTimeWindows.back().SetRootElement(new BlaGuiSimpleTextElement("", textToDraw));
+    m_oneTimeWindows.back().SetRootElement(new BlaGuiSimpleTextElement("", BlaStringId("OneTimeWindow"),textToDraw));
 }
 
 void BlaGuiManager::OpenConsole(const blaString& consoleName)
@@ -1118,3 +1172,43 @@ int BlaGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
 #include "imgui_widgets.cpp"
 #include "examples/imgui_impl_opengl3.cpp"
 #include "examples/imgui_impl_glfw.cpp"
+
+namespace BLAImGui
+{
+
+    // For the main menu bar, which cannot be moved, we honor g.Style.DisplaySafeAreaPadding to ensure text can be visible on a TV set.
+    bool BeginMainToolBar()
+    {
+        ImGuiContext& g = *GImGui;
+        ImGuiViewport* viewport = g.Viewports[0];
+        g.NextWindowData.MenuBarOffsetMinVal = ImVec2(g.Style.DisplaySafeAreaPadding.x, ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f));
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, g.NextWindowData.MenuBarOffsetMinVal.y + g.FontBaseSize + g.Style.FramePadding.y));
+        ImGui::SetNextWindowViewport(viewport->ID); // Enforce viewport so we don't create our onw viewport when ImGuiConfigFlags_ViewportsNoMerge is set.
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+        bool is_open = ImGui::Begin("##MainToolBar", NULL, window_flags) && ImGui::BeginMenuBar();
+        ImGui::PopStyleVar(2);
+        g.NextWindowData.MenuBarOffsetMinVal = ImVec2(0.0f, 0.0f);
+        if (!is_open)
+        {
+            ImGui::End();
+            return false;
+        }
+        return true; //-V1020
+    }
+
+    void EndMainToolBar()
+    {
+        ImGui::EndMenuBar();
+
+        // When the user has left the menu layer (typically: closed menus through activation of an item), we restore focus to the previous window
+        // FIXME: With this strategy we won't be able to restore a NULL focus.
+        ImGuiContext& g = *GImGui;
+        if (g.CurrentWindow == g.NavWindow && g.NavLayer == 0 && !g.NavAnyRequest)
+            ImGui::FocusTopMostWindowUnderOne(g.NavWindow, NULL);
+
+        ImGui::End();
+    }
+}

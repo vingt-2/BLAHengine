@@ -27,7 +27,7 @@
 #ifndef HIDAPI_H__
 #define HIDAPI_H__
 
-#include <wchar.h>
+#include "wchar.h"
 
 #ifdef _WIN32
 #define HID_API_EXPORT __declspec(dllexport)

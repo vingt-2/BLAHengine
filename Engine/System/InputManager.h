@@ -1,8 +1,8 @@
-#include <System.h>
-#include <StdInclude.h>
-#include <DataStructures/BitArray.h>
-#include <BLASingleton.h>
-#include <Maths/Maths.h>
+#include "System.h"
+#include "StdInclude.h"
+#include "DataStructures/BitArray.h"
+#include "BLASingleton.h"
+#include "Maths/Maths.h"
 
 namespace BLA
 {

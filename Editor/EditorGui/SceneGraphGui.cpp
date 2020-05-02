@@ -1,14 +1,14 @@
 #include "SceneGraphGui.h"
 
-#include <Core/Scene.h>
-#include <EngineInstance.h>
+#include "Core/Scene.h"
+#include "EngineInstance.h"
 
 using namespace BLA;
 
-void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObject& object)
-{
-    auto root = m_window.RootElement();
+#define SCENE_GRAPH_ELEMENT_GROUP_ID BlaStringId("SceneGraphElement")
 
+void SceneGraphGui::AddObjectToTree(BlaGuiElement& rootElement, ElementMap& elementMap, const GameObject& object)
+{
     ElementMap::iterator it = elementMap.find(object);
 
     if (it != elementMap.end())
@@ -16,8 +16,14 @@ void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObject& ob
         return;
     }
 
-    BlaGuiElement* element = new BlaGuiCollapsibleElement(blaString(object.GetId()));
-    BlaGuiRegisteredEvents eventListener = { BlaGuiElementEventPayload::EventType::SELECTED, StaticOnGuiElementSelected, this };
+    BlaGuiElement* element = new BlaGuiCollapsibleElement(blaString(object.GetId()), SCENE_GRAPH_ELEMENT_GROUP_ID);
+    BlaGuiRegisteredEvents eventListener = 
+    {
+        BlaGuiElementEventPayload::EventType::SELECTED | 
+        BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED |
+        BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED
+        , StaticOnSceneGraphElementEvent, this
+    };
 
     element->RegisterEvents(eventListener);
 
@@ -27,44 +33,83 @@ void SceneGraphGui::AddObjectToTree(ElementMap& elementMap, const GameObject& ob
 
         if (parentIt == elementMap.end())
         {
-            AddObjectToTree(elementMap, object.GetParent());
+            AddObjectToTree(rootElement, elementMap, object.GetParent());
         }
         parentIt = elementMap.find(object.GetParent().GetId());
-        root->AddChildAfterNode(element, parentIt->second);
+        rootElement.AddChildAfterNode(element, parentIt->second);
     }
     else
     {
-        root->AddChild(element);
+        rootElement.AddChild(element);
     }
 
     elementMap.insert(blaPair<GameObjectID, BlaGuiElement*>(object, element));
 }
 
-// TODO: Huh... Really, I'm referencing a console command here ? Change that ... ? no ? Actual !
+// TODO: Huh... Really, I'm referencing a console command here ? Change that ... ?
 extern void SelectObject(blaString name);
-void SceneGraphGui::OnGuiElementSelected(const BlaGuiElementEventPayload& event)
+extern void FocusOnObject(blaString name);
+extern void SetParent(blaString parent, blaString child);
+void SceneGraphGui::OnSceneGraphElementEvent(const BlaGuiElementEventPayload& event)
 {
-    if (event.m_eventType == BlaGuiElementEventPayload::EventType::SELECTED)
+    switch(event.m_eventType)
     {
-        SelectObject(event.m_pGuiElement->GetName());
+        case BlaGuiElementEventPayload::EventType::SELECTED:
+        {
+            BlaGuiElement* selected = (BlaGuiElement*)event.m_pEventPayload;
+            SelectObject(selected->GetName());
+            if (m_selectedElement)
+                m_selectedElement->m_isSelected = false;
+            m_selectedElement = selected;
+            m_selectedElement->m_isSelected = true;
+        }
+        break;
+        case BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED:
+        {
+            BlaGuiElement* selected = (BlaGuiElement*)event.m_pEventPayload; 
+            FocusOnObject(selected->GetName());
+        }
+        case BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED:
+        {
+            BlaDroppablePayload* droppedPayload = (BlaDroppablePayload*)event.m_pEventPayload;
+            SetParent(droppedPayload->m_receiverElement->GetName(), droppedPayload->m_droppedElement->GetName());
+        }
+        default:
+        break;
     }
-
 }
 
 void SceneGraphGui::UpdateSceneGraph()
 {
+    BlaGuiWindow* window = BlaGuiManager::GetSingletonInstance()->GetWindow("Scene Graph");
+
+    if (!window) 
+        return;
+
     Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
-    delete m_window.RootElement();
+    delete window->RootElement();
 
-    BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", "");
+    BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", SCENE_GRAPH_ELEMENT_GROUP_ID, "Scene:");
+    BlaGuiRegisteredEvents eventListener =
+    {
+        BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED
+        , StaticOnSceneGraphElementEvent, this
+    };
+    root->RegisterEvents(eventListener);
 
-    m_window.SetRootElement(root);
+    window->SetRootElement(root);
 
     m_elementMap.clear();
 
     for (const GameObject& object : scene->GetObjects())
     {
-        AddObjectToTree(m_elementMap, object);
+        AddObjectToTree(*window->RootElement(), m_elementMap, object);
     }
+}
+
+void SceneGraphGui::OpenSceneGraph()
+{
+    BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph");
+    UpdateSceneGraph();
 }

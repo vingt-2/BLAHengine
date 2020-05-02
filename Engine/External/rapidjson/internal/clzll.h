@@ -18,7 +18,7 @@
 #include "../rapidjson.h"
 
 #if defined(_MSC_VER)
-#include <intrin.h>
+#include "intrin.h"
 #if defined(_WIN64)
 #pragma intrinsic(_BitScanReverse64)
 #else

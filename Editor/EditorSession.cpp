@@ -42,7 +42,7 @@ void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
     for (auto path : *dragAndDropInput)
     {
         Console::LogMessage("Dropped file " + path);
-        static_cast<EditorSession*>(EngineInstance::GetSingletonInstance())->EditorDragAndDropedFile(path); // ``safe'' cast...
+        static_cast<EditorSession*>(EngineInstance::GetSingletonInstance())->EditorDragAndDropedFile(path);
     }
 }
 
@@ -116,7 +116,7 @@ void EditorSession::PreEngineUpdate()
 
     if (InputManager::GetSingletonInstance()->GetKeyState(BLA_KEY_GRAVE_ACCENT).IsRisingEdge())
     {
-        m_editorGuiRequests.m_openConsoleRequest = ~m_editorGuiRequests.m_openConsoleRequest;
+        m_editorGuiRequests.m_openConsoleRequest = !m_editorGuiRequests.m_openConsoleRequest;
     }
 }
 
@@ -126,9 +126,10 @@ void EditorSession::EngineUpdate()
     {
         EditorUpdate();
 
-        if (m_sceneGraphGui && (m_scene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE) != 0)
+        if (m_sceneGraphGui && (m_scene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE || m_updatedScene) != 0)
         {
             m_sceneGraphGui->UpdateSceneGraph();
+            m_updatedScene = false;
         }
 
         EngineInstance::EngineUpdate();
@@ -158,12 +159,12 @@ void EditorSession::PostEngineUpdate()
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
-    if (!m_renderWindow->HasCapturedMouse())
+    if (!m_isCapturedMouse)
     {
         m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
         m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
 
-        if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
+        if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
         {
             if (renderGuiWindow->HasFocus())
             {
@@ -173,7 +174,21 @@ void EditorSession::PostEngineUpdate()
                     InputManager::GetSingletonInstance()->m_lockKeyboard = false;
                     InputManager::GetSingletonInstance()->m_lockMouse = false;
                 }
+
+                if(m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_RIGHT).IsDown() ||
+                    m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_MIDDLE).IsDown())
+                {
+                    ToggleCaptureMouse();
+                }
             }
+        }
+    }
+    else
+    {
+        if (m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_RIGHT).IsUp() &&
+            m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_MIDDLE).IsUp())
+        {
+            ToggleCaptureMouse();
         }
     }
 
@@ -237,11 +252,8 @@ bool EditorSession::LoadNewScene()
     delete m_cameraController;
     m_cameraController = new CameraController(
         m_renderWindow,
-        30.f,
+        100.f,
         10.0f);
-
-    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);
-    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);
 
     SetEditorState(new EditorState());
 
@@ -257,11 +269,8 @@ bool EditorSession::LoadWorkingScene(blaString filepath)
     delete m_cameraController;
     m_cameraController = new CameraController(
         m_renderWindow,
-        30.f,
+        100.f,
         10.0f);
-
-    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(1);
-    m_renderWindow->SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(2);
 
     SetEditorState(new EditorState());
 
@@ -300,11 +309,11 @@ void EditorSession::EditorUpdate()
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
     Ray screenRay;
-    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->GetWindow("Editor Window")))
+    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
         screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
 
-        ColliderComponent::CollisionContact contactPoint;
+        // ColliderComponent::CollisionContact contactPoint;
         GameObject hoverObject;// = m_scene->PickGameObjectInScene(screenRay, contactPoint);
 
         auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
@@ -367,8 +376,10 @@ void EditorSession::HandleGuiRequests()
         if (!m_sceneGraphGui)
         {
             m_sceneGraphGui = new SceneGraphGui();
-            m_sceneGraphGui->UpdateSceneGraph();
         }
+        m_sceneGraphGui->OpenSceneGraph();
+        m_sceneGraphGui->UpdateSceneGraph();
+
         m_editorGuiRequests.m_openScenGraphGuiRequest = false;
     }
     if (m_editorGuiRequests.m_openComponentInspectorRequest)
@@ -480,12 +491,24 @@ void EditorSession::SetSelectedObject(GameObject selectedObject)
         if (selectedObject.IsValid())
             m_componentInspector->InspectGameObject(selectedObject);
     }
-
-    if (selectedObject.IsValid())
+        
+    if (selectedObject.IsValid()) 
+    {
         m_selectedObject = selectedObject;
+    }
 }
 
-void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color)
+void EditorSession::SetObjectParent(GameObject parent, GameObject child)
+{
+    /*
+     * Instead go through a command system sent from the UI.
+     * Update Scene graph after each processed command ...
+     */
+    m_scene->SetGameObjectParent(parent, child);
+    m_updatedScene = true;
+}
+
+void EditorSession::DrawGrid(int size, float spacing, const blaVec3& color) const
 {
     for (int i = -size / 2; i <= size / 2; i++)
     {
@@ -505,6 +528,33 @@ DefineConsoleCommand(void, SelectObject, blaString name)
         if (EditorSession* editorSession = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance()))
         {
             editorSession->SetSelectedObject(obj);
+        }
+    }
+}
+
+DefineConsoleCommand(void, FocusOnObject, blaString name)
+{
+    GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+
+    if (obj.IsValid())
+    {
+        if (EditorSession* editorSession = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance()))
+        {
+            editorSession->GetCameraController()->SetTransformFocus(obj.GetComponent<TransformComponent>()->GetTransform().GetPosQuat());
+        }
+    }
+}
+
+DefineConsoleCommand(void, SetParent, blaString parentName, blaString childName)
+{
+    GameObject parentObj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(parentName);
+    GameObject childObj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(childName);
+
+    if (childObj.IsValid())
+    {
+        if (EditorSession* editorSession = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance()))
+        {
+            editorSession->SetObjectParent(parentObj, childObj); 
         }
     }
 }

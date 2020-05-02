@@ -1,9 +1,9 @@
 #pragma once
 #include "Asset.h"
 
-#include <StdInclude.h>
-#include <System.h>
-#include <Maths/Maths.h>
+#include "StdInclude.h"
+#include "System.h"
+#include "Maths/Maths.h"
 
 namespace BLA
 {

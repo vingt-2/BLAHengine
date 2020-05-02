@@ -1,11 +1,11 @@
 #include "TestPlayerComponent.h"
-#include <Core/DebugDraw.h>
-#include <EngineInstance.h>
-#include <System/InputManager.h>
-#include <Core/Scene.h>
-#include <Physics/RigidBodyComponent.h>
-#include <Core/TransformComponent.h>
-#include <Core/Timer.h>
+#include "Core/DebugDraw.h"
+#include "EngineInstance.h"
+#include "System/InputManager.h"
+#include "Core/Scene.h"
+#include "Physics/RigidBodyComponent.h"
+#include "Core/TransformComponent.h"
+#include "Core/Timer.h"
 
 using namespace BLA;
 

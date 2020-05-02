@@ -193,7 +193,16 @@ CameraComponent* Scene::GetMainCamera()
 
 void Scene::SetGameObjectParent(const GameObject& parent, const GameObject& child)
 {
-    m_gameObjectHierarchy[parent] = child;
+    if(parent.IsValid()) 
+    {
+        m_gameObjectHierarchy[child] = parent;
+    }
+    else
+    {
+        GameObjectHierarchyMap::iterator it = m_gameObjectHierarchy.find(child);
+        if (it != m_gameObjectHierarchy.end())
+            m_gameObjectHierarchy.erase(it);
+    }
 }
 
 GameObject Scene::GetGameObjectParent(const GameObject& object)

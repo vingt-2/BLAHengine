@@ -12,7 +12,7 @@
  *
  */
 
-#include <math.h>
+#include "math.h"
 
 
  /* if USE_EPSILON_TEST is true then we do a check:

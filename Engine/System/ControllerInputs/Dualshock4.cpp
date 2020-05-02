@@ -1,6 +1,6 @@
 #include "Dualshock4.h"
 #include <iostream>
-#include <System/InputManager.h>
+#include "System/InputManager.h"
 
 bool Dualshock4::Setup()
 {

@@ -18,7 +18,7 @@
 #include "document.h"
 #include "pointer.h"
 #include "stringbuffer.h"
-#include <cmath> // abs, floor
+#include "cmath> // abs, floor
 
 #if !defined(RAPIDJSON_SCHEMA_USE_INTERNALREGEX)
 #define RAPIDJSON_SCHEMA_USE_INTERNALREGEX 1
@@ -35,7 +35,7 @@
 #if RAPIDJSON_SCHEMA_USE_INTERNALREGEX
 #include "internal/regex.h"
 #elif RAPIDJSON_SCHEMA_USE_STDREGEX
-#include <regex>
+#include "regex>
 #endif
 
 #if RAPIDJSON_SCHEMA_USE_INTERNALREGEX || RAPIDJSON_SCHEMA_USE_STDREGEX

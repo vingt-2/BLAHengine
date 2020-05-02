@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Maths/Maths.h>
-#include <Core/BehaviorComponent.h>
+#include "Maths/Maths.h"
+#include "Core/BehaviorComponent.h"
 
 namespace BLA
 {

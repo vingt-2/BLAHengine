@@ -205,16 +205,7 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
-    m_cursorVisibility = true;
-    for (auto mouseButton : m_mouseButtonsThatKillCursorWhenHeld)
-    {
-        if (glfwGetMouseButton(m_glfwWindow, mouseButton) == GLFW_PRESS)
-        {
-            m_cursorVisibility = false;
-            break;
-        }
-    }
-    SetMouseCursorVisibility(m_cursorVisibility);
+    // SetMouseCursorVisibility(m_cursorVisibility);
 
     glfwSwapInterval(0);
 
@@ -274,11 +265,7 @@ void GLFWRenderWindow::SetMouseCursorVisibility(bool visiblity)
 {
     //GLFW_CURSOR_HIDDEN to not lock the cursor while hidden
     glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, visiblity ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-}
-
-void GLFWRenderWindow::SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton)
-{
-    m_mouseButtonsThatKillCursorWhenHeld.push_back(mouseButton);
+    m_cursorVisibility = visiblity;
 }
 
 blaVec2 GLFWRenderWindow::GetMousePointerScreenSpaceCoordinates()

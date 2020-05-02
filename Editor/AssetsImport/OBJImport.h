@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Geometry/TriangleMesh.h>
+#include "Geometry/TriangleMesh.h"
 
 namespace BLA
 {

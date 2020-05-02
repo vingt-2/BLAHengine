@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/CameraComponent.h>
+#include "Core/CameraComponent.h"
 
 namespace BLA
 {

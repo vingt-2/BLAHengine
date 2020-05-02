@@ -1,19 +1,19 @@
 #include <thread>
 
-#include <System.h>
-#include <Maths/Maths.h>
-#include <Renderer/GL33Renderer.h>
-#include <Core/Timer.h>
-#include <Core/RenderingManager.h>
-#include <Core/DebugDraw.h>
-#include <Core/GameComponent.h>
-#include <Assets/SceneManager.h>
-#include <System/Console.h>
-#include <System/InputManager.h>
-#include <System/RenderWindow.h>
-#include <Gui/GuiManager.h>
-#include <System/ControllerInputs/Dualshock4.h>
-#include <Core/ComponentLibraries.h>
+#include "System.h"
+#include "Maths/Maths.h"
+#include "Renderer/GL33Renderer.h"
+#include "Core/Timer.h"
+#include "Core/RenderingManager.h"
+#include "Core/DebugDraw.h"
+#include "Core/GameComponent.h"
+#include "Assets/SceneManager.h"
+#include "System/Console.h"
+#include "System/InputManager.h"
+#include "System/RenderWindow.h"
+#include "Gui/GuiManager.h"
+#include "System/ControllerInputs/Dualshock4.h"
+#include "Core/ComponentLibraries.h"
 #include "Core/ComponentSystems.h"
 #include "EngineInstance.h"
 
@@ -94,7 +94,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
     m_renderer->m_assetManager = m_assetManager;
 
-    m_timer = new Timer(10);
+    m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 
     m_scene = Scene::AssignAndReturnSingletonInstance(new Scene());
 
@@ -145,7 +145,7 @@ void EngineInstance::PostEngineUpdate()
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
-    if (!m_renderWindow->HasCapturedMouse())
+    if (!m_isCapturedMouse)
     {
         m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
         m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
@@ -220,6 +220,12 @@ void EngineInstance::SetupDirLightAndCamera()
     CameraComponent* cameraComp = cameraObject.CreateComponent<CameraComponent>();
 
     m_renderer->SetCamera(cameraComp);
+}
+
+void EngineInstance::ToggleCaptureMouse()
+{
+    m_isCapturedMouse = !m_isCapturedMouse;
+    m_renderWindow->SetMouseCursorVisibility(!m_isCapturedMouse);
 }
 
 DefineConsoleCommand(void, exit)

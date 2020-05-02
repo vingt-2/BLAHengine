@@ -21,7 +21,7 @@ int main()
 
 #ifdef WIN32
 
-#include <Windows.h> 
+#include "Windows.h" 
 int __stdcall WinMain(
     __in  HINSTANCE hInstance,
     __in  HINSTANCE hPrevInstance,

@@ -1,6 +1,6 @@
 #include "MeshRendererComponent.h"
 
-#include <Core/GameObject.h>
+#include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
 #include "RenderBackend.h"
 #include "Assets/AssetsManager.h"

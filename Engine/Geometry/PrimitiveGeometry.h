@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Geometry/TriangleMesh.h>
-#include <glm/common.hpp>
+#include "Geometry/TriangleMesh.h"
+#include "glm/common.hpp"
 
 namespace BLA
 {

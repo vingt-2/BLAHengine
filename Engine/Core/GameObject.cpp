@@ -1,5 +1,5 @@
-#include <Core/GameComponent.h>
-#include <Core/Scene.h>
+#include "Core/GameComponent.h"
+#include "Core/Scene.h"
 #include "GameObject.h"
 
 #define SCENE Scene::GetSingletonInstance()

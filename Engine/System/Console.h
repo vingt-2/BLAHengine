@@ -1,10 +1,10 @@
 #pragma once
 
-#include <System.h>
-#include <StdInclude.h>
-#include <BLASingleton.h>
-#include <BLAtime.h>
-#include <SillyMacros.h>
+#include "System.h"
+#include "StdInclude.h"
+#include "BLASingleton.h"
+#include "BLAtime.h"
+#include "SillyMacros.h"
 
 #define __SILLY_MACRO__COMPARE_void(x) x
 

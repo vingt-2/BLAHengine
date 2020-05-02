@@ -53,16 +53,16 @@
 #define CUTE_FILES_PLATFORM CUTE_FILES_UNIX
 #endif
 
-#include <string.h> // strerror, strncpy
+#include "string.h" // strerror, strncpy
 
 // change to 0 to compile out any debug checks
 #define CUTE_FILES_DEBUG_CHECKS 1
 
 #if CUTE_FILES_DEBUG_CHECKS
 
-#include <stdio.h>  // printf
-#include <assert.h> // assert
-#include <errno.h>
+#include "stdio.h"  // printf
+#include "assert.h" // assert
+#include "errno.h"
 #define CUTE_FILES_ASSERT assert
 
 #else
@@ -131,7 +131,7 @@ void cf_do_unit_tests();
 #if !defined _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-#include <Windows.h>
+#include "Windows.h"
 
 struct cf_file_t
 {
@@ -158,10 +158,10 @@ struct cf_time_t
 
 #elif CUTE_FILES_PLATFORM == CUTE_FILES_MAC || CUTE_FILES_PLATFORM == CUTE_FILES_UNIX
 
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <time.h>
+#include "sys/stat.h"
+#include "dirent.h"
+#include "unistd.h"
+#include "time.h"
 
 struct cf_file_t
 {

@@ -40,7 +40,7 @@ unsigned get_tick_count();
 #elif defined(WIN32)
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "windows.h"
 
 #ifdef _WDLL
 
@@ -68,7 +68,7 @@ inline unsigned get_tick_count() { return GetTickCount(); }
 ///////////////////////////////////////////////////
 #elif defined(macintosh)
 typedef unsigned long DWORD;
-#include <Events.h>
+#include "Events.h"
 #define get_tick_count() ::TickCount()
 
 #elif defined(CUSTOM)

@@ -1,6 +1,6 @@
 #pragma once
-#include <StdInclude.h>
-#include <Core/Scene.h>
+#include "StdInclude.h"
+#include "Core/Scene.h"
 
 #define SCENE_SUBPATH "./Scenes/"
 

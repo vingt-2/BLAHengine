@@ -13,10 +13,11 @@ namespace BLA
             blaF32 damping,
             blaF32 maxVelocity) :
 
-            m_cameraAngularVelocity(blaVec3(0.f)),
+            m_cameraEulerVelocity(blaVec3(0.f)),
             m_cameraLinearVelocity(blaVec3(0.f)),
             m_cameraDamping(damping),
-            m_currentCameraEulerAngles(0.f, 0.f, 0.f)
+            m_currentCameraEulerAngles(0.f, 0.f, 0.f),
+            m_homingTowardsFocus(false)
         {
             m_prevMousePosition = blaVec2(0.f);
         }
@@ -26,16 +27,23 @@ namespace BLA
 
         void UpdateController(blaF32 dt);
 
+        void SetTransformFocus(blaPosQuat focus);
+
     private:
+        bool m_homingTowardsFocus;
+
+        blaVec3 m_desiredPos;
+        blaVec3 m_desiredRotEuler;
+        blaQuat m_desiredRot;
 
         blaIVec2 m_prevMousePosition;
 
-        blaVec3 m_cameraAngularVelocity;
+        blaVec3 m_cameraEulerVelocity;
         blaVec3 m_cameraLinearVelocity;
 
         blaVec3 m_currentCameraEulerAngles;
 
         blaF32 m_cameraDamping;
-        blaF32 m_maxAngularVelocity;
+        blaF32 m_eulerDamping;
     };
 }

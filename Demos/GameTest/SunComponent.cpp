@@ -1,9 +1,9 @@
 #pragma once
-#include <StdInclude.h>
-#include <Maths/Maths.h>
-#include <Animation/SkeletonAnimationData.h>
-#include <Core/TransformComponent.h>
-#include <Core/BehaviorComponent.h>
+#include "StdInclude.h"
+#include "Maths/Maths.h"
+#include "Animation/SkeletonAnimationData.h"
+#include "Core/TransformComponent.h"
+#include "Core/BehaviorComponent.h"
 
 namespace BLA
 {

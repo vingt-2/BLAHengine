@@ -1,10 +1,10 @@
 #pragma once
 
-#include <StdInclude.h>
-#include <EngineInstance.h>
-#include <Assets/MeshAsset.h>
-#include <EditorGui/GameObjectInspectorGui.h>
-#include <EditorGui/SceneGraphGui.h>
+#include "StdInclude.h"
+#include "EngineInstance.h"
+#include "Assets/MeshAsset.h"
+#include "EditorGui/GameObjectInspectorGui.h"
+#include "EditorGui/SceneGraphGui.h"
 #include "GizmoManager.h"
 
 namespace BLA
@@ -39,9 +39,18 @@ namespace BLA
 
         void SetSelectedObject(GameObject selectedObject);
 
+        CameraController* GetCameraController() const { return m_cameraController; }
+
+        /*
+         * Scene Updated temp logic
+         *
+         */
+
+        void SetObjectParent(GameObject parent, GameObject child);
+
     private:
 
-        void DrawGrid(int size, float spacing, const blaVec3& color);
+        void DrawGrid(int size, float spacing, const blaVec3& color) const;
 
         bool LoadNewScene() override;
 
@@ -69,6 +78,7 @@ namespace BLA
         bool ImportMesh(blaString filepath, blaString name) const;
 
     private:
+        bool m_updatedScene = false;
 
         GameObject m_selectedObject;
 

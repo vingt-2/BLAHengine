@@ -35,7 +35,7 @@
 *  optimized for 2D or 3D point clouds.
 *
 *  nanoflann does not require compiling or installing, just an
-*  #include <nanoflann.hpp> in your code.
+*  #include "nanoflann.hpp> in your code.
 *
 *  See:
 *   - <a href="modules.html" >C++ API organized by modules</a>
@@ -46,14 +46,14 @@
 #ifndef  NANOFLANN_HPP_
 #define  NANOFLANN_HPP_
 
-#include <vector>
-#include <cassert>
-#include <algorithm>
-#include <stdexcept>
-#include <cstdio>  // for fwrite()
-#include <cmath>   // for abs()
-#include <cstdlib> // for abs()
-#include <limits>
+#include "vector>
+#include "cassert>
+#include "algorithm>
+#include "stdexcept>
+#include "cstdio>  // for fwrite()
+#include "cmath>   // for abs()
+#include "cstdlib> // for abs()
+#include "limits>
 
 // Avoid conflicting declaration of min/max macros in windows headers
 #if !defined(NOMINMAX) && (defined(_WIN32) || defined(_WIN32_)  || defined(WIN32) || defined(_WIN64))

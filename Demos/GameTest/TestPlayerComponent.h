@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Maths/Maths.h>
-#include <Animation/SkeletonAnimationData.h>
+#include "Maths/Maths.h"
+#include "Animation/SkeletonAnimationData.h"
 
 //TODO: Replace with contorller implementation from the input manager ...
-#include <System/ControllerInputs/Dualshock4.h>
-#include <Core/BehaviorComponent.h>
+#include "System/ControllerInputs/Dualshock4.h"
+#include "Core/BehaviorComponent.h"
 
 namespace BLA
 {

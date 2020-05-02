@@ -1,7 +1,7 @@
 #pragma once
-#include <DataStructures/Tree.h>
-#include <StdInclude.h>
-#include <Maths/Maths.h>
+#include "DataStructures/Tree.h"
+#include "StdInclude.h"
+#include "Maths/Maths.h"
 
 namespace BLA
 {

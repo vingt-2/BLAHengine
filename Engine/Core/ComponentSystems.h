@@ -5,6 +5,8 @@
 #include "Core/GameObject.h"
 #include "Core/ComponentContainers.h"
 
+// TODO: Crash if dependant doesn't exist !!
+
 #define NOTHING(i)
 #define InputComponents(...) __VA_ARGS__
 #define OutputComponents(...) __VA_ARGS__

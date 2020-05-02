@@ -146,7 +146,7 @@
 #endif // !defined(RAPIDJSON_HAS_STDSTRING)
 
 #if RAPIDJSON_HAS_STDSTRING
-#include <string>
+#include "string>
 #endif // RAPIDJSON_HAS_STDSTRING
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,8 +169,8 @@
 #include "msinttypes/inttypes.h"
 #else
 // Other compilers should have this.
-#include <stdint.h>
-#include <inttypes.h>
+#include "stdint.h"
+#include "inttypes.h"
 #endif
 //!@endcond
 #ifdef RAPIDJSON_DOXYGEN_RUNNING
@@ -223,7 +223,7 @@
 #    endif // __BYTE_ORDER__
 // Detect with GLIBC's endian.h
 #  elif defined(__GLIBC__)
-#    include <endian.h>
+#    include <endian.h"
 #    if (__BYTE_ORDER == __LITTLE_ENDIAN)
 #      define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
 #    elif (__BYTE_ORDER == __BIG_ENDIAN)
@@ -631,7 +631,7 @@ RAPIDJSON_NAMESPACE_END
 #if RAPIDJSON_HAS_CXX11_NOEXCEPT
 #define RAPIDJSON_NOEXCEPT_ASSERT(x)
 #else
-#include <cassert>
+#include "cassert>
 #define RAPIDJSON_NOEXCEPT_ASSERT(x) assert(x)
 #endif // RAPIDJSON_HAS_CXX11_NOEXCEPT
 #else

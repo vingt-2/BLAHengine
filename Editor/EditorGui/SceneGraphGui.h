@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gui/GuiManager.h>
+#include "Gui/GuiManager.h"
 #include "Core/GameObject.h"
 #include "Gui/GuiElements.h"
 
@@ -9,18 +9,25 @@ namespace BLA
     class SceneGraphGui
     {
     public:
-        SceneGraphGui() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph")) {}
+        SceneGraphGui() : m_selectedElement(nullptr) {}
 
         void UpdateSceneGraph();
 
+        void OpenSceneGraph();
+
     private:
         typedef blaMap<GameObjectID, BlaGuiElement*> ElementMap;
-        void AddObjectToTree(ElementMap& elementMap, const GameObject& object);
+        void AddObjectToTree(BlaGuiElement& rootElement, ElementMap& elementMap, const GameObject& object);
 
-        void OnGuiElementSelected(const BlaGuiElementEventPayload& event);
+        void OnSceneGraphElementEvent(const BlaGuiElementEventPayload& event);
 
-        static void StaticOnGuiElementSelected(void* thisPtr, const BlaGuiElementEventPayload& event) { ((SceneGraphGui*)thisPtr)->OnGuiElementSelected(event); }
-        BlaGuiWindow& m_window;
+        static void StaticOnSceneGraphElementEvent(void* thisPtr, const BlaGuiElementEventPayload& event)
+        {
+            ((SceneGraphGui*)thisPtr)->OnSceneGraphElementEvent(event);
+        }
+
         ElementMap m_elementMap;
+
+        BlaGuiElement* m_selectedElement;
     };
 }

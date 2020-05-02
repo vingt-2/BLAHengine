@@ -11,10 +11,10 @@
 using namespace BLA;
 
 //TODO: Extract asset data to the Asset folder out of Game
-#include <Animation/SkeletonAnimationData.h>
+#include "Animation/SkeletonAnimationData.h"
 
 // What if we run this code in a non-engine situation ??
-#include <System/Console.h>
+#include "System/Console.h"
 
 void InvalidBVH()
 {

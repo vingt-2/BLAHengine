@@ -25,7 +25,7 @@
 
 #ifdef GCC
 
-#include <sys/time.h>
+#include "sys/time.h"
 
  // Returns a time index in milliseconds
 unsigned get_tick_count()

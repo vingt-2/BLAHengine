@@ -1,6 +1,6 @@
 #include "IKComponent.h"
 
-#include <Animation/IK/IKTools.h>
+#include "Animation/IK/IKTools.h"
 
 using namespace BLA;
 

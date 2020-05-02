@@ -286,11 +286,32 @@ public:
         float sr = sin(pitch * 0.5f);
 
         blaQuat q;
-        q.w = cyaw * cp * cr + syaw * sp * sr;
         q.x = cyaw * cp * sr - syaw * sp * cr;
         q.y = syaw * cp * sr + cyaw * sp * cr;
         q.z = syaw * cp * cr - cyaw * sp * sr;
+        q.w = cyaw * cp * cr + syaw * sp * sr;
         return q;
+    }
+
+    static blaVec3 QuatToEuler(blaQuat q)
+    {
+        blaVec3 angles;
+
+        float sinp = 2 * (q.w * q.y - q.z * q.x);
+        if (std::abs(sinp) >= 1)
+            angles.x = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+        else
+            angles.x = std::asin(sinp);
+
+        float sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
+        float cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
+        angles.y = std::atan2(sinr_cosp, cosr_cosp);
+
+        float siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+        float cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+        angles.z = std::atan2(siny_cosp, cosy_cosp);
+
+        return angles;
     }
 
     //TODO: The order of inputs here is probably wrong

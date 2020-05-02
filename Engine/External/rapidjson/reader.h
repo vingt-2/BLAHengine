@@ -27,15 +27,15 @@
 #include <limits>
 
 #if defined(RAPIDJSON_SIMD) && defined(_MSC_VER)
-#include <intrin.h>
+#include "intrin.h"
 #pragma intrinsic(_BitScanForward)
 #endif
 #ifdef RAPIDJSON_SSE42
-#include <nmmintrin.h>
+#include "nmmintrin.h"
 #elif defined(RAPIDJSON_SSE2)
-#include <emmintrin.h>
+#include "emmintrin.h"
 #elif defined(RAPIDJSON_NEON)
-#include <arm_neon.h>
+#include "arm_neon.h"
 #endif
 
 #ifdef __clang__
@@ -83,7 +83,7 @@ RAPIDJSON_DIAG_OFF(effc++)
     #define RAPIDJSON_PARSE_ERROR_NORETURN(parseErrorCode,offset) \
        throw ParseException(parseErrorCode, #parseErrorCode, offset)
 
-    #include <stdexcept>               // std::runtime_error
+    #include "stdexcept>               // std::runtime_error
     #include "rapidjson/error/error.h" // rapidjson::ParseResult
 
     struct ParseException : std::runtime_error, rapidjson::ParseResult {

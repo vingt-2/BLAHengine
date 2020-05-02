@@ -16,8 +16,8 @@
 #define RAPIDJSON_ISTREAMWRAPPER_H_
 
 #include "stream.h"
-#include <iosfwd>
-#include <ios>
+#include "iosfwd>
+#include "ios>
 
 #ifdef __clang__
 RAPIDJSON_DIAG_PUSH

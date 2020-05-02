@@ -1,9 +1,9 @@
 #include "RenderingManager.h"
 
-#include <Core/CameraComponent.h>
-#include <Renderer/DirectionalLightComponent.h>
-#include <Renderer/MeshRendererComponent.h>
-#include <Renderer/PointLightComponent.h>
+#include "Core/CameraComponent.h"
+#include "Renderer/DirectionalLightComponent.h"
+#include "Renderer/MeshRendererComponent.h"
+#include "Renderer/PointLightComponent.h"
 
 #pragma optimize("", off)
 
@@ -35,7 +35,8 @@ bool RenderingManager::CancelMeshRendererTicket(MeshRendererComponent* meshRende
 {
     int renderTicket = meshRender->m_renderTicket;
     auto itTicket = m_ticketedMeshRenderers.find(renderTicket);
-    this->m_ticketedMeshRenderers.erase(itTicket);
+    if(itTicket != m_ticketedMeshRenderers.end())
+        this->m_ticketedMeshRenderers.erase(itTicket);
     return true;
 }
 

@@ -1,5 +1,5 @@
 #include "CameraComponent.h"
-#include <Core/GameObject.h>
+#include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
 using namespace BLA;
 

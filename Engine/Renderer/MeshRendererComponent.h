@@ -1,9 +1,9 @@
 #pragma once
-#include <StdInclude.h>
-#include <Assets/MeshAsset.h>
-#include <Assets/Material.h>
+#include "StdInclude.h"
+#include "Assets/MeshAsset.h"
+#include "Assets/Material.h"
 
-#include <Core/BehaviorComponent.h>
+#include "Core/BehaviorComponent.h"
 
 #define BLA_LINE_RENDER 0x0003
 

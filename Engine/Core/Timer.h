@@ -1,12 +1,14 @@
 #pragma once
-#include <BLASingleton.h>
-#include <StdInclude.h>
-#include <System.h>
-#include <Maths/Maths.h>
+#include "BLASingleton.h"
+#include "StdInclude.h"
+#include "System.h"
+#include "Maths/Maths.h"
 namespace BLA
 {
     class BLACORE_API Timer
     {
+        BLA_DECLARE_SINGLETON(Timer);
+
         float m_time;
         float m_elapsedTime;
 

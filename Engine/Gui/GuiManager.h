@@ -1,13 +1,13 @@
 #pragma once
 
-#include <Maths/Maths.h>
-#include <BLASingleton.h>
+#include "Maths/Maths.h"
+#include "BLASingleton.h"
 
 #include "./GuiWindow.h"
 #include "./GuiMenu.h"
 #include "./GuiFileBrowser.h"
 
-#include <StdInclude.h>
+#include "StdInclude.h"
 
 struct GLFWwindow;
 
@@ -49,9 +49,9 @@ namespace BLA
 
         BlaGuiWindow* OpenWindow(blaString name);
 
-        void OpenWindow(blaString name, BlaGuiWindow* window);
+        BlaGuiWindow* GetWindow(blaString name);
 
-        const BlaGuiWindow* GetWindow(const blaString& name) const { return m_openWindows.at(name); }
+        void OpenWindow(blaString name, BlaGuiWindow* window);
 
     private:
 

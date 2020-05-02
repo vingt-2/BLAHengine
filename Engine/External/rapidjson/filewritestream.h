@@ -16,7 +16,7 @@
 #define RAPIDJSON_FILEWRITESTREAM_H_
 
 #include "stream.h"
-#include <cstdio>
+#include "cstdio>
 
 #ifdef __clang__
 RAPIDJSON_DIAG_PUSH
