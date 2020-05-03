@@ -1,9 +1,4 @@
-#include <thread>
-
-#include "System/RenderWindow.h"
 #include "EditorSession.h"
-#include "System/Console.h"
-#include "BLAStringID.h"
 
 using namespace BLA;
 

@@ -14,9 +14,9 @@
 
 namespace BLA
 {
-    class BLACORE_API AssetManager
+    class AssetManager
     {
-        BLA_DECLARE_SINGLETON(AssetManager);
+        BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(AssetManager);
 
     public:
         enum AssetType
@@ -30,21 +30,21 @@ namespace BLA
         AssetManager(void);
         ~AssetManager(void);
 
-        int LoadCookedAssets();
+        BLACORE_API blaIndex LoadCookedAssets();
 
-        AssetType GetAsset(blaString assetName, Asset* &assetPtr);
+        BLACORE_API AssetType GetAsset(blaString assetName, Asset* &assetPtr);
 
-        bool LoadTriangleMesh(blaString filepath);
-        bool LoadTexture(blaString filepath);
-        bool LoadMaterial(blaString filepath);
+        BLACORE_API bool LoadTriangleMesh(blaString filepath);
+        BLACORE_API bool LoadTexture(blaString filepath);
+        BLACORE_API bool LoadMaterial(blaString filepath);
 
-        bool SaveMaterial(Material* mat);
-        bool SaveTexture(Texture2D* mesh);
-        bool SaveTriangleMesh(MeshAsset* mesh);
+        BLACORE_API bool SaveMaterial(Material* mat);
+        BLACORE_API bool SaveTexture(Texture2D* mesh);
+        BLACORE_API bool SaveTriangleMesh(MeshAsset* mesh);
 
     private:
 
-        blaMap<blaString, blaPair<AssetType, blaU32>> m_resourceMap;
+        blaMap<blaString, blaPair<AssetType, blaIndex>> m_resourceMap;
 
         blaVector<MeshAsset*> m_triangleMeshesInMemory;
         blaVector<Material*> m_materialsInMemory;

@@ -199,7 +199,7 @@ void GL33Renderer::RenderGBuffer()
             glBindVertexArray(gl33RenderObject->m_vertexArrayID);
 
             // Draw VAO
-            glDrawElements(gl33RenderObject->m_renderType, gl33RenderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+            glDrawElements(gl33RenderObject->m_renderType, (GLsizei)gl33RenderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
             glBindVertexArray(0);
             // Send textureSamplers to shader
@@ -251,9 +251,9 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRe
 
         AssignMaterial(*object, mat->GetName());
 
-        for (size_t j = 0; j < mat->m_textureSamplerAttributes.size(); j++)
+        for (size_t j = 0; j < mat->GetSamplers().size(); j++)
         {
-            LoadTextureSample(*object, mat->m_textureSamplerAttributes[j].first, mat->m_textureSamplerAttributes[j].second);
+            LoadTextureSample(*object, mat->GetSamplers()[j].first, mat->GetSamplers()[j].second);
         }
     }
 
@@ -426,7 +426,10 @@ void GL33Renderer::DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRi
 
     glEnable(GL_CULL_FACE);
 
-    glViewport(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+    glViewport(static_cast<GLsizei>(topLeft.x), 
+        static_cast<GLsizei>(topLeft.y), 
+        static_cast<GLsizei>(bottomRight.x - topLeft.x), 
+        static_cast<GLsizei>(bottomRight.y - topLeft.y));
 
     // Use our shader
     glUseProgram(m_drawColorBufferPrgmID);
@@ -455,7 +458,7 @@ void GL33Renderer::DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRi
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glViewport(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+    glViewport(static_cast<GLsizei>(topLeft.x), static_cast<GLsizei>(topLeft.y), static_cast<GLsizei>(bottomRight.x - topLeft.x), static_cast<GLsizei>(bottomRight.y - topLeft.y));
 
     // Use our shader
     glUseProgram(DrawDepthBufferPrgmID);
@@ -609,7 +612,7 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     glBindVertexArray(m_pointLightSphereMesh.m_vao);
 
     // Draw VAO
-    glDrawElements(GL_TRIANGLES, m_pointLightSphereMesh.m_size, GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+    glDrawElements(GL_TRIANGLES, (GLsizei)m_pointLightSphereMesh.m_size, GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -672,7 +675,7 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     glBindVertexArray(m_pointLightSphereMesh.m_vao);
 
     // Draw VAO
-    glDrawElements(GL_TRIANGLES, m_pointLightSphereMesh.m_size, GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_pointLightSphereMesh.m_size), GL_UNSIGNED_INT, (const void*)0); // Draw Triangles
     glStencilFunc(GL_NEVER, 0, 0);
     glCullFace(GL_BACK);
     glDisable(GL_STENCIL_TEST);
@@ -715,7 +718,7 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
             glBindVertexArray(renderObject->m_vertexArrayID);
 
             // Draw VAO
-            glDrawElements(GL_TRIANGLES, renderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(renderObject->m_toMeshTriangles->size()), GL_UNSIGNED_INT, (void*)0);
 
             glBindVertexArray(0);
         }
@@ -738,10 +741,10 @@ int BLA::GL33Renderer::SynchWithRenderManager()
     if (!m_renderingManager)
         return 0;
 
-    blaVector<blaU32> toErase;
+    blaVector<blaIndex> toErase;
     for (auto renderingObject : m_meshRenderPool)
     {
-        if (m_renderingManager->GetTicketedMeshRenderers()->count(renderingObject.first) == 0)
+        if (m_renderingManager->GetTicketedMeshRenderers()->count((blaU32)renderingObject.first) == 0)
         {
             if (GL33RenderObject* gl33object = dynamic_cast<GL33RenderObject*>(renderingObject.second))
             {
@@ -824,23 +827,23 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
 
     int layoutIndex = 0;
 
-    GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshVertices)[0]), object.m_toMeshVertices->size() * sizeof(blaVec3), 3, layoutIndex);
+    GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshVertices)[0]), static_cast<GLuint>(object.m_toMeshVertices->size() * sizeof(blaVec3)), 3, layoutIndex);
     layoutIndex++;
     if (!object.m_toMeshUVs->empty())
     {
-        GenerateBufferObject<glm::vec2>(object, &((*object.m_toMeshUVs)[0]), object.m_toMeshUVs->size() * sizeof(glm::vec2), 2, layoutIndex);
+        GenerateBufferObject<glm::vec2>(object, &((*object.m_toMeshUVs)[0]), static_cast<GLuint>(object.m_toMeshUVs->size() * sizeof(glm::vec2)), 2, layoutIndex);
         layoutIndex++;
     }
 
     if (!object.m_toMeshNormals->empty())
     {
-        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshNormals)[0]), object.m_toMeshNormals->size() * sizeof(blaVec3), 3, layoutIndex);
+        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshNormals)[0]), static_cast<GLuint>(object.m_toMeshNormals->size() * sizeof(blaVec3)), 3, layoutIndex);
         layoutIndex++;
     }
 
     if (!object.m_toMeshTangents->empty())
     {
-        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshTangents)[0]), object.m_toMeshTangents->size() * sizeof(blaVec3), 3, layoutIndex);
+        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshTangents)[0]), static_cast<GLuint>(object.m_toMeshTangents->size() * sizeof(blaVec3)), 3, layoutIndex);
         layoutIndex++;
     }
 
@@ -926,7 +929,7 @@ bool GL33Renderer::AssignMaterial(GL33RenderObject& object, blaString name)
         {
             if (Material* material = (Material*)matAsset)
             {
-                for (auto texture : material->m_textureSamplerAttributes)
+                for (auto texture : material->GetSamplers())
                 {
                     Asset* texAsset;
                     AssetManager::AssetType type = m_assetManager->GetAsset(texture.first, texAsset);
@@ -1328,7 +1331,7 @@ void GL33Renderer::RenderDebugLines()
     // Set our "renderedTexture" sampler to user Texture Unit 1
     glUniform1i(displayBufferID, 1);
 
-    glDrawArrays(0x0001, 0, m_debugLinesInfo.size);
+    glDrawArrays(0x0001, 0, (GLsizei)m_debugLinesInfo.size);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1369,7 +1372,7 @@ void GL33Renderer::RenderDebugMeshes()
     // Set our "renderedTexture" sampler to user Texture Unit 1
     glUniform1i(displayBufferID, 1);
 
-    glDrawArrays(GL_TRIANGLES, 0, m_debugMeshesInfo.size);
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)m_debugMeshesInfo.size);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -7,14 +7,15 @@
 
 namespace BLA
 {
-    class BLACORE_API Material : public Asset
+    class Material : public Asset
     {
-    public:
-        Material(blaString name) : Asset(name)
-        {};
-
-        bool AssignTexture(blaString textureName, blaString handleName);
-
         blaVector<blaPair<blaString, blaString>> m_textureSamplerAttributes;
+    	
+    public:
+        Material(blaString name) : Asset(name) {};
+
+        blaVector<blaPair<blaString, blaString>>& GetSamplers();
+    	
+        BLACORE_API bool AssignTexture(blaString textureName, blaString handleName);
     };
 }

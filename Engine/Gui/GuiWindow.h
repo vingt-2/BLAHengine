@@ -8,7 +8,7 @@ namespace BLA
     class BlaGuiElement;
     class Renderer;
 
-    class BLACORE_API BlaGuiWindow
+    class BlaGuiWindow
     {
         friend class BlaGuiManager;
     public:
@@ -38,7 +38,7 @@ namespace BLA
             NoDocking = 1 << 21,
         };
 
-        BlaGuiWindow() :
+        BLACORE_API BlaGuiWindow() :
             m_windowName("")
             , m_windowPosition(blaIVec2(0))
             , m_windowFlags(0)
@@ -46,7 +46,7 @@ namespace BLA
             , m_bOpenWindow(true)
         {}
 
-        BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition)
+        BLACORE_API BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition)
             : m_windowName(windowName)
             , m_windowPosition(windowPosition)
             , m_windowFlags(0)
@@ -56,24 +56,24 @@ namespace BLA
 
         virtual void Render();
 
-        BlaGuiElement* RootElement() const
+        BLACORE_API BlaGuiElement* RootElement() const
         {
             return m_rootElement;
         }
 
-        void SetRootElement(BlaGuiElement* imGuiElements);
+        BLACORE_API void SetRootElement(BlaGuiElement* imGuiElements);
 
-        blaString GetWindowName() const
+        BLACORE_API blaString GetWindowName() const
         {
             return m_windowName;
         }
 
-        blaIVec2 GetWindowPosition() const
+        BLACORE_API blaIVec2 GetWindowPosition() const
         {
             return m_windowPosition;
         }
 
-        bool HasFocus() const { return m_hasFocus; }
+        BLACORE_API bool HasFocus() const { return m_hasFocus; }
 
     protected:
         blaU32 m_windowFlags;
@@ -84,32 +84,32 @@ namespace BLA
         bool m_bOpenWindow;
     };
 
-    class BLACORE_API BlaOneTimeWindow : public BlaGuiWindow
+    class BlaOneTimeWindow : public BlaGuiWindow
     {
     public:
-        BlaOneTimeWindow() : BlaGuiWindow()
+        BLACORE_API BlaOneTimeWindow() : BlaGuiWindow()
         {}
 
-        BlaOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition) :
+        BLACORE_API  BlaOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition) :
             BlaGuiWindow(windowName, windowPosition)
         {};
 
         void Render() override;
     };
 
-    class BLACORE_API BlaGuiRenderWindow : public BlaGuiWindow
+    class BlaGuiRenderWindow : public BlaGuiWindow
     {
     public:
-        BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow(), m_pRenderer(renderer)
+        BLACORE_API BlaGuiRenderWindow(Renderer* renderer) : BlaGuiWindow(), m_pRenderer(renderer)
         {}
 
-        BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition) :
+        BLACORE_API BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition) :
             BlaGuiWindow(windowName, windowPosition), m_pRenderer(renderer)
         {};
 
         void Render() override;
 
-        blaVec2 GetMousePointerScreenSpaceCoordinates() const { return m_cursorScreenSpacePosition; }
+        BLACORE_API blaVec2 GetMousePointerScreenSpaceCoordinates() const { return m_cursorScreenSpacePosition; }
 
     private:
         blaVec2 m_cursorScreenSpacePosition;

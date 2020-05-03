@@ -73,7 +73,7 @@ void SkeletonAnimationData::GetBoneArrayFromEvalAnim(blaVector<blaPair<blaPosQua
 
     for (auto& child : *skeleton)
     {
-        outputBones.emplace_back(blaPair<blaPosQuat, blaF32>(transform, evalAnim[child.GetJointIndex()].GetTranslation3().length()));
+        outputBones.emplace_back(blaPair<blaPosQuat, blaF32>(transform, glm::length2(evalAnim[child.GetJointIndex()].GetTranslation3())));
         GetBoneArrayFromEvalAnim(outputBones, &child, evalAnim);
     }
 }

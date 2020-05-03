@@ -31,10 +31,10 @@ namespace BLA
     public:
         PerspectiveCamera m_mainRenderCamera;
 
-        blaMap<blaU32, RenderObject*> m_meshRenderPool;
+        blaMap<blaIndex, RenderObject*> m_meshRenderPool;
 
-        blaMap<blaU32, DirectionalLightRender*> m_directionalLightPool;
-        blaMap<blaU32, PointLightRender*> m_pointLightPool;
+        blaMap<blaIndex, DirectionalLightRender*> m_directionalLightPool;
+        blaMap<blaIndex, PointLightRender*> m_pointLightPool;
 
         // Rendering Related
         virtual void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) = 0;

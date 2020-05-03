@@ -7,22 +7,22 @@ namespace BLA
 {
     struct BLACORE_API RenderData
     {
-        blaVector<blaU32>  m_triangleIndices;
-        blaVector<blaVec3> m_vertPos;
-        blaVector<blaVec3> m_vertNormal;
-        blaVector<blaVec3> m_vertTangent;
-        blaVector<blaVec3> m_vertBiTangent;
-        blaVector<blaVec2> m_vertUVs;
+        blaVector<blaIndex> m_triangleIndices;
+        blaVector<blaVec3>  m_vertPos;
+        blaVector<blaVec3>  m_vertNormal;
+        blaVector<blaVec3>  m_vertTangent;
+        blaVector<blaVec3>  m_vertBiTangent;
+        blaVector<blaVec2>  m_vertUVs;
     };
 
-    class BLACORE_API TriangleMesh
+    class TriangleMesh
     {
     public:
         typedef blaU32 HeIndx;
         typedef blaU32 FaceIndx;
 
-        TriangleMesh() = default;
-        ~TriangleMesh() = default;
+        BLACORE_API TriangleMesh() = default;
+        BLACORE_API ~TriangleMesh() = default;
 
         typedef struct face_t
         {
@@ -69,29 +69,29 @@ namespace BLA
 
         RenderData m_renderData;
 
-        void BuildMeshTopo(
+        BLACORE_API void BuildMeshTopo(
             blaVector<blaU32> vertPosIndices,
             blaVector<blaU32> vertNormalIndices,
             blaVector<blaU32> vertUVsIndices,
             bool swapNormals);
 
-        void NormalizeModelCoordinates(bool normalizeScale);
-        void ComputeFaceTangents();
-        void ApplyGeomScaling(blaVec3 scaling);
-        void ApplyUVScaling(glm::vec2 scaling);
+        BLACORE_API void NormalizeModelCoordinates(bool normalizeScale);
+        BLACORE_API void ComputeFaceTangents();
+        BLACORE_API void ApplyGeomScaling(blaVec3 scaling);
+        BLACORE_API void ApplyUVScaling(glm::vec2 scaling);
 
-        void GenerateRenderData();
-        void GenerateTopoTriangleIndices(blaVector<blaU32> &posIndices, blaVector<blaU32> &normalIndices);
+        BLACORE_API void GenerateRenderData();
+        BLACORE_API void GenerateTopoTriangleIndices(blaVector<blaU32> &posIndices, blaVector<blaU32> &normalIndices);
 
-        bool IsMeshValid();
+        BLACORE_API bool IsMeshValid();
 
-        void ReverseEdgesOrder();
-        void GetHEvertices(HeIndx halfEdge, blaPair<blaU32, blaU32>* vertexPair);
-        void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
-        bool GetSurroundingVertices(blaU32 vertexIndx, blaVector<DestVertex> &surroundingVertices);
-        bool GetSurroundingTriangles(blaU32 vertexIndx, blaVector<FaceIndx> &surroundingFaces);
-        bool GetEmanatingHalfEdges(blaU32 vertexIndx, blaVector<HeIndx> &edges);
-        void GetTriangleEdges(blaU32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
+        BLACORE_API void ReverseEdgesOrder();
+        BLACORE_API void GetHEvertices(HeIndx halfEdge, blaPair<blaU32, blaU32>* vertexPair);
+        BLACORE_API void GetHETriangle(HeIndx halfEdge, FaceIndx* triangle);
+        BLACORE_API bool GetSurroundingVertices(blaU32 vertexIndx, blaVector<DestVertex> &surroundingVertices);
+        BLACORE_API bool GetSurroundingTriangles(blaU32 vertexIndx, blaVector<FaceIndx> &surroundingFaces);
+        BLACORE_API bool GetEmanatingHalfEdges(blaU32 vertexIndx, blaVector<HeIndx> &edges);
+        BLACORE_API void GetTriangleEdges(blaU32 triangle, HeIndx* edge0, HeIndx* edge1, HeIndx* edge2);
     };
 
     typedef struct RenderVertEntry_t

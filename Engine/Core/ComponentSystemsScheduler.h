@@ -23,7 +23,7 @@ namespace BLA
         {
             blaVector<blaStringId> m_children;
 
-            int m_parentToComplete;
+            blaIndex m_parentToComplete;
 
             const ComponentSystem* m_componentSystemRegisteryEntry;
 

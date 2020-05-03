@@ -29,12 +29,12 @@ __CD__BEGIN
 ////////////////////////////////////////////////////
 // code from here is used in detection process
 
-int BoxTreeInnerNode::getTrianglesNumber()
+size_t BoxTreeInnerNode::getTrianglesNumber()
 {
     return m_Boxes.size();
 }
 
-BoxedTriangle* BoxTreeInnerNode::getTriangle(int which)
+BoxedTriangle* BoxTreeInnerNode::getTriangle(size_t which)
 {
     if (which < 0 || which >= getTrianglesNumber()) return nullptr;
     return m_Boxes[which];

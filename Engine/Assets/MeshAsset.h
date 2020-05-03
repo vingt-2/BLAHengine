@@ -5,10 +5,10 @@
 
 namespace BLA
 {
-    class BLACORE_API MeshAsset : public Asset
+    class MeshAsset : public Asset
     {
     public:
-        MeshAsset(blaString name) : Asset(name) {}
+        BLACORE_API MeshAsset(blaString name) : Asset(name) {}
 
         TriangleMesh m_triangleMesh;
     };

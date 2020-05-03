@@ -92,12 +92,13 @@ struct F32Descriptor : ExposedVarTypeDescriptor
             return DESERIALIZE_ERROR;
         }
 
-        Deserializer* Double(double b) override
+        Deserializer* Double(double d) override
         {
+            float f = (float)d;
             if (m_stage == 1)
             {
                 m_stage++;
-                *static_cast<blaF32*>(m_obj) = b;
+                *static_cast<blaF32*>(m_obj) = f;
                 return POP_DESERIALIZER;
             }
             return DESERIALIZE_ERROR;
@@ -310,8 +311,9 @@ struct blaVec2Descriptor : ExposedVarTypeDescriptor
         }
 
         //Todo: Support ints ?
-        Deserializer* Double(double b) override
+        Deserializer* Double(double bd) override
         {
+            float b = (float)bd;
             if(m_stage == 1) 
             {
                 static_cast<blaVec2*>(m_obj)->x = b;
@@ -388,21 +390,22 @@ struct blaVec3Descriptor : ExposedVarTypeDescriptor
         }
 
         //Todo: Support ints ?
-        Deserializer* Double(double b) override
+        Deserializer* Double(double d) override
         {
+            float f = (float)d;
             if (m_stage == 1)
             {
-                static_cast<blaVec3*>(m_obj)->x = b;
+                static_cast<blaVec3*>(m_obj)->x = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 2)
             {
-                static_cast<blaVec3*>(m_obj)->y = b;
+                static_cast<blaVec3*>(m_obj)->y = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 3)
             {
-                static_cast<blaVec3*>(m_obj)->z = b;
+                static_cast<blaVec3*>(m_obj)->z = f;
                 ++m_stage; return nullptr;
             }
             return DESERIALIZE_ERROR;
@@ -472,8 +475,9 @@ struct blaQuatDescriptor : ExposedVarTypeDescriptor
         }
 
         //Todo: Support ints ?
-        Deserializer* Double(double b) override
+        Deserializer* Double(double bd) override
         {
+            float b = (float)bd;
             if (m_stage == 1)
             {
                 static_cast<blaQuat*>(m_obj)->x = b;
@@ -565,41 +569,42 @@ struct blaPosQuatDescriptor : ExposedVarTypeDescriptor
         }
 
         //Todo: Support ints ?
-        Deserializer* Double(double b) override
+        Deserializer* Double(double d) override
         {
+            float f = (float)d;
             if (m_stage == 1)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetTranslation().x = b;
+                static_cast<blaPosQuat*>(m_obj)->GetTranslation().x = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 2)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetTranslation().y = b;
+                static_cast<blaPosQuat*>(m_obj)->GetTranslation().y = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 3)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetTranslation().z = b;
+                static_cast<blaPosQuat*>(m_obj)->GetTranslation().z = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 4)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetRotation().x = b;
+                static_cast<blaPosQuat*>(m_obj)->GetRotation().x = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 5)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetRotation().y = b;
+                static_cast<blaPosQuat*>(m_obj)->GetRotation().y = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 6)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetRotation().z = b;
+                static_cast<blaPosQuat*>(m_obj)->GetRotation().z = f;
                 ++m_stage; return nullptr;
             }
             if (m_stage == 7)
             {
-                static_cast<blaPosQuat*>(m_obj)->GetRotation().w = b;
+                static_cast<blaPosQuat*>(m_obj)->GetRotation().w = f;
                 ++m_stage; return nullptr;
             }
             return DESERIALIZE_ERROR;
@@ -676,8 +681,9 @@ struct blaScaledTransformDescriptor : ExposedVarTypeDescriptor
         }
 
         //Todo: Support ints ?
-        Deserializer* Double(double b) override
+        Deserializer* Double(double bd) override
         {
+            float b = (float)bd;
             if (m_stage == 1)
             {
                 static_cast<blaScaledTransform*>(m_obj)->m_scale.x = b;

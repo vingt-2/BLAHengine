@@ -35,7 +35,7 @@ namespace BLA
 
     class BlaGuiMenuTab
     {
-        friend class BlaGuiMenu;
+        friend struct BlaGuiMenu;
     public:
         BlaGuiMenuTab(blaString name) :
             m_name(name)

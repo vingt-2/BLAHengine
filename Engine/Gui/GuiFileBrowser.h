@@ -12,7 +12,7 @@ struct GLFWwindow;
 
 namespace BLA
 {
-    class BLACORE_API BlaFileBrowser
+    class BlaFileBrowser
     {
         friend class BlaGuiManager;
     public:
@@ -25,18 +25,13 @@ namespace BLA
             CANCELLED
         };
 
-        BlaFileBrowser(blaString browserName,
-            blaString filesDirectory,
-            blaString directoryDirectory) :
-            m_name(browserName)
-            , m_currentFilesDirectory(filesDirectory)
-            , m_currentDirectoriesDirectory(directoryDirectory)
-            , m_currentState(BROWSING_FIRST_RENDER)
-        {};
-
+        BLACORE_API BlaFileBrowser(blaString browserName,
+                       blaString filesDirectory,
+                       blaString directoryDirectory);
+    	
+        BLACORE_API blaBool IsBrowsingCancelled() const;
+    	
         virtual void Render();
-
-        blaBool IsBrowsingCancelled() const;
     protected:
 
         void FileBrowserDisplayAllContentNonRecursive();
@@ -57,38 +52,29 @@ namespace BLA
         //void FileBrowserDisplayAllContentRecursive();
     };
 
-    class BLACORE_API OpenFilePrompt : public BlaFileBrowser
+    class OpenFilePrompt : public BlaFileBrowser
     {
     public:
-        OpenFilePrompt(blaString browserName,
-            blaString filesDirectory,
-            blaString directoryDirectory,
-            blaBool disableMultipleSelection) :
-            BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
-        {
-            m_disableMultipleSelection = disableMultipleSelection;
-        }
-
+        BLACORE_API OpenFilePrompt(blaString browserName,
+	                   blaString filesDirectory,
+	                   blaString directoryDirectory,
+	                   blaBool disableMultipleSelection);
+    	
+        BLACORE_API blaBool GetConfirmedSelection(blaVector<FileEntry>& selection) const;
+    	
         void Render() override;
-
-        blaBool GetConfirmedSelection(blaVector<FileEntry>& selection) const;
-    private:
     };
 
-    class BLACORE_API SaveFilePrompt : public BlaFileBrowser
+    class SaveFilePrompt : public BlaFileBrowser
     {
     public:
-        SaveFilePrompt(blaString browserName,
-            blaString filesDirectory,
-            blaString directoryDirectory) :
-            BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
-        {
-            m_disableMultipleSelection = true;
-        }
-
+        BLACORE_API SaveFilePrompt(blaString browserName,
+	                   blaString filesDirectory,
+	                   blaString directoryDirectory);
+        BLACORE_API blaBool GetConfirmedSavePath(blaString& savePath) const;
+    	
         void Render() override;
 
-        blaBool GetConfirmedSavePath(blaString& savePath) const;
     private:
 
         blaString m_currentSavePath;

@@ -6,19 +6,16 @@
 
 namespace BLA
 {
-    class BLACORE_API SceneManager
+    class SceneManager
     {
     public:
-        SceneManager();
+        BLACORE_API SceneManager();
 
-        bool SaveScene(blaString filepath, Scene* scene);
+        BLACORE_API bool SaveScene(blaString filepath, Scene* scene);
 
-        void LoadScene(blaString filepath);
+        BLACORE_API void LoadScene(blaString filepath);
 
-        blaString GetCurrentSceneFilePath() const
-        {
-            return m_currentSceneFilePath;
-        }
+        BLACORE_API blaString GetCurrentSceneFilePath() const;
 
     private:
         blaString m_currentSceneFilePath;

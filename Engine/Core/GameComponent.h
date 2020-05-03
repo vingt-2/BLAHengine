@@ -79,19 +79,19 @@ namespace BLA
 #define IF_INCLUDING_EXTERN_COMPONENT_1 __declspec ( dllimport )
 #define IF_INCLUDING_EXTERN_COMPONENT_0 __declspec ( dllexport )
 
-#define BLA_COMPONENT_API_IMPORT_EXPORT_SELECT(ProjectName) \
+#define BLA_EXPORT(ProjectName) \
     __SILLY_MACRO__CAT(IF_INCLUDING_EXTERN_COMPONENT_,__SILLY_MACRO__NOT_EQUAL(ProjectName, BLA_PROJECT_NAME))
 
-#define BeginComponentDeclaration(ProjectName, ComponentName)                                               \
-    class BLA_COMPONENT_API_IMPORT_EXPORT_SELECT(ProjectName) ComponentName : public GameComponent {        \
-    friend struct BLAInspectableVariables::DefaultResolver;                                                 \
-    static void InitReflection(ComponentDescriptor*);														\
-    static GameComponent* Factory(GameObject objR) { return new ComponentName(objR); }                      \
-    ComponentName(GameObject parentObject);                                                                 \
-    public:                                                                                                 \
-	virtual const ComponentDescriptor& GetComponentDescriptor() const {										\
-		return ms_componentDescriptor; }                                                                    \
-    static const ComponentDescriptor ms_componentDescriptor;                                                
+#define BeginComponentDeclaration(ProjectName, ComponentName)                                                   \
+    class ComponentName : public GameComponent {                                                                \
+    friend struct BLAInspectableVariables::DefaultResolver;                                                     \
+    BLA_EXPORT(ProjectName) static void InitReflection(ComponentDescriptor*);								    \
+    BLA_EXPORT(ProjectName) static GameComponent* Factory(GameObject objR) { return new ComponentName(objR); }  \
+    BLA_EXPORT(ProjectName) ComponentName(GameObject parentObject);                                             \
+    public:                                                                                                     \
+	BLA_EXPORT(ProjectName) virtual const ComponentDescriptor& GetComponentDescriptor() const {					\
+		return ms_componentDescriptor; }                                                                        \
+    BLA_EXPORT(ProjectName) static const ComponentDescriptor ms_componentDescriptor;                                                
 
 #define EndComponentDeclaration() };
 
@@ -115,9 +115,10 @@ namespace BLA
         manager->__RegisterComponent(typeDesc->m_typeName, T::Factory);                                     \
     }
 
-    class BLACORE_API GameComponentRegistry
+    class GameComponentRegistry
     {
-        BLA_DECLARE_SINGLETON(GameComponentRegistry)
+    	// TODO: Make it so it should be access only and components outside of native assert if nullptr instead of creating the registry
+        BLA_DECLARE_EXPORTED_SINGLETON(GameComponentRegistry)
 
         friend class GameComponent;
         friend class ComponentLibrariesManager;
@@ -146,24 +147,18 @@ namespace BLA
 
     public:
 
-        GameComponent* __CreateComponent(blaStringId componentName, GameObject objRef);
+        BLACORE_API GameComponent* __CreateComponent(blaStringId componentName, GameObject objRef);
 
         template<class T>
-        T* __CreateComponent(GameObject objRef);
+        BLACORE_API T* __CreateComponent(GameObject objRef);
 
-        void __RegisterComponent(blaStringId name, GameComponentRegistryEntry::ComponentFactory factory);
+        BLACORE_API void __RegisterComponent(blaStringId name, GameComponentRegistryEntry::ComponentFactory factory);
 
-        blaVector<blaString> ListComponentNames();
-        const ComponentDescriptor& GetComponentDescriptor(blaStringId name);
+        BLACORE_API blaVector<blaString> ListComponentNames();
+        BLACORE_API const ComponentDescriptor& GetComponentDescriptor(blaStringId name);
 
-        GameComponentRegistry(): m_currentRegisteringLibrary(BlaStringId("Native")) {}
+        BLACORE_API GameComponentRegistry();
     };
-
-    template <class T>
-    T* GameComponentRegistry::__CreateComponent(GameObject objRef)
-    {
-        return static_cast<T*>(T::Factory(objRef));
-    }
 }
 
 /*

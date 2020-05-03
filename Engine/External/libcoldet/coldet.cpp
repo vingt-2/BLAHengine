@@ -62,7 +62,7 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
     if (MaxProcessingTime == 0) MaxProcessingTime = 0xFFFFFF;
 
     unsigned EndTime, BeginTime = unsigned(get_tick_count());
-    int num = Max(m_Triangles.size(), o->m_Triangles.size());
+    int num = (int) Max(m_Triangles.size(), o->m_Triangles.size());
     int Allocated = Max(64, (num >> 4));
     std::vector<Check> checks(Allocated);
 
@@ -91,16 +91,16 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
         assert(second != NULL);
         if (first->intersect(*second, rs))
         {
-            int tnum1 = first->getTrianglesNumber();
-            int tnum2 = second->getTrianglesNumber();
+            size_t tnum1 = first->getTrianglesNumber();
+            size_t tnum2 = second->getTrianglesNumber();
             if (tnum1 > 0 && tnum2 > 0)
             {
                 {
-                    for (int i = 0; i < tnum2; i++)
+                    for (size_t i = 0; i < tnum2; i++)
                     {
                         BoxedTriangle* bt2 = second->getTriangle(i);
                         Triangle tt(Transform(bt2->v1, rs.t), Transform(bt2->v2, rs.t), Transform(bt2->v3, rs.t));
-                        for (int j = 0; j < tnum1; j++)
+                        for (size_t j = 0; j < tnum1; j++)
                         {
                             BoxedTriangle* bt1 = first->getTriangle(j);
                             if (tt.intersect(*bt1))
@@ -242,12 +242,12 @@ bool CollisionModel3DImpl::rayCollision(const float origin[3],
         checks.pop_back();
         if (b->intersect(O, D, segmax))
         {
-            int sons = b->getSonsNumber();
+            size_t sons = b->getSonsNumber();
             if (sons)
                 while (sons--) checks.push_back(b->getSon(sons));
             else
             {
-                int tri = b->getTrianglesNumber();
+                size_t tri = b->getTrianglesNumber();
                 while (tri--)
                 {
                     BoxedTriangle* bt = b->getTriangle(tri);
@@ -323,12 +323,12 @@ bool CollisionModel3DImpl::threadSafeClosestRayCollision(const float origin[3],
         checks.pop_back();
         if (b->intersect(O, D, segmax))
         {
-            int sons = b->getSonsNumber();
+            size_t sons = b->getSonsNumber();
             if (sons)
                 while (sons--) checks.push_back(b->getSon(sons));
             else
             {
-                int tri = b->getTrianglesNumber();
+                size_t tri = b->getTrianglesNumber();
                 while (tri--)
                 {
                     BoxedTriangle* bt = b->getTriangle(tri);
@@ -371,12 +371,12 @@ bool CollisionModel3DImpl::sphereCollision(const float origin[3], float radius)
         checks.pop_back();
         if (b->intersect(O, radius))
         {
-            int sons = b->getSonsNumber();
+            size_t sons = b->getSonsNumber();
             if (sons)
                 while (sons--) checks.push_back(b->getSon(sons));
             else
             {
-                int tri = b->getTrianglesNumber();
+                size_t tri = b->getTrianglesNumber();
                 while (tri--)
                 {
                     BoxedTriangle* bt = b->getTriangle(tri);

@@ -8,7 +8,7 @@ namespace BLA
 {
     class TriangleMesh;
     class ColliderComponent;
-    class BLACORE_API NextState
+    class NextState
     {
     public:
         NextState();

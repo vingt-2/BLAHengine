@@ -14,7 +14,7 @@ public:
     void FromMaterial(BLA::Material* material)
     {
         m_name = material->GetName();
-        for (auto texturePair : material->m_textureSamplerAttributes)
+        for (auto texturePair : material->GetSamplers())
         {
             m_textureNames.push_back(texturePair.first);
             m_textureHandles.push_back(texturePair.second);
@@ -31,7 +31,7 @@ public:
         {
             blaString texName = m_textureNames[i];
             blaString texHandle = m_textureHandles[i];
-            mat->m_textureSamplerAttributes.push_back(blaPair<blaString, blaString>(texName, texHandle));
+            mat->GetSamplers().push_back(blaPair<blaString, blaString>(texName, texHandle));
         }
         return mat;
     }

@@ -255,13 +255,12 @@ namespace BLA
         static void SetGamepadSticks(const blaVec2& leftStick, const blaVec2& rightStick);
     };
 
-    class BLACORE_API InputManager
+    class InputManager
     {
         friend InputStateSetter;
 
-        BLA_DECLARE_SINGLETON(InputManager)
+        BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(InputManager)
 
-    private:
         BitArray<BLAKeyboard::BLA_KEY_ENUM_END> m_keysSet;
         BitArray<BLAKeyboard::BLA_KEY_ENUM_END> m_previousKeysSet;
 
@@ -279,48 +278,32 @@ namespace BLA
         BLAGamepadStateStorage m_gamepadState;
 
         blaBool m_lockInputs;
+    	
+        blaBool m_lockMouse, m_lockKeyboard;
 
     public:
 
-        InputManager() :
-            m_lockInputs(false)
-            , m_lockMouse(false)
-            , m_lockKeyboard(false)
-        {
-            for (blaU32 i = 0; i < BLAKeyboard::BLA_KEY_ENUM_END; ++i)
-            {
-                m_keyboardTimes[i] = 0.f;
-            }
+        BLACORE_API InputManager();
 
-            for (blaU32 i = 0; i < BLAMouseButtons::BLA_MOUSE_ENUM_END; ++i)
-            {
-                m_mouseButtonTimes[i] = 0.f;
-            }
+        BLACORE_API void SetKeyboardLock(bool lock);
+        BLACORE_API void SetMouseLock(bool lock);
 
-            for (blaU32 i = 0; i < BLAGamepadButtons::BLA_GAMEPAD_ENUM_END; ++i)
-            {
-                m_gamepadTimes[i] = 0.f;
-            }
-        };
+        BLACORE_API BLAKeyState GetKeyState(BLAKeyboard key) const;
+        BLACORE_API BLAKeyTimedState GetKeyTimedState(BLAKeyboard key) const;
 
-        blaBool m_lockMouse, m_lockKeyboard;
+        BLACORE_API BLAMouseState GetMouseButtonState(BLAMouseButtons mouseButton) const;
+        BLACORE_API BLAMouseTimedState GetMouseButtonTimedState(BLAMouseButtons mouseButton) const;
 
-        BLAKeyState GetKeyState(BLAKeyboard key) const;
-        BLAKeyTimedState GetKeyTimedState(BLAKeyboard key) const;
+        BLACORE_API BLAMousePointerState GetMousePointerState() const;
 
-        BLAMouseState GetMouseButtonState(BLAMouseButtons mouseButton) const;
-        BLAMouseTimedState GetMouseButtonTimedState(BLAMouseButtons mouseButton) const;
+        BLACORE_API blaF32 GetMouseScrollDelta() const { return m_mouseState.m_scrollAxisDelta; };
 
-        BLAMousePointerState GetMousePointerState() const;
+        BLACORE_API BLAGamepadAnalogState GetGamepadLeftAnalog() const;
+        BLACORE_API BLAGamepadAnalogState GetGamepadRightAnalog() const;
 
-        blaF32 GetMouseScrollDelta() const { return m_mouseState.m_scrollAxisDelta; };
+        BLACORE_API BLAGamepadState GetGamepadState(BLAGamepadButtons padButton) const;
+        BLACORE_API BLAGamepadTimedState GetGamepadTimedState(BLAGamepadButtons padButton) const;
 
-        BLAGamepadAnalogState GetGamepadLeftAnalog() const;
-        BLAGamepadAnalogState GetGamepadRightAnalog() const;
-
-        BLAGamepadState GetGamepadState(BLAGamepadButtons padButton) const;
-        BLAGamepadTimedState GetGamepadTimedState(BLAGamepadButtons padButton) const;
-
-        void Update();
+        BLACORE_API void Update();
     };
 }

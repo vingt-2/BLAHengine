@@ -126,7 +126,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
 void EngineInstance::PreEngineUpdate()
 {
-    m_timer->Update(glfwGetTime());
+    m_timer->Update((float)glfwGetTime());
 }
 
 void EngineInstance::EngineUpdate()
@@ -147,8 +147,8 @@ void EngineInstance::PostEngineUpdate()
 
     if (!m_isCapturedMouse)
     {
-        m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
-        m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+        m_inputManager->SetMouseLock(m_guiManager->IsMouseOverGui());
+        m_inputManager->SetKeyboardLock(m_guiManager->IsMouseOverGui());
     }
 
     // Final update of the frame
@@ -238,7 +238,7 @@ DefineConsoleCommand(void, shutdown)
     EngineInstance::GetSingletonInstance()->RequestShutdown();
 }
 
-DefineConsoleCommand(void, SetFPS, float fps)
+DefineConsoleCommand(void, SetFPS, int fps)
 {
     EngineInstance::GetSingletonInstance()->SetTargetFPS(fps);
 }

@@ -14,7 +14,7 @@ namespace BLA
     class SphereCollider;
 
     BeginComponentDeclaration(BLAEngine, ColliderComponent)
-    public:
+
         struct CollisionContact
         {
             blaVec3 m_colPositionL;
@@ -31,19 +31,19 @@ namespace BLA
         virtual float GetBoundingRadius() { return 0; };
     EndComponentDeclaration()
 
-    class BLACORE_API MeshCollider
+    class MeshCollider
     {
     public:
-        ~MeshCollider();
+        BLACORE_API ~MeshCollider();
 
-        void SetColliderMesh(TriangleMesh* mesh);
+        BLACORE_API void SetColliderMesh(TriangleMesh* mesh);
 
-        void Update() {};
+        BLACORE_API void Update() {};
 
         blaBool CollideWithRay(const blaScaledTransform& transform, const Ray& ray, ColliderComponent::CollisionContact& outCollision);
         blaBool CollideWithCollider(const ColliderComponent& collider, ColliderComponent::CollisionContact& outCollision);
 
-        float GetBoundingRadius() { return m_boundingRadius; }
+        BLACORE_API float GetBoundingRadius() { return m_boundingRadius; }
 
         CollisionModel3D* m_collisionMesh;
         blaVector<blaU32>* m_vertPosIndices;
@@ -57,18 +57,18 @@ namespace BLA
         void GenerateCollisionModel();
     };
 
-    class BLACORE_API SphereCollider
+    class SphereCollider
     {
     public:
-        SphereCollider(GameObject parentObject) {}
+        BLACORE_API SphereCollider(GameObject parentObject) {}
 
-        void SetSize(float size) { m_boundingRadius = size; }
+        BLACORE_API void SetSize(float size) { m_boundingRadius = size; }
 
-        ~SphereCollider() {};
+        BLACORE_API ~SphereCollider() {};
 
-        void Update() {};
+        BLACORE_API void Update() {};
 
-        float GetBoundingRadius() { return m_boundingRadius; }
+        BLACORE_API float GetBoundingRadius() { return m_boundingRadius; }
 
         blaBool CollideWithRay(const blaScaledTransform& transform, const Ray& ray, ColliderComponent::CollisionContact& outCollision);
         blaBool CollideWithCollider(const ColliderComponent& collider, ColliderComponent::CollisionContact& outCollision);

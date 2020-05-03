@@ -126,7 +126,7 @@ public:
 
         RenderDataSerializer() = default;
 
-        blaVector<unsigned int> triangleIndices;
+        blaVector<blaIndex> triangleIndices;
         blaVector<vec3serializer> vertPos;
         blaVector<vec3serializer> vertNormal;
         blaVector<vec3serializer> vertTangent;

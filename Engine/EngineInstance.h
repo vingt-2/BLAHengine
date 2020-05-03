@@ -2,6 +2,7 @@
 
 #include "StdInclude.h"
 #include "BLASingleton.h"
+#include "System.h"
 
 namespace BLA
 {
@@ -19,9 +20,9 @@ namespace BLA
     class InputManager;
     class BlaGuiManager;
 
-    class BLACORE_API EngineInstance
+    class EngineInstance
     {
-        BLA_DECLARE_SINGLETON(EngineInstance)
+        BLA_DECLARE_EXPORTED_SINGLETON(EngineInstance)
 
     public:
         EngineInstance(bool external, bool isFullscreen) :
@@ -30,45 +31,45 @@ namespace BLA
             m_isCapturedMouse(false)
         {};
 
-        ~EngineInstance() { TerminateEngine(); };
+        BLACORE_API ~EngineInstance() { TerminateEngine(); };
 
-        Scene* GetWorkingScene() const { return m_scene; }
+        BLACORE_API Scene* GetWorkingScene() const { return m_scene; }
 
-        static blaU32 LoopEngine();
+        BLACORE_API static blaU32 LoopEngine();
 
-        void RequestShutdown();
+        BLACORE_API void RequestShutdown();
 
-        void SetTargetFPS(int fps) { m_targetFPS = fps; }
-        blaU32 GetTargetFPS() { return m_targetFPS; }
+        BLACORE_API void SetTargetFPS(int fps) { m_targetFPS = fps; }
+        BLACORE_API blaU32 GetTargetFPS() { return m_targetFPS; }
 
-        GL33Renderer& GetRenderer() { return *m_renderer; }
+        BLACORE_API GL33Renderer& GetRenderer() { return *m_renderer; }
 
-        int GetEngineVersion() const { return m_engineVersion; }
+        BLACORE_API int GetEngineVersion() const { return m_engineVersion; }
 
     protected:
         blaS32 m_targetFPS = 144;
 
-        virtual bool InitializeEngine(RenderWindow* renderWindow);
-        virtual void PreEngineUpdate();
-        virtual void EngineUpdate();
-        virtual void PostEngineUpdate();
-        virtual void TerminateEngine();
+        BLACORE_API virtual bool InitializeEngine(RenderWindow* renderWindow);
+        BLACORE_API virtual void PreEngineUpdate();
+        BLACORE_API virtual void EngineUpdate();
+        BLACORE_API virtual void PostEngineUpdate();
+        BLACORE_API virtual void TerminateEngine();
+        
+		BLACORE_API virtual void InitializeComponentLibrariesManager();
 
-		virtual void InitializeComponentLibrariesManager();
+        BLACORE_API bool ShouldTerminate() const { return m_isTerminationRequested; };
 
-        bool ShouldTerminate() const { return m_isTerminationRequested; };
+        BLACORE_API bool SaveWorkingScene(blaString filePath);
 
-        bool SaveWorkingScene(blaString filePath);
+        BLACORE_API const Timer* GetTimer() const { return m_timer; }
 
-        const Timer* GetTimer() const { return m_timer; }
+        BLACORE_API virtual bool LoadNewScene();
 
-        virtual bool LoadNewScene();
+        BLACORE_API virtual bool LoadWorkingScene(blaString filePath);
 
-        virtual bool LoadWorkingScene(blaString filePath);
+        BLACORE_API void SetupDirLightAndCamera();
 
-        void SetupDirLightAndCamera();
-
-        void ToggleCaptureMouse();
+        BLACORE_API void ToggleCaptureMouse();
 
         // Required Engine Modules
         Console*      m_console;

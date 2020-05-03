@@ -434,7 +434,7 @@ void DebugDraw::InstanceDrawBasis(const blaPosQuat& transform, float size, float
 
 void DebugDraw::InstanceDrawArbitraryGeometry(const blaPosQuat& transform, blaVec3& scale, const TriangleMesh& arbitraryMesh, const blaVec4& colorAndAlpha)
 {
-    const blaVector<blaU32>&  triangleIndices = arbitraryMesh.m_renderData.m_triangleIndices;
+    const blaVector<blaIndex>&  triangleIndices = arbitraryMesh.m_renderData.m_triangleIndices;
     const blaVector<blaVec3>& vertPos = arbitraryMesh.m_renderData.m_vertPos;
 
     for (int i = 0; i < arbitraryMesh.m_renderData.m_triangleIndices.size(); i += 3)

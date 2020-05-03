@@ -154,7 +154,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
                 uselessLines++;
             }
         }
-        catch (std::out_of_range& outOfRangeException)
+        catch (std::out_of_range&)
         {
             outOfRangeExceptionsCount++;
         }

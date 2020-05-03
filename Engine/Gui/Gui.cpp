@@ -348,7 +348,7 @@ template<>
 void BlaGuiEditElement<blaString>::Render()
 {
     char inputBuf[2048];
-    strcpy(inputBuf, m_pToValue->c_str());
+    strcpy_s(inputBuf, m_pToValue->c_str());
     ImGui::InputText(GetName().c_str(), inputBuf, sizeof(inputBuf));
     *m_pToValue = blaString(inputBuf);
 }
@@ -384,7 +384,7 @@ void BlaGuiEditElement<GameObject>::Render()
 void BlaGuiWindow::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
-    ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+    ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
     ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
     // END OCornut's Dear ImGui Specific Code Now
@@ -408,7 +408,7 @@ void BlaGuiWindow::SetRootElement(BlaGuiElement* imGuiElements)
 void BlaOneTimeWindow::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
-    ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+    ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
     ImGui::SetNextWindowPos(position);
     ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags | BlaGuiWindow::WindowFlags::MenuBar | ImGuiWindowFlags_NoTitleBar);
     // END OCornut's Dear ImGui Specific Code Now
@@ -428,14 +428,14 @@ void BlaGuiRenderWindow::Render()
     if (GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer))
     {
         // BEGIN OCornut's Dear ImGui Specific Code Now
-        ImVec2 position(m_windowPosition.x, m_windowPosition.y);
+        ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
         ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
         ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
 
         ImVec2 windowPos = ImGui::GetWindowPos();
 
         ImGui::GetWindowDrawList()->AddImage(
-            (void*)renderer->GetDisplayBufferTexture(),
+            (ImTextureID)((intptr_t)renderer->GetDisplayBufferTexture()),
             windowPos,
             ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight()),
             ImVec2(0, 1), ImVec2(1, 0));
@@ -685,6 +685,14 @@ blaString StringSanitize(blaString in)
     return out;
 }
 
+BlaFileBrowser::BlaFileBrowser(blaString browserName, blaString filesDirectory, blaString directoryDirectory):
+	m_name(browserName)
+	, m_currentFilesDirectory(filesDirectory)
+	, m_currentDirectoriesDirectory(directoryDirectory)
+	, m_currentState(BROWSING_FIRST_RENDER), m_disableMultipleSelection(false)
+{
+}
+
 void BlaFileBrowser::Render()
 {
     blaBool open = true;
@@ -699,7 +707,7 @@ void BlaFileBrowser::Render()
     ImGui::Text("Current Directory: "); ImGui::SameLine();
 
     char readonlyTextCpy[500];
-    strcpy(readonlyTextCpy, m_currentFilesDirectory.c_str());
+    strcpy_s(readonlyTextCpy, m_currentFilesDirectory.c_str());
     readonlyTextCpy[m_currentFilesDirectory.size()] = 0;
 
     ImGui::InputText("", readonlyTextCpy, m_currentFilesDirectory.size() + 1, ImGuiInputTextFlags_ReadOnly); ImGui::SameLine();
@@ -735,6 +743,13 @@ void BlaFileBrowser::Render()
     ImGui::NewLine();
 }
 
+OpenFilePrompt::OpenFilePrompt(blaString browserName, blaString filesDirectory, blaString directoryDirectory,
+                               blaBool disableMultipleSelection):
+	BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+{
+	m_disableMultipleSelection = disableMultipleSelection;
+}
+
 void OpenFilePrompt::Render()
 {
     BlaFileBrowser::Render();
@@ -747,7 +762,7 @@ void OpenFilePrompt::Render()
         selectedFiles += "\"" + file.first + "\" ";
     }
 
-    strcpy(readonlyTextCpy, selectedFiles.c_str());
+    strcpy_s(readonlyTextCpy, selectedFiles.c_str());
     readonlyTextCpy[selectedFiles.size()] = 0;
 
     static float selectedFileFormSize = 100.0f; //The 100.0f is just a guess size for the first frame.
@@ -787,6 +802,12 @@ void OpenFilePrompt::Render()
     ImGui::End();
 }
 
+SaveFilePrompt::SaveFilePrompt(blaString browserName, blaString filesDirectory, blaString directoryDirectory):
+	BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+{
+	m_disableMultipleSelection = true;
+}
+
 void SaveFilePrompt::Render()
 {
     BlaFileBrowser::Render();
@@ -799,7 +820,7 @@ void SaveFilePrompt::Render()
         selectedFiles += file.first;
     }
 
-    strcpy(saveFileTextInput, selectedFiles.c_str());
+    strcpy_s(saveFileTextInput, selectedFiles.c_str());
     saveFileTextInput[selectedFiles.size()] = 0;
 
     static float selectedFileFormSize = 100.0f; //The 100.0f is just a guess size for the first frame.
@@ -1083,7 +1104,7 @@ void BlaGuiConsole::Render()
             }
 
             char childName[64];
-            strcpy(childName, (blaString("CL:") + std::to_string(i)).data());
+            strcpy_s(childName, (blaString("CL:") + std::to_string(i)).data());
             ImGui::BeginChild(childName, ImVec2(0, ImGui::GetFontSize()), false, ImGuiWindowFlags_NoScrollWithMouse);
 
             const char* item = consoleLines[i].data();
@@ -1158,57 +1179,4 @@ int BlaGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
         break;
     }
     return 0;
-}
-
-// You may think I'm a monster for doing this.
-// And perhaps you are right
-
-#undef IMGUI_IMPL_OPENGL_LOADER_GL3W
-#define IMGUI_IMPL_OPENGL_LOADER_GLEW
-
-#include "imgui.cpp"
-#include "imgui_demo.cpp"
-#include "imgui_draw.cpp"
-#include "imgui_widgets.cpp"
-#include "examples/imgui_impl_opengl3.cpp"
-#include "examples/imgui_impl_glfw.cpp"
-
-namespace BLAImGui
-{
-
-    // For the main menu bar, which cannot be moved, we honor g.Style.DisplaySafeAreaPadding to ensure text can be visible on a TV set.
-    bool BeginMainToolBar()
-    {
-        ImGuiContext& g = *GImGui;
-        ImGuiViewport* viewport = g.Viewports[0];
-        g.NextWindowData.MenuBarOffsetMinVal = ImVec2(g.Style.DisplaySafeAreaPadding.x, ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f));
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, g.NextWindowData.MenuBarOffsetMinVal.y + g.FontBaseSize + g.Style.FramePadding.y));
-        ImGui::SetNextWindowViewport(viewport->ID); // Enforce viewport so we don't create our onw viewport when ImGuiConfigFlags_ViewportsNoMerge is set.
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
-        bool is_open = ImGui::Begin("##MainToolBar", NULL, window_flags) && ImGui::BeginMenuBar();
-        ImGui::PopStyleVar(2);
-        g.NextWindowData.MenuBarOffsetMinVal = ImVec2(0.0f, 0.0f);
-        if (!is_open)
-        {
-            ImGui::End();
-            return false;
-        }
-        return true; //-V1020
-    }
-
-    void EndMainToolBar()
-    {
-        ImGui::EndMenuBar();
-
-        // When the user has left the menu layer (typically: closed menus through activation of an item), we restore focus to the previous window
-        // FIXME: With this strategy we won't be able to restore a NULL focus.
-        ImGuiContext& g = *GImGui;
-        if (g.CurrentWindow == g.NavWindow && g.NavLayer == 0 && !g.NavAnyRequest)
-            ImGui::FocusTopMostWindowUnderOne(g.NavWindow, NULL);
-
-        ImGui::End();
-    }
 }

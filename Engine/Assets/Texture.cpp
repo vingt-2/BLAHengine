@@ -33,7 +33,8 @@ Texture2D* TextureImport::LoadBMP(blaString resourceName, blaString filePath)
     blaU32 width, height;
 
     // Open the file
-    FILE * file = fopen(filePath.data(), "rb");
+    FILE* file = nullptr;
+	errno_t error = fopen_s(&file, filePath.data(), "rb");
     if (!file)
     {
         printf("%s could not be opened.\n", filePath.data());
@@ -86,11 +87,11 @@ Texture2D* TextureImport::LoadDDS(blaString name, blaString imagepath)
 
     unsigned char header[124];
 
-    FILE *fp;
+    FILE *fp = nullptr;
 
     /* try to open the file */
-    fp = fopen(imagepath.data(), "rb");
-    if (fp == nullptr)
+    fopen_s(&fp, imagepath.data(), "rb");
+    if (!fp)
         return nullptr;
 
     /* verify the type of file */

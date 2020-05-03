@@ -8,12 +8,14 @@
 
 #define __SILLY_MACRO__COMPARE_void(x) x
 
+#define nothing(...)  
+
 #define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)             \
-return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( ,   \
-    ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__)))));  
+return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( nothing(__VA_ARGS__),   \
+    EXPAND(ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__))))));  
 
 #define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_0(CommandName, ...)             \
-        CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( ,ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__)))); return "";  
+        CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(nothing(__VA_ARGS__) ,EXPAND(ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__))))); return "";  
 
 #define __BLA_CC_DECLARATION_MACRO_SELECT_RETTYPE(RetType) \
     __SILLY_MACRO__CAT(__BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_,__SILLY_MACRO__NOT_EQUAL(RetType, void))
@@ -80,13 +82,13 @@ namespace BLA
         void AddLine(const blaString& logLine);
     };
 
-    class BLACORE_API Console
+    class Console
     {
         friend class BlaGuiConsole;
         friend class ConsoleCommandEntry;
         friend class ComponentLibrariesManager;
 
-        BLA_DECLARE_SINGLETON(Console);
+        BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(Console);
 
         void GetLastNLines(int n, blaVector<blaString>& outVector);
 
@@ -107,9 +109,9 @@ namespace BLA
 
         Console();
 
-        static void LogMessage(const blaString& message) { GetSingletonInstance()->InstanceLogMessage(message); }
-        static void LogWarning(const blaString& warning) { GetSingletonInstance()->InstanceLogWarning(warning); }
-        static void LogError(const blaString& error) { GetSingletonInstance()->InstanceLogError(error); }
+        BLACORE_API static void LogMessage(const blaString& message);
+        BLACORE_API static void LogWarning(const blaString& warning);
+        BLACORE_API static void LogError(const blaString& error);
 
     private:
         ConsoleLog m_log;
@@ -118,7 +120,7 @@ namespace BLA
 
         char m_currentCommandBuffer[2048];
         blaVector<blaString> m_commandHistory;
-        blaS32 m_historyCursor;
+        blaIndex m_historyCursor;
 
         blaU32 m_currentRegisteringLibrary;
     };
@@ -127,7 +129,7 @@ namespace BLA
     blaVector<T> SplitString(blaString str, const blaString& delimiter)
     {
         blaVector<T> ret;
-        size_t i = str.find_first_of(delimiter);
+        blaIndex i = str.find_first_of(delimiter);
         while (i != blaString::npos)
         {
             ret.push_back(blaFromString<T>(str.substr(0, i)));

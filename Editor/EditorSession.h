@@ -11,8 +11,8 @@ namespace BLA
 {
     class CameraController;
     class GameObject;
-    class EditorState;
     class TriangleMesh;
+    struct EditorState;
 
     class EditorSession : public EngineInstance
     {

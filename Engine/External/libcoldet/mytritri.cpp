@@ -36,7 +36,6 @@ void multiple_tri_tri_intersect(const Triangle& t1, const Triangle& t2, Vector3D
         float f3 = p1.Classify(t2.v3);
         float f12 = f1 * f2;
         float f23 = f2 * f3;
-        if (f12 > 0.0f && f23 > 0.0f);
         other_side = (f12 < 0.0f ? (f23 < 0.0f ? 1 : 0) : 2);
     }
     Plane p2(t2.v1, t2.v2, t2.v3);
@@ -68,7 +67,6 @@ void multiple_tri_tri_intersect(const Triangle& t1, const Triangle& t2, Vector3D
         float f3 = p2.Classify(t1.v3);
         float f12 = f1 * f2;
         float f23 = f2 * f3;
-        if (f12 > 0.0f && f23 > 0.0f);
         other_side = (f12 < 0.0f ? (f23 < 0.0f ? 1 : 0) : 2);
     }
     const Vector3D& a1 = td1[other_side + 1];

@@ -55,6 +55,8 @@ const ComponentDescriptor& GameComponentRegistry::GetComponentDescriptor(blaStri
     return g_emptyDescriptor;
 }
 
+GameComponentRegistry::GameComponentRegistry(): m_currentRegisteringLibrary(BlaStringId("Native")) {}
+
 GameComponent* GameComponentRegistry::__CreateComponent(GameComponentID componentName, GameObject objRef)
 {
     for (auto p : m_componentsPerLibraries)
@@ -82,14 +84,26 @@ void GameComponentRegistry::UnloadLibraryComponents(blaStringId libraryId)
     }
 }
 
-BLA_IMPLEMENT_SINGLETON(GameComponentRegistry);
-
-DefineConsoleCommand(int, GetComponentCount)
+template <class T>
+T* GameComponentRegistry::__CreateComponent(GameObject objRef)
 {
-    return GameComponentRegistry::GetSingletonInstance()->ListComponentNames().size();
+    return static_cast<T*>(T::Factory(objRef));
 }
 
-DefineConsoleCommand(void, GetComponentList)
+BLA_IMPLEMENT_SINGLETON(GameComponentRegistry);
+
+DefineConsoleCommand(int, GetComponentCount, int a) 
+{
+    return (int)GameComponentRegistry::GetSingletonInstance()->ListComponentNames().size();
+}
+
+#define TO_STRING(x) #x
+
+DefineConsoleCommand(void, testMacro)
+{
+}
+
+DefineConsoleCommand(void, GetComponentList, int b) 
 {
 	for (auto componentName : GameComponentRegistry::GetSingletonInstance()->ListComponentNames())
 	{

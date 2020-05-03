@@ -173,11 +173,11 @@ void ReadFrameRecursive(blaVector<blaString>& tokens,
         if (channel < 3)
         {
             localJointTransform.SetTranslation3(localJointTransform.GetTranslation3() +
-                GetTranslationForChannel(channel, atof(tokens[++currentToken].c_str())));
+                GetTranslationForChannel(channel, (float)atof(tokens[++currentToken].c_str())));
         }
         else
         {
-            localJointTransform.GetRotation() *= GetRotationForChannel(channel, atof(tokens[++currentToken].c_str()));
+            localJointTransform.GetRotation() *= GetRotationForChannel(channel, (float)atof(tokens[++currentToken].c_str()));
         }
     }
 
@@ -207,7 +207,7 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
     {
         // get length of file:
         bvhFile.seekg(0, bvhFile.end);
-        int length = bvhFile.tellg();
+        std::streamoff length = bvhFile.tellg();
         bvhFile.seekg(0, bvhFile.beg);
 
         char * buffer = new char[length];
@@ -261,7 +261,7 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
     Console::LogMessage("Loaded the following Skeleton(s): ");
     for (auto roots : skeletalRoots)
     {
-        roots->PrintJoint();
+        //roots->PrintJoint();
     }
 
     if (tokens[++currentToken].compare("Frames:"))
@@ -276,7 +276,7 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
         INVALID_BVH_IN_DATA_DEF
     }
 
-    float frameTime = atof(tokens[++currentToken].c_str());
+    float frameTime = (float)atof(tokens[++currentToken].c_str());
 
     blaVector<blaVector<blaVector<blaPosQuat>>>	jointTransformsPerFramePerAnimationInBVH(skeletalRoots.size());
 

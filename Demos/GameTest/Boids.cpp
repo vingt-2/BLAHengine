@@ -98,7 +98,7 @@ namespace BLA
                 particle->AddForce(g_BoidStiffness * boidComponent->m_hominStiffnessMult * (targetTransform->GetLocalTransform().GetPosition() - myPosition) - g_BoidDamping * particle->m_velocity);
             }
 
-            std::uniform_int_distribution<> dist(0, systemObjects.size());
+            std::uniform_int_distribution<> dist(0, static_cast<int>(systemObjects.size()));
 
             int slice = dist(g_dgen);
 
@@ -127,7 +127,7 @@ namespace BLA
 
             boid->m_pastPositions.Push(iTransforms[systemObject]->GetLocalTransform().GetPosition());
 
-            int size = boid->m_pastPositions.GetCount();
+            int size = static_cast<int>(boid->m_pastPositions.GetCount());
             for (int i = 0; i < size - 1; i++)
             {
                 //DebugDraw::DrawLine(boid->m_pastPositions.Peek(i), boid->m_pastPositions.Peek(i + 1), boid->m_color);

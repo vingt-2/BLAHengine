@@ -17,7 +17,7 @@ namespace BLA
 
     class DebugDraw
     {
-        BLA_DECLARE_SINGLETON(DebugDraw)
+        BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(DebugDraw)
 
     public:
 

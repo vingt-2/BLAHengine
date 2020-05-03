@@ -240,3 +240,25 @@ blaVector<GameComponent*> Scene::GetComponentsPerObject(GameObject obj)
 {
     return m_componentContainer.GetComponentsPerObject(obj);
 }
+
+blaU32 Scene::GetSceneFlags() const
+{
+	return m_sceneFlags;
+}
+
+RenderingManager* Scene::GetRenderingManager() const
+{
+	return m_renderingManager;
+}
+
+template <class T>
+T* Scene::AddComponent(GameObject object)
+{
+    return static_cast<T*>(AddComponent(object, T::ms_componentDescriptor.GetName()));
+}
+
+template <class T>
+T* Scene::GetComponentPerObject(GameObject object)
+{
+    return static_cast<T*>(GetComponentPerObject(T::ms_componentDescriptor.GetName(), object));
+}

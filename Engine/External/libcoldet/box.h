@@ -133,14 +133,14 @@ public:
     /** Returns the number of sons this node has */
     virtual int            getSonsNumber() = 0;
     /** Returns a son node, by index */
-    virtual BoxTreeNode*   getSon(int which) = 0;
+    virtual BoxTreeNode*   getSon(size_t which) = 0;
     /** Returns the number of triangles in this node.
         Only non-zero for leaf nodes. */
-    virtual int            getTrianglesNumber() = 0;
+    virtual size_t            getTrianglesNumber() = 0;
     /** Returns the boxed triangle contained in this node
         by its index
     */
-    virtual BoxedTriangle* getTriangle(int which) = 0;
+    virtual BoxedTriangle* getTriangle(size_t which) = 0;
 };
 
 /** Inner node, containing other nodes. */
@@ -174,10 +174,10 @@ public:
         return n;
     }
 
-    int getTrianglesNumber();
-    BoxedTriangle* getTriangle(int which);
+    size_t getTrianglesNumber();
+    BoxedTriangle* getTriangle(size_t which);
 
-    BoxTreeNode* getSon(int which)
+    BoxTreeNode* getSon(size_t which)
     {
         if (which == 0) return m_First;
         if (which == 1) return m_Second;
@@ -199,9 +199,9 @@ public:
     BoxedTriangle(const Vector3D& _1, const Vector3D& _2, const Vector3D& _3);
     virtual bool isLeaf() const { return true; }
     int getSonsNumber() { return 0; }
-    BoxTreeNode* getSon(int which) { return nullptr; }
-    int getTrianglesNumber() { return 1; }
-    BoxedTriangle* getTriangle(int which)
+    BoxTreeNode* getSon(size_t which) { return nullptr; }
+    size_t getTrianglesNumber() { return 1; }
+    BoxedTriangle* getTriangle(size_t which)
     {
         if (which == 0) return this;
         return nullptr;

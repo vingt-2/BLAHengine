@@ -5,9 +5,9 @@
 #include "Maths/Maths.h"
 namespace BLA
 {
-    class BLACORE_API Timer
+    class Timer
     {
-        BLA_DECLARE_SINGLETON(Timer);
+        BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(Timer);
 
         float m_time;
         float m_elapsedTime;
@@ -16,13 +16,16 @@ namespace BLA
         glm::uint8 m_timeBufferSize;
 
     public:
-        Timer(glm::uint8 timeBufferSize);
-        ~Timer();
+        // TODO: Don't export, this belongs to the engine
+        BLACORE_API Timer(glm::uint8 timeBufferSize);
+        // TODO: Don't export, this belongs to the engine
+    	BLACORE_API ~Timer();
 
-        float GetTime() const;
-        float GetDelta() const;
-        float GetFramerate() const;
+        BLACORE_API float GetTime() const;
+        BLACORE_API float GetDelta() const;
+        BLACORE_API float GetFramerate() const;
 
-        void Update(blaF32 newTime);
+    	// TODO: Don't export, this belongs to the engine
+        BLACORE_API void Update(blaF32 newTime);
     };
 }

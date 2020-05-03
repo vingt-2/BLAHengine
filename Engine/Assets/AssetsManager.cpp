@@ -47,7 +47,7 @@ static blaVector<blaString> FilesInDir(blaString dirname)
     return result;
 }
 
-int BLA::AssetManager::LoadCookedAssets()
+blaIndex BLA::AssetManager::LoadCookedAssets()
 {
     blaVector<blaString> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
     blaVector<blaString> matNames = FilesInDir(MATERIAL_SUBPATH);
@@ -78,10 +78,10 @@ AssetManager::AssetType AssetManager::GetAsset(blaString assetName, Asset* &asse
         return type;
     }
 
-    blaPair<AssetType, blaU32> asset = m_resourceMap[assetName];
+    blaPair<AssetType, blaIndex> asset = m_resourceMap[assetName];
 
     type = asset.first;
-    const blaU32 assetIndx = asset.second;
+    const blaIndex assetIndx = asset.second;
 
     switch (type)
     {
@@ -141,9 +141,9 @@ bool AssetManager::LoadTriangleMesh(blaString filepath)
     MeshAsset* triangleMesh = meshSerializer.BuildMesh();
     m_triangleMeshesInMemory.push_back(triangleMesh);
 
-    blaU32 indx = m_triangleMeshesInMemory.size() - 1;
+    blaIndex indx = m_triangleMeshesInMemory.size() - 1;
 
-    m_resourceMap[filepath] = blaPair<AssetType, blaU32>(AssetType::TriangleMeshAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaIndex>(AssetType::TriangleMeshAsset, indx);
 
     return true;
 }
@@ -175,9 +175,9 @@ bool AssetManager::LoadTexture(blaString filepath)
 
     m_textures2DInMemory.push_back(texture2D);
 
-    blaU32 indx = m_textures2DInMemory.size() - 1;
+    blaIndex indx = m_textures2DInMemory.size() - 1;
 
-    m_resourceMap[filepath] = blaPair<AssetType, blaU32>(AssetType::TextureAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaIndex>(AssetType::TextureAsset, indx);
 
     return true;
 }
@@ -209,14 +209,14 @@ bool AssetManager::LoadMaterial(blaString filepath)
 
     m_materialsInMemory.push_back(material);
 
-    blaU32 indx = m_materialsInMemory.size() - 1;
+    blaIndex indx = m_materialsInMemory.size() - 1;
 
-    m_resourceMap[filepath] = blaPair<AssetType, blaU32>(AssetType::MaterialAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaIndex>(AssetType::MaterialAsset, indx);
 
     return true;
 }
 
-bool BLA::AssetManager::SaveMaterial(Material * mat)
+bool AssetManager::SaveMaterial(Material * mat)
 {
     MaterialSerializer matSerializer;
 

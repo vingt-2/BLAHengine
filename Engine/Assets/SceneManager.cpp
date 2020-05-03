@@ -292,3 +292,8 @@ void SceneManager::LoadScene(blaString filepath)
 
     m_currentSceneFilePath = filepath;
 }
+
+blaString SceneManager::GetCurrentSceneFilePath() const
+{
+	return m_currentSceneFilePath;
+}

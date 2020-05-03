@@ -17,9 +17,9 @@
 namespace BLA
 {
     class ComponentSystem;
-    class BLACORE_API Scene
+    class Scene
     {
-        BLA_DECLARE_SINGLETON(Scene)
+        BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(Scene)
 
     public:
 
@@ -27,50 +27,50 @@ namespace BLA
 
         Scene();
 
-        void Initialize(RenderingManager* renderingManager);
-        void Update();
-        void Clear();
+        BLACORE_API void Initialize(RenderingManager* renderingManager);
+        BLACORE_API void Update();
+        BLACORE_API void Clear();
 
-        GameObject CreateObject(GameObjectID name, const GameObject &parentObject = GameObject::InvalidReference());
+        BLACORE_API GameObject CreateObject(GameObjectID name, const GameObject &parentObject = GameObject::InvalidReference());
 
-        GameObject FindObjectByName(blaString name);
+        BLACORE_API GameObject FindObjectByName(blaString name);
 
-        GameComponent* AddComponent(GameObject object, GameComponentID componentId);
+        BLACORE_API GameComponent* AddComponent(GameObject object, GameComponentID componentId);
 
         template<class T>
-        T* AddComponent(GameObject object);
+        BLACORE_API T* AddComponent(GameObject object);
 
         // TODO: mmm how about no ?
-        CameraComponent* GetMainCamera();
+        BLACORE_API CameraComponent* GetMainCamera();
 
-        void UpdateSceneTimer(blaF32 time);
+        BLACORE_API void UpdateSceneTimer(blaF32 time);
 
         //GameObject PickGameObjectInScene(const Ray& inRay, ColliderComponent::CollisionContact& outContact);
 
-        void SetGameObjectParent(const GameObject& parent, const GameObject& child);
-        GameObject GetGameObjectParent(const GameObject& object);
+        BLACORE_API void SetGameObjectParent(const GameObject& parent, const GameObject& child);
+        BLACORE_API GameObject GetGameObjectParent(const GameObject& object);
 
-        blaVector<GameObject> GetObjects();
+        BLACORE_API blaVector<GameObject> GetObjects();
 
-        const blaVector<GameObjectID>& GetObjectsID() const;
+        BLACORE_API const blaVector<GameObjectID>& GetObjectsID() const;
 
-        GameComponent* GetComponentPerObject(GameComponentID componentId, GameObject obj);
+        BLACORE_API GameComponent* GetComponentPerObject(GameComponentID componentId, GameObject obj);
 
         template<class T>
-        T* GetComponentPerObject(GameObject obj);
+        BLACORE_API T* GetComponentPerObject(GameObject obj);
 
-        blaVector<GameComponent*> GetComponentsPerObject(GameObject obj);
+        BLACORE_API blaVector<GameComponent*> GetComponentsPerObject(GameObject obj);
 
         enum ESceneFlags
         {
             DIRTY_SCENE_STRUCTURE = 1 << 0,
         };
 
-        blaU32 GetSceneFlags() const { return m_sceneFlags; }
+        BLACORE_API blaU32 GetSceneFlags() const;
 
         Timer m_sceneTimer;
 
-        RenderingManager* GetRenderingManager() { return m_renderingManager; }
+        BLACORE_API RenderingManager* GetRenderingManager() const;
 
     private:
 
@@ -95,16 +95,4 @@ namespace BLA
 
         blaU32 m_sceneFlags;
     };
-
-    template <class T>
-    T* Scene::AddComponent(GameObject object)
-    {
-        return static_cast<T*>(AddComponent(object, T::ms_componentDescriptor.GetName()));
-    }
-
-    template <class T>
-    T* Scene::GetComponentPerObject(GameObject object)
-    {
-        return static_cast<T*>(GetComponentPerObject(T::ms_componentDescriptor.GetName(), object));
-    }
 }

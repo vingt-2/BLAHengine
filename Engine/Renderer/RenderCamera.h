@@ -4,37 +4,37 @@
 
 namespace BLA
 {
-    class BLACORE_API RenderCamera
+    class RenderCamera
     {
     public:
         // Hold the View Projection matrix (updated each frame)
         blaMat4 m_ViewProjection;
 
-        virtual void AttachCamera(CameraComponent* camera);
-        virtual void Update() = 0;
+        BLACORE_API virtual void AttachCamera(CameraComponent* camera);
+        BLACORE_API virtual void Update() = 0;
 
-        RenderCamera();
+        BLACORE_API RenderCamera();
 
         // Points to the camera object
         CameraComponent* m_attachedCamera;
 
     };
 
-    class BLACORE_API PerspectiveCamera : public RenderCamera
+    class PerspectiveCamera : public RenderCamera
     {
     public:
         blaMat4 m_perspectiveProjection;
 
-        void SetPerspective(glm::vec2 renderSize);
-        void Update();
+        BLACORE_API void SetPerspective(glm::vec2 renderSize);
+        BLACORE_API void Update();
     };
 
-    class BLACORE_API OrthographicCamera : public RenderCamera
+    class OrthographicCamera : public RenderCamera
     {
     public:
         blaMat4 m_orthographicProjection;
 
-        void SetOrthographicProj(float left, float right, float bottom, float top);
-        void Update();
+        BLACORE_API void SetOrthographicProj(float left, float right, float bottom, float top);
+        BLACORE_API void Update();
     };
 }

@@ -34,7 +34,8 @@ void GLFWRenderWindow::GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc,
 
 void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
 {
-    InputStateSetter::SetMouseScrollDelta(yAxisScroll);
+    float yScroll = (float)yAxisScroll;
+    InputStateSetter::SetMouseScrollDelta(yScroll);
 }
 
 BLAKeyboard GLFWToBlaKeyboard(int glfwKey)
@@ -100,7 +101,7 @@ void GLFWKeyboardCallBack(GLFWwindow* window, int keyCode, int scandone, int act
 
     if (key != BLA_KEY_ENUM_END)
     {
-        InputStateSetter::SetKey(GLFWToBlaKeyboard(keyCode), glfwGetTime(), action == GLFW_PRESS);
+        InputStateSetter::SetKey(GLFWToBlaKeyboard(keyCode), (float)glfwGetTime(), action == GLFW_PRESS);
     }
 }
 
@@ -111,7 +112,7 @@ void GLFWMouseButtonCallBack(GLFWwindow* window, int button, int action, int mod
         return;
     }
 
-    InputStateSetter::SetMouseButton((BLAMouseButtons)button, glfwGetTime(), action == GLFW_PRESS);
+    InputStateSetter::SetMouseButton((BLAMouseButtons)button, (float)glfwGetTime(), action == GLFW_PRESS);
 }
 
 void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)

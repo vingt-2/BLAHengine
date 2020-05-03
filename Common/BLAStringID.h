@@ -143,7 +143,7 @@ inline blaU32  _crc32(const char* buf, blaU32 len)
 // Use only when necessary at runtime. I don't want to see this function used where it shouldn't !! 
 inline blaStringId GenerateBlaStringId(blaString string)
 {
-    return blaStringId(string, _crc32(string.c_str(), string.length()));
+    return blaStringId(string, _crc32(string.c_str(), (blaU32)string.length()));
 }
 
 inline blaStringId FromString(blaString string)

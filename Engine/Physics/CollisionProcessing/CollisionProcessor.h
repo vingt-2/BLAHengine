@@ -9,7 +9,7 @@ namespace BLA
     class ColliderComponent;
     class Timer;
 
-    class BLACORE_API Contact
+    class Contact
     {
     public:
         Contact(RigidBodyComponent* body1, RigidBodyComponent* body2, blaVec3 colPoint, blaVec3 normalW, blaVec3 tangentW, int face);
@@ -33,7 +33,7 @@ namespace BLA
     private:
     };
 
-    class BLACORE_API CollisionProcessor
+    class CollisionProcessor
     {
     public:
         CollisionProcessor(Timer* time, float* timestepPtr);
@@ -73,7 +73,7 @@ namespace BLA
         void SolveContacts();
     };
 
-    class BLACORE_API SpatialCoherence
+    class SpatialCoherence
     {
     public:
         SpatialCoherence(float granularity);

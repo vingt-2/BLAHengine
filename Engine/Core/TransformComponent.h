@@ -6,11 +6,11 @@ namespace BLA
 {
     BeginComponentDeclaration(BLAEngine, TransformComponent)
 
-        blaScaledTransform GetTransform();
-        blaScaledTransform GetLocalTransform() const;
+        BLACORE_API blaScaledTransform GetTransform();
+		BLACORE_API blaScaledTransform GetLocalTransform() const;
 
-        void SetTransform(const blaScaledTransform& transform);
-        void SetLocalTransform(const blaScaledTransform& transform);
+        BLACORE_API void SetTransform(const blaScaledTransform& transform);
+        BLACORE_API void SetLocalTransform(const blaScaledTransform& transform);
 
     private:
         blaScaledTransform m_localTransform;

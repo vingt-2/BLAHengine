@@ -228,17 +228,17 @@ void TriangleMesh::ApplyUVScaling(glm::vec2 scaling)
 
 void TriangleMesh::GenerateRenderData()
 {
-    blaHashMap<RenderVertEntry, blaU32, vertEntryHasher> vertexMap;
+    blaHashMap<RenderVertEntry, blaIndex, vertEntryHasher> vertexMap;
 
     m_renderData.m_triangleIndices.resize(3 * this->m_meshTriangles.size());
 
-    for (blaU32 triIndx = 0; triIndx < m_meshTriangles.size(); triIndx++)
+    for (blaIndex triIndx = 0; triIndx < m_meshTriangles.size(); triIndx++)
     {
         HalfEdge edge0 = m_halfEdges[m_meshTriangles[triIndx].firstEdge];
         HalfEdge edge1 = m_halfEdges[edge0.nextHE];
         HalfEdge edge2 = m_halfEdges[edge1.nextHE];
 
-        for (blaU32 i = 0; i < 3; i++)
+        for (blaIndex i = 0; i < 3; i++)
         {
             HalfEdge edge;
 

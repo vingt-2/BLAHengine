@@ -17,7 +17,7 @@
     typedef TypedComponentSystem<IOTS<EXPAND(input_list)>, IOTS<EXPAND(output_list)>> SystemName;
 
 #define BeginComponentSystemDeclaration(ProjectName, SystemName, input_list, output_list)   \
-    class BLA_COMPONENT_API_IMPORT_EXPORT_SELECT(ProjectName) SystemName : public TypedComponentSystem<IOTS<EXPAND(input_list)>, IOTS<EXPAND(output_list)>> {
+    class BLA_EXPORT(ProjectName) SystemName : public TypedComponentSystem<IOTS<EXPAND(input_list)>, IOTS<EXPAND(output_list)>> {
 
 #define EndComponentSystemDeclaration() };
 
@@ -78,11 +78,12 @@ namespace BLA
         blaVector<blaStringId> m_systemDependencies;
     };
 
-    class BLACORE_API ComponentSystemsRegistry
+    class ComponentSystemsRegistry
     {
-        BLA_DECLARE_SINGLETON(ComponentSystemsRegistry);
+        // TODO: Make it so it should be access only and components outside of native assert if nullptr instead of creating the registry
+        BLA_DECLARE_EXPORTED_SINGLETON(ComponentSystemsRegistry);
         friend class ComponentLibrariesManager;
-        friend class ComponentSystemsScheduler;
+        friend struct ComponentSystemsScheduler;
 
         blaStringId m_currentRegisteringLibrary;
 
@@ -91,10 +92,10 @@ namespace BLA
         blaMap<blaStringId, SystemsInLibraries> m_componentSystemsPerLibrary;
 
     public:
-        void FinalizeLoad();
-        blaVector<blaPair<blaStringId, const ComponentSystem*>> GetAllAvailableSystems() const;
-        const ComponentSystem* GetSystemPointer(blaStringId system) const;
-        void __RegisterComponentSystem(ComponentSystem* componentSystem);
+        BLACORE_API void FinalizeLoad();
+        BLACORE_API blaVector<blaPair<blaStringId, const ComponentSystem*>> GetAllAvailableSystems() const;
+        BLACORE_API const ComponentSystem* GetSystemPointer(blaStringId system) const;
+        BLACORE_API void __RegisterComponentSystem(ComponentSystem* componentSystem);
     };
 
     // Dummy class to serve as Input Output Template Separator (used to separate list of variadic template arguments)

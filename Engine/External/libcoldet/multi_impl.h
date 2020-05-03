@@ -258,7 +258,7 @@ public:
                 if (!exact_check(intr.id1, intr.id2)) m_Results.pop_back();
             }
         }
-        return m_Results.size();
+        return (int)m_Results.size();
     }
 };
 
@@ -270,7 +270,7 @@ public:
     virtual int check_collisions(bool exact)
     {
         m_Results.clear();
-        int n = m_Models.size();
+        int n = (int)m_Models.size();
         for (int id1 = 0; id1 < n; ++id1)
         {
             Model& m1 = m_Models[id1];
@@ -294,7 +294,7 @@ public:
                 }
             }
         }
-        return m_Results.size();
+        return (int)m_Results.size();
     }
 
 

@@ -8,12 +8,12 @@ namespace BLA
     class Timer;
     class RigidBodyComponent;
 
-	class BLACORE_API SoftBodyDefinition
+	class SoftBodyDefinition
 	{
 		
 	};
 
-    class BLACORE_API SoftBodySystem
+    class SoftBodySystem
     {
     public:
         int m_substeps;

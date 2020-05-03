@@ -161,7 +161,7 @@ public:
         resize(width, height);
     }
 
-    unsigned size() const { return m_Matrix.size(); }
+    unsigned size() const { return (unsigned)m_Matrix.size(); }
 
     typedef Matrix::const_iterator const_iterator;
     const_iterator begin() const { return m_Matrix.begin(); }

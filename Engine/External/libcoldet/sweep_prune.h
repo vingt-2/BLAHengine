@@ -131,7 +131,7 @@ namespace SNP
 
         void move_end_point_forward(int which, float d)
         {
-            int n = m_EndPoints.size();
+            int n = (int)m_EndPoints.size();
             EndPoint& ep = m_EndPoints[which];
             ep.pos += d;
             int to_index = n - 1;
@@ -241,7 +241,7 @@ namespace SNP
             if (ind.start == ind.stop) return; // No such interval
             for (int i = 0; i < m_N; ++i)
                 m_Matrix[i].reset(unsigned(id));
-            unsigned maxi = m_EndPoints.size() - 2;
+            unsigned maxi = (unsigned)m_EndPoints.size() - 2;
             unsigned step = 1;
             for (unsigned i = ind.start; i < maxi; ++i)
             {
@@ -263,8 +263,8 @@ namespace SNP
             if (ind.start != ind.stop) return false;
             kbits& row = m_Matrix[id];
             row.reset();
-            EndPoint np[] = { {from,id,true}, {to,id,false} };
-            int n = m_EndPoints.size();
+            EndPoint np[] = { {from,(unsigned short)id,true}, {to,(unsigned short)id,false} };
+            int n = (int)m_EndPoints.size();
             EndPoint* cur_ins = np;
             int phase = 0;
             for (int i = 0; i < n; ++i)
@@ -310,8 +310,8 @@ namespace SNP
             }
             for (; phase < 2; ++phase)
             {
-                if (phase == 0) ind.start = m_EndPoints.size();
-                else          ind.stop = m_EndPoints.size();
+                if (phase == 0) ind.start = (unsigned short)m_EndPoints.size();
+                else          ind.stop = (unsigned short)m_EndPoints.size();
                 m_EndPoints.push_back(*cur_ins);
                 ++cur_ins;
             }

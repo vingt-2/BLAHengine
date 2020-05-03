@@ -150,19 +150,23 @@ void EditorSession::PostEngineUpdate()
 {
     m_gizmoManager.Update();
 
+    // TODO: Update() should not be exported, and call from with the engine dll
     m_debug->Update();
 
+    // TODO: Update() should not be exported, and call from with the engine dll
     m_renderer->Update();
 
+	// TODO: Update() should not be exported, and call from with the engine dll
     m_guiManager->Update();
 
+    // TODO: Update() should not be exported, and call from with the engine dll
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
     if (!m_isCapturedMouse)
     {
-        m_inputManager->m_lockMouse = m_guiManager->IsMouseOverGui();
-        m_inputManager->m_lockKeyboard = m_guiManager->IsMouseOverGui();
+        m_inputManager->SetKeyboardLock(m_guiManager->IsMouseOverGui());
+        m_inputManager->SetMouseLock(m_guiManager->IsMouseOverGui());
 
         if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
         {
@@ -171,8 +175,8 @@ void EditorSession::PostEngineUpdate()
                 blaVec2 mouseCoord = renderGuiWindow->GetMousePointerScreenSpaceCoordinates();
                 if (mouseCoord.x >= 0.f && mouseCoord.x <= 1.f && mouseCoord.y >= 0.f && mouseCoord.y <= 1.f)
                 {
-                    InputManager::GetSingletonInstance()->m_lockKeyboard = false;
-                    InputManager::GetSingletonInstance()->m_lockMouse = false;
+                    m_inputManager->SetKeyboardLock(false);
+                    m_inputManager->SetMouseLock(false);
                 }
 
                 if(m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_RIGHT).IsDown() ||

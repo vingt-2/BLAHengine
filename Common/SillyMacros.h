@@ -4,6 +4,8 @@
 #define SBRACL [
 #define SBRACR ]
 
+#define NOTHIN
+
 #define IDT(x) x
 #define CAT(A, B) _CAT(A,B)
 #define _CAT(A, B) A ## B
@@ -11,6 +13,9 @@
 #define STR(A) #A
 
 #define EAT(a)
+
+#define __SILLY_MACRO__IIF_0(t, ...) __VA_ARGS__
+#define __SILLY_MACRO__IIF_1(t, ...) t
 
 // Make an enumarator macro
 #define EN_1(macro, count, X) macro((-1) * (1 - count))
@@ -153,8 +158,6 @@
 #define __SILLY_MACRO__BOOL(x) __SILLY_MACRO__COMPL(__SILLY_MACRO__NOT(x))
 
 #define __SILLY_MACRO__IIF(c) __SILLY_MACRO__PRIMITIVE_CAT(__SILLY_MACRO__IIF_, c)
-#define __SILLY_MACRO__IIF_0(t, ...) __VA_ARGS__
-#define __SILLY_MACRO__IIF_1(t, ...) t
 
 #define __SILLY_MACRO__IF(c) __SILLY_MACRO__IIF(__SILLY_MACRO__BOOL(c))
 

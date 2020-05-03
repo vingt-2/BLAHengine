@@ -12,7 +12,7 @@
 
 namespace BLA
 {
-    class BLACORE_API SkeletonJoint : public IntrusiveTree<SkeletonJoint>
+    class SkeletonJoint : public IntrusiveTree<SkeletonJoint>
     {
     public:
 
@@ -50,7 +50,7 @@ namespace BLA
         blaU32                  m_jointIndex;
     };
 
-    class BLACORE_API SkeletonAnimationData
+    class SkeletonAnimationData
     {
     public:
 

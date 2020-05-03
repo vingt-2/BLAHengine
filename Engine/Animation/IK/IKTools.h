@@ -54,7 +54,7 @@ namespace BLA
         static void ForwardClampToConstraint(const ConeTwistConstraint* constraint, const IKChainJoint* currentJoint, IKChainJoint* childJoint);
     };
 
-    class BLACORE_API IKChainJoint : public IntrusiveTree<IKChainJoint>
+    class IKChainJoint : public IntrusiveTree<IKChainJoint>
     {
     public:
         const SkeletonJoint* m_joint;

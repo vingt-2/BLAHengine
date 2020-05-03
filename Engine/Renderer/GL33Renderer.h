@@ -66,7 +66,7 @@ namespace BLA
         GLuint m_elementBuffer;
         GLuint m_vao;
 
-        GLuint m_size;
+        blaIndex m_size;
     };
 
     class BLACORE_API GL33RenderObject : public RenderObject
@@ -78,7 +78,7 @@ namespace BLA
 
         const blaMat4* m_modelTransform;
 
-        const blaVector<blaU32>* m_toMeshTriangles;
+        const blaVector<blaIndex>* m_toMeshTriangles;
         const blaVector<blaVec3>* m_toMeshVertices;
         const blaVector<blaVec3>* m_toMeshNormals;
         const blaVector<blaVec3>* m_toMeshTangents;
@@ -152,7 +152,7 @@ namespace BLA
             GLuint vertBuffer;
             GLuint colorBuffer;
             GLuint vao;
-            GLuint size;
+            blaIndex size;
         } m_debugLinesInfo;
 
         GLuint m_debugRayPgrmID;
@@ -162,7 +162,7 @@ namespace BLA
             GLuint vertBuffer;
             GLuint colorBuffer;
             GLuint vao;
-            GLuint size;
+            blaIndex size;
         } m_debugMeshesInfo;
 
         GLuint m_debugMeshesPgrmID;

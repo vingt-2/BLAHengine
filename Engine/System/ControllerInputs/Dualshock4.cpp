@@ -96,9 +96,9 @@ void Dualshock4::Close()
 
 void Dualshock4::SetLightBarColor(float r, float g, float b)
 {
-    m_writeBuffer[R_LED_WRITE_INDEX] = 0xFF * r;
-    m_writeBuffer[G_LED_WRITE_INDEX] = 0xFF * g;
-    m_writeBuffer[B_LED_WRITE_INDEX] = 0xFF * b;
+    m_writeBuffer[R_LED_WRITE_INDEX] = (unsigned char)((float)0xFF * r);
+    m_writeBuffer[G_LED_WRITE_INDEX] = (unsigned char)((float)0xFF * g);
+    m_writeBuffer[B_LED_WRITE_INDEX] = (unsigned char)((float)0xFF * b);
 }
 
 void Dualshock4::ReportInputsToManager()
@@ -192,7 +192,7 @@ void Dualshock4::UpdateTimeStep()
     float timestamp = GetTimestamp();
     float dif = timestamp - m_previousTimestamp;
     if (dif > 0) { m_timeStep = dif; }
-    else { m_timeStep = 0.00125; }
+    else { m_timeStep = 0.00125f; }
     m_previousTimestamp = timestamp;
     m_time += m_timeStep;
 }
@@ -226,7 +226,7 @@ void Dualshock4::UpdateAHRS(float dt, float gx, float gy, float gz, float ax, fl
     if (!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) {
 
         // Normalise accelerometer measurement
-        recipNorm = 1. / sqrt(ax * ax + ay * ay + az * az);
+        recipNorm = 1.f / sqrtf(ax * ax + ay * ay + az * az);
         ax *= recipNorm;
         ay *= recipNorm;
         az *= recipNorm;
@@ -251,7 +251,7 @@ void Dualshock4::UpdateAHRS(float dt, float gx, float gy, float gz, float ax, fl
         s1 = _4q1 * q3q3 - _2q3 * ax + 4.0f * q0q0 * m_quaternion[1] - _2q0 * ay - _4q1 + _8q1 * q1q1 + _8q1 * q2q2 + _4q1 * az;
         s2 = 4.0f * q0q0 * m_quaternion[2] + _2q0 * ax + _4q2 * q3q3 - _2q3 * ay - _4q2 + _8q2 * q1q1 + _8q2 * q2q2 + _4q2 * az;
         s3 = 4.0f * q1q1 * m_quaternion[3] - _2q1 * ax + 4.0f * q2q2 * m_quaternion[3] - _2q2 * ay;
-        recipNorm = 1. / sqrt(s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3); // normalise step magnitude
+        recipNorm = 1.f / sqrtf(s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3); // normalise step magnitude
         s0 *= recipNorm;
         s1 *= recipNorm;
         s2 *= recipNorm;
@@ -271,7 +271,7 @@ void Dualshock4::UpdateAHRS(float dt, float gx, float gy, float gz, float ax, fl
     m_quaternion[3] += qDot4 * dt;
 
     // Normalise quaternion
-    recipNorm = 1. / sqrt(m_quaternion[0] * m_quaternion[0] + m_quaternion[1] * m_quaternion[1] + m_quaternion[2] * m_quaternion[2] + m_quaternion[3] * m_quaternion[3]);
+    recipNorm = 1.f / sqrtf(m_quaternion[0] * m_quaternion[0] + m_quaternion[1] * m_quaternion[1] + m_quaternion[2] * m_quaternion[2] + m_quaternion[3] * m_quaternion[3]);
     m_quaternion[0] *= recipNorm;
     m_quaternion[0] *= recipNorm;
     m_quaternion[2] *= recipNorm;

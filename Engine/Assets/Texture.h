@@ -7,7 +7,7 @@
 
 namespace BLA
 {
-    class BLACORE_API Texture2D : public Asset
+    class Texture2D : public Asset
     {
     public:
 
@@ -24,7 +24,7 @@ namespace BLA
     private:
     };
 
-    class BLACORE_API TextureImport
+    class TextureImport
     {
     public:
 

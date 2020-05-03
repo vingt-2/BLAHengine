@@ -94,7 +94,7 @@ void Console::DoCommandCompletion()
 
     if (bestMatch.second != nullptr)
     {
-        strcpy(m_currentCommandBuffer, bestMatch.second->GetName().data());
+        strcpy_s(m_currentCommandBuffer, bestMatch.second->GetName().data());
     }
 }
 
@@ -130,6 +130,21 @@ void Console::UnloadConsoleCommandsForLibrary(blaU32 libraryId)
 Console::Console() : m_historyCursor(0), m_currentRegisteringLibrary(BlaStringId("Native"))
 {
     m_currentCommandBuffer[0] = 0;
+}
+
+void Console::LogMessage(const blaString& message)
+{
+	GetSingletonInstance()->InstanceLogMessage(message);
+}
+
+void Console::LogWarning(const blaString& warning)
+{
+	GetSingletonInstance()->InstanceLogWarning(warning);
+}
+
+void Console::LogError(const blaString& error)
+{
+	GetSingletonInstance()->InstanceLogError(error);
 }
 
 ConsoleCommandEntry::ConsoleCommandEntry(blaString name) : m_name(name)

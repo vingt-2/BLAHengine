@@ -1,6 +1,11 @@
 #include "Material.h"
 using namespace BLA;
 
+blaVector<blaPair<blaString, blaString>>& Material::GetSamplers()
+{
+    return m_textureSamplerAttributes;
+}
+
 bool Material::AssignTexture(blaString textureName, blaString handleName)
 {
     blaString texture = blaString(textureName);
