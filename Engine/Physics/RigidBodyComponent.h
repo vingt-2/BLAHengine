@@ -48,25 +48,25 @@ namespace BLA
         bool m_applyGravity = true;
         bool m_enableCollision = true;
 
-        void SetCollider(ColliderComponent* collider);
+        BLA_EXPORT(BLAEngine) void SetCollider(ColliderComponent* collider);
 
-        void CreateAndSetMeshCollider(TriangleMesh* mesh);
+        BLA_EXPORT(BLAEngine)void CreateAndSetMeshCollider(TriangleMesh* mesh);
 
-        ColliderComponent* GetAssociatedCollider() const { return m_associatedCollider; }
+        BLA_EXPORT(BLAEngine) ColliderComponent* GetAssociatedCollider() const;
 
-        void Init() override;
+        BLA_EXPORT(BLAEngine) void Init() override;
 
-        void PushForceWorld(blaVec3 pushAtW, blaVec3 forceW);
+        BLA_EXPORT(BLAEngine) void PushForceWorld(blaVec3 pushAtW, blaVec3 forceW);
 
-        void AddLinearForce(blaVec3 force);
-        void AddTorque(blaVec3 vector);
-        void AddImpulse(blaVec3 impulse);
+        BLA_EXPORT(BLAEngine) void AddLinearForce(blaVec3 force);
+        BLA_EXPORT(BLAEngine) void AddTorque(blaVec3 vector);
+        BLA_EXPORT(BLAEngine) void AddImpulse(blaVec3 impulse);
 
-        blaVec3 GetForcesAccu() const { return m_forcesAccu; };
-        blaVec3 GetTorquesAccu() const { return m_torquesAccu; };
-        blaVec3 GetImpulseAccu() const { return m_impulseAccu; }
-        void ClearForces() { m_forcesAccu = blaVec3(0); m_torquesAccu = blaVec3(0); }
-        void ClearImpulse() { m_impulseAccu = blaVec3(0); }
+        BLA_EXPORT(BLAEngine) blaVec3 GetForcesAccu() const;;
+        BLA_EXPORT(BLAEngine) blaVec3 GetTorquesAccu() const;;
+        BLA_EXPORT(BLAEngine) blaVec3 GetImpulseAccu() const;
+        BLA_EXPORT(BLAEngine) void ClearForces();
+        BLA_EXPORT(BLAEngine) void ClearImpulse();
 
     private:
 

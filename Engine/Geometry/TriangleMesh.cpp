@@ -228,7 +228,7 @@ void TriangleMesh::ApplyUVScaling(glm::vec2 scaling)
 
 void TriangleMesh::GenerateRenderData()
 {
-    blaHashMap<RenderVertEntry, blaIndex, vertEntryHasher> vertexMap;
+    blaHashMap<RenderVertEntry, blaU32, vertEntryHasher> vertexMap;
 
     m_renderData.m_triangleIndices.resize(3 * this->m_meshTriangles.size());
 
@@ -298,7 +298,7 @@ void TriangleMesh::GenerateRenderData()
                 m_renderData.m_vertUVs.push_back(vert.vt);
                 m_renderData.m_vertTangent.push_back(tangent);
 
-                vertexMap[vert] = m_renderData.m_vertPos.size() - 1;
+                vertexMap[vert] = static_cast<blaU32>(m_renderData.m_vertPos.size() - 1);
 
                 m_renderData.m_triangleIndices[3 * triIndx + i] = m_renderData.m_vertPos.size() - 1;
 

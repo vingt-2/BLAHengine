@@ -29,6 +29,11 @@ void RigidBodyComponent::CreateAndSetMeshCollider(TriangleMesh* mesh)
     // m_associatedCollider = newMeshColliderComponent;
 }
 
+ColliderComponent* RigidBodyComponent::GetAssociatedCollider() const
+{
+    return m_associatedCollider;
+}
+
 void RigidBodyComponent::Init()
 {
     m_invMassTensor = inverse(m_massTensor);
@@ -75,6 +80,32 @@ void RigidBodyComponent::AddTorque(blaVec3 torque)
 void RigidBodyComponent::AddImpulse(blaVec3 impulse)
 {
     m_impulseAccu += impulse;
+}
+
+blaVec3 RigidBodyComponent::GetForcesAccu() const
+{
+    return m_forcesAccu;
+}
+
+blaVec3 RigidBodyComponent::GetTorquesAccu() const
+{
+    return m_torquesAccu;
+}
+
+blaVec3 RigidBodyComponent::GetImpulseAccu() const
+{
+    return m_impulseAccu;
+}
+
+void RigidBodyComponent::ClearForces()
+{
+    m_forcesAccu = blaVec3(0);
+    m_torquesAccu = blaVec3(0);
+}
+
+void RigidBodyComponent::ClearImpulse()
+{
+    m_impulseAccu = blaVec3(0);
 }
 
 NextState::NextState() :
