@@ -216,27 +216,22 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         /*
          * Create The menu
          */
-        BlaGuiMenuTab fileMenu("File");
+        BlaGuiMenuTab& fileMenu = m_guiManager->m_menuBar.AddSubMenu("File");
+        fileMenu.AddMenuItem("New Scene", &m_editorStateRequests.m_newSceneRequest);
+        fileMenu.AddMenuItem("Open Scene", &m_editorStateRequests.m_openSceneRequest, true);
+        fileMenu.AddMenuItem("Save", &m_editorStateRequests.m_saveSceneRequest);
+        fileMenu.AddMenuItem("Save As", &m_editorStateRequests.m_saveSceneAsRequest, true);
+        fileMenu.AddMenuItem("Exit", &m_isTerminationRequested);
 
-        fileMenu.AddMenu(BlaGuiMenuItem("New Scene", &m_editorStateRequests.m_newSceneRequest));
-        fileMenu.AddMenu(BlaGuiMenuItem("Open Scene", &m_editorStateRequests.m_openSceneRequest, true));
-        fileMenu.AddMenu(BlaGuiMenuItem("Save", &m_editorStateRequests.m_saveSceneRequest));
-        fileMenu.AddMenu(BlaGuiMenuItem("Save As", &m_editorStateRequests.m_saveSceneAsRequest, true));
-        fileMenu.AddMenu(BlaGuiMenuItem("Exit", &(m_isTerminationRequested)));
 
-        m_guiManager->m_menuBar.m_menuTabs.push_back(fileMenu);
+        BlaGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
+        settingsMenu.AddMenuItem("Render G-Buffer", &m_renderer->m_debugDrawGBuffer);
+        settingsMenu.AddMenuItem("Draw Grid", &m_bDrawGrid);
 
-        BlaGuiMenuTab settingsMenu("Settings");
-        settingsMenu.AddMenu(BlaGuiMenuItem("G-Buffer", &m_renderer->m_debugDrawGBuffer));
-
-        m_guiManager->m_menuBar.m_menuTabs.push_back(settingsMenu);
-
-        BlaGuiMenuTab windowsMenu("Windows");
-        windowsMenu.AddMenu(BlaGuiMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest));
-        windowsMenu.AddMenu(BlaGuiMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest));
-        windowsMenu.AddMenu(BlaGuiMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest));
-
-        m_guiManager->m_menuBar.m_menuTabs.push_back(windowsMenu);
+        BlaGuiMenuTab& windowsMenu = m_guiManager->m_menuBar.AddSubMenu("Windows");
+        windowsMenu.AddMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest);
+        windowsMenu.AddMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest);
+        windowsMenu.AddMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest);
 
         LoadNewScene();
 
@@ -334,7 +329,12 @@ void EditorSession::EditorUpdate()
             //DebugDraw::DrawArbitraryGeometry(m_selectedObject->GetTransform().GetPosQuat(), m_selectedObject->GetTransform().GetScale(), meshRenderer->m_mesh->m_triangleMesh, blaVec4(BLA::ORANGE, 0.3f));
         }
     }
-
+	
+	if(m_bDrawGrid)
+	{
+        DrawGrid(100, 1.f, WHITE);
+	}
+	
     DebugDraw::DrawBasis(blaPosQuat::GetIdentity(), 1.f);
 }
 

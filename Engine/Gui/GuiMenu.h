@@ -14,18 +14,24 @@ namespace BLA
         void(*m_functionPtr)(void*);
     };
 
-    class BlaGuiMenuItem
+    class BlaGuiMenuBase
     {
         friend class BlaGuiMenuTab;
-    public:
-        BlaGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false) :
-            m_name(name)
-            , m_switch(bool_switch)
-            , m_endWithSeparator(endWithSeparator)
-        {}
+        friend class BlaGuiMenu;
+        virtual void Render() = 0;
 
-    private:
-        void Render();
+    protected:
+        virtual ~BlaGuiMenuBase() {};
+    };
+
+    class BlaGuiMenuItem : public BlaGuiMenuBase
+    {
+        friend class BlaGuiMenuTab;
+        friend class BlaGuiMenu;
+    	
+        BlaGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false);
+
+        void Render() override;
 
         blaString m_name;
         blaBool* m_switch;
@@ -33,28 +39,36 @@ namespace BLA
         blaBool m_endWithSeparator;
     };
 
-    class BlaGuiMenuTab
+    class BlaGuiMenuTab : public BlaGuiMenuBase
     {
-        friend struct BlaGuiMenu;
-    public:
-        BlaGuiMenuTab(blaString name) :
-            m_name(name)
-        {}
-
-        void AddMenu(BlaGuiMenuItem menu)
-        {
-            m_menuItems.emplace_back(menu);
-        }
-
-    private:
+        friend class BlaGuiMenu;
+    	
+        BlaGuiMenuTab(blaString name);
+    	virtual ~BlaGuiMenuTab();
+    	
         blaString m_name;
-        blaVector<BlaGuiMenuItem> m_menuItems;
-        void Render();
+        blaVector<BlaGuiMenuBase*> m_menuItems;
+        void Render() override;
+
+    public:
+    	
+        BLACORE_API void AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false);
+
+        BLACORE_API BlaGuiMenuTab& AddSubMenu(blaString name);
     };
 
-    struct BlaGuiMenu
+    class BlaGuiMenu
     {
-        blaVector<BlaGuiMenuTab> m_menuTabs;
+        friend class BlaGuiManager;
+        blaVector<BlaGuiMenuBase*> m_menuTabs;
         void Render();
+
+    public:
+
+        ~BlaGuiMenu();
+    	
+        BLACORE_API void AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false);
+
+        BLACORE_API BlaGuiMenuTab& AddSubMenu(blaString name);
     };
 }

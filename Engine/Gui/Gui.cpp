@@ -627,6 +627,11 @@ blaBool BlaGuiManager::CloseFileBrowser(blaString browserName)
     return false;
 }
 
+BlaGuiMenuItem::BlaGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator):
+	m_name(name)
+	, m_switch(bool_switch)
+	, m_endWithSeparator(endWithSeparator) {}
+
 void BlaGuiMenuItem::Render()
 {
     ImGui::MenuItem(m_name.c_str(), NULL, m_switch);
@@ -637,13 +642,32 @@ void BlaGuiMenuItem::Render()
     }
 }
 
+BlaGuiMenuTab::BlaGuiMenuTab(blaString name): m_name(name) {}
+
+BlaGuiMenuTab::~BlaGuiMenuTab()
+{
+    for (BlaGuiMenuBase* m : m_menuItems) delete m;
+}
+
+void BlaGuiMenuTab::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
+{
+	m_menuItems.emplace_back(new BlaGuiMenuItem(name, bool_switch, endWithSeparator));
+}
+
+BlaGuiMenuTab& BlaGuiMenuTab::AddSubMenu(blaString name)
+{
+    BlaGuiMenuTab* tab = new BlaGuiMenuTab(name);
+    m_menuItems.emplace_back(tab);
+    return *tab;
+}
+
 void BlaGuiMenuTab::Render()
 {
     if (ImGui::BeginMenu(m_name.c_str(), true))
     {
         for (int i = 0; i < m_menuItems.size(); ++i)
         {
-            m_menuItems[i].Render();
+            m_menuItems[i]->Render();
         }
         ImGui::EndMenu();
     }
@@ -658,11 +682,28 @@ void BlaGuiMenu::Render()
         ImGui::PopFont();
         for (int i = 0; i < m_menuTabs.size(); ++i)
         {
-            m_menuTabs[i].Render();
+            m_menuTabs[i]->Render();
         }
 
         ImGui::EndMainMenuBar();
     }
+}
+
+BlaGuiMenu::~BlaGuiMenu()
+{
+    for (BlaGuiMenuBase* m : m_menuTabs) delete m;
+}
+
+void BlaGuiMenu::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
+{
+    m_menuTabs.emplace_back(new BlaGuiMenuItem(name, bool_switch, endWithSeparator));
+}
+
+BlaGuiMenuTab& BlaGuiMenu::AddSubMenu(blaString name)
+{
+    BlaGuiMenuTab* tab = new BlaGuiMenuTab(name);
+    m_menuTabs.emplace_back(tab);
+    return *tab;
 }
 
 void BlaFileBrowser::CurrentFolderGoBack()

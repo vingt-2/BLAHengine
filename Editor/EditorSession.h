@@ -79,6 +79,7 @@ namespace BLA
 
     private:
         bool m_updatedScene = false;
+        bool m_bDrawGrid = false;
 
         GameObject m_selectedObject;
 
