@@ -60,6 +60,7 @@ namespace BLA
     class BlaGuiMenu
     {
         friend class BlaGuiManager;
+        friend class BlaGuiWindow;
         blaVector<BlaGuiMenuBase*> m_menuTabs;
         void Render();
 

@@ -8,7 +8,7 @@
 #include "Physics/RigidBodyComponent.h"
 #include "Core/TransformComponent.h"
 #include "Core/DebugDraw.h"
-#include "DataStructures/CircularBuffer.h"
+#include "CircularBuffer.h"
 #include "Core/BehaviorComponent.h"
 
 #include <random>

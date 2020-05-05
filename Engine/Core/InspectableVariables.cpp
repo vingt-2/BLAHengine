@@ -6,6 +6,8 @@
 // We're going to do some serialization work here for now
 // Todo: Move serialization out of here.
 #include "External/rapidjson/prettywriter.h"
+// Todo: Move the Gui stuff out of here too. please ?
+#include "Gui/GuiElements.h"
 
 using namespace BLA;
 using namespace BLAInspectableVariables;

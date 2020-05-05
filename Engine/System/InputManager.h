@@ -1,6 +1,6 @@
 #include "System.h"
 #include "StdInclude.h"
-#include "DataStructures/BitArray.h"
+#include "BitArray.h"
 #include "BLASingleton.h"
 #include "Maths/Maths.h"
 

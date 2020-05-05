@@ -1,6 +1,5 @@
 #pragma once
 #include "StdInclude.h"
-#include "Gui/GuiElements.h"
 #include "Maths/Maths.h"
 #include "BLAStringID.h"
 
@@ -14,7 +13,7 @@ namespace BLA
 {
     class GameObject;
     class GameComponent;
-	class BLAGuiElement;
+	class BlaGuiElement;
 
 	namespace BLAInspectableVariables
 	{

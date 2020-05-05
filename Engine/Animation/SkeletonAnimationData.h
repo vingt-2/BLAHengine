@@ -1,7 +1,7 @@
 #pragma once
 #include "StdInclude.h"
 #include "Maths/Maths.h"
-#include "DataStructures/Tree.h"
+#include "IntrusiveTree.h"
 #include "../../Demos/GameTest/TestPlayerComponent.h"
 
 /*

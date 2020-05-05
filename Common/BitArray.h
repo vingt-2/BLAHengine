@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../System.h"
+#include "System.h"
 #define INTEGER_SIZE_BITS 32
 
 template<int size>

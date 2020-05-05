@@ -58,8 +58,6 @@ namespace BLA
         void Init();
         void Destroy();
 
-        blaVector<BlaGuiWindow> m_oneTimeWindows;
-
         blaMap<blaString, BlaGuiWindow*> m_openWindows;
 
         blaMap<blaString, BlaFileBrowser*> m_openBrowsers;

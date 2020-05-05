@@ -5,8 +5,9 @@
 
 #pragma once
 #include "External/HIDAPI/hidapi.h"
-#include "DataStructures/BitArray.h"
 #include "StdInclude.h"
+#include "System.h"
+#include "BitArray.h"
 
 #define VENDOR_ID 1356		// The vendor & product ID of HID device to be used:
 #define PRODUCT_ID 1476		//		(Currently Setup for PS4 controller)

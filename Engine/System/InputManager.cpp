@@ -1,5 +1,7 @@
 #include "InputManager.h"
 
+#include "Console.h"
+
 using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(InputManager)
@@ -28,6 +30,11 @@ InputManager::InputManager():
 void InputManager::SetKeyboardLock(bool lock)
 {
     m_lockKeyboard = lock;
+    // Console::LogMessage("Locking " + std::to_string(lock));
+	//if(lock && GetKeyState(BLA_KEY_DOWN).IsDown())
+	//{
+	//    Console::LogMessage("Uh Oh");
+	//}
 }
 
 void InputManager::SetMouseLock(bool lock)

@@ -80,7 +80,8 @@ void BLAengineStyleColors(ImGuiStyle* dst)
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 2.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 18.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 12.0f);
@@ -224,9 +225,14 @@ void BlaGuiElement::Render()
     }
 }
 
+BlaGuiCollapsibleElement::BlaGuiCollapsibleElement(const blaString& name, blaStringId groupId): BlaGuiElement(
+	name, groupId)
+{
+}
+
 void BlaGuiCollapsibleElement::Render()
 {
-    int flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    int flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | (m_decorateHeader ? ImGuiTreeNodeFlags_Framed : 0);
 
     if (!m_child)
     {
@@ -290,58 +296,90 @@ void BlaGuiSimpleTextElement::Render()
 template<>
 void BlaGuiEditElement<bool>::Render()
 {
-    ImGui::Checkbox(GetName().c_str(), m_pToValue);
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::Checkbox(("##" + GetName()).c_str(), m_pToValue);
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaF32>::Render()
 {
-    ImGui::InputFloat(GetName().c_str(), m_pToValue, 0.1f, 1.f, 7);
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::InputFloat(("##" + GetName()).c_str(), m_pToValue, 0.1f, 1.f, 7);
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaF64>::Render()
 {
-    ImGui::InputDouble(GetName().c_str(), m_pToValue, 0.1, 1.0);
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::InputDouble(("##" + GetName()).c_str(), m_pToValue, 0.1, 1.0);
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaS32>::Render()
 {
-    ImGui::InputInt(GetName().c_str(), m_pToValue, 1, 10);
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::InputInt(("##" + GetName()).c_str(), m_pToValue, 1, 10);
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaVec2>::Render()
 {
-    ImGui::InputFloat2(GetName().c_str(), &(m_pToValue->x));
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::InputFloat2(("##" + GetName()).c_str(), &(m_pToValue->x));
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaVec3>::Render()
 {
-    ImGui::InputFloat3(GetName().c_str(), &(m_pToValue->x));
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::InputFloat3(("##" + GetName()).c_str(), &(m_pToValue->x));
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaQuat>::Render()
 {
-    ImGui::InputFloat4(GetName().c_str(), &(m_pToValue->x));
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+	ImGui::InputFloat4(("##" + GetName()).c_str(), &(m_pToValue->x));
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaPosQuat>::Render()
 {
-    ImGui::InputFloat3((GetName() + " P").c_str(), &(m_pToValue->GetTranslation().x));
-    ImGui::InputFloat4((GetName() + " R").c_str(), &(m_pToValue->GetRotation().x));
+    ImGui::Text(GetName().c_str());
+    ImGui::Columns(2, 0, false);
+    ImGui::Text("\tPosition"); ImGui::NextColumn();
+    ImGui::InputFloat3(("##P" + GetName()).c_str(), &(m_pToValue->GetTranslation().x)); ImGui::NextColumn();
+    ImGui::Text("\tRotation"); ImGui::NextColumn();
+    ImGui::InputFloat4(("##R" + GetName()).c_str(), &(m_pToValue->GetRotation().x)); ImGui::NextColumn();
+    ImGui::Columns(1);
 }
 
 template<>
 void BlaGuiEditElement<blaScaledTransform>::Render()
 {
-    ImGui::InputFloat3((GetName() + " P").c_str(), &(m_pToValue->m_posQuat.GetTranslation().x));
-    ImGui::InputFloat4((GetName() + " R").c_str(), &(m_pToValue->m_posQuat.GetRotation().x));
-    ImGui::InputFloat3((GetName() + " S").c_str(), &(m_pToValue->m_scale.x));
+    ImGui::Text(GetName().c_str());
+    ImGui::Columns(2, 0, false);
+    ImGui::Text("\tPosition"); ImGui::NextColumn();
+    ImGui::InputFloat3(("##P" + GetName()).c_str(), &(m_pToValue->m_posQuat.GetTranslation().x)); ImGui::NextColumn();
+    ImGui::Text("\tRotation"); ImGui::NextColumn();
+    ImGui::InputFloat4(("##R" + GetName()).c_str(), &(m_pToValue->m_posQuat.GetRotation().x)); ImGui::NextColumn();
+    ImGui::Text("\tScale"); ImGui::NextColumn();
+    ImGui::InputFloat3(("##S" + GetName()).c_str(), &(m_pToValue->m_scale.x)); ImGui::NextColumn();
+    ImGui::Columns(1);
 }
 
 template<>
@@ -349,7 +387,10 @@ void BlaGuiEditElement<blaString>::Render()
 {
     char inputBuf[2048];
     strcpy_s(inputBuf, m_pToValue->c_str());
-    ImGui::InputText(GetName().c_str(), inputBuf, sizeof(inputBuf));
+    ImGui::Columns(2, 0, false);
+    ImGui::Text(GetName().c_str()); ImGui::NextColumn();
+    ImGui::InputText(("##" + GetName()).c_str(), inputBuf, sizeof(inputBuf));
+    ImGui::Columns(1);
     *m_pToValue = blaString(inputBuf);
 }
 
@@ -366,7 +407,7 @@ void BlaGuiEditElementVector<T>::Render()
 template<>
 void BlaGuiEditElement<GameObject>::Render()
 {
-    ImGui::Columns(2);
+    ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str());
     ImGui::NextColumn();
     if (m_pToValue->IsValid())
@@ -378,7 +419,33 @@ void BlaGuiEditElement<GameObject>::Render()
     {
         ImGui::Text("Invalid Object Reference");
     }
-    ImGui::Columns();
+    ImGui::Columns(1);
+}
+
+BlaGuiWindow::BlaGuiWindow():
+	m_windowName("")
+	, m_windowPosition(blaIVec2(0))
+	, m_windowFlags(0)
+	, m_rootElement(nullptr)
+	, m_menu(nullptr), m_hasFocus(false), m_bOpenWindow(true)
+{
+}
+
+BlaGuiWindow::BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition): m_windowName(windowName)
+                                                                                         , m_windowPosition(
+	                                                                                         windowPosition)
+                                                                                         , m_windowFlags(0)
+                                                                                         , m_rootElement(nullptr)
+                                                                                         , m_menu(nullptr),
+                                                                                         m_hasFocus(false),
+                                                                                         m_bOpenWindow(true)
+{
+}
+
+BlaGuiWindow::~BlaGuiWindow()
+{
+    delete m_rootElement;
+    delete m_menu;
 }
 
 void BlaGuiWindow::Render()
@@ -389,6 +456,11 @@ void BlaGuiWindow::Render()
     ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
     // END OCornut's Dear ImGui Specific Code Now
 
+    if(m_menu)
+    {
+        m_menu->Render();
+    }
+	
     if (m_rootElement)
     {
         m_rootElement->Render();
@@ -400,9 +472,34 @@ void BlaGuiWindow::Render()
     // END OCornut's Dear ImGui Specific Code Now
 }
 
+BlaGuiElement* BlaGuiWindow::RootElement() const
+{
+	return m_rootElement;
+}
+
 void BlaGuiWindow::SetRootElement(BlaGuiElement* imGuiElements)
 {
     m_rootElement = imGuiElements;
+}
+
+bool BlaGuiWindow::HasFocus() const
+{
+	return m_hasFocus;
+}
+
+BlaGuiMenu& BlaGuiWindow::AddMenu()
+{
+    m_menu = new BlaGuiMenu();
+    return *m_menu;
+}
+
+BlaOneTimeWindow::BlaOneTimeWindow(): BlaGuiWindow()
+{
+}
+
+BlaOneTimeWindow::BlaOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition):
+	BlaGuiWindow(windowName, windowPosition)
+{
 }
 
 void BlaOneTimeWindow::Render()
@@ -421,6 +518,15 @@ void BlaOneTimeWindow::Render()
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImGui::End();
     // END OCornut's Dear ImGui Specific Code Now
+}
+
+BlaGuiRenderWindow::BlaGuiRenderWindow(Renderer* renderer): BlaGuiWindow(), m_pRenderer(renderer)
+{
+}
+
+BlaGuiRenderWindow::BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
+	BlaGuiWindow(windowName, windowPosition), m_cursorScreenSpacePosition(), m_pRenderer(renderer)
+{
 }
 
 void BlaGuiRenderWindow::Render()
@@ -454,6 +560,11 @@ void BlaGuiRenderWindow::Render()
 
         ImGui::End();
     }
+}
+
+blaVec2 BlaGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
+{
+	return m_cursorScreenSpacePosition;
 }
 
 bool g_show_demo_window = false;
@@ -523,12 +634,6 @@ void BlaGuiManager::Update()
         window.second->Render();
     }
 
-    for (auto& window : m_oneTimeWindows)
-    {
-        window.Render();
-    }
-    m_oneTimeWindows.clear();
-
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
     // Display the Dear ImGui toolkit helper so we never have to look too long to know what we can get done !
     if (inputs->GetKeyState(BLA_KEY_LEFT_SHIFT).IsDown() &&
@@ -573,9 +678,6 @@ blaBool BlaGuiManager::IsMouseOverGui() const
 
 void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowPosition)
 {
-    m_oneTimeWindows.emplace_back(BlaOneTimeWindow(blaString(""), renderWindowPosition));
-
-    m_oneTimeWindows.back().SetRootElement(new BlaGuiSimpleTextElement("", BlaStringId("OneTimeWindow"),textToDraw));
 }
 
 void BlaGuiManager::OpenConsole(const blaString& consoleName)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataStructures/Tree.h"
+#include "IntrusiveTree.h"
 #include "StdInclude.h"
 #include "BLAStringID.h"
 
@@ -51,9 +51,9 @@ namespace BLA
     public:
         BlaGuiElement(const blaString& name, blaStringId groupId) :
         m_name(name),
-        m_groupId(groupId),
         m_isSelected(false),
-        m_isDragable(false),
+        m_groupId(groupId),
+    	m_isDragable(false),
         m_isDroppable(false) {}
 
         // Todo: Set options for how to display children
@@ -75,8 +75,10 @@ namespace BLA
     class BLACORE_API BlaGuiCollapsibleElement : public BlaGuiElement
     {
     public:
-        BlaGuiCollapsibleElement(const blaString& name, blaStringId groupId) : BlaGuiElement(name, groupId) {}
+	    BlaGuiCollapsibleElement(const blaString& name, blaStringId groupId);
 
+        bool m_decorateHeader = false;
+    	
         virtual void Render();
     };
 

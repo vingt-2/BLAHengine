@@ -2,7 +2,7 @@
 
 #include "StdInclude.h"
 #include "BLASingleton.h"
-#include "DataStructures/Tree.h"
+#include "IntrusiveTree.h"
 
 // TODO: TODO: Remove this TODO
 #include "Core/RenderingManager.h"

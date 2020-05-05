@@ -21,7 +21,7 @@ void CameraController::UpdateController(blaF32 dt)
 
     if (!camera) return;
 
-    GameObject cameraObject = camera->GetOwnerObject();
+    GameObject cameraObject = camera->GetOwnerObject(); 
     
     TransformComponent* transformComponent = cameraObject.GetComponent<TransformComponent>();
     blaScaledTransform transform = transformComponent->GetTransform();

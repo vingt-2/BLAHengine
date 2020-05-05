@@ -1,5 +1,5 @@
 #include "windows.h"
-
+#include <immintrin.h>
 #include "Maths/Maths.h"
 #include "System/Console.h"
 #include "Core/DebugDraw.h"
@@ -26,6 +26,8 @@ namespace BLA
 	{
         blaScaledTransform t = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
         DebugDraw::DrawOBB(t.GetPosQuat(), t.GetScale() * 0.5f, blaVec3(color));
+
+		
 	}
 
     DefineConsoleCommand(void, SayHi)
