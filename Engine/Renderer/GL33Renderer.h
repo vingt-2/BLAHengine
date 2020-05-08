@@ -78,7 +78,7 @@ namespace BLA
 
         const blaMat4* m_modelTransform;
 
-        const blaVector<blaIndex>* m_toMeshTriangles;
+        const blaVector<blaU32>* m_toMeshTriangles;
         const blaVector<blaVec3>* m_toMeshVertices;
         const blaVector<blaVec3>* m_toMeshNormals;
         const blaVector<blaVec3>* m_toMeshTangents;

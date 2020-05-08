@@ -14,6 +14,13 @@ namespace BLA
     class TriangleMesh;
     struct EditorState;
 
+	
+    /*
+     * Vulkan Test
+     */
+    class VulkanRenderer;
+    class GLFWRenderWindow;
+	
     class EditorSession : public EngineInstance
     {
     public:
@@ -80,7 +87,14 @@ namespace BLA
     private:
         bool m_updatedScene = false;
         bool m_bDrawGrid = false;
+        bool m_bTestVulkan = false;
 
+    	/*
+    	 * Vulkan Test
+    	 */
+        GLFWRenderWindow* m_vulkanWindow = nullptr;
+        VulkanRenderer* m_vulkanRenderer = nullptr;
+    	
         GameObject m_selectedObject;
 
         GizmoManager m_gizmoManager;

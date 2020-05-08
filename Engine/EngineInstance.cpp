@@ -25,9 +25,11 @@ blaU32 EngineInstance::LoopEngine()
 {
     EngineInstance* engineInstance = EngineInstance::GetSingletonInstance();
 
+    GLFWRenderWindow::InitGLFW();
+	
     RenderWindow* renderWindow = new GLFWRenderWindow();
 
-    renderWindow->CreateRenderWindow("BLAengine Editor", 1280, 720, false);
+    renderWindow->CreateGL33RenderWindow("BLAengine Editor", 1280, 720, false);
 
     engineInstance->InitializeEngine(renderWindow);
 
@@ -156,7 +158,7 @@ void EngineInstance::PostEngineUpdate()
 }
 
 void EngineInstance::TerminateEngine()
-{
+{	
     delete m_inputManager;
     delete m_debug;
     delete m_scene;
@@ -170,6 +172,8 @@ void EngineInstance::TerminateEngine()
     delete m_renderWindow;
     delete GameComponentRegistry::GetSingletonInstance();
 	delete m_componentLibrariesManager;
+
+    GLFWRenderWindow::ShutdownGLFW();
 }
 
 void EngineInstance::InitializeComponentLibrariesManager()

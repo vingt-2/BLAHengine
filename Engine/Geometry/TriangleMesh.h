@@ -7,7 +7,7 @@ namespace BLA
 {
     struct BLACORE_API RenderData
     {
-        blaVector<blaIndex> m_triangleIndices;
+        blaVector<blaU32> m_triangleIndices;
         blaVector<blaVec3>  m_vertPos;
         blaVector<blaVec3>  m_vertNormal;
         blaVector<blaVec3>  m_vertTangent;

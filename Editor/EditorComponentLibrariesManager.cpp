@@ -6,10 +6,21 @@
 
 #include "EditorComponentLibrariesManager.h"
 
+//TODO: Make this cross-platformer
+#include "fileapi.h"
 //TODO: Cmake should handle that ...
 #define BLA_CONFIGURATION "RelWithDebInfo"
 
 using namespace BLA;
+
+void EditorComponentLibrariesManager::CreateTemporaryLibaryStorage()
+{
+	// CreateDirectoryA("./Temp",LPSECURITY_ATTRIBUTES)
+}
+
+void EditorComponentLibrariesManager::DeleteTemporaryLibraryStorage()
+{
+}
 
 void EditorComponentLibrariesManager::LoadLibraries()
 {

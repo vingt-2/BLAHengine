@@ -18,6 +18,9 @@
 #include "Core/TransformComponent.h"
 #include "EditorSession.h"
 
+#include "System/RenderWindow.h"
+#include "Renderer/VulkanRenderer.h"
+
 using namespace BLA;
 
 DeclareConsoleVariable(bool, shouldReloadLibraries, false)
@@ -96,6 +99,27 @@ void EditorSession::PreEngineUpdate()
         g_shouldReloadLibraries = false;
     }
 
+	if(m_bTestVulkan)
+	{
+		if(!m_vulkanWindow && !m_vulkanRenderer)
+		{
+            m_vulkanWindow = new GLFWRenderWindow();
+            m_vulkanWindow->CreateVulkanRenderWindow("Vulkan Window", 100, 100, false);
+            m_vulkanRenderer = new VulkanRenderer();
+            m_vulkanRenderer->InitializeRenderer(m_vulkanWindow, m_renderingManager, m_debugRenderingManager);
+		}
+	}
+	if(m_vulkanRenderer && m_vulkanWindow)
+	{
+		if(!m_bTestVulkan)
+		{
+            delete m_vulkanWindow;
+            m_vulkanWindow = nullptr;
+            delete m_vulkanRenderer;
+            m_vulkanRenderer = nullptr;
+		}
+	}
+
     EngineInstance::PreEngineUpdate();
 
     if (m_editorState->m_type == EditorState::BLA_EDITOR_EDITING)
@@ -156,6 +180,11 @@ void EditorSession::PostEngineUpdate()
     // TODO: Update() should not be exported, and call from with the engine dll
     m_renderer->Update();
 
+	/*
+	 * Vulkan Test
+	 */
+    if (m_vulkanRenderer) m_vulkanRenderer->Update();
+	
 	// TODO: Update() should not be exported, and call from with the engine dll
     m_guiManager->Update();
 
@@ -198,6 +227,11 @@ void EditorSession::PostEngineUpdate()
 
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
+
+	/*
+	 * Vulkan Test
+	 */
+    if (m_vulkanWindow) m_vulkanWindow->UpdateWindowAndBuffers();
 }
 
 bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
@@ -227,6 +261,7 @@ bool EditorSession::InitializeEngine(RenderWindow* renderWindow)
         BlaGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
         settingsMenu.AddMenuItem("Render G-Buffer", &m_renderer->m_debugDrawGBuffer);
         settingsMenu.AddMenuItem("Draw Grid", &m_bDrawGrid);
+        settingsMenu.AddMenuItem("Test Vulkan", &m_bTestVulkan);
 
         BlaGuiMenuTab& windowsMenu = m_guiManager->m_menuBar.AddSubMenu("Windows");
         windowsMenu.AddMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest);

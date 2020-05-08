@@ -69,6 +69,7 @@ void SceneGraphGui::OnSceneGraphElementEvent(const BlaGuiElementEventPayload& ev
             BlaGuiElement* selected = (BlaGuiElement*)event.m_pEventPayload; 
             FocusOnObject(selected->GetName());
         }
+        break;
         case BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED:
         {
             BlaDroppablePayload* droppedPayload = (BlaDroppablePayload*)event.m_pEventPayload;

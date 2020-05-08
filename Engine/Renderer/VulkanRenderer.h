@@ -7,7 +7,8 @@
 namespace BLA
 {
     class DirectionalShadowRender;
-    class BLACORE_API VulkanRenderer : public Renderer 
+    struct VulkanState;
+    class BLACORE_API VulkanRenderer : public Renderer
     {
     public:
         void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) override;
@@ -19,28 +20,26 @@ namespace BLA
         bool LoadDebugLines() override;
         Ray ScreenToRay(blaVec2 screenSpaceCoord) override;
         void CleanUpPools() override;
-
+        void CleanupRenderer();
     private:
-        void* m_vulkanInstanceVoidHandle;
-        void* m_vulkanPhysicalDeviceVoidHandle;
-        void* m_vulkanLogicalDeviceVoidHandle;
 
-        void* m_vulkanGraphicsQueueVoidHandle;
-        void* m_vulkanPresentationQueueVoidHandle;
-
-        blaU64 m_vulkanSurfaceVoidHandle;
-        blaU64 m_swapChainVoidHandle;
-
-        blaVector<blaU64> m_swapImagesVoidHandles;
-
-        blaU64 m_swapChainImageFormat;
-
-        struct extents2D_t 
-        {
-            blaU32 width;
-            blaU32 height;
-        } m_extents2D;
-
+        //void createInstance();
+        //void setupDebugMessenger();
+        //void createSurface();
+        //void pickPhysicalDevice();
+        //void createLogicalDevice();
+        //void createSwapChain();
+        //void createImageViews();
+        //void createRenderPass();
+        //void createGraphicsPipeline();
+        //void createFramebuffers();
+        //void createCommandPool();
+        //void createCommandBuffers();
+        //void createSyncObjects();
+        //void cleanupSwapChain();
+    	
         const blaVector<const char*> deviceExtensions = { 0 };
+
+        VulkanState* m_vulkanState = nullptr;
     };
 }

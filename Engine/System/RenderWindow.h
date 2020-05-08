@@ -16,7 +16,8 @@ namespace BLA
         RenderWindow() = default;
         virtual ~RenderWindow() {};
 
-        virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
+        virtual void CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
+        virtual void CreateVulkanRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
         virtual blaString GetMaxGLVersion() const = 0;
 
         virtual void MakeGLContextCurrent() = 0;
@@ -45,8 +46,14 @@ namespace BLA
     {
     public:
 
-        void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
+        static void InitGLFW();
+    	
+        static void ShutdownGLFW();
 
+        void CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
+
+        void CreateVulkanRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
+    	
         blaString GetMaxGLVersion() const override;
 
         void MakeGLContextCurrent() override;
@@ -105,7 +112,7 @@ namespace BLA
         ~WPFRenderWindow();
 
 
-        virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen);
+        virtual void CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen);
 
         virtual void UpdateWindowAndBuffers();
 

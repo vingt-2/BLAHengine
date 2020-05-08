@@ -215,7 +215,7 @@ void TranslationGizmoControl::Update()
         // Todo: write an owned pointer wrapper
         CollisionModel3D* collider = newCollisionModel3D();
 
-        const blaVector<blaIndex>&  triangleIndices = cone.m_renderData.m_triangleIndices;
+        const blaVector<blaU32>&  triangleIndices = cone.m_renderData.m_triangleIndices;
         const blaVector<blaVec3>& vertPos = cone.m_renderData.m_vertPos;
 
         for (size_t i = 0; i < triangleIndices.size(); i += 3)

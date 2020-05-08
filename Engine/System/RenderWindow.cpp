@@ -120,15 +120,24 @@ void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
     InputStateSetter::SetMousePointer(blaVec2(xpos, ypos));
 }
 
-void GLFWRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void GLFWRenderWindow::InitGLFW()
 {
-    GLFWwindow* window;
-    // Initialise GLFW
     if (!glfwInit())
     {
         printf("Failed to initialize GLFW\n");
         return;
     }
+}
+
+void GLFWRenderWindow::ShutdownGLFW()
+{
+    glfwTerminate();
+}
+
+void GLFWRenderWindow::CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
+{
+    GLFWwindow* window;
+    // Initialise GLFW
 
     m_isFullscreen = false;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -194,6 +203,65 @@ void GLFWRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int 
     m_glfwWindow = window;
 }
 
+void GLFWRenderWindow::CreateVulkanRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
+{
+    GLFWwindow* window;
+    // Initialise GLFW
+    if (!glfwInit())
+    {
+        printf("Failed to initialize GLFW\n");
+        return;
+    }
+
+    m_isFullscreen = isFullScreen;
+	
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+    //glfwWindowHint(GLFW_DECORATED, false);
+
+    // Open a window and create its OpenGL context
+    GLFWmonitor* monitor = nullptr;
+
+    if (isFullScreen)
+    {
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
+
+        // Set window size to screen proportions
+        m_width = videoMode->width;
+        m_height = videoMode->height;
+
+        m_isFullscreen = true;
+    }
+    else
+    {
+        m_width = sizeX;
+        m_height = sizeY;
+    }
+
+    window = glfwCreateWindow(m_width, m_height, windowTitle.c_str(), monitor, NULL);
+
+    ms_glfwRenderWindowInstanced.push_back(this);
+
+    glfwSwapInterval(1);
+
+    glfwSetWindowTitle(window, windowTitle.c_str());
+
+    // Ensure we can capture the escape key being pressed below
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetCursorPos(window, m_width / 2, m_height / 2);
+
+    glfwSetMouseButtonCallback(window, GLFWMouseButtonCallBack);
+    glfwSetCursorPosCallback(window, GLFWMouseCursorPosCallBack);
+    glfwSetKeyCallback(window, GLFWKeyboardCallBack);
+    glfwSetScrollCallback(window, (GLFWscrollfun)GLFWMouseWheelCallback);
+
+    glfwSetDropCallback(window, (GLFWdropfun)GLFWDragAndDropCallBack);
+
+    m_glfwWindow = window;
+}
+
 blaString GLFWRenderWindow::GetMaxGLVersion() const
 {
     return blaString("");
@@ -206,8 +274,6 @@ void GLFWRenderWindow::MakeGLContextCurrent()
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
-    // SetMouseCursorVisibility(m_cursorVisibility);
-
     glfwSwapInterval(0);
 
     glfwSwapBuffers(m_glfwWindow);
@@ -255,11 +321,7 @@ GLFWRenderWindow::GLFWRenderWindow() :
 
 GLFWRenderWindow::~GLFWRenderWindow()
 {
-    m_isFullscreen = false;
-    m_width = 0;
-    m_height = 0;
-    m_glfwWindow = nullptr;
-    glfwTerminate();
+    glfwDestroyWindow(m_glfwWindow);
 }
 
 void GLFWRenderWindow::SetMouseCursorVisibility(bool visiblity)
@@ -307,7 +369,7 @@ WPFRenderWindow::WPFRenderWindow() :
     }
 }
 
-void WPFRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void WPFRenderWindow::CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
     m_width = sizeX;
     m_height = sizeY;

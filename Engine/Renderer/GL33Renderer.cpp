@@ -164,7 +164,7 @@ void GL33Renderer::RenderGBuffer()
     GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, DrawBuffers);
 
-    glViewport(0, 0, (GLsizei)m_GBuffer.m_GbufferSize.x, (GLsizei)m_GBuffer.m_GbufferSize.y);
+    glViewport(0, 0, static_cast<GLsizei>(m_GBuffer.m_GbufferSize.x), static_cast<GLsizei>(m_GBuffer.m_GbufferSize.y));
 
     // Clear Frame Buffer.
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -199,7 +199,7 @@ void GL33Renderer::RenderGBuffer()
             glBindVertexArray(gl33RenderObject->m_vertexArrayID);
 
             // Draw VAO
-            glDrawElements(gl33RenderObject->m_renderType, (GLsizei)gl33RenderObject->m_toMeshTriangles->size(), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+            glDrawElements(gl33RenderObject->m_renderType, static_cast<GLsizei>(gl33RenderObject->m_toMeshTriangles->size()), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
             glBindVertexArray(0);
             // Send textureSamplers to shader
@@ -612,7 +612,7 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     glBindVertexArray(m_pointLightSphereMesh.m_vao);
 
     // Draw VAO
-    glDrawElements(GL_TRIANGLES, (GLsizei)m_pointLightSphereMesh.m_size, GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_pointLightSphereMesh.m_size), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -1331,7 +1331,7 @@ void GL33Renderer::RenderDebugLines()
     // Set our "renderedTexture" sampler to user Texture Unit 1
     glUniform1i(displayBufferID, 1);
 
-    glDrawArrays(0x0001, 0, (GLsizei)m_debugLinesInfo.size);
+    glDrawArrays(0x0001, 0, static_cast<GLsizei>(m_debugLinesInfo.size));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1372,7 +1372,7 @@ void GL33Renderer::RenderDebugMeshes()
     // Set our "renderedTexture" sampler to user Texture Unit 1
     glUniform1i(displayBufferID, 1);
 
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)m_debugMeshesInfo.size);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_debugMeshesInfo.size));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
