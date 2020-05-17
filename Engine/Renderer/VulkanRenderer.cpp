@@ -12,6 +12,8 @@
 
 using namespace BLA;
 
+const blaVector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
 std::vector<char> readFile(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -60,6 +62,9 @@ struct BLA::VulkanState
     VkCommandPool m_commandPool;
 
     blaVector<VkCommandBuffer> m_commandBuffers;
+
+    VkSemaphore m_imageAvailableSemaphore;
+    VkSemaphore m_renderFinishedSemaphore;
 	
 	VkShaderModule CreateShaderModule(const blaVector<char>& code)
 	{
@@ -301,7 +306,7 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
     // Skipping validation layer for now
 
     // Picking up physical device
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    vulkanState->m_vulkanPhysicalDevice = VK_NULL_HANDLE;
 
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(vulkanInstance, &deviceCount, nullptr);
@@ -319,21 +324,18 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
     {
         if (BLAVulkanHelpers::IsSuitableDevice(device, surface))
         {
-            physicalDevice = device;
+            vulkanState->m_vulkanPhysicalDevice = device;
             break;
         }
     }
 
-    if (physicalDevice == VK_NULL_HANDLE) 
+    if (vulkanState->m_vulkanPhysicalDevice == VK_NULL_HANDLE) 
     {
         Console::LogError("failed to find a suitable GPU!");
         return;
     }
 
-    // Create Logical device
-    VkDevice vulkanDevice;
-
-    BLAVulkanHelpers::QueueFamilyIndices queueFamilies = BLAVulkanHelpers::FindQueueFamilies(physicalDevice, surface);
+    BLAVulkanHelpers::QueueFamilyIndices queueFamilies = BLAVulkanHelpers::FindQueueFamilies(vulkanState->m_vulkanPhysicalDevice, surface);
     
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = { (uint32_t) queueFamilies.graphicsQueue, (uint32_t) queueFamilies.presentationQueue };
@@ -370,7 +372,7 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
         deviceCreateInfo.enabledLayerCount = 0;
     //}
 
-    if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &vulkanDevice) != VK_SUCCESS) 
+    if (vkCreateDevice(vulkanState->m_vulkanPhysicalDevice, &deviceCreateInfo, nullptr, &vulkanState->m_vulkanLogicalDevice) != VK_SUCCESS) 
     {
         Console::LogError("failed to create logical device!");
         return;
@@ -378,14 +380,14 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
 
     VkQueue graphicsQueue, presentationQueue;
 
-    vkGetDeviceQueue(vulkanDevice, queueFamilies.graphicsQueue, 0, &graphicsQueue);
-    vkGetDeviceQueue(vulkanDevice, queueFamilies.presentationQueue, 0, &presentationQueue);
+    vkGetDeviceQueue(vulkanState->m_vulkanLogicalDevice, queueFamilies.graphicsQueue, 0, &graphicsQueue);
+    vkGetDeviceQueue(vulkanState->m_vulkanLogicalDevice, queueFamilies.presentationQueue, 0, &presentationQueue);
 
     vulkanState->m_vulkanGraphicsQueue = graphicsQueue;
     vulkanState->m_vulkanPresentationQueue = presentationQueue;
 
     // Create Swap chain
-    BLAVulkanHelpers::SwapChainSupportDetails swapChainSupport = BLAVulkanHelpers::QuerySwapChainSupport(physicalDevice, surface);
+    BLAVulkanHelpers::SwapChainSupportDetails swapChainSupport = BLAVulkanHelpers::QuerySwapChainSupport(vulkanState->m_vulkanPhysicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = BLAVulkanHelpers::ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = BLAVulkanHelpers::ChooseSwapPresentMode(swapChainSupport.presentModes);
@@ -430,7 +432,7 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
 
     VkSwapchainKHR swapChain;
 
-    if (vkCreateSwapchainKHR(vulkanDevice, &swapChainCreateInfo, nullptr, &swapChain) != VK_SUCCESS) 
+    if (vkCreateSwapchainKHR(vulkanState->m_vulkanLogicalDevice, &swapChainCreateInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create swap chain!");
     }
@@ -439,9 +441,9 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
 
     std::vector<VkImage> swapChainImages;
 
-    vkGetSwapchainImagesKHR(vulkanDevice, swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(vulkanState->m_vulkanLogicalDevice, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(vulkanDevice, swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(vulkanState->m_vulkanLogicalDevice, swapChain, &imageCount, swapChainImages.data());
 
     vulkanState->m_swapChainImageFormat = surfaceFormat.format;
     vulkanState->m_extents2D.width = extent.width;
@@ -466,7 +468,7 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(vulkanDevice, &createInfo, nullptr, &vulkanState->m_swapChainImageViews[i]) != VK_SUCCESS) 
+        if (vkCreateImageView(vulkanState->m_vulkanLogicalDevice, &createInfo, nullptr, &vulkanState->m_swapChainImageViews[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create image views!");
         }
@@ -502,6 +504,17 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
 
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+
     if (vkCreateRenderPass(vulkanState->m_vulkanLogicalDevice, &renderPassInfo, nullptr, &vulkanState->m_renderPass) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create render pass!");
@@ -510,11 +523,11 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
     /*
      * Create Graphic Pipeline
      */
-    auto vertShaderCode = readFile("shaders/vert.spv");
-    auto fragShaderCode = readFile("shaders/frag.spv");
+    auto vertShaderCode = readFile("./resources/shaders/Vulkan/TriangleVert.spv");
+    auto fragShaderCode = readFile("./resources/shaders/Vulkan/TriangleFrag.spv");;
 
-    VkShaderModule vertShaderModule = m_vulkanState->CreateShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = m_vulkanState->CreateShaderModule(fragShaderCode);
+    VkShaderModule vertShaderModule = vulkanState->CreateShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = vulkanState->CreateShaderModule(fragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -626,6 +639,8 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
 	 * Create FrameBuffer
 	 */
 
+    vulkanState->m_swapChainFramebuffers.resize(vulkanState->m_swapChainImageViews.size());
+
     for (size_t i = 0; i < vulkanState->m_swapChainImageViews.size(); i++)
     {
         VkImageView attachments[] = 
@@ -647,7 +662,6 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
-
 
     /*
      * Create Command Pool
@@ -671,13 +685,114 @@ void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow, RenderingMan
 
     vulkanState->m_commandBuffers.resize(vulkanState->m_swapChainFramebuffers.size());
 
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = vulkanState->m_commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = (uint32_t)vulkanState->m_commandBuffers.size();
+
+    if (vkAllocateCommandBuffers(vulkanState->m_vulkanLogicalDevice, &allocInfo, vulkanState->m_commandBuffers.data()) != VK_SUCCESS) 
+    {
+        throw std::runtime_error("failed to allocate command buffers!");
+    }
+
+    for (size_t i = 0; i < vulkanState->m_commandBuffers.size(); i++) 
+    {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = 0; // Optional
+        beginInfo.pInheritanceInfo = nullptr; // Optional
+
+        if (vkBeginCommandBuffer(vulkanState->m_commandBuffers[i], &beginInfo) != VK_SUCCESS) 
+        {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = vulkanState->m_renderPass;
+        renderPassInfo.framebuffer = vulkanState->m_swapChainFramebuffers[i];
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = vulkanState->m_extents2D;
+
+        VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+        renderPassInfo.clearValueCount = 1;
+        renderPassInfo.pClearValues = &clearColor;
+
+        vkCmdBeginRenderPass(vulkanState->m_commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        vkCmdBindPipeline(vulkanState->m_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanState->m_graphicsPipeline);
+        vkCmdDraw(vulkanState->m_commandBuffers[i], 3, 1, 0, 0);
+        vkCmdEndRenderPass(vulkanState->m_commandBuffers[i]);
+
+        if (vkEndCommandBuffer(vulkanState->m_commandBuffers[i]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
+	/*
+	 * Create the sempahpores
+	 */
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    if (vkCreateSemaphore(vulkanState->m_vulkanLogicalDevice, &semaphoreInfo, nullptr, &vulkanState->m_imageAvailableSemaphore) != VK_SUCCESS ||
+        vkCreateSemaphore(vulkanState->m_vulkanLogicalDevice, &semaphoreInfo, nullptr, &vulkanState->m_renderFinishedSemaphore) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create semaphores!");
+    }
 	
 	
     m_vulkanState = vulkanState;
 }
 
 void VulkanRenderer::SwitchRenderingManager(RenderingManager* renderingManager) {}
-bool VulkanRenderer::Update() { return true; }
+
+bool VulkanRenderer::Update()
+{
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(m_vulkanState->m_vulkanLogicalDevice, m_vulkanState->m_swapChain, UINT64_MAX, m_vulkanState->m_imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkSemaphore waitSemaphores[] = { m_vulkanState->m_imageAvailableSemaphore };
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &m_vulkanState->m_commandBuffers[imageIndex];
+
+    VkSemaphore signalSemaphores[] = { m_vulkanState->m_renderFinishedSemaphore };
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    if (vkQueueSubmit(m_vulkanState->m_vulkanGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) 
+    {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    VkSwapchainKHR swapChains[] = { m_vulkanState->m_swapChain };
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr; // Optional
+
+    vkQueuePresentKHR(m_vulkanState->m_vulkanPresentationQueue , &presentInfo);
+
+    vkDeviceWaitIdle(m_vulkanState->m_vulkanLogicalDevice);
+	
+	return true;
+}
+
 int VulkanRenderer::SynchWithRenderManager() { return 0; }
 RenderObject* VulkanRenderer::LoadRenderObject(const MeshRendererComponent& object, int type) { return nullptr; }
 bool VulkanRenderer::CancelRender(const MeshRendererComponent& object) { return false; }

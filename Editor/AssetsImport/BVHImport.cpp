@@ -236,8 +236,8 @@ blaVector<SkeletonAnimationData*> BVHImport::ImportAnimation(blaString bvhFilePa
 
     int currentToken = -1;
 
-    blaVector<SkeletonJoint*>		skeletalRoots;
-    blaVector<blaVector<int>>			jointChannelsOrderings;
+    blaVector<SkeletonJoint*>	skeletalRoots;
+    blaVector<blaVector<int>>	jointChannelsOrderings;
     int jointIndex = 0;
     while (tokens[++currentToken] != "MOTION")
     {

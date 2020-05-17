@@ -14,12 +14,16 @@ BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_renderType)
 Expose(MeshAssetName)
 Expose(MaterialName)
+//Expose(m_materialNames)
 EndBehaviorDescription()
 
 bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 {
     m_mesh = mesh;
-
+    for(auto& m : m_mesh->m_triangleMesh.m_materials)
+    {
+        m_materialNames.push_back(m.first);
+    }
     return true;
 }
 

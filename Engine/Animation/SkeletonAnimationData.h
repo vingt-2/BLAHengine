@@ -45,7 +45,7 @@ namespace BLA
         void DiscardJointsByName(blaString subname);
 
     private:
-        blaString					m_name;
+        blaString				m_name;
         blaVec3					m_localOffset;
         blaU32                  m_jointIndex;
     };

@@ -76,6 +76,12 @@ void TriangleMeshSerializer::BuildFromMesh(MeshAsset* meshAsset)
     vec3VectorToSerializer(triangleMesh->m_renderData.m_vertTangent, m_renderData.vertTangent);
     vec3VectorToSerializer(triangleMesh->m_renderData.m_vertBiTangent, m_renderData.vertBiTangent);
     vec2VectorToSerializer(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
+
+	for(const auto& m : triangleMesh->m_materials)
+	{
+        m_materials.push_back(m.first);
+        m_materialIndex.push_back(m.second);
+	}
 }
 
 MeshAsset* TriangleMeshSerializer::BuildMesh()
@@ -114,6 +120,11 @@ MeshAsset* TriangleMeshSerializer::BuildMesh()
     vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertTangent, m_renderData.vertTangent);
     vec3serializerVectorTovec3(triangleMesh->m_renderData.m_vertBiTangent, m_renderData.vertBiTangent);
     vec2serializerVectorTovec2(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
+
+    for (int i = 0; i < m_materials.size(); ++i)
+    {
+        triangleMesh->m_materials.push_back(std::make_pair(m_materials[i], m_materialIndex[i]));
+    }
 
     return meshAsset;
 }

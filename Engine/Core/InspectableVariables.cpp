@@ -3,11 +3,10 @@
 #include "Maths/Maths.h"
 #include "System.h"
 #include "System/Console.h"
+
 // We're going to do some serialization work here for now
 // Todo: Move serialization out of here.
 #include "External/rapidjson/prettywriter.h"
-// Todo: Move the Gui stuff out of here too. please ?
-#include "Gui/GuiElements.h"
 
 using namespace BLA;
 using namespace BLAInspectableVariables;
@@ -20,11 +19,6 @@ struct BoolDescriptor : ExposedVarTypeDescriptor
 {
     BoolDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("bool"), sizeof(bool) }
     {}
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<bool>(name, groupId, (bool*)obj);
-    }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
@@ -67,11 +61,6 @@ struct F32Descriptor : ExposedVarTypeDescriptor
 {
     F32Descriptor() : ExposedVarTypeDescriptor{ BlaStringId("F32"), sizeof(blaF32) }
     {
-    }
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaF32>(name, groupId, (float*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
@@ -130,11 +119,6 @@ struct S32Descriptor : ExposedVarTypeDescriptor
     {
     }
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaS32>(name, groupId, (blaS32*)obj);
-    }
-
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
         writer->Int(*(blaS32*)obj);
@@ -188,11 +172,6 @@ struct StringDescriptor : ExposedVarTypeDescriptor
     StringDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("String"), sizeof(blaString) }
     {}
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaString>(name, groupId, (blaString*)obj);
-    }
-
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
         writer->String(static_cast<blaString*>(obj)->c_str());
@@ -236,11 +215,6 @@ struct GameObjectReferenceDescriptor : ExposedVarTypeDescriptor
     {
     }
 
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<GameObject>(name, groupId, static_cast<GameObject*>(obj));
-    }
-
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
         writer->String(static_cast<GameObject*>(obj)->GetId());
@@ -282,11 +256,6 @@ struct blaVec2Descriptor : ExposedVarTypeDescriptor
 {
     blaVec2Descriptor() : ExposedVarTypeDescriptor{ BlaStringId("Vector2"), sizeof(blaVec2) }
     {}
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaVec2>(name, groupId, (blaVec2*)obj);
-    }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
@@ -360,11 +329,6 @@ struct blaVec3Descriptor : ExposedVarTypeDescriptor
 {
     blaVec3Descriptor() : ExposedVarTypeDescriptor{ BlaStringId("Vector3"), sizeof(blaVec3) }
     {}
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaVec3>(name, groupId, (blaVec3*)obj);
-    }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
@@ -444,11 +408,6 @@ struct blaQuatDescriptor : ExposedVarTypeDescriptor
 {
     blaQuatDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("Quaternion"), sizeof(blaQuat) }
     {}
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaQuat>(name, groupId, static_cast<blaQuat*>(obj));
-    }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
@@ -534,11 +493,6 @@ struct blaPosQuatDescriptor : ExposedVarTypeDescriptor
 {
     blaPosQuatDescriptor() : ExposedVarTypeDescriptor{ BlaStringId("Rigid Transform"), sizeof(blaPosQuat) }
     {}
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaPosQuat>(name, groupId, static_cast<blaPosQuat*>(obj));
-    }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
@@ -643,11 +597,6 @@ struct blaScaledTransformDescriptor : ExposedVarTypeDescriptor
 {
     blaScaledTransformDescriptor(): ExposedVarTypeDescriptor{ BlaStringId("Scaled Rigid Transform"), sizeof(blaScaledTransform) }
     {}
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaScaledTransform>(name, groupId, static_cast<blaScaledTransform*>(obj));
-    }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
@@ -767,67 +716,101 @@ BLACORE_API ExposedVarTypeDescriptor* BLAInspectableVariables::GetPrimitiveDescr
 }
 
 template<typename T>
-struct VectorDescriptor : ExposedVarTypeDescriptor
+struct blaVectorDescriptor : ExposedVarTypeDescriptor
 {
     ExposedVarTypeDescriptor* m_itemType;
     size_t(*getSize)(const void*);
     const void* (*getItem)(const void*, size_t);
 
-    template <typename ItemType>
-    VectorDescriptor(ItemType* a) : ExposedVarTypeDescriptor
-    { blaString("blaVector<") + a->GetName() + ">", sizeof(std::vector<ItemType>) },
-        m_itemType{ TypeResolver<ItemType>::get() }
+    blaVectorDescriptor() : ExposedVarTypeDescriptor
+    { GenerateBlaStringId(blaString("Vector<") + blaString(TypeResolver<T>::get()->GetTypeID()) + ">"), sizeof(std::vector<T>) },
+        m_itemType{ TypeResolver<T>::get() }
     {
         getSize = [](const void* vecPtr) -> size_t
         {
-            const auto& vec = *(const std::vector<ItemType>*) vecPtr;
+            const auto& vec = *(const std::vector<T>*) vecPtr;
             return vec.size();
         };
         getItem = [](const void* vecPtr, size_t index) -> const void*
         {
-            const auto& vec = *(const std::vector<ItemType>*) vecPtr;
+            const auto& vec = *(const std::vector<T>*) vecPtr;
             return &vec[index];
         };
-    }
-
-    virtual blaStringId GetName() const override
-    {
-        return GenerateBlaStringId("blaVector<" + blaString(m_itemType->GetName()) + ">"); // TODO: It's pretty dumb to call a runtime CRC in here... Gotta find a solution
-    }
-
-    BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
-    {
-        return new BlaGuiEditElement<blaVec3>(name, (blaVec3*)obj);
     }
 
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
         writer->SetFormatOptions(rapidjson::kFormatSingleLineArray);
-        writer->StartObject();
-        writer->Key(varName);
         writer->StartArray();
         blaVector<T>* v = static_cast<blaVector<T>*>(obj);
+
+        ExposedVarTypeDescriptor* TTypeDescriptor = TypeResolver<T>::get();
+    	
         for(T& e : *v) 
+        {
+            TTypeDescriptor->Serialize(static_cast<void*>(&e), writer);
+        }
+        writer->EndArray();
+    }
+};
+
+template<typename T1, typename T2>
+struct PairDescriptor : ExposedVarTypeDescriptor
+{
+    ExposedVarTypeDescriptor* m_firstType, m_secondType;
+
+    T1& (*GetFirst)(const void*);
+    T2& (*GetSecond)(const void*);
+
+    PairDescriptor() : ExposedVarTypeDescriptor
+    { blaString("Pair<") + TypeResolver<T1>::get()->GetTypeID() + ", " + TypeResolver<T2>::get()->GetTypeID() + ">", sizeof(blaPair<T1,T2>) },
+        m_firstType{ TypeResolver<T1>::get() }, m_secondType{ ypeResolver<T2>::get() }
+    {
+        GetFirst = [](const void* pair) -> T1&
+        {
+            const blaPair<T1, T2>* pair = *(const blaPair<T1,T2>*) pairPtr;
+            return pairPtr->first;
+        };
+
+        GetSecond = [](const void* pair) -> T2&
+        {
+            const blaPair<T1, T2>* pair = *(const blaPair<T1, T2>*) pairPtr;
+            return pairPtr->second;
+        };
+    }
+
+    //BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) override
+    //{
+    //    return new BlaGuiEditElementVector<T>(name, (blaVector<T>*)obj);
+    //}
+
+    void Serialize(void* obj, BLASerializeWriter* writer) const override
+    {
+        writer->SetFormatOptions(rapidjson::kFormatSingleLineArray);
+        writer->StartArray();
+        blaVector<T>* v = static_cast<blaVector<T>*>(obj);
+        for (T& e : *v)
         {
             e->Serialize();
         }
         writer->EndArray();
-        writer->EndObject();
     }
 };
 
-template <typename T> // Partial specialization for containers
-class TypeResolver<blaVector<T>>
+template <typename T1, typename T2>
+ExposedVarTypeDescriptor* BLAInspectableVariables::TypeResolver<blaPair<T1, T2>>::get()
 {
-public:
-    static ExposedVarTypeDescriptor* get()
-    {
-        static VectorDescriptor<T> typeDesc{ (T*) nullptr };
-        return &typeDesc;
-    }
-};
+    static PairDescriptor<T1, T2> typeDesc;
+    return &typeDesc;
+}
 
 void ExposedVarTypeDescriptor::Deserializer::ErrorMessage() const
 {
     Console::LogError(m_errorMessage);
+}
+
+ExposedVarTypeDescriptor* TypeResolver<std::vector<std::basic_string<char>>>::get()
+{
+    static blaVectorDescriptor<blaString> typeDesc;
+    return &typeDesc;
 }

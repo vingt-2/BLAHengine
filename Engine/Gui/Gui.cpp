@@ -293,6 +293,18 @@ void BlaGuiSimpleTextElement::Render()
     BlaGuiElement::Render();
 }
 
+bool BLA::BlaGuiEditElementVectorPreRender(BlaGuiElement* element)
+{
+    int flags = ImGuiTreeNodeFlags_OpenOnArrow;
+
+    return ImGui::TreeNodeEx((void*)(intptr_t)element, flags, element->GetName().c_str());
+}
+
+void BLA::BlaGuiEditElementVectorPostRender(BlaGuiElement* element)
+{
+    ImGui::TreePop();
+}
+
 template<>
 void BlaGuiEditElement<bool>::Render()
 {
@@ -394,14 +406,12 @@ void BlaGuiEditElement<blaString>::Render()
     *m_pToValue = blaString(inputBuf);
 }
 
-template <typename T>
-void BlaGuiEditElementVector<T>::Render()
+template <typename T1, typename T2>
+void BlaGuiEditElementPair<T1, T2>::Render()
 {
-    for (int i = 0; i < m_pToVector->size(); i++)
-    {
-        BlaGuiEditElement<T> toRender = BlaGuiEditElement<T>(GetName() + std::to_string(i), (&m_pToVector[0]) + i * sizeof(T));
-        toRender.Render();
-    }
+    ImGui::Text(GetName().c_str());
+    BlaGuiEditElement<T1>("First", &m_pToPair->first).Render();
+    BlaGuiEditElement<T2>("Second", &m_pToPair->second).Render();
 }
 
 template<>

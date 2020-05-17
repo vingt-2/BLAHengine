@@ -124,11 +124,6 @@ bool GL33Renderer::Update()
         glDrawBuffers(1, DrawBuffers);
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        for (auto pointLight : m_pointLightPool)
-        {
-            DrawPointLight(pointLight.second);
-        }
-
         for (auto ticketedDirLightRender : m_directionalLightPool)
         {
             DirectionalLightRender* dirLightRender = ticketedDirLightRender.second;
@@ -136,6 +131,12 @@ bool GL33Renderer::Update()
             DrawDirectionalLight(dirLightRender);
         }
 
+        for (auto pointLight : m_pointLightPool)
+        {
+            DrawPointLight(pointLight.second);
+        }
+
+    	
         RenderDebug();
 
         if (!m_renderToFrameBufferOnly)
@@ -588,6 +589,9 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
 
+    //glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_CULL_FACE);
+	
     glDisable(GL_BLEND);
     glDisable(GL_CULL_FACE);
 
@@ -631,10 +635,9 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
-
     
     // Use our shader
-    GLuint prgmID = m_glResources.m_glLoadedProgramsIds["DirectionalLight"].m_loaded_id;
+    GLuint prgmID = m_glResources.m_glLoadedProgramsIds["PointLight"].m_loaded_id;
     glUseProgram(prgmID);
 
     MVPid = glGetUniformLocation(prgmID, "MVP");
@@ -1050,7 +1053,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     {
         if (!initialized)
         {
-            //Check for context validity:
+            //Check for context validity:v
 
             // window-> IMPLEMENT CHECK WINDOW STATUS
             int x, y;
@@ -1062,7 +1065,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
 
             // Accept fragment if it closer to the camera than the former one
             glDepthFunc(GL_LESS);
-
+            
             // Cull triangles which normal is not towards the camera
             glEnable(GL_CULL_FACE);
 
@@ -1084,13 +1087,13 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     }
 
     // Hardcode system shaders loading
-    this->m_glResources.m_systemShaders.LoadGeometryPassProgram("resources/shaders/Engine/GeomPassVS.glsl", "./resources/shaders/Engine/GeomPassFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/Engine/DebugRaysShaderFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDebugMeshesProgram("./resources/shaders/Engine/DebugMeshShaderVS.glsl", "./resources/shaders/Engine/DebugMeshShaderFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/Engine/DrawDepthTextureFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/Engine/DrawColorTextureVS.glsl", "./resources/shaders/Engine/DrawColorTextureFS.glsl");
-    this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
-    this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/Engine/ShadowMapVS.glsl", "./resources/shaders/Engine/ShadowMapFS.glsl");
+    this->m_glResources.m_systemShaders.LoadGeometryPassProgram("resources/shaders/GL33/Engine/GeomPassVS.glsl", "./resources/shaders/GL33/Engine/GeomPassFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDebugRaysProgram("./resources/shaders/GL33/Engine/DebugRaysShaderVS.glsl", "./resources/shaders/GL33/Engine/DebugRaysShaderFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDebugMeshesProgram("./resources/shaders/GL33/Engine/DebugMeshShaderVS.glsl", "./resources/shaders/GL33/Engine/DebugMeshShaderFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/GL33/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/GL33/Engine/DrawDepthTextureFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/GL33/Engine/DrawColorTextureVS.glsl", "./resources/shaders/GL33/Engine/DrawColorTextureFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/GL33/Engine/PointLightStencilVS.glsl", "./resources/shaders/GL33/Engine/PointLightStencilFS.glsl");
+    this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/GL33/Engine/ShadowMapVS.glsl", "./resources/shaders/GL33/Engine/ShadowMapFS.glsl");
 
     this->m_glResources.GLLoadSystemShaders();
 
@@ -1101,12 +1104,12 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     m_debugMeshesPgrmID = this->m_glResources.m_systemShaders.m_debugMeshPgrm.m_loaded_id;
 
     GL33Shader dirLightShader = GL33Shader("DirectionalLight");
-    dirLightShader.LoadShaderCode("./resources/shaders/Lighting/DirectLightVS.glsl", "./resources/shaders/Lighting/DirectLightFS.glsl");
+    dirLightShader.LoadShaderCode("./resources/shaders/GL33/Lighting/DirectLightVS.glsl", "./resources/shaders/GL33/Lighting/DirectLightFS.glsl");
 
     m_glResources.GLLoadShaderProgram(dirLightShader);
 
     GL33Shader pointLightShader = GL33Shader("PointLight");
-    dirLightShader.LoadShaderCode("./resources/shaders/Lighting/PointLightVS.glsl", "./resources/shaders/Lighting/PointLightFS.glsl");
+    pointLightShader.LoadShaderCode("./resources/shaders/GL33/Lighting/PointLightVS.glsl", "./resources/shaders/GL33/Lighting/PointLightFS.glsl");
 
     m_glResources.GLLoadShaderProgram(pointLightShader);
 }

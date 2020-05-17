@@ -19,15 +19,12 @@ namespace BLA
 	{
 		struct BLACORE_API ExposedVarTypeDescriptor
 		{
-			blaStringId m_typeName;
+			blaStringId m_typeID;
 			size_t size;
 
-			ExposedVarTypeDescriptor(const blaStringId& name, size_t size) : m_typeName{ name }, size{ size } {}
+			ExposedVarTypeDescriptor(const blaStringId& name, size_t size) : m_typeID{ name }, size{ size } {}
 			virtual ~ExposedVarTypeDescriptor() = default;
-			virtual blaStringId GetName() const { return m_typeName; }
-
-			//Todo: This does not need to be here for non editor builds... Find a way to take it out without disgusting macros
-		    virtual BlaGuiElement* MakeEditGuiElement(const blaString& name, blaStringId groupId, void* obj) { return nullptr; };
+			virtual blaStringId GetTypeID() const { return m_typeID; }
 
 			virtual void Serialize(void* obj, BLASerializeWriter* writer) const {};
 
@@ -99,5 +96,22 @@ namespace BLA
 				return DefaultResolver::get<T>();
 			}
 		};
+		
+		// Declaring Primitive descriptor specialization and TypeResolver Specialization:
+		template <typename T1, typename T2>
+		struct TypeResolver<blaPair<T1, T2>>
+		{
+			static ExposedVarTypeDescriptor* get();
+		};
+
+		//template <typename T>
+		//struct TypeResolver<blaVector<T>>
+		//{
+		//	static ExposedVarTypeDescriptor* get()
+		//	{
+		//		static blaVectorDescriptor<T> typeDesc;
+		//		return &typeDesc;
+		//	}
+		//};
 	};
 }

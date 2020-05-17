@@ -169,6 +169,8 @@ private:
     blaVector<vec3serializer> m_vertexNormals;
     blaVector<vec2serializer> m_vertexUVs;
     blaVector<vec3serializer> m_faceTangent;
+    blaVector<blaString> m_materials;
+    blaVector<blaIndex> m_materialIndex;
 
     RenderDataSerializer m_renderData;
 
@@ -188,7 +190,9 @@ private:
             m_vertexUVs,
             m_faceTangent,
             m_manifoldViolationEdges,
-            m_renderData
+            m_renderData,
+            m_materials,
+            m_materialIndex
         );
     }
 };

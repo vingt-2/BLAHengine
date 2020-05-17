@@ -112,25 +112,54 @@ namespace BLA
         m_pToValue(pToValue)
         {}
 
-        void Render() override;
+        BLACORE_API void Render() override;
 
     private:
         T* m_pToValue;
     };
 
+    bool BlaGuiEditElementVectorPreRender(BlaGuiElement* element);
+    void BlaGuiEditElementVectorPostRender(BlaGuiElement* element);
+	
     template<typename T>
     class BlaGuiEditElementVector : public BlaGuiElement
     {
     public:
-        BlaGuiEditElementVector(const blaString& name, blaStringId groupId, blaVector<T*> pToVector) :
+        BlaGuiEditElementVector(const blaString& name, blaStringId groupId, blaVector<T>* pToVector) :
         BlaGuiElement(name, groupId),
         m_pToVector(pToVector)
+        {}
+
+        void Render() override
+        {
+            if (BlaGuiEditElementVectorPreRender(this))
+            {
+                for (int i = 0; i < m_pToVector->size(); i++)
+                {
+                    BlaGuiEditElement<T> toRender(std::to_string(i), m_groupId, &(m_pToVector->at(0)) + i);
+                    toRender.Render();
+                }
+                BlaGuiEditElementVectorPostRender(this);
+            }
+        }
+
+    private:
+    	
+        blaVector<T>* m_pToVector;
+    };
+
+    template<typename T1, typename T2>
+    class BlaGuiEditElementPair : public BlaGuiElement
+    {
+    public:
+        BlaGuiEditElementPair(const blaString& name, blaStringId groupId, blaPair<T1, T2>* pToPair) :
+            BlaGuiElement(name, groupId),
+            m_pToPair(pToPair)
         {}
 
         void Render() override;
 
     private:
-        blaVector<T>* m_pToVector;
+        blaPair<T1,T2>* m_pToPair;
     };
-
 }

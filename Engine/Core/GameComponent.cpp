@@ -12,7 +12,7 @@ GameComponent::GameComponent(GameObject parentObject) : m_parentObject(parentObj
 GameComponent::~GameComponent()
 {}
 
-void InitEmptyDesc(ComponentDescriptor* d) { d->m_typeName = INVALID_COMPONENT_ID; };
+void InitEmptyDesc(ComponentDescriptor* d) { d->m_typeID = INVALID_COMPONENT_ID; };
 ComponentDescriptor g_emptyDescriptor{ InitEmptyDesc };
 
 const ComponentDescriptor& GameComponent::GetComponentDescriptor() const

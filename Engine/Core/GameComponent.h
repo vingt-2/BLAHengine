@@ -100,7 +100,7 @@ namespace BLA
     const ComponentDescriptor ComponentName::ms_componentDescriptor{ComponentName::InitReflection};		    \
     void ComponentName::InitReflection(ComponentDescriptor* typeDesc) {									    \
         using T = ComponentName;                                                                            \
-        typeDesc->m_typeName = BlaStringId(#ComponentName);                                                 \
+        typeDesc->m_typeID = BlaStringId(#ComponentName);                                                   \
         typeDesc->size = sizeof(T);                                                                         \
         typeDesc->m_members = {
 
@@ -112,7 +112,7 @@ namespace BLA
         GameComponentRegistry* manager = GameComponentRegistry::GetSingletonInstance();                     \
         if(!manager)                                                                                        \
             manager = GameComponentRegistry::AssignAndReturnSingletonInstance(new GameComponentRegistry()); \
-        manager->__RegisterComponent(typeDesc->m_typeName, T::Factory);                                     \
+        manager->__RegisterComponent(typeDesc->m_typeID, T::Factory);                                       \
     }
 
     class GameComponentRegistry

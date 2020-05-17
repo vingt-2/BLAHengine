@@ -11,7 +11,7 @@ namespace BLA
     {
     public:
 
-        //TODO: Support mipblaMapping 
+        //TODO: Support mipMapping 
         Texture2D(blaString name, glm::uint8 nComponents, blaVector<glm::uint8> data, blaU32 width, blaU32 height);
         ~Texture2D(void);
 

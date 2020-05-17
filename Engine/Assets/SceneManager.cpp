@@ -35,7 +35,7 @@ bool SceneManager::SaveScene(blaString filepath, Scene* scene)
         for (GameComponent* c : gameObject.GetAllComponents())
         {
             writer.SetFormatOptions(rapidjson::kFormatDefault);
-            writer.Key(ToString(c->GetComponentDescriptor().GetName()).c_str());
+            writer.Key(ToString(c->GetComponentDescriptor().GetTypeID()).c_str());
             c->GetComponentDescriptor().Serialize(c, &writer);
         }
         writer.EndObject();
@@ -200,7 +200,7 @@ struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Scen
         {
             blaStringId componentId = FromString(blaString(str, length));
             const ComponentDescriptor& componentDescriptor = GameComponentRegistry::GetSingletonInstance()->GetComponentDescriptor(componentId);
-            if(componentDescriptor.GetName() != INVALID_COMPONENT_ID) 
+            if(componentDescriptor.GetTypeID() != INVALID_COMPONENT_ID) 
             {
                 void* obj = m_scene->AddComponent(GameObject(m_currentObjectID), componentId);
                 m_deserializers.push(componentDescriptor.GetDeserializer(obj));

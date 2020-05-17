@@ -17,6 +17,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     std::ifstream fileStream(filename, std::ifstream::in);
     blaString lineInFile = " ";
 
+    blaVector<blaPair<blaString, blaIndex>> matDefs;
     blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
 
     int quadsCount = 0;
@@ -30,7 +31,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
         std::cout << "Failed to Import " << filename << ".\n";
         return false;
     }
-
+	
     int uselessLines = 0;
     while (fileStream.good())
     {
@@ -149,6 +150,14 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
                     missedFaces++;
                 }
             }
+            else if(lineInFile.at(0) == 'u' && lineInFile.at(1) == 's' && lineInFile.at(2) == 'e' && lineInFile.at(3) == 'm' && lineInFile.at(4) == 't' && lineInFile.at(5) == 'l')
+            {
+				char t[50];
+            	char name[50];
+				sscanf_s(lineInFile.data(), "%s %s", &t, 50, &name, 50);
+
+                matDefs.push_back(std::make_pair(blaString(name), (vertexIndices.size() / 3)));
+            }
             else
             {
                 uselessLines++;
@@ -168,7 +177,8 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     std::cout << "Done.\nImported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices, " << mesh.m_manifoldViolationEdges << " non-manifold edges\n";
     std::cout << "Normalizing Model Coordinates \n";
     mesh.NormalizeModelCoordinates(normalScale);
-    std::cout << "Generating Render Data\n";
+    mesh.m_materials = matDefs;
+	std::cout << "Generating Render Data\n";
     mesh.GenerateRenderData();
 
     return true;

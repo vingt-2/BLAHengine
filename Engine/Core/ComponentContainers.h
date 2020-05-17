@@ -60,7 +60,7 @@ namespace BLA
     template <class T>
     InputComponents<T> ComponentSystemIOInterface::GetInputComponents()
     {
-        blaStringId componentName = T::ms_componentDescriptor.GetName();
+        blaStringId componentName = T::ms_componentDescriptor.GetTypeID();
         if(m_pComponentContainer->m_components.find(componentName) != m_pComponentContainer->m_components.end()) 
         {
             InputComponents<T> input;
@@ -78,7 +78,7 @@ namespace BLA
     template <class T>
     OutputComponents<T> ComponentSystemIOInterface::GetOutputComponents()
     {
-        blaStringId componentName = T::ms_componentDescriptor.GetName();
+        blaStringId componentName = T::ms_componentDescriptor.GetTypeID();
         if (m_pComponentContainer->m_components.find(componentName) != m_pComponentContainer->m_components.end())
         {
             OutputComponents<T> output;

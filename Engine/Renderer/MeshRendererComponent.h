@@ -19,6 +19,8 @@ namespace BLA
 
         blaString MeshAssetName;
         blaString MaterialName;
+
+        blaVector<blaString> m_materialNames;
         
 		const blaMat4* GetTransformMatrix() const;
 

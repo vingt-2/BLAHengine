@@ -5,17 +5,15 @@
 namespace BLA
 {
     BeginComponentDeclaration(BLAEngine, DirectionalLightComponent)
-        void SetDirection(blaVec3 direction);
-        blaVec3 GetDirection();
 
+        friend class RenderingManager;
+	
         void Init() override;
         void Shutdown() override;
-        void Update();
-
-        blaU32 m_renderTicket = 0;
-
+        void Update();	
+	
     private:
-        blaVec3 m_lightDirection = blaVec3(0.f);
-
+        int m_renderTicket;
+	
     EndComponentDeclaration()
 }

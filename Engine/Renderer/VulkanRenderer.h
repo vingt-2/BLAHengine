@@ -22,24 +22,7 @@ namespace BLA
         void CleanUpPools() override;
         void CleanupRenderer();
     private:
-
-        //void createInstance();
-        //void setupDebugMessenger();
-        //void createSurface();
-        //void pickPhysicalDevice();
-        //void createLogicalDevice();
-        //void createSwapChain();
-        //void createImageViews();
-        //void createRenderPass();
-        //void createGraphicsPipeline();
-        //void createFramebuffers();
-        //void createCommandPool();
-        //void createCommandBuffers();
-        //void createSyncObjects();
-        //void cleanupSwapChain();
     	
-        const blaVector<const char*> deviceExtensions = { 0 };
-
         VulkanState* m_vulkanState = nullptr;
     };
 }

@@ -9,7 +9,7 @@ namespace BLA
     {
     public:
         static TriangleMesh MakeCube();
-        static TriangleMesh MakeSphere(blaF32 radius);
+        static TriangleMesh MakeSphere(blaF32 radius, bool inverted = false);
         static TriangleMesh MakeDisc(blaU32 resolution);
         static TriangleMesh MakeCone(blaU32 resolution);
 		static TriangleMesh MakePlane(blaVec3 normal, blaU32 width, blaU32 height, blaU32 subdivisionDepth);

@@ -1,17 +1,17 @@
-#include "EditorSession.h"
+#include "SceneEditor.h"
 
 using namespace BLA;
 
-void RunEditorSession()
+void RunSceneEditor()
 {
-    EngineInstance::AssignSingletonInstance(new EditorSession(true, false));
+    EngineInstance::AssignSingletonInstance(new SceneEditor(true, false));
 
     EngineInstance::LoopEngine();
 }
 
 int main()
 {
-    RunEditorSession();
+    RunSceneEditor();
 }
 
 #ifdef WIN32
@@ -23,7 +23,7 @@ int __stdcall WinMain(
     __in  LPSTR lpCmdLine,
     __in  int nCmdShow)
 {
-    RunEditorSession();
+    RunSceneEditor();
     return 0;
 }
 

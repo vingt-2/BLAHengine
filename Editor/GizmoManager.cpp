@@ -2,7 +2,7 @@
 #include "Core/DebugDraw.h"
 #include "Core/Scene.h"
 #include "Renderer/GL33Renderer.h"
-#include "EditorSession.h"
+#include "SceneEditor.h"
 #include "System/Console.h"
 #include "System/InputManager.h"
 #include "Geometry/PrimitiveGeometry.h"
@@ -86,7 +86,7 @@ TriangleMesh cone = PrimitiveGeometry::MakeCone(40);
 Ray screenRay;
 void GizmoManager::Update()
 {
-    EditorSession* editorSess = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance());
+    SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
     GameObject objRef = editorSess->GetSelectedObject();
 
     bool shouldCreateGizmo = false;
@@ -148,7 +148,7 @@ void GizmoManager::Update()
 
 void GizmoControl::Update()
 {
-    EditorSession* editorSess = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance());
+    SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
 
     if (!editorSess)
         return;
@@ -172,7 +172,7 @@ void TranslationGizmoControl::Update()
 {
     GizmoControl::Update();
 
-    EditorSession* editorSess = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance());
+    SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
     GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
@@ -370,7 +370,7 @@ void ScaleGizmoControl::Update()
 {
     GizmoControl::Update();
 
-    EditorSession* editorSess = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance());
+    SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
     GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
@@ -541,7 +541,7 @@ void RotationGizmoControl::Update()
 {
     GizmoControl::Update();
 
-    EditorSession* editorSess = dynamic_cast<EditorSession*>(EngineInstance::GetSingletonInstance());
+    SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
     GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
