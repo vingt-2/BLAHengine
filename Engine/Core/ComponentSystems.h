@@ -48,14 +48,14 @@ namespace BLA
     constexpr blaStringId GetInputComponentName()
     {
         static_assert(std::is_base_of<GameComponent, I>::value, "Invalid Input Component, this class does not derive from GameComponent");
-        return I::ms_componentDescriptor.GetTypeID();
+        return I::ms_componentDescriptor.m_typeID;
     }
 
     template<class O>
     constexpr blaStringId GetOutputComponentName()
     {
         static_assert(std::is_base_of<GameComponent, O>::value, "Invalid Output Component, this class does not derive from GameComponent");
-        return O::ms_componentDescriptor.GetTypeID();
+        return O::ms_componentDescriptor.m_typeID;
     }
 
     class BLACORE_API ComponentSystem

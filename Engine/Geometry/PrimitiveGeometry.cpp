@@ -60,7 +60,7 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius, bool inverted)
             const float phi = float(phiCount) / (phiSamples - 1) * 2 * float(M_PI);
 
             const blaVec3 normal(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
-            sphere.m_vertexPos.push_back((inverted ? -1.f : 1.f) * normal * radius);
+            sphere.m_vertexPos.push_back(normal * radius);
             sphere.m_vertexNormals.push_back(normal);
 
             sphere.m_vertexUVs.push_back(blaVec2(1.f - float(thetaCount) / (thetaSamples - 1), 1.f - float(phiCount) / (phiSamples - 1)));
@@ -75,30 +75,17 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius, bool inverted)
         {
             const blaU32 vn = (phiCount + 1) % phiSamples;
 
-        	if(inverted)
-        	{
-                triangleIndices.push_back(thetaCount * phiSamples + phiCount);
-                triangleIndices.push_back(un * phiSamples + phiCount);
-                triangleIndices.push_back(un * phiSamples + vn);
+            triangleIndices.push_back(thetaCount * phiSamples + phiCount);
+            triangleIndices.push_back(un * phiSamples + phiCount);
+            triangleIndices.push_back(un * phiSamples + vn);
 
-                triangleIndices.push_back(thetaCount * phiSamples + phiCount);
-                triangleIndices.push_back(un * phiSamples + vn);
-                triangleIndices.push_back(thetaCount * phiSamples + vn);
-        	}
-            else
-            {
-                triangleIndices.push_back(un * phiSamples + vn);
-                triangleIndices.push_back(un * phiSamples + phiCount);
-                triangleIndices.push_back(thetaCount * phiSamples + phiCount);
-
-                triangleIndices.push_back(thetaCount * phiSamples + phiCount);
-                triangleIndices.push_back(un * phiSamples + vn);
-                triangleIndices.push_back(thetaCount * phiSamples + phiCount);
-            }
+            triangleIndices.push_back(thetaCount * phiSamples + phiCount);
+            triangleIndices.push_back(un * phiSamples + vn);
+            triangleIndices.push_back(thetaCount * phiSamples + vn);
         }
     }
 
-    sphere.BuildMeshTopo(triangleIndices, triangleIndices, triangleIndices, true);
+    sphere.BuildMeshTopo(triangleIndices, triangleIndices, triangleIndices, inverted);
     sphere.ComputeFaceTangents();
     sphere.GenerateRenderData();
 

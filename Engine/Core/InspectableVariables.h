@@ -3,9 +3,6 @@
 #include "Maths/Maths.h"
 #include "BLAStringID.h"
 
-#define DESERIALIZE_ERROR reinterpret_cast<Deserializer*>(-2)
-#define POP_DESERIALIZER reinterpret_cast<Deserializer*>(-1)
-
 // Todo: Move MakeEditGuiElement and the JSON serializer stuff outside of here, and even more, outside of Engine...
 // Todo: Make deserializer work either for JSON or binary serialization 
 class BLASerializeWriter;
@@ -19,42 +16,11 @@ namespace BLA
 	{
 		struct BLACORE_API ExposedVarTypeDescriptor
 		{
+			ExposedVarTypeDescriptor(const blaStringId& typeID, size_t size) : m_typeID{ typeID }, size{ size } {}
+			virtual ~ExposedVarTypeDescriptor() = default;
+			
 			blaStringId m_typeID;
 			size_t size;
-
-			ExposedVarTypeDescriptor(const blaStringId& name, size_t size) : m_typeID{ name }, size{ size } {}
-			virtual ~ExposedVarTypeDescriptor() = default;
-			virtual blaStringId GetTypeID() const { return m_typeID; }
-
-			virtual void Serialize(void* obj, BLASerializeWriter* writer) const {};
-
-			struct Deserializer
-		    {
-				Deserializer(void* obj) : m_obj(obj) {}
-
-				virtual Deserializer* Null() { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Bool(bool b) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Int(int i) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Uint(unsigned i) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Int64(int64_t i) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Uint64(uint64_t i) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Double(double d) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* RawNumber(const char* str, size_t length, bool copy) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* String(const char* str, size_t  length, bool copy) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* StartObject() { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* Key(const char* str, size_t  length, bool copy) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* EndObject(size_t  memberCount) { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* StartArray() { ErrorMessage(); return DESERIALIZE_ERROR; }
-				virtual Deserializer* EndArray(size_t  elementCount) { ErrorMessage(); return DESERIALIZE_ERROR; }
-
-			protected:
-
-				void ErrorMessage() const;
-				blaString m_errorMessage;
-				void* m_obj;
-			};
-
-			virtual Deserializer* GetDeserializer(void* obj) const { return new Deserializer(obj); }
 		};
 
 		// Declare the function template that handles primitive types such as int, std::string, etc.:
@@ -74,14 +40,14 @@ namespace BLA
 
 			// This version is called if T has a static member named "Reflection":
 			template <typename T, typename std::enable_if<IsReflected<T>::value, int>::type = 0>
-			static ExposedVarTypeDescriptor* get()
+			static ExposedVarTypeDescriptor* GetDescriptor()
 			{
 				return &T::Reflection;
 			}
 
 			// This version is called otherwise:
 			template <typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0>
-			static ExposedVarTypeDescriptor* get()
+			static ExposedVarTypeDescriptor* GetDescriptor()
 			{
 				return GetPrimitiveDescriptor<T>();
 			}
@@ -91,9 +57,9 @@ namespace BLA
 		template <typename T>
 		struct TypeResolver
 		{
-			static ExposedVarTypeDescriptor* get()
+			static ExposedVarTypeDescriptor* GetDescriptor()
 			{
-				return DefaultResolver::get<T>();
+				return DefaultResolver::GetDescriptor<T>();
 			}
 		};
 		
@@ -101,17 +67,39 @@ namespace BLA
 		template <typename T1, typename T2>
 		struct TypeResolver<blaPair<T1, T2>>
 		{
-			static ExposedVarTypeDescriptor* get();
+			static ExposedVarTypeDescriptor* GetDescriptor();
 		};
 
-		//template <typename T>
-		//struct TypeResolver<blaVector<T>>
-		//{
-		//	static ExposedVarTypeDescriptor* get()
-		//	{
-		//		static blaVectorDescriptor<T> typeDesc;
-		//		return &typeDesc;
-		//	}
-		//};
+		template<typename T>
+		struct blaVectorDescriptor : ExposedVarTypeDescriptor
+		{
+			ExposedVarTypeDescriptor* m_itemType;
+			blaIndex(*getSize)(const void*);
+			const void* (*getItem)(const void*, blaIndex);
+
+			blaVectorDescriptor() : ExposedVarTypeDescriptor
+			{ GenerateBlaStringId(blaString("Vector<") + blaString(TypeResolver<T>::GetDescriptor()->m_typeID) + ">"), sizeof(blaVector<T>) },
+				m_itemType{ TypeResolver<T>::GetDescriptor() }
+			{
+				getSize = [](const void* vecPtr) -> blaIndex
+				{
+					return static_cast<const blaVector<T>*>(vecPtr)->size();
+				};
+				getItem = [](const void* vecPtr, blaIndex index) -> const void*
+				{
+					return static_cast<const void*>(&(*static_cast<const blaVector<T>*>(vecPtr))[index]);
+				};
+			}
+		};
+
+		template <typename T>
+		struct TypeResolver<blaVector<T>>
+		{
+			static ExposedVarTypeDescriptor* GetDescriptor()
+			{
+				static blaVectorDescriptor<T> typeDesc;
+				return &typeDesc;
+			}
+		};
 	};
 }

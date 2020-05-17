@@ -73,12 +73,12 @@ namespace BLA
     template<class T>
     T* GameObject::GetComponent()
     {
-        return static_cast<T*>(GetComponent(T::ms_componentDescriptor.GetTypeID()));
+        return static_cast<T*>(GetComponent(T::ms_componentDescriptor.m_typeID));
     }
 
     template <class T>
     T* GameObject::CreateComponent()
     {
-        return static_cast<T*>(CreateComponent(T::ms_componentDescriptor.GetTypeID()));
+        return static_cast<T*>(CreateComponent(T::ms_componentDescriptor.m_typeID));
     }
 }

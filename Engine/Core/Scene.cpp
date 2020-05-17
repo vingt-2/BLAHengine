@@ -254,11 +254,11 @@ RenderingManager* Scene::GetRenderingManager() const
 template <class T>
 T* Scene::AddComponent(GameObject object)
 {
-    return static_cast<T*>(AddComponent(object, T::ms_componentDescriptor.GetTypeID()));
+    return static_cast<T*>(AddComponent(object, T::ms_componentDescriptor.m_typeID));
 }
 
 template <class T>
 T* Scene::GetComponentPerObject(GameObject object)
 {
-    return static_cast<T*>(GetComponentPerObject(T::ms_componentDescriptor.GetTypeID(), object));
+    return static_cast<T*>(GetComponentPerObject(T::ms_componentDescriptor.m_typeID, object));
 }

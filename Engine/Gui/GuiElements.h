@@ -118,8 +118,8 @@ namespace BLA
         T* m_pToValue;
     };
 
-    bool BlaGuiEditElementVectorPreRender(BlaGuiElement* element);
-    void BlaGuiEditElementVectorPostRender(BlaGuiElement* element);
+    BLACORE_API bool BlaGuiEditElementVectorPreRender(BlaGuiElement* element);
+    BLACORE_API void BlaGuiEditElementVectorPostRender(BlaGuiElement* element);
 	
     template<typename T>
     class BlaGuiEditElementVector : public BlaGuiElement
@@ -136,7 +136,7 @@ namespace BLA
             {
                 for (int i = 0; i < m_pToVector->size(); i++)
                 {
-                    BlaGuiEditElement<T> toRender(std::to_string(i), m_groupId, &(m_pToVector->at(0)) + i);
+                    BlaGuiEditElement<T> toRender(std::to_string(i), m_groupId, static_cast<T*>(&((*m_pToVector)[0])) + i);
                     toRender.Render();
                 }
                 BlaGuiEditElementVectorPostRender(this);

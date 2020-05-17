@@ -29,26 +29,6 @@ namespace BLA
 
         ComponentDescriptor(const char* name, size_t size, const std::initializer_list<ExposedMember>& init) : ExposedVarTypeDescriptor{ BlaStringId(""), 0 }, m_members{ init }
         {}
-
-        BLACORE_API void Serialize(void* obj, BLASerializeWriter* writer) const override;
-
-        struct TypedDeserializer : Deserializer
-        {
-            TypedDeserializer(void* obj) : Deserializer(obj) {}
-
-            virtual Deserializer* StartObject();
-            virtual Deserializer* Key(const char* str, size_t  length, bool copy);
-            virtual Deserializer* EndObject(size_t  memberCount);
-
-            void SetComponentDescriptor(const ComponentDescriptor* componentDescriptor);
-
-        private:
-            const ComponentDescriptor* m_componentDescriptor;
-            int m_stage = 0;
-            int m_parsingMember = 0;
-        };
-
-        BLACORE_API Deserializer* GetDeserializer(void* obj) const override;
     };
 
     class GameComponentRegistry;
@@ -105,7 +85,7 @@ namespace BLA
         typeDesc->m_members = {
 
 #define Expose(name)																			            \
-            {BlaStringId(#name), offsetof(T, name), BLAInspectableVariables::TypeResolver<decltype(T::name)>::get()},
+            {BlaStringId(#name), offsetof(T, name), BLAInspectableVariables::TypeResolver<decltype(T::name)>::GetDescriptor()},
 
 #define EndComponentDescription()                                                                           \
         };                                                                                                  \

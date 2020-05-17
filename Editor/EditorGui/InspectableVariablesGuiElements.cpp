@@ -1,5 +1,6 @@
 #include "InspectableVariablesGuiElements.h"
 #include "Maths/Maths.h"
+#include "Core/GameObject.h"
 
 using namespace BLA;
 
@@ -24,9 +25,53 @@ BlaGuiElement* MakeEditGuiElement(const blaString& variableName, blaStringId gro
 	return new BlaGuiEditElement<T>(variableName, groupId, static_cast<T*>(obj));
 }
 
-#define RegisterInspectableVariableGuiElementEditorFactory(Type) \
-	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##Registartor(BLAInspectableVariables::TypeResolver<Type>::get()->GetTypeID(), MakeEditGuiElement<Type>);
+template<typename T>
+BlaGuiElement* MakeVectorEditGuiElement(const blaString& variableName, blaStringId groupId, void* obj)
+{
+	return new BlaGuiEditElementVector<T>(variableName, groupId, static_cast<blaVector<T>*>(obj));
+}
 
+#define RegisterInspectableVariableGuiElementEditorFactory(Type) \
+	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##Registartor(BLAInspectableVariables::TypeResolver<Type>::GetDescriptor()->m_typeID, MakeEditGuiElement<Type>);	\
+	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##VectorRegistartor(BLAInspectableVariables::TypeResolver<blaVector<Type>>::GetDescriptor()->m_typeID, MakeVectorEditGuiElement<Type>);
+
+template<>
+void BlaGuiEditElementVector<blaBool>::Render()
+{
+    if (BlaGuiEditElementVectorPreRender(this))
+    {
+        for (int i = 0; i < m_pToVector->size(); i++)
+        {
+            struct boxedBool
+            {
+                bool v;
+            };
+            boxedBool b = { m_pToVector->at(i) };
+
+            BlaGuiEditElement<blaBool> toRender(std::to_string(i), m_groupId, &b.v);
+            toRender.Render();
+
+            (*m_pToVector)[i] = b.v;
+        }
+        BlaGuiEditElementVectorPostRender(this);
+    }
+}
+
+template<>
+BLAInspectableVariables::blaVectorDescriptor<blaBool>::blaVectorDescriptor() :
+ExposedVarTypeDescriptor
+{ GenerateBlaStringId(blaString("Vector<") + blaString(TypeResolver<blaBool>::GetDescriptor()->m_typeID) + ">"), sizeof(blaVector<blaBool>) },
+m_itemType{ TypeResolver<blaBool>::GetDescriptor() }
+{
+	getSize = [](const void* vecPtr) -> blaIndex
+	{
+		return static_cast<const blaVector<blaBool>*>(vecPtr)->size();
+	};
+	getItem = [](const void* vecPtr, blaIndex index) -> const void*
+	{
+		return nullptr;
+	};
+}
 
 RegisterInspectableVariableGuiElementEditorFactory(blaBool);
 RegisterInspectableVariableGuiElementEditorFactory(blaS32);

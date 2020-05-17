@@ -1,9 +1,12 @@
 #include "SceneManager.h"
 #include "System/Console.h"
 #include "Core/GameComponent.h"
+#include "Assets/JSONSerializers.h"
 #include "External/rapidjson/prettywriter.h"
 #include "External/rapidjson/document.h"
 #include <stack>
+
+#pragma optimize("", off)
 
 using namespace BLA;
 
@@ -35,8 +38,17 @@ bool SceneManager::SaveScene(blaString filepath, Scene* scene)
         for (GameComponent* c : gameObject.GetAllComponents())
         {
             writer.SetFormatOptions(rapidjson::kFormatDefault);
-            writer.Key(ToString(c->GetComponentDescriptor().GetTypeID()).c_str());
-            c->GetComponentDescriptor().Serialize(c, &writer);
+            writer.Key(ToString(c->GetComponentDescriptor().m_typeID).c_str());
+
+            const JSONSerializer* componentSerializer = JSONSerializerManager::GetSerializer(BlaStringId("GameComponent"), c);
+            if (!componentSerializer)
+            {
+                Console::LogError("Could not find the general BlaStringId(\"GameComponent\") JSON Serializer while saving the scene !");
+            }
+            else
+            {
+                componentSerializer->Serialize((char*)c, &writer);
+            }
         }
         writer.EndObject();
     }
@@ -76,7 +88,7 @@ bool SceneManager::SaveScene(blaString filepath, Scene* scene)
 
 struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, SceneParser>
 {
-    using Deserializer = BLAInspectableVariables::ExposedVarTypeDescriptor::Deserializer;
+    using Deserializer = BLA::SAXDeserializerObject;
 
     SceneParser(Scene* newScene) : m_scene(newScene), m_parseState(States::SceneDesc) {}
 
@@ -200,10 +212,18 @@ struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Scen
         {
             blaStringId componentId = FromString(blaString(str, length));
             const ComponentDescriptor& componentDescriptor = GameComponentRegistry::GetSingletonInstance()->GetComponentDescriptor(componentId);
-            if(componentDescriptor.GetTypeID() != INVALID_COMPONENT_ID) 
+            if(componentDescriptor.m_typeID != INVALID_COMPONENT_ID) 
             {
                 void* obj = m_scene->AddComponent(GameObject(m_currentObjectID), componentId);
-                m_deserializers.push(componentDescriptor.GetDeserializer(obj));
+
+                const JSONSerializer* componentSerializer = JSONSerializerManager::GetSerializer(BlaStringId("GameComponent"), obj);
+                if (!componentSerializer)
+                {
+                    Console::LogError("Could not find the general BlaStringId(\"GameComponent\") JSON Serializer while loading the scene !");
+                    return false;
+                }
+            	
+                m_deserializers.push(componentSerializer->GetSAXDeserializerObject(obj));
                 return true;
             }
         }

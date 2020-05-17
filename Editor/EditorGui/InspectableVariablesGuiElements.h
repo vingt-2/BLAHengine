@@ -16,7 +16,7 @@ namespace BLA
 	{
 		static BlaGuiElement* MakeEditGuiElement(const blaString& variableName, blaStringId groupId, const BLAInspectableVariables::ExposedVarTypeDescriptor* typeDescriptor, void* obj)
 		{
-			Factories::const_iterator it = ms_factories.find(typeDescriptor->GetTypeID());
+			Factories::const_iterator it = ms_factories.find(typeDescriptor->m_typeID);
 			if(it != ms_factories.end())
 			{
 				return it->second(variableName, groupId, obj);
