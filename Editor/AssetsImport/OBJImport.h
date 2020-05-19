@@ -9,6 +9,8 @@ namespace BLA
     public:
         bool ImportMesh(const blaString filename, TriangleMesh& mesh, bool swapNormals, bool normalizeScale);
 
+        static bool LoadMaterialTemplateLibrary(const blaString filename);
+
         OBJImport(void);
         ~OBJImport(void) = default;
 

@@ -28,6 +28,7 @@ namespace BLA
         ~GL33SystemShaders() {};
 
         GL33Shader m_drawColorBufferPrgm;
+        GL33Shader m_drawNormalBufferPrgm;
         GL33Shader m_drawDepthBufferPrgm;
         GL33Shader m_geometryPassPrgm;
         GL33Shader m_drawSphereStencilPgrm;
@@ -40,6 +41,7 @@ namespace BLA
         bool LoadDrawSphereStencilProgram(blaString vertFile, blaString fragFile);
         bool LoadGeometryPassProgram(blaString vertFile, blaString fragFile);
         bool LoadDrawColorBufferProgram(blaString vertFile, blaString fragFile);
+        bool LoadDrawNormalBufferProgram(blaString vertFile, blaString fragFile);
         bool LoadDepthBufferProgram(blaString vertFile, blaString fragFile);
         bool LoadShadowMapProgram(blaString vertFile, blaString fragFile);
     };

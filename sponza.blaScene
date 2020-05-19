@@ -1,0 +1,40 @@
+{
+    "BLAEngineVersion": "1",
+    "Scene:./sponza.blaScene": {
+        "DirLight:4240978540": {
+            "TransformComponent:3187546315": {
+                "m_localTransform:2668475925": [1.0, 1.0, 1.0, 0.025342166423797609, 0.2094205617904663, -0.3211771845817566, -0.6446124911308289, 0.2008560448884964, 0.2626020014286041, 0.6893267631530762]
+            },
+            "DirectionalLightComponent:3657284801": {},
+            "CameraComponent:1371827874": {
+                "m_isShadowMapCamera:1567487597": true
+            }
+        },
+        "EditorCamera:1290495955": {
+            "TransformComponent:3187546315": {
+                "m_localTransform:2668475925": [1.0, 1.0, 1.0, 0.6783799529075623, 2.8958871364593508, 0.4527054727077484, 0.11413837224245072, -0.3222767114639282, -0.039176974445581439, -0.9389224648475647]
+            },
+            "CameraComponent:1371827874": {
+                "m_isShadowMapCamera:1567487597": false
+            }
+        },
+        "Sponza:207878904": {
+            "TransformComponent:3187546315": {
+                "m_localTransform:2668475925": [20.0, 20.0, 20.0, -0.04597115516662598, 1.9072699546813965, 0.007387280464172363, 0.0, 0.0, 0.0, 1.0]
+            },
+            "MeshRendererComponent:4028835888": {
+                "m_meshAssetName:4180281198": "sponza",
+                "m_Render:3647196834": true
+            }
+        },
+        "Sky Sphere:4037688177": {
+            "TransformComponent:3187546315": {
+                "m_localTransform:2668475925": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+            },
+            "MeshRendererComponent:4028835888": {
+                "m_meshAssetName:4180281198": "SkySphere",
+                "m_Render:3647196834": false
+            }
+        }
+    }
+}

@@ -1,3 +1,5 @@
+#include "SceneEditor.h"
+
 #include "System.h"
 #include "Maths/Maths.h"
 #include "Renderer/GL33Renderer.h"
@@ -16,7 +18,7 @@
 #include "EditorComponentLibrariesManager.h"
 #include "AssetsImport/OBJImport.h"
 #include "Core/TransformComponent.h"
-#include "SceneEditor.h"
+#include "Assets/Texture.h"
 
 #include "System/RenderWindow.h"
 #include "Renderer/VulkanRenderer.h"
@@ -32,12 +34,14 @@ DefineConsoleCommand(void, MakeSkyObject)
     {
         MeshAsset skyInvertedSphere = MeshAsset("SkySphere");
         skyInvertedSphere.m_triangleMesh = PrimitiveGeometry::MakeSphere(5000, true);
+        skyInvertedSphere.m_triangleMesh.m_materials.push_back(std::make_pair("BlankDiffuseMat", 0));
         AssetManager::GetSingletonInstance()->SaveTriangleMesh(&skyInvertedSphere);
+        AssetManager::GetSingletonInstance()->LoadTriangleMesh("SkySphere");
     }
     GameObject skySphereObject = Scene::GetSingletonInstance()->CreateObject(BlaStringId("Sky Sphere"));
 
-    skySphereObject.CreateComponent<MeshRendererComponent>()->MeshAssetName = "SkySphere";
-    skySphereObject.GetComponent<MeshRendererComponent>()->MaterialName = "BlankDiffuseMat";
+    skySphereObject.CreateComponent<MeshRendererComponent>()->m_meshAssetName = "SkySphere";
+    //skySphereObject.GetComponent<MeshRendererComponent>()->MaterialName = "BlankDiffuseMat";
 }
 
 void DragAndDropHandler(DragAndDropPayloadDontStore* dragAndDropInput)
@@ -336,6 +340,25 @@ void SceneEditor::EditorDragAndDropedFile(const blaString& filePath)
         LoadWorkingScene(filePath);
         return;
     }
+
+	if(file.m_extension == ".tga")
+	{
+        Texture2D* texture = TextureImport::LoadTGA(file.m_name, filePath);
+        AssetManager::GetSingletonInstance()->SaveTexture(texture);
+        AssetManager::GetSingletonInstance()->LoadTexture(file.m_name);
+        return;
+	}
+    if (file.m_extension == ".bmp")
+    {
+        Texture2D* texture = TextureImport::LoadBMP(file.m_name, filePath);
+        AssetManager::GetSingletonInstance()->SaveTexture(texture);
+        AssetManager::GetSingletonInstance()->LoadTexture(file.m_name);
+        return;
+    }
+	if(file.m_extension == ".mtl")
+	{
+        OBJImport::LoadMaterialTemplateLibrary(filePath);
+	}
 }
 
 void SceneEditor::EditorUpdate()
@@ -508,17 +531,16 @@ bool SceneEditor::ImportMesh(blaString filepath, blaString name) const
             return false;
         }
 
-        this->m_assetManager->SaveTriangleMesh(&temporaryMeshAsset);
+        m_assetManager->SaveTriangleMesh(&temporaryMeshAsset);
     }
 
-    this->m_assetManager->LoadTriangleMesh(name);
+    m_assetManager->LoadTriangleMesh(name);
 
     GameObject visualizerObject = m_scene->CreateObject(GenerateBlaStringId(name));
     MeshRendererComponent* meshRenderer = visualizerObject.CreateComponent<MeshRendererComponent>();
     //MeshCollider* colliderComp = visualizerObject.CreateComponent<MeshCollider>();
 
-    meshRenderer->MeshAssetName = name;
-    meshRenderer->MaterialName = "BlankDiffuseMat";
+    meshRenderer->m_meshAssetName = name;
 
     return true;
 }
@@ -638,15 +660,6 @@ DefineConsoleCommand(void, PrintWorkingDirectory)
     Console::LogMessage(GetWorkingDir());
 }
 
-DefineConsoleCommand(void, CreateDude)
-{
-    CreateObject("Dude");
-    AddComponent("Dude", "MeshRendererComponent");
-
-    GameObject(BlaStringId("Dude")).GetComponent<MeshRendererComponent>()->MaterialName = "BlankDiffuseMat";
-    GameObject(BlaStringId("Dude")).GetComponent<MeshRendererComponent>()->MeshAssetName = "dude";
-}
-
 DefineConsoleCommand(void, PointLight, blaString name)
 {
     CreateObject(name);
@@ -660,4 +673,21 @@ DefineConsoleCommand(void, CreateMaterial, blaString name, blaString textureName
     m.AssignTexture("BlankNormal", "normalMap");
 
     AssetManager::GetSingletonInstance()->SaveMaterial(&m);
+    AssetManager::GetSingletonInstance()->LoadMaterial(name);
+}
+
+DefineConsoleCommand(void, LoadMTLFile, blaString filename)
+{
+    OBJImport::LoadMaterialTemplateLibrary(filename);
+}
+
+DefineConsoleCommand(void, MakeSponza)
+{
+    CreateObject("Sponza");
+    if (GameObject(BlaStringId("Sponza")).IsValid())
+    {
+        MeshRendererComponent* r = GameObject(BlaStringId("Sponza")).CreateComponent<MeshRendererComponent>();
+        r->m_meshAssetName = "sponza";
+        r->m_Render = true;
+    }
 }

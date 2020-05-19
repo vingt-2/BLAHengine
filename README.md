@@ -1,3 +1,3 @@
 # BLAengine
 Game Prototyping Engine.
-![Image of Yaktocat](BLAEditor.png)
+![Image of Yaktocat](BLAEditor.gif)

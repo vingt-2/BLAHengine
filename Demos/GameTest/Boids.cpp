@@ -159,8 +159,8 @@ namespace BLA
             ref.CreateComponent<ParticleComponent>();
             MeshRendererComponent* r = ref.CreateComponent<MeshRendererComponent>();
 
-            r->MeshAssetName = "BoidSphere";
-            r->MaterialName = "BlankDiffuseMat";
+            r->m_meshAssetName = "BoidSphere";
+            // r->MaterialName = "BlankDiffuseMat";
 
             boidComponent->m_color = blaVec3(dist(g_dgen), dist(g_dgen), dist(g_dgen));
             boidComponent->m_hominStiffnessMult = dist(g_dgen);

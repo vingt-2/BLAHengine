@@ -11,26 +11,18 @@
 using namespace BLA;
 
 BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
-Expose(m_renderType)
-Expose(MeshAssetName)
-Expose(MaterialName)
-//Expose(m_materialNames)
+Expose(m_meshAssetName)
+Expose(m_Render)
 EndBehaviorDescription()
+
+void MeshRendererComponent::Init()
+{
+	
+}
 
 bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 {
     m_mesh = mesh;
-    for(auto& m : m_mesh->m_triangleMesh.m_materials)
-    {
-        m_materialNames.push_back(m.first);
-    }
-    return true;
-}
-
-bool MeshRendererComponent::AssignMaterial(Material* material, int matIndx)
-{
-    m_materials.push_back(material);
-
     return true;
 }
 
@@ -38,9 +30,6 @@ const blaMat4* MeshRendererComponent::GetTransformMatrix() const
 {
     return &m_modelTransformMatrix;
 }
-
-void MeshRendererComponent::Init()
-{}
 
 void MeshRendererComponent::Shutdown()
 {
@@ -50,10 +39,10 @@ void MeshRendererComponent::Shutdown()
 void MeshRendererComponent::Update()
 {
     bool validState = true;
-    if(m_mesh == nullptr || m_mesh->GetName() != MeshAssetName) 
+    if(m_mesh == nullptr || m_mesh->GetName() != m_meshAssetName)
     {
         Asset* meshAsset = nullptr;
-        if(AssetManager::GetSingletonInstance()->GetAsset(MeshAssetName, meshAsset) == AssetManager::TriangleMeshAsset) 
+        if(AssetManager::GetSingletonInstance()->GetAsset(m_meshAssetName, meshAsset) == AssetManager::TriangleMeshAsset)
         {
             AssignTriangleMesh(static_cast<MeshAsset*>(meshAsset));
         }
@@ -63,26 +52,28 @@ void MeshRendererComponent::Update()
         }
     }
 
-    if(m_materials.empty() || m_materials[0]->GetName() != MaterialName) 
-    {
-        Asset* materialAsset = nullptr;
-        if (AssetManager::GetSingletonInstance()->GetAsset(MaterialName, materialAsset) == AssetManager::AssetType::MaterialAsset)
-        {
-            AssignMaterial(static_cast<Material*>(materialAsset), 0);
-        }
-        else
-        {
-            validState = false;
-        }
-    }
+    //if(!m_material || m_material->GetName() != MaterialName)
+    //{
+    //    Asset* materialAsset = nullptr;
+    //    if (AssetManager::GetSingletonInstance()->GetAsset(MaterialName, materialAsset) == AssetManager::AssetType::MaterialAsset)
+    //    {
+    //        AssignMaterial(static_cast<Material*>(materialAsset), 0);
+    //    }
+    //    else
+    //    {
+    //        validState = false;
+    //    }
+    //}
 
-    if(m_renderTicket != 0 && !validState) 
+    bool render = m_Render && validState;
+	
+    if(m_renderTicket != 0 && !m_Render) 
     {
         Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
         m_renderTicket = 0;
     }
 
-    if(m_renderTicket == 0 && validState) 
+    if(m_renderTicket == 0 && m_Render)
     {
         m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterMeshRenderer(this);
     }

@@ -18,8 +18,11 @@ namespace BLA
         glm::uint8 m_nComponents;
         blaU32 m_dataSize;
         blaU32 m_width, m_height;
+        blaBool m_hasAlpha;
 
         blaVector<glm::uint8> m_data;
+
+        blaBool HasAlpha() const { return m_nComponents > 3; }
 
     private:
     };
@@ -28,7 +31,9 @@ namespace BLA
     {
     public:
 
-        static Texture2D* LoadBMP(blaString name, blaString filePath);
-        static Texture2D* LoadDDS(blaString name, blaString filePath);
+    	// TODO: Move to editor ...
+        BLACORE_API static Texture2D* LoadBMP(blaString name, blaString filePath);
+        BLACORE_API static Texture2D* LoadDDS(blaString name, blaString filePath);
+        BLACORE_API static Texture2D* LoadTGA(blaString name, blaString filepath);
     };
 }

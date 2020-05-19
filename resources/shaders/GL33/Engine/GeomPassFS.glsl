@@ -20,9 +20,7 @@ void main()
 	
 	vec3 normalMapSample  = texture(normalMap, TexCoord0).rgb;
 
-	normalMapSample = normalize(2.0f*normalMapSample - vec3(1.f,1.f,1.f));
-	
-	normalMapSample = vec3(0,0,1);
+	normalMapSample = normalize(vec3(0,0,1)); //normalize(2.0f*normalMapSample - vec3(1.f,1.f,1.f));
 	
 	NormalOut = normalize(TangentSpace0 * normalMapSample);
 	

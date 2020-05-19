@@ -1,5 +1,9 @@
 #include "OBJImport.h"
 
+#include "Assets/Material.h"
+#include "Assets/AssetsManager.h"
+#include "System/Console.h"
+
 using namespace BLA;
 
 OBJImport::OBJImport(void) :
@@ -13,7 +17,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     m_currentMaxVertexPos = 0;
     m_currentMaxUVPos = 0;
     m_currentMaxNormalPos = 0;
-    std::cout << "[OBJ_MESH] Importing " << filename << ".\n";
+    Console::LogMessage("[OBJ_MESH] Importing " + filename);
     std::ifstream fileStream(filename, std::ifstream::in);
     blaString lineInFile = " ";
 
@@ -28,7 +32,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
 
     if (!fileStream.good())
     {
-        std::cout << "Failed to Import " << filename << ".\n";
+        Console::LogError("Failed to Import " + filename);
         return false;
     }
 	
@@ -180,6 +184,77 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     mesh.m_materials = matDefs;
 	std::cout << "Generating Render Data\n";
     mesh.GenerateRenderData();
+
+    return true;
+}
+
+bool OBJImport::LoadMaterialTemplateLibrary(const blaString filename)
+{
+    Console::LogMessage("[MTL loader] Importing " + filename);
+    std::ifstream fileStream(filename, std::ifstream::in);
+    blaString lineInFile = " ";
+
+    blaVector<blaPair<blaString, blaIndex>> matDefs;
+    blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
+
+    int quadsCount = 0;
+    int missedFaces = 0;
+    int triCount = 0;
+
+    int outOfRangeExceptionsCount = 0;
+
+    if (!fileStream.good())
+    {
+        Console::LogError("Failed to Import " + filename);
+        return false;
+    }
+    Material* currentMaterial = nullptr;
+	
+    int uselessLines = 0;
+    while (fileStream.good())
+    {
+        getline(fileStream, lineInFile);
+        try
+        {
+            blaVector<blaString> line = SplitString<blaString>(lineInFile, " ");
+            if (line.empty()) continue;
+        	if(line[0] == "newmtl")
+        	{
+        		if(currentMaterial)
+        		{
+                    AssetManager::GetSingletonInstance()->SaveMaterial(currentMaterial);
+                    delete currentMaterial;
+        		}
+        		
+                currentMaterial = new Material(line[1]);
+        	}
+
+        	if(line[0] == "map_Kd")
+        	{
+                currentMaterial->AssignTexture(line[1], "diffuseMap");
+        	}
+        	
+            if (line[0] == "map_Disp")
+            {
+                currentMaterial->AssignTexture(line[1], "normalMap");
+            }
+        	
+            if (line[0] == "map_Ka")
+            {
+                currentMaterial->AssignTexture(line[1], "alphaMap");
+            }
+        }
+        catch (std::out_of_range&)
+        {
+            outOfRangeExceptionsCount++;
+        }
+    }
+	
+    if (currentMaterial)
+    {
+        AssetManager::GetSingletonInstance()->SaveMaterial(currentMaterial);
+        delete currentMaterial;
+    }
 
     return true;
 }

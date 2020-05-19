@@ -287,4 +287,13 @@ DefineConsoleCommand(void, LoadTextureBMP, blaString name, blaString path)
     Texture2D* texture;
     texture = TextureImport::LoadBMP(name, path);
     AssetManager::GetSingletonInstance()->SaveTexture(texture);
+    delete texture;
+}
+
+DefineConsoleCommand(void, LoadTextureTGA, blaString name, blaString path)
+{
+    Texture2D* texture;
+    texture = TextureImport::LoadTGA(name, path);
+    AssetManager::GetSingletonInstance()->SaveTexture(texture);
+    delete texture;
 }

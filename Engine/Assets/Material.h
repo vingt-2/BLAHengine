@@ -14,6 +14,7 @@ namespace BLA
     public:
         Material(blaString name) : Asset(name) {};
 
+        const blaVector<blaPair<blaString, blaString>>& GetSamplers() const;
         blaVector<blaPair<blaString, blaString>>& GetSamplers();
     	
         BLACORE_API bool AssignTexture(blaString textureName, blaString handleName);

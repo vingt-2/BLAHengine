@@ -1,6 +1,11 @@
 #include "Material.h"
 using namespace BLA;
 
+const blaVector<blaPair<blaString, blaString>>& Material::GetSamplers() const
+{
+    return m_textureSamplerAttributes;
+}
+
 blaVector<blaPair<blaString, blaString>>& Material::GetSamplers()
 {
     return m_textureSamplerAttributes;

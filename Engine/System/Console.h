@@ -10,7 +10,7 @@
 
 #define nothing(...)  
 
-#define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)             \
+#define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)                                 \
 return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( nothing(__VA_ARGS__),   \
     EXPAND(ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__))))));  
 
@@ -22,7 +22,7 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
 
 #define DefineConsoleCommand(RetType, CommandName, ...)                                                        \
     RetType CommandName(__VA_ARGS__);                                                                          \
-    struct ConsoleCommandEntry_##CommandName : BLA::ConsoleCommandEntry                                  \
+    struct ConsoleCommandEntry_##CommandName : BLA::ConsoleCommandEntry                                        \
     {                                                                                                          \
         ConsoleCommandEntry_##CommandName() : ConsoleCommandEntry(#CommandName) {}                             \
         blaString Call(const blaVector<blaString>& arguments) const override                                   \

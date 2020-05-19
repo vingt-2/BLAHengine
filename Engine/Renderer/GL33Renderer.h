@@ -14,7 +14,7 @@ namespace BLA
     {
     public:
         //TODO: Add filtering options
-        bool GLLoadTexture(blaString resourcePath, Texture2D texture);
+        bool GLLoadTexture(blaString resourcePath, const Texture2D& texture);
         bool GLLoadShaderProgram(GL33Shader& shader);
         bool GLLoadSystemShaders();
 
@@ -32,13 +32,13 @@ namespace BLA
 
         GLuint m_frameBufferObject;
 
-        GLuint m_diffuseTextureTarget;
-        GLuint m_normalsTextureTarget;
-        GLuint m_worldPosTextureTarget;
-        GLuint m_texCoordsTextureTarget;
-        GLuint m_depthTextureTarget;
+        GLuint m_diffuseTextureTarget = 0xffffffff;
+        GLuint m_normalsTextureTarget = 0xffffffff;
+        GLuint m_worldPosTextureTarget = 0xffffffff;
+        GLuint m_texCoordsTextureTarget = 0xffffffff;;
+        GLuint m_depthTextureTarget = 0xffffffff;;
 
-        GLuint m_displayTextureTarget;
+        GLuint m_displayTextureTarget = 0xffffffff;
 
         GLuint m_geometryPassPrgmID;
         GLuint m_drawSphereStencilPgrmID;
@@ -84,8 +84,8 @@ namespace BLA
         const blaVector<blaVec3>* m_toMeshTangents;
         const blaVector<blaVec3>* m_toMeshBiTangents;
         const blaVector<blaVec2>* m_toMeshUVs;
-
-        blaVector <blaPair<GLuint, GLuint> > m_activeTextures;
+    	
+        blaVector<blaPair<const Material*, blaU32>> m_materialAndIndex;
 
         // ID of an openGL object (VAO) that lists VBOs 
         GLuint m_elementBufferId;
@@ -94,9 +94,6 @@ namespace BLA
 
         // Keeps track of the VBOs we've generated and added to our VAO
         blaVector<blaPair<GLuint, blaPair<GLuint, GLuint> > > m_vboIDVector;
-
-        // All our textures samplers passed uniform to the shader
-        blaVector<blaPair<GLuint, GLuint> > m_textureSamplersVector;
 
         // Constant shader Infos
         GLuint m_programID;
@@ -129,6 +126,7 @@ namespace BLA
 
         // Debug Vignette;
         GLuint m_drawColorBufferPrgmID;
+        GLuint m_drawNormalsBufferPrgmID;
         GLuint DrawDepthBufferPrgmID;
         //
 
@@ -187,7 +185,7 @@ namespace BLA
 
         bool CleanUp(GL33RenderObject& object);
         void CleanUpVBOs(GL33RenderObject& object);
-        bool AssignMaterial(GL33RenderObject& object, blaString materialName);
+        const Material* LoadMaterial(GL33RenderObject& object, blaString materialName);
         bool LoadTextureSample(GL33RenderObject& object, blaString textureName, blaString sampleName);
         void DestroyVertexArrayID(GL33RenderObject& object);
         void CleanUpFrameDebug();
@@ -203,6 +201,7 @@ namespace BLA
         void RenderDebug();
 
         void DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
+        void DrawNormalBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
         void DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget);
 
         void DrawDirectionalLight(DirectionalLightRender* directionalLight);

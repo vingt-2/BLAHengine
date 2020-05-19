@@ -13,14 +13,7 @@ namespace BLA
         friend class Renderer;
         int m_renderTicket = 0;
 
-        blaVector<Material*> m_materials;
-
-        blaS32 m_renderType = 0x0004; //GL_TRIANGLES
-
-        blaString MeshAssetName;
-        blaString MaterialName;
-
-        blaVector<blaString> m_materialNames;
+        blaBool m_Render;
         
 		const blaMat4* GetTransformMatrix() const;
 
@@ -29,10 +22,11 @@ namespace BLA
 
         const MeshAsset* GetMeshAsset() const { return m_mesh; }
 
+        blaString m_meshAssetName;
+
     private:
         bool AssignTriangleMesh(MeshAsset* mesh);
-        bool AssignMaterial(Material* material, int matIndx);
-
+	
         MeshAsset* m_mesh = nullptr;
         blaMat4 m_modelTransformMatrix;
 	EndBehaviorDeclaration()

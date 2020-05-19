@@ -47,7 +47,7 @@ struct PairDescriptor : ExposedVarTypeDescriptor
 
     PairDescriptor() : ExposedVarTypeDescriptor
     { blaString("Pair<") + TypeResolver<T1>::GetDescriptor()->m_typeID + ", " + TypeResolver<T2>::GetDescriptor()->m_typeID + ">", sizeof(blaPair<T1,T2>) },
-        m_firstType{ TypeResolver<T1>::GetDescriptor() }, m_secondType{ ypeResolver<T2>::GetDescriptor() }
+        m_firstType{ TypeResolver<T1>::GetDescriptor() }, m_secondType{ TypeResolver<T2>::GetDescriptor() }
     {
         GetFirst = [](const void* pair) -> T1&
         {

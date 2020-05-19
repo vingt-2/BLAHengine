@@ -16,7 +16,8 @@ uniform vec3 eyePosition;
 
 in vec2 UV;
 
-void main(){
+void main()
+{
 	vec3 diffuse = texture2D(diffuseMap, UV).rgb;
 	vec3 normal = texture2D(normalMap, UV).rgb;
 	vec3 worldPos = texture2D(worldPosMap, UV).rgb;
@@ -49,7 +50,7 @@ void main(){
 	// And this is the standard shader...
     else
     {
-        float ambientLight = 0.8;
+        float ambientLight = 0.5f;
 		
         vec4 shadowPos = shadowMV * vec4(worldPos, 1.0);
         //shadowPos /= shadowPos.w;
@@ -74,7 +75,7 @@ void main(){
 
         float vis = max(ambientLight,(shadowFactor / 16.0f));
 		
-        color = diffuse * (3 * vis * max(dot(normal, lightDirection),0.3f)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
-		//color = diffuse * (vis * max(dot(normal, lightDirection), 0) + ambientLight);
+        //color = diffuse * (3 * vis * max(dot(normal, lightDirection),0.3f)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
+	   color = diffuse * (vis * max(dot(normal, lightDirection), 0) + ambientLight);
 	}
 }

@@ -7,6 +7,8 @@
 #include "Core/TransformComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 
+#pragma optimize("", off)
+
 using namespace BLA;
 
 TriangleMesh g_PointLightRenderSphere = PrimitiveGeometry::MakeSphere(1.f);
@@ -54,8 +56,7 @@ Ray GL33Renderer::ScreenToRay(blaVec2 screenSpaceCoord)
 }
 
 GL33RenderObject::GL33RenderObject() :
-    m_vboIDVector(blaVector<blaPair<GLuint, blaPair<GLuint, GLuint> > >()),
-    m_textureSamplersVector(blaVector<blaPair<GLuint, GLuint> >())
+    m_vboIDVector(blaVector<blaPair<GLuint, blaPair<GLuint, GLuint> > >())
 {}
 
 GL33RenderObject::~GL33RenderObject() {}
@@ -96,25 +97,27 @@ bool GL33Renderer::Update()
 
         DrawColorBufferOnScreen(glm::vec2(0, 0), glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), m_GBuffer.m_diffuseTextureTarget);
         DrawColorBufferOnScreen(glm::vec2(m_renderSize.x / 2, 0), glm::vec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_worldPosTextureTarget);
-        DrawColorBufferOnScreen(glm::vec2(0, m_renderSize.y / 2), glm::vec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
-        if (m_directionalLightPool.size() > 0)
-        {
-            DirectionalLightRender* pFirstDirLight = nullptr;
-            for (auto dlptr : m_directionalLightPool)
-            {
-                if (dlptr.second != nullptr)
-                {
-                    pFirstDirLight = dlptr.second;
-                    break;
-                }
-            }
-            RenderDirectionalShadowMap(pFirstDirLight->m_shadowRender);
-            DrawDepthBufferOnScreen(glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), glm::vec2(m_renderSize.x, m_renderSize.y), pFirstDirLight->m_shadowRender.m_depthTexture);
-        }
-        else
-        {
-            DrawColorBufferOnScreen(glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), glm::vec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
-        }
+        DrawNormalBufferOnScreen(glm::vec2(0, m_renderSize.y / 2), glm::vec2(m_renderSize.x / 2, m_renderSize.y), m_GBuffer.m_normalsTextureTarget);
+        /* if (m_directionalLightPool.size() > 0)
+         {
+             DirectionalLightRender* pFirstDirLight = nullptr;
+             for (auto dlptr : m_directionalLightPool)
+             {
+                 if (dlptr.second != nullptr)
+                 {
+                     pFirstDirLight = dlptr.second;
+                     break;
+                 }
+             }
+             RenderDirectionalShadowMap(pFirstDirLight->m_shadowRender);
+             DrawDepthBufferOnScreen(glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), glm::vec2(m_renderSize.x, m_renderSize.y), pFirstDirLight->m_shadowRender.m_depthTexture);
+         }*/
+    //    DrawColorBufferOnScreen(glm::vec2(m_renderSize.x / 2, 0), glm::vec2(m_renderSize.x, m_renderSize.y / 2), m_GBuffer.m_texCoordsTextureTarget);
+    //}
+    //    else
+        
+        DrawColorBufferOnScreen(glm::vec2(m_renderSize.x / 2, m_renderSize.y / 2), glm::vec2(m_renderSize.x, m_renderSize.y), m_GBuffer.m_texCoordsTextureTarget);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     else
     {
@@ -187,26 +190,49 @@ void GL33Renderer::RenderGBuffer()
             GLuint transformID = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "modelTransform");
             glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(gl33RenderObject->m_modelTransform))[0][0]);
 
-            // Send textureSamplers to shader
-            for (glm::uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
+
+        	// Render all materials
+            for (blaIndex i = 0; i < gl33RenderObject->m_materialAndIndex.size(); ++i)
             {
-                glActiveTexture(GL_TEXTURE0 + samplerIndex);
+            	const auto& matAndIndex = gl33RenderObject->m_materialAndIndex[i];
 
-                glBindTexture(GL_TEXTURE_2D, gl33RenderObject->m_textureSamplersVector.at(samplerIndex).second);
+                blaU16 samplerCount = 0;
+                for (const auto& sampler : matAndIndex.first->GetSamplers())
+                {
+                    if (m_glResources.m_glLoadedTextureIds.count(sampler.first))
+                    {
+                        GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[sampler.first];
+                        GLuint textureHandleID = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, sampler.second.data());
 
-                glUniform1i(gl33RenderObject->m_textureSamplersVector.at(samplerIndex).first, samplerIndex);
-            }
+                        // Send Texture Samplers to Shader
+                        glActiveTexture(GL_TEXTURE0 + samplerCount);
+                        glBindTexture(GL_TEXTURE_2D, glResourceTextureId);
+                        glUniform1i(textureHandleID, samplerCount);
 
-            glBindVertexArray(gl33RenderObject->m_vertexArrayID);
+                        samplerCount++;
+                    }
+                }
 
-            // Draw VAO
-            glDrawElements(gl33RenderObject->m_renderType, static_cast<GLsizei>(gl33RenderObject->m_toMeshTriangles->size()), GL_UNSIGNED_INT, (void*)0); // Draw Triangles
+                blaIndex drawCallSize;
+                if (i < gl33RenderObject->m_materialAndIndex.size() - 1)
+                {
+                    drawCallSize = 3 * (gl33RenderObject->m_materialAndIndex[i + 1].second - matAndIndex.second);
+                }
+                else
+                {
+                    drawCallSize = gl33RenderObject->m_toMeshTriangles->size() - 3 * matAndIndex.second;
+                }
 
-            glBindVertexArray(0);
-            // Send textureSamplers to shader
-            for (glm::uint16 samplerIndex = 0; samplerIndex < gl33RenderObject->m_textureSamplersVector.size(); samplerIndex++)
-            {
-                glActiveTexture(GL_TEXTURE0 + samplerIndex);
+                char* offset = (char*)0 + 3 *  matAndIndex.second * sizeof(blaU32);
+
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glBindVertexArray(gl33RenderObject->m_vertexArrayID);
+
+                // Draw VAO
+                glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(drawCallSize), GL_UNSIGNED_INT, offset); // Draw Triangles
+                //glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(gl33RenderObject->m_toMeshTriangles->size()), GL_UNSIGNED_INT, 0); // Draw Triangles
+            	
+                glBindVertexArray(0);
             }
 
             for (blaU32 vboIndex = 0; vboIndex < gl33RenderObject->m_vboIDVector.size(); vboIndex++)
@@ -246,19 +272,14 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRe
         return nullptr;
     }
 
-    for (size_t i = 0; i < meshRenderer.m_materials.size(); i++)
+    for(auto mat : meshRenderer.GetMeshAsset()->m_triangleMesh.m_materials)
     {
-        Material* mat = meshRenderer.m_materials[i];
-
-        AssignMaterial(*object, mat->GetName());
-
-        for (size_t j = 0; j < mat->GetSamplers().size(); j++)
-        {
-            LoadTextureSample(*object, mat->GetSamplers()[j].first, mat->GetSamplers()[j].second);
-        }
+        const Material* matPtr = LoadMaterial(*object, mat.first);
+        object->m_materialAndIndex.push_back(std::make_pair(matPtr, static_cast<blaU32>(mat.second)));
     }
 
-    object->m_renderType = meshRenderer.m_renderType;
+	
+    object->m_renderType = 4;
 
     return object;
 }
@@ -410,6 +431,7 @@ bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowR
         return false;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     return true;
 }
@@ -450,6 +472,46 @@ void GL33Renderer::DrawColorBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRi
     glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
     glDisableVertexAttribArray(0);
     glUseProgram(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GL33Renderer::DrawNormalBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget)
+{
+    if (!m_screenSpaceQuad.m_isInit)
+        SetupScreenSpaceRenderQuad();
+
+    glDisable(GL_BLEND);
+
+    //glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    glDisable(GL_DEPTH_TEST);
+
+    glEnable(GL_CULL_FACE);
+
+    glViewport(static_cast<GLsizei>(topLeft.x),
+        static_cast<GLsizei>(topLeft.y),
+        static_cast<GLsizei>(bottomRight.x - topLeft.x),
+        static_cast<GLsizei>(bottomRight.y - topLeft.y));
+
+    // Use our shader
+    glUseProgram(m_drawNormalsBufferPrgmID);
+    GLuint texID = glGetUniformLocation(m_drawNormalsBufferPrgmID, "colorTexture");
+    // Bind our texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureTarget);
+    // Set our "renderedTexture" sampler to user Texture Unit 0
+    glUniform1i(texID, 0);
+
+    // 1rst attribute buffer : vertices
+    glBindVertexArray(m_screenSpaceQuad.m_vao);
+    glEnableVertexAttribArray(0);
+
+    // Draw the triangle !
+    // You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+    glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+    glDisableVertexAttribArray(0);
+    glUseProgram(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void GL33Renderer::DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRight, GLuint textureTarget)
@@ -479,6 +541,7 @@ void GL33Renderer::DrawDepthBufferOnScreen(glm::vec2 topLeft, glm::vec2 bottomRi
     glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
     glDisableVertexAttribArray(0);
     glUseProgram(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight)
@@ -904,50 +967,30 @@ void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
     glGenVertexArrays(1, &(object.m_vertexArrayID));
 }
 
-///// WRONG WRONG WRONG WRONG WRONG
-///// WRONG WRONG WRONG WRONG WRONG
-///// WRONG WRONG WRONG WRONG WRONG
-///// WRONG WRONG WRONG WRONG WRONG            NEEDS REDESIGN
-///// WRONG WRONG WRONG WRONG WRONG
-///// WRONG WRONG WRONG WRONG WRONG
-///// WRONG WRONG WRONG WRONG WRONG
-bool GL33Renderer::AssignMaterial(GL33RenderObject& object, blaString name)
+const Material* GL33Renderer::LoadMaterial(GL33RenderObject& object, blaString name)
 {
+    Asset* matAsset;
+    AssetManager::AssetType type = m_assetManager->GetAsset(name, matAsset);
 
-    if (m_glResources.m_glLoadedProgramsIds.count(name))
+    if (matAsset != nullptr && type == AssetManager::AssetType::MaterialAsset)
     {
-        object.m_programID = m_glResources.m_glLoadedProgramsIds[name].m_loaded_id;
-        if (object.m_programID != 0)
+        if (Material* material = (Material*)matAsset)
+        if (Material* material = (Material*)matAsset)
         {
-            object.m_matrixID = glGetUniformLocation(object.m_programID, "MVP");
-            return true;
-        }
-    }
-    else
-    {
-        Asset* matAsset;
-        AssetManager::AssetType type = m_assetManager->GetAsset(name, matAsset);
-
-        if (matAsset != nullptr && type == AssetManager::AssetType::MaterialAsset)
-        {
-            if (Material* material = (Material*)matAsset)
+            for (auto texture : material->GetSamplers())
             {
-                for (auto texture : material->GetSamplers())
+                Asset* texAsset;
+                AssetManager::AssetType type = m_assetManager->GetAsset(texture.first, texAsset);
+                if (type == AssetManager::AssetType::TextureAsset)
                 {
-                    Asset* texAsset;
-                    AssetManager::AssetType type = m_assetManager->GetAsset(texture.first, texAsset);
-                    if (type == AssetManager::AssetType::TextureAsset)
-                    {
-                        Texture2D* texture = (Texture2D*)texAsset;
-                        m_glResources.GLLoadTexture(texture->GetName(), *texture);
-                    }
+                    Texture2D* texture = (Texture2D*)texAsset;
+                    m_glResources.GLLoadTexture(texture->GetName(), *texture);
                 }
             }
+            return material;
         }
-
-        //cout << "Could not find shader loaded shader pgrm: " << name << "\n";
     }
-    return false;
+    return nullptr;
 }
 
 bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, blaString textureName, blaString sampleName)
@@ -958,8 +1001,6 @@ bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, blaString texture
         {
             GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[textureName];
             GLuint textureHandleID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
-
-            object.m_textureSamplersVector.push_back(blaPair<GLuint, GLuint>(textureHandleID, glResourceTextureId));
 
             return true;
         }
@@ -972,12 +1013,21 @@ bool GL33Renderer::CleanUp(GL33RenderObject& object)
     // Clean up all buffers associated to the mesh Vertex Array ID
     CleanUpVBOs(object);
 
-    // Clean texture samplers 
-    for (GLushort texIndex = 0; texIndex < object.m_textureSamplersVector.size(); texIndex++)
+    // Clean loaded textures
+    for(const auto& m : object.m_materialAndIndex)
     {
-        glDeleteTextures(1, &(object.m_textureSamplersVector.at(texIndex).first));
+	    if(m.first)
+	    {
+		    for(const auto& s : m.first->GetSamplers())
+		    {
+                const auto it = m_glResources.m_glLoadedTextureIds.find(s.first);
+		    	if(it != m_glResources.m_glLoadedTextureIds.end())
+		    	{
+                    glDeleteTextures(1, &it->second);
+		    	}
+		    }
+	    }
     }
-    object.m_textureSamplersVector.clear();
 
     //Cleanup Shader
     //glDeleteProgram(m_programID);
@@ -1092,6 +1142,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     this->m_glResources.m_systemShaders.LoadDebugMeshesProgram("./resources/shaders/GL33/Engine/DebugMeshShaderVS.glsl", "./resources/shaders/GL33/Engine/DebugMeshShaderFS.glsl");
     this->m_glResources.m_systemShaders.LoadDepthBufferProgram("./resources/shaders/GL33/Engine/DrawDepthTextureVS.glsl", "./resources/shaders/GL33/Engine/DrawDepthTextureFS.glsl");
     this->m_glResources.m_systemShaders.LoadDrawColorBufferProgram("./resources/shaders/GL33/Engine/DrawColorTextureVS.glsl", "./resources/shaders/GL33/Engine/DrawColorTextureFS.glsl");
+    this->m_glResources.m_systemShaders.LoadDrawNormalBufferProgram("./resources/shaders/GL33/Engine/DrawColorTextureVS.glsl", "./resources/shaders/GL33/Engine/DrawNormalTextureFS.glsl");
     this->m_glResources.m_systemShaders.LoadDrawSphereStencilProgram("./resources/shaders/GL33/Engine/PointLightStencilVS.glsl", "./resources/shaders/GL33/Engine/PointLightStencilFS.glsl");
     this->m_glResources.m_systemShaders.LoadShadowMapProgram("./resources/shaders/GL33/Engine/ShadowMapVS.glsl", "./resources/shaders/GL33/Engine/ShadowMapFS.glsl");
 
@@ -1100,6 +1151,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
     m_GBuffer.m_drawSphereStencilPgrmID = this->m_glResources.m_systemShaders.m_drawSphereStencilPgrm.m_loaded_id;
     m_GBuffer.m_geometryPassPrgmID = this->m_glResources.m_systemShaders.m_geometryPassPrgm.m_loaded_id;
     m_drawColorBufferPrgmID = this->m_glResources.m_systemShaders.m_drawColorBufferPrgm.m_loaded_id;
+    m_drawNormalsBufferPrgmID = this->m_glResources.m_systemShaders.m_drawNormalBufferPrgm.m_loaded_id;
     m_debugRayPgrmID = this->m_glResources.m_systemShaders.m_debugRayPgrm.m_loaded_id;
     m_debugMeshesPgrmID = this->m_glResources.m_systemShaders.m_debugMeshPgrm.m_loaded_id;
 
@@ -1126,7 +1178,7 @@ bool GBuffer::InitializeGBuffer()
     // Create the FBO
     glGenFramebuffers(1, &m_frameBufferObject);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_frameBufferObject);
-
+    glBindTexture(GL_TEXTURE_2D, 0);
     // Create the gbuffer textures
     glGenTextures(1, &m_diffuseTextureTarget);
     glGenTextures(1, &m_normalsTextureTarget);
@@ -1203,7 +1255,8 @@ bool GBuffer::InitializeGBuffer()
 
     // restore default FBO
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
+	
+    glBindTexture(GL_TEXTURE_2D, 0);
     return true;
 }
 
@@ -1215,12 +1268,25 @@ void GBuffer::SetupGeomPassMaterials(GLuint prgrmId)
 void GBuffer::DeleteGBufferResources()
 {
     //Delete resources
-    glDeleteTextures(1, &m_diffuseTextureTarget);
-    glDeleteTextures(1, &m_normalsTextureTarget);
-    glDeleteTextures(1, &m_worldPosTextureTarget);
-    glDeleteTextures(1, &m_texCoordsTextureTarget);
-    glDeleteTextures(1, &m_depthTextureTarget);
-    glDeleteTextures(1, &m_displayTextureTarget);
+	/*
+	if(m_diffuseTextureTarget != 0xffffffff)
+		glDeleteTextures(1, &m_diffuseTextureTarget);
+	
+    if (m_normalsTextureTarget != 0xffffffff)
+		glDeleteTextures(1, &m_normalsTextureTarget);
+	
+    if (m_worldPosTextureTarget != 0xffffffff)
+		glDeleteTextures(1, &m_worldPosTextureTarget);
+	
+    if (m_texCoordsTextureTarget != 0xffffffff)
+		glDeleteTextures(1, &m_texCoordsTextureTarget);
+
+    if (m_depthTextureTarget != 0xffffffff)
+		glDeleteTextures(1, &m_depthTextureTarget);
+
+    if (m_displayTextureTarget != 0xffffffff)
+		glDeleteTextures(1, &m_displayTextureTarget);
+	*/
 
     //Bind 0, which means render to back buffer, as a result, fb is unbound
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -1340,6 +1406,7 @@ void GL33Renderer::RenderDebugLines()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(0);
     glUseProgram(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void GL33Renderer::RenderDebugMeshes()
@@ -1392,17 +1459,28 @@ void GL33Renderer::RenderDebug()
     }
 }
 
-bool GL33Resources::GLLoadTexture(blaString resourcePath, Texture2D texture)
+bool GL33Resources::GLLoadTexture(blaString resourcePath, const Texture2D& texture)
 {
+    if (m_glLoadedTextureIds.count(texture.GetName())) return true;
+	
+    glBindTexture(GL_TEXTURE_2D, 0);
+	
     // Create one OpenGL texture
-    GLuint texID;
+    GLuint texID = 0;
     glGenTextures(1, &texID);
 
     // "Bind" the newly created texture : all future texture functions will modify this texture
     glBindTexture(GL_TEXTURE_2D, texID);
 
     // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.m_width, texture.m_height, 0, GL_BGR, GL_UNSIGNED_BYTE, texture.m_data.data());
+	if(texture.HasAlpha())
+	{
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.m_width, texture.m_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, texture.m_data.data());
+	}
+    else
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.m_width, texture.m_height, 0, GL_BGR, GL_UNSIGNED_BYTE, texture.m_data.data());
+    }
 
     // Poor filtering, or ...
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1415,6 +1493,8 @@ bool GL33Resources::GLLoadTexture(blaString resourcePath, Texture2D texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+	
     // Return the ID of the texture we just created
     m_glLoadedTextureIds[resourcePath] = texID;
 
@@ -1493,6 +1573,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
 bool GL33Resources::GLLoadSystemShaders()
 {
     this->GLLoadShaderProgram(this->m_systemShaders.m_drawColorBufferPrgm);
+    this->GLLoadShaderProgram(this->m_systemShaders.m_drawNormalBufferPrgm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_drawDepthBufferPrgm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_geometryPassPrgm);
     this->GLLoadShaderProgram(this->m_systemShaders.m_drawSphereStencilPgrm);

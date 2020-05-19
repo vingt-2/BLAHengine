@@ -31,7 +31,8 @@ public:
         {
             blaString texName = m_textureNames[i];
             blaString texHandle = m_textureHandles[i];
-            mat->GetSamplers().push_back(blaPair<blaString, blaString>(texName, texHandle));
+            auto& samplers = mat->GetSamplers();
+        	samplers.push_back(std::make_pair(texName, texHandle));
         }
         return mat;
     }

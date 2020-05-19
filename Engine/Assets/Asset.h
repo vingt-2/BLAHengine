@@ -13,9 +13,9 @@ namespace BLA
             m_isDirty = true;
         }
 
-        blaString GetName() { return m_assetName; }
+        blaString GetName() const { return m_assetName; }
 
-        bool IsDirty() { return m_isDirty; }
+        bool IsDirty() const { return m_isDirty; }
     private:
 
         bool m_isDirty;

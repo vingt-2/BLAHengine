@@ -83,3 +83,9 @@ bool BLA::GL33SystemShaders::LoadDrawColorBufferProgram(blaString vert, blaStrin
     m_drawColorBufferPrgm = GL33Shader("DrawColorBuffer");
     return m_drawColorBufferPrgm.LoadShaderCode(vert, frag);
 }
+
+bool BLA::GL33SystemShaders::LoadDrawNormalBufferProgram(blaString vert, blaString frag)
+{
+    m_drawNormalBufferPrgm = GL33Shader("DrawNormalBuffer");
+    return m_drawNormalBufferPrgm.LoadShaderCode(vert, frag);
+}
