@@ -194,8 +194,6 @@ namespace BLA
 
         void DrawDisplayBuffer();
 
-        //void RenderDefferedLights();
-
         void RenderDebugLines();
         void RenderDebugMeshes();
         void RenderDebug();

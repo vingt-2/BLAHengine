@@ -171,7 +171,7 @@ void GL33Renderer::RenderGBuffer()
     glViewport(0, 0, static_cast<GLsizei>(m_GBuffer.m_GbufferSize.x), static_cast<GLsizei>(m_GBuffer.m_GbufferSize.y));
 
     // Clear Frame Buffer.
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(m_GBuffer.m_geometryPassPrgmID);
@@ -195,10 +195,11 @@ void GL33Renderer::RenderGBuffer()
             for (blaIndex i = 0; i < gl33RenderObject->m_materialAndIndex.size(); ++i)
             {
             	const auto& matAndIndex = gl33RenderObject->m_materialAndIndex[i];
-
+            	
                 blaU16 samplerCount = 0;
                 for (const auto& sampler : matAndIndex.first->GetSamplers())
                 {
+                    if (sampler.second == "alphaMap") continue;
                     if (m_glResources.m_glLoadedTextureIds.count(sampler.first))
                     {
                         GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[sampler.first];
@@ -208,8 +209,11 @@ void GL33Renderer::RenderGBuffer()
                         glActiveTexture(GL_TEXTURE0 + samplerCount);
                         glBindTexture(GL_TEXTURE_2D, glResourceTextureId);
                         glUniform1i(textureHandleID, samplerCount);
-
                         samplerCount++;
+                    }
+                    else
+                    {
+                        Console::LogError("Failed to find instance of texture " + sampler.first + " in GPU memory.");
                     }
                 }
 
@@ -225,7 +229,6 @@ void GL33Renderer::RenderGBuffer()
 
                 char* offset = (char*)0 + 3 *  matAndIndex.second * sizeof(blaU32);
 
-                glBindTexture(GL_TEXTURE_2D, 0);
                 glBindVertexArray(gl33RenderObject->m_vertexArrayID);
 
                 // Draw VAO
@@ -889,6 +892,7 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
     //layout(location = 1) in glm::vec2 vertexUV;
     //layout(location = 2) in blaVec3 vertexNormals;
     //layout(location = 3) in blaVec3 vertexTangent;
+    //layout(location = 3) in blaVec4 vertexTangent;
     bool success = false;
 
     int layoutIndex = 0;
@@ -910,6 +914,12 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
     if (!object.m_toMeshTangents->empty())
     {
         GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshTangents)[0]), static_cast<GLuint>(object.m_toMeshTangents->size() * sizeof(blaVec3)), 3, layoutIndex);
+        layoutIndex++;
+    }
+
+    if (!object.m_toMeshBiTangents->empty())
+    {
+        GenerateBufferObject<blaVec3>(object, &((*object.m_toMeshBiTangents)[0]), static_cast<GLuint>(object.m_toMeshBiTangents->size() * sizeof(blaVec3)), 3, layoutIndex);
         layoutIndex++;
     }
 
@@ -970,42 +980,31 @@ void GL33Renderer::GenerateVertexArrayID(GL33RenderObject& object)
 const Material* GL33Renderer::LoadMaterial(GL33RenderObject& object, blaString name)
 {
     Asset* matAsset;
-    AssetManager::AssetType type = m_assetManager->GetAsset(name, matAsset);
+    AssetManager::AssetType matType = m_assetManager->GetAsset(name, matAsset);
 
-    if (matAsset != nullptr && type == AssetManager::AssetType::MaterialAsset)
+    if (matAsset != nullptr && matType == AssetManager::AssetType::MaterialAsset)
     {
-        if (Material* material = (Material*)matAsset)
         if (Material* material = (Material*)matAsset)
         {
             for (auto texture : material->GetSamplers())
             {
+                if (texture.second == "alphaMap") continue;
                 Asset* texAsset;
                 AssetManager::AssetType type = m_assetManager->GetAsset(texture.first, texAsset);
                 if (type == AssetManager::AssetType::TextureAsset)
                 {
-                    Texture2D* texture = (Texture2D*)texAsset;
-                    m_glResources.GLLoadTexture(texture->GetName(), *texture);
+                    Texture2D* textureAsset = (Texture2D*)texAsset;
+                    m_glResources.GLLoadTexture(textureAsset->GetName(), *textureAsset);
                 }
             }
             return material;
         }
     }
-    return nullptr;
-}
-
-bool GL33Renderer::LoadTextureSample(GL33RenderObject& object, blaString textureName, blaString sampleName)
-{
-    if (object.m_programID != 0)
+    else
     {
-        if (m_glResources.m_glLoadedTextureIds.count(textureName))
-        {
-            GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[textureName];
-            GLuint textureHandleID = glGetUniformLocation(this->m_GBuffer.m_geometryPassPrgmID, sampleName.data());
-
-            return true;
-        }
+        Console::LogError("Could not find Material asset: " + name + "in resources.");
     }
-    return false;
+    return nullptr;
 }
 
 bool GL33Renderer::CleanUp(GL33RenderObject& object)
@@ -1024,6 +1023,7 @@ bool GL33Renderer::CleanUp(GL33RenderObject& object)
 		    	if(it != m_glResources.m_glLoadedTextureIds.end())
 		    	{
                     glDeleteTextures(1, &it->second);
+                    m_glResources.m_glLoadedTextureIds.erase(it);
 		    	}
 		    }
 	    }
@@ -1268,7 +1268,7 @@ void GBuffer::SetupGeomPassMaterials(GLuint prgrmId)
 void GBuffer::DeleteGBufferResources()
 {
     //Delete resources
-	/*
+	
 	if(m_diffuseTextureTarget != 0xffffffff)
 		glDeleteTextures(1, &m_diffuseTextureTarget);
 	
@@ -1286,7 +1286,7 @@ void GBuffer::DeleteGBufferResources()
 
     if (m_displayTextureTarget != 0xffffffff)
 		glDeleteTextures(1, &m_displayTextureTarget);
-	*/
+	
 
     //Bind 0, which means render to back buffer, as a result, fb is unbound
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -1491,6 +1491,7 @@ bool GL33Resources::GLLoadTexture(blaString resourcePath, const Texture2D& textu
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);

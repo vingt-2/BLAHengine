@@ -67,7 +67,7 @@ void TriangleMeshSerializer::BuildFromMesh(MeshAsset* meshAsset)
     vec3VectorToSerializer(triangleMesh->m_vertexPos, m_vertexPos);
     vec3VectorToSerializer(triangleMesh->m_vertexNormals, m_vertexNormals);
     vec2VectorToSerializer(triangleMesh->m_vertexUVs, m_vertexUVs);
-    vec3VectorToSerializer(triangleMesh->m_faceTangent, m_faceTangent);
+    vec3VectorToSerializer(triangleMesh->m_faceTangents, m_faceTangent);
     m_manifoldViolationEdges = triangleMesh->m_manifoldViolationEdges;
 
     m_renderData.triangleIndices = triangleMesh->m_renderData.m_triangleIndices;
@@ -110,7 +110,7 @@ MeshAsset* TriangleMeshSerializer::BuildMesh()
     vec3serializerVectorTovec3(triangleMesh->m_vertexPos, m_vertexPos);
     vec3serializerVectorTovec3(triangleMesh->m_vertexNormals, m_vertexNormals);
     vec2serializerVectorTovec2(triangleMesh->m_vertexUVs, m_vertexUVs);
-    vec3serializerVectorTovec3(triangleMesh->m_faceTangent, m_faceTangent);
+    vec3serializerVectorTovec3(triangleMesh->m_faceTangents, m_faceTangent);
 
     triangleMesh->m_manifoldViolationEdges = m_manifoldViolationEdges;
 

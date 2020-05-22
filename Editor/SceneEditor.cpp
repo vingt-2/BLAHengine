@@ -666,11 +666,11 @@ DefineConsoleCommand(void, PointLight, blaString name)
     AddComponent(name, "PointLightComponent");
 }
 
-DefineConsoleCommand(void, CreateMaterial, blaString name, blaString textureName)
+DefineConsoleCommand(void, CreateMaterial, blaString name, blaString textureName, blaString normalName)
 {
     Material m(name);
     m.AssignTexture(textureName, "diffuseMap");
-    m.AssignTexture("BlankNormal", "normalMap");
+    m.AssignTexture(normalName, "normalMap");
 
     AssetManager::GetSingletonInstance()->SaveMaterial(&m);
     AssetManager::GetSingletonInstance()->LoadMaterial(name);

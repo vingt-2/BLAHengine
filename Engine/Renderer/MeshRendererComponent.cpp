@@ -67,13 +67,13 @@ void MeshRendererComponent::Update()
 
     bool render = m_Render && validState;
 	
-    if(m_renderTicket != 0 && !m_Render) 
+    if(m_renderTicket != 0 && !render)
     {
         Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
         m_renderTicket = 0;
     }
 
-    if(m_renderTicket == 0 && m_Render)
+    if(m_renderTicket == 0 && render)
     {
         m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterMeshRenderer(this);
     }

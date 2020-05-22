@@ -37,9 +37,8 @@ TriangleMesh PrimitiveGeometry::MakeCube()
         cube.m_vertexUVs.push_back(verts[i].texCoord);
     }
 
-    cube.m_materials.push_back(std::make_pair("DefaultMTL", 0));
     cube.BuildMeshTopo(triangleIndices, triangleIndices, triangleIndices, false);
-    cube.ComputeFaceTangents();
+    cube.ComputePerFaceTangentBasis();
     cube.GenerateRenderData();
 
     return cube;
@@ -86,7 +85,7 @@ TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius, bool inverted)
     }
 
     sphere.BuildMeshTopo(triangleIndices, triangleIndices, triangleIndices, inverted);
-    sphere.ComputeFaceTangents();
+    sphere.ComputePerFaceTangentBasis();
     sphere.GenerateRenderData();
 
     return sphere;
@@ -186,7 +185,7 @@ TriangleMesh PrimitiveGeometry::MakeCone(blaU32 resolution)
     normalIndices.push_back(resolution + 1);
 
     cone.BuildMeshTopo(triangleIndices, normalIndices, triangleIndices, false);
-    cone.ComputeFaceTangents();
+    cone.ComputePerFaceTangentBasis();
     cone.GenerateRenderData();
 
     return cone;
@@ -237,7 +236,7 @@ TriangleMesh PrimitiveGeometry::MakeDisc(blaU32 resolution)
     normalIndices.push_back(0);
 
     disc.BuildMeshTopo(triangleIndices, normalIndices, triangleIndices, false);
-    disc.ComputeFaceTangents();
+    disc.ComputePerFaceTangentBasis();
     disc.GenerateRenderData();
 
     return disc;

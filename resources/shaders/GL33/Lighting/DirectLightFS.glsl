@@ -73,9 +73,9 @@ void main()
             }
         }
 
-        float vis = max(ambientLight,(shadowFactor / 16.0f));
+        float vis = shadowFactor / 16.0f;
 		
-        //color = diffuse * (3 * vis * max(dot(normal, lightDirection),0.3f)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
-	   color = diffuse * (vis * max(dot(normal, lightDirection), 0) + ambientLight);
+       // color = diffuse * (3 * vis * max(dot(normal, lightDirection),0.3f)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
+	   color = diffuse * (vis * max(dot(normal, lightDirection),0) + ambientLight);
 	}
 }

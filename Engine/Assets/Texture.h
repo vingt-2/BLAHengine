@@ -18,7 +18,6 @@ namespace BLA
         glm::uint8 m_nComponents;
         blaU32 m_dataSize;
         blaU32 m_width, m_height;
-        blaBool m_hasAlpha;
 
         blaVector<glm::uint8> m_data;
 

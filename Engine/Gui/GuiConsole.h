@@ -21,7 +21,7 @@ namespace BLA
             BlaGuiElement(name, BlaStringId("Console")),
             m_pConsoleSingleton(pConsoleSingleton)
         {
-            m_maxLineCount = 200;
+            m_maxLineCount = 10000;
         }
 
         void Render() override;

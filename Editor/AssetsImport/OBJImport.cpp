@@ -177,7 +177,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     std::cout << "Done reading, building Topology... ";
     mesh.BuildMeshTopo(vertexIndices, normalIndices, uvIndices, swapNormals);
     std::cout << "Built, Computing Tangent Spaces...";
-    mesh.ComputeFaceTangents();
+    mesh.ComputePerFaceTangentBasis();
     std::cout << "Done.\nImported: " << mesh.m_meshTriangles.size() << " triangles, " << mesh.m_vertexPos.size() << " vertices, " << mesh.m_manifoldViolationEdges << " non-manifold edges\n";
     std::cout << "Normalizing Model Coordinates \n";
     mesh.NormalizeModelCoordinates(normalScale);

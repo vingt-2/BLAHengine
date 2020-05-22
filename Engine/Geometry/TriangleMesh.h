@@ -48,7 +48,8 @@ namespace BLA
         /*
         Tangent information for each face:
         */
-        blaVector<blaVec3> m_faceTangent;
+        blaVector<blaVec3> m_faceTangents;
+        blaVector<blaVec3> m_faceBiTangents;
 
         /*
         Now we introduce Half-Edge specific blaMapping to fasten up adjacency queries
@@ -78,7 +79,7 @@ namespace BLA
             bool swapNormals);
 
         BLACORE_API void NormalizeModelCoordinates(bool normalizeScale);
-        BLACORE_API void ComputeFaceTangents();
+        BLACORE_API void ComputePerFaceTangentBasis();
         BLACORE_API void ApplyGeomScaling(blaVec3 scaling);
         BLACORE_API void ApplyUVScaling(glm::vec2 scaling);
 

@@ -59,7 +59,7 @@ namespace BLA
     BeginComponentDeclaration(BLADemos, BoidComponent)
         GameObject m_target;
         blaVec3 m_color;
-        blaF32 m_hominStiffnessMult;
+        blaF32 m_homingStiffnessMult;
         blaF32 m_interBoidStiffnessMult;
         blaF32 m_distanceMult;
         int m_framesSinceLastPush = 0;
@@ -70,6 +70,9 @@ namespace BLA
     BeginComponentDescription(BoidComponent)
         Expose(m_target)
         Expose(m_color)
+		Expose(m_homingStiffnessMult)
+		Expose(m_interBoidStiffnessMult)
+        Expose(m_distanceMult)
     EndComponentDescription()
 
     DeclareComponentSystem(BLADemos, IntegrateBoidSystem, InputComponents(BoidComponent, TransformComponent), OutputComponents(ParticleComponent));
@@ -95,7 +98,7 @@ namespace BLA
             {
                 const TransformComponent* targetTransform = iTransforms[target];
 
-                particle->AddForce(g_BoidStiffness * boidComponent->m_hominStiffnessMult * (targetTransform->GetLocalTransform().GetPosition() - myPosition) - g_BoidDamping * particle->m_velocity);
+                particle->AddForce(g_BoidStiffness * boidComponent->m_homingStiffnessMult * (targetTransform->GetLocalTransform().GetPosition() - myPosition) - g_BoidDamping * particle->m_velocity);
             }
 
             std::uniform_int_distribution<> dist(0, static_cast<int>(systemObjects.size()));
@@ -145,10 +148,12 @@ namespace BLA
         std::uniform_real_distribution<float> dist(0.2f, 1.f);
         std::normal_distribution<float> normalDist(0.7f, 0.3f);
 
-        MeshAsset m("BoidSphere");
+        MeshAsset m("boidCubeMesh");
         m.m_triangleMesh = PrimitiveGeometry::MakeCube();
+        m.m_triangleMesh.m_materials.push_back(std::make_pair("BlankDiffuseMat", 0));
 
         AssetManager::GetSingletonInstance()->SaveTriangleMesh(&m);
+        AssetManager::GetSingletonInstance()->LoadTriangleMesh("boidCubeMesh");
 
         for (int i = 0; i < numberOfBoids; i++)
         {
@@ -159,11 +164,11 @@ namespace BLA
             ref.CreateComponent<ParticleComponent>();
             MeshRendererComponent* r = ref.CreateComponent<MeshRendererComponent>();
 
-            r->m_meshAssetName = "BoidSphere";
-            // r->MaterialName = "BlankDiffuseMat";
+            r->m_meshAssetName = "boidCubeMesh";
+            r->m_Render = true;
 
             boidComponent->m_color = blaVec3(dist(g_dgen), dist(g_dgen), dist(g_dgen));
-            boidComponent->m_hominStiffnessMult = dist(g_dgen);
+            boidComponent->m_homingStiffnessMult = dist(g_dgen);
             boidComponent->m_interBoidStiffnessMult = dist(g_dgen);
             boidComponent->m_distanceMult = normalDist(g_dgen);
             boidComponent->m_target = GameObject(BlaStringId("BoidTarget"));
