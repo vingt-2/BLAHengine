@@ -310,8 +310,11 @@ void BlaGuiEditElement<bool>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::Checkbox(("##" + GetName()).c_str(), m_pToValue);
+    bool value = *m_pToValue;
+	ImGui::Checkbox(("##" + GetName()).c_str(), &value);
     ImGui::Columns(1);
+    if (value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -319,8 +322,11 @@ void BlaGuiEditElement<blaF32>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::InputFloat(("##" + GetName()).c_str(), m_pToValue, 0.1f, 1.f, 7);
+    blaF32 value = *m_pToValue;
+	ImGui::InputFloat(("##" + GetName()).c_str(), &value, 0.1f, 1.f, 7);
     ImGui::Columns(1);
+    if(value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -328,8 +334,11 @@ void BlaGuiEditElement<blaF64>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::InputDouble(("##" + GetName()).c_str(), m_pToValue, 0.1, 1.0);
+    blaF64 value = *m_pToValue;
+	ImGui::InputDouble(("##" + GetName()).c_str(), &value, 0.1, 1.0);
     ImGui::Columns(1);
+    if (value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -337,8 +346,11 @@ void BlaGuiEditElement<blaS32>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::InputInt(("##" + GetName()).c_str(), m_pToValue, 1, 10);
+    blaS32 value = *m_pToValue;
+	ImGui::InputInt(("##" + GetName()).c_str(), &value, 1, 10);
     ImGui::Columns(1);
+    if (value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -346,8 +358,11 @@ void BlaGuiEditElement<blaVec2>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::InputFloat2(("##" + GetName()).c_str(), &(m_pToValue->x));
+    blaVec2 value = *m_pToValue;
+	ImGui::InputFloat2(("##" + GetName()).c_str(), &(value.x));
     ImGui::Columns(1);
+    if (value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -355,8 +370,11 @@ void BlaGuiEditElement<blaVec3>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::InputFloat3(("##" + GetName()).c_str(), &(m_pToValue->x));
+    blaVec3 value = *m_pToValue;
+	ImGui::InputFloat3(("##" + GetName()).c_str(), &(value.x));
     ImGui::Columns(1);
+    if (value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -364,8 +382,11 @@ void BlaGuiEditElement<blaQuat>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
-	ImGui::InputFloat4(("##" + GetName()).c_str(), &(m_pToValue->x));
+    blaQuat value = *m_pToValue;
+	ImGui::InputFloat4(("##" + GetName()).c_str(), &(value.x));
     ImGui::Columns(1);
+    if (value != *m_pToValue)
+        m_onEditFunctor(static_cast<void*>(&value));
 }
 
 template<>
@@ -374,10 +395,17 @@ void BlaGuiEditElement<blaPosQuat>::Render()
     ImGui::Text(GetName().c_str());
     ImGui::Columns(2, 0, false);
     ImGui::Text("\tPosition"); ImGui::NextColumn();
-    ImGui::InputFloat3(("##P" + GetName()).c_str(), &(m_pToValue->GetTranslation().x)); ImGui::NextColumn();
+    blaVec3 posValue = m_pToValue->GetTranslation3();
+    ImGui::InputFloat3(("##P" + GetName()).c_str(), &(posValue.x)); ImGui::NextColumn();
+    blaQuat quatValue = m_pToValue->GetRotation();
     ImGui::Text("\tRotation"); ImGui::NextColumn();
-    ImGui::InputFloat4(("##R" + GetName()).c_str(), &(m_pToValue->GetRotation().x)); ImGui::NextColumn();
+    ImGui::InputFloat4(("##R" + GetName()).c_str(), &(quatValue.x)); ImGui::NextColumn();
     ImGui::Columns(1);
+    if (posValue != m_pToValue->GetTranslation3() || quatValue != m_pToValue->GetRotation())
+    {
+        blaPosQuat pq(posValue, quatValue);
+        m_onEditFunctor(static_cast<void*>(&pq));
+    }
 }
 
 template<>
@@ -403,7 +431,11 @@ void BlaGuiEditElement<blaString>::Render()
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     ImGui::InputText(("##" + GetName()).c_str(), inputBuf, sizeof(inputBuf));
     ImGui::Columns(1);
-    *m_pToValue = blaString(inputBuf);
+    blaString editValue = blaString(inputBuf);
+    if(*m_pToValue != editValue)
+    {
+        m_onEditFunctor(static_cast<void*>(&editValue));
+    }
 }
 
 template <typename T1, typename T2>

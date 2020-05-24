@@ -437,7 +437,7 @@ void SceneEditor::HandleGuiRequests()
     {
         if (!m_sceneGraphGui)
         {
-            m_sceneGraphGui = new SceneGraphGui();
+            m_sceneGraphGui = new SceneGraphGui(m_commandManager);
         }
         m_sceneGraphGui->OpenSceneGraph();
         m_sceneGraphGui->UpdateSceneGraph();
@@ -446,7 +446,7 @@ void SceneEditor::HandleGuiRequests()
     }
     if (m_editorGuiRequests.m_openComponentInspectorRequest)
     {
-        if (!m_componentInspector) m_componentInspector = new GameObjectInspector();
+        if (!m_componentInspector) m_componentInspector = new GameObjectInspector(m_commandManager);
 
         m_editorGuiRequests.m_openComponentInspectorRequest = false;
     }

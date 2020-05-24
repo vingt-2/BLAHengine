@@ -14,6 +14,7 @@
 #include <utility>
 #include <unordered_map>
 #include <tuple>
+#include <functional>
 
 #ifdef BLAEngine_EXPORTS
 #define    BLACORE_API __declspec ( dllexport )
@@ -37,6 +38,9 @@ using blaMap = std::map<T, V>;
 
 template<typename T, typename V>
 using blaPair = std::pair<T, V>;
+
+template<typename L>
+using blaLambda = std::function<L>;
 
 #define BLA_ENGINE_VERSION 1
 

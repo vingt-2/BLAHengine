@@ -5,6 +5,7 @@
 #include "Assets/MeshAsset.h"
 #include "EditorGui/GameObjectInspectorGui.h"
 #include "EditorGui/SceneGraphGui.h"
+#include "EditorCommands.h"
 #include "GizmoManager.h"
 
 namespace BLA
@@ -105,6 +106,7 @@ namespace BLA
          */
         EditorState* m_editorState;
 		CameraController* m_cameraController;
+        EditorCommandManager* m_commandManager;
 
         struct EditorStateRequests
         {

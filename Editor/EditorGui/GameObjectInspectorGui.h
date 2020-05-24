@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Core/GameObject.h"
-#include "Gui/GuiManager.h"
 
 namespace BLA
 {
+    class BlaGuiWindow;
+    class EditorCommandManager;
     class GameObjectInspector
     {
         GameObject m_selectedGameObject;
-
+        EditorCommandManager* m_editorCommandManager;
         BlaGuiWindow& m_window;
 
     public:
-        GameObjectInspector() : m_window(*BlaGuiManager::GetSingletonInstance()->OpenWindow("GameObject Inspector")) {}
+        GameObjectInspector(EditorCommandManager* editorCommandManager);
 
         void InspectGameObject(GameObject gameObject);
 

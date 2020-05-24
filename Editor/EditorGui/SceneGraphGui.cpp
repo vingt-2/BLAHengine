@@ -1,5 +1,8 @@
 #include "SceneGraphGui.h"
 
+#include "Gui/GuiManager.h"
+#include "Gui/GuiElements.h"
+#include "EditorCommands.h"
 #include "Core/Scene.h"
 #include "EngineInstance.h"
 
@@ -78,6 +81,10 @@ void SceneGraphGui::OnSceneGraphElementEvent(const BlaGuiElementEventPayload& ev
         default:
         break;
     }
+}
+
+SceneGraphGui::SceneGraphGui(EditorCommandManager* m_commandManager): m_selectedElement(nullptr)
+{
 }
 
 void SceneGraphGui::UpdateSceneGraph()

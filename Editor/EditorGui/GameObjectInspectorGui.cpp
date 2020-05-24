@@ -3,12 +3,21 @@
 #include "GameObjectInspectorGui.h"
 
 #include "EditorGui/InspectableVariablesGuiElements.h"
+#include "Gui/GuiManager.h"
 #include "Gui/GuiElements.h"
 #include "Core/GameComponent.h"
+#include "EditorCommands.h"
+
 
 #define OBJECT_INSPECTOR_ELEMENT_GROUP_ID BlaStringId("ObjectInspectorElement")
 
 using namespace BLA;
+
+GameObjectInspector::GameObjectInspector(EditorCommandManager* editorCommandManager): m_window(
+    *BlaGuiManager::GetSingletonInstance()->OpenWindow("GameObject Inspector"))
+,   m_editorCommandManager(editorCommandManager)
+{
+}
 
 void GameObjectInspector::InspectGameObject(GameObject gameObject)
 {
@@ -30,7 +39,17 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
             blaString memberName = blaString(exposedMember.m_name);
             if (memberName.find("m_") == 0) memberName = memberName.substr(2);
             memberName[0] = std::toupper(memberName[0]);
-            BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(memberName, BlaStringId("ComponentExposeEditing"), exposedMember.m_type, (char*)comp + exposedMember.m_offset);
+            
+            BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
+                memberName, 
+                BlaStringId("ComponentExposeEditing"), 
+                exposedMember.m_type,
+                [commandManager = m_editorCommandManager](void*)
+                {
+                    commandManager->Execute();
+                },
+                (char*)comp + exposedMember.m_offset);
+
             compEl->AddChild(editElement);
         }
         root->AddChild(compEl);

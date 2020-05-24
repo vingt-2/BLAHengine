@@ -12,18 +12,23 @@
 
 namespace BLA
 {
-	struct InspectableVariablesEditorGuiElementFactoryManager // You read that right. Don't judge me. It is what is
+	struct InspectableVariablesEditorGuiElementFactoryManager // You read that right. Don't judge me. It is what it says it is
 	{
-		static BlaGuiElement* MakeEditGuiElement(const blaString& variableName, blaStringId groupId, const BLAInspectableVariables::ExposedVarTypeDescriptor* typeDescriptor, void* obj)
+		static BlaGuiElement* MakeEditGuiElement(
+			const blaString& variableName, 
+			blaStringId groupId, 
+			const BLAInspectableVariables::ExposedVarTypeDescriptor* typeDescriptor,
+			blaLambda<void(void*)> onEditFunctor,
+			void* obj)
 		{
 			Factories::const_iterator it = ms_factories.find(typeDescriptor->m_typeID);
 			if(it != ms_factories.end())
 			{
-				return it->second(variableName, groupId, obj);
+				return it->second(variableName, groupId, onEditFunctor, obj);
 			}
 			return new BlaGuiSimpleTextElement(variableName, groupId, "Unknown Type");
 		}
-		typedef BlaGuiElement* (*GetEditorFactory)(const blaString&, blaStringId, void*);
+		typedef BlaGuiElement* (*GetEditorFactory)(const blaString&, blaStringId, blaLambda<void(void*)> onEditFunctor, void*);
 
 		static void __RegisterFactory(blaStringId type, GetEditorFactory factory);
 		

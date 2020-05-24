@@ -107,15 +107,18 @@ namespace BLA
     class BlaGuiEditElement : public BlaGuiElement
     {
     public:
-        BlaGuiEditElement(const blaString& name, blaStringId groupId, T* pToValue) :
-        BlaGuiElement(name, groupId),
-        m_pToValue(pToValue)
+        BlaGuiEditElement(const blaString& name, blaStringId groupId,
+            blaLambda<void(void*)> onEditFunctor, T* pToValue) :
+            BlaGuiElement(name, groupId),
+            m_pToValue(pToValue),
+            m_onEditFunctor(onEditFunctor)
         {}
 
         BLACORE_API void Render() override;
 
     private:
         T* m_pToValue;
+        std::function<void(void*)> m_onEditFunctor;
     };
 
     BLACORE_API bool BlaGuiEditElementVectorPreRender(BlaGuiElement* element);
@@ -126,8 +129,8 @@ namespace BLA
     {
     public:
         BlaGuiEditElementVector(const blaString& name, blaStringId groupId, blaVector<T>* pToVector) :
-        BlaGuiElement(name, groupId),
-        m_pToVector(pToVector)
+            BlaGuiElement(name, groupId),
+            m_pToVector(pToVector)
         {}
 
         void Render() override
@@ -136,7 +139,7 @@ namespace BLA
             {
                 for (int i = 0; i < m_pToVector->size(); i++)
                 {
-                    BlaGuiEditElement<T> toRender(std::to_string(i), m_groupId, static_cast<T*>(&((*m_pToVector)[0])) + i);
+                    BlaGuiEditElement<T> toRender(std::to_string(i), m_groupId, [](void*)->void{}, static_cast<T*>(&((*m_pToVector)[0])) + i);
                     toRender.Render();
                 }
                 BlaGuiEditElementVectorPostRender(this);

@@ -9,6 +9,7 @@
 #include "Physics/ColliderComponent.h"
 #include "Core/TransformComponent.h"
 #include "External/libcoldet/coldet.h"
+#include "Gui/GuiManager.h"
 
 #define MAX(a,b) (a > b ? a : b)
 

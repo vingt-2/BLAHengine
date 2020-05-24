@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Gui/GuiManager.h"
 #include "Core/GameObject.h"
-#include "Gui/GuiElements.h"
 
 namespace BLA
 {
+    class EditorCommandManager;
+    class BlaGuiElement;
+    struct BlaGuiElementEventPayload;
     class SceneGraphGui
     {
     public:
-        SceneGraphGui() : m_selectedElement(nullptr) {}
+        SceneGraphGui(EditorCommandManager* m_commandManager);
 
         void UpdateSceneGraph();
 
