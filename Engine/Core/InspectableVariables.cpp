@@ -70,7 +70,7 @@ ExposedVarTypeDescriptor* BLAInspectableVariables::TypeResolver<blaPair<T1, T2>>
     return &typeDesc;
 }
 
-//TODO: REmove me ?
+//TODO: Remove me ?
 ExposedVarTypeDescriptor* TypeResolver<std::vector<std::basic_string<char>>>::GetDescriptor()
 {
     static blaVectorDescriptor<blaString> typeDesc;

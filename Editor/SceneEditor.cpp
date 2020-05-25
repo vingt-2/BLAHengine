@@ -176,7 +176,7 @@ void SceneEditor::EngineUpdate()
 //TODO: Don't call the same things as Engine ...
 void SceneEditor::PostEngineUpdate()
 {
-    m_gizmoManager.Update();
+    m_gizmoManager->Update();
 
     // TODO: Update() should not be exported, and call from with the engine dll
     m_debug->Update();
@@ -238,12 +238,19 @@ void SceneEditor::PostEngineUpdate()
     if (m_vulkanWindow) m_vulkanWindow->UpdateWindowAndBuffers();
 }
 
+SceneEditor::SceneEditor(bool external, bool isFullscreen):
+	EngineInstance(external, isFullscreen),
+	m_cameraController(nullptr)
+{
+}
+
 bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
 {
     if (EngineInstance::InitializeEngine(renderWindow))
     {
         m_renderer->SetRenderToFrameBufferOnly(true);
-
+        m_commandManager = new EditorCommandManager(this);
+        m_gizmoManager = new GizmoManager(m_commandManager);
         m_guiManager->OpenWindow("Editor Window", new BlaGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
 
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
@@ -361,10 +368,29 @@ void SceneEditor::EditorDragAndDropedFile(const blaString& filePath)
 	}
 }
 
+SceneEditor::~SceneEditor()
+{
+    delete m_commandManager;
+    delete m_gizmoManager;
+	EngineInstance::~EngineInstance();
+}
+
 void SceneEditor::EditorUpdate()
 {
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
+    if(m_inputManager->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
+    {
+        if(m_inputManager->GetKeyState(BLA_KEY_Z).IsFallingEdge())
+        {
+            m_commandManager->Undo();
+        }
+        if (m_inputManager->GetKeyState(BLA_KEY_Y).IsFallingEdge())
+        {
+            m_commandManager->Redo();
+        }
+    }
+	
     Ray screenRay;
     if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
@@ -550,7 +576,9 @@ void SceneEditor::SetSelectedObject(GameObject selectedObject)
     if (m_selectedObject != selectedObject)
     {
         if (selectedObject.IsValid())
+        {
             m_componentInspector->InspectGameObject(selectedObject);
+        }
     }
         
     if (selectedObject.IsValid()) 
@@ -567,6 +595,48 @@ void SceneEditor::SetObjectParent(GameObject parent, GameObject child)
      */
     m_scene->SetGameObjectParent(parent, child);
     m_updatedScene = true;
+}
+
+bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCommand)
+{
+    GameObject obj(editCommand->m_gameObjectId);
+	if(obj.IsValid())
+	{
+		for(GameComponent* comp : obj.GetAllComponents())
+		{
+			if(comp->GetComponentDescriptor().m_typeID == editCommand->m_editedComponentId)
+			{
+				// Swooping in here to handle this special case.
+				// Starting to spaghetti a bit, yum.
+				if(editCommand->m_editedComponentId == BlaStringId("TransformComponent"))
+				{
+					if(editCommand->m_exposedMemberEditedId == BlaStringId("m_worldTransform"))
+					{
+                        blaScaledTransform newWorldTransform;
+                        memcpy_s(reinterpret_cast<char*>(&newWorldTransform), sizeof(blaScaledTransform), editCommand->m_delta.GetNewValue(), sizeof(blaScaledTransform));
+                        static_cast<TransformComponent*>(comp)->SetTransform(newWorldTransform);
+                        return true;
+					}
+				}
+                for (const ComponentDescriptor::ExposedMember& exposedMember : comp->GetComponentDescriptor().m_members)
+                {
+                    if (exposedMember.m_name == editCommand->m_exposedMemberEditedId)
+                    {
+                        blaIndex size = editCommand->m_delta.GetValueSizeBytes();
+                        if (exposedMember.m_type->size != size)
+                        {
+                            Console::LogError("Mismatch in data size for a component editor command");
+                            return false;
+                        }
+
+                        memcpy_s(reinterpret_cast<char*>(comp) + exposedMember.m_offset, size, editCommand->m_delta.GetNewValue(), size);
+                        return true;
+                    }
+                }
+			}
+		}
+	}
+    return false;
 }
 
 void SceneEditor::DrawGrid(int size, float spacing, const blaVec3& color) const

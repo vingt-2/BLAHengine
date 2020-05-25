@@ -25,10 +25,7 @@ namespace BLA
     class SceneEditor : public EngineInstance
     {
     public:
-        SceneEditor(bool external, bool isFullscreen) :
-            EngineInstance(external, isFullscreen),
-            m_cameraController(nullptr)
-        {}
+	    SceneEditor(bool external, bool isFullscreen);
 
 		bool InitializeEngine(RenderWindow* renderWindow) override;
 
@@ -41,7 +38,7 @@ namespace BLA
 
         void EditorDragAndDropedFile(const blaString& filePath);
 
-        ~SceneEditor() { EngineInstance::~EngineInstance(); };
+	    ~SceneEditor();
 
         GameObject GetSelectedObject() { return m_selectedObject; }
 
@@ -49,12 +46,17 @@ namespace BLA
 
         CameraController* GetCameraController() const { return m_cameraController; }
 
+        EditorCommandManager* GetCommandManager() const { return m_commandManager; }
+
         /*
          * Scene Updated temp logic
          *
          */
 
         void SetObjectParent(GameObject parent, GameObject child);
+
+    	//TODO: This whole thing is messed up. Less singletons, more component storage
+        bool TemporaryComponentEdit(const GameComponentEditCommand* editCommand);
 
     private:
 
@@ -98,7 +100,7 @@ namespace BLA
     	
         GameObject m_selectedObject;
 
-        GizmoManager m_gizmoManager;
+        GizmoManager* m_gizmoManager;
         GameObjectInspector* m_componentInspector = nullptr;
         SceneGraphGui* m_sceneGraphGui = nullptr;
         /*

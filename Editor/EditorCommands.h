@@ -10,23 +10,17 @@ namespace BLA
 {
 	class SceneEditor;
 
-	struct ValueCommandDelta
+	class ValueCommandDelta
 	{
-		virtual void* GetPreviousValue() = 0;
-		virtual void* GetNewValue() = 0;
-		virtual blaIndex GetValueSizeBytes() = 0;
-	};
-
-	template<typename T>
-	struct TypedValueCommandDelta : ValueCommandDelta
-	{
-		T m_prevValue;
-		T m_newValue;
+		blaVector<char> m_p;
+		blaVector<char> m_n;
 		
-		void* GetPreviousValue() override { return &m_prevValue; }
-		void* GetNewValue() override { return &m_newValue; }
-
-		blaIndex GetValueSizeBytes() override { return sizeof(T); }
+	public:
+		ValueCommandDelta(const char* prevV, const char* newV, blaIndex size);
+		void Invert();
+		const char* GetPreviousValue() const { return &m_p[0]; }
+		const char* GetNewValue() const { return &m_n[0]; }
+		blaIndex GetValueSizeBytes() const { return m_p.size(); }
 	};
 	
 	struct EditorCommand
@@ -37,6 +31,8 @@ namespace BLA
 		};
 
 		CommandType GetType() const;
+
+		virtual void Invert() = 0;
 		
 	private:
 		CommandType m_CommandType;
@@ -47,22 +43,33 @@ namespace BLA
 	struct GameComponentEditCommand : EditorCommand
 	{
 		GameObjectID m_gameObjectId;
-		const ComponentDescriptor* m_editedComponentDescriptor;
-		const ComponentDescriptor::ExposedMember* m_exposedMemberEdited;
-		const ValueCommandDelta* m_delta;
+		GameComponentID m_editedComponentId;
+		blaStringId m_exposedMemberEditedId;
+		ValueCommandDelta m_delta;
 
-        GameComponentEditCommand();
-		~GameComponentEditCommand();
+		GameComponentEditCommand(GameObjectID gameObjectId,
+		                         GameComponentID editedComponentId,
+		                         blaStringId exposedMemberId,
+		                         ValueCommandDelta valueDelta);
+
+		void Invert() override;
 	};
 	
 	class EditorCommandManager
 	{
-		std::stack<const EditorCommand*> m_undoStack;
-		std::stack<const EditorCommand*> m_redoStack;
+		std::stack<EditorCommand*> m_undoStack;
+		std::stack<EditorCommand*> m_redoStack;
 
 		SceneEditor* m_sceneEditor;
+
+		// This is where we delete all editor commands, nowhere else should we delete them
+		void ClearUndoStack();
+		void ClearRedoStack();
 	public:
 		EditorCommandManager(SceneEditor* pSceneEditor);
-		void Execute(const EditorCommand*);
+		~EditorCommandManager();
+		void Execute(EditorCommand* command, bool internal = false);
+		void Undo();
+		void Redo();
 	};
 };

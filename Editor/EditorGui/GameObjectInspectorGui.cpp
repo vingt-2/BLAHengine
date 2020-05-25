@@ -5,13 +5,30 @@
 #include "EditorGui/InspectableVariablesGuiElements.h"
 #include "Gui/GuiManager.h"
 #include "Gui/GuiElements.h"
-#include "Core/GameComponent.h"
+#include "Core/TransformComponent.h"
 #include "EditorCommands.h"
 
+//TODO: This is starting to smell. Most especially the custom gui element for the transform component ...
 
 #define OBJECT_INSPECTOR_ELEMENT_GROUP_ID BlaStringId("ObjectInspectorElement")
 
 using namespace BLA;
+
+class TransformComponentCustomGuiElement : public BlaGuiCollapsibleElement
+{
+    TransformComponent* m_pToTransformComponent;
+public:
+    TransformComponentCustomGuiElement(TransformComponent* transformComponent) :
+	    BlaGuiCollapsibleElement("TransformComponent", OBJECT_INSPECTOR_ELEMENT_GROUP_ID), m_pToTransformComponent(transformComponent)
+	{}
+
+	void Render() override
+    {
+    	// Refresh cached transform
+        m_pToTransformComponent->GetTransform();
+        BlaGuiCollapsibleElement::Render();
+    }
+};
 
 GameObjectInspector::GameObjectInspector(EditorCommandManager* editorCommandManager): m_window(
     *BlaGuiManager::GetSingletonInstance()->OpenWindow("GameObject Inspector"))
@@ -27,12 +44,22 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
 
     BlaGuiElement* root = new BlaGuiSimpleTextElement("", OBJECT_INSPECTOR_ELEMENT_GROUP_ID, "");
 
-    blaVector<blaString> componentNames = GetComponents(gameObject);
-
+    // Refresh cached World transform to be sure we display the right one :)
+    m_selectedGameObject.GetComponent<TransformComponent>()->GetTransform();
+	
     for (GameComponent* comp : gameObject.GetAllComponents())
     {
         ComponentDescriptor compDescriptor = comp->GetComponentDescriptor();
-        BlaGuiCollapsibleElement* compEl = new BlaGuiCollapsibleElement(blaString(compDescriptor.m_typeID), OBJECT_INSPECTOR_ELEMENT_GROUP_ID);
+        BlaGuiCollapsibleElement* compEl;
+    	if(compDescriptor.m_typeID == BlaStringId("TransformComponent"))
+    	{
+            compEl = new TransformComponentCustomGuiElement(static_cast<TransformComponent*>(comp));
+    	}
+        else
+        {
+	        compEl = new BlaGuiCollapsibleElement(blaString(compDescriptor.m_typeID), OBJECT_INSPECTOR_ELEMENT_GROUP_ID);
+        }
+    	
         compEl->m_decorateHeader = true;
         for (const ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members)
         {
@@ -44,9 +71,10 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
                 memberName, 
                 BlaStringId("ComponentExposeEditing"), 
                 exposedMember.m_type,
-                [commandManager = m_editorCommandManager](void*)
+                [commandManager = m_editorCommandManager, objId = gameObject.GetId(), compId = compDescriptor.m_typeID, memberId = exposedMember.m_name]
+					(const char* newValue, const char* preValue, blaIndex sizeOfValue)
                 {
-                    commandManager->Execute();
+                    commandManager->Execute(new GameComponentEditCommand(objId, compId, memberId, ValueCommandDelta(preValue, newValue, sizeOfValue)));
                 },
                 (char*)comp + exposedMember.m_offset);
 

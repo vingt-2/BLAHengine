@@ -5,7 +5,8 @@ using namespace BLA;
 #define SAFE_SIGNED_INC(i) (i < 0x7FFFFFFF) ? i++ : 0;
 
 BeginComponentDescription(TransformComponent)
-    Expose(m_localTransform)
+    Expose(m_worldTransform)
+	Expose(m_localTransform)
 EndComponentDescription()
 
 // TODO: Make a binding component that is updated individually as a system to allow const GetTransform
@@ -23,16 +24,19 @@ blaScaledTransform TransformComponent::GetTransform()
             if (m_cachedParentSetCounter != parentCounter || m_dirtyCachedTransform)
             {
                 const blaScaledTransform parentTransform = parentTransformComponent->GetTransform();
-                m_cachedWorldTransform.m_posQuat = parentTransform.m_posQuat * m_localTransform.m_posQuat;
-                m_cachedWorldTransform.m_scale = parentTransform.m_scale * m_localTransform.m_scale;
+                m_worldTransform.m_posQuat = parentTransform.m_posQuat * m_localTransform.m_posQuat;
+                m_worldTransform.m_scale = parentTransform.m_scale * m_localTransform.m_scale;
                 SAFE_SIGNED_INC(m_setCounter);
                 m_cachedParentSetCounter = parentCounter;
                 m_dirtyCachedTransform = false;
             }
-            return m_cachedWorldTransform;
         }
     }
-    return m_localTransform;
+    else
+    {
+        m_worldTransform = m_localTransform;
+    }
+    return m_worldTransform;
 }
 
 blaScaledTransform TransformComponent::GetLocalTransform() const
@@ -53,7 +57,7 @@ void TransformComponent::SetTransform(const blaScaledTransform& transform)
 
             m_localTransform.m_posQuat = parentT.m_posQuat.GetInverse() * transform.m_posQuat;
             m_localTransform.m_scale = transform.m_scale / parentT.m_scale; //TODO: Make this safe.
-            m_cachedWorldTransform = transform;
+            m_worldTransform = transform;
             m_dirtyCachedTransform = false;
             SAFE_SIGNED_INC(m_setCounter);
             return;

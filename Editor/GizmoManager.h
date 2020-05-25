@@ -7,11 +7,11 @@ namespace BLA
 {
     class Scene;
     class GizmoControl;
-
+    class EditorCommandManager;
     class GizmoControl
     {
     public:
-        GizmoControl(GameObject object) : m_controlledObject(object), m_sizeMultiplier(1.f) {}
+        GizmoControl(GameObject object, EditorCommandManager* editorCommandManager) : m_controlledObject(object), m_sizeMultiplier(1.f), m_editorCommandManager(editorCommandManager) {}
 
         virtual void Update();
 
@@ -20,13 +20,15 @@ namespace BLA
         virtual bool IsBeingControlled() = 0;
     protected:
         GameObject m_controlledObject;
+        EditorCommandManager* m_editorCommandManager;
         blaF32 m_sizeMultiplier;
+        blaScaledTransform m_preClickTransform;
     };
 
     class TranslationGizmoControl : public GizmoControl
     {
     public:
-        TranslationGizmoControl(GameObject object) : GizmoControl(object), m_arrowLengths(1.f), m_arrowThickness(0.2f), m_distanceToCenter(0.5f), m_selectedAxis(NONE)
+        TranslationGizmoControl(GameObject object, EditorCommandManager* editorCommandManager) : GizmoControl(object, editorCommandManager), m_arrowLengths(1.f), m_arrowThickness(0.2f), m_distanceToCenter(0.5f), m_selectedAxis(NONE)
         {}
 
         void Update() override;
@@ -52,7 +54,7 @@ namespace BLA
     class ScaleGizmoControl : public GizmoControl
     {
     public:
-        ScaleGizmoControl(GameObject object) : GizmoControl(object), m_cubeScale(0.15f), m_distanceToCenter(1.f), m_selectedAxis(NONE)
+        ScaleGizmoControl(GameObject object, EditorCommandManager* editorCommandManager) : GizmoControl(object, editorCommandManager), m_cubeScale(0.15f), m_distanceToCenter(1.f), m_selectedAxis(NONE)
         {}
 
         void Update() override;
@@ -78,7 +80,7 @@ namespace BLA
     class RotationGizmoControl : public GizmoControl
     {
     public:
-        RotationGizmoControl(GameObject object) : GizmoControl(object), m_radius(1.f), m_selectedAxis(NONE)
+        RotationGizmoControl(GameObject object, EditorCommandManager* editorCommandManager) : GizmoControl(object, editorCommandManager), m_radius(1.f), m_selectedAxis(NONE)
         {}
 
         void Update() override;
@@ -102,12 +104,12 @@ namespace BLA
     class GizmoManager
     {
     public:
-        GizmoManager();
+        GizmoManager(EditorCommandManager* editorCommandManager);
 
         void Update();
 
     private:
-
+        EditorCommandManager* m_editorCommandManager;
         GizmoControl* m_gizmoController;
     };
 }

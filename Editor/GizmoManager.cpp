@@ -1,4 +1,5 @@
 #include "GizmoManager.h"
+#include "EditorCommands.h"
 #include "Core/DebugDraw.h"
 #include "Core/Scene.h"
 #include "Renderer/GL33Renderer.h"
@@ -17,7 +18,7 @@
 
 using namespace BLA;
 
-GizmoManager::GizmoManager() : m_gizmoController(nullptr)
+GizmoManager::GizmoManager(EditorCommandManager* editorCommandManager) : m_editorCommandManager(editorCommandManager), m_gizmoController(nullptr)
 {}
 
 bool AABB(blaVec3 origin, blaVec3 halfExtent, const Ray& ray, blaF32& tmin, blaF32& tmax)
@@ -90,23 +91,21 @@ void GizmoManager::Update()
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
     GameObject objRef = editorSess->GetSelectedObject();
 
-    bool shouldCreateGizmo = false;
-
     if (objRef.IsValid())
     {
         if (!m_gizmoController || !m_gizmoController->ControlsObject(objRef))
         {
             if (InputManager::GetSingletonInstanceRead()->GetKeyState(BLA_KEY_LEFT_ALT).IsDown())
             {
-                m_gizmoController = new RotationGizmoControl(objRef);
+                m_gizmoController = new RotationGizmoControl(objRef, m_editorCommandManager);
             }
             else if (InputManager::GetSingletonInstanceRead()->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
             {
-                m_gizmoController = new ScaleGizmoControl(objRef);
+                m_gizmoController = new ScaleGizmoControl(objRef, m_editorCommandManager);
             }
             else
             {
-                m_gizmoController = new TranslationGizmoControl(objRef);
+                m_gizmoController = new TranslationGizmoControl(objRef, m_editorCommandManager);
             }
         }
         else if (!m_gizmoController->IsBeingControlled())
@@ -116,7 +115,7 @@ void GizmoManager::Update()
                 if (!dynamic_cast<RotationGizmoControl*>(m_gizmoController))
                 {
                     delete m_gizmoController;
-                    m_gizmoController = new RotationGizmoControl(objRef);
+                    m_gizmoController = new RotationGizmoControl(objRef, m_editorCommandManager);
                 }
             }
             else if (InputManager::GetSingletonInstanceRead()->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
@@ -124,7 +123,7 @@ void GizmoManager::Update()
                 if (!dynamic_cast<ScaleGizmoControl*>(m_gizmoController))
                 {
                     delete m_gizmoController;
-                    m_gizmoController = new ScaleGizmoControl(objRef);
+                    m_gizmoController = new ScaleGizmoControl(objRef, m_editorCommandManager);
                 }
             }
             else
@@ -132,7 +131,7 @@ void GizmoManager::Update()
                 if (!dynamic_cast<TranslationGizmoControl*>(m_gizmoController))
                 {
                     delete m_gizmoController;
-                    m_gizmoController = new TranslationGizmoControl(objRef);
+                    m_gizmoController = new TranslationGizmoControl(objRef, m_editorCommandManager);
                 }
             }
         }
@@ -165,7 +164,6 @@ void GizmoControl::Update()
     else
     {
         Console::LogError("Gizmo Manager failed to find a camera component in the scene, aborting Gizmo update");
-        return;
     }
 }
 
@@ -213,6 +211,7 @@ void TranslationGizmoControl::Update()
 
     if (m_selectedAxis == NONE)
     {
+        m_preClickTransform = transform;
         // Todo: write an owned pointer wrapper
         CollisionModel3D* collider = newCollisionModel3D();
 
@@ -243,7 +242,7 @@ void TranslationGizmoControl::Update()
         coneTransform.GetScaledTransformMatrix(TransformComponentForCollider);
         collider->setTransform(&(TransformComponentForCollider[0][0]));
 
-        if (collider->threadSafeClosestRayCollision(&(screenRay.m_origin.x), &(screenRay.m_direction.x), triangleIndex, tmin, &(colPointL.x)))
+        if (collider->threadSafeClosestRayCollision(&(screenRay.m_origin.x), &(screenRay.m_direction.x), triangleIndex, tmin, &colPointL.x))
         {
             if (tmin < closestT)
             {
@@ -256,7 +255,7 @@ void TranslationGizmoControl::Update()
         coneTransform.GetScaledTransformMatrix(TransformComponentForCollider);
         collider->setTransform(&(TransformComponentForCollider[0][0]));
 
-        if (collider->threadSafeClosestRayCollision(&(screenRay.m_origin.x), &(screenRay.m_direction.x), triangleIndex, tmin, &(colPointL.x)))
+        if (collider->threadSafeClosestRayCollision(&(screenRay.m_origin.x), &(screenRay.m_direction.x), triangleIndex, tmin, &colPointL.x))
         {
             if (tmin < closestT)
             {
@@ -269,7 +268,7 @@ void TranslationGizmoControl::Update()
         coneTransform.GetScaledTransformMatrix(TransformComponentForCollider);
         collider->setTransform(&(TransformComponentForCollider[0][0]));
 
-        if (collider->threadSafeClosestRayCollision(&(screenRay.m_origin.x), &(screenRay.m_direction.x), triangleIndex, tmin, &(colPointL.x)))
+        if (collider->threadSafeClosestRayCollision(&(screenRay.m_origin.x), &(screenRay.m_direction.x), triangleIndex, tmin, &colPointL.x))
         {
             if (tmin < closestT)
             {
@@ -301,6 +300,7 @@ void TranslationGizmoControl::Update()
         if (leftMouseButton.IsUp())
         {
             m_selectedAxis = NONE;
+            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("m_worldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
         }
 
         float t;
@@ -408,6 +408,8 @@ void ScaleGizmoControl::Update()
 
     if (m_selectedAxis == NONE)
     {
+        m_preClickTransform = transform;
+    	
         blaF32 tmin = MAX_NORMAL_FLOAT;
         blaF32 tmax = -MAX_NORMAL_FLOAT;
         float t;
@@ -456,6 +458,7 @@ void ScaleGizmoControl::Update()
         if (leftMouseButton.IsUp())
         {
             m_selectedAxis = NONE;
+            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("m_worldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
         }
 
         currentScreenAxis = m_selectedAxis;
@@ -574,6 +577,8 @@ void RotationGizmoControl::Update()
 
     if (m_selectedAxis == NONE)
     {
+        m_preClickTransform = transform;
+    	
         blaVec3 position;
         blaVec3 startClickPosition;
         float t;
@@ -619,6 +624,7 @@ void RotationGizmoControl::Update()
         if (leftMouseButton.IsUp())
         {
             m_selectedAxis = NONE;
+            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("m_worldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
         }
 
         currentScreenAxis = m_selectedAxis;

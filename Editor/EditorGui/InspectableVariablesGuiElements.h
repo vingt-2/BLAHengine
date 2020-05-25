@@ -18,7 +18,7 @@ namespace BLA
 			const blaString& variableName, 
 			blaStringId groupId, 
 			const BLAInspectableVariables::ExposedVarTypeDescriptor* typeDescriptor,
-			blaLambda<void(void*)> onEditFunctor,
+			blaLambda<void(const char*, const char*, blaIndex)> onEditFunctor,
 			void* obj)
 		{
 			Factories::const_iterator it = ms_factories.find(typeDescriptor->m_typeID);
@@ -28,7 +28,7 @@ namespace BLA
 			}
 			return new BlaGuiSimpleTextElement(variableName, groupId, "Unknown Type");
 		}
-		typedef BlaGuiElement* (*GetEditorFactory)(const blaString&, blaStringId, blaLambda<void(void*)> onEditFunctor, void*);
+		typedef BlaGuiElement* (*GetEditorFactory)(const blaString&, blaStringId, blaLambda<void(const char*, const char*, blaIndex)> onEditFunctor, void*);
 
 		static void __RegisterFactory(blaStringId type, GetEditorFactory factory);
 		

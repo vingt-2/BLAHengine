@@ -42,6 +42,9 @@ using blaPair = std::pair<T, V>;
 template<typename L>
 using blaLambda = std::function<L>;
 
+template<typename T>
+using blaOwnedPointer = std::unique_ptr<T>;
+
 #define BLA_ENGINE_VERSION 1
 
 // TODO: Obviously windows specific for now ...

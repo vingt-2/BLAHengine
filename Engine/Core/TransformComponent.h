@@ -16,7 +16,8 @@ namespace BLA
         blaScaledTransform m_localTransform;
         blaS32 m_setCounter = 0;
 
-        blaScaledTransform m_cachedWorldTransform;
+		// Cached world transform (used to be called m_cachedWorldTransform which I like better, but now it's exposed so unless I make it possible to have a custom name...)
+        blaScaledTransform m_worldTransform;
         blaS32 m_cachedParentSetCounter = -1;
         blaBool m_dirtyCachedTransform = true;
 
