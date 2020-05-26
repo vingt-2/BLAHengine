@@ -1,3 +1,5 @@
+// Copyright (C) 2018 Vincent Petrella. All rights reserved
+
 #pragma once
 
 #include <sstream> 

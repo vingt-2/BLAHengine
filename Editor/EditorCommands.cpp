@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #include "EditorCommands.h"
 #include "SceneEditor.h"
 #include "System/Console.h"

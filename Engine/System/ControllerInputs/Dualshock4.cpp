@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #include "Dualshock4.h"
 #include <iostream>
 #include "System/InputManager.h"

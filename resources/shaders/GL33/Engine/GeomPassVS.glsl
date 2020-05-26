@@ -19,9 +19,9 @@ void main()
     TexCoord0 = vertexUV;
     WorldPos0 = (modelTransform * vec4(vertexPosition_modelspace, 1.0)).xyz;
 	
-	vec3 Normal0 = (modelTransform * vec4(vertexNormal, 0.0)).xyz;
-	vec3 Tangent0 = (modelTransform * vec4(vertexTangent, 0.0)).xyz;
-	vec3 BiTangent0 = (modelTransform * vec4(vertexBiTangent, 0.0)).xyz;
+	vec3 Normal0 = normalize(modelTransform * vec4(vertexNormal, 0.0)).xyz;
+	vec3 Tangent0 = normalize(modelTransform * vec4(vertexTangent, 0.0)).xyz;
+	vec3 BiTangent0 = normalize(modelTransform * vec4(vertexBiTangent, 0.0)).xyz;
 		
 	TangentSpace0 = mat3(Tangent0, BiTangent0, Normal0);
 }

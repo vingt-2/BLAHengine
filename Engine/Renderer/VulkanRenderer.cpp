@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #define GLFW_INCLUDE_VULKAN
 
 #include "RenderBackend.h"

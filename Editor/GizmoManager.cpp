@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #include "GizmoManager.h"
 #include "EditorCommands.h"
 #include "Core/DebugDraw.h"

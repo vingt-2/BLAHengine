@@ -22,7 +22,7 @@ void main()
 
 	normalMapSample = normalize(2.0f * normalMapSample - vec3(1.f,1.f,1.f));
 	
-	NormalOut = normalize(TangentSpace0 * normalMapSample);
+	NormalOut = TangentSpace0 * normalMapSample;
 	
 	TexCoordOut = vec3(TexCoord0, 0.0);
 } 

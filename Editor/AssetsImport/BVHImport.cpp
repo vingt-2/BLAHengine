@@ -1,8 +1,8 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #include <fstream>
 
 #include "BVHImport.h"
-
-
 
 #ifndef M_PI
 #define M_PI       float(3.14159265358979323846)

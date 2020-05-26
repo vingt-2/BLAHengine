@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #pragma once
 #include "StdInclude.h"
 #include "Assets/MeshAsset.h"

@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 // Adapted from following work :
 //              App to phrase IMU data supplied via HID from a PS4 controller, and estimate the orientation of the controller
 //              Written by Jack Halliday (jack.halliday12@imperial.ac.uk) for Igloo Vision LTD (http://www.igloovision.com/).
