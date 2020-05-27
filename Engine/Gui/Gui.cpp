@@ -1,4 +1,4 @@
-// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+// Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "GuiManager.h"
 #include "GuiWindow.h"
@@ -245,7 +245,7 @@ void BlaGuiCollapsibleElement::Render()
     {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
-
+	
     if (ImGui::TreeNodeEx((void*)(intptr_t)this, flags, GetName().c_str()))
     {
         if (IsItemDoubleCliked(ImGuiMouseButton_Left))
@@ -258,7 +258,7 @@ void BlaGuiCollapsibleElement::Render()
         }
 
         HandleDragDropOfElements();
-
+    	
         auto child = GetChild();
 
         while (child != nullptr)
@@ -268,6 +268,10 @@ void BlaGuiCollapsibleElement::Render()
         }
 
         ImGui::TreePop();
+    }
+    else
+    {
+        HandleDragDropOfElements();
     }
 }
 

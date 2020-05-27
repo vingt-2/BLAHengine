@@ -9,11 +9,9 @@
 #include "Core/TransformComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 
-#pragma optimize("", off)
-
 using namespace BLA;
 
-TriangleMesh g_PointLightRenderSphere = PrimitiveGeometry::MakeSphere(1.f);
+TriangleMesh g_PointLightRenderSphere = PrimitiveGeometry::MakeSphere(1.f, false, 16, 16);
 
 GL33Renderer::GL33Renderer() :
     m_debugDrawGBuffer(false),
@@ -201,7 +199,6 @@ void GL33Renderer::RenderGBuffer()
                 blaU16 samplerCount = 0;
                 for (const auto& sampler : matAndIndex.first->GetSamplers())
                 {
-                    if (sampler.second == "alphaMap") continue;
                     if (m_glResources.m_glLoadedTextureIds.count(sampler.first))
                     {
                         GLuint glResourceTextureId = m_glResources.m_glLoadedTextureIds[sampler.first];
@@ -568,7 +565,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight
 
     // Clear Frame Buffer.
     glClearColor(0.3f, 0.3f, 0.3f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
 
     // Use our shader
@@ -594,13 +591,6 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight
     glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_worldPosTextureTarget);
     // Set our "renderedTexture" sampler to user Texture Unit 2
     glUniform1i(worldPosMapID, 2);
-
-    GLuint depthMapID = glGetUniformLocation(prgmID, "depthMap");
-    // Bind our texture in Texture Unit 0
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_depthTextureTarget);
-    // Set our "renderedTexture" sampler to user Texture Unit 3
-    glUniform1i(depthMapID, 3);
 
     blaMat4 biasMatrix(
         0.5, 0.0f, 0.0f, 0.0f,
@@ -643,7 +633,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
+void GL33Renderer::DrawPointLight(PointLightComponent* pointLight)
 {
     if (!m_pointLightSphereMesh.m_isInit)
         SetupPointLightRenderSphere();
@@ -674,7 +664,10 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
 
     glUseProgram(m_GBuffer.m_drawSphereStencilPgrmID);
 
-    blaMat4 modelMatrix = blaPosQuat(*pointLight->m_position, blaQuat()).ToMat4();
+	
+    blaMat4 modelMatrix;
+	 
+	pointLight->GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(modelMatrix);
 
     blaMat4 MVP = m_mainRenderCamera.m_ViewProjection * modelMatrix;
 
@@ -711,8 +704,10 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     MVPid = glGetUniformLocation(prgmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
+    blaScaledTransform pt = pointLight->GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
+	
     GLuint lightPrId = glGetUniformLocation(prgmID, "lightPR");
-    blaVec4 lightPr = blaVec4(*pointLight->m_position, *pointLight->m_radius);
+    blaVec4 lightPr = blaVec4(pt.GetPosition(), 0.8f * (pt.GetScale().x + pt.GetScale().y + pt.GetScale().z) / 3.0);
     glUniform4fv(lightPrId, 1, &(lightPr[0]));
 
     GLuint diffuseMapID = glGetUniformLocation(prgmID, "diffuseMap");
@@ -736,13 +731,6 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     // Set our "renderedTexture" sampler to user Texture Unit 2
     glUniform1i(worldPosMapID, 2);
 
-    GLuint depthMapID = glGetUniformLocation(prgmID, "depthMap");
-    // Bind our texture in Texture Unit 0
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer.m_depthTextureTarget);
-    // Set our "renderedTexture" sampler to user Texture Unit 3
-    glUniform1i(depthMapID, 3);
-
     glBindVertexArray(m_pointLightSphereMesh.m_vao);
 
     // Draw VAO
@@ -750,6 +738,7 @@ void GL33Renderer::DrawPointLight(PointLightRender* pointLight)
     glStencilFunc(GL_NEVER, 0, 0);
     glCullFace(GL_BACK);
     glDisable(GL_STENCIL_TEST);
+    glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
     glBindVertexArray(0);
     glUseProgram(0);
@@ -829,7 +818,37 @@ int BLA::GL33Renderer::SynchWithRenderManager()
     {
         m_meshRenderPool.erase(ticket);
     }
+    toErase.clear();
 
+    for (auto light : m_directionalLightPool)
+    {
+        if (m_renderingManager->GetTicketedDirectionalLights()->count((blaU32)light.first) == 0)
+        {
+            toErase.push_back(light.first);
+            delete light.second;
+        }
+    }
+
+    for (auto ticket : toErase)
+    {
+        m_directionalLightPool.erase(ticket);
+    }
+    toErase.clear();
+	
+    for (auto light : m_pointLightPool)
+    {
+        if (m_renderingManager->GetTicketedPointLights()->count((blaU32)light.first) == 0)
+        {
+            toErase.push_back(light.first);
+        }
+    }
+	
+    for (auto ticket : toErase)
+    {
+        m_pointLightPool.erase(ticket);
+    }
+    toErase.clear();
+	
     int addedObjectsOnCall = 0;
 
     for (auto ticketedObject : *(m_renderingManager->GetTicketedMeshRenderers()))
@@ -865,14 +884,9 @@ int BLA::GL33Renderer::SynchWithRenderManager()
 
     for (auto ticketedObject : *(m_renderingManager->GetTicketedPointLights()))
     {
-        if (m_directionalLightPool.count(ticketedObject.first) == 0)
+        if (m_pointLightPool.count(ticketedObject.first) == 0)
         {
-            PointLightComponent* pointLight = ticketedObject.second;
-
-            PointLightRender* pointLightRender = new PointLightRender();
-            pointLightRender->m_position = pointLight->GetPosition();
-            pointLightRender->m_radius = pointLight->GetLightRadius();
-            m_pointLightPool[ticketedObject.first] = pointLightRender;
+            m_pointLightPool[ticketedObject.first] = ticketedObject.second;
 
             addedObjectsOnCall++;
         }
@@ -1528,7 +1542,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     {
         blaVector<char> VertexShaderErrorMessage(InfoLogLength + 1);
         glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-        printf("%s\n", &VertexShaderErrorMessage[0]);
+        Console::LogError(blaString(&VertexShaderErrorMessage[0]));
     }
 
     char const * FragmentSourcePointer = shader.m_fragmentShader.c_str();
@@ -1542,7 +1556,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     {
         blaVector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
         glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-        printf("%s\n", &FragmentShaderErrorMessage[0]);
+        Console::LogError(blaString(&FragmentShaderErrorMessage[0]));
     }
 
 
@@ -1560,7 +1574,7 @@ bool GL33Resources::GLLoadShaderProgram(GL33Shader& shader)
     if (InfoLogLength > 0) {
         blaVector<char> ProgramErrorMessage(InfoLogLength + 1);
         glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-        printf("%s\n", &ProgramErrorMessage[0]);
+        Console::LogError(blaString(&ProgramErrorMessage[0]));
     }
 
     glDeleteShader(VertexShaderID);

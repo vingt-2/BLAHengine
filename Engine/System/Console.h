@@ -13,7 +13,7 @@
 #define nothing(...)  
 
 #define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)                                 \
-return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( nothing(__VA_ARGS__),   \
+return BLA::blaToString(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( nothing(__VA_ARGS__),   \
     EXPAND(ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__))))));  
 
 #define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_0(CommandName, ...)             \
@@ -32,7 +32,7 @@ return std::to_string(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__
             if(arguments.size() != __SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__)))             \
             {                                                                                                  \
                 Console::LogError("Inadequate number of arguments provided to " + m_name + ", expecting " +    \
-                    std::to_string(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__))));           \
+                    BLA::blaToString(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__))));         \
                 return "";                                                                                     \
             }                                                                                                  \
             EXPAND(__BLA_CC_DECLARATION_MACRO_SELECT_RETTYPE(RetType))(CommandName, __VA_ARGS__)               \
@@ -54,6 +54,9 @@ namespace BLA
 
     template<typename T>
     BLACORE_API T blaFromString(const blaString& str);
+
+	template<typename T>
+    BLACORE_API blaString blaToString(T t);
 
     //template<template<class> class T, typename S>
     //T<S> blaFromString(const blaString& str);

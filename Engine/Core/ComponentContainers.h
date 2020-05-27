@@ -42,6 +42,7 @@ namespace BLA
         friend class ComponentSystemIOInterface;
 
         GameComponent* AddComponent(GameObjectID object, blaStringId componentId);
+        bool RemoveComponent(GameObjectID object, blaStringId componentId);
 
         void Clear();
 

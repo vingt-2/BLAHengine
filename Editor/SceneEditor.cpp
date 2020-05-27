@@ -721,6 +721,19 @@ DefineConsoleCommand(void, AddComponent, blaString objectName, blaString compone
 	}
 }
 
+DefineConsoleCommand(blaString, RemoveComponent, blaString objectName, blaString componentName)
+{
+    GameObject obj(GenerateBlaStringId(objectName));
+    if (obj.IsValid())
+    {
+        if(obj.DeleteComponent(GenerateBlaStringId(componentName)))
+        {
+            return "Deleted";
+        }
+    }
+    return "Can't properly delete component";
+}
+
 DefineConsoleCommand(void, CreateObject, blaString objectName)
 {
     Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();

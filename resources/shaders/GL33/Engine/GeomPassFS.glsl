@@ -11,9 +11,13 @@ layout (location = 3) out vec3 TexCoordOut;
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
+uniform sampler2D alphaMap;
 
 void main()
 {
+	if(texture(alphaMap, TexCoord0).a < 0.5f)
+		discard;
+
     WorldPosOut = WorldPos0;
 	
     DiffuseOut = texture(diffuseMap, TexCoord0).rgb;

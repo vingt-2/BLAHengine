@@ -16,6 +16,7 @@ namespace BLA
 		blaF32* GetLightRadius() { return &m_radius; }
 
 		blaU32 m_renderTicket = 0;
+        blaBool m_draw = false;
 
         void Init() override;
         void Shutdown() override;

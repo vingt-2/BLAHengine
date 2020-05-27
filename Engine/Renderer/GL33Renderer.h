@@ -206,7 +206,7 @@ namespace BLA
 
         void DrawDirectionalLight(DirectionalLightRender* directionalLight);
 
-        void DrawPointLight(PointLightRender* pointLight);
+        void DrawPointLight(PointLightComponent* pointLight);
 
         bool RenderDirectionalShadowMap(DirectionalShadowRender& shadowRender);
 

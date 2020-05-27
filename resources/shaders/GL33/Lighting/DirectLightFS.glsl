@@ -8,7 +8,6 @@ uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D worldPosMap;
 uniform sampler2DShadow shadowMap;
-uniform sampler2D depthMap;
 
 uniform mat4 shadowMV;
 uniform vec3 lightDirection;
@@ -21,7 +20,6 @@ void main()
 	vec3 diffuse = texture2D(diffuseMap, UV).rgb;
 	vec3 normal = texture2D(normalMap, UV).rgb;
 	vec3 worldPos = texture2D(worldPosMap, UV).rgb;
-	float depth = texture2D(depthMap, UV).x;
     
     float sunOrientation = 1 - clamp(0.2 + dot(vec3(0,1,0),lightDirection),0,1);
     float sunOrientationNoOff =  1 - clamp(dot(vec3(0,1,0),lightDirection),0,1);
@@ -76,6 +74,6 @@ void main()
         float vis = shadowFactor / 16.0f;
 		
        // color = diffuse * (3 * vis * max(dot(normal, lightDirection),0.3f)) * (1-sunOrientation) * ((0.5-sunOrientation) + overalSunColor);
-	   color = diffuse * (vis * max(dot(normal, lightDirection),0) + ambientLight);
+	   color = diffuse * (max(vis,0.1f) * max(dot(normal, lightDirection),ambientLight)+ambientLight);
 	}
 }

@@ -15,7 +15,7 @@
 
 #include <random>
 #include "Geometry/PrimitiveGeometry.h"
-#include "Renderer/MeshRendererComponent.h"
+#include "Renderer/PointLightComponent.h"
 #include "Assets/AssetsManager.h"
 
 namespace BLA
@@ -140,7 +140,7 @@ namespace BLA
         }
     }
 
-    DefineConsoleCommand(void, CreateBoidSystem, int numberOfBoids)
+    DefineConsoleCommand(void, CreateLightBoidSystem, int numberOfBoids)
     {
         Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
@@ -150,13 +150,6 @@ namespace BLA
         std::uniform_real_distribution<float> dist(0.2f, 1.f);
         std::normal_distribution<float> normalDist(0.7f, 0.3f);
 
-        MeshAsset m("boidCubeMesh");
-        m.m_triangleMesh = PrimitiveGeometry::MakeCube();
-        m.m_triangleMesh.m_materials.push_back(std::make_pair("BlankDiffuseMat", 0));
-
-        AssetManager::GetSingletonInstance()->SaveTriangleMesh(&m);
-        AssetManager::GetSingletonInstance()->LoadTriangleMesh("boidCubeMesh");
-
         for (int i = 0; i < numberOfBoids; i++)
         {
             GameObject ref = scene->CreateObject(GenerateBlaStringId("Boid" + std::to_string(i))); // TODO: Please don't ...
@@ -164,10 +157,7 @@ namespace BLA
 
             BoidComponent* boidComponent = ref.CreateComponent<BoidComponent>();
             ref.CreateComponent<ParticleComponent>();
-            MeshRendererComponent* r = ref.CreateComponent<MeshRendererComponent>();
-
-            r->m_meshAssetName = "boidCubeMesh";
-            r->m_Render = true;
+            ref.CreateComponent<PointLightComponent>()->m_draw = true;
 
             boidComponent->m_color = blaVec3(dist(g_dgen), dist(g_dgen), dist(g_dgen));
             boidComponent->m_homingStiffnessMult = dist(g_dgen);

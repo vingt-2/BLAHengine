@@ -43,6 +43,11 @@ GameComponent* GameObject::CreateComponent(GameComponentID componentId)
     return SCENE->AddComponent(*this, componentId);
 }
 
+bool GameObject::DeleteComponent(GameComponentID componentId)
+{
+    return SCENE->RemoveComponent(*this, componentId);
+}
+
 //namespace std {
 //
 //    template <>

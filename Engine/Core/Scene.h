@@ -37,6 +37,8 @@ namespace BLA
 
         BLACORE_API GameComponent* AddComponent(GameObject object, GameComponentID componentId);
 
+    	BLACORE_API bool RemoveComponent(GameObject object, GameComponentID componentId);
+    	
         template<class T>
         BLACORE_API T* AddComponent(GameObject object);
 

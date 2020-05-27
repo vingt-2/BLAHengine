@@ -36,7 +36,7 @@ namespace BLA
         blaMap<blaIndex, RenderObject*> m_meshRenderPool;
 
         blaMap<blaIndex, DirectionalLightRender*> m_directionalLightPool;
-        blaMap<blaIndex, PointLightRender*> m_pointLightPool;
+        blaMap<blaIndex, PointLightComponent*> m_pointLightPool;
 
         // Rendering Related
         virtual void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) = 0;

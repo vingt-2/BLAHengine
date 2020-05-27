@@ -167,6 +167,12 @@ BLACORE_API T BLA::blaFromString(const blaString& str)
     return T();
 }
 
+template <typename T>
+BLACORE_API blaString BLA::blaToString(T t)
+{
+	return std::to_string(t);
+}
+
 template<>
 BLACORE_API int BLA::blaFromString(const blaString& str)
 {
@@ -228,4 +234,22 @@ template<>
 BLACORE_API blaVector<blaBool> BLA::blaFromString(const blaString& str)
 {
     return SplitString<blaBool>(str, " ");
+}
+
+template<>
+BLACORE_API blaString BLA::blaToString(blaString t)
+{
+    return t;
+}
+
+template<>
+BLACORE_API blaString BLA::blaToString(char* t)
+{
+    return blaString(t);
+}
+
+template<>
+BLACORE_API blaString BLA::blaToString(int t)
+{
+    return std::to_string(t);
 }

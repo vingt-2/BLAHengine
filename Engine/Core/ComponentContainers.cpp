@@ -19,6 +19,26 @@ GameComponent* ComponentContainer::AddComponent(GameObjectID object, blaStringId
     return gc;
 }
 
+bool ComponentContainer::RemoveComponent(GameObjectID object, blaStringId componentId)
+{
+    auto compIt = m_components.find(componentId);
+
+    if (compIt == m_components.end())
+    {
+        return false;
+    }
+
+    auto objIt = compIt->second.find(object);
+	
+    if (objIt == compIt->second.end())
+    {
+        return false;
+    }
+    compIt->second.erase(objIt);
+
+    return true;
+}
+
 void ComponentContainer::Clear()
 {
     for (auto c : m_components)

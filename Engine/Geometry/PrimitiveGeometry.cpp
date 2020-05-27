@@ -44,11 +44,9 @@ TriangleMesh PrimitiveGeometry::MakeCube()
     return cube;
 }
 
-TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius, bool inverted)
+TriangleMesh PrimitiveGeometry::MakeSphere(blaF32 radius, bool inverted, blaU32 thetaSamples, blaU32 phiSamples)
 {
     TriangleMesh sphere;
-
-    const blaU32 thetaSamples = 32, phiSamples = 32;
 
     for (blaU32 thetaCount = 0; thetaCount < thetaSamples; ++thetaCount)
     {

@@ -57,6 +57,11 @@ GameComponent* Scene::AddComponent(GameObject object, GameComponentID componentI
     return gc;
 }
 
+bool Scene::RemoveComponent(GameObject object, GameComponentID componentId)
+{
+    return m_componentContainer.RemoveComponent(object, componentId);
+}
+
 void Scene::UpdateSceneTimer(blaF32 time)
 {
     m_sceneTimer.Update(time);

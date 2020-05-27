@@ -67,7 +67,8 @@ namespace BLA
         GameObjectID GetId() const { return m_gameObjectId; }
 
         GameComponent* CreateComponent(GameComponentID componentId);
-
+        bool DeleteComponent(GameComponentID componentId);
+    	
         template<class T>
         T* CreateComponent();
     };   

@@ -10,8 +10,9 @@
 
 using namespace BLA;
 
-BeginComponentDescription(PointLightComponent)
+BeginBehaviorDescription(PointLightComponent, Dependencies(RootSystem))
 Expose(m_radius)
+Expose(m_draw)
 EndComponentDescription()
 
 // Norm of the default m_scale for Object Transforms...
@@ -20,6 +21,21 @@ EndComponentDescription()
 void PointLightComponent::Update()
 {
     m_position = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
+	if(m_renderTicket)
+	{
+		if(!m_draw)
+		{
+			Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
+			m_renderTicket = 0;
+		}
+	}
+	else
+	{
+		if (m_draw)
+		{
+			m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
+		}
+	}
 }
 
 void PointLightComponent::Init()
