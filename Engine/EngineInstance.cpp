@@ -219,8 +219,8 @@ bool EngineInstance::SaveWorkingScene(blaString filepath)
 
 void EngineInstance::SetupDirLightAndCamera()
 {
-    GameObject light = m_scene->CreateObject(BlaStringId("DirLight"));
-    light.CreateComponent(BlaStringId("DirectionalLightComponent"));
+    /*GameObject light = m_scene->CreateObject(BlaStringId("DirLight"));
+    light.CreateComponent(BlaStringId("DirectionalLightComponent"));*/
 
     GameObject cameraObject = m_scene->CreateObject(BlaStringId("EditorCamera"));
     CameraComponent* cameraComp = cameraObject.CreateComponent<CameraComponent>();

@@ -271,6 +271,15 @@ void BlaGuiCollapsibleElement::Render()
     }
     else
     {
+        if (IsItemDoubleCliked(ImGuiMouseButton_Left))
+        {
+            SendEvent(BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED, this);
+        }
+        else if (ImGui::IsItemClicked())
+        {
+            SendEvent(BlaGuiElementEventPayload::EventType::SELECTED, this);
+        }
+    	
         HandleDragDropOfElements();
     }
 }

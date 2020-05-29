@@ -11,7 +11,7 @@
 using namespace BLA;
 
 BeginBehaviorDescription(PointLightComponent, Dependencies(RootSystem))
-Expose(m_radius)
+Expose(m_radiosity)
 Expose(m_draw)
 EndComponentDescription()
 
@@ -40,7 +40,6 @@ void PointLightComponent::Update()
 
 void PointLightComponent::Init()
 {
-    m_radius = 1.f;
     m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
 }
 

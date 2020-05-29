@@ -612,7 +612,7 @@ bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCom
 				// Starting to spaghetti a bit, yum.
 				if(editCommand->m_editedComponentId == BlaStringId("TransformComponent"))
 				{
-					if(editCommand->m_exposedMemberEditedId == BlaStringId("m_worldTransform"))
+					if(editCommand->m_exposedMemberEditedId == BlaStringId("WorldTransform"))
 					{
                         blaScaledTransform newWorldTransform;
                         memcpy_s(reinterpret_cast<char*>(&newWorldTransform), sizeof(blaScaledTransform), editCommand->m_delta.GetNewValue(), sizeof(blaScaledTransform));

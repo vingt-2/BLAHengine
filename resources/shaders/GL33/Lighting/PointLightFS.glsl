@@ -8,6 +8,7 @@ uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D worldPosMap;
 uniform vec4 lightPR;
+uniform vec3 radiosity;
 
 in vec4 position;
 
@@ -29,7 +30,16 @@ void main()
 	vec3 normal = texture2D(normalMap, UV).rgb;
 	vec3 worldPos = texture2D(worldPosMap, UV).rgb;
 
-    float lightAmount = (1 - clamp(length(worldPos - lightPR.xyz) / lightPR.w ,0.0f , 1.0f));
+	float d = length(worldPos - lightPR.xyz);
+	float d2 = d * d;
+	
+	float dORadius = d / lightPR.w;
+	float dORadius4 = dORadius * dORadius * dORadius * dORadius;
+	
+    float lightFallOff = clamp(1 - dORadius4,0.0f , 1.0f);
+	lightFallOff *= lightFallOff;
+	
+	lightFallOff /= (d2 + 1);
     
-    color = diffuse * lightAmount * max(dot(normalize(lightPR.xyz - worldPos),normalize(normal)), 0);
+    color = (diffuse * radiosity * lightFallOff) / 3.14f;//* max(dot(normalize(lightPR.xyz - worldPos),normalize(normal)), 0);
 }

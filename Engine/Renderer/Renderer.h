@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Core/RenderingManager.h"
+#include "Renderer/ShadowRender.h"
 #include "System/RenderWindow.h"
 #include "Maths/Ray.h"
 
@@ -10,7 +11,6 @@
 
 namespace BLA
 {
-    class DirectionalLightRender;
     class PointLightRender;
     class BLACORE_API RenderObject
     {
@@ -28,6 +28,12 @@ namespace BLA
 
     };
 
+	struct DirectionalLightRender
+	{
+        DirectionalLightComponent* m_dirLightComponent;
+        DirectionalShadowRender m_shadowRender;
+	};
+
     class BLACORE_API Renderer
     {
     public:
@@ -35,7 +41,7 @@ namespace BLA
 
         blaMap<blaIndex, RenderObject*> m_meshRenderPool;
 
-        blaMap<blaIndex, DirectionalLightRender*> m_directionalLightPool;
+        blaMap<blaIndex, DirectionalLightRender> m_directionalLightPool;
         blaMap<blaIndex, PointLightComponent*> m_pointLightPool;
 
         // Rendering Related

@@ -20,16 +20,31 @@ class TransformComponentCustomGuiElement : public BlaGuiCollapsibleElement
 {
     TransformComponent* m_pToTransformComponent;
 public:
-    TransformComponentCustomGuiElement(TransformComponent* transformComponent) :
+    TransformComponentCustomGuiElement(EditorCommandManager* editorCommandManager, TransformComponent* transformComponent) :
 	    BlaGuiCollapsibleElement("TransformComponent", OBJECT_INSPECTOR_ELEMENT_GROUP_ID), m_pToTransformComponent(transformComponent)
-	{}
+    {
+        BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
+            "World Transform",
+            BlaStringId("ComponentExposeEditing"),
+            BLAInspectableVariables::TypeResolver<blaScaledTransform>::GetDescriptor(),
+            [commandManager = editorCommandManager, objId = transformComponent->GetOwnerObject().GetId(), compId = BlaStringId("TransformComponent"), memberId = BlaStringId("WorldTransform")]
+		        (const char* newValue, const char* preValue, blaIndex sizeOfValue)
+		        {
+		            commandManager->Execute(new GameComponentEditCommand(objId, compId, memberId, ValueCommandDelta(preValue, newValue, sizeOfValue)));
+		        },
+            (char*)&m_worldTransform);
+
+        AddChild(editElement);
+    }
 
 	void Render() override
     {
-    	// Refresh cached transform
-        m_pToTransformComponent->GetTransform();
-        BlaGuiCollapsibleElement::Render();
+        m_worldTransform = m_pToTransformComponent->GetTransform();
+	
+    	BlaGuiCollapsibleElement::Render();
     }
+
+    blaScaledTransform m_worldTransform;
 };
 
 GameObjectInspector::GameObjectInspector(EditorCommandManager* editorCommandManager): m_window(
@@ -55,33 +70,34 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
         BlaGuiCollapsibleElement* compEl;
     	if(compDescriptor.m_typeID == BlaStringId("TransformComponent"))
     	{
-            compEl = new TransformComponentCustomGuiElement(static_cast<TransformComponent*>(comp));
+            compEl = new TransformComponentCustomGuiElement(m_editorCommandManager, static_cast<TransformComponent*>(comp));
+            compEl->m_decorateHeader = true;
     	}
         else
         {
 	        compEl = new BlaGuiCollapsibleElement(blaString(compDescriptor.m_typeID), OBJECT_INSPECTOR_ELEMENT_GROUP_ID);
-        }
-    	
-        compEl->m_decorateHeader = true;
-        for (const ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members)
-        {
-            blaString memberName = blaString(exposedMember.m_name);
-            if (memberName.find("m_") == 0) memberName = memberName.substr(2);
-            memberName[0] = std::toupper(memberName[0]);
-            
-            BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
-                memberName, 
-                BlaStringId("ComponentExposeEditing"), 
-                exposedMember.m_type,
-                [commandManager = m_editorCommandManager, objId = gameObject.GetId(), compId = compDescriptor.m_typeID, memberId = exposedMember.m_name]
-					(const char* newValue, const char* preValue, blaIndex sizeOfValue)
+            compEl->m_decorateHeader = true;
+            for (const ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members)
+            {
+                blaString memberName = blaString(exposedMember.m_name);
+                if (memberName.find("m_") == 0) memberName = memberName.substr(2);
+                memberName[0] = std::toupper(memberName[0]);
+
+                BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
+                    memberName,
+                    BlaStringId("ComponentExposeEditing"),
+                    exposedMember.m_type,
+                    [commandManager = m_editorCommandManager, objId = gameObject.GetId(), compId = compDescriptor.m_typeID, memberId = exposedMember.m_name]
+                (const char* newValue, const char* preValue, blaIndex sizeOfValue)
                 {
                     commandManager->Execute(new GameComponentEditCommand(objId, compId, memberId, ValueCommandDelta(preValue, newValue, sizeOfValue)));
                 },
-                (char*)comp + exposedMember.m_offset);
+                    (char*)comp + exposedMember.m_offset);
 
-            compEl->AddChild(editElement);
+                compEl->AddChild(editElement);
+            }
         }
+    	
         root->AddChild(compEl);
     }
 

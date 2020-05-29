@@ -7,7 +7,6 @@ using namespace BLA;
 #define SAFE_SIGNED_INC(i) (i < 0x7FFFFFFF) ? i++ : 0;
 
 BeginComponentDescription(TransformComponent)
-    Expose(m_worldTransform)
 	Expose(m_localTransform)
 EndComponentDescription()
 

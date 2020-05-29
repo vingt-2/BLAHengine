@@ -5,7 +5,6 @@
 #include "System/Console.h"
 #include "Renderer/MeshRendererComponent.h"
 #include "Renderer/PointLightComponent.h"
-#include "Renderer/LightRender.h"
 #include "Core/TransformComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 
@@ -129,9 +128,9 @@ bool GL33Renderer::Update()
 
         for (auto ticketedDirLightRender : m_directionalLightPool)
         {
-            DirectionalLightRender* dirLightRender = ticketedDirLightRender.second;
-            RenderDirectionalShadowMap(dirLightRender->m_shadowRender);
-            DrawDirectionalLight(dirLightRender);
+            DirectionalLightComponent* dirLightRender = ticketedDirLightRender.second.m_dirLightComponent;
+            RenderDirectionalShadowMap(ticketedDirLightRender.second.m_shadowRender);
+            DrawDirectionalLight(&ticketedDirLightRender.second);
         }
 
         for (auto pointLight : m_pointLightPool)
@@ -139,7 +138,6 @@ bool GL33Renderer::Update()
             DrawPointLight(pointLight.second);
         }
 
-    	
         RenderDebug();
 
         if (!m_renderToFrameBufferOnly)
@@ -171,7 +169,7 @@ void GL33Renderer::RenderGBuffer()
     glViewport(0, 0, static_cast<GLsizei>(m_GBuffer.m_GbufferSize.x), static_cast<GLsizei>(m_GBuffer.m_GbufferSize.y));
 
     // Clear Frame Buffer.
-    glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(m_GBuffer.m_geometryPassPrgmID);
@@ -399,12 +397,8 @@ void GL33Renderer::CleanUpPools()
     }
     m_meshRenderPool.clear();
 
-    for (auto dirLight : m_directionalLightPool)
-    {
-        delete dirLight.second;
-    }
-
     m_directionalLightPool.clear();
+    m_pointLightPool.clear();
 }
 
 bool GL33Renderer::SetupDirectionalShadowBuffer(DirectionalShadowRender& shadowRender)
@@ -567,7 +561,6 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight
     glClearColor(0.3f, 0.3f, 0.3f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-
     // Use our shader
     GLuint prgmID = m_glResources.m_glLoadedProgramsIds["DirectionalLight"].m_loaded_id;
     glUseProgram(prgmID);
@@ -626,7 +619,6 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight
     // Draw the triangle !
     // You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
     glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-
 
     glDisableVertexAttribArray(0);
     glUseProgram(0);
@@ -709,6 +701,10 @@ void GL33Renderer::DrawPointLight(PointLightComponent* pointLight)
     GLuint lightPrId = glGetUniformLocation(prgmID, "lightPR");
     blaVec4 lightPr = blaVec4(pt.GetPosition(), 0.8f * (pt.GetScale().x + pt.GetScale().y + pt.GetScale().z) / 3.0);
     glUniform4fv(lightPrId, 1, &(lightPr[0]));
+
+    GLuint radiosityId = glGetUniformLocation(prgmID, "radiosity");
+    blaVec3 radiosity = pointLight->m_radiosity;
+    glUniform3fv(radiosityId, 1, &(radiosity[0]));
 
     GLuint diffuseMapID = glGetUniformLocation(prgmID, "diffuseMap");
     // Bind our texture in Texture Unit 0
@@ -825,7 +821,6 @@ int BLA::GL33Renderer::SynchWithRenderManager()
         if (m_renderingManager->GetTicketedDirectionalLights()->count((blaU32)light.first) == 0)
         {
             toErase.push_back(light.first);
-            delete light.second;
         }
     }
 
@@ -871,11 +866,12 @@ int BLA::GL33Renderer::SynchWithRenderManager()
         {
             blaPair<DirectionalLightComponent*, CameraComponent*> dirLightAndCamera = ticketedObject.second;
 
-            DirectionalLightRender* dirLightRender = new DirectionalLightRender();
-            dirLightRender->m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);
-            dirLightRender->m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
-            dirLightRender->m_shadowRender.m_bufferSize = 8192;
-            SetupDirectionalShadowBuffer(dirLightRender->m_shadowRender);
+            DirectionalLightRender dirLightRender;
+            dirLightRender.m_dirLightComponent = dirLightAndCamera.first;
+            dirLightRender.m_shadowRender.m_shadowCamera.AttachCamera(dirLightAndCamera.second);
+            dirLightRender.m_shadowRender.m_shadowCamera.SetOrthographicProj(-200, 200, -200, 200);
+            dirLightRender.m_shadowRender.m_bufferSize = 8192;
+            SetupDirectionalShadowBuffer(dirLightRender.m_shadowRender);
             m_directionalLightPool[ticketedObject.first] = dirLightRender;
 
             addedObjectsOnCall++;

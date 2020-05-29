@@ -302,7 +302,7 @@ void TranslationGizmoControl::Update()
         if (leftMouseButton.IsUp())
         {
             m_selectedAxis = NONE;
-            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("m_worldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
+            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("WorldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
         }
 
         float t;
@@ -460,7 +460,7 @@ void ScaleGizmoControl::Update()
         if (leftMouseButton.IsUp())
         {
             m_selectedAxis = NONE;
-            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("m_worldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
+            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("WorldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
         }
 
         currentScreenAxis = m_selectedAxis;
@@ -626,7 +626,7 @@ void RotationGizmoControl::Update()
         if (leftMouseButton.IsUp())
         {
             m_selectedAxis = NONE;
-            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("m_worldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
+            m_editorCommandManager->Execute(new GameComponentEditCommand(m_controlledObject, BlaStringId("TransformComponent"), BlaStringId("WorldTransform"), ValueCommandDelta(reinterpret_cast<char*>(&m_preClickTransform), reinterpret_cast<char*>(&transform), sizeof(blaScaledTransform))));
         }
 
         currentScreenAxis = m_selectedAxis;

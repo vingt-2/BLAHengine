@@ -6,7 +6,6 @@
 #include "System/Console.h"
 #include "Renderer/MeshRendererComponent.h"
 #include "Renderer/PointLightComponent.h"
-#include "Renderer/LightRender.h"
 
 #include <optional>
 #include "VulkanRenderer.h"
