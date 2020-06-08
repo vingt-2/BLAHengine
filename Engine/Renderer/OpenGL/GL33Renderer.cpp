@@ -7,12 +7,15 @@
 #include "Renderer/PointLightComponent.h"
 #include "Core/TransformComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
+#include "System/RenderWindow.h"
+#include "Assets/AssetsManager.h"
 
 using namespace BLA;
 
 TriangleMesh g_PointLightRenderSphere = PrimitiveGeometry::MakeSphere(1.f, false, 16, 16);
 
-GL33Renderer::GL33Renderer() :
+GL33Renderer::GL33Renderer(const AssetManager* assetManager) :
+    Renderer(assetManager),
     m_debugDrawGBuffer(false),
     m_renderDebug(true),
     m_clearColor(blaVec3(0.3, 0.3, 0.3))
@@ -27,7 +30,7 @@ void GL33Renderer::ViewportResize(int width, int height)
 {
     m_renderSize = blaIVec2(width, height);
 
-    m_mainRenderCamera.SetPerspective(m_renderSize);
+    m_mainRenderCamera.SetAspect(m_renderSize);
 
     m_GBuffer.DeleteGBufferResources();
     m_GBuffer.m_GbufferSize = m_renderSize;
@@ -42,11 +45,11 @@ Ray GL33Renderer::ScreenToRay(blaVec2 screenSpaceCoord)
     rayDirection.y = -(2.0f * screenSpaceCoord.y - 1.f) / this->m_mainRenderCamera.m_perspectiveProjection[1][1];
 
     blaMat4 viewTransformMatrix;
-    this->m_mainRenderCamera.m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(viewTransformMatrix);
+    this->m_mainRenderCamera.m_attachedCamera->m_worldToCamera.GetScaledTransformMatrix(viewTransformMatrix);
 
     blaMat4 inverseView = inverse(viewTransformMatrix);
 
-    blaVec4 direction = (inverseView * blaVec4(rayDirection, 0));
+    blaVec4 direction = inverseView * blaVec4(rayDirection, 0);
     rayDirection = normalize(blaVec3(direction.x, direction.y, direction.z));
 
     blaVec3 rayOrigin = blaVec3(inverseView[3][0], inverseView[3][1], inverseView[3][2]);
@@ -174,19 +177,22 @@ void GL33Renderer::RenderGBuffer()
 
     glUseProgram(m_GBuffer.m_geometryPassPrgmID);
 
+    GLuint timeid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "time");
+    glUniform1f(timeid, (float) glfwGetTime());
+
     for (auto loadedRenderObject : m_meshRenderPool)
     {
         RenderObject* renderObject = loadedRenderObject.second;
         if (GL33RenderObject* gl33RenderObject = dynamic_cast<GL33RenderObject*>(renderObject))
         {
-            blaMat4 MVP = m_mainRenderCamera.m_ViewProjection  * (*(gl33RenderObject->m_modelTransform));
+            blaMat4 MVP = m_mainRenderCamera.m_worldToClipSpace  * (*(gl33RenderObject->m_modelToWorld));
 
             GLuint MVPid = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "MVP");
             glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
 
             //send modelTransform to shader
             GLuint transformID = glGetUniformLocation(m_GBuffer.m_geometryPassPrgmID, "modelTransform");
-            glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(gl33RenderObject->m_modelTransform))[0][0]);
+            glUniformMatrix4fv(transformID, 1, GL_FALSE, &(*(gl33RenderObject->m_modelToWorld))[0][0]);
 
 
         	// Render all materials
@@ -265,7 +271,7 @@ RenderObject* GL33Renderer::LoadRenderObject(const MeshRendererComponent& meshRe
     object->m_toMeshBiTangents = &(renderData->m_vertBiTangent);
     object->m_toMeshUVs = &(renderData->m_vertUVs);
 
-    object->m_modelTransform = meshRenderer.GetTransformMatrix();
+    object->m_modelToWorld = meshRenderer.GetTransformMatrix();
 
     if (!this->GenerateArrays(*object))
     {
@@ -592,7 +598,7 @@ void GL33Renderer::DrawDirectionalLight(DirectionalLightRender* directionalLight
         0.5, 0.5, 0.5, 1.0f
     );
 
-    blaMat4 shadowMV = biasMatrix * shadowCamera->m_ViewProjection;
+    blaMat4 shadowMV = biasMatrix * shadowCamera->m_worldToClipSpace;
     GLuint shadowTID = glGetUniformLocation(prgmID, "shadowMV");
     glUniformMatrix4fv(shadowTID, 1, GL_FALSE, &shadowMV[0][0]);
 
@@ -661,7 +667,7 @@ void GL33Renderer::DrawPointLight(PointLightComponent* pointLight)
 	 
 	pointLight->GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(modelMatrix);
 
-    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection * modelMatrix;
+    blaMat4 MVP = m_mainRenderCamera.m_worldToClipSpace * modelMatrix;
 
     GLuint MVPid = glGetUniformLocation(m_GBuffer.m_drawSphereStencilPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
@@ -766,7 +772,7 @@ bool GL33Renderer::RenderDirectionalShadowMap(DirectionalShadowRender& shadowRen
     {
         if (GL33RenderObject* renderObject = dynamic_cast<GL33RenderObject*>(m_meshRenderPool[i]))
         {
-            blaMat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelTransform));
+            blaMat4 MVP = shadowRender.getShadowViewProjection() * (*(renderObject->m_modelToWorld));
 
             GLuint shadowMVID = glGetUniformLocation(programId, "depthMVP");
             glUniformMatrix4fv(shadowMVID, 1, GL_FALSE, &MVP[0][0]);
@@ -1087,8 +1093,7 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
 
     bool initialized = false;
 
-#ifdef GLFW_INTERFACE
-    if (GLFWRenderWindow* render = dynamic_cast<GLFWRenderWindow*>(window))
+    if (GLFWOpenGLRenderWindow* renderWindow = dynamic_cast<GLFWOpenGLRenderWindow*>(window))
     {
         // window-> IMPLEMENT CHECK WINDOW STATUS
 
@@ -1105,42 +1110,10 @@ void GL33Renderer::InitializeRenderer(RenderWindow* window, RenderingManager* re
         m_GBuffer.InitializeGBuffer();
 
         this->m_isContextEnabled = true;
-        m_renderWindow = window;
+        m_renderWindow = renderWindow;
 
         initialized = true;
     }
-
-#elif defined(WPF_INTERFACE)
-    if (WPFRenderWindow* render = dynamic_cast<WPFRenderWindow*>(window))
-    {
-        if (!initialized)
-        {
-            //Check for context validity:v
-
-            // window-> IMPLEMENT CHECK WINDOW STATUS
-            int x, y;
-            render->GetSize(x, y);
-            m_renderSize = glm::vec2(100, 100);
-
-            //Neat grey background
-            glClearColor(1.f, 0.f, 0.f, 1.0f);
-
-            // Accept fragment if it closer to the camera than the former one
-            glDepthFunc(GL_LESS);
-            
-            // Cull triangles which normal is not towards the camera
-            glEnable(GL_CULL_FACE);
-
-            m_GBuffer.m_GbufferSize = m_renderSize;
-            m_GBuffer.InitializeGBuffer();
-
-            this->m_isContextEnabled = true;
-            m_renderWindow = window;
-
-            initialized = true;
-        }
-    }
-#endif
 
     if (!initialized)
     {
@@ -1393,7 +1366,7 @@ void GL33Renderer::RenderDebugLines()
 
     glUseProgram(m_debugRayPgrmID);
 
-    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection; // model space is identity as it's loaded everything is loaded in worldspace
+    blaMat4 MVP = m_mainRenderCamera.m_worldToClipSpace; // model space is identity as it's loaded everything is loaded in worldspace
 
     GLuint MVPid = glGetUniformLocation(m_debugRayPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);
@@ -1435,7 +1408,7 @@ void GL33Renderer::RenderDebugMeshes()
 
     glUseProgram(m_debugMeshesPgrmID);
 
-    blaMat4 MVP = m_mainRenderCamera.m_ViewProjection; // model space is identity as it's loaded everything is loaded in worldspace
+    blaMat4 MVP = m_mainRenderCamera.m_worldToClipSpace; // model space is identity as it's loaded everything is loaded in worldspace
 
     GLuint MVPid = glGetUniformLocation(m_debugMeshesPgrmID, "MVP");
     glUniformMatrix4fv(MVPid, 1, GL_FALSE, &MVP[0][0]);

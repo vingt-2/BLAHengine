@@ -7,8 +7,8 @@
 namespace BLA
 {
     class EditorCommandManager;
-    class BlaGuiElement;
-    struct BlaGuiElementEventPayload;
+    class DevGuiElement;
+    struct DevGuiElementEventPayload;
     class SceneGraphGui
     {
     public:
@@ -19,18 +19,18 @@ namespace BLA
         void OpenSceneGraph();
 
     private:
-        typedef blaMap<GameObjectID, BlaGuiElement*> ElementMap;
-        void AddObjectToTree(BlaGuiElement& rootElement, ElementMap& elementMap, const GameObject& object);
+        typedef blaMap<GameObjectID, DevGuiElement*> ElementMap;
+        void AddObjectToTree(DevGuiElement& rootElement, ElementMap& elementMap, const GameObject& object);
 
-        void OnSceneGraphElementEvent(const BlaGuiElementEventPayload& event);
+        void OnSceneGraphElementEvent(const DevGuiElementEventPayload& event);
 
-        static void StaticOnSceneGraphElementEvent(void* thisPtr, const BlaGuiElementEventPayload& event)
+        static void StaticOnSceneGraphElementEvent(void* thisPtr, const DevGuiElementEventPayload& event)
         {
             ((SceneGraphGui*)thisPtr)->OnSceneGraphElementEvent(event);
         }
 
         ElementMap m_elementMap;
 
-        BlaGuiElement* m_selectedElement;
+        DevGuiElement* m_selectedElement;
     };
 }

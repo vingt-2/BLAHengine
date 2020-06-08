@@ -14,8 +14,9 @@ void Renderer::SetCamera(CameraComponent * camera)
     m_mainRenderCamera.AttachCamera(camera);
 }
 
-Renderer::Renderer()
+Renderer::Renderer(const AssetManager* assetManager)
 {
+    m_assetManager = assetManager;
     m_renderToFrameBufferOnly = false;
     m_isContextEnabled = false;
     this->m_renderSize = glm::vec2(0, 0);

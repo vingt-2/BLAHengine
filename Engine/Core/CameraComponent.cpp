@@ -5,6 +5,9 @@ using namespace BLA;
 
 BeginComponentDescription(CameraComponent)
 Expose(m_isShadowMapCamera)
+Expose(m_fov)
+Expose(m_nearClipPlane)
+Expose(m_farClipPlane)
 EndComponentDescription()
 
 void CameraComponent::Init()
@@ -19,7 +22,7 @@ void CameraComponent::UpdateView()
 
     blaScaledTransform t = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
 
-    m_viewTransform.m_posQuat = t.m_posQuat.GetInverse();
+    m_worldToCamera.m_posQuat = t.m_posQuat.GetInverse();
 }
 
 void CameraComponent::Update()

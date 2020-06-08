@@ -9,10 +9,14 @@ namespace BLA
     BeginComponentDeclaration(BLAEngine, CameraComponent)
         void Init() override;
 
-        blaScaledTransform  m_viewTransform;
+        blaScaledTransform  m_worldToCamera;
         
         bool m_isShadowMapCamera = false;
 
+        blaF32 m_fov = 120.f;
+        blaF32 m_nearClipPlane = 0.01f;
+        blaF32 m_farClipPlane = 10000.f;
+	
         // Functions
         void UpdateView();
         void Update();

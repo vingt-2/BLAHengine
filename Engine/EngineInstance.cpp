@@ -4,7 +4,7 @@
 
 #include "System.h"
 #include "Maths/Maths.h"
-#include "Renderer/GL33Renderer.h"
+
 #include "Core/Timer.h"
 #include "Core/RenderingManager.h"
 #include "Core/DebugDraw.h"
@@ -13,11 +13,17 @@
 #include "System/Console.h"
 #include "System/InputManager.h"
 #include "System/RenderWindow.h"
-#include "Gui/GuiManager.h"
+#include "Gui/DevGuiManager.h"
 #include "System/ControllerInputs/Dualshock4.h"
 #include "Core/ComponentLibraries.h"
 #include "Core/ComponentSystems.h"
 #include "EngineInstance.h"
+
+#if VULKAN
+#include "Renderer/Vulkan/VulkanRenderer.h"
+#else
+#include "Renderer/OpenGL/GL33Renderer.h" 
+#endif
 
 using namespace BLA;
 
@@ -28,10 +34,14 @@ blaU32 EngineInstance::LoopEngine()
     EngineInstance* engineInstance = EngineInstance::GetSingletonInstance();
 
     GLFWRenderWindow::InitGLFW();
-	
-    RenderWindow* renderWindow = new GLFWRenderWindow();
 
-    renderWindow->CreateGL33RenderWindow("BLAengine Editor", 1280, 720, false);
+#if VULKAN
+    RenderWindow* renderWindow = new GLFWVulkanRenderWindow();
+#else
+    RenderWindow* renderWindow = new GLFWOpenGLRenderWindow();
+#endif
+
+    renderWindow->CreateRenderWindow("BLAengine Editor", 1280, 720, false);
 
     engineInstance->InitializeEngine(renderWindow);
 
@@ -93,10 +103,13 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
 
-    m_renderer = new GL33Renderer();
-
+#if VULKAN
+    m_renderer = new VulkanRenderer(m_assetManager);
     m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
-    m_renderer->m_assetManager = m_assetManager;
+#else
+    m_renderer = new GL33Renderer(m_assetManager);
+    m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
+#endif
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 
@@ -113,7 +126,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_scene->Initialize(m_renderingManager);
 
-    m_guiManager = BlaGuiManager::AssignAndReturnSingletonInstance(new BlaGuiManager((dynamic_cast<GLFWRenderWindow*>(m_renderWindow))->GetWindowPointer()));
+    m_guiManager = DevGuiManager::AssignAndReturnSingletonInstance(new DevGuiManager(m_renderWindow));
 
     // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())

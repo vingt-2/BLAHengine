@@ -71,16 +71,19 @@ blaIndex BLA::AssetManager::LoadCookedAssets()
     return triMeshNames.size() + matNames.size() + textureNames.size();
 }
 
-AssetManager::AssetType AssetManager::GetAsset(blaString assetName, Asset* &assetPtr)
+AssetManager::AssetType AssetManager::GetAsset(blaString assetName, Asset* &assetPtr) const
 {
     AssetType type;
-    if (!m_resourceMap.count(assetName))
+
+    ResourceMap::const_iterator it = m_resourceMap.find(assetName);
+
+    if (it == m_resourceMap.end())
     {
         type = InvalidAsset;
         return type;
     }
 
-    blaPair<AssetType, blaIndex> asset = m_resourceMap[assetName];
+    blaPair<AssetType, blaIndex> asset = it->second;
 
     type = asset.first;
     const blaIndex assetIndx = asset.second;

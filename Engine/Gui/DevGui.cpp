@@ -1,21 +1,27 @@
 // Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
-#include "GuiManager.h"
-#include "GuiWindow.h"
-#include "GuiElements.h"
-#include "GuiMenu.h"
-#include "GuiConsole.h"
+#include "DevGuiManager.h"
+#include "DevGuiWindow.h"
+#include "DevGuiElements.h"
+#include "DevGuiMenu.h"
+#include "DevGuiConsole.h"
 
 #include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
+
+#if VULKAN
+#include "examples/imgui_impl_vulkan.h"
+#include "System/VulkanRenderWindow.h"
+#else
 #include "examples/imgui_impl_opengl3.h"
+#endif
 
 #include "System/RenderWindow.h"
 #include "System/InputManager.h"
 #include "System/FileSystem/Files.h"
 #include "System/Console.h"
 #include "Core/Scene.h"
-#include "Renderer/GL33Renderer.h"
+#include "Renderer/OpenGL/GL33Renderer.h"
 
 #include "EngineInstance.h"
 
@@ -23,7 +29,7 @@
 
 using namespace BLA;
 
-BLA_IMPLEMENT_SINGLETON(BlaGuiManager);
+BLA_IMPLEMENT_SINGLETON(DevGuiManager);
 
 blaBool IsItemDoubleCliked(int mouse_button = 0);
 
@@ -92,17 +98,30 @@ void BLAengineStyleColors(ImGuiStyle* dst)
 ImFont* f;
 ImFont* f2;
 
-BlaGuiWindow* BlaGuiManager::OpenWindow(blaString name)
+DevGuiManager::DevGuiManager(RenderWindow* glfwWindow) :
+    m_window(glfwWindow)
+{
+    m_showDockspace = true;
+    Init();
+    m_lastFileBrowserOpenDirectory = "./";
+}
+
+DevGuiManager::~DevGuiManager()
+{
+    Destroy();
+}
+
+DevGuiWindow* DevGuiManager::OpenWindow(blaString name)
 {
     auto w = m_openWindows.find(name);
     if (w != m_openWindows.end())
         return w->second;
     
-    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, new BlaGuiWindow(name, blaIVec2(10, 10))));
+    m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(name, new DevGuiWindow(name, blaIVec2(10, 10))));
     return m_openWindows[name];
 }
 
-BlaGuiWindow* BlaGuiManager::GetWindow(blaString name)
+DevGuiWindow* DevGuiManager::GetWindow(blaString name)
 {
     auto w = m_openWindows.find(name);
     if (w != m_openWindows.end())
@@ -110,12 +129,51 @@ BlaGuiWindow* BlaGuiManager::GetWindow(blaString name)
     return nullptr;
 }
 
-void BlaGuiManager::OpenWindow(blaString name, BlaGuiWindow* window)
+void DevGuiManager::OpenWindow(blaString name, DevGuiWindow* window)
 {
-    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(name, window));
+    m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(name, window));
 }
 
-void BlaGuiManager::Init()
+#if VULKAN
+static void CreateImGuiVulkanRenderPass(const VulkanContext* vulkanContext, VulkanWindowInfo* vulkanWindowInfo)
+{
+    VkAttachmentDescription attachment = {};
+    attachment.format = vulkanWindowInfo->SurfaceFormat.format;
+    attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    attachment.loadOp = vulkanWindowInfo->ClearEnable ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    VkAttachmentReference color_attachment = {};
+    color_attachment.attachment = 0;
+    color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    VkSubpassDescription subpass = {};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment;
+    VkSubpassDependency dependency = {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    VkRenderPassCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    info.attachmentCount = 1;
+    info.pAttachments = &attachment;
+    info.subpassCount = 1;
+    info.pSubpasses = &subpass;
+    info.dependencyCount = 1;
+    info.pDependencies = &dependency;
+    VkResult err = vkCreateRenderPass(vulkanContext->m_Device, &info, nullptr, &vulkanWindowInfo->ImGuiRenderPass);
+    check_vk_result(err);
+}
+#endif
+
+void DevGuiManager::Init()
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -135,12 +193,66 @@ void BlaGuiManager::Init()
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer bindings
-    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
+#if VULKAN
+    GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
 
+    ImGui_ImplGlfw_InitForVulkan(renderWindow->GetWindowPointer(), true);
+
+    const VulkanContext* vulkanContext = renderWindow->GetVulkanContext();
+    VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
+
+    CreateImGuiVulkanRenderPass(vulkanContext, renderWindowInfo);
+
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = vulkanContext->m_Instance;
+    init_info.PhysicalDevice = vulkanContext->m_PhysicalDevice;
+    init_info.Device = vulkanContext->m_Device;
+    init_info.QueueFamily = vulkanContext->m_QueueFamily;
+    init_info.Queue = vulkanContext->m_Queue;
+    init_info.PipelineCache = vulkanContext->m_PipelineCache;
+    init_info.DescriptorPool = vulkanContext->m_DescriptorPool;
+    init_info.Allocator = vulkanContext->m_Allocator;
+    init_info.MinImageCount = vulkanContext->m_MinImageCount;
+    init_info.ImageCount = vulkanContext->m_MinImageCount;
+    init_info.CheckVkResultFn = &check_vk_result;
+    ImGui_ImplVulkan_Init(&init_info, renderWindowInfo->ImGuiRenderPass);
+    {
+        // Use any command queue
+        VkCommandPool command_pool = renderWindowInfo->Frames[renderWindowInfo->FrameIndex].CommandPool;
+        VkCommandBuffer command_buffer = renderWindowInfo->Frames[renderWindowInfo->FrameIndex].CommandBuffer;
+
+        VkResult err = vkResetCommandPool(vulkanContext->m_Device, command_pool, 0);
+        check_vk_result(err);
+        VkCommandBufferBeginInfo begin_info = {};
+        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        err = vkBeginCommandBuffer(command_buffer, &begin_info);
+        check_vk_result(err);
+
+        ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+
+        VkSubmitInfo end_info = {};
+        end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        end_info.commandBufferCount = 1;
+        end_info.pCommandBuffers = &command_buffer;
+        err = vkEndCommandBuffer(command_buffer);
+        check_vk_result(err);
+        err = vkQueueSubmit(vulkanContext->m_Queue, 1, &end_info, VK_NULL_HANDLE);
+        check_vk_result(err);
+
+        err = vkDeviceWaitIdle(vulkanContext->m_Device);
+        check_vk_result(err);
+        ImGui_ImplVulkan_DestroyFontUploadObjects();
+    }
+
+#else
+    GLFWOpenGLRenderWindow* renderWindow = static_cast<GLFWOpenGLRenderWindow*>(m_window);
+    ImGui_ImplGlfw_InitForOpenGL(renderWindow->GetWindowPointer(), true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+#endif
 }
 
-void BlaGuiManager::Destroy()
+void DevGuiManager::Destroy()
 {
     for (auto window : m_openWindows)
     {
@@ -148,28 +260,39 @@ void BlaGuiManager::Destroy()
     }
 
     // Cleanup
+#if VULKAN
+    GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
+
+    const VulkanContext* vulkanContext = renderWindow->GetVulkanContext();
+    VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
+    vkDestroyRenderPass(vulkanContext->m_Device, renderWindowInfo->ImGuiRenderPass, nullptr);
+
+    ImGui_ImplVulkan_Shutdown();
+#else
     ImGui_ImplOpenGL3_Shutdown();
+#endif
+
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void BlaGuiElement::SendEvent(BlaGuiElementEventPayload::EventType eventType, void* pEventPayload)
+void DevGuiElement::SendEvent(DevGuiElementEventPayload::EventType eventType, void* pEventPayload)
 {
     for (const auto& cb : m_registeredCallbacks)
     {
         if ((cb.m_eventTriggerFlags & eventType) != 0)
         {
-            BlaGuiElementEventPayload callbackPayload{ eventType, pEventPayload };
+            DevGuiElementEventPayload callbackPayload{ eventType, pEventPayload };
             cb.m_callback(cb.m_callerPtr, callbackPayload);
         }
     }
 }
 
-void BlaGuiElement::HandleDragDropOfElements()
+void DevGuiElement::HandleDragDropOfElements()
 {
     struct DragPtrPayload
     {
-        BlaGuiElement* sender;
+        DevGuiElement* sender;
     };
 
     // Our buttons are both drag sources and drag targets here!
@@ -186,18 +309,18 @@ void BlaGuiElement::HandleDragDropOfElements()
         {
             IM_ASSERT(payload->DataSize == sizeof(DragPtrPayload));
 
-            BlaGuiElement* payloadPtr = (BlaGuiElement*)((DragPtrPayload*)payload->Data)->sender;
+            DevGuiElement* payloadPtr = (DevGuiElement*)((DragPtrPayload*)payload->Data)->sender;
             BlaDroppablePayload p = { this, payloadPtr };
-            SendEvent(BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED, (void*)&p);
+            SendEvent(DevGuiElementEventPayload::EventType::ELEMENT_DROPPED, (void*)&p);
         }
         ImGui::EndDragDropTarget();
     }
 }
 
-void BlaGuiElement::RegisterEvents(BlaGuiRegisteredEvents& cb)
+void DevGuiElement::RegisterEvents(DevGuiRegisteredEvents& cb)
 {
-    blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
-        [cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
+    blaVector<DevGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
+        [cb](const DevGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
 
     if (it == m_registeredCallbacks.end())
     {
@@ -205,10 +328,10 @@ void BlaGuiElement::RegisterEvents(BlaGuiRegisteredEvents& cb)
     }
 }
 
-void BlaGuiElement::UnRegisterEvents(BlaGuiRegisteredEvents& cb)
+void DevGuiElement::UnRegisterEvents(DevGuiRegisteredEvents& cb)
 {
-    blaVector<BlaGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
-        [cb](const BlaGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
+    blaVector<DevGuiRegisteredEvents>::iterator it = std::find_if(m_registeredCallbacks.begin(), m_registeredCallbacks.end(),
+        [cb](const DevGuiRegisteredEvents& c) {return cb.m_callback == c.m_callback; });
 
     if (it != m_registeredCallbacks.end())
     {
@@ -216,7 +339,7 @@ void BlaGuiElement::UnRegisterEvents(BlaGuiRegisteredEvents& cb)
     }
 }
 
-void BlaGuiElement::Render()
+void DevGuiElement::Render()
 {
     auto child = GetChild();
 
@@ -227,12 +350,12 @@ void BlaGuiElement::Render()
     }
 }
 
-BlaGuiCollapsibleElement::BlaGuiCollapsibleElement(const blaString& name, blaStringId groupId): BlaGuiElement(
+DevGuiCollapsibleElement::DevGuiCollapsibleElement(const blaString& name, blaStringId groupId): DevGuiElement(
 	name, groupId)
 {
 }
 
-void BlaGuiCollapsibleElement::Render()
+void DevGuiCollapsibleElement::Render()
 {
     int flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | (m_decorateHeader ? ImGuiTreeNodeFlags_Framed : 0);
 
@@ -250,11 +373,11 @@ void BlaGuiCollapsibleElement::Render()
     {
         if (IsItemDoubleCliked(ImGuiMouseButton_Left))
         {
-            SendEvent(BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED, this);
+            SendEvent(DevGuiElementEventPayload::EventType::DOUBLE_CLICKED, this);
         }
         else if (ImGui::IsItemClicked()) 
         {
-            SendEvent(BlaGuiElementEventPayload::EventType::SELECTED, this);
+            SendEvent(DevGuiElementEventPayload::EventType::SELECTED, this);
         }
 
         HandleDragDropOfElements();
@@ -273,18 +396,18 @@ void BlaGuiCollapsibleElement::Render()
     {
         if (IsItemDoubleCliked(ImGuiMouseButton_Left))
         {
-            SendEvent(BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED, this);
+            SendEvent(DevGuiElementEventPayload::EventType::DOUBLE_CLICKED, this);
         }
         else if (ImGui::IsItemClicked())
         {
-            SendEvent(BlaGuiElementEventPayload::EventType::SELECTED, this);
+            SendEvent(DevGuiElementEventPayload::EventType::SELECTED, this);
         }
     	
         HandleDragDropOfElements();
     }
 }
 
-void BlaGuiCollapsibleHeaderElement::Render()
+void DevGuiCollapsibleHeaderElement::Render()
 {
     if (ImGui::CollapsingHeader(GetName().c_str()))
     {
@@ -298,30 +421,30 @@ void BlaGuiCollapsibleHeaderElement::Render()
     }
 }
 
-void BlaGuiSimpleTextElement::Render()
+void DevGuiSimpleTextElement::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImGui::Text(m_text.c_str());
     // END OCornut's Dear ImGui Specific Code Now
     HandleDragDropOfElements();
 
-    BlaGuiElement::Render();
+    DevGuiElement::Render();
 }
 
-bool BLA::BlaGuiEditElementVectorPreRender(BlaGuiElement* element)
+bool BLA::DevGuiEditElementVectorPreRender(DevGuiElement* element)
 {
     int flags = ImGuiTreeNodeFlags_OpenOnArrow;
 
     return ImGui::TreeNodeEx((void*)(intptr_t)element, flags, element->GetName().c_str());
 }
 
-void BLA::BlaGuiEditElementVectorPostRender(BlaGuiElement* element)
+void BLA::DevGuiEditElementVectorPostRender(DevGuiElement* element)
 {
     ImGui::TreePop();
 }
 
 template<>
-void BlaGuiEditElement<bool>::Render()
+void DevGuiEditElement<bool>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -335,7 +458,7 @@ void BlaGuiEditElement<bool>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaF32>::Render()
+void DevGuiEditElement<blaF32>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -349,7 +472,7 @@ void BlaGuiEditElement<blaF32>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaF64>::Render()
+void DevGuiEditElement<blaF64>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -363,7 +486,7 @@ void BlaGuiEditElement<blaF64>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaS32>::Render()
+void DevGuiEditElement<blaS32>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -377,7 +500,7 @@ void BlaGuiEditElement<blaS32>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaVec2>::Render()
+void DevGuiEditElement<blaVec2>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -391,7 +514,7 @@ void BlaGuiEditElement<blaVec2>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaVec3>::Render()
+void DevGuiEditElement<blaVec3>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -405,7 +528,7 @@ void BlaGuiEditElement<blaVec3>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaQuat>::Render()
+void DevGuiEditElement<blaQuat>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
@@ -420,7 +543,7 @@ void BlaGuiEditElement<blaQuat>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaPosQuat>::Render()
+void DevGuiEditElement<blaPosQuat>::Render()
 {
     ImGui::Text(GetName().c_str());
     ImGui::Columns(2, 0, false);
@@ -440,7 +563,7 @@ void BlaGuiEditElement<blaPosQuat>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaScaledTransform>::Render()
+void DevGuiEditElement<blaScaledTransform>::Render()
 {
     ImGui::Text(GetName().c_str());
     ImGui::Columns(2, 0, false);
@@ -466,7 +589,7 @@ void BlaGuiEditElement<blaScaledTransform>::Render()
 }
 
 template<>
-void BlaGuiEditElement<blaString>::Render()
+void DevGuiEditElement<blaString>::Render()
 {
     char inputBuf[2048];
     strcpy_s(inputBuf, m_pToValue->c_str());
@@ -482,15 +605,15 @@ void BlaGuiEditElement<blaString>::Render()
 }
 
 template <typename T1, typename T2>
-void BlaGuiEditElementPair<T1, T2>::Render()
+void DevGuiEditElementPair<T1, T2>::Render()
 {
     ImGui::Text(GetName().c_str());
-    BlaGuiEditElement<T1>("First", &m_pToPair->first).Render();
-    BlaGuiEditElement<T2>("Second", &m_pToPair->second).Render();
+    DevGuiEditElement<T1>("First", &m_pToPair->first).Render();
+    DevGuiEditElement<T2>("Second", &m_pToPair->second).Render();
 }
 
 template<>
-void BlaGuiEditElement<GameObject>::Render()
+void DevGuiEditElement<GameObject>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str());
@@ -507,7 +630,7 @@ void BlaGuiEditElement<GameObject>::Render()
     ImGui::Columns(1);
 }
 
-BlaGuiWindow::BlaGuiWindow():
+DevGuiWindow::DevGuiWindow():
 	m_windowName("")
 	, m_windowPosition(blaIVec2(0))
 	, m_windowFlags(0)
@@ -516,7 +639,7 @@ BlaGuiWindow::BlaGuiWindow():
 {
 }
 
-BlaGuiWindow::BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition):
+DevGuiWindow::DevGuiWindow(const blaString& windowName, const blaIVec2& windowPosition):
 m_windowName(windowName)
 , m_windowPosition(windowPosition)
 , m_windowFlags(0)
@@ -527,13 +650,13 @@ m_windowName(windowName)
 {
 }
 
-BlaGuiWindow::~BlaGuiWindow()
+DevGuiWindow::~DevGuiWindow()
 {
     delete m_rootElement;
     delete m_menu;
 }
 
-void BlaGuiWindow::Render()
+void DevGuiWindow::Render()
 {
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
@@ -557,33 +680,33 @@ void BlaGuiWindow::Render()
     // END OCornut's Dear ImGui Specific Code Now
 }
 
-BlaGuiElement* BlaGuiWindow::RootElement() const
+DevGuiElement* DevGuiWindow::RootElement() const
 {
 	return m_rootElement;
 }
 
-void BlaGuiWindow::SetRootElement(BlaGuiElement* imGuiElements)
+void DevGuiWindow::SetRootElement(DevGuiElement* imGuiElements)
 {
     m_rootElement = imGuiElements;
 }
 
-bool BlaGuiWindow::HasFocus() const
+bool DevGuiWindow::HasFocus() const
 {
 	return m_hasFocus;
 }
 
-BlaGuiMenu& BlaGuiWindow::AddMenu()
+DevGuiMenu& DevGuiWindow::AddMenu()
 {
-    m_menu = new BlaGuiMenu();
+    m_menu = new DevGuiMenu();
     return *m_menu;
 }
 
-BlaOneTimeWindow::BlaOneTimeWindow(): BlaGuiWindow()
+BlaOneTimeWindow::BlaOneTimeWindow(): DevGuiWindow()
 {
 }
 
 BlaOneTimeWindow::BlaOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition):
-	BlaGuiWindow(windowName, windowPosition)
+	DevGuiWindow(windowName, windowPosition)
 {
 }
 
@@ -592,7 +715,7 @@ void BlaOneTimeWindow::Render()
     // BEGIN OCornut's Dear ImGui Specific Code Now
     ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
     ImGui::SetNextWindowPos(position);
-    ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags | BlaGuiWindow::WindowFlags::MenuBar | ImGuiWindowFlags_NoTitleBar);
+    ImGui::Begin(m_windowName.c_str(), NULL, m_windowFlags | DevGuiWindow::WindowFlags::MenuBar | ImGuiWindowFlags_NoTitleBar);
     // END OCornut's Dear ImGui Specific Code Now
 
     if (m_rootElement)
@@ -605,17 +728,20 @@ void BlaOneTimeWindow::Render()
     // END OCornut's Dear ImGui Specific Code Now
 }
 
-BlaGuiRenderWindow::BlaGuiRenderWindow(Renderer* renderer): BlaGuiWindow(), m_pRenderer(renderer)
+DevGuiRenderWindow::DevGuiRenderWindow(Renderer* renderer): DevGuiWindow(), m_pRenderer(renderer)
 {
 }
 
-BlaGuiRenderWindow::BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
-	BlaGuiWindow(windowName, windowPosition), m_cursorScreenSpacePosition(), m_pRenderer(renderer)
+DevGuiRenderWindow::DevGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
+	DevGuiWindow(windowName, windowPosition), m_cursorScreenSpacePosition(), m_pRenderer(renderer)
 {
 }
 
-void BlaGuiRenderWindow::Render()
+void DevGuiRenderWindow::Render()
 {
+#if VULKAN
+    return;
+#else
     if (GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer))
     {
         // BEGIN OCornut's Dear ImGui Specific Code Now
@@ -645,9 +771,10 @@ void BlaGuiRenderWindow::Render()
 
         ImGui::End();
     }
+#endif
 }
 
-blaVec2 BlaGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
+blaVec2 DevGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
 {
 	return m_cursorScreenSpacePosition;
 }
@@ -655,10 +782,77 @@ blaVec2 BlaGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
 bool g_show_demo_window = false;
 bool g_debugFileBrowser = false;
 
-void BlaGuiManager::Update()
+#if VULKAN
+static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vulkanWindowInfo)
+{
+    VkResult err;
+
+    VkSemaphore image_acquired_semaphore = vulkanWindowInfo->FrameSemaphores[vulkanWindowInfo->SemaphoreIndex].ImageAcquiredSemaphore;
+    VkSemaphore render_complete_semaphore = vulkanWindowInfo->FrameSemaphores[vulkanWindowInfo->SemaphoreIndex].RenderCompleteSemaphore;
+    err = vkAcquireNextImageKHR(vulkanContext->m_Device, vulkanWindowInfo->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &vulkanWindowInfo->FrameIndex);
+    check_vk_result(err);
+
+    VulkanFrameContext* fd = &vulkanWindowInfo->Frames[vulkanWindowInfo->FrameIndex];
+    {
+        err = vkWaitForFences(vulkanContext->m_Device, 1, &fd->Fence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
+        check_vk_result(err);
+
+        err = vkResetFences(vulkanContext->m_Device, 1, &fd->Fence);
+        check_vk_result(err);
+    }
+    {
+        err = vkResetCommandPool(vulkanContext->m_Device, fd->CommandPool, 0);
+        check_vk_result(err);
+        VkCommandBufferBeginInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        err = vkBeginCommandBuffer(fd->CommandBuffer, &info);
+        check_vk_result(err);
+    }
+    {
+        VkRenderPassBeginInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        info.renderPass = vulkanWindowInfo->ImGuiRenderPass;
+        info.framebuffer = fd->Framebuffer;
+        info.renderArea.extent = vulkanWindowInfo->Extent;
+        info.clearValueCount = 1;
+        info.pClearValues = &vulkanWindowInfo->ClearValue;
+        vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+    }
+
+    // Record Imgui Draw Data and draw funcs into command buffer
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
+
+    // Submit command buffer
+    vkCmdEndRenderPass(fd->CommandBuffer);
+    {
+        VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        VkSubmitInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        info.waitSemaphoreCount = 1;
+        info.pWaitSemaphores = &image_acquired_semaphore;
+        info.pWaitDstStageMask = &wait_stage;
+        info.commandBufferCount = 1;
+        info.pCommandBuffers = &fd->CommandBuffer;
+        info.signalSemaphoreCount = 1;
+        info.pSignalSemaphores = &render_complete_semaphore;
+
+        err = vkEndCommandBuffer(fd->CommandBuffer);
+        check_vk_result(err);
+        err = vkQueueSubmit(vulkanContext->m_Queue, 1, &info, fd->Fence);
+        check_vk_result(err);
+    }
+}
+#endif
+
+void DevGuiManager::Update()
 {
     // Start the Dear ImGui frame
+#if VULKAN
+    ImGui_ImplVulkan_NewFrame();
+#else
     ImGui_ImplOpenGL3_NewFrame();
+#endif
     ImGui_ImplGlfw_NewFrame();
 
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -736,12 +930,18 @@ void BlaGuiManager::Update()
 
     ImGui::Render();
 
+#if VULKAN
+    GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
+    // glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
+    FrameRender(renderWindow->GetVulkanContext(), renderWindow->GetVulkanWindowInfo());
+#else
+    GLFWOpenGLRenderWindow* renderWindow = static_cast<GLFWOpenGLRenderWindow*>(m_window);
+    glfwMakeContextCurrent(renderWindow->GetWindowPointer());
     int display_w, display_h;
-    glfwMakeContextCurrent(m_window);
-    glfwGetFramebufferSize(m_window, &display_w, &display_h);
+    glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
 
     // Update and Render additional Platform Windows
        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
@@ -755,23 +955,23 @@ void BlaGuiManager::Update()
     }
 }
 
-blaBool BlaGuiManager::IsMouseOverGui() const
+blaBool DevGuiManager::IsMouseOverGui() const
 {
     ImGuiIO& io = ImGui::GetIO();
     return io.WantCaptureMouse;
 }
 
-void BlaGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowPosition)
+void DevGuiManager::DrawText(const blaString& textToDraw, blaIVec2 renderWindowPosition)
 {
 }
 
-void BlaGuiManager::OpenConsole(const blaString& consoleName)
+void DevGuiManager::OpenConsole(const blaString& consoleName)
 {
-    m_openWindows.insert(blaPair<blaString, BlaGuiWindow*>(consoleName, new BlaGuiWindow(consoleName, blaIVec2(10, 10))));
-    m_openWindows[consoleName]->SetRootElement(new BlaGuiConsole(consoleName, Console::GetSingletonInstance()));
+    m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(consoleName, new DevGuiWindow(consoleName, blaIVec2(10, 10))));
+    m_openWindows[consoleName]->SetRootElement(new DevGuiConsole(consoleName, Console::GetSingletonInstance()));
 }
 
-OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection)
+OpenFilePrompt* DevGuiManager::CreateOpenFilePrompt(blaString browserName, blaBool disableMultipleSelection)
 {
     OpenFilePrompt* browser = new OpenFilePrompt(browserName, m_lastFileBrowserOpenDirectory, "./", disableMultipleSelection);
 
@@ -785,7 +985,7 @@ OpenFilePrompt* BlaGuiManager::CreateOpenFilePrompt(blaString browserName, blaBo
     return (OpenFilePrompt*)m_openBrowsers.at(browserName);
 }
 
-SaveFilePrompt* BlaGuiManager::CreateSaveFilePrompt(blaString browserName)
+SaveFilePrompt* DevGuiManager::CreateSaveFilePrompt(blaString browserName)
 {
     SaveFilePrompt* browser = new SaveFilePrompt(browserName, m_lastFileBrowserOpenDirectory, "./");
 
@@ -800,7 +1000,7 @@ SaveFilePrompt* BlaGuiManager::CreateSaveFilePrompt(blaString browserName)
 }
 
 
-blaBool BlaGuiManager::CloseFileBrowser(blaString browserName)
+blaBool DevGuiManager::CloseFileBrowser(blaString browserName)
 {
     auto browserSearch = m_openBrowsers.find(browserName);
     if (browserSearch != m_openBrowsers.end())
@@ -814,12 +1014,12 @@ blaBool BlaGuiManager::CloseFileBrowser(blaString browserName)
     return false;
 }
 
-BlaGuiMenuItem::BlaGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator):
+DevGuiMenuItem::DevGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator):
 	m_name(name)
 	, m_switch(bool_switch)
 	, m_endWithSeparator(endWithSeparator) {}
 
-void BlaGuiMenuItem::Render()
+void DevGuiMenuItem::Render()
 {
     ImGui::MenuItem(m_name.c_str(), NULL, m_switch);
 
@@ -829,26 +1029,26 @@ void BlaGuiMenuItem::Render()
     }
 }
 
-BlaGuiMenuTab::BlaGuiMenuTab(blaString name): m_name(name) {}
+DevGuiMenuTab::DevGuiMenuTab(blaString name): m_name(name) {}
 
-BlaGuiMenuTab::~BlaGuiMenuTab()
+DevGuiMenuTab::~DevGuiMenuTab()
 {
-    for (BlaGuiMenuBase* m : m_menuItems) delete m;
+    for (DevGuiMenuBase* m : m_menuItems) delete m;
 }
 
-void BlaGuiMenuTab::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
+void DevGuiMenuTab::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
 {
-	m_menuItems.emplace_back(new BlaGuiMenuItem(name, bool_switch, endWithSeparator));
+	m_menuItems.emplace_back(new DevGuiMenuItem(name, bool_switch, endWithSeparator));
 }
 
-BlaGuiMenuTab& BlaGuiMenuTab::AddSubMenu(blaString name)
+DevGuiMenuTab& DevGuiMenuTab::AddSubMenu(blaString name)
 {
-    BlaGuiMenuTab* tab = new BlaGuiMenuTab(name);
+    DevGuiMenuTab* tab = new DevGuiMenuTab(name);
     m_menuItems.emplace_back(tab);
     return *tab;
 }
 
-void BlaGuiMenuTab::Render()
+void DevGuiMenuTab::Render()
 {
     if (ImGui::BeginMenu(m_name.c_str(), true))
     {
@@ -860,7 +1060,7 @@ void BlaGuiMenuTab::Render()
     }
 }
 
-void BlaGuiMenu::Render()
+void DevGuiMenu::Render()
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -876,19 +1076,19 @@ void BlaGuiMenu::Render()
     }
 }
 
-BlaGuiMenu::~BlaGuiMenu()
+DevGuiMenu::~DevGuiMenu()
 {
-    for (BlaGuiMenuBase* m : m_menuTabs) delete m;
+    for (DevGuiMenuBase* m : m_menuTabs) delete m;
 }
 
-void BlaGuiMenu::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
+void DevGuiMenu::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
 {
-    m_menuTabs.emplace_back(new BlaGuiMenuItem(name, bool_switch, endWithSeparator));
+    m_menuTabs.emplace_back(new DevGuiMenuItem(name, bool_switch, endWithSeparator));
 }
 
-BlaGuiMenuTab& BlaGuiMenu::AddSubMenu(blaString name)
+DevGuiMenuTab& DevGuiMenu::AddSubMenu(blaString name)
 {
-    BlaGuiMenuTab* tab = new BlaGuiMenuTab(name);
+    DevGuiMenuTab* tab = new DevGuiMenuTab(name);
     m_menuTabs.emplace_back(tab);
     return *tab;
 }
@@ -1306,7 +1506,7 @@ void BlaFileBrowser::FileBrowserDisplayDirectoriesRecursive(blaString currentdir
 //    }
 //}
 
-void BlaGuiConsole::Render()
+void DevGuiConsole::Render()
 {
     bool copy_to_clipboard = false;
     blaVector<blaString> consoleLines;
@@ -1364,7 +1564,7 @@ void BlaGuiConsole::Render()
         m_pConsoleSingleton->m_currentCommandBuffer,
         2048,
         ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory,
-        &BlaGuiConsole::HandleCmdCallbacks,
+        &DevGuiConsole::HandleCmdCallbacks,
         (void*)this))
     {
         m_pConsoleSingleton->ExecuteCurrentCommand();
@@ -1379,9 +1579,9 @@ void BlaGuiConsole::Render()
 
 }
 
-int BlaGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
+int DevGuiConsole::HandleCmdCallbacks(ImGuiInputTextCallbackData* data)
 {
-    Console* pConsole = ((BlaGuiConsole*)(data->UserData))->m_pConsoleSingleton;
+    Console* pConsole = ((DevGuiConsole*)(data->UserData))->m_pConsoleSingleton;
     switch (data->EventFlag)
     {
     case ImGuiInputTextFlags_CallbackCompletion:

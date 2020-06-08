@@ -5,8 +5,8 @@
 #include "GameObjectInspectorGui.h"
 
 #include "EditorGui/InspectableVariablesGuiElements.h"
-#include "Gui/GuiManager.h"
-#include "Gui/GuiElements.h"
+#include "Gui/DevGuiManager.h"
+#include "Gui/DevGuiElements.h"
 #include "Core/TransformComponent.h"
 #include "EditorCommands.h"
 
@@ -16,14 +16,14 @@
 
 using namespace BLA;
 
-class TransformComponentCustomGuiElement : public BlaGuiCollapsibleElement
+class TransformComponentCustomGuiElement : public DevGuiCollapsibleElement
 {
     TransformComponent* m_pToTransformComponent;
 public:
     TransformComponentCustomGuiElement(EditorCommandManager* editorCommandManager, TransformComponent* transformComponent) :
-	    BlaGuiCollapsibleElement("TransformComponent", OBJECT_INSPECTOR_ELEMENT_GROUP_ID), m_pToTransformComponent(transformComponent)
+	    DevGuiCollapsibleElement("TransformComponent", OBJECT_INSPECTOR_ELEMENT_GROUP_ID), m_pToTransformComponent(transformComponent)
     {
-        BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
+        DevGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
             "World Transform",
             BlaStringId("ComponentExposeEditing"),
             BLAInspectableVariables::TypeResolver<blaScaledTransform>::GetDescriptor(),
@@ -41,14 +41,14 @@ public:
     {
         m_worldTransform = m_pToTransformComponent->GetTransform();
 	
-    	BlaGuiCollapsibleElement::Render();
+    	DevGuiCollapsibleElement::Render();
     }
 
     blaScaledTransform m_worldTransform;
 };
 
 GameObjectInspector::GameObjectInspector(EditorCommandManager* editorCommandManager): m_window(
-    *BlaGuiManager::GetSingletonInstance()->OpenWindow("GameObject Inspector"))
+    *DevGuiManager::GetSingletonInstance()->OpenWindow("GameObject Inspector"))
 ,   m_editorCommandManager(editorCommandManager)
 {
 }
@@ -59,7 +59,7 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
 
     m_selectedGameObject = gameObject;
 
-    BlaGuiElement* root = new BlaGuiSimpleTextElement("", OBJECT_INSPECTOR_ELEMENT_GROUP_ID, "");
+    DevGuiElement* root = new DevGuiSimpleTextElement("", OBJECT_INSPECTOR_ELEMENT_GROUP_ID, "");
 
     // Refresh cached World transform to be sure we display the right one :)
     m_selectedGameObject.GetComponent<TransformComponent>()->GetTransform();
@@ -67,7 +67,7 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
     for (GameComponent* comp : gameObject.GetAllComponents())
     {
         ComponentDescriptor compDescriptor = comp->GetComponentDescriptor();
-        BlaGuiCollapsibleElement* compEl;
+        DevGuiCollapsibleElement* compEl;
     	if(compDescriptor.m_typeID == BlaStringId("TransformComponent"))
     	{
             compEl = new TransformComponentCustomGuiElement(m_editorCommandManager, static_cast<TransformComponent*>(comp));
@@ -75,7 +75,7 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
     	}
         else
         {
-	        compEl = new BlaGuiCollapsibleElement(blaString(compDescriptor.m_typeID), OBJECT_INSPECTOR_ELEMENT_GROUP_ID);
+	        compEl = new DevGuiCollapsibleElement(blaString(compDescriptor.m_typeID), OBJECT_INSPECTOR_ELEMENT_GROUP_ID);
             compEl->m_decorateHeader = true;
             for (const ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members)
             {
@@ -83,7 +83,7 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
                 if (memberName.find("m_") == 0) memberName = memberName.substr(2);
                 memberName[0] = std::toupper(memberName[0]);
 
-                BlaGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
+                DevGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
                     memberName,
                     BlaStringId("ComponentExposeEditing"),
                     exposedMember.m_type,

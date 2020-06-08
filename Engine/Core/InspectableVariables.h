@@ -12,7 +12,7 @@ namespace BLA
 {
     class GameObject;
     class GameComponent;
-	class BlaGuiElement;
+	class DevGuiElement;
 
 	namespace BLAInspectableVariables
 	{

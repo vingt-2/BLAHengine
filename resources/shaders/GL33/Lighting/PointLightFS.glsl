@@ -29,8 +29,10 @@ void main()
 	vec3 diffuse = texture2D(diffuseMap, UV).rgb;
 	vec3 normal = texture2D(normalMap, UV).rgb;
 	vec3 worldPos = texture2D(worldPosMap, UV).rgb;
+	
+	vec3 toLight = lightPR.xyz - worldPos;
 
-	float d = length(worldPos - lightPR.xyz);
+	float d = length(toLight);
 	float d2 = d * d;
 	
 	float dORadius = d / lightPR.w;
@@ -41,5 +43,5 @@ void main()
 	
 	lightFallOff /= (d2 + 1);
     
-    color = (diffuse * radiosity * lightFallOff) / 3.14f;//* max(dot(normalize(lightPR.xyz - worldPos),normalize(normal)), 0);
+    color = (diffuse * radiosity * lightFallOff * max(dot(toLight / d, normal), 0));
 }

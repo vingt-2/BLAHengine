@@ -89,7 +89,7 @@ namespace BLA
 
     class Console
     {
-        friend class BlaGuiConsole;
+        friend class DevGuiConsole;
         friend class ConsoleCommandEntry;
         friend class ComponentLibrariesManager;
 

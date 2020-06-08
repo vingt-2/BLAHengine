@@ -4,15 +4,17 @@
 #include "StdInclude.h"
 #include "Assets/AssetsManager.h"
 
-#include "Renderer.h"
+#include "Renderer/Renderer.h"
 
 namespace BLA
 {
-    class DirectionalShadowRender;
+    struct DirectionalShadowRender;
     struct VulkanState;
     class BLACORE_API VulkanRenderer : public Renderer
     {
     public:
+        VulkanRenderer(const AssetManager* assetManager);
+
         void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) override;
         void SwitchRenderingManager(RenderingManager* renderingManager) override;
         bool Update() override;

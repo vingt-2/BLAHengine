@@ -3,15 +3,15 @@
 #pragma once
 
 #include "Maths/Maths.h"
-#include "GuiElements.h"
+#include "DevGuiElements.h"
 
 struct ImGuiInputTextCallbackData;
 namespace BLA
 {
-    class BlaGuiElement;
+    class DevGuiElement;
     class Console;
 
-    class BlaGuiConsole : public BlaGuiElement
+    class DevGuiConsole : public DevGuiElement
     {
     private:
         Console* m_pConsoleSingleton;
@@ -19,8 +19,8 @@ namespace BLA
         blaU32 m_maxLineCount;
 
     public:
-        BlaGuiConsole(const blaString& name, Console* pConsoleSingleton) :
-            BlaGuiElement(name, BlaStringId("Console")),
+        DevGuiConsole(const blaString& name, Console* pConsoleSingleton) :
+            DevGuiElement(name, BlaStringId("Console")),
             m_pConsoleSingleton(pConsoleSingleton)
         {
             m_maxLineCount = 10000;

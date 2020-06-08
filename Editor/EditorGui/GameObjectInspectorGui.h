@@ -6,13 +6,13 @@
 
 namespace BLA
 {
-    class BlaGuiWindow;
+    class DevGuiWindow;
     class EditorCommandManager;
     class GameObjectInspector
     {
         GameObject m_selectedGameObject;
         EditorCommandManager* m_editorCommandManager;
-        BlaGuiWindow& m_window;
+        DevGuiWindow& m_window;
 
     public:
         GameObjectInspector(EditorCommandManager* editorCommandManager);

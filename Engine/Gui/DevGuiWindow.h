@@ -7,13 +7,13 @@
 
 namespace BLA
 {
-    class BlaGuiElement;
-    class BlaGuiMenu;
+    class DevGuiElement;
+    class DevGuiMenu;
     class Renderer;
 
-    class BlaGuiWindow
+    class DevGuiWindow
     {
-        friend class BlaGuiManager;
+        friend class DevGuiManager;
     	
     public:
         enum WindowFlags
@@ -44,9 +44,9 @@ namespace BLA
 
         virtual void Render();
 
-        BLACORE_API BlaGuiElement* RootElement() const;
+        BLACORE_API DevGuiElement* RootElement() const;
 
-        BLACORE_API void SetRootElement(BlaGuiElement* imGuiElements);
+        BLACORE_API void SetRootElement(DevGuiElement* imGuiElements);
 
         BLACORE_API blaString GetWindowName() const;
 
@@ -54,34 +54,34 @@ namespace BLA
 
         BLACORE_API bool HasFocus() const;
 
-        BLACORE_API BlaGuiMenu& AddMenu();
+        BLACORE_API DevGuiMenu& AddMenu();
 
     protected:
 
-        BlaGuiWindow();
-        BlaGuiWindow(const blaString& windowName, const blaIVec2& windowPosition);
-        ~BlaGuiWindow();
+        DevGuiWindow();
+        DevGuiWindow(const blaString& windowName, const blaIVec2& windowPosition);
+        ~DevGuiWindow();
     	
         blaU32 m_windowFlags;
         blaString m_windowName;
         blaIVec2 m_windowPosition;
-        BlaGuiElement* m_rootElement;
-        BlaGuiMenu* m_menu;
+        DevGuiElement* m_rootElement;
+        DevGuiMenu* m_menu;
         bool m_hasFocus;
         bool m_bOpenWindow;
     };
 
-    inline blaIVec2 BlaGuiWindow::GetWindowPosition() const
+    inline blaIVec2 DevGuiWindow::GetWindowPosition() const
     {
 	    return m_windowPosition;
     }
 
-    inline blaString BlaGuiWindow::GetWindowName() const
+    inline blaString DevGuiWindow::GetWindowName() const
     {
 	    return m_windowName;
     }
 
-    class BlaOneTimeWindow : public BlaGuiWindow
+    class BlaOneTimeWindow : public DevGuiWindow
     {
     public:
         BLACORE_API BlaOneTimeWindow();
@@ -91,12 +91,12 @@ namespace BLA
         void Render() override;
     };
 
-    class BlaGuiRenderWindow : public BlaGuiWindow
+    class DevGuiRenderWindow : public DevGuiWindow
     {
     public:
-        BLACORE_API BlaGuiRenderWindow(Renderer* renderer);
+        BLACORE_API DevGuiRenderWindow(Renderer* renderer);
 
-        BLACORE_API BlaGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition);
+        BLACORE_API DevGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition);
 
         void Render() override;
 

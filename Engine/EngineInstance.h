@@ -9,7 +9,7 @@
 namespace BLA
 {
     class Console;
-    class GL33Renderer;
+    class Renderer;
     class AssetManager;
 	class ComponentLibrariesManager;
     class SceneManager;
@@ -20,7 +20,7 @@ namespace BLA
     class RenderingManager;
     class DebugRenderingManager;
     class InputManager;
-    class BlaGuiManager;
+    class DevGuiManager;
 
     class EngineInstance
     {
@@ -44,7 +44,7 @@ namespace BLA
         BLACORE_API void SetTargetFPS(int fps) { m_targetFPS = fps; }
         BLACORE_API blaU32 GetTargetFPS() { return m_targetFPS; }
 
-        BLACORE_API GL33Renderer& GetRenderer() { return *m_renderer; }
+        BLACORE_API Renderer* GetRenderer() { return m_renderer; }
 
         BLACORE_API int GetEngineVersion() const { return m_engineVersion; }
 
@@ -75,7 +75,7 @@ namespace BLA
 
         // Required Engine Modules
         Console*      m_console;
-        GL33Renderer* m_renderer;
+        Renderer* m_renderer;
         AssetManager* m_assetManager;
 		ComponentLibrariesManager* m_componentLibrariesManager;
         SceneManager* m_sceneManager;
@@ -86,7 +86,7 @@ namespace BLA
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
         InputManager* m_inputManager;
-        BlaGuiManager* m_guiManager;
+        DevGuiManager* m_guiManager;
 
         bool m_isFullScreen;
         bool m_isTerminationRequested;

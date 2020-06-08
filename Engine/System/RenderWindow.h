@@ -3,9 +3,10 @@
 #pragma once
 #include "System.h"
 #include "StdInclude.h"
-#include "RenderBackend.h"
+
 #include "Maths/Maths.h"
 
+struct GLFWwindow;
 namespace BLA
 {
     typedef blaVector<blaString> DragAndDropPayloadDontStore;
@@ -18,11 +19,8 @@ namespace BLA
         RenderWindow() = default;
         virtual ~RenderWindow() {};
 
-        virtual void CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
-        virtual void CreateVulkanRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
-        virtual blaString GetMaxGLVersion() const = 0;
+        virtual void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) = 0;
 
-        virtual void MakeGLContextCurrent() = 0;
         virtual void UpdateWindowAndBuffers() = 0;
 
         virtual void GetSize(int &width, int &height) const = 0;
@@ -43,7 +41,6 @@ namespace BLA
         virtual void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) = 0;
     };
 
-#ifdef GLFW_INTERFACE
     class BLACORE_API GLFWRenderWindow : public RenderWindow
     {
     public:
@@ -51,15 +48,7 @@ namespace BLA
         static void InitGLFW();
     	
         static void ShutdownGLFW();
-
-        void CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
-
-        void CreateVulkanRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
-    	
-        blaString GetMaxGLVersion() const override;
-
-        void MakeGLContextCurrent() override;
-
+    
         void UpdateWindowAndBuffers() override;
 
         void GetSize(int &width, int &height) const override;
@@ -92,7 +81,7 @@ namespace BLA
 
         static void GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc, char** paths);
 
-    private:
+    protected:
 
         GLFWwindow* m_glfwWindow;
 
@@ -105,61 +94,41 @@ namespace BLA
         DragAndDropCallback m_registeredDragAndDropCallback;
     };
 
-#elif defined(WPF_INTERFACE)
-    //TODO: Implement Mouse Wheel
-    class BLACORE_API WPFRenderWindow : public RenderWindow
+    void GLFWKeyboardCallBack(GLFWwindow* window, int keyCode, int scandone, int action, int mods);
+    void GLFWMouseButtonCallBack(GLFWwindow* window, int button, int action, int mods);
+    void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos);
+    void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll);
+
+#if VULKAN
+    struct VulkanContext;
+    struct VulkanWindowInfo;
+    class BLACORE_API GLFWVulkanRenderWindow : public GLFWRenderWindow
     {
     public:
-        WPFRenderWindow();
-        ~WPFRenderWindow();
+        virtual ~GLFWVulkanRenderWindow();
 
-
-        virtual void CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen);
-
-        virtual void UpdateWindowAndBuffers();
-
-        virtual void MakeGLContextCurrent();
-
-        virtual void GetSize(int &width, int &height) const;
-
-        virtual blaString GetMaxGLVersion() const;
-
-        void WriteSize(int x, int y);
-        void WriteMousePos(int x, int y);
-
-        virtual bool isFullScreen() const;
-
-        virtual void SetWindowTitle(blaString title);
-        virtual blaString GetWindowTitle() const;
-
-        bool ShouldUpdateWindow() const;
-        void SetWindowUpdated();
-
-        bool ShouldMakeGLCurrent() const;
-        void SetMadeGLCurrent();
-
-        void SetMouseCursorVisibility(bool visibility) override {};
-
-        virtual void SetMouseCursorLockedAndInvisibleOnMouseButtonHeld(int mouseButton) override {};
-
-        blaVec2 GetMousePointerScreenSpaceCoordinates() { return blaVec2(0.f); }
-
-        void SetDragAndDropCallback(DragAndDropCallback dragandDropCallback) override {};
-
-        unsigned char m_mouseDownState;
-        bool m_keyPressed[100];
-
+        void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
+        void UpdateWindowAndBuffers() override;
+        const VulkanContext* GetVulkanContext() const;
+        VulkanWindowInfo* GetVulkanWindowInfo() const;
     private:
+        void CreateSwapChain();
+        void CreateSwapChainCommandBuffers();
 
-        int m_width, m_height, m_mousePosX, m_mousePosY;
+        void DestroySwapChainAndCommandBuffers();
 
-        bool m_makeGLCurrentRequest;
-        bool m_updateWindowRequest;
+        const VulkanContext* m_vulkanContext;
+        VulkanWindowInfo* m_vulkanWindowInfo;
 
-        DragAndDropCallback m_registeredDragAndDropCallback;
-
-        blaString m_glVersion;
+        static const VulkanContext* SetupVulkanContext(const char** extensions, uint32_t extensions_count);
+    };
+#else
+    class BLACORE_API GLFWOpenGLRenderWindow : public GLFWRenderWindow
+    {
+    public:
+        void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
+        void UpdateWindowAndBuffers() override;
+        void MakeGLContextCurrent();
     };
 #endif
-
 }

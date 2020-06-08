@@ -17,6 +17,8 @@ typedef glm::mat3 blaMat3;
 typedef glm::mat4 blaMat4;
 
 #define M_PI 3.14159265359f
+#define RAD_TO_DEG (360.f / M_PI)
+#define DEG_TO_RAD (M_PI / 360.f)
 #define M_TWO_PI 6.28318530718f
 #define P_GRAVITY blaVec3(0.f, -0.9807f, 0.f)
 

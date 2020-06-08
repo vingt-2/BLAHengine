@@ -2,8 +2,8 @@
 
 #include "SceneGraphGui.h"
 
-#include "Gui/GuiManager.h"
-#include "Gui/GuiElements.h"
+#include "Gui/DevGuiManager.h"
+#include "Gui/DevGuiElements.h"
 #include "EditorCommands.h"
 #include "Core/Scene.h"
 #include "EngineInstance.h"
@@ -12,7 +12,7 @@ using namespace BLA;
 
 #define SCENE_GRAPH_ELEMENT_GROUP_ID BlaStringId("SceneGraphElement")
 
-void SceneGraphGui::AddObjectToTree(BlaGuiElement& rootElement, ElementMap& elementMap, const GameObject& object)
+void SceneGraphGui::AddObjectToTree(DevGuiElement& rootElement, ElementMap& elementMap, const GameObject& object)
 {
     ElementMap::iterator it = elementMap.find(object);
 
@@ -21,12 +21,12 @@ void SceneGraphGui::AddObjectToTree(BlaGuiElement& rootElement, ElementMap& elem
         return;
     }
 
-    BlaGuiElement* element = new BlaGuiCollapsibleElement(blaString(object.GetId()), SCENE_GRAPH_ELEMENT_GROUP_ID);
-    BlaGuiRegisteredEvents eventListener = 
+    DevGuiElement* element = new DevGuiCollapsibleElement(blaString(object.GetId()), SCENE_GRAPH_ELEMENT_GROUP_ID);
+    DevGuiRegisteredEvents eventListener = 
     {
-        BlaGuiElementEventPayload::EventType::SELECTED | 
-        BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED |
-        BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED
+        DevGuiElementEventPayload::EventType::SELECTED | 
+        DevGuiElementEventPayload::EventType::DOUBLE_CLICKED |
+        DevGuiElementEventPayload::EventType::ELEMENT_DROPPED
         , StaticOnSceneGraphElementEvent, this
     };
 
@@ -48,20 +48,20 @@ void SceneGraphGui::AddObjectToTree(BlaGuiElement& rootElement, ElementMap& elem
         rootElement.AddChild(element);
     }
 
-    elementMap.insert(blaPair<GameObjectID, BlaGuiElement*>(object, element));
+    elementMap.insert(blaPair<GameObjectID, DevGuiElement*>(object, element));
 }
 
 // TODO: Huh... Really, I'm referencing a console command here ? Change that ... ?
 extern void SelectObject(blaString name);
 extern void FocusOnObject(blaString name);
 extern void SetParent(blaString parent, blaString child);
-void SceneGraphGui::OnSceneGraphElementEvent(const BlaGuiElementEventPayload& event)
+void SceneGraphGui::OnSceneGraphElementEvent(const DevGuiElementEventPayload& event)
 {
     switch(event.m_eventType)
     {
-        case BlaGuiElementEventPayload::EventType::SELECTED:
+        case DevGuiElementEventPayload::EventType::SELECTED:
         {
-            BlaGuiElement* selected = (BlaGuiElement*)event.m_pEventPayload;
+            DevGuiElement* selected = (DevGuiElement*)event.m_pEventPayload;
             SelectObject(selected->GetName());
             if (m_selectedElement)
                 m_selectedElement->m_isSelected = false;
@@ -69,13 +69,13 @@ void SceneGraphGui::OnSceneGraphElementEvent(const BlaGuiElementEventPayload& ev
             m_selectedElement->m_isSelected = true;
         }
         break;
-        case BlaGuiElementEventPayload::EventType::DOUBLE_CLICKED:
+        case DevGuiElementEventPayload::EventType::DOUBLE_CLICKED:
         {
-            BlaGuiElement* selected = (BlaGuiElement*)event.m_pEventPayload; 
+            DevGuiElement* selected = (DevGuiElement*)event.m_pEventPayload; 
             FocusOnObject(selected->GetName());
         }
         break;
-        case BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED:
+        case DevGuiElementEventPayload::EventType::ELEMENT_DROPPED:
         {
             BlaDroppablePayload* droppedPayload = (BlaDroppablePayload*)event.m_pEventPayload;
             SetParent(droppedPayload->m_receiverElement->GetName(), droppedPayload->m_droppedElement->GetName());
@@ -91,7 +91,7 @@ SceneGraphGui::SceneGraphGui(EditorCommandManager* m_commandManager): m_selected
 
 void SceneGraphGui::UpdateSceneGraph()
 {
-    BlaGuiWindow* window = BlaGuiManager::GetSingletonInstance()->GetWindow("Scene Graph");
+    DevGuiWindow* window = DevGuiManager::GetSingletonInstance()->GetWindow("Scene Graph");
 
     if (!window) 
         return;
@@ -100,10 +100,10 @@ void SceneGraphGui::UpdateSceneGraph()
 
     delete window->RootElement();
 
-    BlaGuiElement* root = new BlaGuiSimpleTextElement("SceneRoot", SCENE_GRAPH_ELEMENT_GROUP_ID, "Scene:");
-    BlaGuiRegisteredEvents eventListener =
+    DevGuiElement* root = new DevGuiSimpleTextElement("SceneRoot", SCENE_GRAPH_ELEMENT_GROUP_ID, "Scene:");
+    DevGuiRegisteredEvents eventListener =
     {
-        BlaGuiElementEventPayload::EventType::ELEMENT_DROPPED
+        DevGuiElementEventPayload::EventType::ELEMENT_DROPPED
         , StaticOnSceneGraphElementEvent, this
     };
     root->RegisterEvents(eventListener);
@@ -120,6 +120,6 @@ void SceneGraphGui::UpdateSceneGraph()
 
 void SceneGraphGui::OpenSceneGraph()
 {
-    BlaGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph");
+    DevGuiManager::GetSingletonInstance()->OpenWindow("Scene Graph");
     UpdateSceneGraph();
 }

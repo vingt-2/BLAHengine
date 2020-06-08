@@ -4,11 +4,19 @@
 #undef IMGUI_IMPL_OPENGL_LOADER_GL3W
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
 
+#include "StdInclude.h"
+
 #include "imgui.cpp"
 #include "imgui_demo.cpp"
 #include "imgui_draw.cpp"
 #include "imgui_widgets.cpp"
-#include "examples/imgui_impl_opengl3.cpp"
+
+#if VULKAN
+    #include "examples/imgui_impl_vulkan.cpp"
+#else
+    #include "examples/imgui_impl_opengl3.cpp"
+#endif
+
 #include "examples/imgui_impl_glfw.cpp"
 
 namespace BLAImGui

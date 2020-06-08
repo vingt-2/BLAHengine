@@ -4,15 +4,14 @@
 
 #include "System.h"
 #include "Maths/Maths.h"
-#include "Renderer/GL33Renderer.h"
 #include "Core/Timer.h"
 #include "Core/DebugDraw.h"
 #include "Assets/SceneManager.h"
 #include "CameraControl.h"
 #include "System/Console.h"
 #include "System/InputManager.h"
-#include "Gui/GuiManager.h"
-#include "Gui/GuiMenu.h"
+#include "Gui/DevGuiManager.h"
+#include "Gui/DevGuiMenu.h"
 #include "Physics/ColliderComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 #include "System/FileSystem/Files.h"
@@ -21,9 +20,10 @@
 #include "AssetsImport/OBJImport.h"
 #include "Core/TransformComponent.h"
 #include "Assets/Texture.h"
-
 #include "System/RenderWindow.h"
-#include "Renderer/VulkanRenderer.h"
+
+// Todo: Remove me
+#include "Renderer/OpenGL/GL33Renderer.h"
 
 using namespace BLA;
 
@@ -105,27 +105,6 @@ void SceneEditor::PreEngineUpdate()
         g_shouldReloadLibraries = false;
     }
 
-	if(m_bTestVulkan)
-	{
-		if(!m_vulkanWindow && !m_vulkanRenderer)
-		{
-            m_vulkanWindow = new GLFWRenderWindow();
-            m_vulkanWindow->CreateVulkanRenderWindow("Vulkan Window", 100, 100, false);
-            m_vulkanRenderer = new VulkanRenderer();
-            m_vulkanRenderer->InitializeRenderer(m_vulkanWindow, m_renderingManager, m_debugRenderingManager);
-		}
-	}
-	if(m_vulkanRenderer && m_vulkanWindow)
-	{
-		if(!m_bTestVulkan)
-		{
-            delete m_vulkanWindow;
-            m_vulkanWindow = nullptr;
-            delete m_vulkanRenderer;
-            m_vulkanRenderer = nullptr;
-		}
-	}
-
     EngineInstance::PreEngineUpdate();
 
     if (m_editorState->m_type == EditorState::BLA_EDITOR_EDITING)
@@ -185,11 +164,6 @@ void SceneEditor::PostEngineUpdate()
 
     // TODO: Update() should not be exported, and call from with the engine dll
     m_renderer->Update();
-
-	/*
-	 * Vulkan Test
-	 */
-    if (m_vulkanRenderer) m_vulkanRenderer->Update();
 	
 	// TODO: Update() should not be exported, and call from with the engine dll
     m_guiManager->Update();
@@ -203,7 +177,7 @@ void SceneEditor::PostEngineUpdate()
         m_inputManager->SetKeyboardLock(m_guiManager->IsMouseOverGui());
         m_inputManager->SetMouseLock(m_guiManager->IsMouseOverGui());
 
-        if (const BlaGuiRenderWindow * renderGuiWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
+        if (const DevGuiRenderWindow * renderGuiWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
         {
             if (renderGuiWindow->HasFocus())
             {
@@ -233,11 +207,6 @@ void SceneEditor::PostEngineUpdate()
 
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
-
-	/*
-	 * Vulkan Test
-	 */
-    if (m_vulkanWindow) m_vulkanWindow->UpdateWindowAndBuffers();
 }
 
 SceneEditor::SceneEditor(bool external, bool isFullscreen):
@@ -253,7 +222,7 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         m_renderer->SetRenderToFrameBufferOnly(true);
         m_commandManager = new EditorCommandManager(this);
         m_gizmoManager = new GizmoManager(m_commandManager);
-        m_guiManager->OpenWindow("Editor Window", new BlaGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
+        m_guiManager->OpenWindow("Editor Window", new DevGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
 
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
 
@@ -263,7 +232,7 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         /*
          * Create The menu
          */
-        BlaGuiMenuTab& fileMenu = m_guiManager->m_menuBar.AddSubMenu("File");
+        DevGuiMenuTab& fileMenu = m_guiManager->m_menuBar.AddSubMenu("File");
         fileMenu.AddMenuItem("New Scene", &m_editorStateRequests.m_newSceneRequest);
         fileMenu.AddMenuItem("Open Scene", &m_editorStateRequests.m_openSceneRequest, true);
         fileMenu.AddMenuItem("Save", &m_editorStateRequests.m_saveSceneRequest);
@@ -271,12 +240,17 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         fileMenu.AddMenuItem("Exit", &m_isTerminationRequested);
 
 
-        BlaGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
-        settingsMenu.AddMenuItem("Render G-Buffer", &m_renderer->m_debugDrawGBuffer);
-        settingsMenu.AddMenuItem("Draw Grid", &m_bDrawGrid);
-        settingsMenu.AddMenuItem("Test Vulkan", &m_bTestVulkan);
+        DevGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
 
-        BlaGuiMenuTab& windowsMenu = m_guiManager->m_menuBar.AddSubMenu("Windows");
+        //TODO: Fix this garbagio
+        if(GL33Renderer* openglRenderer = dynamic_cast<GL33Renderer*>(m_renderer))
+        {
+            settingsMenu.AddMenuItem("Render G-Buffer", &openglRenderer->m_debugDrawGBuffer);
+        }
+
+        settingsMenu.AddMenuItem("Draw Grid", &m_bDrawGrid);
+
+        DevGuiMenuTab& windowsMenu = m_guiManager->m_menuBar.AddSubMenu("Windows");
         windowsMenu.AddMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest);
         windowsMenu.AddMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest);
         windowsMenu.AddMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest);
@@ -394,7 +368,7 @@ void SceneEditor::EditorUpdate()
     }
 	
     Ray screenRay;
-    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
+    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
         screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
 

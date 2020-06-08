@@ -9,17 +9,15 @@
 namespace BLA
 {
 
-    class BLACORE_API ShadowRender
+    struct ShadowRender
     {
-    public:
         virtual blaMat4 getShadowViewProjection() = 0;
         virtual void Update() = 0;  // <-- m_shadowCamera.Update();
     };
 
-    class BLACORE_API DirectionalShadowRender : ShadowRender
+    struct DirectionalShadowRender : ShadowRender
     {
     public:
-        bool m_isSetup;
         blaVec3 m_shadowDirection;
 
         //OpenGL
@@ -35,10 +33,9 @@ namespace BLA
         OrthographicCamera m_shadowCamera;
     };
 
-    class BLACORE_API PerspectiveShadowRender : ShadowRender
+    struct PerspectiveShadowRender : ShadowRender
     {
     public:
-        bool m_isSetup;
         blaVec3 m_shadowDirection;
 
         //OpenGL
@@ -53,6 +50,24 @@ namespace BLA
 
         OrthographicCamera m_shadowCamera;
 
+    };
+
+    struct Cubemap : ShadowRender
+    {
+    public:
+        blaVec3 m_shadowDirection;
+
+        //OpenGL
+        GLuint m_depthTexture[6];
+        GLuint m_shadowPrgmID;
+        GLuint m_shadowBuffers[6];
+
+        int m_bufferSize;
+
+        blaMat4 getShadowViewProjection();
+        void Update();
+
+        PerspectiveCamera m_shadowCamera;
     };
 
 

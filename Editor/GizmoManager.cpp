@@ -4,7 +4,7 @@
 #include "EditorCommands.h"
 #include "Core/DebugDraw.h"
 #include "Core/Scene.h"
-#include "Renderer/GL33Renderer.h"
+#include "Renderer/OpenGL/GL33Renderer.h"
 #include "SceneEditor.h"
 #include "System/Console.h"
 #include "System/InputManager.h"
@@ -12,7 +12,7 @@
 #include "Physics/ColliderComponent.h"
 #include "Core/TransformComponent.h"
 #include "External/libcoldet/coldet.h"
-#include "Gui/GuiManager.h"
+#include "Gui/DevGuiManager.h"
 
 #define MAX(a,b) (a > b ? a : b)
 
@@ -189,9 +189,9 @@ void TranslationGizmoControl::Update()
     BLAMouseState leftMouseButton = InputManager::GetSingletonInstance()->GetMouseButtonState(BLA_MOUSE_BUTTON_1);
 
     Ray screenRay;
-    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(BlaGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
+    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-        screenRay = editorSess->GetRenderer().ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+        screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
     }
     else
     {
@@ -389,9 +389,9 @@ void ScaleGizmoControl::Update()
     BLAMouseState leftMouseButton = InputManager::GetSingletonInstance()->GetMouseButtonState(BLA_MOUSE_BUTTON_1);
 
     Ray screenRay;
-    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(BlaGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
+    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-        screenRay = editorSess->GetRenderer().ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+        screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
     }
     else
     {
@@ -562,9 +562,9 @@ void RotationGizmoControl::Update()
     BLAMouseState leftMouseButton = InputManager::GetSingletonInstance()->GetMouseButtonState(BLA_MOUSE_BUTTON_1);
 
     Ray screenRay;
-    if (const BlaGuiRenderWindow* guiRenderWindow = dynamic_cast<const BlaGuiRenderWindow*>(BlaGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
+    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-        screenRay = editorSess->GetRenderer().ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+        screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
     }
     else
     {

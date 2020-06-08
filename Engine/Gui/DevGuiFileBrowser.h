@@ -5,8 +5,7 @@
 #include "Maths/Maths.h"
 #include "System/FileSystem/Files.h"
 
-#include "./GuiWindow.h"
-#include "./GuiMenu.h"
+#include "DevGuiWindow.h"
 
 #include "StdInclude.h"
 
@@ -16,7 +15,7 @@ namespace BLA
 {
     class BlaFileBrowser
     {
-        friend class BlaGuiManager;
+        friend class DevGuiManager;
     public:
 
         enum FileBrowserState

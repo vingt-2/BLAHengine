@@ -5,12 +5,12 @@
 #include "RenderBackend.h"
 #include "Assets/AssetsManager.h"
 
-#include "Renderer.h"
+#include "Renderer/Renderer.h"
 #include "GL33Shader.h"
 
 namespace BLA
 {
-    class DirectionalShadowRender;
+    struct DirectionalShadowRender;
 
     class BLACORE_API GL33Resources
     {
@@ -78,7 +78,7 @@ namespace BLA
         GL33RenderObject();
         ~GL33RenderObject();
 
-        const blaMat4* m_modelTransform;
+        const blaMat4* m_modelToWorld;
 
         const blaVector<blaU32>* m_toMeshTriangles;
         const blaVector<blaVec3>* m_toMeshVertices;
@@ -119,11 +119,11 @@ namespace BLA
 
         void CleanUpPools() override;
 
-        RenderWindow* GetWindow() const { return m_renderWindow; }
+        GLFWOpenGLRenderWindow* GetWindow() const { return m_renderWindow; }
         void        ViewportResize(int width, int height);
         Ray        ScreenToRay(blaVec2 screenSpaceCoord);
 
-        GL33Renderer();
+        GL33Renderer(const AssetManager* assetManager);
         ~GL33Renderer() override;
 
         // Debug Vignette;
@@ -139,9 +139,6 @@ namespace BLA
         PointLightSphere m_pointLightSphereMesh;
 
         GL33Resources m_glResources;
-
-        // External References 
-        AssetManager* m_assetManager;
 
         bool m_debugDrawGBuffer;
 

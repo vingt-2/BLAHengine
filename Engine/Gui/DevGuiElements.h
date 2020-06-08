@@ -10,15 +10,15 @@
 
 namespace BLA
 {
-    class BlaGuiElement;
+    class DevGuiElement;
 
     struct BlaDroppablePayload
     {
-        BlaGuiElement* m_receiverElement = nullptr;
-        BlaGuiElement* m_droppedElement = nullptr;
+        DevGuiElement* m_receiverElement = nullptr;
+        DevGuiElement* m_droppedElement = nullptr;
     };
 
-    struct BlaGuiElementEventPayload
+    struct DevGuiElementEventPayload
     {
         enum EventType
         {
@@ -30,28 +30,28 @@ namespace BLA
         void* m_pEventPayload;
     };
 
-    typedef void(*EventCallBack)(void*, const BlaGuiElementEventPayload&);
+    typedef void(*EventCallBack)(void*, const DevGuiElementEventPayload&);
 
-    struct BlaGuiRegisteredEvents
+    struct DevGuiRegisteredEvents
     {
         blaU32 m_eventTriggerFlags = 0;
         EventCallBack m_callback = nullptr;
         void* m_callerPtr = nullptr;
     };
 
-    class BLACORE_API BlaGuiElement : public IntrusiveTree<BlaGuiElement>
+    class BLACORE_API DevGuiElement : public IntrusiveTree<DevGuiElement>
     {
         blaString m_name;
 
-        blaVector<BlaGuiRegisteredEvents> m_registeredCallbacks;
+        blaVector<DevGuiRegisteredEvents> m_registeredCallbacks;
 
     protected:
-        void SendEvent(BlaGuiElementEventPayload::EventType eventType, void* pEventPayload);
+        void SendEvent(DevGuiElementEventPayload::EventType eventType, void* pEventPayload);
 
         void HandleDragDropOfElements();
 
     public:
-        BlaGuiElement(const blaString& name, blaStringId groupId) :
+        DevGuiElement(const blaString& name, blaStringId groupId) :
         m_name(name),
         m_isSelected(false),
         m_groupId(groupId),
@@ -62,8 +62,8 @@ namespace BLA
 
         const blaString& GetName() const { return m_name; }
 
-        void RegisterEvents(BlaGuiRegisteredEvents& cb);
-        void UnRegisterEvents(BlaGuiRegisteredEvents& cb);
+        void RegisterEvents(DevGuiRegisteredEvents& cb);
+        void UnRegisterEvents(DevGuiRegisteredEvents& cb);
 
         virtual void Render();
 
@@ -74,29 +74,29 @@ namespace BLA
         blaStringId m_groupId;
     };
 
-    class BLACORE_API BlaGuiCollapsibleElement : public BlaGuiElement
+    class BLACORE_API DevGuiCollapsibleElement : public DevGuiElement
     {
     public:
-	    BlaGuiCollapsibleElement(const blaString& name, blaStringId groupId);
+	    DevGuiCollapsibleElement(const blaString& name, blaStringId groupId);
 
         bool m_decorateHeader = false;
     	
         virtual void Render();
     };
 
-    class BLACORE_API BlaGuiCollapsibleHeaderElement : public BlaGuiElement
+    class BLACORE_API DevGuiCollapsibleHeaderElement : public DevGuiElement
     {
     public:
-        BlaGuiCollapsibleHeaderElement(const blaString& name, blaStringId groupId) : BlaGuiElement(name, groupId) {}
+        DevGuiCollapsibleHeaderElement(const blaString& name, blaStringId groupId) : DevGuiElement(name, groupId) {}
 
         virtual void Render();
     };
 
-    class BLACORE_API BlaGuiSimpleTextElement : public BlaGuiElement
+    class BLACORE_API DevGuiSimpleTextElement : public DevGuiElement
     {
     public:
-        BlaGuiSimpleTextElement(const blaString& name, blaStringId groupId, const blaString& text) :
-            BlaGuiElement(name, groupId),
+        DevGuiSimpleTextElement(const blaString& name, blaStringId groupId, const blaString& text) :
+            DevGuiElement(name, groupId),
             m_text(text) {}
 
         void Render() override;
@@ -106,12 +106,12 @@ namespace BLA
     };
 
     template<typename T>
-    class BlaGuiEditElement : public BlaGuiElement
+    class DevGuiEditElement : public DevGuiElement
     {
     public:
-        BlaGuiEditElement(const blaString& name, blaStringId groupId,
+        DevGuiEditElement(const blaString& name, blaStringId groupId,
             blaLambda<void(const char*, const char*, blaIndex)> onEditFunctor, T* pToValue) :
-            BlaGuiElement(name, groupId),
+            DevGuiElement(name, groupId),
             m_pToValue(pToValue),
             m_onEditFunctor(onEditFunctor)
         {}
@@ -123,28 +123,28 @@ namespace BLA
         blaLambda<void(const char*, const char*, blaIndex)> m_onEditFunctor;
     };
 
-    BLACORE_API bool BlaGuiEditElementVectorPreRender(BlaGuiElement* element);
-    BLACORE_API void BlaGuiEditElementVectorPostRender(BlaGuiElement* element);
+    BLACORE_API bool DevGuiEditElementVectorPreRender(DevGuiElement* element);
+    BLACORE_API void DevGuiEditElementVectorPostRender(DevGuiElement* element);
 	
     template<typename T>
-    class BlaGuiEditElementVector : public BlaGuiElement
+    class DevGuiEditElementVector : public DevGuiElement
     {
     public:
-        BlaGuiEditElementVector(const blaString& name, blaStringId groupId, blaVector<T>* pToVector) :
-            BlaGuiElement(name, groupId),
+        DevGuiEditElementVector(const blaString& name, blaStringId groupId, blaVector<T>* pToVector) :
+            DevGuiElement(name, groupId),
             m_pToVector(pToVector)
         {}
 
         void Render() override
         {
-            if (BlaGuiEditElementVectorPreRender(this))
+            if (DevGuiEditElementVectorPreRender(this))
             {
                 for (int i = 0; i < m_pToVector->size(); i++)
                 {
-                    BlaGuiEditElement<T> toRender(std::to_string(i), m_groupId, [](const char*, const char*, blaIndex){}, static_cast<T*>(&((*m_pToVector)[0])) + i);
+                    DevGuiEditElement<T> toRender(std::to_string(i), m_groupId, [](const char*, const char*, blaIndex){}, static_cast<T*>(&((*m_pToVector)[0])) + i);
                     toRender.Render();
                 }
-                BlaGuiEditElementVectorPostRender(this);
+                DevGuiEditElementVectorPostRender(this);
             }
         }
 
@@ -154,11 +154,11 @@ namespace BLA
     };
 
     template<typename T1, typename T2>
-    class BlaGuiEditElementPair : public BlaGuiElement
+    class DevGuiEditElementPair : public DevGuiElement
     {
     public:
-        BlaGuiEditElementPair(const blaString& name, blaStringId groupId, blaPair<T1, T2>* pToPair) :
-            BlaGuiElement(name, groupId),
+        DevGuiEditElementPair(const blaString& name, blaStringId groupId, blaPair<T1, T2>* pToPair) :
+            DevGuiElement(name, groupId),
             m_pToPair(pToPair)
         {}
 

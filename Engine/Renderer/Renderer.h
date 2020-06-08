@@ -4,13 +4,13 @@
 
 #include "Core/RenderingManager.h"
 #include "Renderer/ShadowRender.h"
-#include "System/RenderWindow.h"
 #include "Maths/Ray.h"
 
 #include "RenderCamera.h"
 
 namespace BLA
 {
+    class AssetManager;
     class PointLightRender;
     class BLACORE_API RenderObject
     {
@@ -34,6 +34,8 @@ namespace BLA
         DirectionalShadowRender m_shadowRender;
 	};
 
+    class RenderWindow;
+    class GLFWOpenGLRenderWindow;
     class BLACORE_API Renderer
     {
     public:
@@ -60,18 +62,20 @@ namespace BLA
         bool GetStatus()        const { return m_isContextEnabled; }
         blaVec2 GetRenderSize()    const { return m_renderSize; }
 
-        //TODO: Remove, improve blaguiwindow design ...
+        //TODO: Remove, improve DevGuiwindow design ...
         virtual void SetRenderSize(blaIVec2 renderSize);
 
         void SetCamera(CameraComponent* camera);
 
-        Renderer();
+        Renderer(const AssetManager* assetManager);
         virtual ~Renderer(void) = default;
 
         void SetRenderToFrameBufferOnly(bool renderToFrameBuffer) { m_renderToFrameBufferOnly = renderToFrameBuffer; }
 
     protected:
-        RenderWindow* m_renderWindow;
+        GLFWOpenGLRenderWindow* m_renderWindow;
+
+        const AssetManager* m_assetManager;
         RenderingManager* m_renderingManager;
         DebugRenderingManager* m_debugRenderingManager;
 

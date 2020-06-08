@@ -7,12 +7,12 @@ using namespace BLA;
 
 blaMat4 DirectionalShadowRender::getShadowViewProjection()
 {
-    return m_shadowCamera.m_ViewProjection;
+    return m_shadowCamera.m_worldToClipSpace;
 }
 
 blaMat4 PerspectiveShadowRender::getShadowViewProjection()
 {
-    return m_shadowCamera.m_ViewProjection;
+    return m_shadowCamera.m_worldToClipSpace;
 }
 
 void DirectionalShadowRender::Update()

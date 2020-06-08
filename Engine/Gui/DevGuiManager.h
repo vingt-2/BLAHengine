@@ -5,9 +5,9 @@
 #include "Maths/Maths.h"
 #include "BLASingleton.h"
 
-#include "./GuiWindow.h"
-#include "./GuiMenu.h"
-#include "./GuiFileBrowser.h"
+#include "DevGuiWindow.h"
+#include "DevGuiMenu.h"
+#include "DevGuiFileBrowser.h"
 
 #include "StdInclude.h"
 
@@ -15,23 +15,14 @@ struct GLFWwindow;
 
 namespace BLA
 {
-    class BLACORE_API BlaGuiManager
+    class RenderWindow;
+    class BLACORE_API DevGuiManager
     {
-        BLA_DECLARE_SINGLETON(BlaGuiManager)
+        BLA_DECLARE_SINGLETON(DevGuiManager)
 
     public:
-        BlaGuiManager(GLFWwindow* glfwWindow) :
-            m_window(glfwWindow)
-        {
-            m_showDockspace = true;
-            Init();
-            m_lastFileBrowserOpenDirectory = "./";
-        }
-
-        ~BlaGuiManager()
-        {
-            Destroy();
-        }
+        DevGuiManager(RenderWindow* glfwWindow);
+        ~DevGuiManager();
 
         void Update();
 
@@ -47,26 +38,26 @@ namespace BLA
 
         blaBool CloseFileBrowser(blaString browserName);
 
-        BlaGuiMenu m_menuBar;
+        DevGuiMenu m_menuBar;
 
-        BlaGuiWindow* OpenWindow(blaString name);
+        DevGuiWindow* OpenWindow(blaString name);
 
-        BlaGuiWindow* GetWindow(blaString name);
+        DevGuiWindow* GetWindow(blaString name);
 
-        void OpenWindow(blaString name, BlaGuiWindow* window);
+        void OpenWindow(blaString name, DevGuiWindow* window);
 
     private:
 
         void Init();
         void Destroy();
 
-        blaMap<blaString, BlaGuiWindow*> m_openWindows;
+        blaMap<blaString, DevGuiWindow*> m_openWindows;
 
         blaMap<blaString, BlaFileBrowser*> m_openBrowsers;
 
         blaString m_lastFileBrowserOpenDirectory;
 
-        GLFWwindow* m_window;
+        RenderWindow* m_window;
 
         bool m_showDockspace;
     };

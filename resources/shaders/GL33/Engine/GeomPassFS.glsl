@@ -12,21 +12,26 @@ layout (location = 3) out vec3 TexCoordOut;
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D alphaMap;
+uniform float time;
 
 void main()
 {
-	if(texture(alphaMap, TexCoord0).a < 0.5f)
+	float alpha = 0.005f * time;
+	
+	vec2 uv = mat2(vec2(cos(alpha), sin(alpha)), vec2(-sin(alpha), cos(alpha))) * TexCoord0;
+	
+	if(texture(alphaMap, uv).a < 0.5f)
 		discard;
 
     WorldPosOut = WorldPos0;
 	
-    DiffuseOut = texture(diffuseMap, TexCoord0).rgb;
+    DiffuseOut = texture(diffuseMap, uv).rgb;
 	
-	vec3 normalMapSample = texture(normalMap, TexCoord0).rgb;
+	vec3 normalMapSample = texture(normalMap, uv).rgb;
 
 	normalMapSample = normalize(2.0f * normalMapSample - vec3(1.f,1.f,1.f));
 	
 	NormalOut = TangentSpace0 * normalMapSample;
 	
-	TexCoordOut = vec3(TexCoord0, 0.0);
+	TexCoordOut = vec3(uv, 0.0);
 } 

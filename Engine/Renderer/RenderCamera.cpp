@@ -9,23 +9,40 @@ void RenderCamera::AttachCamera(CameraComponent* camera)
     this->m_attachedCamera = camera;
 }
 
-void PerspectiveCamera::SetPerspective(glm::vec2 renderSize)
+void PerspectiveCamera::SetAspect(blaVec2 renderSize)
 {
-    //m_perspectiveProjection = glm::perspective(fovY, aspect, 0.0f1f, 10000.f);
-    m_perspectiveProjection = glm::frustum(-0.00001f*renderSize.x, 0.00001f*renderSize.x, -0.00001f*renderSize.y, 0.00001f*renderSize.y, 0.01f, 10000.0f);
+    m_aspectRatio = renderSize.x / renderSize.y;
+}
+
+/*
+ * Creates a right handed homogeneous matrix for perspective projection based on desired FOV angles
+ */
+static blaMat4 GetPerspective(blaF32 horizontalFovRad, blaF32 verticalFovRad, blaF32 nearClipPlane, blaF32 farClipPlane)
+{
+    return blaMat4(
+        blaVec4(0.5f / tanf(0.5f * horizontalFovRad), 0.f, 0.f, 0.f),
+        blaVec4(0.f, 0.5f / tanf(0.5f * verticalFovRad), 0.f, 0.f),
+        blaVec4(0.f, 0.f, nearClipPlane / (nearClipPlane - farClipPlane), -1.f),
+        blaVec4(0.0f, 0.0f, (farClipPlane * nearClipPlane) / (nearClipPlane - farClipPlane), 0.f)
+    );
 }
 
 void PerspectiveCamera::Update()
 {
     this->m_attachedCamera->Update();
 
+    blaF32 horFovRad = m_attachedCamera->m_fov * DEG_TO_RAD;
+    blaF32 vertFovRad = horFovRad / m_aspectRatio;
+	
+    m_perspectiveProjection = GetPerspective(horFovRad, vertFovRad, m_attachedCamera->m_nearClipPlane, m_attachedCamera->m_farClipPlane);
+	
     blaMat4 cameraTransformMat;
-    m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(cameraTransformMat);
+    m_attachedCamera->m_worldToCamera.GetScaledTransformMatrix(cameraTransformMat);
 
     if (m_attachedCamera != nullptr)
-        m_ViewProjection = m_perspectiveProjection * cameraTransformMat;
+        m_worldToClipSpace = m_perspectiveProjection * cameraTransformMat;
     else
-        m_ViewProjection = blaMat4(1);
+        m_worldToClipSpace = blaMat4(1);
 }
 
 RenderCamera::RenderCamera()
@@ -43,10 +60,10 @@ void OrthographicCamera::Update()
     this->m_attachedCamera->Update();
 
     blaMat4 cameraTransformMat;
-    m_attachedCamera->m_viewTransform.GetScaledTransformMatrix(cameraTransformMat);
+    m_attachedCamera->m_worldToCamera.GetScaledTransformMatrix(cameraTransformMat);
 
     if (m_attachedCamera != nullptr)
-        m_ViewProjection = m_orthographicProjection * cameraTransformMat;
+        m_worldToClipSpace = m_orthographicProjection * cameraTransformMat;
     else
-        m_ViewProjection = blaMat4(1);
+        m_worldToClipSpace = blaMat4(1);
 }

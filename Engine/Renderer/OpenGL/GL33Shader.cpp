@@ -44,49 +44,49 @@ bool GL33Shader::LoadShaderCode(blaString vertexCodeFile, blaString fragmentCode
     return true;
 }
 
-bool BLA::GL33SystemShaders::LoadDebugRaysProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadDebugRaysProgram(blaString vert, blaString frag)
 {
     m_debugRayPgrm = GL33Shader("SystemDebugRays");
     return m_debugRayPgrm.LoadShaderCode(vert, frag);
 }
 
-bool BLA::GL33SystemShaders::LoadDebugMeshesProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadDebugMeshesProgram(blaString vert, blaString frag)
 {
     m_debugMeshPgrm = GL33Shader("SystemDebugMeshes");
     return m_debugMeshPgrm.LoadShaderCode(vert, frag);
 }
 
-bool BLA::GL33SystemShaders::LoadDrawSphereStencilProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadDrawSphereStencilProgram(blaString vert, blaString frag)
 {
     m_drawSphereStencilPgrm = GL33Shader("DrawSphereStencil");
     return m_drawSphereStencilPgrm.LoadShaderCode(vert, frag);
 }
 
-bool BLA::GL33SystemShaders::LoadGeometryPassProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadGeometryPassProgram(blaString vert, blaString frag)
 {
     m_geometryPassPrgm = GL33Shader("GeometryPass");
     return m_geometryPassPrgm.LoadShaderCode(vert, frag);
 }
 
-bool BLA::GL33SystemShaders::LoadDepthBufferProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadDepthBufferProgram(blaString vert, blaString frag)
 {
     m_drawDepthBufferPrgm = GL33Shader("DrawDepthBuffer");
     return m_drawDepthBufferPrgm.LoadShaderCode(vert, frag);
 }
 
-bool BLA::GL33SystemShaders::LoadShadowMapProgram(blaString vertFile, blaString fragFile)
+bool GL33SystemShaders::LoadShadowMapProgram(blaString vertFile, blaString fragFile)
 {
     m_shadowMapPgrm = GL33Shader("ShadowMap");
     return m_shadowMapPgrm.LoadShaderCode(vertFile, fragFile);
 }
 
-bool BLA::GL33SystemShaders::LoadDrawColorBufferProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadDrawColorBufferProgram(blaString vert, blaString frag)
 {
     m_drawColorBufferPrgm = GL33Shader("DrawColorBuffer");
     return m_drawColorBufferPrgm.LoadShaderCode(vert, frag);
 }
 
-bool BLA::GL33SystemShaders::LoadDrawNormalBufferProgram(blaString vert, blaString frag)
+bool GL33SystemShaders::LoadDrawNormalBufferProgram(blaString vert, blaString frag)
 {
     m_drawNormalBufferPrgm = GL33Shader("DrawNormalBuffer");
     return m_drawNormalBufferPrgm.LoadShaderCode(vert, frag);

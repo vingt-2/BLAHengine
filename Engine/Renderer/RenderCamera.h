@@ -10,7 +10,7 @@ namespace BLA
     {
     public:
         // Hold the View Projection matrix (updated each frame)
-        blaMat4 m_ViewProjection;
+        blaMat4 m_worldToClipSpace;
 
         BLACORE_API virtual void AttachCamera(CameraComponent* camera);
         BLACORE_API virtual void Update() = 0;
@@ -19,7 +19,7 @@ namespace BLA
 
         // Points to the camera object
         CameraComponent* m_attachedCamera;
-
+        float m_aspectRatio;
     };
 
     class PerspectiveCamera : public RenderCamera
@@ -27,7 +27,7 @@ namespace BLA
     public:
         blaMat4 m_perspectiveProjection;
 
-        BLACORE_API void SetPerspective(glm::vec2 renderSize);
+        BLACORE_API void SetAspect(glm::vec2 renderSize);
         BLACORE_API void Update();
     };
 

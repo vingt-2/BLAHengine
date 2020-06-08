@@ -3,9 +3,9 @@
 #include "RenderWindow.h"
 #include "InputManager.h"
 
-using namespace BLA;
+#include "RenderBackend.h"
 
-#ifdef GLFW_INTERFACE
+using namespace BLA;
 
 blaVector<GLFWRenderWindow*> GLFWRenderWindow::ms_glfwRenderWindowInstanced = blaVector<GLFWRenderWindow*>();
 
@@ -32,12 +32,6 @@ void GLFWRenderWindow::GLFWDragAndDropCallBack(GLFWwindow* glfwWindow, int argc,
             renderWindow->m_registeredDragAndDropCallback(&dragAndDropPayload);
         }
     }
-}
-
-void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
-{
-    float yScroll = (float)yAxisScroll;
-    InputStateSetter::SetMouseScrollDelta(yScroll);
 }
 
 BLAKeyboard GLFWToBlaKeyboard(int glfwKey)
@@ -92,34 +86,43 @@ BLAKeyboard GLFWToBlaKeyboard(int glfwKey)
     return BLA_KEY_ENUM_END;
 }
 
-void GLFWKeyboardCallBack(GLFWwindow* window, int keyCode, int scandone, int action, int mods)
+namespace BLA
 {
-    if (action == GLFW_REPEAT)
+    void GLFWKeyboardCallBack(GLFWwindow* window, int keyCode, int scandone, int action, int mods)
     {
-        return;
+        if (action == GLFW_REPEAT)
+        {
+            return;
+        }
+
+        BLAKeyboard key = GLFWToBlaKeyboard(keyCode);
+
+        if (key != BLA_KEY_ENUM_END)
+        {
+            InputStateSetter::SetKey(GLFWToBlaKeyboard(keyCode), (float)glfwGetTime(), action == GLFW_PRESS);
+        }
     }
 
-    BLAKeyboard key = GLFWToBlaKeyboard(keyCode);
-
-    if (key != BLA_KEY_ENUM_END)
+    void GLFWMouseButtonCallBack(GLFWwindow* window, int button, int action, int mods)
     {
-        InputStateSetter::SetKey(GLFWToBlaKeyboard(keyCode), (float)glfwGetTime(), action == GLFW_PRESS);
-    }
-}
+        if (action == GLFW_REPEAT)
+        {
+            return;
+        }
 
-void GLFWMouseButtonCallBack(GLFWwindow* window, int button, int action, int mods)
-{
-    if (action == GLFW_REPEAT)
-    {
-        return;
+        InputStateSetter::SetMouseButton((BLAMouseButtons)button, (float)glfwGetTime(), action == GLFW_PRESS);
     }
 
-    InputStateSetter::SetMouseButton((BLAMouseButtons)button, (float)glfwGetTime(), action == GLFW_PRESS);
-}
+    void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
+    {
+        InputStateSetter::SetMousePointer(blaVec2(xpos, ypos));
+    }
 
-void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
-{
-    InputStateSetter::SetMousePointer(blaVec2(xpos, ypos));
+    void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll)
+    {
+        float yScroll = (float)yAxisScroll;
+        InputStateSetter::SetMouseScrollDelta(yScroll);
+    }
 }
 
 void GLFWRenderWindow::InitGLFW()
@@ -136,7 +139,7 @@ void GLFWRenderWindow::ShutdownGLFW()
     glfwTerminate();
 }
 
-void GLFWRenderWindow::CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void GLFWOpenGLRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
     GLFWwindow* window;
     // Initialise GLFW
@@ -146,7 +149,7 @@ void GLFWRenderWindow::CreateGL33RenderWindow(blaString windowTitle, int sizeX, 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 1);
 
     //glfwWindowHint(GLFW_DECORATED, false);
 
@@ -205,79 +208,19 @@ void GLFWRenderWindow::CreateGL33RenderWindow(blaString windowTitle, int sizeX, 
     m_glfwWindow = window;
 }
 
-void GLFWRenderWindow::CreateVulkanRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
+void GLFWOpenGLRenderWindow::UpdateWindowAndBuffers()
 {
-    GLFWwindow* window;
-    // Initialise GLFW
-    if (!glfwInit())
-    {
-        printf("Failed to initialize GLFW\n");
-        return;
-    }
-
-    m_isFullscreen = isFullScreen;
-	
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
-    //glfwWindowHint(GLFW_DECORATED, false);
-
-    // Open a window and create its OpenGL context
-    GLFWmonitor* monitor = nullptr;
-
-    if (isFullScreen)
-    {
-        monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
-
-        // Set window size to screen proportions
-        m_width = videoMode->width;
-        m_height = videoMode->height;
-
-        m_isFullscreen = true;
-    }
-    else
-    {
-        m_width = sizeX;
-        m_height = sizeY;
-    }
-
-    window = glfwCreateWindow(m_width, m_height, windowTitle.c_str(), monitor, NULL);
-
-    ms_glfwRenderWindowInstanced.push_back(this);
-
-    glfwSwapInterval(1);
-
-    glfwSetWindowTitle(window, windowTitle.c_str());
-
-    // Ensure we can capture the escape key being pressed below
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-    glfwSetCursorPos(window, m_width / 2, m_height / 2);
-
-    glfwSetMouseButtonCallback(window, GLFWMouseButtonCallBack);
-    glfwSetCursorPosCallback(window, GLFWMouseCursorPosCallBack);
-    glfwSetKeyCallback(window, GLFWKeyboardCallBack);
-    glfwSetScrollCallback(window, (GLFWscrollfun)GLFWMouseWheelCallback);
-
-    glfwSetDropCallback(window, (GLFWdropfun)GLFWDragAndDropCallBack);
-
-    m_glfwWindow = window;
+    glfwSwapInterval(0);
+    GLFWRenderWindow::UpdateWindowAndBuffers();
 }
 
-blaString GLFWRenderWindow::GetMaxGLVersion() const
-{
-    return blaString("");
-}
-
-void GLFWRenderWindow::MakeGLContextCurrent()
+void GLFWOpenGLRenderWindow::MakeGLContextCurrent()
 {
     glfwMakeContextCurrent(m_glfwWindow);
 }
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {
-    glfwSwapInterval(0);
-
     glfwSwapBuffers(m_glfwWindow);
     glfwPollEvents();
 
@@ -353,98 +296,3 @@ void GLFWRenderWindow::SetDragAndDropCallback(DragAndDropCallback dragAndDropCal
 {
     m_registeredDragAndDropCallback = dragAndDropCallback;
 }
-
-
-#elif defined(WPF_INTERFACE)
-
-WPFRenderWindow::WPFRenderWindow() :
-    m_glVersion(blaString("NONE")),
-    m_makeGLCurrentRequest(true),
-    m_updateWindowRequest(false),
-    m_width(0), m_height(0),
-    m_mousePosX(0), m_mousePosY(0),
-    m_mouseDownState(0x00)
-{
-    for (int i = 0; i < 100; i++)
-    {
-        m_keyPressed[i] = false;
-    }
-}
-
-void WPFRenderWindow::CreateGL33RenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
-{
-    m_width = sizeX;
-    m_height = sizeY;
-
-    glewExperimental = GL_TRUE;
-    glewInit();
-
-    m_glVersion = blaString((char*)glGetString(GL_VERSION));
-}
-
-void WPFRenderWindow::UpdateWindowAndBuffers()
-{
-    m_updateWindowRequest = true;
-}
-
-void WPFRenderWindow::MakeGLContextCurrent()
-{
-    m_makeGLCurrentRequest = true;
-}
-
-void WPFRenderWindow::WriteSize(int x, int y)
-{
-    //std::cout << "Writing size: " << x << ", " << y << "\n";
-    m_width = x;
-    m_height = y;
-}
-
-void WPFRenderWindow::WriteMousePos(int x, int y)
-{
-    m_mousePosX = x;
-    m_mousePosY = y;
-}
-
-//void WPFRenderWindow::SetMouseXY() {}
-//
-//bool WPFRenderWindow::GetKeyPressed(int key) const
-//{
-//    bool r = m_keyPressed[key];
-//    return r;
-//}
-//
-//bool WPFRenderWindow::GetMousePressed(int button) const
-//{ 
-//    int mask = (unsigned char) (0x01 << button);
-//
-//    return (mask & m_mouseDownState) != 0x00;
-//}
-
-blaString WPFRenderWindow::GetMaxGLVersion() const { return m_glVersion; }
-
-bool WPFRenderWindow::isFullScreen() const
-{
-    return false;
-}
-
-void WPFRenderWindow::SetWindowTitle(blaString title) { }
-blaString WPFRenderWindow::GetWindowTitle() const { return ""; }
-
-bool WPFRenderWindow::ShouldUpdateWindow() const { return m_updateWindowRequest; }
-void WPFRenderWindow::SetWindowUpdated() { m_updateWindowRequest = false; }
-
-bool WPFRenderWindow::ShouldMakeGLCurrent() const { return m_makeGLCurrentRequest; }
-void WPFRenderWindow::SetMadeGLCurrent() { m_makeGLCurrentRequest = false; }
-
-void WPFRenderWindow::GetSize(int &width, int &height) const
-{
-    width = m_width;
-    height = m_height;
-}
-//
-//void WPFRenderWindow::GetMouse(double &x, double &y) const
-//{
-//    x = m_mousePosX;
-//    y = m_mousePosY;
-//}
-#endif

@@ -34,7 +34,7 @@ namespace BLA
 
         BLACORE_API blaIndex LoadCookedAssets();
 
-        BLACORE_API AssetType GetAsset(blaString assetName, Asset* &assetPtr);
+        BLACORE_API AssetType GetAsset(blaString assetName, Asset* &assetPtr) const;
 
         BLACORE_API bool LoadTriangleMesh(blaString filepath);
         BLACORE_API bool LoadTexture(blaString filepath);
@@ -45,8 +45,8 @@ namespace BLA
         BLACORE_API bool SaveTriangleMesh(MeshAsset* mesh);
 
     private:
-
-        blaMap<blaString, blaPair<AssetType, blaIndex>> m_resourceMap;
+        typedef blaMap<blaString, blaPair<AssetType, blaIndex>> ResourceMap;
+        ResourceMap m_resourceMap;
 
         blaVector<MeshAsset*> m_triangleMeshesInMemory;
         blaVector<Material*> m_materialsInMemory;

@@ -23,6 +23,7 @@
 #else
 #define BLACORE_API __declspec ( dllimport )
 #endif
+
 #ifndef WIN32
 #define WIN32
 #endif
@@ -47,6 +48,8 @@ using blaLambda = std::function<L>;
 template<typename T>
 using blaOwnedPointer = std::unique_ptr<T>;
 
+#define ArraySize(arr) (int)(sizeof(arr) / sizeof(*arr))
+
 #define BLA_ENGINE_VERSION 1
 
 // TODO: Obviously windows specific for now ...
@@ -65,3 +68,5 @@ using blaOwnedPointer = std::unique_ptr<T>;
         }                                                                               \
         return true;                                                                    \
     }
+
+#define VULKAN 0

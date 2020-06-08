@@ -8,8 +8,6 @@
 #include "External/rapidjson/document.h"
 #include <stack>
 
-#pragma optimize("", off)
-
 using namespace BLA;
 
 BLA::SceneManager::SceneManager()
