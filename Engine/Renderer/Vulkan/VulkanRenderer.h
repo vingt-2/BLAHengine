@@ -29,4 +29,21 @@ namespace BLA
     	
         VulkanState* m_vulkanState = nullptr;
     };
+
+    class BLACORE_API ShaderResource
+    {
+
+    };
+
+    class BLACORE_API ShaderAttachment
+    {
+
+    };
+
+    template<int AttachmentCount>
+    class BLACORE_API RenderPass
+    {
+        ShaderAttachment m_attachment[AttachmentCount];
+
+    };
 }

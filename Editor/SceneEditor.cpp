@@ -99,7 +99,7 @@ void SceneEditor::SetEditorState(EditorState* state)
 
 void SceneEditor::PreEngineUpdate()
 {
-    if(g_shouldReloadLibraries) 
+    if (g_shouldReloadLibraries)
     {
         static_cast<EditorComponentLibrariesManager*>(m_componentLibrariesManager)->ReloadLibraries();
         g_shouldReloadLibraries = false;
@@ -164,8 +164,8 @@ void SceneEditor::PostEngineUpdate()
 
     // TODO: Update() should not be exported, and call from with the engine dll
     m_renderer->Update();
-	
-	// TODO: Update() should not be exported, and call from with the engine dll
+
+    // TODO: Update() should not be exported, and call from with the engine dll
     m_guiManager->Update();
 
     // TODO: Update() should not be exported, and call from with the engine dll
@@ -177,7 +177,7 @@ void SceneEditor::PostEngineUpdate()
         m_inputManager->SetKeyboardLock(m_guiManager->IsMouseOverGui());
         m_inputManager->SetMouseLock(m_guiManager->IsMouseOverGui());
 
-        if (const DevGuiRenderWindow * renderGuiWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
+        if (const DevGuiRenderWindow* renderGuiWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
         {
             if (renderGuiWindow->HasFocus())
             {
@@ -188,7 +188,7 @@ void SceneEditor::PostEngineUpdate()
                     m_inputManager->SetMouseLock(false);
                 }
 
-                if(m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_RIGHT).IsDown() ||
+                if (m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_RIGHT).IsDown() ||
                     m_inputManager->GetMouseButtonState(BLA_MOUSE_BUTTON_MIDDLE).IsDown())
                 {
                     ToggleCaptureMouse();
@@ -209,9 +209,9 @@ void SceneEditor::PostEngineUpdate()
     m_renderWindow->UpdateWindowAndBuffers();
 }
 
-SceneEditor::SceneEditor(bool external, bool isFullscreen):
-	EngineInstance(external, isFullscreen),
-	m_cameraController(nullptr)
+SceneEditor::SceneEditor(bool external, bool isFullscreen) :
+    EngineInstance(external, isFullscreen),
+    m_cameraController(nullptr)
 {
 }
 
@@ -243,7 +243,7 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         DevGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
 
         //TODO: Fix this garbagio
-        if(GL33Renderer* openglRenderer = dynamic_cast<GL33Renderer*>(m_renderer))
+        if (GL33Renderer* openglRenderer = dynamic_cast<GL33Renderer*>(m_renderer))
         {
             settingsMenu.AddMenuItem("Render G-Buffer", &openglRenderer->m_debugDrawGBuffer);
         }
@@ -305,14 +305,14 @@ void SceneEditor::TerminateEngine()
 
 void SceneEditor::InitializeComponentLibrariesManager()
 {
-	m_componentLibrariesManager = new EditorComponentLibrariesManager();
+    m_componentLibrariesManager = new EditorComponentLibrariesManager();
 }
 
 void SceneEditor::EditorDragAndDropedFile(const blaString& filePath)
 {
     FileEntry file = ParseFilePath(filePath);
 
-    if(file.m_extension == ".obj") 
+    if (file.m_extension == ".obj")
     {
         ImportMesh(file.GetFullPath(), file.m_name);
         return;
@@ -324,13 +324,13 @@ void SceneEditor::EditorDragAndDropedFile(const blaString& filePath)
         return;
     }
 
-	if(file.m_extension == ".tga")
-	{
+    if (file.m_extension == ".tga")
+    {
         Texture2D* texture = TextureImport::LoadTGA(file.m_name, filePath);
         AssetManager::GetSingletonInstance()->SaveTexture(texture);
         AssetManager::GetSingletonInstance()->LoadTexture(file.m_name);
         return;
-	}
+    }
     if (file.m_extension == ".bmp")
     {
         Texture2D* texture = TextureImport::LoadBMP(file.m_name, filePath);
@@ -338,26 +338,26 @@ void SceneEditor::EditorDragAndDropedFile(const blaString& filePath)
         AssetManager::GetSingletonInstance()->LoadTexture(file.m_name);
         return;
     }
-	if(file.m_extension == ".mtl")
-	{
+    if (file.m_extension == ".mtl")
+    {
         OBJImport::LoadMaterialTemplateLibrary(filePath);
-	}
+    }
 }
 
 SceneEditor::~SceneEditor()
 {
     delete m_commandManager;
     delete m_gizmoManager;
-	EngineInstance::~EngineInstance();
+    EngineInstance::~EngineInstance();
 }
 
 void SceneEditor::EditorUpdate()
 {
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
 
-    if(m_inputManager->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
+    if (m_inputManager->GetKeyState(BLA_KEY_LEFT_CONTROL).IsDown())
     {
-        if(m_inputManager->GetKeyState(BLA_KEY_Z).IsFallingEdge())
+        if (m_inputManager->GetKeyState(BLA_KEY_Z).IsFallingEdge())
         {
             m_commandManager->Undo();
         }
@@ -366,7 +366,7 @@ void SceneEditor::EditorUpdate()
             m_commandManager->Redo();
         }
     }
-	
+
     Ray screenRay;
     if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
@@ -389,12 +389,12 @@ void SceneEditor::EditorUpdate()
             //DebugDraw::DrawArbitraryGeometry(m_selectedObject->GetTransform().GetPosQuat(), m_selectedObject->GetTransform().GetScale(), meshRenderer->m_mesh->m_triangleMesh, blaVec4(BLA::ORANGE, 0.3f));
         }
     }
-	
-	if(m_bDrawGrid)
-	{
+
+    if (m_bDrawGrid)
+    {
         DrawGrid(100, 1.f, WHITE);
-	}
-	
+    }
+
     DebugDraw::DrawBasis(blaPosQuat::GetIdentity(), 1.f);
 }
 
@@ -556,8 +556,8 @@ void SceneEditor::SetSelectedObject(GameObject selectedObject)
             m_componentInspector->InspectGameObject(selectedObject);
         }
     }
-        
-    if (selectedObject.IsValid()) 
+
+    if (selectedObject.IsValid())
     {
         m_selectedObject = selectedObject;
     }
@@ -576,24 +576,24 @@ void SceneEditor::SetObjectParent(GameObject parent, GameObject child)
 bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCommand)
 {
     GameObject obj(editCommand->m_gameObjectId);
-	if(obj.IsValid())
-	{
-		for(GameComponent* comp : obj.GetAllComponents())
-		{
-			if(comp->GetComponentDescriptor().m_typeID == editCommand->m_editedComponentId)
-			{
-				// Swooping in here to handle this special case.
-				// Starting to spaghetti a bit, yum.
-				if(editCommand->m_editedComponentId == BlaStringId("TransformComponent"))
-				{
-					if(editCommand->m_exposedMemberEditedId == BlaStringId("WorldTransform"))
-					{
+    if (obj.IsValid())
+    {
+        for (GameComponent* comp : obj.GetAllComponents())
+        {
+            if (comp->GetComponentDescriptor().m_typeID == editCommand->m_editedComponentId)
+            {
+                // Swooping in here to handle this special case.
+                // Starting to spaghetti a bit, yum.
+                if (editCommand->m_editedComponentId == BlaStringId("TransformComponent"))
+                {
+                    if (editCommand->m_exposedMemberEditedId == BlaStringId("WorldTransform"))
+                    {
                         blaScaledTransform newWorldTransform;
                         memcpy_s(reinterpret_cast<char*>(&newWorldTransform), sizeof(blaScaledTransform), editCommand->m_delta.GetNewValue(), sizeof(blaScaledTransform));
                         static_cast<TransformComponent*>(comp)->SetTransform(newWorldTransform);
                         return true;
-					}
-				}
+                    }
+                }
                 for (const ComponentDescriptor::ExposedMember& exposedMember : comp->GetComponentDescriptor().m_members)
                 {
                     if (exposedMember.m_name == editCommand->m_exposedMemberEditedId)
@@ -609,9 +609,9 @@ bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCom
                         return true;
                     }
                 }
-			}
-		}
-	}
+            }
+        }
+    }
     return false;
 }
 
@@ -661,7 +661,7 @@ DefineConsoleCommand(void, SetParent, blaString parentName, blaString childName)
     {
         if (SceneEditor* editorSession = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance()))
         {
-            editorSession->SetObjectParent(parentObj, childObj); 
+            editorSession->SetObjectParent(parentObj, childObj);
         }
     }
 }
@@ -688,11 +688,11 @@ DefineConsoleCommand(void, CreatePointLight, blaString name)
 
 DefineConsoleCommand(void, AddComponent, blaString objectName, blaString componentName)
 {
-	GameObject obj(GenerateBlaStringId(objectName));
-	if(obj.IsValid()) 
+    GameObject obj(GenerateBlaStringId(objectName));
+    if (obj.IsValid())
     {
         obj.CreateComponent(GenerateBlaStringId(componentName));
-	}
+    }
 }
 
 DefineConsoleCommand(blaString, RemoveComponent, blaString objectName, blaString componentName)
@@ -700,7 +700,7 @@ DefineConsoleCommand(blaString, RemoveComponent, blaString objectName, blaString
     GameObject obj(GenerateBlaStringId(objectName));
     if (obj.IsValid())
     {
-        if(obj.DeleteComponent(GenerateBlaStringId(componentName)))
+        if (obj.DeleteComponent(GenerateBlaStringId(componentName)))
         {
             return "Deleted";
         }

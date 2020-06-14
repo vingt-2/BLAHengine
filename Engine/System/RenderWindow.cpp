@@ -139,6 +139,8 @@ void GLFWRenderWindow::ShutdownGLFW()
     glfwTerminate();
 }
 
+#if !VULKAN
+
 void GLFWOpenGLRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {
     GLFWwindow* window;
@@ -218,6 +220,8 @@ void GLFWOpenGLRenderWindow::MakeGLContextCurrent()
 {
     glfwMakeContextCurrent(m_glfwWindow);
 }
+
+#endif
 
 void GLFWRenderWindow::UpdateWindowAndBuffers()
 {

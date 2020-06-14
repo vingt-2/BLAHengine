@@ -71,7 +71,7 @@ struct MM<size, size, dummy>
     }
 };
 
-// This doesn't take into account the nul char (update: whatever I meant by that ¯\_(:/)_/¯ )
+// This doesn't use the null terminating char
 #define COMPILE_TIME_CRC32_STR(x) (MM<sizeof(x)-1>::crc32(x))
 
 class blaStringId

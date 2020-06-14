@@ -1,6 +1,6 @@
 #include "ComponentSystemsScheduler.h"
 
-#include "core/ComponentSystems.h"
+#include "Core/ComponentSystems.h"
 
 using namespace BLA;
 

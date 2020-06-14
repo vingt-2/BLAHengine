@@ -199,10 +199,6 @@ bool OBJImport::LoadMaterialTemplateLibrary(const blaString filename)
     blaVector<blaPair<blaString, blaIndex>> matDefs;
     blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
 
-    int quadsCount = 0;
-    int missedFaces = 0;
-    int triCount = 0;
-
     int outOfRangeExceptionsCount = 0;
 
     if (!fileStream.good())

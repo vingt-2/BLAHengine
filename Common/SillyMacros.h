@@ -1,3 +1,7 @@
+// BLAEngine Copyright (C) 2019 Vincent Petrella. All rights reserved.
+
+// Warning: Reading this here file may result in temporary loss of cognitive abilities and / or will to live. Use with extreme caution.
+
 #define LPAREN (
 #define RPAREN )
 #define COMMA ,

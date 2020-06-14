@@ -14,6 +14,7 @@
 #include "System/VulkanRenderWindow.h"
 #else
 #include "examples/imgui_impl_opengl3.h"
+#include "Renderer/OpenGL/GL33Renderer.h"
 #endif
 
 #include "System/RenderWindow.h"
@@ -21,7 +22,6 @@
 #include "System/FileSystem/Files.h"
 #include "System/Console.h"
 #include "Core/Scene.h"
-#include "Renderer/OpenGL/GL33Renderer.h"
 
 #include "EngineInstance.h"
 

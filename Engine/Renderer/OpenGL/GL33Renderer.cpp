@@ -1,7 +1,9 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
-#include "GL33Renderer.h"
+#include "StdInclude.h"
 
+#if !VULKAN
+#include "GL33Renderer.h"
 #include "System/Console.h"
 #include "Renderer/MeshRendererComponent.h"
 #include "Renderer/PointLightComponent.h"
@@ -919,7 +921,7 @@ bool GL33Renderer::GenerateArrays(GL33RenderObject& object)
     layoutIndex++;
     if (!object.m_toMeshUVs->empty())
     {
-        GenerateBufferObject<glm::vec2>(object, &((*object.m_toMeshUVs)[0]), static_cast<GLuint>(object.m_toMeshUVs->size() * sizeof(glm::vec2)), 2, layoutIndex);
+        GenerateBufferObject<blaVec2>(object, &((*object.m_toMeshUVs)[0]), static_cast<GLuint>(object.m_toMeshUVs->size() * sizeof(glm::vec2)), 2, layoutIndex);
         layoutIndex++;
     }
 
@@ -1569,3 +1571,5 @@ bool GL33Resources::GLLoadSystemShaders()
 
     return true;
 }
+
+#endif
