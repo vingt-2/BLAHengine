@@ -12,7 +12,7 @@
 
 #define nothing(...)  
 
-#define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)                                 \
+#define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)                                   \
 return BLA::blaToString(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( nothing(__VA_ARGS__),   \
     EXPAND(ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__))))));  
 
@@ -42,9 +42,9 @@ return BLA::blaToString(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS
     ConsoleCommandEntry_##CommandName ConsoleCommandEntry_##CommandName::Init;                                 \
     RetType CommandName(__VA_ARGS__)                                                                                                              
 
-#define DeclareConsoleVariable(type, name, defaultValue)                        \
-    type g_##name = defaultValue;                                               \
-    DefineConsoleCommand(int, name, type value) { g_##name = value; return 0; } \
+#define DeclareConsoleVariable(type, name, defaultValue)               \
+    type g_##name = defaultValue;                                      \
+    DefineConsoleCommand(void, name, type value) { g_##name = value; } \
 
 namespace BLA
 {

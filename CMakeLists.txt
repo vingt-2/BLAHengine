@@ -109,7 +109,7 @@ set(GLEW_INCLUDE_DIR ${GLEW_LIBRARY}/include)
 find_path(VulkanHeaders_PATH vulkan.h ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include/vulkan)
 
 if(NOT VulkanHeaders_PATH OR (NOT EXISTS ${VulkanHeaders_PATH}))
-    # we couldn't find the header files for GLM or they don't exist
+    # we couldn't find the header files for VulkanHeaders or they don't exist
     message("Unable to find Vulkan-Headers, fetching the git submodule...")
 
     GetHeaderDependency(Vulkan-Headers)
@@ -121,12 +121,37 @@ if(NOT VulkanHeaders_PATH OR (NOT EXISTS ${VulkanHeaders_PATH}))
 	endif()
 endif()
 
-set(VulkanHeaders_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include CACHE PATH "Vulkan Headers directory")
+set(VulkanHeaders_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include CACHE PATH "Vulkan Headers include directory")
 set(VulkanRegistry_DIR ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/registry CACHE PATH "Vulkan Registry directory")
 
 GetCMakeDependency(Vulkan-Loader)
 set(VULKAN_LOADER_LIBRARY ${PROJECT_EXTERNAL_DIR}/Vulkan-Loader CACHE PATH "Vulkan-Loader directory")
 add_subdirectory(${VULKAN_LOADER_LIBRARY}) 
+
+GetHeaderDependency(SPIRV-Headers)
+set(SPIRV-Headers_SOURCE_DIR ${PROJECT_EXTERNAL_DIR}/SPIRV-Headers CACHE PATH "SPIRV-Headers directory")
+
+GetCMakeDependency(SPIRV-Tools)
+set(SPIRVTOOLS_LIBRARY ${PROJECT_EXTERNAL_DIR}/SPIRV-Tools CACHE PATH "SPIRV-Tools directory")
+set(SPIRV_SKIP_TESTS ON)
+set(SKIP_SPIRV_TOOLS_INSTALL ON)
+set(SPIRV_SKIP_EXECUTABLES ON)
+add_subdirectory(${SPIRVTOOLS_LIBRARY})
+
+GetCMakeDependency(glslang)
+set(GLSLANG_LIBRARY ${PROJECT_EXTERNAL_DIR}/glslang CACHE PATH "glslang directory")
+set(SKIP_GLSLANG_INSTALL ON)
+set(ENABLE_SPVREMAPPER OFF)
+set(ENABLE_CTEST OFF)
+add_subdirectory(${GLSLANG_LIBRARY})
+
+GetCMakeDependency(shaderc)
+set(SHADERC_LIBRARY ${PROJECT_EXTERNAL_DIR}/shaderc CACHE PATH "shaderc directory")
+set(SHADERC_SKIP_INSTALL ON)
+set(SHADERC_ENABLE_SPVC OFF)
+set(SHADERC_SKIP_TESTS ON)
+set(SHADERC_ENABLE_SHARED_CRT OFF)
+add_subdirectory(${SHADERC_LIBRARY})
 
 link_directories(${LIBRARY_OUTPUT_PATH})
 

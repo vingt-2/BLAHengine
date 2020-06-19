@@ -9,7 +9,7 @@
 #include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
 #include "examples/imgui_impl_vulkan.h"
 #include "System/VulkanRenderWindow.h"
 #else
@@ -134,7 +134,7 @@ void DevGuiManager::OpenWindow(blaString name, DevGuiWindow* window)
     m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(name, window));
 }
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
 static void CreateImGuiVulkanRenderPass(const VulkanContext* vulkanContext, VulkanWindowInfo* vulkanWindowInfo)
 {
     VkAttachmentDescription attachment = {};
@@ -193,7 +193,7 @@ void DevGuiManager::Init()
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer bindings
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
 
     ImGui_ImplGlfw_InitForVulkan(renderWindow->GetWindowPointer(), true);
@@ -260,7 +260,7 @@ void DevGuiManager::Destroy()
     }
 
     // Cleanup
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
 
     const VulkanContext* vulkanContext = renderWindow->GetVulkanContext();
@@ -739,7 +739,7 @@ DevGuiRenderWindow::DevGuiRenderWindow(Renderer* renderer, const blaString& wind
 
 void DevGuiRenderWindow::Render()
 {
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     return;
 #else
     if (GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer))
@@ -782,7 +782,7 @@ blaVec2 DevGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
 bool g_show_demo_window = false;
 bool g_debugFileBrowser = false;
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
 static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vulkanWindowInfo)
 {
     VkResult err;
@@ -848,7 +848,7 @@ static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vu
 void DevGuiManager::Update()
 {
     // Start the Dear ImGui frame
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     ImGui_ImplVulkan_NewFrame();
 #else
     ImGui_ImplOpenGL3_NewFrame();
@@ -930,7 +930,7 @@ void DevGuiManager::Update()
 
     ImGui::Render();
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
     // glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
     FrameRender(renderWindow->GetVulkanContext(), renderWindow->GetVulkanWindowInfo());

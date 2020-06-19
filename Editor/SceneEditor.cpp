@@ -22,8 +22,13 @@
 #include "Assets/Texture.h"
 #include "System/RenderWindow.h"
 
-// Todo: Remove me
+#include "Gui/DevTextEditor.h"
+
+#if NEW_VULKAN_RENDERER
+#include "Renderer/Vulkan/VulkanRenderer.h"
+#else
 #include "Renderer/OpenGL/GL33Renderer.h"
+#endif
 
 using namespace BLA;
 
@@ -222,8 +227,10 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         m_renderer->SetRenderToFrameBufferOnly(true);
         m_commandManager = new EditorCommandManager(this);
         m_gizmoManager = new GizmoManager(m_commandManager);
-        m_guiManager->OpenWindow("Editor Window", new DevGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
 
+#if !NEW_VULKAN_RENDERER
+        m_guiManager->OpenWindow("Editor Window", new DevGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
+#endif
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
 
         m_editorState = new EditorState();
@@ -242,11 +249,14 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
 
         DevGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
 
-        //TODO: Fix this garbagio
+#if !NEW_VULKAN_RENDERER
+
         if (GL33Renderer* openglRenderer = dynamic_cast<GL33Renderer*>(m_renderer))
         {
             settingsMenu.AddMenuItem("Render G-Buffer", &openglRenderer->m_debugDrawGBuffer);
         }
+#endif
+        settingsMenu.AddMenuItem("TextEditor", &m_bTextEdit);
 
         settingsMenu.AddMenuItem("Draw Grid", &m_bDrawGrid);
 
@@ -367,11 +377,21 @@ void SceneEditor::EditorUpdate()
         }
     }
 
+    if(m_bTextEdit)
+    {
+        DevGuiWindow* textEditorWindow = m_guiManager->OpenWindow("TextEditor");
+        if(textEditorWindow->RootElement() == nullptr)
+        {
+            textEditorWindow->SetRootElement(new TextEditor("TextEditor", BlaStringId("TestTextEditor")));
+        }   
+    }
+
     Ray screenRay;
     if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
+#if !NEW_VULKAN_RENDERER
         screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
-
+#endif
         // ColliderComponent::CollisionContact contactPoint;
         GameObject hoverObject;// = m_scene->PickGameObjectInScene(screenRay, contactPoint);
 

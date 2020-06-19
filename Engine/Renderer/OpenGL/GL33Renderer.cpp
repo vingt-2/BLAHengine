@@ -2,7 +2,7 @@
 
 #include "StdInclude.h"
 
-#if !VULKAN
+#if !NEW_VULKAN_RENDERER
 #include "GL33Renderer.h"
 #include "System/Console.h"
 #include "Renderer/MeshRendererComponent.h"

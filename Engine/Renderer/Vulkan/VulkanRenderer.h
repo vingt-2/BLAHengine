@@ -6,44 +6,56 @@
 
 #include "Renderer/Renderer.h"
 
+#define GLFW_INCLUDE_VULKAN
+#include "RenderBackend.h"
+
 namespace BLA
 {
+    class RenderPassManager
+    {
+
+    };
+
+    struct TextureView
+    {
+        //VkImage m_image;
+        //VkImageView m_imageView;
+    };
+
+    struct OffscreenRenderBuffer
+    {
+        TextureView m_color;
+    };
+
     struct DirectionalShadowRender;
-    struct VulkanState;
-    class BLACORE_API VulkanRenderer : public Renderer
+    class GLFWVulkanRenderWindow;
+    class BLACORE_API VulkanRenderer
     {
     public:
         VulkanRenderer(const AssetManager* assetManager);
 
-        void InitializeRenderer(RenderWindow* renderWindow, RenderingManager* renderingManager, DebugRenderingManager* debugRenderManager) override;
-        void SwitchRenderingManager(RenderingManager* renderingManager) override;
-        bool Update() override;
-        int SynchWithRenderManager() override;
-        RenderObject* LoadRenderObject(const MeshRendererComponent& object, int type) override;
-        bool CancelRender(const MeshRendererComponent& object) override;
-        bool LoadDebugLines() override;
-        Ray ScreenToRay(blaVec2 screenSpaceCoord) override;
-        void CleanUpPools() override;
+        void InitializeRenderer(RenderWindow* renderWindow);
+
+        bool Update();
+
         void CleanupRenderer();
+
+        int GetStatus() { return 1; }
+
+        void SetRenderToFrameBufferOnly(bool a) {};
+
     private:
-    	
-        VulkanState* m_vulkanState = nullptr;
+
+        void CreateDisplayBuffers();
+
+        OffscreenRenderBuffer m_offscreenBuffer;
+
+        blaIVec2 m_viewPortExtents;
+        GLFWVulkanRenderWindow* m_renderWindow;
     };
 
     class BLACORE_API ShaderResource
     {
-
-    };
-
-    class BLACORE_API ShaderAttachment
-    {
-
-    };
-
-    template<int AttachmentCount>
-    class BLACORE_API RenderPass
-    {
-        ShaderAttachment m_attachment[AttachmentCount];
 
     };
 }

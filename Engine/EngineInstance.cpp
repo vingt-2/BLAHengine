@@ -19,7 +19,7 @@
 #include "Core/ComponentSystems.h"
 #include "EngineInstance.h"
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
 #include "Renderer/Vulkan/VulkanRenderer.h"
 #else
 #include "Renderer/OpenGL/GL33Renderer.h" 
@@ -35,7 +35,7 @@ blaU32 EngineInstance::LoopEngine()
 
     GLFWRenderWindow::InitGLFW();
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     RenderWindow* renderWindow = new GLFWVulkanRenderWindow();
 #else
     RenderWindow* renderWindow = new GLFWOpenGLRenderWindow();
@@ -103,9 +103,9 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     m_renderer = new VulkanRenderer(m_assetManager);
-    m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
+    m_renderer->InitializeRenderer(this->m_renderWindow);
 #else
     m_renderer = new GL33Renderer(m_assetManager);
     m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
@@ -200,7 +200,9 @@ bool EngineInstance::LoadNewScene()
 {
     Scene::GetSingletonInstance()->Clear();
 
+#if !NEW_VULKAN_RENDERER
     m_renderer->SwitchRenderingManager(m_renderingManager);
+#endif
 
     SetupDirLightAndCamera();
 
@@ -213,10 +215,12 @@ bool EngineInstance::LoadWorkingScene(blaString filepath)
 {
     m_sceneManager->LoadScene(filepath);
 
+#if !NEW_VULKAN_RENDERER
     m_renderer->SwitchRenderingManager(m_renderingManager);
 
     //SetupDirLightAndCamera();
     m_renderer->SetCamera(m_scene->GetMainCamera());
+#endif
 
     FileEntry sceneFileEntry = ParseFilePath(filepath);
 
@@ -238,7 +242,9 @@ void EngineInstance::SetupDirLightAndCamera()
     GameObject cameraObject = m_scene->CreateObject(BlaStringId("EditorCamera"));
     CameraComponent* cameraComp = cameraObject.CreateComponent<CameraComponent>();
 
+#if !NEW_VULKAN_RENDERER
     m_renderer->SetCamera(cameraComp);
+#endif
 }
 
 void EngineInstance::ToggleCaptureMouse()

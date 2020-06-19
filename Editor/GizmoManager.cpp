@@ -191,7 +191,9 @@ void TranslationGizmoControl::Update()
     Ray screenRay;
     if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
+#if !NEW_VULKAN_RENDERER
         screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+#endif
     }
     else
     {
@@ -391,7 +393,9 @@ void ScaleGizmoControl::Update()
     Ray screenRay;
     if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
+#if !NEW_VULKAN_RENDERER
         screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+#endif
     }
     else
     {
@@ -564,7 +568,9 @@ void RotationGizmoControl::Update()
     Ray screenRay;
     if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
+#if !NEW_VULKAN_RENDERER
         screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+#endif
     }
     else
     {

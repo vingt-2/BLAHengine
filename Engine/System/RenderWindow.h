@@ -99,7 +99,7 @@ namespace BLA
     void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos);
     void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll);
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
     struct VulkanContext;
     struct VulkanWindowInfo;
     class BLACORE_API GLFWVulkanRenderWindow : public GLFWRenderWindow

@@ -139,7 +139,7 @@ void GLFWRenderWindow::ShutdownGLFW()
     glfwTerminate();
 }
 
-#if !VULKAN
+#if !NEW_VULKAN_RENDERER
 
 void GLFWOpenGLRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
 {

@@ -1,6 +1,6 @@
 #include "StdInclude.h"
 
-#if VULKAN
+#if NEW_VULKAN_RENDERER
 
 #define GLFW_INCLUDE_VULKAN
 #include "RenderBackend.h"
@@ -62,7 +62,7 @@ namespace BLA
 
     struct VulkanContext
     {
-        VkAllocationCallbacks* m_Allocator = NULL;
+        VkAllocationCallbacks*   m_Allocator = NULL;
         VkInstance               m_Instance = VK_NULL_HANDLE;
         VkPhysicalDevice         m_PhysicalDevice = VK_NULL_HANDLE;
         VkDevice                 m_Device = VK_NULL_HANDLE;

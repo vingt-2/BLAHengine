@@ -10,14 +10,15 @@
 #include "EditorCommands.h"
 #include "GizmoManager.h"
 
+
+
 namespace BLA
 {
     class CameraController;
     class GameObject;
     class TriangleMesh;
     struct EditorState;
-
-	
+    class TextEditor;
     /*
      * Vulkan Test
      */
@@ -92,7 +93,7 @@ namespace BLA
     private:
         bool m_updatedScene = false;
         bool m_bDrawGrid = false;
-        bool m_bTestVulkan = false;
+        bool m_bTextEdit = false;
 
     	/*
     	 * Vulkan Test

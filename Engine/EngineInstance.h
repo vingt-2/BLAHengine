@@ -9,7 +9,11 @@
 namespace BLA
 {
     class Console;
+#if NEW_VULKAN_RENDERER
+    class VulkanRenderer;
+#else
     class Renderer;
+#endif
     class AssetManager;
 	class ComponentLibrariesManager;
     class SceneManager;
@@ -44,7 +48,9 @@ namespace BLA
         BLACORE_API void SetTargetFPS(int fps) { m_targetFPS = fps; }
         BLACORE_API blaU32 GetTargetFPS() { return m_targetFPS; }
 
+#if !NEW_VULKAN_RENDERER
         BLACORE_API Renderer* GetRenderer() { return m_renderer; }
+#endif
 
         BLACORE_API int GetEngineVersion() const { return m_engineVersion; }
 
@@ -75,7 +81,11 @@ namespace BLA
 
         // Required Engine Modules
         Console*      m_console;
+#if NEW_VULKAN_RENDERER
+        VulkanRenderer* m_renderer;
+#else
         Renderer* m_renderer;
+#endif       
         AssetManager* m_assetManager;
 		ComponentLibrariesManager* m_componentLibrariesManager;
         SceneManager* m_sceneManager;
