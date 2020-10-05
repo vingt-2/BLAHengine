@@ -48,6 +48,7 @@ namespace BLA
 			}
 
 			// This version is called otherwise:
+			// We assert statically if we reach this template expansion and T isn't a primitive type
 			template <typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0>
 			static ExposedVarTypeDescriptor* GetDescriptor()
 			{

@@ -11,20 +11,16 @@
 
 namespace BLA
 {
+    struct TextureView;
+
     class RenderPassManager
     {
 
     };
 
-    struct TextureView
-    {
-        //VkImage m_image;
-        //VkImageView m_imageView;
-    };
-
     struct OffscreenRenderBuffer
     {
-        TextureView m_color;
+        TextureView* m_color;
     };
 
     struct DirectionalShadowRender;
@@ -58,4 +54,7 @@ namespace BLA
     {
 
     };
+
+    template<class RenderPass>
+    BLACORE_API blaString GenerateVulkanShaderTemplate();
 }

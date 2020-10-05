@@ -22,6 +22,14 @@ BLACORE_API ExposedVarTypeDescriptor* BLAInspectableVariables::GetPrimitiveDescr
     return &typeDesc;                                                                                   \
 }
 
+// Unimplemented type descriptor throws a static assert at compile time
+template<typename T>
+BLACORE_API ExposedVarTypeDescriptor* BLAInspectableVariables::GetPrimitiveDescriptor()
+{
+    static_assert(false, "Trying to inspect a non-inspectable variable! Does your code / data-structure expect an inspectable variable ?");
+    return nullptr;
+}
+
 /*
  * Declare all primitive descriptors (template specialization)
  */

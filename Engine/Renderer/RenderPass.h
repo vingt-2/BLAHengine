@@ -1,14 +1,15 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #pragma once
-#include "StdInclude.h"
+#include "BLAStringID.h"
 
+#include "StdInclude.h"
 
 #define VertexAttributes(...) __VA_ARGS__
 #define UniformValues(...) __VA_ARGS__
 
 #define DeclareRenderPass(Name, VertexAttributes, UniformValues, attachmentCount) \
-    typedef BLA::RenderPass<BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>, attachmentCount> Name;   
+    typedef BLA::TypedRenderPass<BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>, attachmentCount> Name;   
 
 namespace BLA
 {
@@ -24,7 +25,7 @@ namespace BLA
         class RPIS {};
     }
 
-    // TODO Only inspectable types can be passed to a render pass Instance.
+    // Only inspectable types should be template arguments to a render pass.
     // Check and use it to infer things
     //
     template<typename... Ts>
@@ -144,10 +145,10 @@ namespace BLA
     };
 
     template<class VertexAttributes, class ShaderUniforms, int attachmentCount>
-    class RenderPass;
+    class TypedRenderPass;
 
     template<int attachmentCount, typename... VAs, typename... UVs>
-    class BLACORE_API RenderPass<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>, attachmentCount>
+    class BLACORE_API TypedRenderPass<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>, attachmentCount>
     {
         static_assert(attachmentCount > 0, "Number of attachments on a RenderPass < 1 is invalid");
 
@@ -155,5 +156,8 @@ namespace BLA
 
     public:
         typedef _RenderPassInstance<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassInstance;
+
+        static const size_t VACount = sizeof...(VAs);
+        static const size_t UVCount = sizeof...(UVs);
     };
 }
