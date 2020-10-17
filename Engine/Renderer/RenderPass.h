@@ -4,12 +4,32 @@
 #include "BLAStringID.h"
 
 #include "StdInclude.h"
+#include "Core/InspectableVariables.h"
+#include "BLASingleton.h"
 
 #define VertexAttributes(...) __VA_ARGS__
 #define UniformValues(...) __VA_ARGS__
 
 #define DeclareRenderPass(Name, VertexAttributes, UniformValues, attachmentCount) \
-    typedef BLA::TypedRenderPass<BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>, attachmentCount> Name;   
+   typedef BLA::RenderPass<COMPILE_TIME_CRC32_STR(#Name), attachmentCount, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>> Name;
+
+#define RegisterRenderPass(Name)                                                                                        \
+    class Name##Registrator                                                                                             \
+    {                                                                                                                   \
+    public:                                                                                                             \
+        Name##Registrator()                                                                                             \
+        {                                                                                                               \
+            RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();                                  \
+            if(!registry)                                                                                               \
+            {                                                                                                           \
+                 registry = RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());             \
+            }                                                                                                           \
+            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<Name>();     \
+            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<Name>();     \
+            registry->__RegisterRenderPass(Name::ms_renderPassId, 1, vas, uvs);                                         \
+        }                                                                                                               \
+    };                                                                                                                  \
+    static Name##Registrator ms_Name##Registrator;                                                  
 
 namespace BLA
 {
@@ -144,11 +164,11 @@ namespace BLA
         _RenderPassInstance(const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms ...) : _RenderPassInstanceVAs<VAs...>(vertexAttributes), _RenderPassInstanceUVs<UVs...>(shaderUniforms) {}
     };
 
-    template<class VertexAttributes, class ShaderUniforms, int attachmentCount>
-    class TypedRenderPass;
+    template<blaU32 renderPassId, blaS32 attachmentCount, class VertexAttributes, class ShaderUniforms>
+    class RenderPass;
 
-    template<int attachmentCount, typename... VAs, typename... UVs>
-    class BLACORE_API TypedRenderPass<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>, attachmentCount>
+    template<blaU32 renderPassId, blaS32 attachmentCount, typename... VAs, typename... UVs>
+    class BLACORE_API RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>
     {
         static_assert(attachmentCount > 0, "Number of attachments on a RenderPass < 1 is invalid");
 
@@ -157,7 +177,105 @@ namespace BLA
     public:
         typedef _RenderPassInstance<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassInstance;
 
-        static const size_t VACount = sizeof...(VAs);
-        static const size_t UVCount = sizeof...(UVs);
+        static const blaU32 ms_renderPassId = renderPassId;
+        static const size_t ms_VACount = sizeof...(VAs);
+        static const size_t ms_UVCount = sizeof...(UVs);
+    };
+
+    template<int i, class RenderPass>
+    class _GetRenderPassVADescriptorsInternal
+    {
+    public:
+        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        {
+            _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
+            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+
+            typeDescriptors.push_back(d);
+        }
+    };
+
+    template<class RenderPass>
+    class _GetRenderPassVADescriptorsInternal<0, RenderPass>
+    {
+    public:
+        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        {
+            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+
+            typeDescriptors.push_back(d);
+        }
+    };
+
+    template<class RenderPass>
+    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassVADescriptors()
+    {
+        blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
+
+        _GetRenderPassVADescriptorsInternal<RenderPass::ms_VACount - 1, RenderPass>::Get(typeDescriptors);
+
+        return typeDescriptors;
+    }
+
+    template<int i, class RenderPass>
+    class _GetRenderPassUVDescriptorsInternal
+    {
+    public:
+        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        {
+            _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
+            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+
+            typeDescriptors.push_back(d);
+        }
+    };
+
+    template<class RenderPass>
+    class _GetRenderPassUVDescriptorsInternal<0, RenderPass>
+    {
+    public:
+        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        {
+            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+
+            typeDescriptors.push_back(d);
+        }
+    };
+
+    template<class RenderPass>
+    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUVDescriptors()
+    {
+        blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
+
+        _GetRenderPassUVDescriptorsInternal<RenderPass::ms_UVCount - 1, RenderPass>::Get(typeDescriptors);
+
+        return typeDescriptors;
+    }
+
+    // This may only be needed for editor purposes... **May**
+    class RenderPassRegistry
+    {
+        BLA_DECLARE_EXPORTED_SINGLETON(RenderPassRegistry);
+
+        struct RenderPassRegistryEntry
+        {
+            blaU32 m_attachmentCount;
+            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
+            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
+        };
+
+        typedef blaMap<blaU32, RenderPassRegistryEntry> RenderPassRegistryStorage;
+        RenderPassRegistryStorage m_registry;
+
+    public:
+
+        void __RegisterRenderPass(blaU32 id,
+            blaU32 attachmentCount,
+            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
+            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
     };
 }

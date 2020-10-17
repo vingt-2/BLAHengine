@@ -72,6 +72,9 @@ namespace BLA
         VkPipelineCache          m_PipelineCache = VK_NULL_HANDLE;
         VkDescriptorPool         m_DescriptorPool = VK_NULL_HANDLE;
         int                      m_MinImageCount = 2;
+        VkPhysicalDeviceMemoryProperties m_memoryProperties;
+
+        uint32_t GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound = nullptr) const;
     };
 };
 

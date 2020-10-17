@@ -12,12 +12,12 @@
 #include "imgui_widgets.cpp"
 
 #if NEW_VULKAN_RENDERER
-    #include "examples/imgui_impl_vulkan.cpp"
+    #include "backends/imgui_impl_vulkan.cpp"
 #else
-    #include "examples/imgui_impl_opengl3.cpp"
+    #include "backends/imgui_impl_opengl3.cpp"
 #endif
 
-#include "examples/imgui_impl_glfw.cpp"
+#include "backends/imgui_impl_glfw.cpp"
 
 namespace BLAImGui
 {

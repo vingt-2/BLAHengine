@@ -145,6 +145,10 @@ const VulkanContext* GLFWVulkanRenderWindow::SetupVulkanContext(const char** ext
         BLA_ASSERT(vulkanContext->m_QueueFamily != (uint32_t)-1);
     }
 
+    {
+        vkGetPhysicalDeviceMemoryProperties(vulkanContext->m_PhysicalDevice, &vulkanContext->m_memoryProperties);
+    }
+
     // Create Logical Device (with 1 queue)
     {
         int device_extension_count = 1;
@@ -513,4 +517,32 @@ void GLFWVulkanRenderWindow::DestroySwapChainAndCommandBuffers()
     m_vulkanWindowInfo->ImageCount = 0;
 }
 
+uint32_t VulkanContext::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound) const
+{
+    for (uint32_t i = 0; i < m_memoryProperties.memoryTypeCount; i++)
+    {
+        if ((typeBits & 1) == 1)
+        {
+            if ((m_memoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            {
+                if (memTypeFound)
+                {
+                    *memTypeFound = true;
+                }
+                return i;
+            }
+        }
+        typeBits >>= 1;
+    }
+
+    if (memTypeFound)
+    {
+        *memTypeFound = false;
+        return 0;
+    }
+
+    return -1;
+}
+
 #endif
+

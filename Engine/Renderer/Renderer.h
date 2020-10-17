@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Core/RenderingManager.h"
+#include "Core/InspectableVariables.h"
 #include "Renderer/ShadowRender.h"
 #include "Maths/Ray.h"
 
@@ -84,6 +85,4 @@ namespace BLA
         bool m_isFullScreen;
         bool m_renderToFrameBufferOnly;
     };
-
-
 }

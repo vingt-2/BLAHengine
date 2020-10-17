@@ -91,10 +91,10 @@ namespace BLA
 
 #define EndComponentDescription()                                                                           \
         };                                                                                                  \
-        GameComponentRegistry* manager = GameComponentRegistry::GetSingletonInstance();                     \
-        if(!manager)                                                                                        \
-            manager = GameComponentRegistry::AssignAndReturnSingletonInstance(new GameComponentRegistry()); \
-        manager->__RegisterComponent(typeDesc->m_typeID, T::Factory);                                       \
+        GameComponentRegistry* registry = GameComponentRegistry::GetSingletonInstance();                     \
+        if(!registry)                                                                                        \
+            registry = GameComponentRegistry::AssignAndReturnSingletonInstance(new GameComponentRegistry()); \
+        registry->__RegisterComponent(typeDesc->m_typeID, T::Factory);                                       \
     }
 
     class GameComponentRegistry

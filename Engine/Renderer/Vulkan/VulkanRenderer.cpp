@@ -12,7 +12,6 @@
 #include "System/RenderWindow.h"
 #include "Renderer/MeshRendererComponent.h"
 #include "Renderer/PointLightComponent.h"
-#include "core/InspectableVariables.h"
 
 #include "System/VulkanRenderWindow.h"
 #include <optional>
@@ -28,6 +27,8 @@ using namespace BLA;
 #include "Renderer/RenderPass.h"
 
 DeclareRenderPass(TestRenderPass, VertexAttributes(blaVec3, blaVec2), UniformValues(blaVec3, blaF32), 1)
+
+RegisterRenderPass(TestRenderPass)
 
 const blaVector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -85,48 +86,8 @@ void SetupDebugRenderPass()
 
     g_instance = new TestRenderPass::RenderPassInstance(quadVA, colorUniform);
 
-    blaString a = BLA::GenerateVulkanShaderTemplate<TestRenderPass>();
-
-    g_instance->GetVertexAttributes<0>();
-    g_instance->GetVertexAttributes<1>();
-}
-
-
-template<int i, class RenderPass>
-class GetRenderPassVADescriptorsInternal
-{
-public:
-    static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
-    {
-        GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
-        BLAInspectableVariables::ExposedVarTypeDescriptor* d = 
-            BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
-
-        typeDescriptors.push_back(d);
-    }
-};
-
-template<class RenderPass>
-class GetRenderPassVADescriptorsInternal<0, RenderPass>
-{
-public:
-    static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
-    {
-        BLAInspectableVariables::ExposedVarTypeDescriptor* d = 
-            BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
-
-        typeDescriptors.push_back(d);
-    }
-};
-
-template<class RenderPass>
-blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassVADescriptors()
-{
-    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
-
-    GetRenderPassVADescriptorsInternal<RenderPass::VACount - 1, RenderPass>::Get(typeDescriptors);
-
-    return typeDescriptors;
+    Console::LogMessage("Here's what's in the TestRenderPass");
+    Console::LogMessage(BLA::GenerateVulkanShaderTemplate<TestRenderPass>());
 }
 
 template<class RenderPass>
@@ -163,33 +124,47 @@ void VulkanRenderer::CleanupRenderer()
 
 void VulkanRenderer::CreateDisplayBuffers()
 {
-    VkImageCreateInfo imageCreate = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
-    memset(&imageCreate, 0, sizeof(imageCreate));
-
-    imageCreate.extent.width = m_viewPortExtents.x;
-    imageCreate.extent.height = m_viewPortExtents.y;
-    imageCreate.extent.depth = 1;
-    imageCreate.imageType = VK_IMAGE_TYPE_2D;
-    imageCreate.format = VK_FORMAT_R8G8B8_UNORM;
-    imageCreate.mipLevels = 1;
-    imageCreate.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageCreate.tiling = VK_IMAGE_TILING_OPTIMAL;
-    // We will sample directly from the color attachment
-    imageCreate.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    VkImageCreateInfo imageCreateInfo = {};
+    imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageCreateInfo.extent.width = m_viewPortExtents.x;
+    imageCreateInfo.extent.height = m_viewPortExtents.y;
+    imageCreateInfo.extent.depth = 1;
+    imageCreateInfo.mipLevels = 1;
+    imageCreateInfo.arrayLayers = 1;
+    imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
     VkMemoryAllocateInfo memAlloc{};
     VkMemoryRequirements memReqs;
 
     VkDevice device = m_renderWindow->GetVulkanContext()->m_Device;
 
-    m_offscreenBuffer.m_color = new TextureView();
+    m_offscreenBuffer.m_color = new BLA::TextureView();
 
-    VK_CHECK_RESULT(vkCreateImage(device, &imageCreate, nullptr, &m_offscreenBuffer.m_color->m_image));
+    VkResult r = VK_CHECK_RESULT(vkCreateImage(device, &imageCreateInfo, nullptr, &m_offscreenBuffer.m_color->m_image));
+    if(r != VkResult::VK_SUCCESS)
+    {
+        return;
+    }
     vkGetImageMemoryRequirements(device, m_offscreenBuffer.m_color->m_image, &memReqs);
     memAlloc.allocationSize = memReqs.size;
-    memAlloc.memoryTypeIndex = 0;// d->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &m_offscreenBuffer.m_color->m_memory));
-    VK_CHECK_RESULT(vkBindImageMemory(device, m_offscreenBuffer.m_color->m_image, m_offscreenBuffer.m_color->m_memory, 0));
+    memAlloc.memoryTypeIndex = m_renderWindow->GetVulkanContext()->GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    r = VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &m_offscreenBuffer.m_color->m_memory));
+    if (r != VkResult::VK_SUCCESS)
+    {
+        return;
+    }
+    r = VK_CHECK_RESULT(vkBindImageMemory(device, m_offscreenBuffer.m_color->m_image, m_offscreenBuffer.m_color->m_memory, 0));
+    if (r != VkResult::VK_SUCCESS)
+    {
+        return;
+    }
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -202,7 +177,11 @@ void VulkanRenderer::CreateDisplayBuffers()
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    VK_CHECK_RESULT(vkCreateImageView(device, &viewInfo, nullptr, &m_offscreenBuffer.m_color->m_imageView));
+    r = VK_CHECK_RESULT(vkCreateImageView(device, &viewInfo, nullptr, &m_offscreenBuffer.m_color->m_imageView));
+    if (r != VkResult::VK_SUCCESS)
+    {
+        return;
+    }
 }
 
 #endif

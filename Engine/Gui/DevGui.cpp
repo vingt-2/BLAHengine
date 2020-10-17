@@ -7,13 +7,14 @@
 #include "DevGuiConsole.h"
 
 #include "imgui.h"
-#include "examples/imgui_impl_glfw.h"
+#include "backends/imgui_impl_glfw.h"
 
 #if NEW_VULKAN_RENDERER
-#include "examples/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_vulkan.h"
 #include "System/VulkanRenderWindow.h"
+#include "Renderer/Vulkan/VulkanRenderer.h"
 #else
-#include "examples/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_opengl3.h"
 #include "Renderer/OpenGL/GL33Renderer.h"
 #endif
 
@@ -463,7 +464,7 @@ void DevGuiEditElement<blaF32>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaF32 value = *m_pToValue;
-	ImGui::InputFloat(("##" + GetName()).c_str(), &value, 0.1f, 1.f, 7);
+	ImGui::InputFloat(("##" + GetName()).c_str(), &value, 0.1f, 1.f, "%.7f");
     ImGui::Columns(1);
     if(value != *m_pToValue)
     {
@@ -740,7 +741,37 @@ DevGuiRenderWindow::DevGuiRenderWindow(Renderer* renderer, const blaString& wind
 void DevGuiRenderWindow::Render()
 {
 #if NEW_VULKAN_RENDERER
-    return;
+    if (VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(m_pRenderer))
+    {
+        // BEGIN OCornut's Dear ImGui Specific Code Now
+        ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
+        ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
+        ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
+
+        ImVec2 windowPos = ImGui::GetWindowPos();
+
+        // TODO: This ?
+        
+        //ImGui::GetWindowDrawList()->AddImage(
+        //    (ImTextureID)((intptr_t)renderer->GetDisplayBufferTexture(),
+        //    windowPos,
+        //    ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight()),
+        //    ImVec2(0, 1), ImVec2(1, 0));
+
+        ImVec2 cursorInWindow = ImGui::GetCursorPos();
+
+        m_pRenderer->SetRenderSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
+
+        ImVec2 mouse = ImGui::GetMousePos();
+
+        m_cursorScreenSpacePosition = blaVec2(
+            1.0f - (mouse.x - windowPos.x) / ImGui::GetWindowWidth(),
+            1.0f - (mouse.y - windowPos.y) / ImGui::GetWindowHeight());
+
+        m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
+
+        ImGui::End();
+    }
 #else
     if (GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer))
     {
