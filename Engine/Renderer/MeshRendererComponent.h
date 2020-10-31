@@ -9,9 +9,21 @@
 
 #define BLA_LINE_RENDER 0x0003
 
+#if NEW_VULKAN_RENDERER
+#include "Renderer/Vulkan/VulkanRenderer.h"
+#endif
 namespace BLA
 {
     BeginBehaviorDeclaration(BLAEngine, MeshRendererComponent)
+
+        DeclareRenderPass(
+            MeshTestRenderPass, 
+            VertexAttributes(
+                blaVec3, // Model Pos
+                blaVec3), // normal 
+            UniformValues(blaMat4), 
+            1)
+        
         friend class Renderer;
         int m_renderTicket = 0;
 
@@ -31,5 +43,11 @@ namespace BLA
 	
         MeshAsset* m_mesh = nullptr;
         blaMat4 m_modelTransformMatrix;
+
+#if NEW_VULKAN_RENDERER 
+        bool init = false;
+        PerspectiveCamera m_camera;
+#endif
+
 	EndBehaviorDeclaration()
 }

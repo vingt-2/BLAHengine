@@ -4,7 +4,9 @@
 
 #include "Core/RenderingManager.h"
 #include "Core/InspectableVariables.h"
+#include "System/Console.h"
 #include "Renderer/ShadowRender.h"
+#include "Renderer/RenderPass.h"
 #include "Maths/Ray.h"
 
 #include "RenderCamera.h"
@@ -35,6 +37,43 @@ namespace BLA
         DirectionalShadowRender m_shadowRender;
 	};
 
+    class RenderPassManager
+    {
+    public:
+        blaVector<blaU32> m_renderPasses;
+        blaVector<RenderPassInstanceContainer*> m_renderPassInstanceContainers;
+
+        RenderPassManager(const blaVector<blaU32>& rpIds);
+
+        template<typename RenderPass>
+        void AddRenderPassInstance(const typename RenderPass::RenderPassInstance& rp)
+        {
+            bool renderPassRegistered = false;
+            for (blaU32 registered : m_renderPasses)
+            {
+                if (registered == RenderPass::ms_renderPassId)
+                {
+                    renderPassRegistered = true;
+                    break;
+                }
+            }
+            if (!renderPassRegistered)
+            {
+                Console::LogError("Trying to add an instance of an unregistered render pass");
+            }
+
+            // Select the RenderPassInstanceContainer ...
+            for (auto c : m_renderPassInstanceContainers)
+            {
+                if (c->GetId() == RenderPass::ms_renderPassId)
+                {
+                    reinterpret_cast<TypedRenderPassInstanceContainer<RenderPass>*>(c)->AddInstance(rp);
+                }
+            }
+        }
+
+    };
+
     class RenderWindow;
     class GLFWOpenGLRenderWindow;
     class BLACORE_API Renderer
@@ -52,6 +91,10 @@ namespace BLA
         virtual void SwitchRenderingManager(RenderingManager* renderingManager) = 0;
         virtual bool Update() = 0;
         virtual int	 SynchWithRenderManager() = 0;
+
+        // New Interface ...
+        // New Interface ...
+        virtual RenderPassManager* GetRenderPassManager() = 0;
 
         virtual RenderObject* LoadRenderObject(const MeshRendererComponent& object, int type) = 0;
         virtual bool    CancelRender(const MeshRendererComponent& object) = 0;

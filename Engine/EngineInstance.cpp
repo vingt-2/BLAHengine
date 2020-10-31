@@ -45,6 +45,8 @@ blaU32 EngineInstance::LoopEngine()
 
     engineInstance->InitializeEngine(renderWindow);
 
+    engineInstance->LoadWorkingScene("./sponza.blaScene");
+
     Dualshock4 controller;
 
     while (!engineInstance->ShouldTerminate())
@@ -103,8 +105,12 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     m_renderingManager = new RenderingManager(RenderingManager::Game);
     m_debugRenderingManager = new DebugRenderingManager();
 
+
+
 #if NEW_VULKAN_RENDERER
-    m_renderer = new VulkanRenderer(m_assetManager);
+    blaVector<blaU32> rpIds;
+    RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
+    m_renderer = new VulkanRenderer(m_assetManager, rpIds);
     m_renderer->InitializeRenderer(this->m_renderWindow);
 #else
     m_renderer = new GL33Renderer(m_assetManager);
@@ -125,8 +131,6 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
 
     m_scene->Initialize(m_renderingManager);
-
-    m_guiManager = DevGuiManager::AssignAndReturnSingletonInstance(new DevGuiManager(m_renderWindow));
 
     // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())
@@ -157,16 +161,16 @@ void EngineInstance::PostEngineUpdate()
 
     m_renderer->Update();
 
-    m_guiManager->Update();
+   // m_guiManager->Update(false);
 
     // Inputs should be the second to last thing to update !
     m_inputManager->Update();
 
-    if (!m_isCapturedMouse)
+    /*if (!m_isCapturedMouse)
     {
         m_inputManager->SetMouseLock(m_guiManager->IsMouseOverGui());
         m_inputManager->SetKeyboardLock(m_guiManager->IsMouseOverGui());
-    }
+    }*/
 
     // Final update of the frame
     m_renderWindow->UpdateWindowAndBuffers();
@@ -206,7 +210,7 @@ bool EngineInstance::LoadNewScene()
 
     SetupDirLightAndCamera();
 
-    m_renderWindow->SetWindowTitle("BLA Editor - New Scene");
+    m_renderWindow->SetWindowTitle("New Scene");
 
     return true;
 }
@@ -224,7 +228,7 @@ bool EngineInstance::LoadWorkingScene(blaString filepath)
 
     FileEntry sceneFileEntry = ParseFilePath(filepath);
 
-    m_renderWindow->SetWindowTitle("BLA Editor - " + sceneFileEntry.m_name);
+    m_renderWindow->SetWindowTitle(sceneFileEntry.m_name);
 
     return true;
 }

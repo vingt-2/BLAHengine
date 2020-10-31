@@ -7,6 +7,11 @@
 #include "RenderBackend.h"
 #include "Assets/AssetsManager.h"
 
+#if NEW_VULKAN_RENDERER
+#include "Core/CameraComponent.h"
+#include "Renderer/Vulkan/VulkanRenderer.h"
+#endif
+
 // TODO: Find a better way to register the rendering components ...
 #include "Core/Scene.h"
 
@@ -71,13 +76,33 @@ void MeshRendererComponent::Update()
 	
     if(m_renderTicket != 0 && !render)
     {
+#if NEW_VULKAN_RENDERER
+
+#else
         Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
+#endif
         m_renderTicket = 0;
     }
 
     if(m_renderTicket == 0 && render)
     {
+#if NEW_VULKAN_RENDERER
+        int renderTicket = 1;
+        VulkanRenderer* renderer = VulkanRenderer::GetSingletonInstance();
+        if(renderer)
+        {
+            CameraComponent* camera = Scene::GetSingletonInstance()->GetMainCamera();
+            m_camera.AttachCamera(camera);
+            RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
+            const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(rd.m_vertPos, rd.m_vertNormal);
+            const MeshTestRenderPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix());
+            const MeshTestRenderPass::RenderPassInstance renderPassInstance(meshVAs, meshUniforms);
+
+            renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
+        }
+#else
         m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterMeshRenderer(this);
+#endif
     }
 
     if (!GetOwnerObject().IsValid())

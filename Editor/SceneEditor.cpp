@@ -171,7 +171,7 @@ void SceneEditor::PostEngineUpdate()
     m_renderer->Update();
 
     // TODO: Update() should not be exported, and call from with the engine dll
-    m_guiManager->Update();
+    m_guiManager->Update(true);
 
     // TODO: Update() should not be exported, and call from with the engine dll
     // Inputs should be the second to last thing to update !
@@ -224,6 +224,9 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
 {
     if (EngineInstance::InitializeEngine(renderWindow))
     {
+        // TODO: Temporary completely removed from the engine init, but belongs there
+        m_guiManager = DevGuiManager::AssignAndReturnSingletonInstance(new DevGuiManager(m_renderWindow));
+
         m_renderer->SetRenderToFrameBufferOnly(true);
         m_commandManager = new EditorCommandManager(this);
         m_gizmoManager = new GizmoManager(m_commandManager);

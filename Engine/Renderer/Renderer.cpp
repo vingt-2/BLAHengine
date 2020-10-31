@@ -33,3 +33,11 @@ void RenderPassRegistry::__RegisterRenderPass(blaU32 id, blaU32 attachmentCount,
 
     m_registry.insert(std::make_pair(id, RenderPassRegistryEntry{ attachmentCount, vertexAttributesDescriptors, uniformValuesDescriptor }));
 }
+
+void RenderPassRegistry::GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const
+{
+    for(auto e : m_registry)
+    {
+        stringIds.push_back(e.first);
+    }
+}

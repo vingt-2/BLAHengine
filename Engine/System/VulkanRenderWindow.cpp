@@ -430,7 +430,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
         VkImageView attachment[1];
         VkFramebufferCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        info.renderPass = m_vulkanWindowInfo->ImGuiRenderPass;
+        info.renderPass = m_vulkanWindowInfo->RenderWindowPresentationPass;
         info.attachmentCount = 1;
         info.pAttachments = attachment;
         info.width = m_vulkanWindowInfo->Extent.width;

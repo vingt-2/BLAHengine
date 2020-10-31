@@ -69,24 +69,24 @@ namespace BLA
         template <typename T, typename... Ts>
         struct InferVAType<0, _RenderPassInstanceVAs<T, Ts...>>
         {
-            typedef T VAType;
+            typedef T type;
         };
 
         template <size_t k, typename T, typename... Ts>
         struct InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>
         {
-            typedef typename InferVAType<k - 1, _RenderPassInstanceVAs<Ts...>>::VAType VAType;
+            typedef typename InferVAType<k - 1, _RenderPassInstanceVAs<Ts...>>::type type;
         };
 
         template <size_t, class> struct InferUVType;
 
-        template <class T, class... Ts>
+        template <typename T, typename... Ts>
         struct InferUVType<0, _RenderPassInstanceUVs<T, Ts...>>
         {
             typedef T type;
         };
 
-        template <size_t k, class T, class... Ts>
+        template <size_t k, typename T, typename... Ts>
         struct InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>
         {
             typedef typename InferUVType<k - 1, _RenderPassInstanceUVs<Ts...>>::type type;
@@ -106,14 +106,14 @@ namespace BLA
         };
 
         template <size_t k>
-        const blaVector<typename std::enable_if<k == 0, T>::type>& GetVertexAttributes()
+        const blaVector<typename std::enable_if<k == 0, T>::type>& GetVertexAttributes() const
         {
             return m_dataVector;
         }
 
         template <size_t k>
-        const blaVector<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::VAType>
-            ::type>& GetVertexAttributes()
+        const blaVector<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::type>
+            ::type>& GetVertexAttributes() const
         {
             return _RenderPassInstanceVAs<Ts...>::template GetVertexAttributes<k - 1>();
         }
@@ -135,33 +135,80 @@ namespace BLA
         };
 
         template <size_t k>
-        const typename std::enable_if<k == 0, T>::type& GetUniformValue()
+        const typename std::enable_if<k == 0, T>::type& GetUniformValue() const
         {
             return m_uniformValue;
         }
 
         template <size_t k>
-        const typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::VAType>
-            ::type& GetUniformValue()
+        const typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>::type>::type& GetUniformValue() const
         {
-            return _RenderPassInstanceVAs<Ts...>::template GetVertexAttributes<k - 1>();
+            return _RenderPassInstanceUVs<Ts...>::template GetUniformValue<k - 1>();
+        }
+
+        template <size_t k>
+        typename std::enable_if<k == 0, T>::type& GetUniformValue()
+        {
+            return m_uniformValue;
+        }
+
+        template <size_t k>
+        typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>::type>::type& GetUniformValue()
+        {
+            return _RenderPassInstanceUVs<Ts...>::template GetUniformValue<k - 1>();
         }
 
     protected:
         const T& m_uniformValue;
     };
 
-    template<class VertexAttributes, class ShaderUniforms>
+    template<typename _RenderPass, class VertexAttributes, class ShaderUniforms>
     class _RenderPassInstance;
 
-    template<typename... VAs, typename... UVs>
-    class _RenderPassInstance<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : public _RenderPassInstanceVAs<VAs...>, public _RenderPassInstanceUVs<UVs...>
+    template<typename _RenderPass, typename... VAs, typename... UVs>
+    class _RenderPassInstance<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : public _RenderPassInstanceVAs<VAs...>, public _RenderPassInstanceUVs<UVs...>
     {
     public:
         typedef _RenderPassInstanceVAs<VAs...> InstanceVertexAttributes;
         typedef _RenderPassInstanceUVs<UVs...> InstanceUniformValues;
+        typedef _RenderPass RenderPass;
+
+        blaVector<blaU32> m_indices;
+
+        template<int n>
+        struct GetVAType
+        {
+            typedef typename _RenderPassTemplateHelpers::InferVAType<n, InstanceVertexAttributes>::type Type;
+        };
+
+        template<int n>
+        struct GetUVType
+        {
+            typedef typename _RenderPassTemplateHelpers::InferUVType<n, InstanceUniformValues>::type Type;
+        };
 
         _RenderPassInstance(const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms ...) : _RenderPassInstanceVAs<VAs...>(vertexAttributes), _RenderPassInstanceUVs<UVs...>(shaderUniforms) {}
+    };
+
+    class RenderPassInstanceContainer
+    {
+    public:
+        virtual blaU32 GetId() const = 0;
+    };
+
+    template<typename _RenderPass>
+    class TypedRenderPassInstanceContainer : public RenderPassInstanceContainer
+    {
+        blaVector<typename _RenderPass::RenderPassInstance> m_instances;
+    public:
+        typedef _RenderPass RenderPass;
+
+        blaU32 GetId() const override { return RenderPass::ms_renderPassId; }
+
+        void AddInstance(const typename RenderPass::RenderPassInstance& renderPass)
+        {
+            m_instances.push_back(renderPass);
+        }
     };
 
     template<blaU32 renderPassId, blaS32 attachmentCount, class VertexAttributes, class ShaderUniforms>
@@ -175,7 +222,8 @@ namespace BLA
         ShaderAttachment m_attachment[attachmentCount];
 
     public:
-        typedef _RenderPassInstance<_RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassInstance;
+        typedef _RenderPassInstance<RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>,
+                                        _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassInstance;
 
         static const blaU32 ms_renderPassId = renderPassId;
         static const size_t ms_VACount = sizeof...(VAs);
@@ -190,7 +238,7 @@ namespace BLA
         {
             _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
             BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -203,7 +251,7 @@ namespace BLA
         static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -227,7 +275,7 @@ namespace BLA
         {
             _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
             BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<i, typename RenderPass::RenderPassInstance::InstanceUniformValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -240,7 +288,7 @@ namespace BLA
         static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::VAType>::GetDescriptor();
+                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<0, typename RenderPass::RenderPassInstance::InstanceUniformValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -256,17 +304,18 @@ namespace BLA
         return typeDescriptors;
     }
 
-    // This may only be needed for editor purposes... **May**
     class RenderPassRegistry
     {
-        BLA_DECLARE_EXPORTED_SINGLETON(RenderPassRegistry);
-
+    public:
         struct RenderPassRegistryEntry
         {
             blaU32 m_attachmentCount;
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
         };
+
+    private:
+        BLA_DECLARE_EXPORTED_SINGLETON(RenderPassRegistry);
 
         typedef blaMap<blaU32, RenderPassRegistryEntry> RenderPassRegistryStorage;
         RenderPassRegistryStorage m_registry;
@@ -277,5 +326,7 @@ namespace BLA
             blaU32 attachmentCount,
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
+
+        void GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const;
     };
 }

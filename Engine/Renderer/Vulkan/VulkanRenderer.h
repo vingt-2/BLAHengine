@@ -3,7 +3,6 @@
 #pragma once
 #include "StdInclude.h"
 #include "Assets/AssetsManager.h"
-
 #include "Renderer/Renderer.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -13,9 +12,9 @@ namespace BLA
 {
     struct TextureView;
 
-    class RenderPassManager
+    struct ScreenFrameBuffer
     {
-
+        
     };
 
     struct OffscreenRenderBuffer
@@ -27,11 +26,14 @@ namespace BLA
     class GLFWVulkanRenderWindow;
     class BLACORE_API VulkanRenderer
     {
+        BLA_DECLARE_SINGLETON(VulkanRenderer)
     public:
-        VulkanRenderer(const AssetManager* assetManager);
+
+        VulkanRenderer(const AssetManager* assetManager, const blaVector<blaU32>& rpIds);
 
         void InitializeRenderer(RenderWindow* renderWindow);
 
+        RenderPassManager* GetRenderPassManager();
         bool Update();
 
         void CleanupRenderer();
@@ -48,6 +50,8 @@ namespace BLA
 
         blaIVec2 m_viewPortExtents;
         GLFWVulkanRenderWindow* m_renderWindow;
+
+        RenderPassManager m_renderPassManager;
     };
 
     class BLACORE_API ShaderResource

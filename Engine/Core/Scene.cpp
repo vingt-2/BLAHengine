@@ -148,6 +148,8 @@ void Scene::Clear()
     m_camera = nullptr;
 
     m_sceneFlags |= DIRTY_SCENE_STRUCTURE;
+
+    m_toInitialize.clear();
 }
 
 CameraComponent* Scene::GetMainCamera()

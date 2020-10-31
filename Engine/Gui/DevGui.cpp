@@ -169,7 +169,7 @@ static void CreateImGuiVulkanRenderPass(const VulkanContext* vulkanContext, Vulk
     info.pSubpasses = &subpass;
     info.dependencyCount = 1;
     info.pDependencies = &dependency;
-    VkResult err = vkCreateRenderPass(vulkanContext->m_Device, &info, nullptr, &vulkanWindowInfo->ImGuiRenderPass);
+    VkResult err = vkCreateRenderPass(vulkanContext->m_Device, &info, nullptr, &vulkanWindowInfo->RenderWindowPresentationPass);
     check_vk_result(err);
 }
 #endif
@@ -216,7 +216,7 @@ void DevGuiManager::Init()
     init_info.MinImageCount = vulkanContext->m_MinImageCount;
     init_info.ImageCount = vulkanContext->m_MinImageCount;
     init_info.CheckVkResultFn = &check_vk_result;
-    ImGui_ImplVulkan_Init(&init_info, renderWindowInfo->ImGuiRenderPass);
+    ImGui_ImplVulkan_Init(&init_info, renderWindowInfo->RenderWindowPresentationPass);
     {
         // Use any command queue
         VkCommandPool command_pool = renderWindowInfo->Frames[renderWindowInfo->FrameIndex].CommandPool;
@@ -266,7 +266,7 @@ void DevGuiManager::Destroy()
 
     const VulkanContext* vulkanContext = renderWindow->GetVulkanContext();
     VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
-    vkDestroyRenderPass(vulkanContext->m_Device, renderWindowInfo->ImGuiRenderPass, nullptr);
+    vkDestroyRenderPass(vulkanContext->m_Device, renderWindowInfo->RenderWindowPresentationPass, nullptr);
 
     ImGui_ImplVulkan_Shutdown();
 #else
@@ -843,7 +843,7 @@ static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vu
     {
         VkRenderPassBeginInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        info.renderPass = vulkanWindowInfo->ImGuiRenderPass;
+        info.renderPass = vulkanWindowInfo->RenderWindowPresentationPass;
         info.framebuffer = fd->Framebuffer;
         info.renderArea.extent = vulkanWindowInfo->Extent;
         info.clearValueCount = 1;
@@ -876,7 +876,7 @@ static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vu
 }
 #endif
 
-void DevGuiManager::Update()
+void DevGuiManager::Update(bool editorBuild)
 {
     // Start the Dear ImGui frame
 #if NEW_VULKAN_RENDERER
@@ -886,8 +886,11 @@ void DevGuiManager::Update()
 #endif
     ImGui_ImplGlfw_NewFrame();
 
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
+    if(editorBuild)
+    {
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    }
+    
     ImGui::NewFrame();
 
     if (m_showDockspace)

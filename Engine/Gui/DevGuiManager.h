@@ -24,7 +24,7 @@ namespace BLA
         DevGuiManager(RenderWindow* glfwWindow);
         ~DevGuiManager();
 
-        void Update();
+        void Update(bool editorBuild);
 
         blaBool IsMouseOverGui() const;
 

@@ -117,6 +117,8 @@ namespace BLA
         bool    LoadDebugLines();
         bool	LoadDebugMeshes();
 
+        RenderPassManager* GetRenderPassManager() override { return nullptr; }
+
         void CleanUpPools() override;
 
         GLFWOpenGLRenderWindow* GetWindow() const { return m_renderWindow; }

@@ -1,3 +1,6 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+#pragma once
+
 #include "StdInclude.h"
 
 #if NEW_VULKAN_RENDERER
@@ -42,7 +45,7 @@ namespace BLA
         VkSurfaceKHR        Surface;
         VkSurfaceFormatKHR  SurfaceFormat;
         VkPresentModeKHR    PresentMode;
-        VkRenderPass        ImGuiRenderPass; //TODO: Obviously move this where it belongs ...
+        VkRenderPass        RenderWindowPresentationPass;
         bool                ClearEnable;
         VkClearValue        ClearValue;
         uint32_t            FrameIndex;    
