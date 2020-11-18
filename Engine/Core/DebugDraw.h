@@ -1,5 +1,4 @@
 #pragma once
-#include "Core/RenderingManager.h"
 
 #include "Maths/Ray.h"
 
@@ -21,7 +20,7 @@ namespace BLA
 
     public:
 
-        DebugDraw(DebugRenderingManager* renderManager);
+        DebugDraw();
         ~DebugDraw();
 
         void BLACORE_API Update(); //TODO: Do not expose Update()...
@@ -78,7 +77,6 @@ namespace BLA
 
         blaPair<blaVector<blaVec3>, blaVector<blaVec3>> m_lineMeshVertsAndColor;
         blaPair<blaVector<blaVec3>, blaVector<blaVec4>> m_debugTrianglesVertsAndColorA;
-        DebugRenderingManager* m_debugRenderManager;
 
         bool m_drawDebugLines;
         bool m_drawDebugMeshes;

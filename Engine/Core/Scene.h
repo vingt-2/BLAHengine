@@ -4,8 +4,6 @@
 #include "BLASingleton.h"
 #include "IntrusiveTree.h"
 
-// TODO: TODO: Remove this TODO
-#include "Core/RenderingManager.h"
 #include "Core/Timer.h"
 #include "Core/GameObject.h"
 #include "Core/ComponentContainers.h"
@@ -27,7 +25,7 @@ namespace BLA
 
         Scene();
 
-        BLACORE_API void Initialize(RenderingManager* renderingManager);
+        BLACORE_API void Initialize();
         BLACORE_API void Update();
         BLACORE_API void Clear();
 
@@ -72,8 +70,6 @@ namespace BLA
 
         Timer m_sceneTimer;
 
-        BLACORE_API RenderingManager* GetRenderingManager() const;
-
     private:
 
         typedef blaHashMap<GameObjectID, GameObject::GameObjectFlags, GameObjectID::Hasher> GameObjectFlagMap;
@@ -86,8 +82,6 @@ namespace BLA
 
         // TODO: mmm how about no ?
         CameraComponent* m_camera;
-
-        RenderingManager* m_renderingManager;
 
         ComponentContainer m_componentContainer;
 

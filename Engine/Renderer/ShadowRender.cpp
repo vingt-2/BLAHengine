@@ -5,12 +5,12 @@
 
 using namespace BLA;
 
-blaMat4 DirectionalShadowRender::getShadowViewProjection()
+blaMat4 DirectionalShadowRender::GetShadowViewProjection()
 {
     return m_shadowCamera.m_worldToClipSpace;
 }
 
-blaMat4 PerspectiveShadowRender::getShadowViewProjection()
+blaMat4 PerspectiveShadowRender::GetShadowViewProjection()
 {
     return m_shadowCamera.m_worldToClipSpace;
 }

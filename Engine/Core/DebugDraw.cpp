@@ -6,11 +6,11 @@ using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(DebugDraw)
 
-DebugDraw::DebugDraw(DebugRenderingManager* manager)
+DebugDraw::DebugDraw()
 {
     m_drawDebugLines = true;
     m_drawDebugMeshes = true;
-    this->m_debugRenderManager = manager;
+    // this->m_debugRenderManager = manager;
 }
 
 DebugDraw::~DebugDraw(void)
@@ -20,14 +20,14 @@ void DebugDraw::Update()
 {
     if (m_drawDebugLines)
     {
-        m_debugRenderManager->m_lineMeshes.clear();
-        m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);
+        // m_debugRenderManager->m_lineMeshes.clear();
+        // m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);*/
     }
 
     if (m_drawDebugMeshes)
     {
-        m_debugRenderManager->m_filledMeshes.clear();
-        m_debugRenderManager->LoadDebugFilledMesh(m_debugTrianglesVertsAndColorA);
+        //m_debugRenderManager->m_filledMeshes.clear();
+        //m_debugRenderManager->LoadDebugFilledMesh(m_debugTrianglesVertsAndColorA);
     }
 
     m_lineMeshVertsAndColor.first.clear();

@@ -17,21 +17,30 @@ void Renderer::SetCamera(CameraComponent * camera)
     m_mainRenderCamera.AttachCamera(camera);
 }
 
-Renderer::Renderer(const AssetManager* assetManager)
+Renderer::Renderer()
 {
-    m_assetManager = assetManager;
     m_renderToFrameBufferOnly = false;
     m_isContextEnabled = false;
     this->m_renderSize = glm::vec2(0, 0);
 }
 
-void RenderPassRegistry::__RegisterRenderPass(blaU32 id, blaU32 attachmentCount,
+void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, blaU32 attachmentCount,
     blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
     blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor)
 {
     BLA_ASSERT(m_registry.find(id) == m_registry.end());
 
-    m_registry.insert(std::make_pair(id, RenderPassRegistryEntry{ attachmentCount, vertexAttributesDescriptors, uniformValuesDescriptor }));
+    m_registry.insert(std::make_pair(id, Entry{ stringId, attachmentCount, vertexAttributesDescriptors, uniformValuesDescriptor }));
+}
+
+const RenderPassRegistry::Entry* RenderPassRegistry::GetRenderPassEntry(blaU32 id) const
+{
+    RenderPassRegistryStorage::const_iterator it = m_registry.find(id);
+    if(it != m_registry.end())
+    {
+        return &it->second;
+    }
+    return nullptr;
 }
 
 void RenderPassRegistry::GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const

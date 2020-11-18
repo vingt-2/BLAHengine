@@ -5,12 +5,17 @@
 #include "Assets/AssetsManager.h"
 #include "Renderer/Renderer.h"
 
-#define GLFW_INCLUDE_VULKAN
 #include "RenderBackend.h"
 
 namespace BLA
 {
-    struct TextureView;
+    struct TextureView
+    {
+        VkImage m_image;
+        VkImageView m_imageView;
+        VkDeviceMemory m_memory;
+        bool m_updated;
+    };
 
     struct ScreenFrameBuffer
     {
@@ -19,7 +24,7 @@ namespace BLA
 
     struct OffscreenRenderBuffer
     {
-        TextureView* m_color;
+        TextureView m_color;
     };
 
     struct DirectionalShadowRender;
@@ -33,7 +38,6 @@ namespace BLA
 
         void InitializeRenderer(RenderWindow* renderWindow);
 
-        RenderPassManager* GetRenderPassManager();
         bool Update();
 
         void CleanupRenderer();
@@ -42,16 +46,17 @@ namespace BLA
 
         void SetRenderToFrameBufferOnly(bool a) {};
 
+        const GLFWVulkanRenderWindow* GetRenderWindow() const { return m_renderWindow; }
+
+        void SetRenderSize(blaIVec2 renderSize);
+
+        OffscreenRenderBuffer m_offscreenBuffer;
     private:
 
         void CreateDisplayBuffers();
 
-        OffscreenRenderBuffer m_offscreenBuffer;
-
         blaIVec2 m_viewPortExtents;
         GLFWVulkanRenderWindow* m_renderWindow;
-
-        RenderPassManager m_renderPassManager;
     };
 
     class BLACORE_API ShaderResource

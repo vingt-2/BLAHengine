@@ -43,6 +43,8 @@ DECLARE_PRIMITIVE_DESCRIPTOR(blaVec3, "3D Vector (float)")
 DECLARE_PRIMITIVE_DESCRIPTOR(blaQuat, "Quaternion")
 DECLARE_PRIMITIVE_DESCRIPTOR(blaPosQuat, "Rigid Transform (PosQuat)")
 DECLARE_PRIMITIVE_DESCRIPTOR(blaScaledTransform, "Scaled Rigid Transform")
+DECLARE_PRIMITIVE_DESCRIPTOR(blaMat3, "4x4 Matrix")
+DECLARE_PRIMITIVE_DESCRIPTOR(blaMat4, "4x4 Matrix")
 
 /*
  * Declare container and other templated descriptors

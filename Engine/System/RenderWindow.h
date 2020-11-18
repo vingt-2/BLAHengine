@@ -99,8 +99,7 @@ namespace BLA
     void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos);
     void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll);
 
-#if NEW_VULKAN_RENDERER
-    struct VulkanContext;
+    class VulkanInterface;
     struct VulkanWindowInfo;
     class BLACORE_API GLFWVulkanRenderWindow : public GLFWRenderWindow
     {
@@ -109,7 +108,7 @@ namespace BLA
 
         void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
         void UpdateWindowAndBuffers() override;
-        const VulkanContext* GetVulkanContext() const;
+        VulkanInterface* GetVulkanInterface() const;
         VulkanWindowInfo* GetVulkanWindowInfo() const;
     private:
         void CreateSwapChain();
@@ -117,18 +116,9 @@ namespace BLA
 
         void DestroySwapChainAndCommandBuffers();
 
-        const VulkanContext* m_vulkanContext;
+        VulkanInterface* m_vulkanInterface;
         VulkanWindowInfo* m_vulkanWindowInfo;
 
-        static const VulkanContext* SetupVulkanContext(const char** extensions, uint32_t extensions_count);
+        static VulkanInterface* SetupVulkanInterface(const char** extensions, uint32_t extensions_count);
     };
-#else
-    class BLACORE_API GLFWOpenGLRenderWindow : public GLFWRenderWindow
-    {
-    public:
-        void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
-        void UpdateWindowAndBuffers() override;
-        void MakeGLContextCurrent();
-    };
-#endif
 }

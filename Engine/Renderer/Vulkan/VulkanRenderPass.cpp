@@ -3,12 +3,8 @@
 #include "StdInclude.h"
 #include "VulkanRenderPass.h"
 
-#if NEW_VULKAN_RENDERER
-
-#define GLFW_INCLUDE_VULKAN
-
 #include "RenderBackend.h"
-#include "System/VulkanRenderWindow.h"
+#include "System/Vulkan/VulkanRenderWindow.h"
 #include "VulkanRenderer.h"
 #include <set>
 
@@ -64,18 +60,17 @@ VkRect2D MakeRect2D(
 }
 
 template<>
-struct GetVulkanInputAttributeFormat<blaVec3>
+struct GetVulkanDataFormat<blaVec3>
 {
 	static constexpr VkFormat ms_dataFormat = VkFormat::VK_FORMAT_R32G32B32_SFLOAT;
 };
 
 template<>
-struct GetVulkanInputAttributeFormat<blaVec2>
+struct GetVulkanDataFormat<blaVec2>
 {
 	static constexpr VkFormat ms_dataFormat = VkFormat::VK_FORMAT_R32G32_SFLOAT;
 };
 
-#endif
 void VulkanRenderPassHelpers::check_vk_result(VkResult err)
 {
 	if (err == 0) return;
@@ -84,7 +79,7 @@ void VulkanRenderPassHelpers::check_vk_result(VkResult err)
 		abort();
 }
 
-uint32_t VulkanRenderPassHelpers::FindMemoryType(const VulkanContext* context, uint32_t typeBits, VkMemoryPropertyFlags flags)
+uint32_t VulkanRenderPassHelpers::FindMemoryType(const VulkanInterface* vulkanInterface, uint32_t typeBits, VkMemoryPropertyFlags flags)
 {
-	return context->GetMemoryType(typeBits, flags);
+	return vulkanInterface->GetMemoryType(typeBits, flags);
 }

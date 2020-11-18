@@ -101,11 +101,6 @@ set(GLFW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glfw CACHE PATH "GLFW directory")
 add_subdirectory(${GLFW_LIBRARY})
 set(GLFW_INCLUDE_DIR ${GLFW_LIBRARY}/include)
 
-GetCMakeDependency(glew-cmake)
-set(GLEW_LIBRARY ${PROJECT_EXTERNAL_DIR}/glew-cmake CACHE PATH "GLEW directory")
-add_subdirectory(${GLEW_LIBRARY})
-set(GLEW_INCLUDE_DIR ${GLEW_LIBRARY}/include)
-
 find_path(VulkanHeaders_PATH vulkan.h ${PROJECT_EXTERNAL_DIR}/Vulkan-Headers/include/vulkan)
 
 if(NOT VulkanHeaders_PATH OR (NOT EXISTS ${VulkanHeaders_PATH}))

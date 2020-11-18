@@ -58,7 +58,5 @@ namespace BLA
         blaString m_lastFileBrowserOpenDirectory;
 
         RenderWindow* m_window;
-
-        bool m_showDockspace;
     };
 }

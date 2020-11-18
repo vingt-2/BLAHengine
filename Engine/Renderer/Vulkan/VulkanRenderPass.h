@@ -4,18 +4,20 @@
 #include "StdInclude.h"
 #include "System.h"
 
-#define GLFW_INCLUDE_VULKAN
-
 #include "RenderBackend.h"
-#include "System/VulkanRenderWindow.h"
+#include "System/Vulkan/VulkanRenderWindow.h"
+
+#define VK_CHECK_RESULT(x) x
 
 namespace BLA
 {
-	struct VulkanContext;
+    class RenderPassInstanceBase;
+
+    class VulkanInterface;
 	struct VulkanWindowInfo;
 
 	template<typename T>
-	struct GetVulkanInputAttributeFormat
+	struct GetVulkanDataFormat
 	{
 		static constexpr VkFormat ms_dataFormat = VkFormat::VK_FORMAT_UNDEFINED;
 	};
@@ -34,6 +36,7 @@ namespace BLA
 
 	struct VulkanRenderPassInstance
 	{
+		RenderPassInstanceBase* m_renderPassInstancePtr;
 		typedef std::pair<VkBuffer, VkDeviceMemory> VKBufferAndMemory;
 
 		struct VKUniformBufferEntry
@@ -69,7 +72,7 @@ namespace BLA
 	namespace VulkanRenderPassHelpers
 	{
 		void check_vk_result(VkResult err);
-		uint32_t FindMemoryType(const VulkanContext* context, uint32_t typeBits, VkMemoryPropertyFlags flags);
+		uint32_t FindMemoryType(const VulkanInterface* vulkanInterface, uint32_t typeBits, VkMemoryPropertyFlags flags);
 
 		template<class RenderPassInstance, int descLeft, int descSize>
 		struct SetupVertexInputBindingDescription
@@ -101,7 +104,7 @@ namespace BLA
 
 				vaDescriptor->location = descSize - descLeft;
 				vaDescriptor->binding = bindingDescriptor->binding;
-				vaDescriptor->format = GetVulkanInputAttributeFormat<VertexAttributeType>::ms_dataFormat;
+				vaDescriptor->format = GetVulkanDataFormat<VertexAttributeType>::ms_dataFormat;
 				vaDescriptor->offset = 0; // NON-INTERLEAVED DATA LAYOUT !!
 
 				SetupVertexInputAttributeDescription<RenderPassInstance, descLeft - 1, descSize>::Setup(++vaDescriptor, ++bindingDescriptor);
@@ -140,7 +143,7 @@ namespace BLA
 		template<class RenderPassInstance, int descLeft, int descSize>
 		struct CreateVertexBuffer
 		{
-			static void Create(const VulkanContext* context, VkDevice device, const RenderPassInstance& rpInstance, blaVector<VkBuffer>& buffers, blaVector<VkDeviceMemory>& bufferMemories)
+			static void Create(const VulkanInterface* vulkanInterface, VkDevice device, const RenderPassInstance& rpInstance, blaVector<VkBuffer>& buffers, blaVector<VkDeviceMemory>& bufferMemories)
 			{
 				typedef typename RenderPassInstance::template GetVAType<descSize - descLeft>::Type VertexAttributeType;
 
@@ -161,7 +164,7 @@ namespace BLA
 				VkMemoryAllocateInfo allocInfo{};
 				allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 				allocInfo.allocationSize = memRequirements.size;
-				allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(context, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+				allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(vulkanInterface, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 				err = vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemories[bufferMemories.size() - 1]);
 
@@ -170,20 +173,20 @@ namespace BLA
 				memcpy(data, rpInstance.template GetVertexAttributes<descSize - descLeft>().data(), (size_t)bufferInfo.size);
 				vkUnmapMemory(device, bufferMemories[bufferMemories.size() - 1]);
 
-				CreateVertexBuffer<RenderPassInstance, descLeft - 1, descSize>::Create(context, device, rpInstance, buffers, bufferMemories);
+				CreateVertexBuffer<RenderPassInstance, descLeft - 1, descSize>::Create(vulkanInterface, device, rpInstance, buffers, bufferMemories);
 			}
 		};
 
 		template<class RenderPassInstance, int descSize>
 		struct CreateVertexBuffer<RenderPassInstance, 0, descSize>
 		{
-			static void Create(const VulkanContext*, VkDevice, const RenderPassInstance&, blaVector<VkBuffer>&, blaVector<VkDeviceMemory>&) {}
+			static void Create(const VulkanInterface*, VkDevice, const RenderPassInstance&, blaVector<VkBuffer>&, blaVector<VkDeviceMemory>&) {}
 		};
 
 		template<class RenderPassInstance, int descLeft, int descSize>
 		struct CreateUniformBuffers
 		{
-			static void Create(int frameCount, const VulkanContext* context, VkDevice device, const RenderPassInstance& rpInstance, blaVector<VulkanRenderPassInstance::VKUniformBufferEntry>& buffers)
+			static void Create(int frameCount, const VulkanInterface* vulkanInterface, VkDevice device, const RenderPassInstance& rpInstance, blaVector<VulkanRenderPassInstance::VKUniformBufferEntry>& buffers)
 			{
 				typedef typename RenderPassInstance::template GetUVType<descSize - descLeft>::Type UniformValueType;
 
@@ -211,25 +214,25 @@ namespace BLA
 					VkMemoryAllocateInfo allocInfo{};
 					allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 					allocInfo.allocationSize = memRequirements.size;
-					allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(context, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+					allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(vulkanInterface, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 					err = vkAllocateMemory(device, &allocInfo, nullptr, &buffer.bufferMemories[i].second);
 				}
 
-				CreateUniformBuffers<RenderPassInstance, descLeft - 1, descSize>::Create(frameCount, context, device, rpInstance, buffers);
+				CreateUniformBuffers<RenderPassInstance, descLeft - 1, descSize>::Create(frameCount, vulkanInterface, device, rpInstance, buffers);
 			}
 		};
 
 		template<class RenderPassInstance, int descSize>
 		struct CreateUniformBuffers<RenderPassInstance, 0, descSize>
 		{
-			static void Create(int, const VulkanContext*, VkDevice, const RenderPassInstance&, blaVector<VulkanRenderPassInstance::VKUniformBufferEntry>&) {}
+			static void Create(int, const VulkanInterface*, VkDevice, const RenderPassInstance&, blaVector<VulkanRenderPassInstance::VKUniformBufferEntry>&) {}
 		};
 
 		template<class RenderPassInstance, int descLeft, int descSize>
 		struct CreateDescriptorSets
 		{
-			static void Create(int frameCount, VkDescriptorSetLayout* layout, const VulkanContext* context, VkDevice device, const RenderPassInstance& rpInstance, blaVector<VkDescriptorSet>& descriptorSets)
+			static void Create(int frameCount, VkDescriptorSetLayout* layout, const VulkanInterface* vulkanInterface, VkDevice device, const RenderPassInstance& rpInstance, blaVector<VkDescriptorSet>& descriptorSets)
 			{
 				typedef typename RenderPassInstance::template GetUVType<descSize - descLeft>::Type UniformValueType;
 
@@ -249,32 +252,33 @@ namespace BLA
 					VkMemoryAllocateInfo allocInfo{};
 					allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 					allocInfo.allocationSize = memRequirements.size;
-					allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(context, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+					allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(vulkanInterface, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 					err = vkAllocateMemory(device, &allocInfo, nullptr, &buffer.second[i].second);
 				}
 
-				CreateUniformBuffers<RenderPassInstance, descLeft - 1, descSize>::Create(frameCount, context, device, rpInstance, descriptorSets);
+				CreateUniformBuffers<RenderPassInstance, descLeft - 1, descSize>::Create(frameCount, vulkanInterface, device, rpInstance, descriptorSets);
 			}
 		};
 
 		template<class RenderPassInstance, int descSize>
 		struct CreateDescriptorSets<RenderPassInstance, 0, descSize>
 		{
-			static void Create(int, const VulkanContext*, VkDevice, const RenderPassInstance&, blaVector<VkDescriptorSet>&) {}
+			static void Create(int, const VulkanInterface*, VkDevice, const RenderPassInstance&, blaVector<VkDescriptorSet>&) {}
 		};
 	}
 
 	template<class RenderPass>
     class VulkanRenderPass
     {
+		VkRenderPass m_renderPass;
 		VkPipelineLayout m_pipelineLayout;
 		VkPipeline m_pipeline;
 		VkDescriptorSetLayout m_descriptorSetLayout;
 
 		blaVector<VulkanRenderPassInstance> m_currentInstances;
 
-		static void CreateIndexBuffer(const VulkanContext* context, VkDevice device, const typename RenderPass::RenderPassInstance& rpInstance, VulkanRenderPassInstance& vulkanRenderPassInstance)
+		static void CreateIndexBuffer(const VulkanInterface* vulkanInterface, VkDevice device, const typename RenderPass::RenderPassInstance& rpInstance, VulkanRenderPassInstance& vulkanRenderPassInstance)
 		{
 			vulkanRenderPassInstance.m_indexCount = static_cast<blaU32>(rpInstance.m_indices.size());
 
@@ -294,7 +298,7 @@ namespace BLA
 			VkMemoryAllocateInfo allocInfo{};
 			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(context, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			allocInfo.memoryTypeIndex = VulkanRenderPassHelpers::FindMemoryType(vulkanInterface, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			VkDeviceMemory& memory = vulkanRenderPassInstance.m_indexBuffer.second;
 
@@ -308,37 +312,38 @@ namespace BLA
 		    
 	public:
 
-		void RegisterRenderPassInstance(const VulkanWindowInfo* vulkanWindoInfo, const VulkanContext* context, VkDevice device, const typename RenderPass::RenderPassInstance& rpInstance)
+		void RegisterRenderPassInstance(const VulkanWindowInfo* vulkanWindoInfo, const VulkanInterface* vulkanInterface, VkDevice device, const typename RenderPass::RenderPassInstance& rpInstance)
 		{
 			m_currentInstances.push_back(VulkanRenderPassInstance());
 
 			VulkanRenderPassInstance& vulkanRenderPassInstance = m_currentInstances[m_currentInstances.size() - 1];
+			vulkanRenderPassInstance.m_renderPassInstancePtr = &rpInstance;
 
 			// Create a Vertex Buffer for each Vertex Attribute
 			// This will also copy the vertex data into resident memory
 			VulkanRenderPassHelpers::CreateVertexBuffer<typename RenderPass::RenderPassInstance, RenderPass::ms_VACount, RenderPass::ms_VACount>::
-		        Create(context, device, rpInstance, vulkanRenderPassInstance.m_vertexBuffers, vulkanRenderPassInstance.m_vertexBufferMemories);
+		        Create(vulkanInterface, device, rpInstance, vulkanRenderPassInstance.m_vertexBuffers, vulkanRenderPassInstance.m_vertexBufferMemories);
 
 			// Create the uniform buffers
 			VulkanRenderPassHelpers::CreateUniformBuffers<typename RenderPass::RenderPassInstance, RenderPass::ms_UVCount, RenderPass::ms_UVCount>::
-		        Create(static_cast<int>(vulkanWindoInfo->Frames.size()), context, device, rpInstance, vulkanRenderPassInstance.m_uniformBuffers);
+		        Create(static_cast<int>(vulkanWindoInfo->m_frames.size()), vulkanInterface, device, rpInstance, vulkanRenderPassInstance.m_uniformBuffers);
 
 			// Create the index buffer
-			CreateIndexBuffer(context, device, rpInstance, vulkanRenderPassInstance);
+			CreateIndexBuffer(vulkanInterface, device, rpInstance, vulkanRenderPassInstance);
 
 			// Allocate the descriptor sets for all the uniform
-			std::vector<VkDescriptorSetLayout> layouts(vulkanWindoInfo->Frames.size(), m_descriptorSetLayout);
+			std::vector<VkDescriptorSetLayout> layouts(vulkanWindoInfo->m_frames.size(), m_descriptorSetLayout);
 			VkDescriptorSetAllocateInfo allocInfo{};
 			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			allocInfo.descriptorPool = context->m_DescriptorPool;
-			allocInfo.descriptorSetCount = static_cast<uint32_t>(vulkanWindoInfo->Frames.size());
+			allocInfo.descriptorPool = vulkanInterface->m_DescriptorPool;
+			allocInfo.descriptorSetCount = static_cast<uint32_t>(vulkanWindoInfo->m_frames.size());
 			allocInfo.pSetLayouts = layouts.data();
 
-			vulkanRenderPassInstance.m_descriptorSets.resize(vulkanWindoInfo->Frames.size());
+			vulkanRenderPassInstance.m_descriptorSets.resize(vulkanWindoInfo->m_frames.size());
 
 			VkResult err = vkAllocateDescriptorSets(device, &allocInfo, vulkanRenderPassInstance.m_descriptorSets.data());
 
-			for (blaIndex i = 0; i < vulkanWindoInfo->Frames.size(); i++)
+			for (blaIndex i = 0; i < vulkanWindoInfo->m_frames.size(); i++)
 			{
 				blaVector<VkDescriptorBufferInfo> bufferInfos(vulkanRenderPassInstance.m_uniformBuffers.size());
 				blaVector<VkWriteDescriptorSet> descriptorWrites(vulkanRenderPassInstance.m_uniformBuffers.size());
@@ -365,11 +370,43 @@ namespace BLA
 			}
 		}
 
-	    void CreateTestRenderPassGraphicsPipeline(
+		void CreateVKRenderPass(VkDevice device)
+		{
+			VkAttachmentDescription colorAttachment{};
+			colorAttachment.format = VK_FORMAT_R8G8B8A8_UNORM;
+			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+			VkAttachmentReference colorAttachmentRef{};
+			colorAttachmentRef.attachment = 0;
+			colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+			VkSubpassDescription subpass{};
+			subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+			subpass.colorAttachmentCount = 1;
+			subpass.pColorAttachments = &colorAttachmentRef;
+
+			VkRenderPassCreateInfo renderPassInfo{};
+			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+			renderPassInfo.attachmentCount = 1;
+			renderPassInfo.pAttachments = &colorAttachment;
+			renderPassInfo.subpassCount = 1;
+			renderPassInfo.pSubpasses = &subpass;
+
+			VkResult err = vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass);
+
+			VulkanRenderPassHelpers::check_vk_result(err);
+		}
+
+	    void CreatePipeline(
 			VkDevice device,
 			const VkAllocationCallbacks* allocator,
 			VkPipelineCache pipelineCache,
-			VkRenderPass renderPass,
 			VkSampleCountFlagBits MSAASamples,
 			VkShaderModule vertexModule,
 			VkShaderModule fragmentModule)
@@ -459,7 +496,7 @@ namespace BLA
 			VkResult err = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, allocator, &m_descriptorSetLayout);
 			VulkanRenderPassHelpers::check_vk_result(err);
 
-			VkDescriptorSetLayout set_layout[1] = { descriptorSetLayout };
+			VkDescriptorSetLayout set_layout[1] = { m_descriptorSetLayout };
 			VkPipelineLayoutCreateInfo layout_info = {};
 			layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			layout_info.setLayoutCount = 1;
@@ -484,13 +521,13 @@ namespace BLA
 			pipelineCreateInfo.pColorBlendState = &blend_info;
 			pipelineCreateInfo.pDynamicState = &dynamic_state;
 			pipelineCreateInfo.layout = m_pipelineLayout;
-			pipelineCreateInfo.renderPass = renderPass;
+			pipelineCreateInfo.renderPass = m_renderPass;
 
 			err = vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, allocator, &m_pipeline);
 			VulkanRenderPassHelpers::check_vk_result(err);
 		}
 
-		void BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& renderPassInstance, VulkanContext* vulkanContext, VulkanWindowInfo* vkWindow) const
+		void BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& renderPassInstance, VulkanWindowInfo* vkWindow) const
 	    {
 			VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
 			cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -501,44 +538,44 @@ namespace BLA
 			clearValues[1].depthStencil = { 1.0f, 0 };
 
 			VkRenderPassBeginInfo renderPassBeginInfo;
-			renderPassBeginInfo.renderPass = vkWindow->RenderWindowPresentationPass;
+			renderPassBeginInfo.renderPass = vkWindow->m_renderWindowPresentationPass;
 			renderPassBeginInfo.renderArea.offset.x = 0;
 			renderPassBeginInfo.renderArea.offset.y = 0;
-			renderPassBeginInfo.renderArea.extent.width = vkWindow->Extent.width;
-			renderPassBeginInfo.renderArea.extent.height = vkWindow->Extent.height;
+			renderPassBeginInfo.renderArea.extent.width = vkWindow->m_extent.width;
+			renderPassBeginInfo.renderArea.extent.height = vkWindow->m_extent.height;
 			renderPassBeginInfo.clearValueCount = 2;
 			renderPassBeginInfo.pClearValues = clearValues;
 
-			for (int32_t i = 0; i < vkWindow->Frames.size(); ++i)
+			for (int32_t i = 0; i < vkWindow->m_frames.size(); ++i)
 			{
-				renderPassBeginInfo.framebuffer = vkWindow->Frames[i].Framebuffer;
+				renderPassBeginInfo.framebuffer = vkWindow->m_frames[i].m_framebuffer;
 
-				vkBeginCommandBuffer(vkWindow->Frames[i].CommandBuffer, &cmdBufferBeginInfo);
+				vkBeginCommandBuffer(vkWindow->m_frames[i].m_commandBuffer, &cmdBufferBeginInfo);
 
-				vkCmdBeginRenderPass(vkWindow->Frames[i].CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+				vkCmdBeginRenderPass(vkWindow->m_frames[i].m_commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-				VkViewport viewport = MakeViewport((float)vkWindow->Extent.width, (float)vkWindow->Extent.height, 0.0f, 1.0f);
-				vkCmdSetViewport(vkWindow->Frames[i].CommandBuffer, 0, 1, &viewport);
+				VkViewport viewport = MakeViewport((float)vkWindow->m_extent.width, (float)vkWindow->m_extent.height, 0.0f, 1.0f);
+				vkCmdSetViewport(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &viewport);
 
-				VkRect2D scissor = MakeRect2D(vkWindow->Extent.width, (float)vkWindow->Extent.height, 0, 0);
-				vkCmdSetScissor(vkWindow->Frames[i].CommandBuffer, 0, 1, &scissor);
+				VkRect2D scissor = MakeRect2D(vkWindow->m_extent.width, (float)vkWindow->m_extent.height, 0, 0);
+				vkCmdSetScissor(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &scissor);
 
-				vkCmdBindPipeline(vkWindow->Frames[i].CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+				vkCmdBindPipeline(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
 				for(VulkanRenderPassInstance& instance : renderPassInstance)
 				{
-					vkCmdBindVertexBuffers(vkWindow->Frames[i].CommandBuffer, 0, instance.m_vertexBuffers.size(), instance.m_vertexBuffers.data(), nullptr);
+					vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, instance.m_vertexBuffers.size(), instance.m_vertexBuffers.data(), nullptr);
 
-					vkCmdBindIndexBuffer(vkWindow->Frames[i].CommandBuffer, instance.m_indexBuffer.first, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
+					vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, instance.m_indexBuffer.first, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
 
-					vkCmdBindDescriptorSets(vkWindow->Frames[i].CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &instance.m_descriptorSets[i], 0, nullptr);
+					vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &instance.m_descriptorSets[i], 0, nullptr);
 
-				    vkCmdDrawIndexed(vkWindow->Frames[i].CommandBuffer, instance.m_indexCount, 1, 0, 0, 0);
+				    vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_indexCount, 1, 0, 0, 0);
 				}
 
-				vkCmdEndRenderPass(vkWindow->Frames[i].CommandBuffer);
+				vkCmdEndRenderPass(vkWindow->m_frames[i].m_commandBuffer);
 
-				vkEndCommandBuffer(vkWindow->Frames[i].CommandBuffer);
+				vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
 			}
 	    }
     };

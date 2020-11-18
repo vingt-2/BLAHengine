@@ -124,18 +124,20 @@ Texture2D* TextureImport::LoadDDS(blaString name, blaString imagepath)
     fclose(fp);
 
     unsigned int components = (fourCC == FOURCC_DXT1) ? 3 : 4;
-    unsigned int format;
+    //unsigned int format;
     switch (fourCC)
     {
-    case FOURCC_DXT1:
-        format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-        break;
-    case FOURCC_DXT3:
-        format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-        break;
-    case FOURCC_DXT5:
-        format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-        break;
+    case -1:
+        // vvvvvvvvvvvvvvv Needs vulkan vvvvvvvvvvvvvvv
+    //case FOURCC_DXT1:
+    //    format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+    //    break;
+    //case FOURCC_DXT3:
+    //    format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    //    break;
+    //case FOURCC_DXT5:
+    //    format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+    //    break;
     default:
         free(buffer);
         return nullptr;

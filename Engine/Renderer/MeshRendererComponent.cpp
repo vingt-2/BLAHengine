@@ -7,15 +7,23 @@
 #include "RenderBackend.h"
 #include "Assets/AssetsManager.h"
 
-#if NEW_VULKAN_RENDERER
+using namespace BLA;
+
 #include "Core/CameraComponent.h"
 #include "Renderer/Vulkan/VulkanRenderer.h"
-#endif
+
+DeclareRenderPass(
+    MeshTestRenderPass,
+    VertexAttributes(
+        blaVec3, // Model Pos
+        blaVec3), // normal 
+    UniformValues(blaMat4),
+    1)
+
+RegisterRenderPass(MeshTestRenderPass)
 
 // TODO: Find a better way to register the rendering components ...
 #include "Core/Scene.h"
-
-using namespace BLA;
 
 BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_meshAssetName)
@@ -40,7 +48,7 @@ const blaMat4* MeshRendererComponent::GetTransformMatrix() const
 
 void MeshRendererComponent::Shutdown()
 {
-    Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
+    //Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
 }
 
 void MeshRendererComponent::Update()
@@ -76,17 +84,11 @@ void MeshRendererComponent::Update()
 	
     if(m_renderTicket != 0 && !render)
     {
-#if NEW_VULKAN_RENDERER
-
-#else
-        Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
-#endif
         m_renderTicket = 0;
     }
 
     if(m_renderTicket == 0 && render)
     {
-#if NEW_VULKAN_RENDERER
         int renderTicket = 1;
         VulkanRenderer* renderer = VulkanRenderer::GetSingletonInstance();
         if(renderer)
@@ -96,13 +98,12 @@ void MeshRendererComponent::Update()
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
             const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(rd.m_vertPos, rd.m_vertNormal);
             const MeshTestRenderPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix());
-            const MeshTestRenderPass::RenderPassInstance renderPassInstance(meshVAs, meshUniforms);
 
-            renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
+            MeshTestRenderPass::RenderPassInstance renderPassInstance(meshVAs, meshUniforms);
+            renderPassInstance.m_indices = rd.m_triangleIndices;
+
+            // renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
         }
-#else
-        m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterMeshRenderer(this);
-#endif
     }
 
     if (!GetOwnerObject().IsValid())

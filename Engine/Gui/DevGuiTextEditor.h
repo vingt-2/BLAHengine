@@ -17,7 +17,7 @@
 
 namespace BLA
 {
-	class TextEditor : public DevGuiElement
+	class DevGuiTextEditor : public DevGuiElement
 	{
 	public:
 		enum class PaletteIndex
@@ -154,7 +154,7 @@ namespace BLA
 		typedef std::vector<Glyph> Line;
 		typedef std::vector<Line> Lines;
 
-		struct LanguageDefinition
+		struct BLACORE_API LanguageDefinition
 		{
 			typedef std::pair<std::string, PaletteIndex> TokenRegexString;
 			typedef std::vector<TokenRegexString> TokenRegexStrings;
@@ -188,21 +188,21 @@ namespace BLA
 			static const LanguageDefinition& Lua();
 		};
 
-		BLACORE_API TextEditor(const blaString& name, blaStringId groupId);
-		BLACORE_API ~TextEditor();
+		BLACORE_API DevGuiTextEditor(const blaString& name, blaStringId groupId);
+		BLACORE_API ~DevGuiTextEditor();
 
-		void SetLanguageDefinition(const LanguageDefinition& aLanguageDef);
-		const LanguageDefinition& GetLanguageDefinition() const { return mLanguageDefinition; }
+		BLACORE_API void SetLanguageDefinition(const LanguageDefinition& aLanguageDef);
+		BLACORE_API const LanguageDefinition& GetLanguageDefinition() const { return mLanguageDefinition; }
 
-		const Palette& GetPalette() const { return mPaletteBase; }
-		void SetPalette(const Palette& aValue);
+		BLACORE_API const Palette& GetPalette() const { return mPaletteBase; }
+		BLACORE_API void SetPalette(const Palette& aValue);
 
-		void SetErrorMarkers(const ErrorMarkers& aMarkers) { mErrorMarkers = aMarkers; }
-		void SetBreakpoints(const Breakpoints& aMarkers) { mBreakpoints = aMarkers; }
+		BLACORE_API void SetErrorMarkers(const ErrorMarkers& aMarkers) { mErrorMarkers = aMarkers; }
+		BLACORE_API void SetBreakpoints(const Breakpoints& aMarkers) { mBreakpoints = aMarkers; }
 
 		void Render() override;
-		void SetText(const std::string& aText);
-		std::string GetText() const;
+		BLACORE_API void SetText(const std::string& aText);
+		BLACORE_API std::string GetText() const;
 
 		void SetTextLines(const std::vector<std::string>& aLines);
 		std::vector<std::string> GetTextLines() const;
@@ -290,18 +290,18 @@ namespace BLA
 
 			UndoRecord(
 				const std::string& aAdded,
-				const TextEditor::Coordinates aAddedStart,
-				const TextEditor::Coordinates aAddedEnd,
+				const DevGuiTextEditor::Coordinates aAddedStart,
+				const DevGuiTextEditor::Coordinates aAddedEnd,
 
 				const std::string& aRemoved,
-				const TextEditor::Coordinates aRemovedStart,
-				const TextEditor::Coordinates aRemovedEnd,
+				const DevGuiTextEditor::Coordinates aRemovedStart,
+				const DevGuiTextEditor::Coordinates aRemovedEnd,
 
-				TextEditor::EditorState& aBefore,
-				TextEditor::EditorState& aAfter);
+				DevGuiTextEditor::EditorState& aBefore,
+				DevGuiTextEditor::EditorState& aAfter);
 
-			void Undo(TextEditor* aEditor);
-			void Redo(TextEditor* aEditor);
+			void Undo(DevGuiTextEditor* aEditor);
+			void Redo(DevGuiTextEditor* aEditor);
 
 			std::string mAdded;
 			Coordinates mAddedStart;

@@ -10,8 +10,6 @@
 #include "CameraControl.h"
 #include "System/Console.h"
 #include "System/InputManager.h"
-#include "Gui/DevGuiManager.h"
-#include "Gui/DevGuiMenu.h"
 #include "Physics/ColliderComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 #include "System/FileSystem/Files.h"
@@ -21,14 +19,10 @@
 #include "Core/TransformComponent.h"
 #include "Assets/Texture.h"
 #include "System/RenderWindow.h"
+#include "Gui/DevGuiManager.h"
+#include "Gui/DevGuiMenu.h"
 
-#include "Gui/DevTextEditor.h"
-
-#if NEW_VULKAN_RENDERER
 #include "Renderer/Vulkan/VulkanRenderer.h"
-#else
-#include "Renderer/OpenGL/GL33Renderer.h"
-#endif
 
 using namespace BLA;
 
@@ -182,7 +176,7 @@ void SceneEditor::PostEngineUpdate()
         m_inputManager->SetKeyboardLock(m_guiManager->IsMouseOverGui());
         m_inputManager->SetMouseLock(m_guiManager->IsMouseOverGui());
 
-        if (const DevGuiRenderWindow* renderGuiWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
+        if (const DevGuiRenderViewportWindow* renderGuiWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(m_guiManager->OpenWindow("Editor Window")))
         {
             if (renderGuiWindow->HasFocus())
             {
@@ -231,9 +225,9 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         m_commandManager = new EditorCommandManager(this);
         m_gizmoManager = new GizmoManager(m_commandManager);
 
-#if !NEW_VULKAN_RENDERER
-        m_guiManager->OpenWindow("Editor Window", new DevGuiRenderWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
-#endif
+        // TODO: Make this work for vulkan renderer ...
+        m_guiManager->OpenWindow("Editor Window", new DevGuiRenderViewportWindow(m_renderer, "Editor Window", blaVec2(0.f, 0.f)));
+
         m_renderWindow->SetDragAndDropCallback((DragAndDropCallback)DragAndDropHandler);
 
         m_editorState = new EditorState();
@@ -252,13 +246,6 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
 
         DevGuiMenuTab& settingsMenu = m_guiManager->m_menuBar.AddSubMenu("Settings");
 
-#if !NEW_VULKAN_RENDERER
-
-        if (GL33Renderer* openglRenderer = dynamic_cast<GL33Renderer*>(m_renderer))
-        {
-            settingsMenu.AddMenuItem("Render G-Buffer", &openglRenderer->m_debugDrawGBuffer);
-        }
-#endif
         settingsMenu.AddMenuItem("TextEditor", &m_bTextEdit);
 
         settingsMenu.AddMenuItem("Draw Grid", &m_bDrawGrid);
@@ -267,6 +254,7 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         windowsMenu.AddMenuItem("Console", &m_editorGuiRequests.m_openConsoleRequest);
         windowsMenu.AddMenuItem("Scene Graph", &m_editorGuiRequests.m_openScenGraphGuiRequest);
         windowsMenu.AddMenuItem("Component Inspector", &m_editorGuiRequests.m_openComponentInspectorRequest);
+        windowsMenu.AddMenuItem("Render Pass Editor", &m_editorGuiRequests.m_openRenderPassEditorRequest);
 
         LoadNewScene();
 
@@ -380,21 +368,14 @@ void SceneEditor::EditorUpdate()
         }
     }
 
-    if(m_bTextEdit)
-    {
-        DevGuiWindow* textEditorWindow = m_guiManager->OpenWindow("TextEditor");
-        if(textEditorWindow->RootElement() == nullptr)
-        {
-            textEditorWindow->SetRootElement(new TextEditor("TextEditor", BlaStringId("TestTextEditor")));
-        }   
-    }
-
     Ray screenRay;
-    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(m_guiManager->OpenWindow("Editor Window")))
+    if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
-#if !NEW_VULKAN_RENDERER
-        screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
-#endif
+
+        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
+        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
+        // screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+
         // ColliderComponent::CollisionContact contactPoint;
         GameObject hoverObject;// = m_scene->PickGameObjectInScene(screenRay, contactPoint);
 
@@ -474,6 +455,13 @@ void SceneEditor::HandleGuiRequests()
         if (!m_componentInspector) m_componentInspector = new GameObjectInspector(m_commandManager);
 
         m_editorGuiRequests.m_openComponentInspectorRequest = false;
+    }
+    if (m_editorGuiRequests.m_openRenderPassEditorRequest)
+    {
+        if (!m_renderPassEditor) m_renderPassEditor = new RenderPassEditorGui(m_commandManager);
+        m_renderPassEditor->OpenRenderPassEditor();
+
+        m_editorGuiRequests.m_openRenderPassEditorRequest = false;
     }
 }
 

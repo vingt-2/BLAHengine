@@ -2,8 +2,6 @@
 
 #pragma once
 #include "System.h"
-#include "RenderBackend.h"
-
 #include "RenderCamera.h"
 
 namespace BLA
@@ -11,7 +9,7 @@ namespace BLA
 
     struct ShadowRender
     {
-        virtual blaMat4 getShadowViewProjection() = 0;
+        virtual blaMat4 GetShadowViewProjection() = 0;
         virtual void Update() = 0;  // <-- m_shadowCamera.Update();
     };
 
@@ -20,14 +18,14 @@ namespace BLA
     public:
         blaVec3 m_shadowDirection;
 
-        //OpenGL
-        GLuint m_depthTexture;
-        GLuint m_shadowPrgmID;
-        GLuint m_shadowBuffer;
+        //TODO: THIS IS OpenGL... THIS NEEDS MURDERED
+        blaU32 m_depthTexture;
+        blaU32 m_shadowPrgmID;
+        blaU32 m_shadowBuffer;
 
         int m_bufferSize;
 
-        blaMat4 getShadowViewProjection();
+        blaMat4 GetShadowViewProjection();
         void Update();
 
         OrthographicCamera m_shadowCamera;
@@ -38,14 +36,14 @@ namespace BLA
     public:
         blaVec3 m_shadowDirection;
 
-        //OpenGL
-        GLuint m_depthTexture;
-        GLuint m_shadowPrgmID;
-        GLuint m_shadowBuffer;
+        //TODO: THIS IS OpenGL... THIS NEEDS MURDERED
+        blaU32 m_depthTexture;
+        blaU32 m_shadowPrgmID;
+        blaU32 m_shadowBuffer;
 
         int m_bufferSize;
 
-        blaMat4 getShadowViewProjection();
+        blaMat4 GetShadowViewProjection();
         void Update();
 
         OrthographicCamera m_shadowCamera;
@@ -57,14 +55,15 @@ namespace BLA
     public:
         blaVec3 m_shadowDirection;
 
-        //OpenGL
-        GLuint m_depthTexture[6];
-        GLuint m_shadowPrgmID;
-        GLuint m_shadowBuffers[6];
+
+        //TODO: THIS IS OpenGL... THIS NEEDS MURDERED
+        blaU32 m_depthTexture[6];
+        blaU32 m_shadowPrgmID;
+        blaU32 m_shadowBuffers[6];
 
         int m_bufferSize;
 
-        blaMat4 getShadowViewProjection();
+        blaMat4 GetShadowViewProjection();
         void Update();
 
         PerspectiveCamera m_shadowCamera;

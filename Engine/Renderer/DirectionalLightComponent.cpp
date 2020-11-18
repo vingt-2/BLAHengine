@@ -6,7 +6,6 @@
 #include "Core/GameObject.h"
 
 #include "Core/Scene.h"
-#include "Core/RenderingManager.h"
 
 using namespace BLA;
 
@@ -28,10 +27,10 @@ void DirectionalLightComponent::Init()
         shadowCamera->m_isShadowMapCamera = true;
     }
 
-    m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterDirectionalLight(this, shadowCamera);
+    // m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterDirectionalLight(this, shadowCamera);
 }
 
 void DirectionalLightComponent::Shutdown()
 {
-    Scene::GetSingletonInstance()->GetRenderingManager()->CancelDirectionalLightTicket(this);
+    // Scene::GetSingletonInstance()->GetRenderingManager()->CancelDirectionalLightTicket(this);
 }

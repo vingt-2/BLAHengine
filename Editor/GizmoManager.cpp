@@ -189,11 +189,11 @@ void TranslationGizmoControl::Update()
     BLAMouseState leftMouseButton = InputManager::GetSingletonInstance()->GetMouseButtonState(BLA_MOUSE_BUTTON_1);
 
     Ray screenRay;
-    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
+    if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-#if !NEW_VULKAN_RENDERER
-        screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
-#endif
+        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
+        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
+        // screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
     }
     else
     {
@@ -391,11 +391,11 @@ void ScaleGizmoControl::Update()
     BLAMouseState leftMouseButton = InputManager::GetSingletonInstance()->GetMouseButtonState(BLA_MOUSE_BUTTON_1);
 
     Ray screenRay;
-    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
+    if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-#if !NEW_VULKAN_RENDERER
-        screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
-#endif
+        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
+        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
+        // screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates
     }
     else
     {
@@ -566,11 +566,11 @@ void RotationGizmoControl::Update()
     BLAMouseState leftMouseButton = InputManager::GetSingletonInstance()->GetMouseButtonState(BLA_MOUSE_BUTTON_1);
 
     Ray screenRay;
-    if (const DevGuiRenderWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
+    if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-#if !NEW_VULKAN_RENDERER
-        screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
-#endif
+        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
+        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
+        // screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates
     }
     else
     {

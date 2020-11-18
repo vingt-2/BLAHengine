@@ -9,14 +9,9 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 
-#if NEW_VULKAN_RENDERER
 #include "backends/imgui_impl_vulkan.h"
-#include "System/VulkanRenderWindow.h"
+#include "System/Vulkan/VulkanRenderWindow.h"
 #include "Renderer/Vulkan/VulkanRenderer.h"
-#else
-#include "backends/imgui_impl_opengl3.h"
-#include "Renderer/OpenGL/GL33Renderer.h"
-#endif
 
 #include "System/RenderWindow.h"
 #include "System/InputManager.h"
@@ -102,7 +97,6 @@ ImFont* f2;
 DevGuiManager::DevGuiManager(RenderWindow* glfwWindow) :
     m_window(glfwWindow)
 {
-    m_showDockspace = true;
     Init();
     m_lastFileBrowserOpenDirectory = "./";
 }
@@ -135,13 +129,12 @@ void DevGuiManager::OpenWindow(blaString name, DevGuiWindow* window)
     m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(name, window));
 }
 
-#if NEW_VULKAN_RENDERER
-static void CreateImGuiVulkanRenderPass(const VulkanContext* vulkanContext, VulkanWindowInfo* vulkanWindowInfo)
+static void CreateImGuiVulkanRenderPass(const VulkanInterface* vulkanInterface, VulkanWindowInfo* vulkanWindowInfo)
 {
     VkAttachmentDescription attachment = {};
-    attachment.format = vulkanWindowInfo->SurfaceFormat.format;
+    attachment.format = vulkanWindowInfo->m_surfaceFormat.format;
     attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment.loadOp = vulkanWindowInfo->ClearEnable ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachment.loadOp = vulkanWindowInfo->m_clearEnable ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -169,10 +162,9 @@ static void CreateImGuiVulkanRenderPass(const VulkanContext* vulkanContext, Vulk
     info.pSubpasses = &subpass;
     info.dependencyCount = 1;
     info.pDependencies = &dependency;
-    VkResult err = vkCreateRenderPass(vulkanContext->m_Device, &info, nullptr, &vulkanWindowInfo->RenderWindowPresentationPass);
+    VkResult err = vkCreateRenderPass(vulkanInterface->m_device, &info, nullptr, &vulkanWindowInfo->m_renderWindowPresentationPass);
     check_vk_result(err);
 }
-#endif
 
 void DevGuiManager::Init()
 {
@@ -194,35 +186,34 @@ void DevGuiManager::Init()
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer bindings
-#if NEW_VULKAN_RENDERER
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
 
     ImGui_ImplGlfw_InitForVulkan(renderWindow->GetWindowPointer(), true);
 
-    const VulkanContext* vulkanContext = renderWindow->GetVulkanContext();
+    const VulkanInterface* vulkanInterface = renderWindow->GetVulkanInterface();
     VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
 
-    CreateImGuiVulkanRenderPass(vulkanContext, renderWindowInfo);
+    CreateImGuiVulkanRenderPass(vulkanInterface, renderWindowInfo);
 
     ImGui_ImplVulkan_InitInfo init_info = {};
-    init_info.Instance = vulkanContext->m_Instance;
-    init_info.PhysicalDevice = vulkanContext->m_PhysicalDevice;
-    init_info.Device = vulkanContext->m_Device;
-    init_info.QueueFamily = vulkanContext->m_QueueFamily;
-    init_info.Queue = vulkanContext->m_Queue;
-    init_info.PipelineCache = vulkanContext->m_PipelineCache;
-    init_info.DescriptorPool = vulkanContext->m_DescriptorPool;
-    init_info.Allocator = vulkanContext->m_Allocator;
-    init_info.MinImageCount = vulkanContext->m_MinImageCount;
-    init_info.ImageCount = vulkanContext->m_MinImageCount;
+    init_info.Instance = vulkanInterface->m_instance;
+    init_info.PhysicalDevice = vulkanInterface->m_physicalDevice;
+    init_info.Device = vulkanInterface->m_device;
+    init_info.QueueFamily = vulkanInterface->m_queueFamily;
+    init_info.Queue = vulkanInterface->m_queue;
+    init_info.PipelineCache = vulkanInterface->m_pipelineCache;
+    init_info.DescriptorPool = vulkanInterface->m_descriptorPool;
+    init_info.Allocator = vulkanInterface->m_allocator;
+    init_info.MinImageCount = vulkanInterface->m_minImageCount;
+    init_info.ImageCount = vulkanInterface->m_minImageCount;
     init_info.CheckVkResultFn = &check_vk_result;
-    ImGui_ImplVulkan_Init(&init_info, renderWindowInfo->RenderWindowPresentationPass);
+    ImGui_ImplVulkan_Init(&init_info, renderWindowInfo->m_renderWindowPresentationPass);
     {
         // Use any command queue
-        VkCommandPool command_pool = renderWindowInfo->Frames[renderWindowInfo->FrameIndex].CommandPool;
-        VkCommandBuffer command_buffer = renderWindowInfo->Frames[renderWindowInfo->FrameIndex].CommandBuffer;
+        VkCommandPool command_pool = renderWindowInfo->m_frames[renderWindowInfo->m_frameIndex].m_commandPool;
+        VkCommandBuffer command_buffer = renderWindowInfo->m_frames[renderWindowInfo->m_frameIndex].m_commandBuffer;
 
-        VkResult err = vkResetCommandPool(vulkanContext->m_Device, command_pool, 0);
+        VkResult err = vkResetCommandPool(vulkanInterface->m_device, command_pool, 0);
         check_vk_result(err);
         VkCommandBufferBeginInfo begin_info = {};
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -238,19 +229,13 @@ void DevGuiManager::Init()
         end_info.pCommandBuffers = &command_buffer;
         err = vkEndCommandBuffer(command_buffer);
         check_vk_result(err);
-        err = vkQueueSubmit(vulkanContext->m_Queue, 1, &end_info, VK_NULL_HANDLE);
+        err = vkQueueSubmit(vulkanInterface->m_queue, 1, &end_info, VK_NULL_HANDLE);
         check_vk_result(err);
 
-        err = vkDeviceWaitIdle(vulkanContext->m_Device);
+        err = vkDeviceWaitIdle(vulkanInterface->m_device);
         check_vk_result(err);
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
-
-#else
-    GLFWOpenGLRenderWindow* renderWindow = static_cast<GLFWOpenGLRenderWindow*>(m_window);
-    ImGui_ImplGlfw_InitForOpenGL(renderWindow->GetWindowPointer(), true);
-    ImGui_ImplOpenGL3_Init("#version 130");
-#endif
 }
 
 void DevGuiManager::Destroy()
@@ -261,17 +246,13 @@ void DevGuiManager::Destroy()
     }
 
     // Cleanup
-#if NEW_VULKAN_RENDERER
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
 
-    const VulkanContext* vulkanContext = renderWindow->GetVulkanContext();
+    const VulkanInterface* vulkanInterface = renderWindow->GetVulkanInterface();
     VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
-    vkDestroyRenderPass(vulkanContext->m_Device, renderWindowInfo->RenderWindowPresentationPass, nullptr);
+    vkDestroyRenderPass(vulkanInterface->m_device, renderWindowInfo->m_renderWindowPresentationPass, nullptr);
 
     ImGui_ImplVulkan_Shutdown();
-#else
-    ImGui_ImplOpenGL3_Shutdown();
-#endif
 
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -729,20 +710,56 @@ void BlaOneTimeWindow::Render()
     // END OCornut's Dear ImGui Specific Code Now
 }
 
-DevGuiRenderWindow::DevGuiRenderWindow(Renderer* renderer): DevGuiWindow(), m_pRenderer(renderer)
+struct BLA::RenderWindowData
 {
+    ImTextureID m_offscreenImageTextureId;
+};
+
+
+void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
+{
+    const GLFWVulkanRenderWindow* renderWindow = renderer->GetRenderWindow();
+
+    VkSamplerCreateInfo samplerInfo = {};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_NEAREST;
+    samplerInfo.minFilter = VK_FILTER_NEAREST;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.anisotropyEnable = VK_FALSE;
+    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
+
+    VkSampler sampler;
+    vkCreateSampler(renderWindow->GetVulkanInterface()->m_device, &samplerInfo, nullptr, &sampler);
+
+    m_renderData->m_offscreenImageTextureId = ImGui_ImplVulkan_AddTexture(sampler, renderer->m_offscreenBuffer.m_color.m_imageView, VK_IMAGE_LAYOUT_GENERAL);
+
+    renderer->m_offscreenBuffer.m_color.m_updated = false;
 }
 
-DevGuiRenderWindow::DevGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
-	DevGuiWindow(windowName, windowPosition), m_cursorScreenSpacePosition(), m_pRenderer(renderer)
+DevGuiRenderViewportWindow::DevGuiRenderViewportWindow(VulkanRenderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
+	DevGuiWindow(windowName, windowPosition), m_pRenderer(renderer), m_cursorScreenSpacePosition(), m_renderData(new RenderWindowData())
 {
+    UpdateDisplayTexture(renderer);
 }
 
-void DevGuiRenderWindow::Render()
+void DevGuiRenderViewportWindow::Render()
 {
-#if NEW_VULKAN_RENDERER
     if (VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(m_pRenderer))
     {
+        if(renderer->m_offscreenBuffer.m_color.m_updated)
+        {
+            UpdateDisplayTexture(renderer);
+        }
+
         // BEGIN OCornut's Dear ImGui Specific Code Now
         ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
         ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
@@ -750,13 +767,7 @@ void DevGuiRenderWindow::Render()
 
         ImVec2 windowPos = ImGui::GetWindowPos();
 
-        // TODO: This ?
-        
-        //ImGui::GetWindowDrawList()->AddImage(
-        //    (ImTextureID)((intptr_t)renderer->GetDisplayBufferTexture(),
-        //    windowPos,
-        //    ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight()),
-        //    ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(m_renderData->m_offscreenImageTextureId, ImGui::GetWindowSize());
 
         ImVec2 cursorInWindow = ImGui::GetCursorPos();
 
@@ -772,40 +783,9 @@ void DevGuiRenderWindow::Render()
 
         ImGui::End();
     }
-#else
-    if (GL33Renderer* renderer = dynamic_cast<GL33Renderer*>(m_pRenderer))
-    {
-        // BEGIN OCornut's Dear ImGui Specific Code Now
-        ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
-        ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
-        ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
-
-        ImVec2 windowPos = ImGui::GetWindowPos();
-
-        ImGui::GetWindowDrawList()->AddImage(
-            (ImTextureID)((intptr_t)renderer->GetDisplayBufferTexture()),
-            windowPos,
-            ImVec2(windowPos.x + ImGui::GetWindowWidth(), windowPos.y + ImGui::GetWindowHeight()),
-            ImVec2(0, 1), ImVec2(1, 0));
-
-        ImVec2 cursorInWindow = ImGui::GetCursorPos();
-
-        m_pRenderer->SetRenderSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
-
-        ImVec2 mouse = ImGui::GetMousePos();
-
-        m_cursorScreenSpacePosition = blaVec2(
-            1.0f - (mouse.x - windowPos.x) / ImGui::GetWindowWidth(),
-            1.0f - (mouse.y - windowPos.y) / ImGui::GetWindowHeight());
-
-        m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
-
-        ImGui::End();
-    }
-#endif
 }
 
-blaVec2 DevGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
+blaVec2 DevGuiRenderViewportWindow::GetMousePointerScreenSpaceCoordinates() const
 {
 	return m_cursorScreenSpacePosition;
 }
@@ -813,49 +793,48 @@ blaVec2 DevGuiRenderWindow::GetMousePointerScreenSpaceCoordinates() const
 bool g_show_demo_window = false;
 bool g_debugFileBrowser = false;
 
-#if NEW_VULKAN_RENDERER
-static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vulkanWindowInfo)
+static void FrameRender(const VulkanInterface* vulkanInterface, VulkanWindowInfo* vulkanWindowInfo)
 {
     VkResult err;
 
-    VkSemaphore image_acquired_semaphore = vulkanWindowInfo->FrameSemaphores[vulkanWindowInfo->SemaphoreIndex].ImageAcquiredSemaphore;
-    VkSemaphore render_complete_semaphore = vulkanWindowInfo->FrameSemaphores[vulkanWindowInfo->SemaphoreIndex].RenderCompleteSemaphore;
-    err = vkAcquireNextImageKHR(vulkanContext->m_Device, vulkanWindowInfo->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &vulkanWindowInfo->FrameIndex);
+    VkSemaphore image_acquired_semaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_imageAcquiredSemaphore;
+    VkSemaphore render_complete_semaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_renderCompleteSemaphore;
+    err = vkAcquireNextImageKHR(vulkanInterface->m_device, vulkanWindowInfo->m_swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &vulkanWindowInfo->m_frameIndex);
     check_vk_result(err);
 
-    VulkanFrameContext* fd = &vulkanWindowInfo->Frames[vulkanWindowInfo->FrameIndex];
+    VulkanFrameContext* fd = &vulkanWindowInfo->m_frames[vulkanWindowInfo->m_frameIndex];
     {
-        err = vkWaitForFences(vulkanContext->m_Device, 1, &fd->Fence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
+        err = vkWaitForFences(vulkanInterface->m_device, 1, &fd->m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
         check_vk_result(err);
 
-        err = vkResetFences(vulkanContext->m_Device, 1, &fd->Fence);
+        err = vkResetFences(vulkanInterface->m_device, 1, &fd->m_imageFence);
         check_vk_result(err);
     }
     {
-        err = vkResetCommandPool(vulkanContext->m_Device, fd->CommandPool, 0);
+        err = vkResetCommandPool(vulkanInterface->m_device, fd->m_commandPool, 0);
         check_vk_result(err);
         VkCommandBufferBeginInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        err = vkBeginCommandBuffer(fd->CommandBuffer, &info);
+        err = vkBeginCommandBuffer(fd->m_commandBuffer, &info);
         check_vk_result(err);
     }
     {
         VkRenderPassBeginInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        info.renderPass = vulkanWindowInfo->RenderWindowPresentationPass;
-        info.framebuffer = fd->Framebuffer;
-        info.renderArea.extent = vulkanWindowInfo->Extent;
+        info.renderPass = vulkanWindowInfo->m_renderWindowPresentationPass;
+        info.framebuffer = fd->m_framebuffer;
+        info.renderArea.extent = vulkanWindowInfo->m_extent;
         info.clearValueCount = 1;
-        info.pClearValues = &vulkanWindowInfo->ClearValue;
-        vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+        info.pClearValues = &vulkanWindowInfo->m_clearValue;
+        vkCmdBeginRenderPass(fd->m_commandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
     }
 
     // Record Imgui Draw Data and draw funcs into command buffer
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->m_commandBuffer);
 
     // Submit command buffer
-    vkCmdEndRenderPass(fd->CommandBuffer);
+    vkCmdEndRenderPass(fd->m_commandBuffer);
     {
         VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo info = {};
@@ -864,26 +843,21 @@ static void FrameRender(const VulkanContext* vulkanContext, VulkanWindowInfo* vu
         info.pWaitSemaphores = &image_acquired_semaphore;
         info.pWaitDstStageMask = &wait_stage;
         info.commandBufferCount = 1;
-        info.pCommandBuffers = &fd->CommandBuffer;
+        info.pCommandBuffers = &fd->m_commandBuffer;
         info.signalSemaphoreCount = 1;
         info.pSignalSemaphores = &render_complete_semaphore;
 
-        err = vkEndCommandBuffer(fd->CommandBuffer);
+        err = vkEndCommandBuffer(fd->m_commandBuffer);
         check_vk_result(err);
-        err = vkQueueSubmit(vulkanContext->m_Queue, 1, &info, fd->Fence);
+        err = vkQueueSubmit(vulkanInterface->m_queue, 1, &info, fd->m_imageFence);
         check_vk_result(err);
     }
 }
-#endif
 
 void DevGuiManager::Update(bool editorBuild)
 {
     // Start the Dear ImGui frame
-#if NEW_VULKAN_RENDERER
     ImGui_ImplVulkan_NewFrame();
-#else
-    ImGui_ImplOpenGL3_NewFrame();
-#endif
     ImGui_ImplGlfw_NewFrame();
 
     if(editorBuild)
@@ -893,7 +867,7 @@ void DevGuiManager::Update(bool editorBuild)
     
     ImGui::NewFrame();
 
-    if (m_showDockspace)
+    if (editorBuild)
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;// | ImGuiWindowFlags_NoDocking;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -964,22 +938,19 @@ void DevGuiManager::Update(bool editorBuild)
 
     ImGui::Render();
 
-#if NEW_VULKAN_RENDERER
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
     // glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
-    FrameRender(renderWindow->GetVulkanContext(), renderWindow->GetVulkanWindowInfo());
-#else
-    GLFWOpenGLRenderWindow* renderWindow = static_cast<GLFWOpenGLRenderWindow*>(m_window);
-    glfwMakeContextCurrent(renderWindow->GetWindowPointer());
-    int display_w, display_h;
-    glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif
+    FrameRender(renderWindow->GetVulkanInterface(), renderWindow->GetVulkanWindowInfo());
+    ImDrawData* draw_data = ImGui::GetDrawData();
+    const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
+    if (!is_minimized)
+    {
+        FrameRender(renderWindow->GetVulkanInterface(), renderWindow->GetVulkanWindowInfo());
+    }
 
     // Update and Render additional Platform Windows
-       // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-       //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+   // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+   //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         GLFWwindow* backup_current_context = glfwGetCurrentContext();

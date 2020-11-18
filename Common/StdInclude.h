@@ -68,5 +68,3 @@ using blaOwnedPointer = std::unique_ptr<T>;
         }                                                                               \
         return true;                                                                    \
     }
-
-#define NEW_VULKAN_RENDERER 1

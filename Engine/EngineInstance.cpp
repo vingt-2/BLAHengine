@@ -6,7 +6,6 @@
 #include "Maths/Maths.h"
 
 #include "Core/Timer.h"
-#include "Core/RenderingManager.h"
 #include "Core/DebugDraw.h"
 #include "Core/GameComponent.h"
 #include "Assets/SceneManager.h"
@@ -19,11 +18,7 @@
 #include "Core/ComponentSystems.h"
 #include "EngineInstance.h"
 
-#if NEW_VULKAN_RENDERER
 #include "Renderer/Vulkan/VulkanRenderer.h"
-#else
-#include "Renderer/OpenGL/GL33Renderer.h" 
-#endif
 
 using namespace BLA;
 
@@ -35,11 +30,7 @@ blaU32 EngineInstance::LoopEngine()
 
     GLFWRenderWindow::InitGLFW();
 
-#if NEW_VULKAN_RENDERER
     RenderWindow* renderWindow = new GLFWVulkanRenderWindow();
-#else
-    RenderWindow* renderWindow = new GLFWOpenGLRenderWindow();
-#endif
 
     renderWindow->CreateRenderWindow("BLAengine Editor", 1280, 720, false);
 
@@ -102,20 +93,10 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
 	InitializeComponentLibrariesManager();
 
-    m_renderingManager = new RenderingManager(RenderingManager::Game);
-    m_debugRenderingManager = new DebugRenderingManager();
-
-
-
-#if NEW_VULKAN_RENDERER
     blaVector<blaU32> rpIds;
     RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
     m_renderer = new VulkanRenderer(m_assetManager, rpIds);
     m_renderer->InitializeRenderer(this->m_renderWindow);
-#else
-    m_renderer = new GL33Renderer(m_assetManager);
-    m_renderer->InitializeRenderer(this->m_renderWindow, m_renderingManager, m_debugRenderingManager);
-#endif
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 
@@ -123,14 +104,14 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_sceneManager = new SceneManager();
 
-    m_debug = new DebugDraw(m_debugRenderingManager);
+    m_debug = new DebugDraw();
 
     DebugDraw::AssignSingletonInstance(m_debug);
 
     m_componentLibrariesManager->LoadLibraries();
     ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
 
-    m_scene->Initialize(m_renderingManager);
+    m_scene->Initialize();
 
     // Is the renderer and its window up and running ?
     if (!m_renderer->GetStatus())
@@ -182,8 +163,6 @@ void EngineInstance::TerminateEngine()
     delete m_debug;
     delete m_scene;
     delete m_timer;
-    delete m_renderingManager;
-    delete m_debugRenderingManager;
     delete m_renderer;
     delete m_sceneManager;
     delete m_assetManager;
@@ -204,10 +183,6 @@ bool EngineInstance::LoadNewScene()
 {
     Scene::GetSingletonInstance()->Clear();
 
-#if !NEW_VULKAN_RENDERER
-    m_renderer->SwitchRenderingManager(m_renderingManager);
-#endif
-
     SetupDirLightAndCamera();
 
     m_renderWindow->SetWindowTitle("New Scene");
@@ -219,12 +194,8 @@ bool EngineInstance::LoadWorkingScene(blaString filepath)
 {
     m_sceneManager->LoadScene(filepath);
 
-#if !NEW_VULKAN_RENDERER
-    m_renderer->SwitchRenderingManager(m_renderingManager);
-
-    //SetupDirLightAndCamera();
-    m_renderer->SetCamera(m_scene->GetMainCamera());
-#endif
+    // SetupDirLightAndCamera();
+    // m_renderer->SetCamera(m_scene->GetMainCamera());
 
     FileEntry sceneFileEntry = ParseFilePath(filepath);
 
@@ -244,11 +215,9 @@ void EngineInstance::SetupDirLightAndCamera()
     light.CreateComponent(BlaStringId("DirectionalLightComponent"));*/
 
     GameObject cameraObject = m_scene->CreateObject(BlaStringId("EditorCamera"));
-    CameraComponent* cameraComp = cameraObject.CreateComponent<CameraComponent>();
+    // CameraComponent* cameraComp = cameraObject.CreateComponent<CameraComponent>();
 
-#if !NEW_VULKAN_RENDERER
-    m_renderer->SetCamera(cameraComp);
-#endif
+    // m_renderer->SetCamera(cameraComp);
 }
 
 void EngineInstance::ToggleCaptureMouse()

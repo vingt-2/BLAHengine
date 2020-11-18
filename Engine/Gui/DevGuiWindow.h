@@ -7,6 +7,7 @@
 
 namespace BLA
 {
+    class VulkanRenderer;
     class DevGuiElement;
     class DevGuiMenu;
     class Renderer;
@@ -91,19 +92,23 @@ namespace BLA
         void Render() override;
     };
 
-    class DevGuiRenderWindow : public DevGuiWindow
+    struct RenderWindowData;
+    class DevGuiRenderViewportWindow : public DevGuiWindow
     {
     public:
-        BLACORE_API DevGuiRenderWindow(Renderer* renderer);
-
-        BLACORE_API DevGuiRenderWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition);
+        BLACORE_API DevGuiRenderViewportWindow(VulkanRenderer* renderer, const blaString& windowName, const blaIVec2& windowPosition);
 
         void Render() override;
 
         BLACORE_API blaVec2 GetMousePointerScreenSpaceCoordinates() const;
 
     private:
+
+        void UpdateDisplayTexture(VulkanRenderer* renderer);
+
         blaVec2 m_cursorScreenSpacePosition;
-        Renderer* m_pRenderer;
+        VulkanRenderer* m_pRenderer;
+
+        RenderWindowData* m_renderData;
     };
 }

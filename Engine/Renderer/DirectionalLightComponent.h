@@ -7,8 +7,6 @@
 namespace BLA
 {
     BeginComponentDeclaration(BLAEngine, DirectionalLightComponent)
-
-        friend class RenderingManager;
 	
         void Init() override;
         void Shutdown() override;

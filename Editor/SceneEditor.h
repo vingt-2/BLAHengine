@@ -7,6 +7,7 @@
 #include "Assets/MeshAsset.h"
 #include "EditorGui/GameObjectInspectorGui.h"
 #include "EditorGui/SceneGraphGui.h"
+#include "EditorGui/RenderPassEditorGui.h"
 #include "EditorCommands.h"
 #include "GizmoManager.h"
 
@@ -18,7 +19,7 @@ namespace BLA
     class GameObject;
     class TriangleMesh;
     struct EditorState;
-    class TextEditor;
+    class DevGuiTextEditor;
     /*
      * Vulkan Test
      */
@@ -94,17 +95,12 @@ namespace BLA
         bool m_updatedScene = false;
         bool m_bDrawGrid = false;
         bool m_bTextEdit = false;
-
-    	/*
-    	 * Vulkan Test
-    	 */
-        GLFWRenderWindow* m_vulkanWindow = nullptr;
-        VulkanRenderer* m_vulkanRenderer = nullptr;
     	
         GameObject m_selectedObject;
 
         GizmoManager* m_gizmoManager;
         GameObjectInspector* m_componentInspector = nullptr;
+        RenderPassEditorGui* m_renderPassEditor = nullptr;
         SceneGraphGui* m_sceneGraphGui = nullptr;
         /*
          * Editor State
@@ -126,6 +122,7 @@ namespace BLA
             blaBool m_openConsoleRequest = true;
             blaBool m_openScenGraphGuiRequest = true;
             blaBool m_openComponentInspectorRequest = true;
+            blaBool m_openRenderPassEditorRequest = false;
         } m_editorGuiRequests;
     };
 };

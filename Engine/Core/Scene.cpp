@@ -12,7 +12,6 @@ BLA_IMPLEMENT_SINGLETON(Scene)
 Scene::Scene() : m_sceneTimer(Timer(1))
 {
     this->m_camera = nullptr;
-    this->m_renderingManager = nullptr;
 }
 
 GameObject Scene::CreateObject(GameObjectID objectId, const GameObject& parentObject)
@@ -72,20 +71,15 @@ void Scene::UpdateSceneTimer(blaF32 time)
     m_sceneTimer.Update(time);
 }
 
-void Scene::Initialize(RenderingManager* renderingManager)
+void Scene::Initialize()
 {
-    this->m_renderingManager = renderingManager;
-
+  
     m_componentSystemsScheduler.RebuildScheduler(ComponentSystemsRegistry::GetSingletonInstanceRead());
 }
 
 void Scene::Update()
 {
     m_sceneFlags = 0;
-    if (!m_renderingManager)
-    {
-        return;
-    }
 
     for(GameComponent* gc : m_toInitialize) 
     {
@@ -258,11 +252,6 @@ blaVector<GameComponent*> Scene::GetComponentsPerObject(GameObject obj)
 blaU32 Scene::GetSceneFlags() const
 {
 	return m_sceneFlags;
-}
-
-RenderingManager* Scene::GetRenderingManager() const
-{
-	return m_renderingManager;
 }
 
 template <class T>

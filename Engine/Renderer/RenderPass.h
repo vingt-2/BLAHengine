@@ -1,8 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
-
 #pragma once
-#include "BLAStringID.h"
 
+#include "BLAStringID.h"
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "BLASingleton.h"
@@ -19,25 +18,20 @@
     public:                                                                                                             \
         Name##Registrator()                                                                                             \
         {                                                                                                               \
-            RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();                                  \
+            BLA::RenderPassRegistry* registry = BLA::RenderPassRegistry::GetSingletonInstance();                        \
             if(!registry)                                                                                               \
             {                                                                                                           \
-                 registry = RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());             \
+                 registry = BLA::RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());        \
             }                                                                                                           \
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<Name>();     \
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<Name>();     \
-            registry->__RegisterRenderPass(Name::ms_renderPassId, 1, vas, uvs);                                         \
+            registry->__RegisterRenderPass(BlaStringId(#Name), Name::ms_renderPassId, 1, vas, uvs);                     \
         }                                                                                                               \
     };                                                                                                                  \
     static Name##Registrator ms_Name##Registrator;                                                  
 
 namespace BLA
 {
-    class BLACORE_API ShaderAttachment
-    {
-
-    };
-
     namespace _RenderPassTemplateHelpers
     {
         // Dummy class to serve as Render Pass Input Type Separator (used to separate lists of variadic template arguments)
@@ -162,6 +156,12 @@ namespace BLA
         const T& m_uniformValue;
     };
 
+    struct VulkanRenderPassInstance;
+    class RenderPassInstanceBase
+    {
+        virtual void CreateVulkanRenderPassInstnace(VulkanRenderPassInstance* vulkanPass) = 0;
+    };
+
     template<typename _RenderPass, class VertexAttributes, class ShaderUniforms>
     class _RenderPassInstance;
 
@@ -194,22 +194,45 @@ namespace BLA
     {
     public:
         virtual blaU32 GetId() const = 0;
+
+        blaVector<RenderPassInstanceBase*> m_toAdd;
+        blaVector<RenderPassInstanceBase*> m_toRemove;
     };
 
     template<typename _RenderPass>
     class TypedRenderPassInstanceContainer : public RenderPassInstanceContainer
     {
+        //TODO: This should be a reliable data structure. That is something that is won't move object pointers for the lifetime of the object
+        //TODO: For now, I'll just make it big by default so I don't hit issues
         blaVector<typename _RenderPass::RenderPassInstance> m_instances;
+
     public:
         typedef _RenderPass RenderPass;
+
+        TypedRenderPassInstanceContainer()
+        {
+            m_instances.reserve(1000);
+        }
 
         blaU32 GetId() const override { return RenderPass::ms_renderPassId; }
 
         void AddInstance(const typename RenderPass::RenderPassInstance& renderPass)
         {
+            if (m_instances.size() == 1000)
+            {
+                Console::LogError("Out of instance space for render pass: " + std::to_string(RenderPass::ms_renderPassId));
+                return;
+            }
+
             m_instances.push_back(renderPass);
+            m_toAdd.push_back(&renderPass);
         }
     };
+
+    /*
+     *   RenderPass definition
+     *
+     */
 
     template<blaU32 renderPassId, blaS32 attachmentCount, class VertexAttributes, class ShaderUniforms>
     class RenderPass;
@@ -294,6 +317,11 @@ namespace BLA
         }
     };
 
+    /*
+     *  RenderPass templated accessors
+     *
+     */
+
     template<class RenderPass>
     blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUVDescriptors()
     {
@@ -304,11 +332,17 @@ namespace BLA
         return typeDescriptors;
     }
 
+    /*
+     *  RenderPass Registry
+     *
+     */
+
     class RenderPassRegistry
     {
     public:
-        struct RenderPassRegistryEntry
+        struct Entry
         {
+            blaStringId m_name;
             blaU32 m_attachmentCount;
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
@@ -317,16 +351,20 @@ namespace BLA
     private:
         BLA_DECLARE_EXPORTED_SINGLETON(RenderPassRegistry);
 
-        typedef blaMap<blaU32, RenderPassRegistryEntry> RenderPassRegistryStorage;
+        typedef blaMap<blaU32, Entry> RenderPassRegistryStorage;
         RenderPassRegistryStorage m_registry;
 
     public:
 
-        void __RegisterRenderPass(blaU32 id,
+        void __RegisterRenderPass(
+            blaStringId name,
+            blaU32 id,
             blaU32 attachmentCount,
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
             blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
 
-        void GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const;
+        BLACORE_API const Entry* GetRenderPassEntry(blaU32 id) const;
+
+        BLACORE_API void GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const;
     };
 }

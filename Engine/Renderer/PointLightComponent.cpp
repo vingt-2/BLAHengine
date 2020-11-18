@@ -5,7 +5,6 @@
 #include "Core/GameObject.h"
 
 #include "Core/Scene.h"
-#include "Core/RenderingManager.h"
 #include "Core/TransformComponent.h"
 
 using namespace BLA;
@@ -25,7 +24,7 @@ void PointLightComponent::Update()
 	{
 		if(!m_draw)
 		{
-			Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
+			//Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
 			m_renderTicket = 0;
 		}
 	}
@@ -33,17 +32,17 @@ void PointLightComponent::Update()
 	{
 		if (m_draw)
 		{
-			m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
+			//m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
 		}
 	}
 }
 
 void PointLightComponent::Init()
 {
-    m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
+    // m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
 }
 
 void PointLightComponent::Shutdown()
 {
-    Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
+    // Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
 }
