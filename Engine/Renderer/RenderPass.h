@@ -32,6 +32,11 @@
 
 namespace BLA
 {
+    class BLACORE_API RenderPassAttachment
+    {
+
+    };
+
     namespace _RenderPassTemplateHelpers
     {
         // Dummy class to serve as Render Pass Input Type Separator (used to separate lists of variadic template arguments)
@@ -242,7 +247,7 @@ namespace BLA
     {
         static_assert(attachmentCount > 0, "Number of attachments on a RenderPass < 1 is invalid");
 
-        ShaderAttachment m_attachment[attachmentCount];
+        RenderPassAttachment m_attachment[attachmentCount];
 
     public:
         typedef _RenderPassInstance<RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>,
