@@ -23,7 +23,7 @@ bool OBJImport::ImportMesh(const blaString filename, TriangleMesh& mesh, bool sw
     std::ifstream fileStream(filename, std::ifstream::in);
     blaString lineInFile = " ";
 
-    blaVector<blaPair<blaString, blaIndex>> matDefs;
+    blaVector<blaPair<blaString, blaSize>> matDefs;
     blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
 
     int quadsCount = 0;
@@ -196,7 +196,7 @@ bool OBJImport::LoadMaterialTemplateLibrary(const blaString filename)
     std::ifstream fileStream(filename, std::ifstream::in);
     blaString lineInFile = " ";
 
-    blaVector<blaPair<blaString, blaIndex>> matDefs;
+    blaVector<blaPair<blaString, blaSize>> matDefs;
     blaVector<blaU32> vertexIndices, uvIndices, normalIndices;
 
     int outOfRangeExceptionsCount = 0;

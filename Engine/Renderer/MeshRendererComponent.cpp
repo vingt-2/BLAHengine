@@ -4,7 +4,6 @@
 
 #include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
-#include "RenderBackend.h"
 #include "Assets/AssetsManager.h"
 
 using namespace BLA;
@@ -90,17 +89,26 @@ void MeshRendererComponent::Update()
     if(m_renderTicket == 0 && render)
     {
         int renderTicket = 1;
-        VulkanRenderer* renderer = VulkanRenderer::GetSingletonInstance();
+        VulkanRenderer* renderer = nullptr;
         if(renderer)
         {
             CameraComponent* camera = Scene::GetSingletonInstance()->GetMainCamera();
             m_camera.AttachCamera(camera);
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
-            const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(rd.m_vertPos, rd.m_vertNormal);
+
+            m_vertPos = GPU::Buffer<blaVec3>::New(rd.m_vertPos.size());
+            memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
+
+            m_vertNormal = GPU::Buffer<blaVec3>::New(rd.m_vertNormal.size());
+            memcpy_s(m_vertNormal->GetData(), sizeof(blaVec3) * m_vertNormal->GetLength(), rd.m_vertNormal.data(), rd.m_vertNormal.size() * sizeof(blaVec3));
+
+            m_indices = GPU::Buffer<blaU32>::New(rd.m_triangleIndices.size());
+            memcpy_s(m_indices->GetData(), sizeof(blaVec3) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaVec3));
+
+            const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos, *m_vertNormal);
             const MeshTestRenderPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix());
 
-            MeshTestRenderPass::RenderPassInstance renderPassInstance(meshVAs, meshUniforms);
-            renderPassInstance.m_indices = rd.m_triangleIndices;
+            MeshTestRenderPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
 
             // renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
         }

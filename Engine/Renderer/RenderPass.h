@@ -5,6 +5,7 @@
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "BLASingleton.h"
+#include "Buffer.h"
 
 #define VertexAttributes(...) __VA_ARGS__
 #define UniformValues(...) __VA_ARGS__
@@ -43,6 +44,38 @@ namespace BLA
         template<typename...>
         class RPIS {};
     }
+
+    class BaseRenderPassInstance
+    {
+        friend class Renderer;
+
+        blaU16 m_vaCount;
+        blaU16 m_uvCount;
+
+    protected:
+        const GPU::Buffer<blaU32>* m_indices;
+
+        BaseRenderPassInstance(const GPU::Buffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount) :
+            m_vaCount(vaCount), m_uvCount(uvCount), m_indices(&indices) {}
+
+    public:
+        void GetVertexAttribute(blaU32 i, const void*& pointerToData, blaSize& bufferLength)
+        {
+            //TODO fatal assert i <= vaCount
+
+            const GPU::BaseBuffer* buffer = reinterpret_cast<const GPU::BaseBuffer*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const GPU::BaseBuffer*) * i);
+
+            pointerToData = buffer->GetData();
+            bufferLength = buffer->GetLength();
+        }
+
+        void GetUniformValuePtr(int i, const void*& pointerToData)
+        {
+            //TODO: fatal assert i <= uvCount
+
+            pointerToData = reinterpret_cast<const void*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const GPU::BaseBuffer*) * m_vaCount + sizeof(const void*) * i);
+        }
+    };
 
     // Only inspectable types should be template arguments to a render pass.
     // Check and use it to infer things
@@ -96,29 +129,29 @@ namespace BLA
     class _RenderPassInstanceVAs<T, Ts...> : _RenderPassInstanceVAs<Ts...>
     {
     public:
-        _RenderPassInstanceVAs(const blaVector<T>& dataVector, const blaVector<Ts>&... dataVectors) :
+        _RenderPassInstanceVAs(const GPU::Buffer<T>& dataVector, const GPU::Buffer<Ts>&... dataVectors) :
             _RenderPassInstanceVAs<Ts...>(dataVectors...),
-            m_dataVector(dataVector)
+            m_dataVector(&dataVector)
         {
             // TODO: Reason about type, statically check inspectability... Pre-fecth type information
             // Remember this constructor is executed every time we request a new RenderObject for this RenderPass, so not like it's only registered once yea ?
         };
 
         template <size_t k>
-        const blaVector<typename std::enable_if<k == 0, T>::type>& GetVertexAttributes() const
+        const GPU::Buffer<typename std::enable_if<k == 0, T>::type>& GetVertexAttributes() const
         {
             return m_dataVector;
         }
 
         template <size_t k>
-        const blaVector<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::type>
+        const GPU::Buffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::type>
             ::type>& GetVertexAttributes() const
         {
             return _RenderPassInstanceVAs<Ts...>::template GetVertexAttributes<k - 1>();
         }
 
     protected:
-        const blaVector<T>& m_dataVector;
+        const GPU::Buffer<T>* m_dataVector;
     };
 
     template<typename T, typename... Ts>
@@ -127,7 +160,7 @@ namespace BLA
     public:
         _RenderPassInstanceUVs(const T& uniformValue, const Ts&... uniformValues) :
             _RenderPassInstanceUVs<Ts...>(uniformValues...),
-            m_uniformValue(uniformValue)
+            m_uniformValue(&uniformValue)
         {
             // TODO: Reason about type, statically check inspectability... Pre-fecth type information
             // Remember this constructor is executed every time we request a new RenderObject for this RenderPass, so not like it's only registered once yea ?
@@ -158,27 +191,19 @@ namespace BLA
         }
 
     protected:
-        const T& m_uniformValue;
-    };
-
-    struct VulkanRenderPassInstance;
-    class RenderPassInstanceBase
-    {
-        virtual void CreateVulkanRenderPassInstnace(VulkanRenderPassInstance* vulkanPass) = 0;
+        const T* m_uniformValue;
     };
 
     template<typename _RenderPass, class VertexAttributes, class ShaderUniforms>
     class _RenderPassInstance;
 
     template<typename _RenderPass, typename... VAs, typename... UVs>
-    class _RenderPassInstance<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : public _RenderPassInstanceVAs<VAs...>, public _RenderPassInstanceUVs<UVs...>
+    class _RenderPassInstance<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : BaseRenderPassInstance, public _RenderPassInstanceVAs<VAs...>, public _RenderPassInstanceUVs<UVs...>
     {
     public:
         typedef _RenderPassInstanceVAs<VAs...> InstanceVertexAttributes;
         typedef _RenderPassInstanceUVs<UVs...> InstanceUniformValues;
         typedef _RenderPass RenderPass;
-
-        blaVector<blaU32> m_indices;
 
         template<int n>
         struct GetVAType
@@ -192,53 +217,14 @@ namespace BLA
             typedef typename _RenderPassTemplateHelpers::InferUVType<n, InstanceUniformValues>::type Type;
         };
 
-        _RenderPassInstance(const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms ...) : _RenderPassInstanceVAs<VAs...>(vertexAttributes), _RenderPassInstanceUVs<UVs...>(shaderUniforms) {}
-    };
-
-    class RenderPassInstanceContainer
-    {
-    public:
-        virtual blaU32 GetId() const = 0;
-
-        blaVector<RenderPassInstanceBase*> m_toAdd;
-        blaVector<RenderPassInstanceBase*> m_toRemove;
-    };
-
-    template<typename _RenderPass>
-    class TypedRenderPassInstanceContainer : public RenderPassInstanceContainer
-    {
-        //TODO: This should be a reliable data structure. That is something that is won't move object pointers for the lifetime of the object
-        //TODO: For now, I'll just make it big by default so I don't hit issues
-        blaVector<typename _RenderPass::RenderPassInstance> m_instances;
-
-    public:
-        typedef _RenderPass RenderPass;
-
-        TypedRenderPassInstanceContainer()
-        {
-            m_instances.reserve(1000);
-        }
-
-        blaU32 GetId() const override { return RenderPass::ms_renderPassId; }
-
-        void AddInstance(const typename RenderPass::RenderPassInstance& renderPass)
-        {
-            if (m_instances.size() == 1000)
-            {
-                Console::LogError("Out of instance space for render pass: " + std::to_string(RenderPass::ms_renderPassId));
-                return;
-            }
-
-            m_instances.push_back(renderPass);
-            m_toAdd.push_back(&renderPass);
-        }
+        _RenderPassInstance(const GPU::Buffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms ...):
+            BaseRenderPassInstance(indices, RenderPass::ms_VACount, RenderPass::ms_UVCount), _RenderPassInstanceVAs<VAs...>(vertexAttributes), _RenderPassInstanceUVs<UVs...>(shaderUniforms) {}
     };
 
     /*
      *   RenderPass definition
      *
      */
-
     template<blaU32 renderPassId, blaS32 attachmentCount, class VertexAttributes, class ShaderUniforms>
     class RenderPass;
 
@@ -326,7 +312,6 @@ namespace BLA
      *  RenderPass templated accessors
      *
      */
-
     template<class RenderPass>
     blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUVDescriptors()
     {
@@ -337,11 +322,18 @@ namespace BLA
         return typeDescriptors;
     }
 
+    class RenderPassInstance
+    {
+        friend class Renderer;
+
+        virtual void GetVertexAttribute(int i, void*& pointerToData, int& dataSize, int& bufferLength) = 0;
+        virtual void GetUniformValuePtr(int i, void*& pointerToData, int& dataSize) = 0;
+    };
+
     /*
      *  RenderPass Registry
      *
      */
-
     class RenderPassRegistry
     {
     public:

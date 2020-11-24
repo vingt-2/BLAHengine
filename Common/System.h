@@ -26,7 +26,7 @@ typedef glm::f32 blaF32;
 typedef glm::f64 blaF64;
 #endif
 
-typedef std::size_t blaIndex;
+typedef std::size_t blaSize;
 typedef bool blaBool;
 
 namespace BLA

@@ -49,7 +49,7 @@ static blaVector<blaString> FilesInDir(blaString dirname)
     return result;
 }
 
-blaIndex BLA::AssetManager::LoadCookedAssets()
+blaSize BLA::AssetManager::LoadCookedAssets()
 {
     blaVector<blaString> triMeshNames = FilesInDir(TRIANGLE_MESH_SUBPATH);
     blaVector<blaString> matNames = FilesInDir(MATERIAL_SUBPATH);
@@ -83,10 +83,10 @@ AssetManager::AssetType AssetManager::GetAsset(blaString assetName, Asset* &asse
         return type;
     }
 
-    blaPair<AssetType, blaIndex> asset = it->second;
+    blaPair<AssetType, blaSize> asset = it->second;
 
     type = asset.first;
-    const blaIndex assetIndx = asset.second;
+    const blaSize assetIndx = asset.second;
 
     switch (type)
     {
@@ -146,9 +146,9 @@ bool AssetManager::LoadTriangleMesh(blaString filepath)
     MeshAsset* triangleMesh = meshSerializer.BuildMesh();
     m_triangleMeshesInMemory.push_back(triangleMesh);
 
-    blaIndex indx = m_triangleMeshesInMemory.size() - 1;
+    blaSize indx = m_triangleMeshesInMemory.size() - 1;
 
-    m_resourceMap[filepath] = blaPair<AssetType, blaIndex>(AssetType::TriangleMeshAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaSize>(AssetType::TriangleMeshAsset, indx);
 
     return true;
 }
@@ -180,9 +180,9 @@ bool AssetManager::LoadTexture(blaString filepath)
 
     m_textures2DInMemory.push_back(texture2D);
 
-    blaIndex indx = m_textures2DInMemory.size() - 1;
+    blaSize indx = m_textures2DInMemory.size() - 1;
 
-    m_resourceMap[filepath] = blaPair<AssetType, blaIndex>(AssetType::TextureAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaSize>(AssetType::TextureAsset, indx);
 
     return true;
 }
@@ -214,9 +214,9 @@ bool AssetManager::LoadMaterial(blaString filepath)
 
     m_materialsInMemory.push_back(material);
 
-    blaIndex indx = m_materialsInMemory.size() - 1;
+    blaSize indx = m_materialsInMemory.size() - 1;
 
-    m_resourceMap[filepath] = blaPair<AssetType, blaIndex>(AssetType::MaterialAsset, indx);
+    m_resourceMap[filepath] = blaPair<AssetType, blaSize>(AssetType::MaterialAsset, indx);
 
     return true;
 }

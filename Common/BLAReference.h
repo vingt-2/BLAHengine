@@ -9,7 +9,7 @@
             static REFERENCE_NAME InvalidReference()                        \
                 { return REFERENCE_NAME(); }                                \
     private:                                                                \
-        REFERENCE_NAME(blaIndex idx, blaVector<REFERENCE_TYPE>* pVector) :	\
+        REFERENCE_NAME(blaSize idx, blaVector<REFERENCE_TYPE>* pVector) :	\
             BLAReference<REFERENCE_TYPE>(idx, pVector) {}                   \
 
 template<class Object>
@@ -38,9 +38,9 @@ public:
 
     static BLAReference InvalidReference() { return BLAReference(); };
 protected:
-    BLAReference(blaIndex idx, blaVector<Object>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
+    BLAReference(blaSize idx, blaVector<Object>* pVector) : m_objectIndex(idx), m_pGameObjectVector(pVector)
     {}
 
-    blaIndex m_objectIndex;
+    blaSize m_objectIndex;
     blaVector<Object>* m_pGameObjectVector;
 };

@@ -192,15 +192,15 @@ FileEntry BLA::ParseFilePath(const blaString &filepath)
 {
     FileEntry file;
 
-    blaIndex i = filepath.find_last_of('/');
-    blaIndex j = filepath.find_last_of('\\');
+    blaSize i = filepath.find_last_of('/');
+    blaSize j = filepath.find_last_of('\\');
 
     i = i == blaString::npos ? 0 : i;
     j = j == blaString::npos ? 0 : j;
 
-    const blaIndex lastSlash = (i > j ? i : j) + 1;
+    const blaSize lastSlash = (i > j ? i : j) + 1;
 
-    blaIndex lastDot = filepath.find_last_of('.');
+    blaSize lastDot = filepath.find_last_of('.');
 
     if (lastDot == blaString::npos)
     {

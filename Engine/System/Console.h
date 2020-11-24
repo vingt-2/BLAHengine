@@ -125,7 +125,7 @@ namespace BLA
 
         char m_currentCommandBuffer[2048];
         blaVector<blaString> m_commandHistory;
-        blaIndex m_historyCursor;
+        blaSize m_historyCursor;
 
         blaU32 m_currentRegisteringLibrary;
     };
@@ -134,7 +134,7 @@ namespace BLA
     blaVector<T> SplitString(blaString str, const blaString& delimiter)
     {
         blaVector<T> ret;
-        blaIndex i = str.find_first_of(delimiter);
+        blaSize i = str.find_first_of(delimiter);
         while (i != blaString::npos)
         {
             ret.push_back(blaFromString<T>(str.substr(0, i)));

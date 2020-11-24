@@ -18,11 +18,11 @@ namespace BLA
 		blaVector<char> m_n;
 		
 	public:
-		ValueCommandDelta(const char* prevV, const char* newV, blaIndex size);
+		ValueCommandDelta(const char* prevV, const char* newV, blaSize size);
 		void Invert();
 		const char* GetPreviousValue() const { return &m_p[0]; }
 		const char* GetNewValue() const { return &m_n[0]; }
-		blaIndex GetValueSizeBytes() const { return m_p.size(); }
+		blaSize GetValueSizeBytes() const { return m_p.size(); }
 	};
 	
 	struct EditorCommand

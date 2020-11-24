@@ -77,18 +77,18 @@ namespace BLA
 		struct blaVectorDescriptor : ExposedVarTypeDescriptor
 		{
 			ExposedVarTypeDescriptor* m_itemType;
-			blaIndex(*getSize)(const void*);
-			const void* (*getItem)(const void*, blaIndex);
+			blaSize(*getSize)(const void*);
+			const void* (*getItem)(const void*, blaSize);
 
 			blaVectorDescriptor() : ExposedVarTypeDescriptor
 			{ GenerateBlaStringId(blaString("Vector<") + blaString(TypeResolver<T>::GetDescriptor()->m_typeID) + ">"), sizeof(blaVector<T>) },
 				m_itemType{ TypeResolver<T>::GetDescriptor() }
 			{
-				getSize = [](const void* vecPtr) -> blaIndex
+				getSize = [](const void* vecPtr) -> blaSize
 				{
 					return static_cast<const blaVector<T>*>(vecPtr)->size();
 				};
-				getItem = [](const void* vecPtr, blaIndex index) -> const void*
+				getItem = [](const void* vecPtr, blaSize index) -> const void*
 				{
 					return static_cast<const void*>(&(*static_cast<const blaVector<T>*>(vecPtr))[index]);
 				};

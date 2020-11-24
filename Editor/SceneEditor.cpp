@@ -221,7 +221,7 @@ bool SceneEditor::InitializeEngine(RenderWindow* renderWindow)
         // TODO: Temporary completely removed from the engine init, but belongs there
         m_guiManager = DevGuiManager::AssignAndReturnSingletonInstance(new DevGuiManager(m_renderWindow));
 
-        m_renderer->SetRenderToFrameBufferOnly(true);
+        // m_renderer->SetRenderToFrameBufferOnly(true);
         m_commandManager = new EditorCommandManager(this);
         m_gizmoManager = new GizmoManager(m_commandManager);
 
@@ -609,7 +609,7 @@ bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCom
                 {
                     if (exposedMember.m_name == editCommand->m_exposedMemberEditedId)
                     {
-                        blaIndex size = editCommand->m_delta.GetValueSizeBytes();
+                        blaSize size = editCommand->m_delta.GetValueSizeBytes();
                         if (exposedMember.m_type->size != size)
                         {
                             Console::LogError("Mismatch in data size for a component editor command");

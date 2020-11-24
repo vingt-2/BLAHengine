@@ -4,8 +4,7 @@
 #include "StdInclude.h"
 #include "Assets/AssetsManager.h"
 #include "Renderer/Renderer.h"
-
-#include "RenderBackend.h"
+#include "System/Vulkan/VulkanInterface.h"
 
 namespace BLA
 {
@@ -17,11 +16,6 @@ namespace BLA
         bool m_updated;
     };
 
-    struct ScreenFrameBuffer
-    {
-        
-    };
-
     struct OffscreenRenderBuffer
     {
         TextureView m_color;
@@ -29,41 +23,18 @@ namespace BLA
 
     struct DirectionalShadowRender;
     class GLFWVulkanRenderWindow;
-    class BLACORE_API VulkanRenderer
+    class VulkanRenderer : public Renderer
     {
-        BLA_DECLARE_SINGLETON(VulkanRenderer)
     public:
+        VulkanRenderer(GLFWVulkanRenderWindow* pRenderWindow);
 
-        VulkanRenderer(const AssetManager* assetManager, const blaVector<blaU32>& rpIds);
-
-        void InitializeRenderer(RenderWindow* renderWindow);
-
-        bool Update();
-
-        void CleanupRenderer();
-
-        int GetStatus() { return 1; }
-
-        void SetRenderToFrameBufferOnly(bool a) {};
-
-        const GLFWVulkanRenderWindow* GetRenderWindow() const { return m_renderWindow; }
-
-        void SetRenderSize(blaIVec2 renderSize);
-
+        bool Update() override;
+        void SetViewportSize(blaIVec2 viewportSize) override;
+        RenderWindow* GetRenderWindow() override;
         OffscreenRenderBuffer m_offscreenBuffer;
+
     private:
-
         void CreateDisplayBuffers();
-
-        blaIVec2 m_viewPortExtents;
         GLFWVulkanRenderWindow* m_renderWindow;
     };
-
-    class BLACORE_API ShaderResource
-    {
-
-    };
-
-    template<class RenderPass>
-    BLACORE_API blaString GenerateVulkanShaderTemplate();
 }

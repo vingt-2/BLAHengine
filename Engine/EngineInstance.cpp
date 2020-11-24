@@ -95,8 +95,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     blaVector<blaU32> rpIds;
     RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
-    m_renderer = new VulkanRenderer(m_assetManager, rpIds);
-    m_renderer->InitializeRenderer(this->m_renderWindow);
+    m_renderer = new VulkanRenderer(static_cast<GLFWVulkanRenderWindow*>(m_renderWindow));
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 
@@ -112,13 +111,6 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
 
     m_scene->Initialize();
-
-    // Is the renderer and its window up and running ?
-    if (!m_renderer->GetStatus())
-    {
-        printf("Failed to initiate renderer and / or render window... Terminating.\n");
-        return false;
-    }
 
     // Finally, load our assets in memory...
     m_assetManager->LoadCookedAssets();

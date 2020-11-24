@@ -10,7 +10,7 @@
 #include "backends/imgui_impl_glfw.h"
 
 #include "backends/imgui_impl_vulkan.h"
-#include "System/Vulkan/VulkanRenderWindow.h"
+#include "System/Vulkan/VulkanInterface.h"
 #include "Renderer/Vulkan/VulkanRenderer.h"
 
 #include "System/RenderWindow.h"
@@ -24,6 +24,7 @@
 #include <iomanip>
 
 using namespace BLA;
+using namespace Vulkan;
 
 BLA_IMPLEMENT_SINGLETON(DevGuiManager);
 
@@ -129,7 +130,7 @@ void DevGuiManager::OpenWindow(blaString name, DevGuiWindow* window)
     m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(name, window));
 }
 
-static void CreateImGuiVulkanRenderPass(const VulkanInterface* vulkanInterface, VulkanWindowInfo* vulkanWindowInfo)
+static void CreateImGuiVulkanRenderPass(const Vulkan::Interface* vulkanInterface, Vulkan::WindowInfo* vulkanWindowInfo)
 {
     VkAttachmentDescription attachment = {};
     attachment.format = vulkanWindowInfo->m_surfaceFormat.format;
@@ -163,7 +164,7 @@ static void CreateImGuiVulkanRenderPass(const VulkanInterface* vulkanInterface, 
     info.dependencyCount = 1;
     info.pDependencies = &dependency;
     VkResult err = vkCreateRenderPass(vulkanInterface->m_device, &info, nullptr, &vulkanWindowInfo->m_renderWindowPresentationPass);
-    check_vk_result(err);
+    Vulkan::Interface::HandleError(err);
 }
 
 void DevGuiManager::Init()
@@ -190,8 +191,8 @@ void DevGuiManager::Init()
 
     ImGui_ImplGlfw_InitForVulkan(renderWindow->GetWindowPointer(), true);
 
-    const VulkanInterface* vulkanInterface = renderWindow->GetVulkanInterface();
-    VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
+    const Vulkan::Interface* vulkanInterface = renderWindow->GetVulkanInterface();
+    Vulkan::WindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
 
     CreateImGuiVulkanRenderPass(vulkanInterface, renderWindowInfo);
 
@@ -206,7 +207,7 @@ void DevGuiManager::Init()
     init_info.Allocator = vulkanInterface->m_allocator;
     init_info.MinImageCount = vulkanInterface->m_minImageCount;
     init_info.ImageCount = vulkanInterface->m_minImageCount;
-    init_info.CheckVkResultFn = &check_vk_result;
+    init_info.CheckVkResultFn = &Vulkan::Interface::HandleError;
     ImGui_ImplVulkan_Init(&init_info, renderWindowInfo->m_renderWindowPresentationPass);
     {
         // Use any command queue
@@ -214,12 +215,12 @@ void DevGuiManager::Init()
         VkCommandBuffer command_buffer = renderWindowInfo->m_frames[renderWindowInfo->m_frameIndex].m_commandBuffer;
 
         VkResult err = vkResetCommandPool(vulkanInterface->m_device, command_pool, 0);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
         VkCommandBufferBeginInfo begin_info = {};
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         err = vkBeginCommandBuffer(command_buffer, &begin_info);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
 
         ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
 
@@ -228,12 +229,12 @@ void DevGuiManager::Init()
         end_info.commandBufferCount = 1;
         end_info.pCommandBuffers = &command_buffer;
         err = vkEndCommandBuffer(command_buffer);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
         err = vkQueueSubmit(vulkanInterface->m_queue, 1, &end_info, VK_NULL_HANDLE);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
 
         err = vkDeviceWaitIdle(vulkanInterface->m_device);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 }
@@ -248,8 +249,8 @@ void DevGuiManager::Destroy()
     // Cleanup
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
 
-    const VulkanInterface* vulkanInterface = renderWindow->GetVulkanInterface();
-    VulkanWindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
+    const Vulkan::Interface* vulkanInterface = renderWindow->GetVulkanInterface();
+    Vulkan::WindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
     vkDestroyRenderPass(vulkanInterface->m_device, renderWindowInfo->m_renderWindowPresentationPass, nullptr);
 
     ImGui_ImplVulkan_Shutdown();
@@ -718,7 +719,9 @@ struct BLA::RenderWindowData
 
 void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
 {
-    const GLFWVulkanRenderWindow* renderWindow = renderer->GetRenderWindow();
+    const GLFWVulkanRenderWindow* renderWindow = dynamic_cast<const GLFWVulkanRenderWindow*>(renderer->GetRenderWindow());
+
+    // assert renderWindow
 
     VkSamplerCreateInfo samplerInfo = {};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -771,7 +774,7 @@ void DevGuiRenderViewportWindow::Render()
 
         ImVec2 cursorInWindow = ImGui::GetCursorPos();
 
-        m_pRenderer->SetRenderSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
+        m_pRenderer->SetViewportSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
 
         ImVec2 mouse = ImGui::GetMousePos();
 
@@ -793,31 +796,31 @@ blaVec2 DevGuiRenderViewportWindow::GetMousePointerScreenSpaceCoordinates() cons
 bool g_show_demo_window = false;
 bool g_debugFileBrowser = false;
 
-static void FrameRender(const VulkanInterface* vulkanInterface, VulkanWindowInfo* vulkanWindowInfo)
+static void FrameRender(const Vulkan::Interface* vulkanInterface, Vulkan::WindowInfo* vulkanWindowInfo)
 {
     VkResult err;
 
     VkSemaphore image_acquired_semaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_imageAcquiredSemaphore;
     VkSemaphore render_complete_semaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_renderCompleteSemaphore;
     err = vkAcquireNextImageKHR(vulkanInterface->m_device, vulkanWindowInfo->m_swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &vulkanWindowInfo->m_frameIndex);
-    check_vk_result(err);
+    Vulkan::Interface::HandleError(err);
 
-    VulkanFrameContext* fd = &vulkanWindowInfo->m_frames[vulkanWindowInfo->m_frameIndex];
+    Vulkan::FrameContext* fd = &vulkanWindowInfo->m_frames[vulkanWindowInfo->m_frameIndex];
     {
         err = vkWaitForFences(vulkanInterface->m_device, 1, &fd->m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
 
         err = vkResetFences(vulkanInterface->m_device, 1, &fd->m_imageFence);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
     }
     {
         err = vkResetCommandPool(vulkanInterface->m_device, fd->m_commandPool, 0);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
         VkCommandBufferBeginInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         err = vkBeginCommandBuffer(fd->m_commandBuffer, &info);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
     }
     {
         VkRenderPassBeginInfo info = {};
@@ -848,9 +851,9 @@ static void FrameRender(const VulkanInterface* vulkanInterface, VulkanWindowInfo
         info.pSignalSemaphores = &render_complete_semaphore;
 
         err = vkEndCommandBuffer(fd->m_commandBuffer);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
         err = vkQueueSubmit(vulkanInterface->m_queue, 1, &info, fd->m_imageFence);
-        check_vk_result(err);
+        Vulkan::Interface::HandleError(err);
     }
 }
 

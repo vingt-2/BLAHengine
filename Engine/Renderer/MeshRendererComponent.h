@@ -4,12 +4,14 @@
 #include "StdInclude.h"
 #include "Assets/MeshAsset.h"
 #include "Assets/Material.h"
+#include "Renderer/Buffer.h"
 
 #include "Core/BehaviorComponent.h"
 
 #define BLA_LINE_RENDER 0x0003
 
 #include "Renderer/Renderer.h"
+#include "Renderer\RenderCamera.h"
 
 namespace BLA
 {
@@ -37,6 +39,10 @@ namespace BLA
 
         bool init = false;
         PerspectiveCamera m_camera;
+
+        GPU::Buffer<blaVec3>* m_vertPos = nullptr;
+        GPU::Buffer<blaVec3>* m_vertNormal = nullptr;
+        GPU::Buffer<blaU32>* m_indices = nullptr;
 
 	EndBehaviorDeclaration()
 }

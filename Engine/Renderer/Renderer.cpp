@@ -7,23 +7,6 @@ using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(RenderPassRegistry)
 
-void Renderer::SetRenderSize(blaIVec2 renderSize)
-{
-    m_renderSize = renderSize;
-}
-
-void Renderer::SetCamera(CameraComponent * camera)
-{
-    m_mainRenderCamera.AttachCamera(camera);
-}
-
-Renderer::Renderer()
-{
-    m_renderToFrameBufferOnly = false;
-    m_isContextEnabled = false;
-    this->m_renderSize = glm::vec2(0, 0);
-}
-
 void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, blaU32 attachmentCount,
     blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
     blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor)

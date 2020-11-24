@@ -22,13 +22,13 @@ struct InspectableVariablesEditorGuiElementFactoryRegistrator
 };
 
 template<typename T>
-DevGuiElement* MakeEditGuiElement(const blaString& variableName, blaStringId groupId, blaLambda<void(const char*, const char*, blaIndex)> onEditFunctor, void* obj)
+DevGuiElement* MakeEditGuiElement(const blaString& variableName, blaStringId groupId, blaLambda<void(const char*, const char*, blaSize)> onEditFunctor, void* obj)
 {
 	return new DevGuiEditElement<T>(variableName, groupId, onEditFunctor, static_cast<T*>(obj));
 }
 
 template<typename T>
-DevGuiElement* MakeVectorEditGuiElement(const blaString& variableName, blaStringId groupId, blaLambda<void(const char*, const char*, blaIndex)> onEditFunctor, void* obj)
+DevGuiElement* MakeVectorEditGuiElement(const blaString& variableName, blaStringId groupId, blaLambda<void(const char*, const char*, blaSize)> onEditFunctor, void* obj)
 {
 	return new DevGuiEditElementVector<T>(variableName, groupId, static_cast<blaVector<T>*>(obj));
 }
@@ -49,7 +49,7 @@ void DevGuiEditElementVector<blaBool>::Render()
                 bool v;
             };
             boxedBool b = { m_pToVector->at(i) };
-			DevGuiEditElement<blaBool> toRender(std::to_string(i), m_groupId, [](const char*, const char*, blaIndex) {}, &b.v);
+			DevGuiEditElement<blaBool> toRender(std::to_string(i), m_groupId, [](const char*, const char*, blaSize) {}, &b.v);
             toRender.Render();
 
             (*m_pToVector)[i] = b.v;
@@ -64,11 +64,11 @@ ExposedVarTypeDescriptor
 { GenerateBlaStringId(blaString("Vector<") + blaString(TypeResolver<blaBool>::GetDescriptor()->m_typeID) + ">"), sizeof(blaVector<blaBool>) },
 m_itemType{ TypeResolver<blaBool>::GetDescriptor() }
 {
-	getSize = [](const void* vecPtr) -> blaIndex
+	getSize = [](const void* vecPtr) -> blaSize
 	{
 		return static_cast<const blaVector<blaBool>*>(vecPtr)->size();
 	};
-	getItem = [](const void* vecPtr, blaIndex index) -> const void*
+	getItem = [](const void* vecPtr, blaSize index) -> const void*
 	{
 		return nullptr;
 	};

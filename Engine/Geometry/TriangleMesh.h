@@ -68,7 +68,7 @@ namespace BLA
 
         blaVector<HeIndx> m_heEmanatingFromVert; // a list of one HE index (from m_halfEdges) emanating from each vertex Position (should be size of m_vertexPos)
 
-        blaVector<blaPair<blaString, blaIndex>> m_materials;
+        blaVector<blaPair<blaString, blaSize>> m_materials;
 
         int m_manifoldViolationEdges = 0;
 

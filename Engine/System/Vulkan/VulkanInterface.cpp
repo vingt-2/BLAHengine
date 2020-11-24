@@ -1,12 +1,10 @@
 #include "VulkanInterface.h"
-
-#include <StdInclude.h>
-
+#include "StdInclude.h"
 #include "System.h"
 
-namespace BLA
+namespace BLA::Vulkan
 {
-    VulkanInterface::VulkanInterface(const char** extensions, uint32_t extensions_count)
+    Interface::Interface(const char** extensions, uint32_t extensions_count)
     {
         VkResult err;
         // Create Vulkan Instance
@@ -117,7 +115,7 @@ namespace BLA
         m_currentCommandPool = m_TransferCommandPool;
     }
 
-    uint32_t VulkanInterface::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound) const
+    uint32_t Vulkan::Interface::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound) const
     {
         for (uint32_t i = 0; i < m_memoryProperties.memoryTypeCount; i++)
         {
@@ -144,62 +142,62 @@ namespace BLA
         return -1;
     }
 
-	VkCommandBuffer VulkanInterface::BeginSingleTimeCommands()
-	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_currentCommandPool;
-		allocInfo.commandBufferCount = 1;
+    VkCommandBuffer Vulkan::Interface::BeginSingleTimeCommands()
+    {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = m_currentCommandPool;
+        allocInfo.commandBufferCount = 1;
 
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(m_device, &allocInfo, &commandBuffer);
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(m_device, &allocInfo, &commandBuffer);
 
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-		return commandBuffer;
-	}
+        return commandBuffer;
+    }
 
-	void VulkanInterface::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
-	{
-		vkEndCommandBuffer(commandBuffer);
+    void Vulkan::Interface::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
+    {
+        vkEndCommandBuffer(commandBuffer);
 
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
 
-		vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(m_queue);
+        vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(m_queue);
 
-		vkFreeCommandBuffers(m_device, m_currentCommandPool, 1, &commandBuffer);
-	}
+        vkFreeCommandBuffers(m_device, m_currentCommandPool, 1, &commandBuffer);
+    }
 
-	void VulkanInterface::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-	{
-        VkCommandPool previousPool = m_currentCommandPool;
-        SetTransferCommandPool();
-
-		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-		VkBufferCopy copyRegion{};
-		copyRegion.size = size;
-		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-		EndSingleTimeCommands(commandBuffer);
-
-        SetCommandPool(previousPool);
-	}
-
-	void VulkanInterface::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) 
+    void Vulkan::Interface::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
     {
         VkCommandPool previousPool = m_currentCommandPool;
         SetTransferCommandPool();
-		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+        VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+        VkBufferCopy copyRegion{};
+        copyRegion.size = size;
+        vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+        EndSingleTimeCommands(commandBuffer);
+
+        SetCommandPool(previousPool);
+    }
+
+    void Vulkan::Interface::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+    {
+        VkCommandPool previousPool = m_currentCommandPool;
+        SetTransferCommandPool();
+        VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -244,12 +242,12 @@ namespace BLA
             1, &barrier
         );
 
-		EndSingleTimeCommands(commandBuffer);
+        EndSingleTimeCommands(commandBuffer);
 
         SetCommandPool(previousPool);
-	}
+    }
 
-    void VulkanInterface::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+    void Vulkan::Interface::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -278,32 +276,31 @@ namespace BLA
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void VulkanInterface::CreateBuffer(
-		VkDeviceSize size,
-		VkBufferUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory)
-	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.usage = usage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    void Vulkan::Interface::CreateBuffer(
+        VkDeviceSize size,
+        VkBufferUsageFlags usage,
+        VkMemoryPropertyFlags properties,
+        VkBuffer& buffer,
+        VkDeviceMemory& bufferMemory)
+    {
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		HandleError(vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer));
+        HandleError(vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer));
 
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
 
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = GetMemoryType(memRequirements.memoryTypeBits, properties);
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = GetMemoryType(memRequirements.memoryTypeBits, properties);
 
-		HandleError(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory));
+        HandleError(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory));
 
-		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
-	}
-
+        vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
+    }
 }

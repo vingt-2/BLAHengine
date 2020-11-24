@@ -3,7 +3,7 @@
 #include "RenderWindow.h"
 #include "InputManager.h"
 
-#include "RenderBackend.h"
+#include "System/GraphicsAdapter.h"
 
 using namespace BLA;
 

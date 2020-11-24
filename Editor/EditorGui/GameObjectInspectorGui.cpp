@@ -28,7 +28,7 @@ public:
             BlaStringId("ComponentExposeEditing"),
             BLAInspectableVariables::TypeResolver<blaScaledTransform>::GetDescriptor(),
             [commandManager = editorCommandManager, objId = transformComponent->GetOwnerObject().GetId(), compId = BlaStringId("TransformComponent"), memberId = BlaStringId("WorldTransform")]
-		        (const char* newValue, const char* preValue, blaIndex sizeOfValue)
+		        (const char* newValue, const char* preValue, blaSize sizeOfValue)
 		        {
 		            commandManager->Execute(new GameComponentEditCommand(objId, compId, memberId, ValueCommandDelta(preValue, newValue, sizeOfValue)));
 		        },
@@ -88,7 +88,7 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
                     BlaStringId("ComponentExposeEditing"),
                     exposedMember.m_type,
                     [commandManager = m_editorCommandManager, objId = gameObject.GetId(), compId = compDescriptor.m_typeID, memberId = exposedMember.m_name]
-                (const char* newValue, const char* preValue, blaIndex sizeOfValue)
+                (const char* newValue, const char* preValue, blaSize sizeOfValue)
                 {
                     commandManager->Execute(new GameComponentEditCommand(objId, compId, memberId, ValueCommandDelta(preValue, newValue, sizeOfValue)));
                 },

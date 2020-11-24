@@ -2,42 +2,20 @@
 
 #include "StdInclude.h"
 
-#include "RenderBackend.h"
 #include "System/Console.h"
-#include "System/RenderWindow.h"
-#include "Renderer/MeshRendererComponent.h"
-#include "Renderer/PointLightComponent.h"
 #include "Renderer/Vulkan/VulkanRenderPass.h"
-#include "System/Vulkan/VulkanRenderWindow.h"
-#include <optional>
-#include "VulkanRenderer.h"
+#include "Renderer/Vulkan/VulkanRenderer.h"
+#include "System/RenderWindow.h"
 #include <set>
+#include <optional>
+#include <random>
 
 using namespace BLA;
 
-BLA_IMPLEMENT_SINGLETON(VulkanRenderer)
-
 const blaVector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-VulkanRenderer::VulkanRenderer(const AssetManager* assetManager, const blaVector<blaU32>& rpIds)
-{}
-
-template<class RenderPass>
-blaString BLA::GenerateVulkanShaderTemplate()
+VulkanRenderer::VulkanRenderer(GLFWVulkanRenderWindow* pRenderWindow) : m_renderWindow(pRenderWindow)
 {
-    blaString r = "";
-    for(auto d : GetRenderPassVADescriptors<RenderPass>())
-    {
-        r += blaString(d->m_typeID) + ", ";
-    }
-
-    return r;
-}
-
-void VulkanRenderer::InitializeRenderer(RenderWindow* renderWindow)
-{
-    m_renderWindow = dynamic_cast<GLFWVulkanRenderWindow*>(renderWindow);
-
     m_renderWindow->GetSize(m_viewPortExtents.x, m_viewPortExtents.y);
 
     CreateDisplayBuffers();
@@ -48,11 +26,7 @@ bool VulkanRenderer::Update()
 	return true;
 }
 
-void VulkanRenderer::CleanupRenderer()
-{
-}
-
-void VulkanRenderer::SetRenderSize(blaIVec2 renderSize)
+void VulkanRenderer::SetViewportSize(blaIVec2 renderSize)
 {
 	if(renderSize.x != m_viewPortExtents.x || renderSize.y != m_viewPortExtents.y)
 	{
@@ -105,7 +79,11 @@ void VulkanRenderer::CreateDisplayBuffers()
         return;
     }
 
-	blaVector<blaU32> dummydata(m_viewPortExtents.x * m_viewPortExtents.y, 0xFF3399FF);
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_int_distribution<> distrib(0xFF, 0xEF);
+
+	blaVector<blaU32> dummydata(m_viewPortExtents.x * m_viewPortExtents.y, distrib(gen) << 8 | distrib(gen) << 16 | distrib(gen) << 24| 0xFF);
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -139,4 +117,9 @@ void VulkanRenderer::CreateDisplayBuffers()
     {
         return;
     }
+}
+
+RenderWindow* VulkanRenderer::GetRenderWindow()
+{
+    return static_cast<RenderWindow*>(m_renderWindow);
 }

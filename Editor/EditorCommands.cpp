@@ -8,7 +8,7 @@ using namespace BLA;
 
 EditorCommand::EditorCommand(CommandType type) : m_CommandType(type) {}
 
-ValueCommandDelta::ValueCommandDelta(const char* prevV, const char* newV, blaIndex size)
+ValueCommandDelta::ValueCommandDelta(const char* prevV, const char* newV, blaSize size)
 {
     m_p = blaVector<char>(prevV, prevV + size);
     m_n = blaVector<char>(newV, newV + size);

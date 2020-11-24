@@ -172,7 +172,7 @@ private:
     blaVector<vec2serializer> m_vertexUVs;
     blaVector<vec3serializer> m_faceTangent;
     blaVector<blaString> m_materials;
-    blaVector<blaIndex> m_materialIndex;
+    blaVector<blaSize> m_materialIndex;
 
     RenderDataSerializer m_renderData;
 

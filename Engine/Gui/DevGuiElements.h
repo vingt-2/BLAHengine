@@ -110,7 +110,7 @@ namespace BLA
     {
     public:
         DevGuiEditElement(const blaString& name, blaStringId groupId,
-            blaLambda<void(const char*, const char*, blaIndex)> onEditFunctor, T* pToValue) :
+            blaLambda<void(const char*, const char*, blaSize)> onEditFunctor, T* pToValue) :
             DevGuiElement(name, groupId),
             m_pToValue(pToValue),
             m_onEditFunctor(onEditFunctor)
@@ -120,7 +120,7 @@ namespace BLA
 
     private:
         T* m_pToValue;
-        blaLambda<void(const char*, const char*, blaIndex)> m_onEditFunctor;
+        blaLambda<void(const char*, const char*, blaSize)> m_onEditFunctor;
     };
 
     BLACORE_API bool DevGuiEditElementVectorPreRender(DevGuiElement* element);
@@ -141,7 +141,7 @@ namespace BLA
             {
                 for (int i = 0; i < m_pToVector->size(); i++)
                 {
-                    DevGuiEditElement<T> toRender(std::to_string(i), m_groupId, [](const char*, const char*, blaIndex){}, static_cast<T*>(&((*m_pToVector)[0])) + i);
+                    DevGuiEditElement<T> toRender(std::to_string(i), m_groupId, [](const char*, const char*, blaSize){}, static_cast<T*>(&((*m_pToVector)[0])) + i);
                     toRender.Render();
                 }
                 DevGuiEditElementVectorPostRender(this);

@@ -34,14 +34,14 @@ CollisionProcessor::~CollisionProcessor()
     m_currentContacts.clear();
 }
 
-void HelperShuffleArray(blaIndex* array, blaIndex size)
+void HelperShuffleArray(blaSize* array, blaSize size)
 {
     srand((unsigned int)time(NULL));
 
-    for (blaIndex i = size - 1; i > 0; i--)
+    for (blaSize i = size - 1; i > 0; i--)
     {
-        blaIndex index = rand() % (i + 1);
-        blaIndex a = array[index];
+        blaSize index = rand() % (i + 1);
+        blaSize a = array[index];
         array[index] = array[i];
         array[i] = a;
     }
@@ -240,14 +240,14 @@ void CollisionProcessor::SolveContacts()
     int iteration = 0;
 
     blaVector<blaVec3> lambdas(m_currentContacts.size());
-    for (blaIndex i = 0; i < m_currentContacts.size(); i++)
+    for (blaSize i = 0; i < m_currentContacts.size(); i++)
     {
         lambdas[i] = blaVec3(0);
     }
 
     // Randomize contact order for faster convergence
-    blaVector<blaIndex> contactIndices(m_currentContacts.size());
-    for (blaIndex i = 0; i < m_currentContacts.size(); i++)
+    blaVector<blaSize> contactIndices(m_currentContacts.size());
+    for (blaSize i = 0; i < m_currentContacts.size(); i++)
     {
         contactIndices[i] = i;
     }
