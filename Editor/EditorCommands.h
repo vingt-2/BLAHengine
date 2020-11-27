@@ -44,13 +44,13 @@ namespace BLA
 
 	struct GameComponentEditCommand : EditorCommand
 	{
-		GameObjectID m_gameObjectId;
-		GameComponentID m_editedComponentId;
+		Core::GameObjectID m_gameObjectId;
+		Core::GameComponentID m_editedComponentId;
 		blaStringId m_exposedMemberEditedId;
 		ValueCommandDelta m_delta;
 
-		GameComponentEditCommand(GameObjectID gameObjectId,
-		                         GameComponentID editedComponentId,
+		GameComponentEditCommand(Core::GameObjectID gameObjectId,
+		                         Core::GameComponentID editedComponentId,
 		                         blaStringId exposedMemberId,
 		                         ValueCommandDelta valueDelta);
 

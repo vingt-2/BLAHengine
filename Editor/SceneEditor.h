@@ -15,8 +15,12 @@
 
 namespace BLA
 {
+    namespace Core
+    {
+        class GameObject;
+    }
+
     class CameraController;
-    class GameObject;
     class TriangleMesh;
     struct EditorState;
     class DevGuiTextEditor;
@@ -44,9 +48,9 @@ namespace BLA
 
 	    ~SceneEditor();
 
-        GameObject GetSelectedObject() { return m_selectedObject; }
+        Core::GameObject GetSelectedObject() { return m_selectedObject; }
 
-        void SetSelectedObject(GameObject selectedObject);
+        void SetSelectedObject(Core::GameObject selectedObject);
 
         CameraController* GetCameraController() const { return m_cameraController; }
 
@@ -57,7 +61,7 @@ namespace BLA
          *
          */
 
-        void SetObjectParent(GameObject parent, GameObject child);
+        void SetObjectParent(Core::GameObject parent, Core::GameObject child);
 
     	//TODO: This whole thing is messed up. Less singletons, more component storage
         bool TemporaryComponentEdit(const GameComponentEditCommand* editCommand);
@@ -96,7 +100,7 @@ namespace BLA
         bool m_bDrawGrid = false;
         bool m_bTextEdit = false;
     	
-        GameObject m_selectedObject;
+        Core::GameObject m_selectedObject;
 
         GizmoManager* m_gizmoManager;
         GameObjectInspector* m_componentInspector = nullptr;

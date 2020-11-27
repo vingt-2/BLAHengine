@@ -1,7 +1,9 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #pragma once
 
 #include "System.h"
+#include "ResourceTypes.h"
 
 namespace BLA
 {
@@ -9,6 +11,8 @@ namespace BLA
     {
         struct BaseBuffer
         {
+            static const EResourceType ms_resourceType = EResourceType::eStaticBuffer;
+
             const void* GetData() const;
             void* GetData();
             blaSize GetLength() const;

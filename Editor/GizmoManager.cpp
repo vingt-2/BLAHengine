@@ -91,7 +91,7 @@ Ray screenRay;
 void GizmoManager::Update()
 {
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    GameObject objRef = editorSess->GetSelectedObject();
+    Core::GameObject objRef = editorSess->GetSelectedObject();
 
     if (objRef.IsValid())
     {
@@ -157,7 +157,7 @@ void GizmoControl::Update()
 
     blaScaledTransform transform = m_controlledObject.GetComponent<TransformComponent>()->GetTransform();
 
-    GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
     if (camera)
     {
         blaVec3 camPos = camera->GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
@@ -174,7 +174,7 @@ void TranslationGizmoControl::Update()
     GizmoControl::Update();
 
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
         return;
@@ -376,7 +376,7 @@ void ScaleGizmoControl::Update()
     GizmoControl::Update();
 
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
         return;
@@ -552,7 +552,7 @@ void RotationGizmoControl::Update()
     GizmoControl::Update();
 
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
         return;

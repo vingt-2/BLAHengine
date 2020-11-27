@@ -102,7 +102,7 @@ namespace BLA
                 VkBuffer& buffer,
                 VkDeviceMemory& bufferMemory);
 
-            static void HandleError(VkResult) {};
+            static void HandleError(VkResult);
         };
     }
 }

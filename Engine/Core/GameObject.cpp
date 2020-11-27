@@ -6,46 +6,47 @@
 
 #define SCENE Scene::GetSingletonInstance()
 
-using namespace BLA;
-
-void GameObject::SetParent(GameObject parent) const
+namespace BLA::Core
 {
-    SCENE->SetGameObjectParent(*this, parent);
-    SCENE->m_gameObjectsFlags[*this] |= DIRTY_WORLD_TRANSFORM;
-}
+    void GameObject::SetParent(GameObject parent) const
+    {
+        SCENE->SetGameObjectParent(*this, parent);
+        SCENE->m_gameObjectsFlags[*this] |= DIRTY_WORLD_TRANSFORM;
+    }
 
-blaBool GameObject::IsValid() const
-{
-    if (m_gameObjectId == INVALID_OBJECT_ID) return false;
+    blaBool GameObject::IsValid() const
+    {
+        if (m_gameObjectId == INVALID_OBJECT_ID) return false;
 
-    if (std::find(SCENE->GetObjectsID().begin(), SCENE->GetObjectsID().end(), m_gameObjectId) != SCENE->GetObjectsID().end()) return true;
+        if (std::find(SCENE->GetObjectsID().begin(), SCENE->GetObjectsID().end(), m_gameObjectId) != SCENE->GetObjectsID().end()) return true;
 
-    return false;
-}
+        return false;
+    }
 
-blaVector<GameComponent*> GameObject::GetAllComponents() const
-{
-    return SCENE->GetComponentsPerObject(*this);
-}
+    blaVector<GameComponent*> GameObject::GetAllComponents() const
+    {
+        return SCENE->GetComponentsPerObject(*this);
+    }
 
-GameComponent* GameObject::GetComponent(GameComponentID componentId)
-{
-    return SCENE->GetComponentPerObject(componentId, *this);
-}
+    GameComponent* GameObject::GetComponent(GameComponentID componentId)
+    {
+        return SCENE->GetComponentPerObject(componentId, *this);
+    }
 
-GameObject GameObject::GetParent() const
-{
-    return SCENE->GetGameObjectParent(*this);
-}
+    GameObject GameObject::GetParent() const
+    {
+        return SCENE->GetGameObjectParent(*this);
+    }
 
-GameComponent* GameObject::CreateComponent(GameComponentID componentId)
-{
-    return SCENE->AddComponent(*this, componentId);
-}
+    GameComponent* GameObject::CreateComponent(GameComponentID componentId)
+    {
+        return SCENE->AddComponent(*this, componentId);
+    }
 
-bool GameObject::DeleteComponent(GameComponentID componentId)
-{
-    return SCENE->RemoveComponent(*this, componentId);
+    bool GameObject::DeleteComponent(GameComponentID componentId)
+    {
+        return SCENE->RemoveComponent(*this, componentId);
+    }
 }
 
 //namespace std {

@@ -132,7 +132,6 @@
 #define COLLECT_NAMES(...) FOR_EACH(EAT_VAR_TYPE, __VA_ARGS__)
 
 #define GET_ARGUMENT_I(i) arguments[i] RPAREN
-#define FROM_STRING_MACRO( i ) blaFromString< EAT_VAR_NAME(i)> LPAREN
 
 #define __SILLY_MACRO__CAT(a, ...) __SILLY_MACRO__EXPAND(__SILLY_MACRO__PRIMITIVE_CAT(a, __VA_ARGS__))
 #define __SILLY_MACRO__PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__

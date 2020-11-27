@@ -62,7 +62,7 @@ namespace BLA
     class SphereCollider
     {
     public:
-        BLACORE_API SphereCollider(GameObject parentObject) {}
+        BLACORE_API SphereCollider(Core::GameObject parentObject) {}
 
         BLACORE_API void SetSize(float size) { m_boundingRadius = size; }
 

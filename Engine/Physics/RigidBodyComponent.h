@@ -6,7 +6,7 @@
 
 #include "Core/BehaviorComponent.h"
 
-namespace BLA::Physics
+namespace BLA
 {
     class TriangleMesh;
     class ColliderComponent;

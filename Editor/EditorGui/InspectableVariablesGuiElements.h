@@ -19,7 +19,7 @@ namespace BLA
 		static DevGuiElement* MakeEditGuiElement(
 			const blaString& variableName, 
 			blaStringId groupId, 
-			const BLAInspectableVariables::ExposedVarTypeDescriptor* typeDescriptor,
+			const BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* typeDescriptor,
 			blaLambda<void(const char*, const char*, blaSize)> onEditFunctor,
 			void* obj)
 		{

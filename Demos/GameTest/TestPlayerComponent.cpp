@@ -49,7 +49,7 @@ void TestPlayerComponent::Update()
         }
         else
         {
-            m_mainCameraObject.SetParent(GameObject::InvalidReference());
+            m_mainCameraObject.SetParent(Core::GameObject::InvalidReference());
         }
 
         m_stickValue = inputs->GetGamepadLeftAnalog().GetPosition();

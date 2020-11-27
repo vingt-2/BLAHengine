@@ -39,7 +39,7 @@ DefineConsoleCommand(void, MakeSkyObject)
         AssetManager::GetSingletonInstance()->SaveTriangleMesh(&skyInvertedSphere);
         AssetManager::GetSingletonInstance()->LoadTriangleMesh("SkySphere");
     }
-    GameObject skySphereObject = Scene::GetSingletonInstance()->CreateObject(BlaStringId("Sky Sphere"));
+    Core::GameObject skySphereObject = Core::Scene::GetSingletonInstance()->CreateObject(BlaStringId("Sky Sphere"));
 
     skySphereObject.CreateComponent<MeshRendererComponent>()->m_meshAssetName = "SkySphere";
     //skySphereObject.GetComponent<MeshRendererComponent>()->MaterialName = "BlankDiffuseMat";
@@ -134,7 +134,7 @@ void SceneEditor::EngineUpdate()
     {
         EditorUpdate();
 
-        if (m_sceneGraphGui && (m_scene->GetSceneFlags() & Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE || m_updatedScene) != 0)
+        if (m_sceneGraphGui && (m_scene->GetSceneFlags() & Core::Scene::ESceneFlags::DIRTY_SCENE_STRUCTURE || m_updatedScene) != 0)
         {
             m_sceneGraphGui->UpdateSceneGraph();
             m_updatedScene = false;
@@ -148,7 +148,7 @@ void SceneEditor::EngineUpdate()
 
         if (m_inputManager->GetKeyState(BLA_KEY_ESCAPE).IsRisingEdge())
         {
-            m_selectedObject = GameObject::InvalidReference();
+            m_selectedObject = Core::GameObject::InvalidReference();
         }
     }
 }
@@ -267,7 +267,7 @@ bool SceneEditor::LoadNewScene()
 {
     EngineInstance::LoadNewScene();
 
-    m_selectedObject = GameObject::InvalidReference();
+    m_selectedObject = Core::GameObject::InvalidReference();
 
     // MakeSkyObject();
 
@@ -286,7 +286,7 @@ bool SceneEditor::LoadWorkingScene(blaString filepath)
 {
     EngineInstance::LoadWorkingScene(filepath);
 
-    m_selectedObject = GameObject::InvalidReference();
+    m_selectedObject = Core::GameObject::InvalidReference();
 
     delete m_cameraController;
     m_cameraController = new CameraController(
@@ -377,7 +377,7 @@ void SceneEditor::EditorUpdate()
         // screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
 
         // ColliderComponent::CollisionContact contactPoint;
-        GameObject hoverObject;// = m_scene->PickGameObjectInScene(screenRay, contactPoint);
+        Core::GameObject hoverObject;// = m_scene->PickGameObjectInScene(screenRay, contactPoint);
 
         auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
         if (leftMouseButton.IsRisingEdge())
@@ -549,7 +549,7 @@ bool SceneEditor::ImportMesh(blaString filepath, blaString name) const
 
     m_assetManager->LoadTriangleMesh(name);
 
-    GameObject visualizerObject = m_scene->CreateObject(GenerateBlaStringId(name));
+    Core::GameObject visualizerObject = m_scene->CreateObject(GenerateBlaStringId(name));
     MeshRendererComponent* meshRenderer = visualizerObject.CreateComponent<MeshRendererComponent>();
     //MeshCollider* colliderComp = visualizerObject.CreateComponent<MeshCollider>();
 
@@ -558,7 +558,7 @@ bool SceneEditor::ImportMesh(blaString filepath, blaString name) const
     return true;
 }
 
-void SceneEditor::SetSelectedObject(GameObject selectedObject)
+void SceneEditor::SetSelectedObject(Core::GameObject selectedObject)
 {
     if (m_selectedObject != selectedObject)
     {
@@ -574,7 +574,7 @@ void SceneEditor::SetSelectedObject(GameObject selectedObject)
     }
 }
 
-void SceneEditor::SetObjectParent(GameObject parent, GameObject child)
+void SceneEditor::SetObjectParent(Core::GameObject parent, Core::GameObject child)
 {
     /*
      * Instead go through a command system sent from the UI.
@@ -586,10 +586,10 @@ void SceneEditor::SetObjectParent(GameObject parent, GameObject child)
 
 bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCommand)
 {
-    GameObject obj(editCommand->m_gameObjectId);
+    Core::GameObject obj(editCommand->m_gameObjectId);
     if (obj.IsValid())
     {
-        for (GameComponent* comp : obj.GetAllComponents())
+        for (Core::GameComponent* comp : obj.GetAllComponents())
         {
             if (comp->GetComponentDescriptor().m_typeID == editCommand->m_editedComponentId)
             {
@@ -605,7 +605,7 @@ bool SceneEditor::TemporaryComponentEdit(const GameComponentEditCommand* editCom
                         return true;
                     }
                 }
-                for (const ComponentDescriptor::ExposedMember& exposedMember : comp->GetComponentDescriptor().m_members)
+                for (const Core::ComponentDescriptor::ExposedMember& exposedMember : comp->GetComponentDescriptor().m_members)
                 {
                     if (exposedMember.m_name == editCommand->m_exposedMemberEditedId)
                     {
@@ -639,7 +639,7 @@ void SceneEditor::DrawGrid(int size, float spacing, const blaVec3& color) const
 
 DefineConsoleCommand(void, SelectObject, blaString name)
 {
-    GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+    Core::GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
     if (obj.IsValid())
     {
@@ -652,7 +652,7 @@ DefineConsoleCommand(void, SelectObject, blaString name)
 
 DefineConsoleCommand(void, FocusOnObject, blaString name)
 {
-    GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+    Core::GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
     if (obj.IsValid())
     {
@@ -665,8 +665,8 @@ DefineConsoleCommand(void, FocusOnObject, blaString name)
 
 DefineConsoleCommand(void, SetParent, blaString parentName, blaString childName)
 {
-    GameObject parentObj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(parentName);
-    GameObject childObj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(childName);
+    Core::GameObject parentObj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(parentName);
+    Core::GameObject childObj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(childName);
 
     if (childObj.IsValid())
     {
@@ -679,7 +679,7 @@ DefineConsoleCommand(void, SetParent, blaString parentName, blaString childName)
 
 DefineConsoleCommand(int, SelectScale, blaString name, blaF32 scalex, blaF32 scaley, blaF32 scalez)
 {
-    GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
+    Core::GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->FindObjectByName(name);
 
     if (obj.IsValid())
     {
@@ -692,14 +692,14 @@ DefineConsoleCommand(int, SelectScale, blaString name, blaF32 scalex, blaF32 sca
 
 DefineConsoleCommand(void, CreatePointLight, blaString name)
 {
-    GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->CreateObject(GenerateBlaStringId(name));
+    Core::GameObject obj = EngineInstance::GetSingletonInstance()->GetWorkingScene()->CreateObject(GenerateBlaStringId(name));
     obj.CreateComponent(BlaStringId("PointLightComponent"));
 }
 
 
 DefineConsoleCommand(void, AddComponent, blaString objectName, blaString componentName)
 {
-    GameObject obj(GenerateBlaStringId(objectName));
+    Core::GameObject obj(GenerateBlaStringId(objectName));
     if (obj.IsValid())
     {
         obj.CreateComponent(GenerateBlaStringId(componentName));
@@ -708,7 +708,7 @@ DefineConsoleCommand(void, AddComponent, blaString objectName, blaString compone
 
 DefineConsoleCommand(blaString, RemoveComponent, blaString objectName, blaString componentName)
 {
-    GameObject obj(GenerateBlaStringId(objectName));
+    Core::GameObject obj(GenerateBlaStringId(objectName));
     if (obj.IsValid())
     {
         if (obj.DeleteComponent(GenerateBlaStringId(componentName)))
@@ -721,7 +721,7 @@ DefineConsoleCommand(blaString, RemoveComponent, blaString objectName, blaString
 
 DefineConsoleCommand(void, CreateObject, blaString objectName)
 {
-    Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
+    Core::Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
     scene->CreateObject(GenerateBlaStringId(objectName));
 }
 
@@ -754,9 +754,9 @@ DefineConsoleCommand(void, LoadMTLFile, blaString filename)
 DefineConsoleCommand(void, MakeSponza)
 {
     CreateObject("Sponza");
-    if (GameObject(BlaStringId("Sponza")).IsValid())
+    if (Core::GameObject(BlaStringId("Sponza")).IsValid())
     {
-        MeshRendererComponent* r = GameObject(BlaStringId("Sponza")).CreateComponent<MeshRendererComponent>();
+        MeshRendererComponent* r = Core::GameObject(BlaStringId("Sponza")).CreateComponent<MeshRendererComponent>();
         r->m_meshAssetName = "sponza";
         r->m_Render = true;
     }

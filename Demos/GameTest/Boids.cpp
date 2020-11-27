@@ -59,7 +59,7 @@ namespace BLA
 
     // Target should be system unique for example ... To store in a system state ?
     BeginComponentDeclaration(BLADemos, BoidComponent)
-        GameObject m_target;
+        Core::GameObject m_target;
         blaVec3 m_color;
         blaF32 m_homingStiffnessMult;
         blaF32 m_interBoidStiffnessMult;
@@ -142,17 +142,17 @@ namespace BLA
 
     DefineConsoleCommand(void, CreateLightBoidSystem, int numberOfBoids)
     {
-        Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
+        Core::Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
         scene->CreateObject(BlaStringId("BoidTarget"));
-        GameObject boidsGroup = scene->CreateObject(BlaStringId("Boids"));
+        Core::GameObject boidsGroup = scene->CreateObject(BlaStringId("Boids"));
 
         std::uniform_real_distribution<float> dist(0.2f, 1.f);
         std::normal_distribution<float> normalDist(0.7f, 0.3f);
 
         for (int i = 0; i < numberOfBoids; i++)
         {
-            GameObject ref = scene->CreateObject(GenerateBlaStringId("Boid" + std::to_string(i))); // TODO: Please don't ...
+            Core::GameObject ref = scene->CreateObject(GenerateBlaStringId("Boid" + std::to_string(i))); // TODO: Please don't ...
             scene->SetGameObjectParent(boidsGroup, ref);
 
             BoidComponent* boidComponent = ref.CreateComponent<BoidComponent>();
@@ -163,7 +163,7 @@ namespace BLA
             boidComponent->m_homingStiffnessMult = dist(g_dgen);
             boidComponent->m_interBoidStiffnessMult = dist(g_dgen);
             boidComponent->m_distanceMult = normalDist(g_dgen);
-            boidComponent->m_target = GameObject(BlaStringId("BoidTarget"));
+            boidComponent->m_target = Core::GameObject(BlaStringId("BoidTarget"));
 
             blaScaledTransform s(blaVec3(0.2f), blaPosQuat(blaVec3(dist(g_dgen), dist(g_dgen), dist(g_dgen)), blaPosQuat::QuatIdentity()));
 

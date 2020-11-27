@@ -19,11 +19,11 @@ void CameraController::UpdateController(blaF32 dt)
 {
     auto inputs = InputManager::GetSingletonInstanceRead();
 
-    CameraComponent* camera = Scene::GetSingletonInstance()->GetMainCamera();
+    CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
 
     if (!camera) return;
 
-    GameObject cameraObject = camera->GetOwnerObject(); 
+    Core::GameObject cameraObject = camera->GetOwnerObject(); 
     
     TransformComponent* transformComponent = cameraObject.GetComponent<TransformComponent>();
     blaScaledTransform transform = transformComponent->GetTransform();

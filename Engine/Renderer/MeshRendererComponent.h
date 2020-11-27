@@ -4,7 +4,7 @@
 #include "StdInclude.h"
 #include "Assets/MeshAsset.h"
 #include "Assets/Material.h"
-#include "Renderer/Buffer.h"
+#include "Renderer/GPU/Buffer.h"
 
 #include "Core/BehaviorComponent.h"
 

@@ -12,7 +12,7 @@ using namespace BLA;
 
 #define SCENE_GRAPH_ELEMENT_GROUP_ID BlaStringId("SceneGraphElement")
 
-void SceneGraphGui::AddObjectToTree(DevGuiElement& rootElement, ElementMap& elementMap, const GameObject& object)
+void SceneGraphGui::AddObjectToTree(DevGuiElement& rootElement, ElementMap& elementMap, const Core::GameObject& object)
 {
     ElementMap::iterator it = elementMap.find(object);
 
@@ -48,7 +48,7 @@ void SceneGraphGui::AddObjectToTree(DevGuiElement& rootElement, ElementMap& elem
         rootElement.AddChild(element);
     }
 
-    elementMap.insert(blaPair<GameObjectID, DevGuiElement*>(object, element));
+    elementMap.insert(blaPair<Core::GameObjectID, DevGuiElement*>(object, element));
 }
 
 // TODO: Huh... Really, I'm referencing a console command here ? Change that ... ?
@@ -96,7 +96,7 @@ void SceneGraphGui::UpdateSceneGraph()
     if (!window) 
         return;
 
-    Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
+    Core::Scene* scene = EngineInstance::GetSingletonInstance()->GetWorkingScene();
 
     delete window->RootElement();
 
@@ -112,7 +112,7 @@ void SceneGraphGui::UpdateSceneGraph()
 
     m_elementMap.clear();
 
-    for (const GameObject& object : scene->GetObjects())
+    for (const Core::GameObject& object : scene->GetObjects())
     {
         AddObjectToTree(*window->RootElement(), m_elementMap, object);
     }

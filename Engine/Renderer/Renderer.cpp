@@ -8,8 +8,8 @@ using namespace BLA;
 BLA_IMPLEMENT_SINGLETON(RenderPassRegistry)
 
 void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, blaU32 attachmentCount,
-    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
-    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor)
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor)
 {
     BLA_ASSERT(m_registry.find(id) == m_registry.end());
 

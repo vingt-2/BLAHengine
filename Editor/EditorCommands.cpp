@@ -26,8 +26,8 @@ EditorCommand::CommandType EditorCommand::GetType() const
 	return m_CommandType;
 }
 
-GameComponentEditCommand::GameComponentEditCommand(GameObjectID gameObjectId,
-    GameComponentID editedComponentId, blaStringId exposedMemberId, ValueCommandDelta valueDelta) :
+GameComponentEditCommand::GameComponentEditCommand(Core::GameObjectID gameObjectId,
+    Core::GameComponentID editedComponentId, blaStringId exposedMemberId, ValueCommandDelta valueDelta) :
 
 	EditorCommand(eGameComponentEditCommand),
 	m_gameObjectId(gameObjectId),

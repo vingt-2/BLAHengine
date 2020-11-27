@@ -34,8 +34,8 @@ DevGuiElement* MakeVectorEditGuiElement(const blaString& variableName, blaString
 }
 
 #define RegisterInspectableVariableGuiElementEditorFactory(Type) \
-	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##Registartor(BLAInspectableVariables::TypeResolver<Type>::GetDescriptor()->m_typeID, MakeEditGuiElement<Type>);	\
-	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##VectorRegistartor(BLAInspectableVariables::TypeResolver<blaVector<Type>>::GetDescriptor()->m_typeID, MakeVectorEditGuiElement<Type>);
+	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##Registartor(Core::InspectableVariables::TypeResolver<Type>::GetDescriptor()->m_typeID, MakeEditGuiElement<Type>);	\
+	InspectableVariablesEditorGuiElementFactoryRegistrator g_TypeGuiElementEditorFactory##Type##VectorRegistartor(Core::InspectableVariables::TypeResolver<blaVector<Type>>::GetDescriptor()->m_typeID, MakeVectorEditGuiElement<Type>);
 
 template<>
 void DevGuiEditElementVector<blaBool>::Render()
@@ -59,7 +59,7 @@ void DevGuiEditElementVector<blaBool>::Render()
 }
 
 template<>
-BLAInspectableVariables::blaVectorDescriptor<blaBool>::blaVectorDescriptor() :
+BLA::Core::InspectableVariables::blaVectorDescriptor<blaBool>::blaVectorDescriptor() :
 ExposedVarTypeDescriptor
 { GenerateBlaStringId(blaString("Vector<") + blaString(TypeResolver<blaBool>::GetDescriptor()->m_typeID) + ">"), sizeof(blaVector<blaBool>) },
 m_itemType{ TypeResolver<blaBool>::GetDescriptor() }
@@ -78,9 +78,12 @@ RegisterInspectableVariableGuiElementEditorFactory(blaBool);
 RegisterInspectableVariableGuiElementEditorFactory(blaS32);
 RegisterInspectableVariableGuiElementEditorFactory(blaF32);
 RegisterInspectableVariableGuiElementEditorFactory(blaString);
-RegisterInspectableVariableGuiElementEditorFactory(GameObject);
 RegisterInspectableVariableGuiElementEditorFactory(blaVec2)
 RegisterInspectableVariableGuiElementEditorFactory(blaVec3)
 RegisterInspectableVariableGuiElementEditorFactory(blaQuat)
 RegisterInspectableVariableGuiElementEditorFactory(blaPosQuat)
 RegisterInspectableVariableGuiElementEditorFactory(blaScaledTransform);
+
+using namespace Core;
+RegisterInspectableVariableGuiElementEditorFactory(GameObject);
+

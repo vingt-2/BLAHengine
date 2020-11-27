@@ -8,13 +8,16 @@
 
 namespace BLA
 {
+    namespace Core
+    {
+        class Scene;
+        class ComponentLibrariesManager;
+    }
     class Console;
     class VulkanRenderer;
     class AssetManager;
-	class ComponentLibrariesManager;
     class SceneManager;
     class DebugDraw;
-    class Scene;
     class RenderWindow;
     class Timer;
     class InputManager;
@@ -33,7 +36,7 @@ namespace BLA
 
         BLACORE_API ~EngineInstance() { TerminateEngine(); };
 
-        BLACORE_API Scene* GetWorkingScene() const { return m_scene; }
+        BLACORE_API Core::Scene* GetWorkingScene() const { return m_scene; }
 
         BLACORE_API static blaU32 LoopEngine();
 
@@ -75,10 +78,10 @@ namespace BLA
         VulkanRenderer* m_renderer;
    
         AssetManager* m_assetManager;
-		ComponentLibrariesManager* m_componentLibrariesManager;
+        Core::ComponentLibrariesManager* m_componentLibrariesManager;
         SceneManager* m_sceneManager;
         DebugDraw* m_debug;
-        Scene* m_scene;
+        Core::Scene* m_scene;
         RenderWindow* m_renderWindow;
         Timer* m_timer;
         InputManager* m_inputManager;

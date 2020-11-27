@@ -26,7 +26,7 @@ public:
         DevGuiElement* editElement = InspectableVariablesEditorGuiElementFactoryManager::MakeEditGuiElement(
             "World Transform",
             BlaStringId("ComponentExposeEditing"),
-            BLAInspectableVariables::TypeResolver<blaScaledTransform>::GetDescriptor(),
+            BLA::Core::InspectableVariables::TypeResolver<blaScaledTransform>::GetDescriptor(),
             [commandManager = editorCommandManager, objId = transformComponent->GetOwnerObject().GetId(), compId = BlaStringId("TransformComponent"), memberId = BlaStringId("WorldTransform")]
 		        (const char* newValue, const char* preValue, blaSize sizeOfValue)
 		        {
@@ -53,7 +53,7 @@ GameObjectInspector::GameObjectInspector(EditorCommandManager* editorCommandMana
 {
 }
 
-void GameObjectInspector::InspectGameObject(GameObject gameObject)
+void GameObjectInspector::InspectGameObject(Core::GameObject gameObject)
 {
     delete m_window.RootElement();
 
@@ -64,9 +64,9 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
     // Refresh cached World transform to be sure we display the right one :)
     m_selectedGameObject.GetComponent<TransformComponent>()->GetTransform();
 	
-    for (GameComponent* comp : gameObject.GetAllComponents())
+    for (Core::GameComponent* comp : gameObject.GetAllComponents())
     {
-        ComponentDescriptor compDescriptor = comp->GetComponentDescriptor();
+        Core::ComponentDescriptor compDescriptor = comp->GetComponentDescriptor();
         DevGuiCollapsibleElement* compEl;
     	if(compDescriptor.m_typeID == BlaStringId("TransformComponent"))
     	{
@@ -77,7 +77,7 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
         {
 	        compEl = new DevGuiCollapsibleElement(blaString(compDescriptor.m_typeID), OBJECT_INSPECTOR_ELEMENT_GROUP_ID);
             compEl->m_decorateHeader = true;
-            for (const ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members)
+            for (const Core::ComponentDescriptor::ExposedMember& exposedMember : compDescriptor.m_members)
             {
                 blaString memberName = blaString(exposedMember.m_name);
                 if (memberName.find("m_") == 0) memberName = memberName.substr(2);
@@ -104,11 +104,11 @@ void GameObjectInspector::InspectGameObject(GameObject gameObject)
     m_window.SetRootElement(root);
 }
 
-std::vector<blaString> GameObjectInspector::GetComponents(GameObject gameObject)
+std::vector<blaString> GameObjectInspector::GetComponents(Core::GameObject gameObject)
 {
     blaVector<blaString> ret;
 
-    for (GameComponent* comp : gameObject.GetAllComponents())
+    for (Core::GameComponent* comp : gameObject.GetAllComponents())
     {
         ret.push_back(blaString(comp->GetComponentDescriptor().m_typeID));
     }

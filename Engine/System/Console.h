@@ -12,6 +12,8 @@
 
 #define nothing(...)  
 
+#define FROM_STRING_MACRO( i ) BLA::blaFromString< EAT_VAR_NAME(i)> LPAREN
+
 #define __BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_1(CommandName, ...)                                   \
 return BLA::blaToString(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))( nothing(__VA_ARGS__),   \
     EXPAND(ENUM_WITH_PREFIX_MACRO(FROM_STRING_MACRO, GET_ARGUMENT_I, __VA_ARGS__))))));  
@@ -22,24 +24,24 @@ return BLA::blaToString(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS
 #define __BLA_CC_DECLARATION_MACRO_SELECT_RETTYPE(RetType) \
     __SILLY_MACRO__CAT(__BLA_CC_DECLARATION_MACRO__IF_RETTYPE_NOT_VOID_,__SILLY_MACRO__NOT_EQUAL(RetType, void))
 
-#define DefineConsoleCommand(RetType, CommandName, ...)                                                        \
-    RetType CommandName(__VA_ARGS__);                                                                          \
-    struct ConsoleCommandEntry_##CommandName : BLA::ConsoleCommandEntry                                        \
-    {                                                                                                          \
-        ConsoleCommandEntry_##CommandName() : ConsoleCommandEntry(#CommandName) {}                             \
-        blaString Call(const blaVector<blaString>& arguments) const override                                   \
-        {                                                                                                      \
-            if(arguments.size() != __SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__)))             \
-            {                                                                                                  \
-                Console::LogError("Inadequate number of arguments provided to " + m_name + ", expecting " +    \
-                    BLA::blaToString(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__))));         \
-                return "";                                                                                     \
-            }                                                                                                  \
-            EXPAND(__BLA_CC_DECLARATION_MACRO_SELECT_RETTYPE(RetType))(CommandName, __VA_ARGS__)               \
-        }                                                                                                      \
-        static ConsoleCommandEntry_##CommandName Init;                                                         \
-    };                                                                                                         \
-    ConsoleCommandEntry_##CommandName ConsoleCommandEntry_##CommandName::Init;                                 \
+#define DefineConsoleCommand(RetType, CommandName, ...)                                                             \
+    RetType CommandName(__VA_ARGS__);                                                                               \
+    struct ConsoleCommandEntry_##CommandName : BLA::ConsoleCommandEntry                                             \
+    {                                                                                                               \
+        ConsoleCommandEntry_##CommandName() : ConsoleCommandEntry(#CommandName) {}                                  \
+        blaString Call(const blaVector<blaString>& arguments) const override                                        \
+        {                                                                                                           \
+            if(arguments.size() != __SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__)))                  \
+            {                                                                                                       \
+                BLA::Console::LogError("Inadequate number of arguments provided to " + m_name + ", expecting " +    \
+                    BLA::blaToString(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS__))(0,SIZE(__VA_ARGS__))));              \
+                return "";                                                                                          \
+            }                                                                                                       \
+            EXPAND(__BLA_CC_DECLARATION_MACRO_SELECT_RETTYPE(RetType))(CommandName, __VA_ARGS__)                    \
+        }                                                                                                           \
+        static ConsoleCommandEntry_##CommandName Init;                                                              \
+    };                                                                                                              \
+    ConsoleCommandEntry_##CommandName ConsoleCommandEntry_##CommandName::Init;                                      \
     RetType CommandName(__VA_ARGS__)                                                                                                              
 
 #define DeclareConsoleVariable(type, name, defaultValue)               \
@@ -48,6 +50,10 @@ return BLA::blaToString(CommandName(EXPAND(__SILLY_MACRO__IIF(IS_EMPTY(__VA_ARGS
 
 namespace BLA
 {
+    namespace Core
+    {
+        class ComponentLibrariesManager;
+    }
     /*
      * Todo: It'll be great if we can have ConsoleCommandDefinition to Component instances (as a seperate type of command) ...
      */
@@ -91,7 +97,7 @@ namespace BLA
     {
         friend class DevGuiConsole;
         friend class ConsoleCommandEntry;
-        friend class ComponentLibrariesManager;
+        friend class Core::ComponentLibrariesManager;
 
         BLA_DECLARE_EXPORTED_ACCESS_SINGLETON(Console);
 

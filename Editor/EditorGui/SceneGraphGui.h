@@ -19,8 +19,8 @@ namespace BLA
         void OpenSceneGraph();
 
     private:
-        typedef blaMap<GameObjectID, DevGuiElement*> ElementMap;
-        void AddObjectToTree(DevGuiElement& rootElement, ElementMap& elementMap, const GameObject& object);
+        typedef blaMap<Core::GameObjectID, DevGuiElement*> ElementMap;
+        void AddObjectToTree(DevGuiElement& rootElement, ElementMap& elementMap, const Core::GameObject& object);
 
         void OnSceneGraphElementEvent(const DevGuiElementEventPayload& event);
 

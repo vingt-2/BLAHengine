@@ -5,7 +5,7 @@
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "BLASingleton.h"
-#include "Buffer.h"
+#include "GPU/Buffer.h"
 
 #define VertexAttributes(...) __VA_ARGS__
 #define UniformValues(...) __VA_ARGS__
@@ -13,22 +13,22 @@
 #define DeclareRenderPass(Name, VertexAttributes, UniformValues, attachmentCount) \
    typedef BLA::RenderPass<COMPILE_TIME_CRC32_STR(#Name), attachmentCount, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>> Name;
 
-#define RegisterRenderPass(Name)                                                                                        \
-    class Name##Registrator                                                                                             \
-    {                                                                                                                   \
-    public:                                                                                                             \
-        Name##Registrator()                                                                                             \
-        {                                                                                                               \
-            BLA::RenderPassRegistry* registry = BLA::RenderPassRegistry::GetSingletonInstance();                        \
-            if(!registry)                                                                                               \
-            {                                                                                                           \
-                 registry = BLA::RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());        \
-            }                                                                                                           \
-            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<Name>();     \
-            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<Name>();     \
-            registry->__RegisterRenderPass(BlaStringId(#Name), Name::ms_renderPassId, 1, vas, uvs);                     \
-        }                                                                                                               \
-    };                                                                                                                  \
+#define RegisterRenderPass(Name)                                                                                                \
+    class Name##Registrator                                                                                                     \
+    {                                                                                                                           \
+    public:                                                                                                                     \
+        Name##Registrator()                                                                                                     \
+        {                                                                                                                       \
+            BLA::RenderPassRegistry* registry = BLA::RenderPassRegistry::GetSingletonInstance();                                \
+            if(!registry)                                                                                                       \
+            {                                                                                                                   \
+                 registry = BLA::RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());                \
+            }                                                                                                                   \
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<Name>();     \
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<Name>();     \
+            registry->__RegisterRenderPass(BlaStringId(#Name), Name::ms_renderPassId, 1, vas, uvs);                             \
+        }                                                                                                                       \
+    };                                                                                                                          \
     static Name##Registrator ms_Name##Registrator;                                                  
 
 namespace BLA
@@ -133,7 +133,7 @@ namespace BLA
             _RenderPassInstanceVAs<Ts...>(dataVectors...),
             m_dataVector(&dataVector)
         {
-            // TODO: Reason about type, statically check inspectability... Pre-fecth type information
+            // TODO: statically check type compatibility
             // Remember this constructor is executed every time we request a new RenderObject for this RenderPass, so not like it's only registered once yea ?
         };
 
@@ -248,11 +248,11 @@ namespace BLA
     class _GetRenderPassVADescriptorsInternal
     {
     public:
-        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
-            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::type>::GetDescriptor();
+            BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<i, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -262,19 +262,19 @@ namespace BLA
     class _GetRenderPassVADescriptorsInternal<0, RenderPass>
     {
     public:
-        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
-            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::type>::GetDescriptor();
+            BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferVAType<0, typename RenderPass::RenderPassInstance::InstanceVertexAttributes>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
     };
 
     template<class RenderPass>
-    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassVADescriptors()
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassVADescriptors()
     {
-        blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
 
         _GetRenderPassVADescriptorsInternal<RenderPass::ms_VACount - 1, RenderPass>::Get(typeDescriptors);
 
@@ -285,11 +285,11 @@ namespace BLA
     class _GetRenderPassUVDescriptorsInternal
     {
     public:
-        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
-            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<i, typename RenderPass::RenderPassInstance::InstanceUniformValues>::type>::GetDescriptor();
+            BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<i, typename RenderPass::RenderPassInstance::InstanceUniformValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -299,10 +299,10 @@ namespace BLA
     class _GetRenderPassUVDescriptorsInternal<0, RenderPass>
     {
     public:
-        static void Get(blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
-            BLAInspectableVariables::ExposedVarTypeDescriptor* d =
-                BLAInspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<0, typename RenderPass::RenderPassInstance::InstanceUniformValues>::type>::GetDescriptor();
+            BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<0, typename RenderPass::RenderPassInstance::InstanceUniformValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -313,22 +313,14 @@ namespace BLA
      *
      */
     template<class RenderPass>
-    blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUVDescriptors()
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUVDescriptors()
     {
-        blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
 
         _GetRenderPassUVDescriptorsInternal<RenderPass::ms_UVCount - 1, RenderPass>::Get(typeDescriptors);
 
         return typeDescriptors;
     }
-
-    class RenderPassInstance
-    {
-        friend class Renderer;
-
-        virtual void GetVertexAttribute(int i, void*& pointerToData, int& dataSize, int& bufferLength) = 0;
-        virtual void GetUniformValuePtr(int i, void*& pointerToData, int& dataSize) = 0;
-    };
 
     /*
      *  RenderPass Registry
@@ -341,8 +333,8 @@ namespace BLA
         {
             blaStringId m_name;
             blaU32 m_attachmentCount;
-            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
-            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
         };
 
     private:
@@ -357,8 +349,8 @@ namespace BLA
             blaStringId name,
             blaU32 id,
             blaU32 attachmentCount,
-            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
-            blaVector<BLAInspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
 
         BLACORE_API const Entry* GetRenderPassEntry(blaU32 id) const;
 

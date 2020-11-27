@@ -9,6 +9,7 @@
 #include "RigidBodySystem.h"
 
 using namespace BLA;
+using namespace BLA::Core;
 
 RegisterComponentSystem(RigidBodySystem, Dependencies(RootSystem))
 

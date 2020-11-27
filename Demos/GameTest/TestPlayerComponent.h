@@ -13,7 +13,7 @@ BeginBehaviorDeclaration(BLADemos, TestPlayerComponent)
     void Init() override;
 	
 	float m_speed = 1.f;
-	GameObject m_mainCameraObject;
+	Core::GameObject m_mainCameraObject;
 
 	blaVec2 m_stickValue;
 

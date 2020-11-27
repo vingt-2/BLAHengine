@@ -36,8 +36,8 @@ void EditorComponentLibrariesManager::LoadLibraries()
 
 	for(FileEntry& file : files)
 	{
-        GameComponentRegistry* componentRegistry = GameComponentRegistry::GetSingletonInstance();
-        ComponentSystemsRegistry* systemsRegistry = ComponentSystemsRegistry::GetSingletonInstance();
+        Core::GameComponentRegistry* componentRegistry = Core::GameComponentRegistry::GetSingletonInstance();
+        Core::ComponentSystemsRegistry* systemsRegistry = Core::ComponentSystemsRegistry::GetSingletonInstance();
         Console* console = Console::GetSingletonInstance();
 
         blaStringId libraryId = GenerateBlaStringId(file.m_name);
@@ -69,8 +69,8 @@ void EditorComponentLibrariesManager::LoadLibraries()
 
 void EditorComponentLibrariesManager::UnloadLibraries()
 {
-    GameComponentRegistry* componentRegistry = GameComponentRegistry::GetSingletonInstance();
-    ComponentSystemsRegistry* systemsRegistry = ComponentSystemsRegistry::GetSingletonInstance();
+    Core::GameComponentRegistry* componentRegistry = Core::GameComponentRegistry::GetSingletonInstance();
+    Core::ComponentSystemsRegistry* systemsRegistry = Core::ComponentSystemsRegistry::GetSingletonInstance();
     Console* console = Console::GetSingletonInstance();
 
     for (auto library : m_loadedLibraries)

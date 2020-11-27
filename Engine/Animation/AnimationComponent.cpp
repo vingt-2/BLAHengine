@@ -26,7 +26,7 @@ void AnimationComponent::Update()
         blaF32 animDt = 1.0f / m_animation->GetSamplingRate();
         const EngineInstance* engine = EngineInstance::GetSingletonInstanceRead();
 
-        blaF32 gameDt = Scene::GetSingletonInstance()->m_sceneTimer.GetDelta();
+        blaF32 gameDt = Core::Scene::GetSingletonInstance()->m_sceneTimer.GetDelta();
         blaF32 animStep = m_playbackMultiplier * (gameDt / animDt);
 
         if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown() || inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
@@ -43,13 +43,13 @@ void AnimationComponent::Update()
             if (inputs->GetKeyState(BLA_KEY_RIGHT).IsDown())
             {
                 m_frameIndex += animStep;
-                m_lastTimePlayerInteraction = Scene::GetSingletonInstance()->m_sceneTimer.GetTime();
+                m_lastTimePlayerInteraction = Core::Scene::GetSingletonInstance()->m_sceneTimer.GetTime();
             }
             if (inputs->GetKeyState(BLA_KEY_LEFT).IsDown())
             {
                 m_frameIndex -= animStep;
                 m_frameIndex = m_frameIndex < 0.f ? 0.f : m_frameIndex;
-                m_lastTimePlayerInteraction = Scene::GetSingletonInstance()->m_sceneTimer.GetTime();
+                m_lastTimePlayerInteraction = Core::Scene::GetSingletonInstance()->m_sceneTimer.GetTime();
             }
         }
 

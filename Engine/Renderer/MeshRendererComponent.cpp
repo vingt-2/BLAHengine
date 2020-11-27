@@ -92,7 +92,7 @@ void MeshRendererComponent::Update()
         VulkanRenderer* renderer = nullptr;
         if(renderer)
         {
-            CameraComponent* camera = Scene::GetSingletonInstance()->GetMainCamera();
+            CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
             m_camera.AttachCamera(camera);
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
 

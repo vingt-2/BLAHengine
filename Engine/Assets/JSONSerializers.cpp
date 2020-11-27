@@ -10,7 +10,6 @@
 #include "External/rapidjson/prettywriter.h"
 
 using namespace BLA;
-using namespace BLAInspectableVariables;
 
 JSONSerializerManager::Serializers JSONSerializerManager::ms_serializers;
 
@@ -48,7 +47,7 @@ private:
 
 //TODO: Much like for the InspectableVariablesGuiElements, add in there a serializer object for vectors of primitives ! (with an exception required for blaBool when using std::vector...)
 #define REGISTER_PRIMITIVE_SERIALIZER(type) \
-	JSONSerializerRegistrator g_##type##Registrator(BLAInspectableVariables::TypeResolver<type>::GetDescriptor()->m_typeID, new type##JSONSerializer());
+	JSONSerializerRegistrator g_##type##Registrator(Core::InspectableVariables::TypeResolver<type>::GetDescriptor()->m_typeID, new type##JSONSerializer());
 
 class BLASerializeWriter : public rapidjson::PrettyWriter<rapidjson::StringBuffer>
 {};
@@ -216,7 +215,7 @@ struct GameObjectJSONSerializer : JSONSerializer
 {
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
-        writer->String(static_cast<GameObject*>(obj)->GetId());
+        writer->String(static_cast<Core::GameObject*>(obj)->GetId());
     }
 
     struct TypedSAXDeserializerObject : SAXDeserializerObject
@@ -228,7 +227,7 @@ struct GameObjectJSONSerializer : JSONSerializer
             if (m_stage == 1)
             {
                 m_stage++;
-                *static_cast<GameObject*>(m_obj) = GameObject(GenerateBlaStringId(blaString(str, length)));
+                *static_cast<Core::GameObject*>(m_obj) = Core::GameObject(GenerateBlaStringId(blaString(str, length)));
                 return POP_DESERIALIZER;
             }
             return DESERIALIZE_ERROR;
@@ -244,6 +243,7 @@ struct GameObjectJSONSerializer : JSONSerializer
     };
 };
 
+using namespace Core;
 REGISTER_PRIMITIVE_SERIALIZER(GameObject)
 
 struct blaVec2JSONSerializer : JSONSerializer
@@ -692,9 +692,9 @@ struct GameComponentJSONSerializer : JSONSerializer
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
     	//TODO: This here is a bit dangerous. I'd like not to have to trust we pass the right pointer and have a static check...
-        const ComponentDescriptor& desc = reinterpret_cast<GameComponent*>(obj)->GetComponentDescriptor();
+        const Core::ComponentDescriptor& desc = reinterpret_cast<Core::GameComponent*>(obj)->GetComponentDescriptor();
         writer->StartObject();
-        for (const ComponentDescriptor::ExposedMember& member : desc.m_members)
+        for (const Core::ComponentDescriptor::ExposedMember& member : desc.m_members)
         {
             writer->Key(ToString(member.m_name).c_str());
             const JSONSerializer* memberSerializer = JSONSerializerManager::GetSerializer(member.m_type->m_typeID, (char*)obj + member.m_offset);
@@ -712,13 +712,13 @@ struct GameComponentJSONSerializer : JSONSerializer
 
     struct TypedDeserializer : SAXDeserializerObject
     {
-        TypedDeserializer(void* obj, const ComponentDescriptor* componentDescriptor) : SAXDeserializerObject(obj), m_componentDescriptor(componentDescriptor) {}
+        TypedDeserializer(void* obj, const Core::ComponentDescriptor* componentDescriptor) : SAXDeserializerObject(obj), m_componentDescriptor(componentDescriptor) {}
 
         virtual SAXDeserializerObject* StartObject() { return nullptr; }
         virtual SAXDeserializerObject* Key(const char* str, size_t  length, bool copy)
         {
             blaStringId varName = FromString(blaString(str, length));
-            for (const ComponentDescriptor::ExposedMember& member : m_componentDescriptor->m_members)
+            for (const Core::ComponentDescriptor::ExposedMember& member : m_componentDescriptor->m_members)
             {
                 if (member.m_name == varName)
                 {
@@ -739,7 +739,7 @@ struct GameComponentJSONSerializer : JSONSerializer
         }
 
     private:
-        const ComponentDescriptor* m_componentDescriptor;
+        const Core::ComponentDescriptor* m_componentDescriptor;
         int m_stage = 0;
         int m_parsingMember = 0;
     };
@@ -747,7 +747,7 @@ struct GameComponentJSONSerializer : JSONSerializer
     SAXDeserializerObject* GetSAXDeserializerObject(void* obj) const override
     {
         //TODO: This here is a bit dangerous. I'd like not to have to trust we pass the right pointer and have a static check...
-        const ComponentDescriptor& desc = reinterpret_cast<GameComponent*>(obj)->GetComponentDescriptor();
+        const Core::ComponentDescriptor& desc = reinterpret_cast<Core::GameComponent*>(obj)->GetComponentDescriptor();
 	    return new TypedDeserializer(obj, &desc);
     }
 };

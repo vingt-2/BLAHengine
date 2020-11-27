@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #pragma once
 
 #include "Maths/Ray.h"
@@ -5,7 +7,7 @@
 #include "StdInclude.h"
 #include "BLASingleton.h"
 /*
-TODO:
+TODO: Move this the fuck out of core
 SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
 And Common m_debug asserts
 */

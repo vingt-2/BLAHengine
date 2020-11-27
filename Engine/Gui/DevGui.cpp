@@ -8,8 +8,8 @@
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
-
 #include "backends/imgui_impl_vulkan.h"
+
 #include "System/Vulkan/VulkanInterface.h"
 #include "Renderer/Vulkan/VulkanRenderer.h"
 
@@ -596,7 +596,7 @@ void DevGuiEditElementPair<T1, T2>::Render()
 }
 
 template<>
-void DevGuiEditElement<GameObject>::Render()
+void DevGuiEditElement<Core::GameObject>::Render()
 {
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str());
@@ -800,9 +800,10 @@ static void FrameRender(const Vulkan::Interface* vulkanInterface, Vulkan::Window
 {
     VkResult err;
 
-    VkSemaphore image_acquired_semaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_imageAcquiredSemaphore;
-    VkSemaphore render_complete_semaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_renderCompleteSemaphore;
-    err = vkAcquireNextImageKHR(vulkanInterface->m_device, vulkanWindowInfo->m_swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &vulkanWindowInfo->m_frameIndex);
+    VkSemaphore imageAcquiredSemaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_imageAcquiredSemaphore;
+    VkSemaphore renderCompleteSemaphore = vulkanWindowInfo->m_frameSemaphores[vulkanWindowInfo->m_semaphoreIndex].m_renderCompleteSemaphore;
+    err = vkAcquireNextImageKHR(vulkanInterface->m_device, vulkanWindowInfo->m_swapchain, UINT64_MAX, imageAcquiredSemaphore, VK_NULL_HANDLE, &vulkanWindowInfo->m_frameIndex);
+    
     Vulkan::Interface::HandleError(err);
 
     Vulkan::FrameContext* fd = &vulkanWindowInfo->m_frames[vulkanWindowInfo->m_frameIndex];
@@ -843,12 +844,12 @@ static void FrameRender(const Vulkan::Interface* vulkanInterface, Vulkan::Window
         VkSubmitInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         info.waitSemaphoreCount = 1;
-        info.pWaitSemaphores = &image_acquired_semaphore;
+        info.pWaitSemaphores = &imageAcquiredSemaphore;
         info.pWaitDstStageMask = &wait_stage;
         info.commandBufferCount = 1;
         info.pCommandBuffers = &fd->m_commandBuffer;
         info.signalSemaphoreCount = 1;
-        info.pSignalSemaphores = &render_complete_semaphore;
+        info.pSignalSemaphores = &renderCompleteSemaphore;
 
         err = vkEndCommandBuffer(fd->m_commandBuffer);
         Vulkan::Interface::HandleError(err);
@@ -943,7 +944,7 @@ void DevGuiManager::Update(bool editorBuild)
 
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
     // glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
-    FrameRender(renderWindow->GetVulkanInterface(), renderWindow->GetVulkanWindowInfo());
+    
     ImDrawData* draw_data = ImGui::GetDrawData();
     const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
     if (!is_minimized)

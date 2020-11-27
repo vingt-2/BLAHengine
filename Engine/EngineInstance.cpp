@@ -99,7 +99,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 
-    m_scene = Scene::AssignAndReturnSingletonInstance(new Scene());
+    m_scene = Core::Scene::AssignAndReturnSingletonInstance(new Core::Scene());
 
     m_sceneManager = new SceneManager();
 
@@ -108,7 +108,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
     DebugDraw::AssignSingletonInstance(m_debug);
 
     m_componentLibrariesManager->LoadLibraries();
-    ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
+    Core::ComponentSystemsRegistry::GetSingletonInstance()->FinalizeLoad();
 
     m_scene->Initialize();
 
@@ -160,7 +160,7 @@ void EngineInstance::TerminateEngine()
     delete m_assetManager;
     delete m_guiManager;
     delete m_renderWindow;
-    delete GameComponentRegistry::GetSingletonInstance();
+    delete Core::GameComponentRegistry::GetSingletonInstance();
 	delete m_componentLibrariesManager;
 
     GLFWRenderWindow::ShutdownGLFW();
@@ -168,12 +168,12 @@ void EngineInstance::TerminateEngine()
 
 void EngineInstance::InitializeComponentLibrariesManager()
 {
-	m_componentLibrariesManager = new ComponentLibrariesManager();
+	m_componentLibrariesManager = new Core::ComponentLibrariesManager();
 }
 
 bool EngineInstance::LoadNewScene()
 {
-    Scene::GetSingletonInstance()->Clear();
+    Core::Scene::GetSingletonInstance()->Clear();
 
     SetupDirLightAndCamera();
 
@@ -206,7 +206,7 @@ void EngineInstance::SetupDirLightAndCamera()
     /*GameObject light = m_scene->CreateObject(BlaStringId("DirLight"));
     light.CreateComponent(BlaStringId("DirectionalLightComponent"));*/
 
-    GameObject cameraObject = m_scene->CreateObject(BlaStringId("EditorCamera"));
+    Core::GameObject cameraObject = m_scene->CreateObject(BlaStringId("EditorCamera"));
     // CameraComponent* cameraComp = cameraObject.CreateComponent<CameraComponent>();
 
     // m_renderer->SetCamera(cameraComp);

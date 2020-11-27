@@ -1,8 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #pragma once
-#include "Core/GameComponent.h"
-
+#include "Core/BehaviorComponent.h"
 #include "SkeletonAnimationData.h"
 
 namespace BLA

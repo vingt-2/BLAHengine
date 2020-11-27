@@ -3,7 +3,7 @@
 
 namespace BLA
 {
-	class EditorComponentLibrariesManager : public ComponentLibrariesManager
+	class EditorComponentLibrariesManager : public Core::ComponentLibrariesManager
 	{
 		void CreateTemporaryLibaryStorage();
 		void DeleteTemporaryLibraryStorage();

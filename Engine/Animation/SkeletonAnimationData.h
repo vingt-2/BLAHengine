@@ -4,7 +4,6 @@
 #include "StdInclude.h"
 #include "Maths/Maths.h"
 #include "IntrusiveTree.h"
-#include "../../Demos/GameTest/TestPlayerComponent.h"
 
 /*
     Class SkeletonJoint:

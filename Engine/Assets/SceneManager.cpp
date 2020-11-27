@@ -20,7 +20,7 @@ class BLASerializeWriter : public rapidjson::PrettyWriter<rapidjson::StringBuffe
     using rapidjson::PrettyWriter<rapidjson::StringBuffer>::PrettyWriter;
 };
 
-bool SceneManager::SaveScene(blaString filepath, Scene* scene)
+bool SceneManager::SaveScene(blaString filepath, Core::Scene* scene)
 {
     rapidjson::StringBuffer sb;
     BLASerializeWriter writer(sb);
@@ -30,12 +30,12 @@ bool SceneManager::SaveScene(blaString filepath, Scene* scene)
     writer.String(std::to_string(BLA_ENGINE_VERSION).c_str());
     writer.Key((blaString("Scene:") + filepath).c_str()); //TODO: Move to Scene Name
     writer.StartObject();
-    for(GameObject gameObject : scene->GetObjects()) 
+    for(Core::GameObject gameObject : scene->GetObjects())
     {
         writer.SetFormatOptions(rapidjson::kFormatDefault);
         writer.Key(ToString(gameObject.GetId()).c_str());
         writer.StartObject();
-        for (GameComponent* c : gameObject.GetAllComponents())
+        for (Core::GameComponent* c : gameObject.GetAllComponents())
         {
             writer.SetFormatOptions(rapidjson::kFormatDefault);
             writer.Key(ToString(c->GetComponentDescriptor().m_typeID).c_str());
@@ -90,7 +90,7 @@ struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Scen
 {
     using Deserializer = BLA::SAXDeserializerObject;
 
-    SceneParser(Scene* newScene) : m_scene(newScene), m_parseState(States::SceneDesc) {}
+    SceneParser(Core::Scene* newScene) : m_scene(newScene), m_parseState(States::SceneDesc) {}
 
     bool Null()
     {
@@ -211,10 +211,10 @@ struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Scen
         if (m_parseState == ComponentEnum)
         {
             blaStringId componentId = FromString(blaString(str, length));
-            const ComponentDescriptor& componentDescriptor = GameComponentRegistry::GetSingletonInstance()->GetComponentDescriptor(componentId);
+            const Core::ComponentDescriptor& componentDescriptor = Core::GameComponentRegistry::GetSingletonInstance()->GetComponentDescriptor(componentId);
             if(componentDescriptor.m_typeID != INVALID_COMPONENT_ID) 
             {
-                void* obj = m_scene->AddComponent(GameObject(m_currentObjectID), componentId);
+                void* obj = m_scene->AddComponent(Core::GameObject(m_currentObjectID), componentId);
 
                 const JSONSerializer* componentSerializer = JSONSerializerManager::GetSerializer(BlaStringId("GameComponent"), obj);
                 if (!componentSerializer)
@@ -281,8 +281,8 @@ struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Scen
 
 private:
     std::stack<Deserializer*> m_deserializers;
-    Scene* m_scene;
-    GameObjectID m_currentObjectID;
+    Core::Scene* m_scene;
+    Core::GameObjectID m_currentObjectID;
 
     enum States
     {
@@ -304,10 +304,10 @@ void SceneManager::LoadScene(blaString filepath)
 
     StringStream a(json.c_str());
 
-    Scene::GetSingletonInstance()->Clear();
+    Core::Scene::GetSingletonInstance()->Clear();
 
     Reader reader;
-    SceneParser sceneParser(Scene::GetSingletonInstance());
+    SceneParser sceneParser(Core::Scene::GetSingletonInstance());
     reader.Parse(a, sceneParser);
 
     m_currentSceneFilePath = filepath;

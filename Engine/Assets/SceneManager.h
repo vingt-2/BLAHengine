@@ -13,7 +13,7 @@ namespace BLA
     public:
         BLACORE_API SceneManager();
 
-        BLACORE_API bool SaveScene(blaString filepath, Scene* scene);
+        BLACORE_API bool SaveScene(blaString filepath, Core::Scene* scene);
 
         BLACORE_API void LoadScene(blaString filepath);
 

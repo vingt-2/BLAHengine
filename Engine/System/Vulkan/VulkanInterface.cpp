@@ -303,4 +303,12 @@ namespace BLA::Vulkan
 
         vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
     }
+
+    void Interface::HandleError(VkResult err)
+    {
+        if (err == 0) return;
+        printf("Vulkan Error: %i\n", err);
+        if (err < 0)
+            abort();
+    }
 }

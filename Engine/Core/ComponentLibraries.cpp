@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #include "windows.h" // <-- Obviously needs to be abstracted away... Especially in Core. The editor version can stay windows specific
 #include "System/FileSystem/Files.h"
 #include "System/Console.h"
@@ -7,38 +9,39 @@
 //TODO: Cmake should handle that ...
 #define BLA_CONFIGURATION "Release"
 
-using namespace BLA;
-
-void ComponentLibrariesManager::LoadLibraries()
+namespace BLA::Core
 {
-	blaString libFolder = GetWorkingDir() + "Cooked/Libraries/"+ blaString(BLA_CONFIGURATION);
-
-	blaVector<FileEntry> files;
-
-	GetFilesInDirectory(files, libFolder);
-
-	for(FileEntry& file : files)
+	void ComponentLibrariesManager::LoadLibraries()
 	{
-		if(file.m_extension == ".dll")
+		blaString libFolder = GetWorkingDir() + "Cooked/Libraries/" + blaString(BLA_CONFIGURATION);
+
+		blaVector<FileEntry> files;
+
+		GetFilesInDirectory(files, libFolder);
+
+		for (FileEntry& file : files)
 		{
-			LoadLibraryA(file.GetFullPath().c_str());
+			if (file.m_extension == ".dll")
+			{
+				LoadLibraryA(file.GetFullPath().c_str());
+			}
 		}
 	}
-}
 
-void ComponentLibrariesManager::UnloadLibraries()
-{
-}
+	void ComponentLibrariesManager::UnloadLibraries()
+	{
+	}
 
-void ComponentLibrariesManager::SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
-{
-    componentRegistry->m_currentRegisteringLibrary = libraryId;
-	systemsRegistry->m_currentRegisteringLibrary = libraryId;
-    console->m_currentRegisteringLibrary = libraryId;
-}
+	void ComponentLibrariesManager::SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
+	{
+		componentRegistry->m_currentRegisteringLibrary = libraryId;
+		systemsRegistry->m_currentRegisteringLibrary = libraryId;
+		console->m_currentRegisteringLibrary = libraryId;
+	}
 
-void ComponentLibrariesManager::UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
-{
-    componentRegistry->UnloadLibraryComponents(libraryId);
-    console->UnloadConsoleCommandsForLibrary(libraryId);
+	void ComponentLibrariesManager::UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
+	{
+		componentRegistry->UnloadLibraryComponents(libraryId);
+		console->UnloadConsoleCommandsForLibrary(libraryId);
+	}
 }

@@ -10,15 +10,15 @@ namespace BLA
     class EditorCommandManager;
     class GameObjectInspector
     {
-        GameObject m_selectedGameObject;
+        Core::GameObject m_selectedGameObject;
         EditorCommandManager* m_editorCommandManager;
         DevGuiWindow& m_window;
 
     public:
         GameObjectInspector(EditorCommandManager* editorCommandManager);
 
-        void InspectGameObject(GameObject gameObject);
+        void InspectGameObject(Core::GameObject gameObject);
 
-        static blaVector<blaString> GetComponents(GameObject gameObject);
+        static blaVector<blaString> GetComponents(Core::GameObject gameObject);
     };
 }

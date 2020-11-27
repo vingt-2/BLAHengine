@@ -1,3 +1,5 @@
+// BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
+
 #pragma once
 
 #include "StdInclude.h"
@@ -6,36 +8,39 @@
 
 namespace BLA
 {
-    class ComponentSystemsRegistry;
-    class ComponentSystem;
-    struct ComponentSystemsScheduler
+    namespace Core
     {
-        void RebuildScheduler(const ComponentSystemsRegistry* registry);
-        void RefreshSchedulerState();
-        bool GetNextJob(blaStringId& job);
-        void NotifyCompletion(blaStringId job);
-
-    private:
-
-        bool GetNextJob(blaStringId root, blaStringId& job);
-
-        struct SchedulerNode
+        class ComponentSystemsRegistry;
+        class ComponentSystem;
+        struct ComponentSystemsScheduler
         {
-            blaVector<blaStringId> m_children;
+            void RebuildScheduler(const ComponentSystemsRegistry* registry);
+            void RefreshSchedulerState();
+            bool GetNextJob(blaStringId& job);
+            void NotifyCompletion(blaStringId job);
 
-            blaSize m_parentToComplete;
+        private:
 
-            const ComponentSystem* m_componentSystemRegisteryEntry;
+            bool GetNextJob(blaStringId root, blaStringId& job);
 
-            enum SystemState : blaU8
+            struct SchedulerNode
             {
-                TO_RUN,
-                RUNNING,
-                COMPLETED
-            } m_state;
-        };
+                blaVector<blaStringId> m_children;
 
-        std::mutex m_lock;
-        blaMap<blaStringId, SchedulerNode> m_graph;
-    };
+                blaSize m_parentToComplete;
+
+                const ComponentSystem* m_componentSystemRegisteryEntry;
+
+                enum SystemState : blaU8
+                {
+                    TO_RUN,
+                    RUNNING,
+                    COMPLETED
+                } m_state;
+            };
+
+            std::mutex m_lock;
+            blaMap<blaStringId, SchedulerNode> m_graph;
+        };
+    }
 }
