@@ -36,7 +36,12 @@ private:
         if(s_blaSingletonInstance == nullptr)                                               \
                    { s_blaSingletonInstance = instance; }                                   \
         return s_blaSingletonInstance; } 
-    
+
+//Todo: Implement per-thread singleton
+#define BLA_DECLARE_THREAD_SINGLETON(CLASSNAME) BLA_DECLARE_SINGLETON(CLASSNAME)
+
+#define BLA_IMPLEMENT_THREAD_SINGLETON(CLASSNAME) BLA_IMPLEMENT_SINGLETON(CLASSNAME)
+
 
 //template<class T>
 //class Singleton

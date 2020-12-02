@@ -34,6 +34,7 @@ namespace BLA
         template<typename T>
         struct StaticResource : BaseResource
         {
+            // TODO Statically check type validity (can be a primitive type, a gpu buffer, a texture ...)
             friend class Renderer;
 
             StaticResource(T& resource) : BaseResource(), m_resource(resource)
@@ -50,13 +51,13 @@ namespace BLA
 
             void Submit()
             {
-                extern const ResourceHandle(*g_GPUImplementationResourceSubmitFunctionTable[static_cast<blaSize>(EResourceType::eEnd)])(void*);
+                extern ResourceHandle(*g_GPUImplementationResourceSubmitFunctionTable[static_cast<blaSize>(EResourceType::eEnd)])(void*);
                 m_handle = reinterpret_cast<ResourceHandle>(g_GPUImplementationResourceSubmitFunctionTable[T::ms_resourceType](&m_resource));
             }
 
             void Cancel()
             {
-                extern const void* (*g_GPUImplementationResourceDeleteFunctionTable[static_cast<blaSize>(EResourceType::eEnd)])(ResourceHandle);
+                extern void* (*g_GPUImplementationResourceDeleteFunctionTable[static_cast<blaSize>(EResourceType::eEnd)])(ResourceHandle);
                 g_GPUImplementationResourceDeleteFunctionTable[T::ms_resourceType](m_handle);
             }
         };

@@ -4,7 +4,7 @@
 #include "StdInclude.h"
 #include "Assets/AssetsManager.h"
 #include "Renderer/Renderer.h"
-#include "System/Vulkan/VulkanInterface.h"
+#include "System/Vulkan/Context.h"
 
 namespace BLA
 {

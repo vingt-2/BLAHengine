@@ -1,7 +1,8 @@
 #include "System/RenderWindow.h"
-#include "VulkanInterface.h"
+#include "Context.h"
 
 using namespace BLA;
+using namespace System;
 
 struct SwapChainSupportDetails
 {
@@ -81,9 +82,9 @@ static VkExtent2D ChooseSwapExtent(blaU32 desiredHeight, blaU32 desiredWidth, co
     return actualExtent;
 }
 
-Vulkan::Interface* GLFWVulkanRenderWindow::SetupVulkanInterface(const char** extensions, uint32_t extensions_count)
+Vulkan::Context* GLFWVulkanRenderWindow::SetupVulkanInterface(const char** extensions, uint32_t extensions_count)
 {
-    Vulkan::Interface* vulkanInterface = new Vulkan::Interface(extensions, extensions_count);
+    Vulkan::Context* vulkanInterface = new Vulkan::Context(extensions, extensions_count);
     return vulkanInterface;
 }
 
@@ -136,7 +137,7 @@ void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX
     }
     uint32_t extensions_count = 0;
     const char** extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
-    m_vulkanInterface = new Vulkan::Interface(extensions, extensions_count);
+    m_vulkanInterface = new Vulkan::Context(extensions, extensions_count);
 
     VkSurfaceKHR surface;
     if (glfwCreateWindowSurface(m_vulkanInterface->m_instance, window, nullptr, &surface) != VK_SUCCESS)
@@ -190,11 +191,11 @@ void GLFWVulkanRenderWindow::UpdateWindowAndBuffers()
     info.pSwapchains = &m_vulkanWindowInfo->m_swapchain;
     info.pImageIndices = &m_vulkanWindowInfo->m_frameIndex;
     VkResult err = vkQueuePresentKHR(m_vulkanInterface->m_queue, &info);
-    Vulkan::Interface::HandleError(err);
+    Vulkan::Context::HandleError(err);
     m_vulkanWindowInfo->m_semaphoreIndex = (m_vulkanWindowInfo->m_semaphoreIndex + 1) % m_vulkanWindowInfo->m_imageCount; // Now we can use the next set of semaphores
 }
 
-Vulkan::Interface* GLFWVulkanRenderWindow::GetVulkanInterface() const
+Vulkan::Context* GLFWVulkanRenderWindow::GetVulkanInterface() const
 {
     return m_vulkanInterface;
 }
@@ -214,7 +215,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
 
     // this is a blocking wait to collect frames in flight ...
     err = vkDeviceWaitIdle(m_vulkanInterface->m_device);
-    Vulkan::Interface::HandleError(err);
+    Vulkan::Context::HandleError(err);
 
     DestroySwapChainAndCommandBuffers();
 
@@ -264,7 +265,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
 
     VkSwapchainKHR swapChain;
     err = vkCreateSwapchainKHR(m_vulkanInterface->m_device, &swapChainCreateInfo, nullptr, &swapChain);
-    Vulkan::Interface::HandleError(err);
+    Vulkan::Context::HandleError(err);
 
     m_vulkanWindowInfo->m_swapchain = swapChain;
 
@@ -273,7 +274,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
     {
         blaVector<VkImage> swapChainImages;
         swapChainImages.resize(m_vulkanWindowInfo->m_imageCount);
-        Vulkan::Interface::HandleError(vkGetSwapchainImagesKHR(
+        Vulkan::Context::HandleError(vkGetSwapchainImagesKHR(
             m_vulkanInterface->m_device, 
             swapChain, 
             &m_vulkanWindowInfo->m_imageCount, 
@@ -334,7 +335,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
         {
             attachment[0] = m_vulkanWindowInfo->m_frames[i].m_backBufferView;
             VkResult err = vkCreateFramebuffer(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_framebuffer);
-            Vulkan::Interface::HandleError(err);
+            Vulkan::Context::HandleError(err);
         }
     }
 }
@@ -351,7 +352,7 @@ void GLFWVulkanRenderWindow::CreateSwapChainCommandBuffers()
             info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
             info.queueFamilyIndex = m_vulkanInterface->m_queueFamily;
             err = vkCreateCommandPool(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_commandPool);
-            Vulkan::Interface::HandleError(err);
+            Vulkan::Context::HandleError(err);
         }
         {
             VkCommandBufferAllocateInfo info = {};
@@ -360,22 +361,22 @@ void GLFWVulkanRenderWindow::CreateSwapChainCommandBuffers()
             info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
             info.commandBufferCount = 1;
             err = vkAllocateCommandBuffers(m_vulkanInterface->m_device, &info, &m_vulkanWindowInfo->m_frames[i].m_commandBuffer);
-            Vulkan::Interface::HandleError(err);
+            Vulkan::Context::HandleError(err);
         }
         {
             VkFenceCreateInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
             info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
             err = vkCreateFence(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_imageFence);
-            Vulkan::Interface::HandleError(err);
+            Vulkan::Context::HandleError(err);
         }
         {
             VkSemaphoreCreateInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
             err = vkCreateSemaphore(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frameSemaphores[i].m_imageAcquiredSemaphore);
-            Vulkan::Interface::HandleError(err);
+            Vulkan::Context::HandleError(err);
             err = vkCreateSemaphore(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frameSemaphores[i].m_renderCompleteSemaphore);
-            Vulkan::Interface::HandleError(err);
+            Vulkan::Context::HandleError(err);
         }
     }
 }

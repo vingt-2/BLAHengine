@@ -7,6 +7,8 @@
 
 namespace BLA
 {
+    //TODO: This honestly should directly be a staging buffer, 
+    //TODO: this way resources are first memcpied into a staging buffer ready for transfer
     namespace GPU
     {
         struct BaseBuffer
@@ -15,10 +17,12 @@ namespace BLA
 
             const void* GetData() const;
             void* GetData();
-            blaSize GetLength() const;
+            blaU32 GetLength() const;
+            blaU32 GetElementSize() const;
         protected:
-            BaseBuffer(blaSize size);
-            blaSize m_bufferLength;
+            BaseBuffer(blaU32 size);
+            blaU32 m_bufferLength;
+            blaU32 m_elementSize;
             static BaseBuffer* New(blaSize length, blaSize elementSize);
             static void Delete(BaseBuffer* baseBuffer);
         };
@@ -26,7 +30,7 @@ namespace BLA
         template<typename T>
         class Buffer : public BaseBuffer
         {
-            Buffer(blaSize size) : BaseBuffer(size) {}
+            Buffer(blaSize size) : BaseBuffer(static_cast<blaU32>(size)) {}
 
         public:
             ~Buffer() = delete;

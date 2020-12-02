@@ -3,7 +3,7 @@
 
 #include "StdInclude.h"
 #include "System.h"
-#include "System/Vulkan/VulkanInterface.h"
+#include "System/Vulkan/Context.h"
 
 #define VK_CHECK_RESULT(x) x
 
@@ -58,12 +58,12 @@ namespace BLA
  //   {
 	//	blaVector<VulkanRenderPassInstance> m_currentInstances;
 
- //       static void CreateIndexBuffer(const Vulkan::Interface* vulkanInterface, VkDevice device,
+ //       static void CreateIndexBuffer(const Vulkan::Context* vulkanInterface, VkDevice device,
  //                                     blaVector<blaU32>& indices, VulkanRenderPassInstance& vulkanRenderPassInstance);
 
 	//public:
 
-	//	void RegisterRenderPassInstance(const Vulkan::WindowInfo* vulkanWindoInfo, const Vulkan::Interface* vulkanInterface, VkDevice device, const BaseRenderPassInstance& rpInstance)
+	//	void RegisterRenderPassInstance(const Vulkan::WindowInfo* vulkanWindoInfo, const Vulkan::Context* vulkanInterface, VkDevice device, const BaseRenderPassInstance& rpInstance)
 	//	{
 	//		m_currentInstances.push_back(VulkanRenderPassInstance());
 

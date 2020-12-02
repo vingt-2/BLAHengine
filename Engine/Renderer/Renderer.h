@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Core/InspectableVariables.h"
+#include "Gpu/Resource.h"
 #include "Renderer/RenderPass.h"
 
 namespace BLA

@@ -99,9 +99,9 @@ namespace BLA
     void GLFWMouseCursorPosCallBack(GLFWwindow* window, double xpos, double ypos);
     void GLFWMouseWheelCallback(GLFWwindow* window, double xAxisScroll, double yAxisScroll);
 
-    namespace Vulkan
+    namespace System::Vulkan
     {
-        class Interface;
+        class Context;
         struct WindowInfo;
     }
 
@@ -112,17 +112,17 @@ namespace BLA
 
         void CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen) override;
         void UpdateWindowAndBuffers() override;
-        Vulkan::Interface* GetVulkanInterface() const;
-        Vulkan::WindowInfo* GetVulkanWindowInfo() const;
+        System::Vulkan::Context* GetVulkanInterface() const;
+        System::Vulkan::WindowInfo* GetVulkanWindowInfo() const;
     private:
         void CreateSwapChain();
         void CreateSwapChainCommandBuffers();
 
         void DestroySwapChainAndCommandBuffers();
 
-        Vulkan::Interface* m_vulkanInterface;
-        Vulkan::WindowInfo* m_vulkanWindowInfo;
+        System::Vulkan::Context* m_vulkanInterface;
+        System::Vulkan::WindowInfo* m_vulkanWindowInfo;
 
-        static Vulkan::Interface* SetupVulkanInterface(const char** extensions, uint32_t extensions_count);
+        static System::Vulkan::Context* SetupVulkanInterface(const char** extensions, uint32_t extensions_count);
     };
 }

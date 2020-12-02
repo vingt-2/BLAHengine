@@ -81,7 +81,7 @@ void VulkanRenderPassInstance::UpdateUniformBuffersOnDevice(VkDevice device, int
     }
 }
 
-//void VulkanRenderPass::CreateIndexBuffer(const Vulkan::Interface* vulkanInterface, VkDevice device,
+//void VulkanRenderPass::CreateIndexBuffer(const Vulkan::Context* vulkanInterface, VkDevice device,
 //                                         blaVector<blaU32>& indices, VulkanRenderPassInstance& vulkanRenderPassInstance)
 //{
 //    vulkanRenderPassInstance.m_indexCount = static_cast<blaU32>(indices.size());
