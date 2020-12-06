@@ -21,7 +21,7 @@ ${VulkanHeaders_INCLUDE_DIR})
 find_package(OpenGL REQUIRED)
 
 # Gotta do the following here because glew with glew-cmake will build the target in build/lib which is otherwise unreachable
-	link_directories(${CMAKE_BINARY_DIR}/lib)
+    link_directories(${CMAKE_BINARY_DIR}/lib)
 #
 
 add_library(BLAEngine SHARED ${ENGINE_SOURCE_FILES})
@@ -32,6 +32,6 @@ target_link_libraries(BLAEngine PRIVATE glfw PRIVATE glew PRIVATE ${OPENGL_LIBRA
 set_property(TARGET BLAEngine PROPERTY CXX_STANDARD 17)
 
 if(WIN32)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
-	target_link_libraries(BLAEngine PRIVATE setupapi.lib)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+    target_link_libraries(BLAEngine PRIVATE setupapi.lib)
 endif()

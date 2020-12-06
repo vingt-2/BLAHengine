@@ -26,9 +26,9 @@ namespace BLA
 
         ~SkeletonJoint() {};
 
-        blaString		GetName() const { return m_name; }
+        blaString        GetName() const { return m_name; }
 
-        blaVec3		GetLocalOffset() const { return m_localOffset; }
+        blaVec3        GetLocalOffset() const { return m_localOffset; }
 
         blaU32      GetJointIndex() const { return m_jointIndex; }
 
@@ -46,8 +46,8 @@ namespace BLA
         void DiscardJointsByName(blaString subname);
 
     private:
-        blaString				m_name;
-        blaVec3					m_localOffset;
+        blaString                m_name;
+        blaVec3                    m_localOffset;
         blaU32                  m_jointIndex;
     };
 
@@ -60,7 +60,7 @@ namespace BLA
             blaVector<blaVector<blaPosQuat>> jointTransforms,
             SkeletonJoint* skeletonDef,
             float samplingRate,
-            int	  frameCount)
+            int      frameCount)
         {
             m_name = name;
             m_jointTransforms = jointTransforms;
@@ -148,9 +148,9 @@ namespace BLA
         blaMap<blaString, blaU32>   m_jointIndexByName;
 
         //Todo: Make this a pointer to a valid skeleton Asset...
-        SkeletonJoint*		            m_skeletonDef;
+        SkeletonJoint*                    m_skeletonDef;
 
-        float							m_samplingRate;
-        int								m_frameCount;
+        float                            m_samplingRate;
+        int                                m_frameCount;
     };
 }

@@ -46,7 +46,7 @@ namespace BLA
     public:
 
         static void InitGLFW();
-    	
+        
         static void ShutdownGLFW();
     
         void UpdateWindowAndBuffers() override;
@@ -120,7 +120,7 @@ namespace BLA
 
         void DestroySwapChainAndCommandBuffers();
 
-        System::Vulkan::Context* m_vulkanInterface;
+        System::Vulkan::Context* m_vulkanContext;
         System::Vulkan::WindowInfo* m_vulkanWindowInfo;
 
         static System::Vulkan::Context* SetupVulkanInterface(const char** extensions, uint32_t extensions_count);

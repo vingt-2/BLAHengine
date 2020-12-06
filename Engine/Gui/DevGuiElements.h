@@ -55,7 +55,7 @@ namespace BLA
         m_name(name),
         m_isSelected(false),
         m_groupId(groupId),
-    	m_isDragable(false),
+        m_isDragable(false),
         m_isDroppable(false) {}
 
         // Todo: Set options for how to display children
@@ -77,10 +77,10 @@ namespace BLA
     class BLACORE_API DevGuiCollapsibleElement : public DevGuiElement
     {
     public:
-	    DevGuiCollapsibleElement(const blaString& name, blaStringId groupId);
+        DevGuiCollapsibleElement(const blaString& name, blaStringId groupId);
 
         bool m_decorateHeader = false;
-    	
+        
         virtual void Render();
     };
 
@@ -125,7 +125,7 @@ namespace BLA
 
     BLACORE_API bool DevGuiEditElementVectorPreRender(DevGuiElement* element);
     BLACORE_API void DevGuiEditElementVectorPostRender(DevGuiElement* element);
-	
+    
     template<typename T>
     class DevGuiEditElementVector : public DevGuiElement
     {
@@ -149,7 +149,7 @@ namespace BLA
         }
 
     private:
-    	
+        
         blaVector<T>* m_pToVector;
     };
 

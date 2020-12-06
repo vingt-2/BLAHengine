@@ -7,7 +7,7 @@
 
 namespace BLA
 {
-    namespace GPU
+    namespace Gpu
     {
         struct ResourceHandle
         {
@@ -22,44 +22,60 @@ namespace BLA
 
         struct BaseResource
         {
-            BaseResource() : m_handle{0}
+            BaseResource(EResourceType type) : m_handle{0}, m_resourceType(type)
             {}
 
             bool IsReady() const { return m_handle.m_impl.bits64 != 0; }
+            EResourceType GetType() const { return m_resourceType; }
+
+            void Submit();
+            void Cancel();
+
+            ResourceHandle GetHandle() const { return m_handle; }
 
         protected:
             ResourceHandle m_handle;
+            EResourceType m_resourceType;
         };
 
         template<typename T>
-        struct StaticResource : BaseResource
+        struct Resource : BaseResource
         {
             // TODO Statically check type validity (can be a primitive type, a gpu buffer, a texture ...)
             friend class Renderer;
 
-            StaticResource(T& resource) : BaseResource(), m_resource(resource)
+            T* Get()
+            {
+                return m_resource;
+            }
+
+            const T* Get() const
+            {
+                return m_resource;
+            }
+
+            T* operator->()
+            {
+                return m_resource;
+            }
+
+            const T* operator->() const
+            {
+                return m_resource;
+            }
+
+            Resource() : BaseResource(T::ms_resourceType), m_resource(nullptr) {}
+
+            Resource(T& resource) : BaseResource(T::ms_resourceType), m_resource(&resource)
             {}
 
-            ~StaticResource<T>()
+            ~Resource<T>()
             {
                 Cancel();
             }
 
-            T& m_resource;
-
         private:
-
-            void Submit()
-            {
-                extern ResourceHandle(*g_GPUImplementationResourceSubmitFunctionTable[static_cast<blaSize>(EResourceType::eEnd)])(void*);
-                m_handle = reinterpret_cast<ResourceHandle>(g_GPUImplementationResourceSubmitFunctionTable[T::ms_resourceType](&m_resource));
-            }
-
-            void Cancel()
-            {
-                extern void* (*g_GPUImplementationResourceDeleteFunctionTable[static_cast<blaSize>(EResourceType::eEnd)])(ResourceHandle);
-                g_GPUImplementationResourceDeleteFunctionTable[T::ms_resourceType](m_handle);
-            }
+            T* m_resource;
         };
     }
 };

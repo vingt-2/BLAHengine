@@ -24,7 +24,7 @@ namespace BLA
     BeginComponentDeclaration(BLAEngine, SimpleHairComponent)
         bool m_isPinned = false;
         bool m_applyGravity = true;
-		bool m_renderDebug = false;
+        bool m_renderDebug = false;
 
         void Update();
 

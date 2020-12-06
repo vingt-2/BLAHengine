@@ -23,9 +23,9 @@ bool Dualshock4::Setup()
             //std::cout << "unable to sent report\n";
         }
 
-        m_time = 0.;												  // starts in low energy mode where IMU data not sent
-        m_quaternion[0] = 1.0;										  // requesting feature report puts it into full mode. Source:   
-        m_quaternion[1] = 0.;										  // (https://github.com/torvalds/linux/blob/master/drivers/hid/hid-sony.c)
+        m_time = 0.;                                                  // starts in low energy mode where IMU data not sent
+        m_quaternion[0] = 1.0;                                          // requesting feature report puts it into full mode. Source:   
+        m_quaternion[1] = 0.;                                          // (https://github.com/torvalds/linux/blob/master/drivers/hid/hid-sony.c)
         m_quaternion[2] = 0.;
         m_quaternion[3] = 0.;
         m_beta = BETA;
@@ -149,7 +149,7 @@ void Dualshock4::ReportInputsToManager()
 
 int Dualshock4::ReadInt16LE(unsigned char buffer[], int index)
 {
-    unsigned short highByte = buffer[index];	//Byte order swapped in BLADualshock4 io buffer
+    unsigned short highByte = buffer[index];    //Byte order swapped in BLADualshock4 io buffer
     unsigned short lowByte = buffer[index++];
     short combined = lowByte << 8 | highByte;
     return int(combined);

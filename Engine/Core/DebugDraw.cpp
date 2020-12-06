@@ -142,11 +142,11 @@ void DebugDraw::InstanceDrawRay(const Ray& ray, const blaVec3& color)
 // Draw Disc ...
 //for (blaU32 i = 0; i < resolution; i++)
 //{
-//	const blaF32 angle = (i / (float)resolution) * M_TWO_PI;
+//    const blaF32 angle = (i / (float)resolution) * M_TWO_PI;
 //
-//	cone.m_vertexPos.emplace_back(blaVec3(cosf(angle), 0.f, sinf(angle)));
-//	cone.m_vertexNormals.emplace_back(blaVec3(cosf(angle), 0.f, sinf(angle)));
-//	cone.m_vertexUVs.emplace_back(blaVec2(cosf(angle), sinf(angle)));
+//    cone.m_vertexPos.emplace_back(blaVec3(cosf(angle), 0.f, sinf(angle)));
+//    cone.m_vertexNormals.emplace_back(blaVec3(cosf(angle), 0.f, sinf(angle)));
+//    cone.m_vertexUVs.emplace_back(blaVec2(cosf(angle), sinf(angle)));
 //}
 
 void DebugDraw::InstanceDrawCircle(const blaVec3& origin, const blaVec3& normal, blaF32 radius, const blaVec3& color, blaU32 resolution)

@@ -79,11 +79,11 @@ void TriangleMeshSerializer::BuildFromMesh(MeshAsset* meshAsset)
     vec3VectorToSerializer(triangleMesh->m_renderData.m_vertBiTangent, m_renderData.vertBiTangent);
     vec2VectorToSerializer(triangleMesh->m_renderData.m_vertUVs, m_renderData.vertUVs);
 
-	for(const auto& m : triangleMesh->m_materials)
-	{
+    for(const auto& m : triangleMesh->m_materials)
+    {
         m_materials.push_back(m.first);
         m_materialIndex.push_back(m.second);
-	}
+    }
 }
 
 MeshAsset* TriangleMeshSerializer::BuildMesh()

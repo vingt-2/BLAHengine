@@ -30,7 +30,7 @@ namespace BLA
     {
         friend class DevGuiMenuTab;
         friend class DevGuiMenu;
-    	
+        
         DevGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false);
 
         void Render() override;
@@ -44,16 +44,16 @@ namespace BLA
     class DevGuiMenuTab : public DevGuiMenuBase
     {
         friend class DevGuiMenu;
-    	
+        
         DevGuiMenuTab(blaString name);
-    	virtual ~DevGuiMenuTab();
-    	
+        virtual ~DevGuiMenuTab();
+        
         blaString m_name;
         blaVector<DevGuiMenuBase*> m_menuItems;
         void Render() override;
 
     public:
-    	
+        
         BLACORE_API void AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false);
 
         BLACORE_API DevGuiMenuTab& AddSubMenu(blaString name);
@@ -69,7 +69,7 @@ namespace BLA
     public:
 
         ~DevGuiMenu();
-    	
+        
         BLACORE_API void AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator = false);
 
         BLACORE_API DevGuiMenuTab& AddSubMenu(blaString name);

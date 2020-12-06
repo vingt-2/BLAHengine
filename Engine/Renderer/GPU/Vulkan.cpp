@@ -1,38 +1,84 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "Vulkan.h"
-#include "Buffer.h"
 #include "System/Vulkan/Context.h"
 
-namespace BLA::GPU
-{
+#define VMA_IMPLEMENTATION
+#define VMA_STATIC_VULKAN_FUNCTIONS 1
+#include "vk_mem_alloc.h"
+
+#include "Resource.h"
+#include "StaticBuffer.h"
+#include "Image.h"
+
+namespace BLA::Gpu
+{ 
     struct Vulkan::VulkanImplementation
     {
+        VulkanImplementation(const System::Vulkan::Context* context) : m_vulkanContext(context)
+        {
+            VmaAllocatorCreateInfo allocatorInfo = {};
+            allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+            allocatorInfo.physicalDevice = m_vulkanContext->m_physicalDevice;
+            allocatorInfo.device = m_vulkanContext->m_device;
+            allocatorInfo.instance = m_vulkanContext->m_instance;
+
+            vmaCreateAllocator(&allocatorInfo, &m_allocator);
+        }
+
         const System::Vulkan::Context* m_vulkanContext;
+
+        VmaAllocator m_allocator;
 
         VkQueue m_queue;
         VkCommandPool m_commandPool;
 
-        VkCommandBuffer BeginSingleTimeCommands();
+        VkCommandBuffer BeginSingleTimeCommands() const;
 
-        void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void EndSingleTimeCommands(VkCommandBuffer commandBuffer) const;
 
-        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
 
-        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) const;
 
-        void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+        void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) const;
 
-        void CreateBuffer(
+        void CreateDeviceOnlyBuffer(
             VkDeviceSize size,
             VkBufferUsageFlags usage,
-            VkMemoryPropertyFlags properties,
-            VkBuffer& buffer,
-            VkDeviceMemory& bufferMemory);
+            VkBuffer& buffer, VmaAllocation& allocation) const;
+
+        void CreateStagingBuffer(
+            VkDeviceSize size,
+            VkBufferUsageFlags usage,
+            VkBuffer& buffer, VmaAllocation& allocation) const;
+
+        void CreateImage(blaIVec2 size, VkImage& image, VmaAllocation& allocation) const;
     };
+
+    Vulkan::Vulkan(const System::Vulkan::Context* context)
+    {
+        m_implementation = new VulkanImplementation(context);
+    }
 
     ResourceHandle Vulkan::Submit(BaseResource* resource)
     {
+        switch(resource->GetType())
+        {
+        case EResourceType::eStaticBuffer:
+        {
+            return SubmitStaticBuffer(*static_cast<Resource<BaseStaticBuffer>*>(resource));
+        }
+        case EResourceType::eImage:
+        {
+            return SubmitImage(*static_cast<Resource<Image>*>(resource));
+        }
+        case EResourceType::eEnd: break;
+        default: ;
+        }
+
+        BLA_TRAP(false);
+
         return ResourceHandle();
     }
 
@@ -41,41 +87,54 @@ namespace BLA::GPU
 
     }
 
-    ResourceHandle Vulkan::SubmitStaticBuffer(StaticResource<BaseBuffer>* resource)
+    ResourceHandle Vulkan::SubmitStaticBuffer(Resource<BaseStaticBuffer>& resource)
     {
-        VkDevice device = m_implementation->m_vulkanContext->m_device;
         VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
 
-        blaU32 bufferSize = resource->m_resource.GetElementSize() * resource->m_resource.GetLength();
+        blaU32 bufferSize = resource->GetElementSize() * resource->GetLength();
 
-        m_implementation->CreateBuffer(
+        VmaAllocation stagingAlloc;
+        m_implementation->CreateStagingBuffer(
             bufferSize,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            stagingBuffer, stagingBufferMemory);
+            stagingBuffer, stagingAlloc);
 
         void* data;
-        vkMapMemory(m_implementation->m_vulkanContext->m_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, resource->m_resource.GetData(), static_cast<size_t>(bufferSize));
-        vkUnmapMemory(device, stagingBufferMemory);
+        vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &data);
+        memcpy(data, resource->GetData(), bufferSize);
+        vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
 
         VkBuffer deviceLocalResourceBuffer;
-        VkDeviceMemory deviceLocalMemory;
 
-        m_implementation->CreateBuffer(
+        m_implementation->CreateDeviceOnlyBuffer(
             bufferSize,
             VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            deviceLocalResourceBuffer, deviceLocalMemory);
+            deviceLocalResourceBuffer, reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
 
-        // Blocking copy call from host visible memory to gpu local (Creates and wait on the command on this thread's queue
+        // Blocking copy call from host visible memory to gpu local (Creates and wait on the command on this thread's queue)
         m_implementation->CopyBuffer(stagingBuffer, deviceLocalResourceBuffer, bufferSize);
 
-        // vkFreeMemory(m_de)
+        ResourceHandle retVal;
+        retVal.m_impl.pointer = deviceLocalResourceBuffer;
+
+        return retVal;
     }
 
-    VkCommandBuffer Vulkan::Vulkan::VulkanImplementation::BeginSingleTimeCommands()
+    ResourceHandle Vulkan::SubmitImage(Resource<Image>& resource)
+    {
+        VkImage image;
+        m_implementation->CreateImage(
+            resource->GetSize(),
+            image,
+            reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
+
+        ResourceHandle retVal;
+        retVal.m_impl.pointer = image;
+
+        return retVal;
+    }
+
+    VkCommandBuffer Vulkan::Vulkan::VulkanImplementation::BeginSingleTimeCommands() const
     {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -95,7 +154,7 @@ namespace BLA::GPU
         return commandBuffer;
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
+    void Vulkan::Vulkan::VulkanImplementation::EndSingleTimeCommands(VkCommandBuffer commandBuffer) const
     {
         vkEndCommandBuffer(commandBuffer);
 
@@ -110,7 +169,7 @@ namespace BLA::GPU
         vkFreeCommandBuffers(m_vulkanContext->m_device, m_commandPool, 1, &commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+    void Vulkan::Vulkan::VulkanImplementation::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -121,7 +180,7 @@ namespace BLA::GPU
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+    void Vulkan::Vulkan::VulkanImplementation::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -157,7 +216,8 @@ namespace BLA::GPU
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
-        else {
+        else 
+        {
             throw std::invalid_argument("unsupported layout transition!");
         }
 
@@ -173,7 +233,7 @@ namespace BLA::GPU
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+    void Vulkan::Vulkan::VulkanImplementation::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -202,12 +262,11 @@ namespace BLA::GPU
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::VulkanImplementation::CreateBuffer(
+    // TODO: Factor out create buffer logic with the memtype parameter
+    void Vulkan::VulkanImplementation::CreateDeviceOnlyBuffer(
         VkDeviceSize size,
         VkBufferUsageFlags usage,
-        VkMemoryPropertyFlags properties,
-        VkBuffer& buffer,
-        VkDeviceMemory& bufferMemory)
+        VkBuffer& buffer, VmaAllocation& allocation) const
     {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -215,18 +274,46 @@ namespace BLA::GPU
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        System::Vulkan::Context::HandleError(vkCreateBuffer(m_vulkanContext->m_device, &bufferInfo, nullptr, &buffer));
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
-        VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(m_vulkanContext->m_device, buffer, &memRequirements);
+        vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
+    }
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = m_vulkanContext->GetMemoryType(memRequirements.memoryTypeBits, properties);
+    void Vulkan::VulkanImplementation::CreateStagingBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkBuffer& buffer, VmaAllocation& allocation) const
+    {
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        System::Vulkan::Context::HandleError(vkAllocateMemory(m_vulkanContext->m_device, &allocInfo, nullptr, &bufferMemory));
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-        vkBindBufferMemory(m_vulkanContext->m_device, buffer, bufferMemory, 0);
+        vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
+    }
+
+    void Vulkan::VulkanImplementation::CreateImage(blaIVec2 size, VkImage& image, VmaAllocation& allocation) const
+    {
+        VkImageCreateInfo imageCreateInfo = {};
+        imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+        imageCreateInfo.extent.width = size.x;
+        imageCreateInfo.extent.height = size.y;
+        imageCreateInfo.extent.depth = 1;
+        imageCreateInfo.mipLevels = 1;
+        imageCreateInfo.arrayLayers = 1;
+        imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+        vmaCreateImage(m_allocator, &imageCreateInfo, &allocInfo, &image, &allocation, nullptr);
     }
 }

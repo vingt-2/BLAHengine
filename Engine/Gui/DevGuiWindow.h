@@ -15,7 +15,7 @@ namespace BLA
     class DevGuiWindow
     {
         friend class DevGuiManager;
-    	
+        
     public:
         enum WindowFlags
         {
@@ -62,7 +62,7 @@ namespace BLA
         DevGuiWindow();
         DevGuiWindow(const blaString& windowName, const blaIVec2& windowPosition);
         ~DevGuiWindow();
-    	
+        
         blaU32 m_windowFlags;
         blaString m_windowName;
         blaIVec2 m_windowPosition;
@@ -74,12 +74,12 @@ namespace BLA
 
     inline blaIVec2 DevGuiWindow::GetWindowPosition() const
     {
-	    return m_windowPosition;
+        return m_windowPosition;
     }
 
     inline blaString DevGuiWindow::GetWindowName() const
     {
-	    return m_windowName;
+        return m_windowName;
     }
 
     class BlaOneTimeWindow : public DevGuiWindow

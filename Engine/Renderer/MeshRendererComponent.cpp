@@ -31,7 +31,7 @@ EndBehaviorDescription()
 
 void MeshRendererComponent::Init()
 {
-	
+    
 }
 
 bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
@@ -80,7 +80,7 @@ void MeshRendererComponent::Update()
     //}
 
     bool render = m_Render && validState;
-	
+    
     if(m_renderTicket != 0 && !render)
     {
         m_renderTicket = 0;
@@ -96,13 +96,13 @@ void MeshRendererComponent::Update()
             m_camera.AttachCamera(camera);
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
 
-            m_vertPos = GPU::Buffer<blaVec3>::New(rd.m_vertPos.size());
+            m_vertPos = Gpu::StaticBuffer<blaVec3>::New(rd.m_vertPos.size());
             memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
 
-            m_vertNormal = GPU::Buffer<blaVec3>::New(rd.m_vertNormal.size());
+            m_vertNormal = Gpu::StaticBuffer<blaVec3>::New(rd.m_vertNormal.size());
             memcpy_s(m_vertNormal->GetData(), sizeof(blaVec3) * m_vertNormal->GetLength(), rd.m_vertNormal.data(), rd.m_vertNormal.size() * sizeof(blaVec3));
 
-            m_indices = GPU::Buffer<blaU32>::New(rd.m_triangleIndices.size());
+            m_indices = Gpu::StaticBuffer<blaU32>::New(rd.m_triangleIndices.size());
             memcpy_s(m_indices->GetData(), sizeof(blaVec3) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaVec3));
 
             const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos, *m_vertNormal);

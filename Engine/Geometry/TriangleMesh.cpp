@@ -195,10 +195,10 @@ void TriangleMesh::ComputePerFaceTangentBasis()
         blaVec3 T = invScale * glm::mat2x3(q1, q2) * glm::vec2(st2.t, -st1.t);
         blaVec3 B = invScale * glm::mat2x3(q1, q2) * glm::vec2(-st2.s, st1.s);
 
-    	if(glm::dot(glm::cross(m_vertexNormals[v0.normalIndex], T), B) < 0.f)
-    	{
+        if(glm::dot(glm::cross(m_vertexNormals[v0.normalIndex], T), B) < 0.f)
+        {
             T *= -1.f;
-    	}
+        }
 
         if (isnan(T.x) || isnan(T.y) || isnan(T.z))
         {
@@ -281,7 +281,7 @@ void TriangleMesh::GenerateRenderData()
             const bool correctQuery = GetSurroundingTriangles(edge.destVertex.posIndex, surroundingFaces);
 
             blaVec3 tangent = m_faceTangents[triIndx];
-        	blaVec3 biTangent = m_faceBiTangents[triIndx];
+            blaVec3 biTangent = m_faceBiTangents[triIndx];
 
             if (correctQuery)
             {
@@ -291,7 +291,7 @@ void TriangleMesh::GenerateRenderData()
                     biTangent += m_faceBiTangents[face];
                 }
             }
-        	
+            
             //// tangent = tangent - (vert.vn * glm::dot(tangent, vert.vn));
 
             tangent = SafeNormalize(tangent);
@@ -309,7 +309,7 @@ void TriangleMesh::GenerateRenderData()
                 m_renderData.m_vertUVs.push_back(vert.vt);
                 m_renderData.m_vertTangent.push_back(tangent);
                 m_renderData.m_vertBiTangent.push_back(biTangent);
-            	
+                
                 blaU32 numberOfVertexPos = static_cast<blaU32>(m_renderData.m_vertPos.size());
 
                 vertexMap[vert] = numberOfVertexPos - 1;

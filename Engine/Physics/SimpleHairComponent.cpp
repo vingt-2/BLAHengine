@@ -117,10 +117,10 @@ void SimpleHairComponent::Update()
 {
     StepHair();
 
-	if(m_renderDebug)
-	{
-		DebugRenderSimpleHair();
-	}
+    if(m_renderDebug)
+    {
+        DebugRenderSimpleHair();
+    }
 }
 
 void SimpleHairComponent::PushForceWorld(blaVec3 pushAtW, blaVec3 forceW)

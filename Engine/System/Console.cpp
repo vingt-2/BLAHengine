@@ -136,17 +136,17 @@ Console::Console() : m_historyCursor(0), m_currentRegisteringLibrary(BlaStringId
 
 void Console::LogMessage(const blaString& message)
 {
-	GetSingletonInstance()->InstanceLogMessage(message);
+    GetSingletonInstance()->InstanceLogMessage(message);
 }
 
 void Console::LogWarning(const blaString& warning)
 {
-	GetSingletonInstance()->InstanceLogWarning(warning);
+    GetSingletonInstance()->InstanceLogWarning(warning);
 }
 
 void Console::LogError(const blaString& error)
 {
-	GetSingletonInstance()->InstanceLogError(error);
+    GetSingletonInstance()->InstanceLogError(error);
 }
 
 ConsoleCommandEntry::ConsoleCommandEntry(blaString name) : m_name(name)
@@ -170,7 +170,7 @@ BLACORE_API T BLA::blaFromString(const blaString& str)
 template <typename T>
 BLACORE_API blaString BLA::blaToString(T t)
 {
-	return std::to_string(t);
+    return std::to_string(t);
 }
 
 template<>

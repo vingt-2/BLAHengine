@@ -7,13 +7,13 @@
 namespace BLA
 {
     BeginComponentDeclaration(BLAEngine, DirectionalLightComponent)
-	
+
         void Init() override;
         void Shutdown() override;
-        void Update();	
-	
+        void Update();    
+
     private:
         int m_renderTicket;
-	
+
     EndComponentDeclaration()
 }

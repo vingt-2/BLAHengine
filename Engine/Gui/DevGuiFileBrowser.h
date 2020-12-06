@@ -29,9 +29,9 @@ namespace BLA
         BLACORE_API BlaFileBrowser(blaString browserName,
                        blaString filesDirectory,
                        blaString directoryDirectory);
-    	
+        
         BLACORE_API blaBool IsBrowsingCancelled() const;
-    	
+        
         virtual void Render();
     protected:
 
@@ -57,12 +57,12 @@ namespace BLA
     {
     public:
         BLACORE_API OpenFilePrompt(blaString browserName,
-	                   blaString filesDirectory,
-	                   blaString directoryDirectory,
-	                   blaBool disableMultipleSelection);
-    	
+                       blaString filesDirectory,
+                       blaString directoryDirectory,
+                       blaBool disableMultipleSelection);
+        
         BLACORE_API blaBool GetConfirmedSelection(blaVector<FileEntry>& selection) const;
-    	
+        
         void Render() override;
     };
 
@@ -70,10 +70,10 @@ namespace BLA
     {
     public:
         BLACORE_API SaveFilePrompt(blaString browserName,
-	                   blaString filesDirectory,
-	                   blaString directoryDirectory);
+                       blaString filesDirectory,
+                       blaString directoryDirectory);
         BLACORE_API blaBool GetConfirmedSavePath(blaString& savePath) const;
-    	
+        
         void Render() override;
 
     private:

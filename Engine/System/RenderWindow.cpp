@@ -2,10 +2,15 @@
 
 #include "RenderWindow.h"
 #include "InputManager.h"
-
-#include "System/GraphicsAdapter.h"
+#include "Time.h"
+#include <GLFW/glfw3.h>
 
 using namespace BLA;
+
+blaF32 System::GetSystemTime()
+{
+    return (blaF32)glfwGetTime();
+}
 
 blaVector<GLFWRenderWindow*> GLFWRenderWindow::ms_glfwRenderWindowInstanced = blaVector<GLFWRenderWindow*>();
 

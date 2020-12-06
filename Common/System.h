@@ -45,6 +45,10 @@ namespace BLA
 
 };
 
+#define BLA_THREAD thread_local
+
+#define BLA_TRAP(Condition) BLA_ASSERT(Condition)
+
 #define BLA_ASSERT(Condition) \
 if(!(Condition))          \
 {                       \

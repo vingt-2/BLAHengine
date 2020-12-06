@@ -8,7 +8,7 @@ using namespace Core;
 #define SAFE_SIGNED_INC(i) (i < 0x7FFFFFFF) ? i++ : 0;
 
 BeginComponentDescription(TransformComponent)
-	Expose(m_localTransform)
+    Expose(m_localTransform)
 EndComponentDescription()
 
 // TODO: Make a binding component that is updated individually as a system to allow const GetTransform

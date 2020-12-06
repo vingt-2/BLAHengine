@@ -222,7 +222,7 @@ struct SceneParser : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Scen
                     Console::LogError("Could not find the general BlaStringId(\"GameComponent\") JSON Serializer while loading the scene !");
                     return false;
                 }
-            	
+                
                 m_deserializers.push(componentSerializer->GetSAXDeserializerObject(obj));
                 return true;
             }
@@ -315,5 +315,5 @@ void SceneManager::LoadScene(blaString filepath)
 
 blaString SceneManager::GetCurrentSceneFilePath() const
 {
-	return m_currentSceneFilePath;
+    return m_currentSceneFilePath;
 }

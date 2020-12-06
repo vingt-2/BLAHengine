@@ -11,15 +11,15 @@
 #include "System.h"
 #include "BitArray.h"
 
-#define VENDOR_ID 1356		// The vendor & product ID of HID device to be used:
-#define PRODUCT_ID 1476		//		(Currently Setup for PS4 controller)
+#define VENDOR_ID 1356        // The vendor & product ID of HID device to be used:
+#define PRODUCT_ID 1476        //        (Currently Setup for PS4 controller)
 
-#define ACC_FACTOR 9.8f / 8100.f		// No' of m/s2 per arb unit of acceleration
+#define ACC_FACTOR 9.8f / 8100.f        // No' of m/s2 per arb unit of acceleration
 
-#define GYRO_FACTOR 1.f / 1024.f		// No of rad/s per arb unit of angular velocity
-#define GYRO_ERROR 0.001f			// Estimated error on gyroscope measurement in rad/s
+#define GYRO_FACTOR 1.f / 1024.f        // No of rad/s per arb unit of angular velocity
+#define GYRO_ERROR 0.001f            // Estimated error on gyroscope measurement in rad/s
 
-#define TIME_FACTOR 0.00125f / 188.f	// No' of secs per arb unit of time 
+#define TIME_FACTOR 0.00125f / 188.f    // No' of secs per arb unit of time 
 
 #define DS4_INPUT_REPORT_LENGTH 64
 #define DS4_OUTPUT_REPORT_LENGTH 32
@@ -27,7 +27,7 @@
 #define DEADZONE_SIZE 0.08f
 
 // Indices for controller connected via USB
-#define GX_INDEX 14		
+#define GX_INDEX 14        
 #define GY_INDEX 16
 #define GZ_INDEX 18
 #define DX_INDEX 20

@@ -280,7 +280,7 @@ namespace BLA
         BLAGamepadStateStorage m_gamepadState;
 
         blaBool m_lockInputs;
-    	
+        
         blaBool m_lockMouse, m_lockKeyboard;
 
     public:

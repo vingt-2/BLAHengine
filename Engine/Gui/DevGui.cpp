@@ -12,6 +12,8 @@
 
 #include "System/Vulkan/Context.h"
 #include "Renderer/Vulkan/VulkanRenderer.h"
+#include "Renderer/Gpu/Resource.h"
+#include "Renderer/Gpu/Image.h"
 
 #include "System/RenderWindow.h"
 #include "System/InputManager.h"
@@ -23,8 +25,10 @@
 
 #include <iomanip>
 
+#include "GLFW/glfw3.h"
+
 using namespace BLA;
-using namespace Vulkan;
+using namespace System;
 
 BLA_IMPLEMENT_SINGLETON(DevGuiManager);
 
@@ -334,7 +338,7 @@ void DevGuiElement::Render()
 }
 
 DevGuiCollapsibleElement::DevGuiCollapsibleElement(const blaString& name, blaStringId groupId): DevGuiElement(
-	name, groupId)
+    name, groupId)
 {
 }
 
@@ -351,7 +355,7 @@ void DevGuiCollapsibleElement::Render()
     {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
-	
+    
     if (ImGui::TreeNodeEx((void*)(intptr_t)this, flags, GetName().c_str()))
     {
         if (IsItemDoubleCliked(ImGuiMouseButton_Left))
@@ -364,7 +368,7 @@ void DevGuiCollapsibleElement::Render()
         }
 
         HandleDragDropOfElements();
-    	
+        
         auto child = GetChild();
 
         while (child != nullptr)
@@ -385,7 +389,7 @@ void DevGuiCollapsibleElement::Render()
         {
             SendEvent(DevGuiElementEventPayload::EventType::SELECTED, this);
         }
-    	
+        
         HandleDragDropOfElements();
     }
 }
@@ -432,7 +436,7 @@ void DevGuiEditElement<bool>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     bool value = *m_pToValue;
-	ImGui::Checkbox(("##" + GetName()).c_str(), &value);
+    ImGui::Checkbox(("##" + GetName()).c_str(), &value);
     ImGui::Columns(1);
     if (value != *m_pToValue)
     {
@@ -446,7 +450,7 @@ void DevGuiEditElement<blaF32>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaF32 value = *m_pToValue;
-	ImGui::InputFloat(("##" + GetName()).c_str(), &value, 0.1f, 1.f, "%.7f");
+    ImGui::InputFloat(("##" + GetName()).c_str(), &value, 0.1f, 1.f, "%.7f");
     ImGui::Columns(1);
     if(value != *m_pToValue)
     {
@@ -460,7 +464,7 @@ void DevGuiEditElement<blaF64>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaF64 value = *m_pToValue;
-	ImGui::InputDouble(("##" + GetName()).c_str(), &value, 0.1, 1.0);
+    ImGui::InputDouble(("##" + GetName()).c_str(), &value, 0.1, 1.0);
     ImGui::Columns(1);
     if (value != *m_pToValue)
     {
@@ -474,7 +478,7 @@ void DevGuiEditElement<blaS32>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaS32 value = *m_pToValue;
-	ImGui::InputInt(("##" + GetName()).c_str(), &value, 1, 10);
+    ImGui::InputInt(("##" + GetName()).c_str(), &value, 1, 10);
     ImGui::Columns(1);
     if (value != *m_pToValue)
     {
@@ -488,7 +492,7 @@ void DevGuiEditElement<blaVec2>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaVec2 value = *m_pToValue;
-	ImGui::InputFloat2(("##" + GetName()).c_str(), &(value.x));
+    ImGui::InputFloat2(("##" + GetName()).c_str(), &(value.x));
     ImGui::Columns(1);
     if (value != *m_pToValue)
     {
@@ -502,7 +506,7 @@ void DevGuiEditElement<blaVec3>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaVec3 value = *m_pToValue;
-	ImGui::InputFloat3(("##" + GetName()).c_str(), &(value.x));
+    ImGui::InputFloat3(("##" + GetName()).c_str(), &(value.x));
     ImGui::Columns(1);
     if (value != *m_pToValue)
     {
@@ -516,7 +520,7 @@ void DevGuiEditElement<blaQuat>::Render()
     ImGui::Columns(2, 0, false);
     ImGui::Text(GetName().c_str()); ImGui::NextColumn();
     blaQuat value = *m_pToValue;
-	ImGui::InputFloat4(("##" + GetName()).c_str(), &(value.x));
+    ImGui::InputFloat4(("##" + GetName()).c_str(), &(value.x));
     ImGui::Columns(1);
     if (value != *m_pToValue)
     {
@@ -540,7 +544,7 @@ void DevGuiEditElement<blaPosQuat>::Render()
     if (posValue != m_pToValue->GetTranslation3() || quatValue != m_pToValue->GetRotation())
     {
         blaPosQuat pq(posValue, quatValue);
-    	
+        
         m_onEditFunctor(reinterpret_cast<char*>(&pq), reinterpret_cast<char*>(m_pToValue), sizeof(blaPosQuat));
     }
 }
@@ -614,11 +618,11 @@ void DevGuiEditElement<Core::GameObject>::Render()
 }
 
 DevGuiWindow::DevGuiWindow():
-	m_windowName("")
-	, m_windowPosition(blaIVec2(0))
-	, m_windowFlags(0)
-	, m_rootElement(nullptr)
-	, m_menu(nullptr), m_hasFocus(false), m_bOpenWindow(true)
+    m_windowName("")
+    , m_windowPosition(blaIVec2(0))
+    , m_windowFlags(0)
+    , m_rootElement(nullptr)
+    , m_menu(nullptr), m_hasFocus(false), m_bOpenWindow(true)
 {
 }
 
@@ -651,7 +655,7 @@ void DevGuiWindow::Render()
     {
         m_menu->Render();
     }
-	
+    
     if (m_rootElement)
     {
         m_rootElement->Render();
@@ -665,7 +669,7 @@ void DevGuiWindow::Render()
 
 DevGuiElement* DevGuiWindow::RootElement() const
 {
-	return m_rootElement;
+    return m_rootElement;
 }
 
 void DevGuiWindow::SetRootElement(DevGuiElement* imGuiElements)
@@ -675,7 +679,7 @@ void DevGuiWindow::SetRootElement(DevGuiElement* imGuiElements)
 
 bool DevGuiWindow::HasFocus() const
 {
-	return m_hasFocus;
+    return m_hasFocus;
 }
 
 DevGuiMenu& DevGuiWindow::AddMenu()
@@ -689,7 +693,7 @@ BlaOneTimeWindow::BlaOneTimeWindow(): DevGuiWindow()
 }
 
 BlaOneTimeWindow::BlaOneTimeWindow(const blaString& windowName, const blaIVec2& windowPosition):
-	DevGuiWindow(windowName, windowPosition)
+    DevGuiWindow(windowName, windowPosition)
 {
 }
 
@@ -713,13 +717,53 @@ void BlaOneTimeWindow::Render()
 
 struct BLA::RenderWindowData
 {
+    RenderWindowData()
+    {
+        memset(this, 0, sizeof(RenderWindowData));
+    }
+
     ImTextureID m_offscreenImageTextureId;
+
+    //TODO: For now, devgui.cpp speaks vulkan ... so it's cool to do this, FOR NOW
+    VkImage m_currentImage;
+    VkImageView m_currentImageView;
+    VkSampler m_currentRenderTargetSampler;
 };
 
 
 void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
 {
     const GLFWVulkanRenderWindow* renderWindow = dynamic_cast<const GLFWVulkanRenderWindow*>(renderer->GetRenderWindow());
+
+    VkImage offscreenBufferImage = static_cast<VkImage>(renderer->m_offscreenBuffer.m_color.GetHandle().m_impl.pointer);
+
+    if (offscreenBufferImage == m_renderData->m_currentImage)
+        return;
+
+    if (!renderer->m_offscreenBuffer.m_color->m_allocationHandle.pointer)
+        return;
+
+    m_renderData->m_currentImage = offscreenBufferImage;
+
+    VkDevice device = renderWindow->GetVulkanInterface()->m_device;
+
+    if (m_renderData->m_currentImageView)
+        vkDestroyImageView(device, m_renderData->m_currentImageView, nullptr);
+
+    if (m_renderData->m_currentRenderTargetSampler)
+        vkDestroySampler(device, m_renderData->m_currentRenderTargetSampler, nullptr);
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = static_cast<VkImage>(renderer->m_offscreenBuffer.m_color.GetHandle().m_impl.pointer);
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    vkCreateImageView(device, &viewInfo, nullptr, &m_renderData->m_currentImageView);
 
     // assert renderWindow
 
@@ -740,16 +784,13 @@ void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
     samplerInfo.minLod = 0.0f;
     samplerInfo.maxLod = 0.0f;
 
-    VkSampler sampler;
-    vkCreateSampler(renderWindow->GetVulkanInterface()->m_device, &samplerInfo, nullptr, &sampler);
+    vkCreateSampler(renderWindow->GetVulkanInterface()->m_device, &samplerInfo, nullptr, &m_renderData->m_currentRenderTargetSampler);
 
-    m_renderData->m_offscreenImageTextureId = ImGui_ImplVulkan_AddTexture(sampler, renderer->m_offscreenBuffer.m_color.m_imageView, VK_IMAGE_LAYOUT_GENERAL);
-
-    renderer->m_offscreenBuffer.m_color.m_updated = false;
+    m_renderData->m_offscreenImageTextureId = ImGui_ImplVulkan_AddTexture(m_renderData->m_currentRenderTargetSampler, m_renderData->m_currentImageView, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 DevGuiRenderViewportWindow::DevGuiRenderViewportWindow(VulkanRenderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
-	DevGuiWindow(windowName, windowPosition), m_pRenderer(renderer), m_cursorScreenSpacePosition(), m_renderData(new RenderWindowData())
+    DevGuiWindow(windowName, windowPosition), m_pRenderer(renderer), m_cursorScreenSpacePosition(), m_renderData(new RenderWindowData())
 {
     UpdateDisplayTexture(renderer);
 }
@@ -758,10 +799,7 @@ void DevGuiRenderViewportWindow::Render()
 {
     if (VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(m_pRenderer))
     {
-        if(renderer->m_offscreenBuffer.m_color.m_updated)
-        {
-            UpdateDisplayTexture(renderer);
-        }
+        UpdateDisplayTexture(renderer);   
 
         // BEGIN OCornut's Dear ImGui Specific Code Now
         ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
@@ -770,7 +808,10 @@ void DevGuiRenderViewportWindow::Render()
 
         ImVec2 windowPos = ImGui::GetWindowPos();
 
-        ImGui::Image(m_renderData->m_offscreenImageTextureId, ImGui::GetWindowSize());
+        if (m_renderData->m_offscreenImageTextureId)
+        {
+            ImGui::Image(m_renderData->m_offscreenImageTextureId, ImGui::GetWindowSize());
+        }
 
         ImVec2 cursorInWindow = ImGui::GetCursorPos();
 
@@ -790,7 +831,7 @@ void DevGuiRenderViewportWindow::Render()
 
 blaVec2 DevGuiRenderViewportWindow::GetMousePointerScreenSpaceCoordinates() const
 {
-	return m_cursorScreenSpacePosition;
+    return m_cursorScreenSpacePosition;
 }
 
 bool g_show_demo_window = false;
@@ -952,6 +993,7 @@ void DevGuiManager::Update(bool editorBuild)
         FrameRender(renderWindow->GetVulkanInterface(), renderWindow->GetVulkanWindowInfo());
     }
 
+    // TODO: Handle viewports from within bla itself ... (This is prone to a lot of issues) (+ non portable obv...)
     // Update and Render additional Platform Windows
    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
    //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
@@ -1024,9 +1066,9 @@ blaBool DevGuiManager::CloseFileBrowser(blaString browserName)
 }
 
 DevGuiMenuItem::DevGuiMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator):
-	m_name(name)
-	, m_switch(bool_switch)
-	, m_endWithSeparator(endWithSeparator) {}
+    m_name(name)
+    , m_switch(bool_switch)
+    , m_endWithSeparator(endWithSeparator) {}
 
 void DevGuiMenuItem::Render()
 {
@@ -1047,7 +1089,7 @@ DevGuiMenuTab::~DevGuiMenuTab()
 
 void DevGuiMenuTab::AddMenuItem(blaString name, blaBool* bool_switch, blaBool endWithSeparator)
 {
-	m_menuItems.emplace_back(new DevGuiMenuItem(name, bool_switch, endWithSeparator));
+    m_menuItems.emplace_back(new DevGuiMenuItem(name, bool_switch, endWithSeparator));
 }
 
 DevGuiMenuTab& DevGuiMenuTab::AddSubMenu(blaString name)
@@ -1123,10 +1165,10 @@ blaString StringSanitize(blaString in)
 }
 
 BlaFileBrowser::BlaFileBrowser(blaString browserName, blaString filesDirectory, blaString directoryDirectory):
-	m_name(browserName)
-	, m_currentFilesDirectory(filesDirectory)
-	, m_currentDirectoriesDirectory(directoryDirectory)
-	, m_currentState(BROWSING_FIRST_RENDER), m_disableMultipleSelection(false)
+    m_name(browserName)
+    , m_currentFilesDirectory(filesDirectory)
+    , m_currentDirectoriesDirectory(directoryDirectory)
+    , m_currentState(BROWSING_FIRST_RENDER), m_disableMultipleSelection(false)
 {
 }
 
@@ -1182,9 +1224,9 @@ void BlaFileBrowser::Render()
 
 OpenFilePrompt::OpenFilePrompt(blaString browserName, blaString filesDirectory, blaString directoryDirectory,
                                blaBool disableMultipleSelection):
-	BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+    BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
 {
-	m_disableMultipleSelection = disableMultipleSelection;
+    m_disableMultipleSelection = disableMultipleSelection;
 }
 
 void OpenFilePrompt::Render()
@@ -1240,9 +1282,9 @@ void OpenFilePrompt::Render()
 }
 
 SaveFilePrompt::SaveFilePrompt(blaString browserName, blaString filesDirectory, blaString directoryDirectory):
-	BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
+    BlaFileBrowser(browserName, filesDirectory, directoryDirectory)
 {
-	m_disableMultipleSelection = true;
+    m_disableMultipleSelection = true;
 }
 
 void SaveFilePrompt::Render()

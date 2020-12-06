@@ -1,5 +1,9 @@
-#include "System/RenderWindow.h"
 #include "Context.h"
+#include "System/RenderWindow.h"
+// TODO: Fix this spaghetto
+#include "Renderer/Gpu/Interface.h"
+#include "Renderer/Gpu/Vulkan.h"
+#include <GLFW/glfw3.h>
 
 using namespace BLA;
 using namespace System;
@@ -90,7 +94,7 @@ Vulkan::Context* GLFWVulkanRenderWindow::SetupVulkanInterface(const char** exten
 
 GLFWVulkanRenderWindow::~GLFWVulkanRenderWindow()
 {
-    vkDestroySurfaceKHR(m_vulkanInterface->m_instance, m_vulkanWindowInfo->m_surface, nullptr);
+    vkDestroySurfaceKHR(m_vulkanContext->m_instance, m_vulkanWindowInfo->m_surface, nullptr);
 }
 
 void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
@@ -137,10 +141,10 @@ void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX
     }
     uint32_t extensions_count = 0;
     const char** extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
-    m_vulkanInterface = new Vulkan::Context(extensions, extensions_count);
+    m_vulkanContext = new Vulkan::Context(extensions, extensions_count);
 
     VkSurfaceKHR surface;
-    if (glfwCreateWindowSurface(m_vulkanInterface->m_instance, window, nullptr, &surface) != VK_SUCCESS)
+    if (glfwCreateWindowSurface(m_vulkanContext->m_instance, window, nullptr, &surface) != VK_SUCCESS)
     {
         //TODO: Remove runtime_error throwing
         throw std::runtime_error("failed to create window surface!");
@@ -166,6 +170,8 @@ void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX
     glfwSetDropCallback(window, (GLFWdropfun)GLFWDragAndDropCallBack);
 
     m_glfwWindow = window;
+
+    Gpu::Interface::AssignSingletonInstance(new Gpu::Vulkan(m_vulkanContext));
 }
 
 void GLFWVulkanRenderWindow::UpdateWindowAndBuffers()
@@ -190,14 +196,14 @@ void GLFWVulkanRenderWindow::UpdateWindowAndBuffers()
     info.swapchainCount = 1;
     info.pSwapchains = &m_vulkanWindowInfo->m_swapchain;
     info.pImageIndices = &m_vulkanWindowInfo->m_frameIndex;
-    VkResult err = vkQueuePresentKHR(m_vulkanInterface->m_queue, &info);
+    VkResult err = vkQueuePresentKHR(m_vulkanContext->m_queue, &info);
     Vulkan::Context::HandleError(err);
     m_vulkanWindowInfo->m_semaphoreIndex = (m_vulkanWindowInfo->m_semaphoreIndex + 1) % m_vulkanWindowInfo->m_imageCount; // Now we can use the next set of semaphores
 }
 
 Vulkan::Context* GLFWVulkanRenderWindow::GetVulkanInterface() const
 {
-    return m_vulkanInterface;
+    return m_vulkanContext;
 }
 
 Vulkan::WindowInfo* GLFWVulkanRenderWindow::GetVulkanWindowInfo() const
@@ -214,12 +220,12 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
     VkSwapchainKHR oldSwapchain = m_vulkanWindowInfo->m_swapchain;
 
     // this is a blocking wait to collect frames in flight ...
-    err = vkDeviceWaitIdle(m_vulkanInterface->m_device);
+    err = vkDeviceWaitIdle(m_vulkanContext->m_device);
     Vulkan::Context::HandleError(err);
 
     DestroySwapChainAndCommandBuffers();
 
-    SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(m_vulkanInterface->m_physicalDevice, m_vulkanWindowInfo->m_surface);
+    SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(m_vulkanContext->m_physicalDevice, m_vulkanWindowInfo->m_surface);
 
     VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
@@ -264,18 +270,18 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
     swapChainCreateInfo.clipped = VK_TRUE;
 
     VkSwapchainKHR swapChain;
-    err = vkCreateSwapchainKHR(m_vulkanInterface->m_device, &swapChainCreateInfo, nullptr, &swapChain);
+    err = vkCreateSwapchainKHR(m_vulkanContext->m_device, &swapChainCreateInfo, nullptr, &swapChain);
     Vulkan::Context::HandleError(err);
 
     m_vulkanWindowInfo->m_swapchain = swapChain;
 
-    vkGetSwapchainImagesKHR(m_vulkanInterface->m_device, swapChain, &m_vulkanWindowInfo->m_imageCount, nullptr);
+    vkGetSwapchainImagesKHR(m_vulkanContext->m_device, swapChain, &m_vulkanWindowInfo->m_imageCount, nullptr);
 
     {
         blaVector<VkImage> swapChainImages;
         swapChainImages.resize(m_vulkanWindowInfo->m_imageCount);
         Vulkan::Context::HandleError(vkGetSwapchainImagesKHR(
-            m_vulkanInterface->m_device, 
+            m_vulkanContext->m_device, 
             swapChain, 
             &m_vulkanWindowInfo->m_imageCount, 
             swapChainImages.data()));
@@ -294,7 +300,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
 
     if (oldSwapchain)
     {
-        vkDestroySwapchainKHR(m_vulkanInterface->m_device, oldSwapchain, nullptr);
+        vkDestroySwapchainKHR(m_vulkanContext->m_device, oldSwapchain, nullptr);
     }
         
     {
@@ -314,7 +320,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
         for (size_t i = 0; i < m_vulkanWindowInfo->m_imageCount; i++)
         {
             createInfo.image = m_vulkanWindowInfo->m_frames[i].m_backbuffer;
-            if (vkCreateImageView(m_vulkanInterface->m_device, &createInfo, nullptr, &m_vulkanWindowInfo->m_frames[i].m_backBufferView) != VK_SUCCESS)
+            if (vkCreateImageView(m_vulkanContext->m_device, &createInfo, nullptr, &m_vulkanWindowInfo->m_frames[i].m_backBufferView) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to create image views!");
             }
@@ -334,7 +340,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
         for (uint32_t i = 0; i < m_vulkanWindowInfo->m_imageCount; i++)
         {
             attachment[0] = m_vulkanWindowInfo->m_frames[i].m_backBufferView;
-            VkResult err = vkCreateFramebuffer(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_framebuffer);
+            VkResult err = vkCreateFramebuffer(m_vulkanContext->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_framebuffer);
             Vulkan::Context::HandleError(err);
         }
     }
@@ -350,8 +356,8 @@ void GLFWVulkanRenderWindow::CreateSwapChainCommandBuffers()
             VkCommandPoolCreateInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
             info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-            info.queueFamilyIndex = m_vulkanInterface->m_queueFamily;
-            err = vkCreateCommandPool(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_commandPool);
+            info.queueFamilyIndex = m_vulkanContext->m_queueFamily;
+            err = vkCreateCommandPool(m_vulkanContext->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_commandPool);
             Vulkan::Context::HandleError(err);
         }
         {
@@ -360,22 +366,22 @@ void GLFWVulkanRenderWindow::CreateSwapChainCommandBuffers()
             info.commandPool = m_vulkanWindowInfo->m_frames[i].m_commandPool;
             info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
             info.commandBufferCount = 1;
-            err = vkAllocateCommandBuffers(m_vulkanInterface->m_device, &info, &m_vulkanWindowInfo->m_frames[i].m_commandBuffer);
+            err = vkAllocateCommandBuffers(m_vulkanContext->m_device, &info, &m_vulkanWindowInfo->m_frames[i].m_commandBuffer);
             Vulkan::Context::HandleError(err);
         }
         {
             VkFenceCreateInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
             info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-            err = vkCreateFence(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_imageFence);
+            err = vkCreateFence(m_vulkanContext->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_imageFence);
             Vulkan::Context::HandleError(err);
         }
         {
             VkSemaphoreCreateInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-            err = vkCreateSemaphore(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frameSemaphores[i].m_imageAcquiredSemaphore);
+            err = vkCreateSemaphore(m_vulkanContext->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frameSemaphores[i].m_imageAcquiredSemaphore);
             Vulkan::Context::HandleError(err);
-            err = vkCreateSemaphore(m_vulkanInterface->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frameSemaphores[i].m_renderCompleteSemaphore);
+            err = vkCreateSemaphore(m_vulkanContext->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frameSemaphores[i].m_renderCompleteSemaphore);
             Vulkan::Context::HandleError(err);
         }
     }
@@ -388,22 +394,22 @@ void GLFWVulkanRenderWindow::DestroySwapChainAndCommandBuffers()
         // Destroy Frame
         {
             Vulkan::FrameContext* frame = &m_vulkanWindowInfo->m_frames[i];
-            vkDestroyFence(m_vulkanInterface->m_device, frame->m_imageFence, nullptr);
-            vkFreeCommandBuffers(m_vulkanInterface->m_device, frame->m_commandPool, 1, &frame->m_commandBuffer);
-            vkDestroyCommandPool(m_vulkanInterface->m_device, frame->m_commandPool, nullptr);
+            vkDestroyFence(m_vulkanContext->m_device, frame->m_imageFence, nullptr);
+            vkFreeCommandBuffers(m_vulkanContext->m_device, frame->m_commandPool, 1, &frame->m_commandBuffer);
+            vkDestroyCommandPool(m_vulkanContext->m_device, frame->m_commandPool, nullptr);
             frame->m_imageFence = VK_NULL_HANDLE;
             frame->m_commandBuffer = VK_NULL_HANDLE;
             frame->m_commandPool = VK_NULL_HANDLE;
 
-            vkDestroyImageView(m_vulkanInterface->m_device, frame->m_backBufferView, nullptr);
-            vkDestroyFramebuffer(m_vulkanInterface->m_device, frame->m_framebuffer, nullptr);
+            vkDestroyImageView(m_vulkanContext->m_device, frame->m_backBufferView, nullptr);
+            vkDestroyFramebuffer(m_vulkanContext->m_device, frame->m_framebuffer, nullptr);
         }
 
         // Destroy Frame Semaphore
         {
             Vulkan::FrameSemaphore* frame = &m_vulkanWindowInfo->m_frameSemaphores[i];
-            vkDestroySemaphore(m_vulkanInterface->m_device, frame->m_imageAcquiredSemaphore, nullptr);
-            vkDestroySemaphore(m_vulkanInterface->m_device, frame->m_renderCompleteSemaphore, nullptr);
+            vkDestroySemaphore(m_vulkanContext->m_device, frame->m_imageAcquiredSemaphore, nullptr);
+            vkDestroySemaphore(m_vulkanContext->m_device, frame->m_renderCompleteSemaphore, nullptr);
             frame->m_imageAcquiredSemaphore = frame->m_renderCompleteSemaphore = VK_NULL_HANDLE;
         }
     }

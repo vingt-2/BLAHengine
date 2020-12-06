@@ -10,10 +10,10 @@ namespace BLA
     class Timer;
     class RigidBodyComponent;
 
-	class SoftBodyDefinition
-	{
-		
-	};
+    class SoftBodyDefinition
+    {
+        
+    };
 
     class SoftBodySystem
     {
@@ -24,12 +24,12 @@ namespace BLA
         bool m_enableGravity;
         bool m_tieToTime;
 
-		SoftBodySystem(Timer* time);
+        SoftBodySystem(Timer* time);
         ~SoftBodySystem();
 
         void UpdateSystem() {};
         
-    	float GetTimeStep() { return m_timeStep; };
+        float GetTimeStep() { return m_timeStep; };
 
         void SetTimeObject(Timer* time);
 

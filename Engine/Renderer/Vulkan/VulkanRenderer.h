@@ -4,21 +4,14 @@
 #include "StdInclude.h"
 #include "Assets/AssetsManager.h"
 #include "Renderer/Renderer.h"
-#include "System/Vulkan/Context.h"
+#include "Renderer/Gpu/Interface.h"
+#include "Renderer/Gpu/Image.h"
 
 namespace BLA
 {
-    struct TextureView
+    struct OffscreenRenderTarget
     {
-        VkImage m_image;
-        VkImageView m_imageView;
-        VkDeviceMemory m_memory;
-        bool m_updated;
-    };
-
-    struct OffscreenRenderBuffer
-    {
-        TextureView m_color;
+        Gpu::Resource<Gpu::Image> m_color;
     };
 
     struct DirectionalShadowRender;
@@ -31,10 +24,10 @@ namespace BLA
         bool Update() override;
         void SetViewportSize(blaIVec2 viewportSize) override;
         RenderWindow* GetRenderWindow() override;
-        OffscreenRenderBuffer m_offscreenBuffer;
+        OffscreenRenderTarget m_offscreenBuffer;
 
     private:
-        void CreateDisplayBuffers();
+        void CreateOrUpdateRenderTargets();
         GLFWVulkanRenderWindow* m_renderWindow;
     };
 }

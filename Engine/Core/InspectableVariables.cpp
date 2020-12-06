@@ -9,7 +9,7 @@
 namespace BLA::Core::InspectableVariables
 {
 #define DECLARE_PRIMITIVE_DESCRIPTOR(TypeName, TypeStringName)                                          \
-	struct TypeName##Descriptor : ExposedVarTypeDescriptor                                              \
+    struct TypeName##Descriptor : ExposedVarTypeDescriptor                                              \
 {                                                                                                       \
     TypeName##Descriptor() : ExposedVarTypeDescriptor{ BlaStringId(TypeStringName), sizeof(TypeName) }  \
     {}                                                                                                  \

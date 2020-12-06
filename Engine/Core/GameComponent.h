@@ -29,17 +29,17 @@
 #define BeginComponentDeclaration(ProjectName, ComponentName)                                                                       \
     class ComponentName : public BLA::Core::GameComponent {                                                                         \
     friend struct BLA::Core::InspectableVariables::DefaultResolver;                                                                 \
-    BLA_EXPORT(ProjectName) static void InitReflection(BLA::Core::ComponentDescriptor*);								            \
+    BLA_EXPORT(ProjectName) static void InitReflection(BLA::Core::ComponentDescriptor*);                                            \
     BLA_EXPORT(ProjectName) static BLA::Core::GameComponent* Factory(BLA::Core::GameObject obj) { return new ComponentName(obj); }  \
     BLA_EXPORT(ProjectName) ComponentName(BLA::Core::GameObject parentObject);                                                      \
     public:                                                                                                                         \
-	BLA_EXPORT(ProjectName) virtual const BLA::Core::ComponentDescriptor& GetComponentDescriptor() const {		                    \
-		return ms_componentDescriptor; }                                                                                            \
+    BLA_EXPORT(ProjectName) virtual const BLA::Core::ComponentDescriptor& GetComponentDescriptor() const {                            \
+        return ms_componentDescriptor; }                                                                                            \
     BLA_EXPORT(ProjectName) static const BLA::Core::ComponentDescriptor ms_componentDescriptor;                                                
 
 #define EndComponentDeclaration() };
 
-#define BeginComponentDescription(ComponentName)														         \
+#define BeginComponentDescription(ComponentName)                                                                 \
     ComponentName::ComponentName(BLA::Core::GameObject parentObject) : BLA::Core::GameComponent(parentObject) {} \
     const BLA::Core::ComponentDescriptor ComponentName::ms_componentDescriptor{ComponentName::InitReflection};   \
     void ComponentName::InitReflection(BLA::Core::ComponentDescriptor* typeDesc) {                               \
@@ -48,7 +48,7 @@
         typeDesc->size = sizeof(T);                                                                              \
         typeDesc->m_members = {
 
-#define Expose(name)																			            \
+#define Expose(name)                                                                                        \
             {BlaStringId(#name), offsetof(T, name), BLA::Core::InspectableVariables::TypeResolver<decltype(T::name)>::GetDescriptor()},
 
 #define EndComponentDescription()                                                                                                   \

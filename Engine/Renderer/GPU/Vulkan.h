@@ -4,21 +4,33 @@
 
 #include "Interface.h"
 
+// TODO: This public interface isn't very necessary, probably best to be hidden away in the vulkan impl abstract
 namespace BLA
 {
-    namespace GPU
+    namespace System::Vulkan
     {
-        struct BaseBuffer;
+        class Context;
+    }
+
+    namespace Gpu
+    {
+        struct BaseStaticBuffer;
+        struct Image;
+        
         class Vulkan : public Interface
         {
             struct VulkanImplementation;
         public:
+            Vulkan(const System::Vulkan::Context* context);
+
             virtual ResourceHandle Submit(BaseResource* resource);
             virtual void Cancel(ResourceHandle handle);
 
         private:
-            ResourceHandle SubmitStaticBuffer(StaticResource<BaseBuffer>* resource);
+            ResourceHandle SubmitStaticBuffer(Resource<BaseStaticBuffer>& resource);
             void CancelStaticBuffer(ResourceHandle handle);
+
+            ResourceHandle SubmitImage(Resource<Image>& resource);
 
             VulkanImplementation* m_implementation;
         };

@@ -32,7 +32,7 @@ namespace BLA
     {
     public:
 
-    	// TODO: Move to editor ...
+        // TODO: Move to editor ...
         BLACORE_API static Texture2D* LoadBMP(blaString name, blaString filePath);
         BLACORE_API static Texture2D* LoadDDS(blaString name, blaString filePath);
         BLACORE_API static Texture2D* LoadTGA(blaString name, blaString filepath);

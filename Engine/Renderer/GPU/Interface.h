@@ -8,11 +8,11 @@
 
 namespace BLA
 {
-    namespace GPU
+    namespace Gpu
     {
         class Interface
         {
-            BLA_DECLARE_THREAD_SINGLETON(Interface)
+            BLA_DECLARE_THREAD_LOCAL_SINGLETON(Interface)
         public:
             virtual ResourceHandle Submit(BaseResource* resource) = 0;
             virtual void Cancel(ResourceHandle handle) = 0;

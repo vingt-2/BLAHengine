@@ -1,6 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "Timer.h"
+
 using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(Timer)
@@ -27,8 +28,9 @@ float Timer::GetDelta() const
     return m_elapsedTime;
 }
 
-void Timer::Update(blaF32 systemTime)
+void Timer::Update(blaF32 currentTime)
 {
+    blaF32 systemTime = currentTime;
     m_elapsedTime = systemTime - m_time;
 
     m_time = systemTime;

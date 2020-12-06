@@ -6,23 +6,23 @@
 
 namespace BLA
 {
-	class Console;
+    class Console;
 
-	namespace Core
-	{
-		class GameComponentRegistry;
-		class ComponentSystemsRegistry;
-		class BLACORE_API ComponentLibrariesManager
-		{
-		public:
-			virtual void LoadLibraries();
-			virtual void UnloadLibraries();
+    namespace Core
+    {
+        class GameComponentRegistry;
+        class ComponentSystemsRegistry;
+        class BLACORE_API ComponentLibrariesManager
+        {
+        public:
+            virtual void LoadLibraries();
+            virtual void UnloadLibraries();
 
-		protected:
-			static void SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId);
-			static void UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId);
+        protected:
+            static void SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId);
+            static void UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId);
 
-			blaVector<blaPair<blaStringId, void*>> m_loadedLibraries;
-		};
-	}
+            blaVector<blaPair<blaStringId, void*>> m_loadedLibraries;
+        };
+    }
 }

@@ -2,7 +2,7 @@
 
 #include "Interface.h"
 
-namespace BLA::GPU
+namespace BLA::Gpu
 {
-    BLA_IMPLEMENT_THREAD_SINGLETON(Interface)
+    BLA_IMPLEMENT_THREAD_LOCAL_SINGLETON(Interface)
 }

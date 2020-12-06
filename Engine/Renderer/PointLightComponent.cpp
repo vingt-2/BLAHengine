@@ -20,21 +20,21 @@ EndComponentDescription()
 void PointLightComponent::Update()
 {
     m_position = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetPosition();
-	if(m_renderTicket)
-	{
-		if(!m_draw)
-		{
-			//Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
-			m_renderTicket = 0;
-		}
-	}
-	else
-	{
-		if (m_draw)
-		{
-			//m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
-		}
-	}
+    if(m_renderTicket)
+    {
+        if(!m_draw)
+        {
+            //Scene::GetSingletonInstance()->GetRenderingManager()->CancelPointLightTicket(this);
+            m_renderTicket = 0;
+        }
+    }
+    else
+    {
+        if (m_draw)
+        {
+            //m_renderTicket = Scene::GetSingletonInstance()->GetRenderingManager()->RegisterPointLight(this);
+        }
+    }
 }
 
 void PointLightComponent::Init()

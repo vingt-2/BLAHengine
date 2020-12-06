@@ -33,9 +33,9 @@ void PerspectiveCamera::Update()
 
     blaF32 horFovRad = m_attachedCamera->m_fov * DEG_TO_RAD;
     blaF32 vertFovRad = horFovRad / m_aspectRatio;
-	
+    
     m_perspectiveProjection = GetPerspective(horFovRad, vertFovRad, m_attachedCamera->m_nearClipPlane, m_attachedCamera->m_farClipPlane);
-	
+    
     blaMat4 cameraTransformMat;
     m_attachedCamera->m_worldToCamera.GetScaledTransformMatrix(cameraTransformMat);
 

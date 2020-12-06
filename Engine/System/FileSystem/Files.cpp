@@ -92,7 +92,7 @@ void BLA::GetFilesInDirectory(blaVector<FileEntry>& directoryContent, const blaS
 
         if (file.is_reg)
         {
-			entry = ParseFilePath(file.path);
+            entry = ParseFilePath(file.path);
             cf_get_file_time(file.path, (cf_time_t*)&(entry.m_lastEditTime));
             directoryContent.push_back(entry);
         }
@@ -181,11 +181,11 @@ blaString BLA::GetModulePath()
 
 blaString BLA::GetWorkingDir()
 {
-	char buf[256];
-	GetCurrentDirectoryA(256, buf);
-	blaString s = buf;
-	std::replace(s.begin(), s.end(), '\\', '/');
-	return s + "/";
+    char buf[256];
+    GetCurrentDirectoryA(256, buf);
+    blaString s = buf;
+    std::replace(s.begin(), s.end(), '\\', '/');
+    return s + "/";
 }
 
 FileEntry BLA::ParseFilePath(const blaString &filepath)

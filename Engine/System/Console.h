@@ -61,7 +61,7 @@ namespace BLA
     template<typename T>
     BLACORE_API T blaFromString(const blaString& str);
 
-	template<typename T>
+    template<typename T>
     BLACORE_API blaString blaToString(T t);
 
     //template<template<class> class T, typename S>

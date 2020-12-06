@@ -11,37 +11,37 @@
 
 namespace BLA::Core
 {
-	void ComponentLibrariesManager::LoadLibraries()
-	{
-		blaString libFolder = GetWorkingDir() + "Cooked/Libraries/" + blaString(BLA_CONFIGURATION);
+    void ComponentLibrariesManager::LoadLibraries()
+    {
+        blaString libFolder = GetWorkingDir() + "Cooked/Libraries/" + blaString(BLA_CONFIGURATION);
 
-		blaVector<FileEntry> files;
+        blaVector<FileEntry> files;
 
-		GetFilesInDirectory(files, libFolder);
+        GetFilesInDirectory(files, libFolder);
 
-		for (FileEntry& file : files)
-		{
-			if (file.m_extension == ".dll")
-			{
-				LoadLibraryA(file.GetFullPath().c_str());
-			}
-		}
-	}
+        for (FileEntry& file : files)
+        {
+            if (file.m_extension == ".dll")
+            {
+                LoadLibraryA(file.GetFullPath().c_str());
+            }
+        }
+    }
 
-	void ComponentLibrariesManager::UnloadLibraries()
-	{
-	}
+    void ComponentLibrariesManager::UnloadLibraries()
+    {
+    }
 
-	void ComponentLibrariesManager::SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
-	{
-		componentRegistry->m_currentRegisteringLibrary = libraryId;
-		systemsRegistry->m_currentRegisteringLibrary = libraryId;
-		console->m_currentRegisteringLibrary = libraryId;
-	}
+    void ComponentLibrariesManager::SetLoadingLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
+    {
+        componentRegistry->m_currentRegisteringLibrary = libraryId;
+        systemsRegistry->m_currentRegisteringLibrary = libraryId;
+        console->m_currentRegisteringLibrary = libraryId;
+    }
 
-	void ComponentLibrariesManager::UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
-	{
-		componentRegistry->UnloadLibraryComponents(libraryId);
-		console->UnloadConsoleCommandsForLibrary(libraryId);
-	}
+    void ComponentLibrariesManager::UnloadLibrary(GameComponentRegistry* componentRegistry, ComponentSystemsRegistry* systemsRegistry, Console* console, blaStringId libraryId)
+    {
+        componentRegistry->UnloadLibraryComponents(libraryId);
+        console->UnloadConsoleCommandsForLibrary(libraryId);
+    }
 }

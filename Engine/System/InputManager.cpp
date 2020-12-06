@@ -9,34 +9,34 @@ using namespace BLA;
 BLA_IMPLEMENT_SINGLETON(InputManager)
 
 InputManager::InputManager():
-	m_lockInputs(false)
-	, m_lockMouse(false)
-	, m_lockKeyboard(false)
+    m_lockInputs(false)
+    , m_lockMouse(false)
+    , m_lockKeyboard(false)
 {
-	for (blaU32 i = 0; i < BLAKeyboard::BLA_KEY_ENUM_END; ++i)
-	{
-		m_keyboardTimes[i] = 0.f;
-	}
+    for (blaU32 i = 0; i < BLAKeyboard::BLA_KEY_ENUM_END; ++i)
+    {
+        m_keyboardTimes[i] = 0.f;
+    }
 
-	for (blaU32 i = 0; i < BLAMouseButtons::BLA_MOUSE_ENUM_END; ++i)
-	{
-		m_mouseButtonTimes[i] = 0.f;
-	}
+    for (blaU32 i = 0; i < BLAMouseButtons::BLA_MOUSE_ENUM_END; ++i)
+    {
+        m_mouseButtonTimes[i] = 0.f;
+    }
 
-	for (blaU32 i = 0; i < BLAGamepadButtons::BLA_GAMEPAD_ENUM_END; ++i)
-	{
-		m_gamepadTimes[i] = 0.f;
-	}
+    for (blaU32 i = 0; i < BLAGamepadButtons::BLA_GAMEPAD_ENUM_END; ++i)
+    {
+        m_gamepadTimes[i] = 0.f;
+    }
 }
 
 void InputManager::SetKeyboardLock(bool lock)
 {
     m_lockKeyboard = lock;
     // Console::LogMessage("Locking " + std::to_string(lock));
-	//if(lock && GetKeyState(BLA_KEY_DOWN).IsDown())
-	//{
-	//    Console::LogMessage("Uh Oh");
-	//}
+    //if(lock && GetKeyState(BLA_KEY_DOWN).IsDown())
+    //{
+    //    Console::LogMessage("Uh Oh");
+    //}
 }
 
 void InputManager::SetMouseLock(bool lock)

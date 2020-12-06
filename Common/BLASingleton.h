@@ -37,10 +37,26 @@ private:
                    { s_blaSingletonInstance = instance; }                                   \
         return s_blaSingletonInstance; } 
 
-//Todo: Implement per-thread singleton
-#define BLA_DECLARE_THREAD_SINGLETON(CLASSNAME) BLA_DECLARE_SINGLETON(CLASSNAME)
+#define BLA_DECLARE_THREAD_LOCAL_SINGLETON(CLASSNAME)                                       \
+public:                                                                                     \
+    static BLA_THREAD CLASSNAME* s_blaSingletonInstance;                                    \
+    static void AssignSingletonInstance(CLASSNAME* instance);                               \
+    static CLASSNAME* AssignAndReturnSingletonInstance(CLASSNAME* instance);                \
+    static CLASSNAME* GetSingletonInstance();                                               \
+    static const CLASSNAME* GetSingletonInstanceRead();                                     \
+private:
 
-#define BLA_IMPLEMENT_THREAD_SINGLETON(CLASSNAME) BLA_IMPLEMENT_SINGLETON(CLASSNAME)
+#define BLA_IMPLEMENT_THREAD_LOCAL_SINGLETON(CLASSNAME)                                     \
+    BLA_THREAD CLASSNAME* CLASSNAME::s_blaSingletonInstance = nullptr;                      \
+    CLASSNAME* CLASSNAME::GetSingletonInstance(){ return s_blaSingletonInstance; }          \
+    const CLASSNAME* CLASSNAME::GetSingletonInstanceRead() { return s_blaSingletonInstance;}\
+    void CLASSNAME::AssignSingletonInstance(CLASSNAME* instance){                           \
+        if(s_blaSingletonInstance == nullptr)                                               \
+           { s_blaSingletonInstance = instance; } }                                         \
+    CLASSNAME* CLASSNAME::AssignAndReturnSingletonInstance(CLASSNAME* instance){            \
+        if(s_blaSingletonInstance == nullptr)                                               \
+                   { s_blaSingletonInstance = instance; }                                   \
+        return s_blaSingletonInstance; } 
 
 
 //template<class T>

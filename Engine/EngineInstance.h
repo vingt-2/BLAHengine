@@ -56,7 +56,7 @@ namespace BLA
         BLACORE_API virtual void PostEngineUpdate();
         BLACORE_API virtual void TerminateEngine();
         
-		BLACORE_API virtual void InitializeComponentLibrariesManager();
+        BLACORE_API virtual void InitializeComponentLibrariesManager();
 
         BLACORE_API bool ShouldTerminate() const { return m_isTerminationRequested; };
 

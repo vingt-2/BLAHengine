@@ -5,7 +5,7 @@
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "BLASingleton.h"
-#include "GPU/Buffer.h"
+#include "GPU/StaticBuffer.h"
 
 #define VertexAttributes(...) __VA_ARGS__
 #define UniformValues(...) __VA_ARGS__
@@ -53,9 +53,9 @@ namespace BLA
         blaU16 m_uvCount;
 
     protected:
-        const GPU::Buffer<blaU32>* m_indices;
+        const Gpu::StaticBuffer<blaU32>* m_indices;
 
-        BaseRenderPassInstance(const GPU::Buffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount) :
+        BaseRenderPassInstance(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount) :
             m_vaCount(vaCount), m_uvCount(uvCount), m_indices(&indices) {}
 
     public:
@@ -63,7 +63,7 @@ namespace BLA
         {
             //TODO fatal assert i <= vaCount
 
-            const GPU::BaseBuffer* buffer = reinterpret_cast<const GPU::BaseBuffer*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const GPU::BaseBuffer*) * i);
+            const Gpu::BaseStaticBuffer* buffer = reinterpret_cast<const Gpu::BaseStaticBuffer*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * i);
 
             pointerToData = buffer->GetData();
             bufferLength = buffer->GetLength();
@@ -73,7 +73,7 @@ namespace BLA
         {
             //TODO: fatal assert i <= uvCount
 
-            pointerToData = reinterpret_cast<const void*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const GPU::BaseBuffer*) * m_vaCount + sizeof(const void*) * i);
+            pointerToData = reinterpret_cast<const void*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * m_vaCount + sizeof(const void*) * i);
         }
     };
 
@@ -129,7 +129,7 @@ namespace BLA
     class _RenderPassInstanceVAs<T, Ts...> : _RenderPassInstanceVAs<Ts...>
     {
     public:
-        _RenderPassInstanceVAs(const GPU::Buffer<T>& dataVector, const GPU::Buffer<Ts>&... dataVectors) :
+        _RenderPassInstanceVAs(const Gpu::StaticBuffer<T>& dataVector, const Gpu::StaticBuffer<Ts>&... dataVectors) :
             _RenderPassInstanceVAs<Ts...>(dataVectors...),
             m_dataVector(&dataVector)
         {
@@ -138,20 +138,20 @@ namespace BLA
         };
 
         template <size_t k>
-        const GPU::Buffer<typename std::enable_if<k == 0, T>::type>& GetVertexAttributes() const
+        const Gpu::StaticBuffer<typename std::enable_if<k == 0, T>::type>& GetVertexAttributes() const
         {
             return m_dataVector;
         }
 
         template <size_t k>
-        const GPU::Buffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::type>
+        const Gpu::StaticBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferVAType<k, _RenderPassInstanceVAs<T, Ts...>>::type>
             ::type>& GetVertexAttributes() const
         {
             return _RenderPassInstanceVAs<Ts...>::template GetVertexAttributes<k - 1>();
         }
 
     protected:
-        const GPU::Buffer<T>* m_dataVector;
+        const Gpu::StaticBuffer<T>* m_dataVector;
     };
 
     template<typename T, typename... Ts>
@@ -217,7 +217,7 @@ namespace BLA
             typedef typename _RenderPassTemplateHelpers::InferUVType<n, InstanceUniformValues>::type Type;
         };
 
-        _RenderPassInstance(const GPU::Buffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms ...):
+        _RenderPassInstance(const Gpu::StaticBuffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms ...):
             BaseRenderPassInstance(indices, RenderPass::ms_VACount, RenderPass::ms_UVCount), _RenderPassInstanceVAs<VAs...>(vertexAttributes), _RenderPassInstanceUVs<UVs...>(shaderUniforms) {}
     };
 

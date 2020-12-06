@@ -20,12 +20,12 @@ void SAXDeserializerObject::ErrorMessage() const
 
 const JSONSerializer* JSONSerializerManager::GetSerializer(blaStringId typeID, void* obj)
 {
-	Serializers::const_iterator it = ms_serializers.find(typeID);
-	if (it != ms_serializers.end())
-	{
-		return it->second;
-	}
-	return nullptr;
+    Serializers::const_iterator it = ms_serializers.find(typeID);
+    if (it != ms_serializers.end())
+    {
+        return it->second;
+    }
+    return nullptr;
 }
 
 void JSONSerializerManager::__RegisterJSONSerializer(blaStringId type, JSONSerializer* serializer)
@@ -41,13 +41,13 @@ struct JSONSerializerRegistrator
     }
     ~JSONSerializerRegistrator() { delete m_serializer; }
 private:
-	
+    
     JSONSerializer* m_serializer;
 };
 
 //TODO: Much like for the InspectableVariablesGuiElements, add in there a serializer object for vectors of primitives ! (with an exception required for blaBool when using std::vector...)
 #define REGISTER_PRIMITIVE_SERIALIZER(type) \
-	JSONSerializerRegistrator g_##type##Registrator(Core::InspectableVariables::TypeResolver<type>::GetDescriptor()->m_typeID, new type##JSONSerializer());
+    JSONSerializerRegistrator g_##type##Registrator(Core::InspectableVariables::TypeResolver<type>::GetDescriptor()->m_typeID, new type##JSONSerializer());
 
 class BLASerializeWriter : public rapidjson::PrettyWriter<rapidjson::StringBuffer>
 {};
@@ -688,20 +688,20 @@ struct PairJSONSerializer : JSONSerializer
 };
 
 struct GameComponentJSONSerializer : JSONSerializer
-{	
+{    
     void Serialize(void* obj, BLASerializeWriter* writer) const override
     {
-    	//TODO: This here is a bit dangerous. I'd like not to have to trust we pass the right pointer and have a static check...
+        //TODO: This here is a bit dangerous. I'd like not to have to trust we pass the right pointer and have a static check...
         const Core::ComponentDescriptor& desc = reinterpret_cast<Core::GameComponent*>(obj)->GetComponentDescriptor();
         writer->StartObject();
         for (const Core::ComponentDescriptor::ExposedMember& member : desc.m_members)
         {
             writer->Key(ToString(member.m_name).c_str());
             const JSONSerializer* memberSerializer = JSONSerializerManager::GetSerializer(member.m_type->m_typeID, (char*)obj + member.m_offset);
-        	if(!memberSerializer)
-        	{
+            if(!memberSerializer)
+            {
                 Console::LogError("Could not find proper JSON Serializer for type " + ToString(member.m_type->m_typeID) + " while serializing component of type " + ToString(desc.m_typeID) + ".");
-        	}
+            }
             else
             {
                 memberSerializer->Serialize((char*)obj + member.m_offset, writer);
@@ -748,7 +748,7 @@ struct GameComponentJSONSerializer : JSONSerializer
     {
         //TODO: This here is a bit dangerous. I'd like not to have to trust we pass the right pointer and have a static check...
         const Core::ComponentDescriptor& desc = reinterpret_cast<Core::GameComponent*>(obj)->GetComponentDescriptor();
-	    return new TypedDeserializer(obj, &desc);
+        return new TypedDeserializer(obj, &desc);
     }
 };
 

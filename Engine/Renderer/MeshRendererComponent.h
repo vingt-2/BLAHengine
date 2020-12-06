@@ -4,7 +4,7 @@
 #include "StdInclude.h"
 #include "Assets/MeshAsset.h"
 #include "Assets/Material.h"
-#include "Renderer/GPU/Buffer.h"
+#include "Renderer/GPU/StaticBuffer.h"
 
 #include "Core/BehaviorComponent.h"
 
@@ -22,7 +22,7 @@ namespace BLA
 
         blaBool m_Render;
         
-		const blaMat4* GetTransformMatrix() const;
+        const blaMat4* GetTransformMatrix() const;
 
         void Init() override;
         void Shutdown() override;
@@ -33,16 +33,16 @@ namespace BLA
 
     private:
         bool AssignTriangleMesh(MeshAsset* mesh);
-	
+ 
         MeshAsset* m_mesh = nullptr;
         blaMat4 m_modelTransformMatrix;
 
         bool init = false;
         PerspectiveCamera m_camera;
 
-        GPU::Buffer<blaVec3>* m_vertPos = nullptr;
-        GPU::Buffer<blaVec3>* m_vertNormal = nullptr;
-        GPU::Buffer<blaU32>* m_indices = nullptr;
+        Gpu::StaticBuffer<blaVec3>* m_vertPos = nullptr;
+        Gpu::StaticBuffer<blaVec3>* m_vertNormal = nullptr;
+        Gpu::StaticBuffer<blaU32>* m_indices = nullptr;
 
-	EndBehaviorDeclaration()
+    EndBehaviorDeclaration()
 }

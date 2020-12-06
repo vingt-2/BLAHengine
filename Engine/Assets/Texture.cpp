@@ -34,7 +34,7 @@ Texture2D* TextureImport::LoadBMP(blaString resourceName, blaString filePath)
 
     // Open the file
     FILE* file = nullptr;
-	errno_t error = fopen_s(&file, filePath.data(), "rb");
+    errno_t error = fopen_s(&file, filePath.data(), "rb");
     if (!file)
     {
         printf("%s could not be opened.\n", filePath.data());

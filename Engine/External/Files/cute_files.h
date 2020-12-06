@@ -38,9 +38,9 @@
 
 #if !defined(CUTE_FILES_H)
 
-#define CUTE_FILES_WINDOWS	1
-#define CUTE_FILES_MAC		2
-#define CUTE_FILES_UNIX		3
+#define CUTE_FILES_WINDOWS    1
+#define CUTE_FILES_MAC        2
+#define CUTE_FILES_UNIX        3
 
 #if defined(_WIN32)
 #define CUTE_FILES_PLATFORM CUTE_FILES_WINDOWS

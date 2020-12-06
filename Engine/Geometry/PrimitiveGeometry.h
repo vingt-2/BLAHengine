@@ -12,6 +12,6 @@ namespace BLA
         static TriangleMesh MakeSphere(blaF32 radius, bool inverted = false, blaU32 thetaSamples = 32, blaU32 phiSamples = 32);
         static TriangleMesh MakeDisc(blaU32 resolution);
         static TriangleMesh MakeCone(blaU32 resolution);
-		static TriangleMesh MakePlane(blaVec3 normal, blaU32 width, blaU32 height, blaU32 subdivisionDepth);
+        static TriangleMesh MakePlane(blaVec3 normal, blaU32 width, blaU32 height, blaU32 subdivisionDepth);
     };
 };

@@ -12,6 +12,7 @@
 #include "System/Console.h"
 #include "System/InputManager.h"
 #include "System/RenderWindow.h"
+#include "System/Time.h"
 #include "Gui/DevGuiManager.h"
 #include "System/ControllerInputs/Dualshock4.h"
 #include "Core/ComponentLibraries.h"
@@ -91,7 +92,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     m_assetManager = AssetManager::AssignAndReturnSingletonInstance(new AssetManager());
 
-	InitializeComponentLibrariesManager();
+    InitializeComponentLibrariesManager();
 
     blaVector<blaU32> rpIds;
     RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
@@ -120,7 +121,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
 void EngineInstance::PreEngineUpdate()
 {
-    m_timer->Update((float)glfwGetTime());
+    m_timer->Update(System::GetSystemTime());
 }
 
 void EngineInstance::EngineUpdate()
@@ -150,7 +151,7 @@ void EngineInstance::PostEngineUpdate()
 }
 
 void EngineInstance::TerminateEngine()
-{	
+{    
     delete m_inputManager;
     delete m_debug;
     delete m_scene;
@@ -161,14 +162,14 @@ void EngineInstance::TerminateEngine()
     delete m_guiManager;
     delete m_renderWindow;
     delete Core::GameComponentRegistry::GetSingletonInstance();
-	delete m_componentLibrariesManager;
+    delete m_componentLibrariesManager;
 
     GLFWRenderWindow::ShutdownGLFW();
 }
 
 void EngineInstance::InitializeComponentLibrariesManager()
 {
-	m_componentLibrariesManager = new Core::ComponentLibrariesManager();
+    m_componentLibrariesManager = new Core::ComponentLibrariesManager();
 }
 
 bool EngineInstance::LoadNewScene()

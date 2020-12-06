@@ -6,11 +6,12 @@
 
 namespace BLA
 {
-    namespace GPU
+    namespace Gpu
     {
         enum class EResourceType : blaU8
         {
             eStaticBuffer = 0,
+            eImage,
             eEnd
         };
     }

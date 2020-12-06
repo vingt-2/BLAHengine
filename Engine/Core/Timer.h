@@ -21,13 +21,13 @@ namespace BLA
         // TODO: Don't export, this belongs to the engine
         BLACORE_API Timer(glm::uint8 timeBufferSize);
         // TODO: Don't export, this belongs to the engine
-    	BLACORE_API ~Timer();
+        BLACORE_API ~Timer();
 
         BLACORE_API float GetTime() const;
         BLACORE_API float GetDelta() const;
         BLACORE_API float GetFramerate() const;
 
-    	// TODO: Don't export, this belongs to the engine
-        BLACORE_API void Update(blaF32 newTime);
+        // TODO: Don't export, this belongs to the engine
+        BLACORE_API void Update(blaF32 curTime);
     };
 }
