@@ -31,7 +31,7 @@ void RenderPassEditorGui::UpdateRenderPassEditor()
 
     for(blaU32 id : rpIds)
     {
-        if(const RenderPassRegistry::Entry* entry = registry->GetRenderPassEntry(id))
+        if(const RenderPassDescriptor* entry = registry->GetRenderPassEntry(id))
         {
             DevGuiElement* rpElement = new DevGuiCollapsibleElement(blaString(entry->m_name), RENDER_PASS_ELEMENT_GROUP_ID);
             m_renderPassList->AddChild(rpElement);

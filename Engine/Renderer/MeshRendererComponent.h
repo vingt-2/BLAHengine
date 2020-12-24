@@ -40,9 +40,9 @@ namespace BLA
         bool init = false;
         PerspectiveCamera m_camera;
 
-        Gpu::StaticBuffer<blaVec3>* m_vertPos = nullptr;
-        Gpu::StaticBuffer<blaVec3>* m_vertNormal = nullptr;
-        Gpu::StaticBuffer<blaU32>* m_indices = nullptr;
+        Gpu::Resource<Gpu::StaticBuffer<blaVec3>> m_vertPos;
+        Gpu::Resource<Gpu::StaticBuffer<blaVec3>> m_vertNormal;
+        Gpu::Resource<Gpu::StaticBuffer<blaU32>> m_indices;
 
     EndBehaviorDeclaration()
 }

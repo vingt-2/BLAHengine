@@ -64,6 +64,12 @@ namespace BLA
                 return m_resource;
             }
 
+            void operator=(T& resource)
+            {
+                Cancel();
+                *this = Resource<T>(resource);
+            }
+
             Resource() : BaseResource(T::ms_resourceType), m_resource(nullptr) {}
 
             Resource(T& resource) : BaseResource(T::ms_resourceType), m_resource(&resource)

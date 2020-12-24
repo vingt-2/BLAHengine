@@ -35,6 +35,18 @@ private:
     CLASSNAME* CLASSNAME::AssignAndReturnSingletonInstance(CLASSNAME* instance){            \
         if(s_blaSingletonInstance == nullptr)                                               \
                    { s_blaSingletonInstance = instance; }                                   \
+        return s_blaSingletonInstance; }
+
+#define BLA_IMPLEMENT_CONSTRUCT_TEMPLATED_SINGLETON(CLASSNAME, ConstructorCall)                            \
+    template<> CLASSNAME* CLASSNAME::s_blaSingletonInstance = new ConstructorCall;                         \
+    template<> CLASSNAME* CLASSNAME::GetSingletonInstance(){ return s_blaSingletonInstance; }              \
+    template<> const CLASSNAME* CLASSNAME::GetSingletonInstanceRead() { return s_blaSingletonInstance;}    \
+    template<> void CLASSNAME::AssignSingletonInstance(CLASSNAME* instance){                               \
+        if(s_blaSingletonInstance == nullptr)                                                              \
+           { s_blaSingletonInstance = instance; } }                                                        \
+   template<>  CLASSNAME* CLASSNAME::AssignAndReturnSingletonInstance(CLASSNAME* instance){                \
+        if(s_blaSingletonInstance == nullptr)                                                              \
+                   { s_blaSingletonInstance = instance; }                                                  \
         return s_blaSingletonInstance; } 
 
 #define BLA_DECLARE_THREAD_LOCAL_SINGLETON(CLASSNAME)                                       \

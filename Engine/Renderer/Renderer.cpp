@@ -13,10 +13,10 @@ void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, b
 {
     BLA_ASSERT(m_registry.find(id) == m_registry.end());
 
-    m_registry.insert(std::make_pair(id, Entry{ stringId, attachmentCount, vertexAttributesDescriptors, uniformValuesDescriptor }));
+    m_registry.insert(std::make_pair(id, RenderPassDescriptor{ stringId, attachmentCount, nullptr, vertexAttributesDescriptors, uniformValuesDescriptor }));
 }
 
-const RenderPassRegistry::Entry* RenderPassRegistry::GetRenderPassEntry(blaU32 id) const
+const RenderPassDescriptor* RenderPassRegistry::GetRenderPassEntry(blaU32 id) const
 {
     RenderPassRegistryStorage::const_iterator it = m_registry.find(id);
     if(it != m_registry.end())

@@ -56,10 +56,10 @@ namespace BLA
     class VulkanRenderPass : BaseVulkanRenderPass
     {
            protected:
-    VkRenderPass m_vkRenderPass = VK_NULL_HANDLE;
-    VkPipelineLayout m_vkPipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_vkPipeline = VK_NULL_HANDLE;
-    VkDescriptorSetLayout m_vkDescriptorSetLayout = VK_NULL_HANDLE;
+        VkRenderPass m_vkRenderPass = VK_NULL_HANDLE;
+        VkPipelineLayout m_vkPipelineLayout = VK_NULL_HANDLE;
+        VkPipeline m_vkPipeline = VK_NULL_HANDLE;
+        VkDescriptorSetLayout m_vkDescriptorSetLayout = VK_NULL_HANDLE;
         blaVector<VulkanRenderPassInstance> m_currentInstances;
 
         static void CreateIndexBuffer(const System::Vulkan::Context* vulkanInterface, VkDevice device,

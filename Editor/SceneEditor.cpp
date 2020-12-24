@@ -13,7 +13,7 @@
 #include "Physics/ColliderComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 #include "System/FileSystem/Files.h"
-#include "Renderer/MeshRendererComponent.h"
+//#include "Renderer/MeshRendererComponent.h"
 #include "EditorComponentLibrariesManager.h"
 #include "AssetsImport/OBJImport.h"
 #include "Core/TransformComponent.h"
@@ -41,7 +41,7 @@ DefineConsoleCommand(void, MakeSkyObject)
     }
     Core::GameObject skySphereObject = Core::Scene::GetSingletonInstance()->CreateObject(BlaStringId("Sky Sphere"));
 
-    skySphereObject.CreateComponent<MeshRendererComponent>()->m_meshAssetName = "SkySphere";
+    // skySphereObject.CreateComponent<MeshRendererComponent>()->m_meshAssetName = "SkySphere";
     //skySphereObject.GetComponent<MeshRendererComponent>()->MaterialName = "BlankDiffuseMat";
 }
 
@@ -388,7 +388,7 @@ void SceneEditor::EditorUpdate()
 
     if (m_selectedObject.IsValid())
     {
-        if (MeshRendererComponent* meshRenderer = m_selectedObject.GetComponent<MeshRendererComponent>())
+        // if (MeshRendererComponent* meshRenderer = m_selectedObject.GetComponent<MeshRendererComponent>())
         {
             //DebugDraw::DrawArbitraryGeometry(m_selectedObject->GetTransform().GetPosQuat(), m_selectedObject->GetTransform().GetScale(), meshRenderer->m_mesh->m_triangleMesh, blaVec4(BLA::ORANGE, 0.3f));
         }
@@ -550,10 +550,10 @@ bool SceneEditor::ImportMesh(blaString filepath, blaString name) const
     m_assetManager->LoadTriangleMesh(name);
 
     Core::GameObject visualizerObject = m_scene->CreateObject(GenerateBlaStringId(name));
-    MeshRendererComponent* meshRenderer = visualizerObject.CreateComponent<MeshRendererComponent>();
+    // MeshRendererComponent* meshRenderer = visualizerObject.CreateComponent<MeshRendererComponent>();
     //MeshCollider* colliderComp = visualizerObject.CreateComponent<MeshCollider>();
 
-    meshRenderer->m_meshAssetName = name;
+    // meshRenderer->m_meshAssetName = name;
 
     return true;
 }
@@ -756,8 +756,8 @@ DefineConsoleCommand(void, MakeSponza)
     CreateObject("Sponza");
     if (Core::GameObject(BlaStringId("Sponza")).IsValid())
     {
-        MeshRendererComponent* r = Core::GameObject(BlaStringId("Sponza")).CreateComponent<MeshRendererComponent>();
-        r->m_meshAssetName = "sponza";
-        r->m_Render = true;
+        // MeshRendererComponent* r = Core::GameObject(BlaStringId("Sponza")).CreateComponent<MeshRendererComponent>();
+        /*r->m_meshAssetName = "sponza";
+        r->m_Render = true;*/
     }
 }
