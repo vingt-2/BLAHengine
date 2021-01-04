@@ -26,7 +26,7 @@ find_package(OpenGL REQUIRED)
 
 add_library(BLAEngine SHARED ${ENGINE_SOURCE_FILES})
 
-target_link_libraries(BLAEngine PRIVATE glfw PRIVATE glew PRIVATE ${OPENGL_LIBRARIES} PRIVATE vulkan-1.lib)
+target_link_libraries(BLAEngine PRIVATE glfw PRIVATE ${OPENGL_LIBRARIES} PRIVATE vulkan-1.lib)
 
 #TODO: It'd be great to take that down to 11 ... (to of my mind we need to get rid of std::apply)
 set_property(TARGET BLAEngine PROPERTY CXX_STANDARD 17)
