@@ -26,18 +26,9 @@ namespace BLA::Gpu
         return m_elementSize;
     }
 
-    Image::Image(blaIVec2 size, blaSize elementSize) : m_size(size), m_elementSize(static_cast<blaU32>(elementSize))
-    {}
-
-    Image* Image::New(blaIVec2 size, blaSize elementSize)
+    Image::Image(blaIVec2 size, BaseStaticBuffer* buffer) : BaseResource(EResourceType::eImage), m_size(size), m_buffer(buffer), m_elementSize(buffer->GetElementSize())
     {
-        blaU8* storage = (new blaU8[sizeof(Image) + size.x * size.y * elementSize]);
-
-        return new (storage) Image(size, elementSize);
-    }
-
-    void Image::Delete(Image* baseBuffer)
-    {
-        delete baseBuffer;
+        BLA_TRAP(buffer);
+        BLA_TRAP(size.x * size.y == buffer->GetLength());
     }
 }

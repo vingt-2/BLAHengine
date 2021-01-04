@@ -1,19 +1,19 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "StaticBuffer.h"
+#include "Interface.h"
 
 // Handle alignment concerns when required
-
 namespace BLA::Gpu
 {
     const void* BaseStaticBuffer::GetData() const
     {
-        return static_cast<const void*>(this + 1);
+        return m_dataPointer;
     }
 
     void* BaseStaticBuffer::GetData()
     {
-        return static_cast<void*>(this + 1);
+        return m_dataPointer;
     }
 
     blaU32 BaseStaticBuffer::GetLength() const
@@ -26,18 +26,18 @@ namespace BLA::Gpu
         return m_elementSize;
     }
 
-    BaseStaticBuffer::BaseStaticBuffer(blaU32 size)
+    BaseStaticBuffer::BaseStaticBuffer(blaU32 length, blaSize elementSize) : 
+        BaseResource(EResourceType::eStaticBuffer), 
+        m_bufferLength(length), 
+        m_elementSize(static_cast<blaU32>(elementSize))
     {
-        m_bufferLength = size;
+        memset(&m_StagingData, 0, sizeof(StagingData_t));
+        memset(&m_allocationHandle, 0, sizeof(AllocationHandle_t));
+        Interface* gpuInterface = Interface::GetSingletonInstance();
+
+        BLA_ASSERT(gpuInterface);
+
+        gpuInterface->PrepareForStaging(this);
     }
 
-    BaseStaticBuffer* BaseStaticBuffer::New(blaSize length, blaSize elementSize)
-    {
-        return reinterpret_cast<BaseStaticBuffer*>(new blaU8[sizeof(BaseStaticBuffer) + length * elementSize]);
-    }
-
-    void BaseStaticBuffer::Delete(BaseStaticBuffer* baseBuffer)
-    {
-        delete baseBuffer;
-    }
 }

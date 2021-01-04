@@ -1,0 +1,5 @@
+#define IF_INCLUDING_EXTERN_COMPONENT_1 __declspec ( dllimport )
+#define IF_INCLUDING_EXTERN_COMPONENT_0 __declspec ( dllexport )
+
+#define BLA_EXPORT(ProjectName) \
+    __SILLY_MACRO__CAT(IF_INCLUDING_EXTERN_COMPONENT_,__SILLY_MACRO__NOT_EQUAL(ProjectName, BLA_PROJECT_NAME))

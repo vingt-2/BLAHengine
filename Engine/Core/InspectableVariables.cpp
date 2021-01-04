@@ -8,10 +8,11 @@
 
 namespace BLA::Core::InspectableVariables
 {
+    //TODO: Re-add support for type string name (better names for the editor ... but on the editor side ...)
 #define DECLARE_PRIMITIVE_DESCRIPTOR(TypeName, TypeStringName)                                          \
     struct TypeName##Descriptor : ExposedVarTypeDescriptor                                              \
 {                                                                                                       \
-    TypeName##Descriptor() : ExposedVarTypeDescriptor{ BlaStringId(TypeStringName), sizeof(TypeName) }  \
+    TypeName##Descriptor() : ExposedVarTypeDescriptor{ BlaStringId(#TypeName), sizeof(TypeName) }       \
     {}                                                                                                  \
 };                                                                                                      \
 template <>                                                                                             \

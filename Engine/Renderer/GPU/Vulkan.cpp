@@ -1,6 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "Vulkan.h"
+#include "Renderer/GPU/VulkanRenderPass.h"
 #include "System/Vulkan/Context.h"
 
 #define VMA_IMPLEMENTATION
@@ -10,6 +11,8 @@
 #include "Resource.h"
 #include "StaticBuffer.h"
 #include "Image.h"
+
+#pragma optimize("", off)
 
 namespace BLA::Gpu
 { 
@@ -24,6 +27,14 @@ namespace BLA::Gpu
             allocatorInfo.instance = m_vulkanContext->m_instance;
 
             vmaCreateAllocator(&allocatorInfo, &m_allocator);
+
+            VkCommandPoolCreateInfo info = {};
+            info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+            info.queueFamilyIndex = m_vulkanContext->m_queueFamily;
+            vkCreateCommandPool(m_vulkanContext->m_device, &info, nullptr, &m_commandPool);
+
+            m_queue = m_vulkanContext->m_queue;
         }
 
         const System::Vulkan::Context* m_vulkanContext;
@@ -67,11 +78,11 @@ namespace BLA::Gpu
         {
         case EResourceType::eStaticBuffer:
         {
-            return SubmitStaticBuffer(*static_cast<Resource<BaseStaticBuffer>*>(resource));
+            return SubmitStaticBuffer(static_cast<BaseStaticBuffer*>(resource));
         }
         case EResourceType::eImage:
         {
-            return SubmitImage(*static_cast<Resource<Image>*>(resource));
+            return SubmitImage(static_cast<Image*>(resource));
         }
         case EResourceType::eEnd: break;
         default: ;
@@ -87,24 +98,59 @@ namespace BLA::Gpu
 
     }
 
-    ResourceHandle Vulkan::SubmitStaticBuffer(Resource<BaseStaticBuffer>& resource)
+    void Vulkan::PrepareForStaging(BaseResource* resource)
     {
-        VkBuffer stagingBuffer;
+        switch (resource->GetType())
+        {
+        case EResourceType::eStaticBuffer:
+        {
+            BaseStaticBuffer* bufferResource = static_cast<BaseStaticBuffer*>(resource);
+            
+            VkBuffer& stagingBuffer = reinterpret_cast<VkBuffer&>(bufferResource->m_StagingData.pointers[0]);
+            VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_StagingData.pointers[1]);
 
-        blaU32 bufferSize = resource->GetElementSize() * resource->GetLength();
+            blaU32 bufferSize = bufferResource->GetElementSize() * bufferResource->GetLength();
 
-        VmaAllocation stagingAlloc;
-        m_implementation->CreateStagingBuffer(
-            bufferSize,
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            stagingBuffer, stagingAlloc);
+            m_implementation->CreateStagingBuffer(
+                bufferSize,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                stagingBuffer, stagingAlloc);
 
-        void* data;
-        vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &data);
-        memcpy(data, resource->GetData(), bufferSize);
-        vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
+            void* pointer;
+            vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &pointer);
+            Interface::SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
+
+            // memcpy(data, resource->GetData(), bufferSize);
+            // vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
+
+        }
+        case EResourceType::eEnd: break;
+        default:;
+        }
+    }
+
+    RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor)
+    {
+        VulkanRenderPass* renderPass = new VulkanRenderPass();
+        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
+
+       /* renderPass->CreatePipeline(
+            renderPassDescriptor, 
+            m_implementation->m_vulkanContext->m_device, 
+            nullptr, 
+            m_implementation->m_vulkanContext->m_pipelineCache,
+            VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT, */
+
+        return renderPass;
+    }
+
+    ResourceHandle Vulkan::SubmitStaticBuffer(BaseStaticBuffer* resource)
+    {
+        BLA_TRAP(resource->m_StagingData.pointers[0] != nullptr && resource->m_StagingData.pointers[1] != nullptr);
 
         VkBuffer deviceLocalResourceBuffer;
+
+        blaU32 bufferSize = resource->GetElementSize() * resource->GetLength();
 
         m_implementation->CreateDeviceOnlyBuffer(
             bufferSize,
@@ -112,7 +158,7 @@ namespace BLA::Gpu
             deviceLocalResourceBuffer, reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
 
         // Blocking copy call from host visible memory to gpu local (Creates and wait on the command on this thread's queue)
-        m_implementation->CopyBuffer(stagingBuffer, deviceLocalResourceBuffer, bufferSize);
+        m_implementation->CopyBuffer(reinterpret_cast<VkBuffer>(resource->m_StagingData.pointers[0]), deviceLocalResourceBuffer, bufferSize);
 
         ResourceHandle retVal;
         retVal.m_impl.pointer = deviceLocalResourceBuffer;
@@ -120,13 +166,18 @@ namespace BLA::Gpu
         return retVal;
     }
 
-    ResourceHandle Vulkan::SubmitImage(Resource<Image>& resource)
+    ResourceHandle Vulkan::SubmitImage(Image* resource)
     {
         VkImage image;
         m_implementation->CreateImage(
             resource->GetSize(),
             image,
             reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
+
+        m_implementation->CopyBufferToImage(
+            static_cast<VkBuffer>(GetImageBuffer(resource)->m_StagingData.pointers[0]), // <---- Needs a bunch of helper function to extract api specific shit form there ...
+            image,
+            resource->GetSize().x, resource->GetSize().y);
 
         ResourceHandle retVal;
         retVal.m_impl.pointer = image;

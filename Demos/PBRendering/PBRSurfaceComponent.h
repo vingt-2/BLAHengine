@@ -4,7 +4,6 @@
 #include "StdInclude.h"
 #include "Physics/ColliderComponent.h"
 #include "Assets/Material.h"
-#include "Renderer/MeshRendererComponent.h"
 
 namespace BLA
 {

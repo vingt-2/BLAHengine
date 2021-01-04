@@ -11,7 +11,7 @@ namespace BLA
 {
     struct OffscreenRenderTarget
     {
-        Gpu::Resource<Gpu::Image> m_color;
+        Gpu::Image* m_color = nullptr;
     };
 
     struct DirectionalShadowRender;
@@ -27,6 +27,9 @@ namespace BLA
         OffscreenRenderTarget m_offscreenBuffer;
 
     private:
+
+        blaU32 SetupAllRegisteredRenderPasses();
+
         void CreateOrUpdateRenderTargets();
         GLFWVulkanRenderWindow* m_renderWindow;
     };

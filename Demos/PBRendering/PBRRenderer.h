@@ -3,9 +3,11 @@
 #pragma once
 #include "PBRSurfaceComponent.h"
 #include "PBRPhotonMap.h"
+#include "Core/BehaviorComponent.h"
 
 namespace BLA
 {
+    class MeshRendererComponent;
     class PBRRenderer
     {
     public:

@@ -5,13 +5,19 @@
 #include "System.h"
 #include "Maths/Maths.h"
 #include "ResourceTypes.h"
+#include "Resource.h"
+#include "StaticBuffer.h"
 
 namespace BLA
 {
     namespace Gpu
     {
-        struct Image
+        struct BaseStaticBuffer;
+
+        struct Image : BaseResource
         {
+            friend class Interface;
+
             static const EResourceType ms_resourceType = EResourceType::eImage;
 
             const void* GetData() const;
@@ -27,13 +33,11 @@ namespace BLA
                 void* pointer;
             } m_allocationHandle;
 
-            static Image* New(blaIVec2 size, blaSize elementSize);
-            static void Delete(Image* baseBuffer);
-
+            Image(blaIVec2 size, BaseStaticBuffer* buffer);
         protected:
-            Image(blaIVec2 size, blaSize elementSize);
             blaIVec2 m_size;
             blaU32 m_elementSize;
+            BaseStaticBuffer* m_buffer;
         };
     }
 };

@@ -7,6 +7,7 @@
 #include "BLASingleton.h"
 #include "Core/InspectableVariables.h"
 #include "SillyMacros.h"
+#include "ProjectExport.h"
 
 #define INVALID_COMPONENT_ID Core::GameComponentID("", 0)
 
@@ -19,12 +20,6 @@
  *      void SomeComponentPrivateFunction();
  *  END_COMPONENT_DECLARATION()
  */
-
-#define IF_INCLUDING_EXTERN_COMPONENT_1 __declspec ( dllimport )
-#define IF_INCLUDING_EXTERN_COMPONENT_0 __declspec ( dllexport )
-
-#define BLA_EXPORT(ProjectName) \
-    __SILLY_MACRO__CAT(IF_INCLUDING_EXTERN_COMPONENT_,__SILLY_MACRO__NOT_EQUAL(ProjectName, BLA_PROJECT_NAME))
 
 #define BeginComponentDeclaration(ProjectName, ComponentName)                                                                       \
     class ComponentName : public BLA::Core::GameComponent {                                                                         \

@@ -5,7 +5,10 @@
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "BLASingleton.h"
+#include "GPU/RenderPassDescription.h"
 #include "GPU/StaticBuffer.h"
+#include "SillyMacros.h"
+#include "ProjectExport.h"
 
 #define VertexAttributes(...) __VA_ARGS__
 #define UniformValues(...) __VA_ARGS__
@@ -13,25 +16,11 @@
 #define DeclareRenderPass(Name, VertexAttributes, UniformValues, attachmentCount) \
    typedef BLA::RenderPass<COMPILE_TIME_CRC32_STR(#Name), attachmentCount, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>> Name;
 
-#define RegisterRenderPass(Name)                                                                                                \
+#define RegisterRenderPass(Name) \
     BLA_IMPLEMENT_CONSTRUCT_TEMPLATED_SINGLETON(Name, Name(BlaStringId(#Name)))
 
 namespace BLA
 {
-    class BaseRenderPassImplementationDescriptor
-    {
-        
-    };
-
-    struct RenderPassDescriptor
-    {
-        blaStringId m_name;
-        blaU32 m_attachmentCount;
-        BaseRenderPassImplementationDescriptor* m_pToInstanceRenderPassDescriptorPointer;
-        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
-        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
-    };
-
     class BLACORE_API RenderPassAttachment
     {
 
@@ -228,7 +217,7 @@ namespace BLA
     class RenderPass;
 
     template<blaU32 renderPassId, blaS32 attachmentCount, typename... VAs, typename... UVs>
-    class BLACORE_API RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>
+    class RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>
     {
         using type = RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>;
 
@@ -237,9 +226,10 @@ namespace BLA
         static_assert(attachmentCount > 0, "Number of attachments on a RenderPass < 1 is invalid");
 
         RenderPassAttachment m_attachment[attachmentCount];
-        const RenderPassDescriptor* m_pRenderPassDescriptor;
 
     public:
+        const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
+
         typedef _RenderPassInstance<RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>,
                                         _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassInstance;
 
@@ -338,7 +328,7 @@ namespace BLA
     {
         BLA_DECLARE_EXPORTED_SINGLETON(RenderPassRegistry);
 
-        typedef blaMap<blaU32, RenderPassDescriptor> RenderPassRegistryStorage;
+        typedef blaMap<blaU32, Gpu::RenderPassDescriptor> RenderPassRegistryStorage;
         RenderPassRegistryStorage m_registry;
 
     public:
@@ -350,13 +340,15 @@ namespace BLA
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
 
-        BLACORE_API const RenderPassDescriptor* GetRenderPassEntry(blaU32 id) const;
+        BLACORE_API Gpu::RenderPassDescriptor* GetRenderPassEntry(blaU32 id);
+
+        BLACORE_API const Gpu::RenderPassDescriptor* GetRenderPassEntry(blaU32 id) const;
 
         BLACORE_API void GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const;
     };
 
     template <blaU32 renderPassId, blaS32 attachmentCount, typename ... VAs, typename ... UVs>
-    RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS
+    inline RenderPass<renderPassId, attachmentCount, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS
         <UVs...>>::RenderPass(blaStringId id)
     {
         BLA::RenderPassRegistry* registry = BLA::RenderPassRegistry::GetSingletonInstance();

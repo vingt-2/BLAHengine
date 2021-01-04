@@ -16,23 +16,28 @@ namespace BLA
     {
         struct BaseStaticBuffer;
         struct Image;
-        
+        class RenderPassImplementation;
+
         class Vulkan : public Interface
         {
             struct VulkanImplementation;
         public:
             Vulkan(const System::Vulkan::Context* context);
 
-            virtual ResourceHandle Submit(BaseResource* resource);
-            virtual void Cancel(ResourceHandle handle);
-
+            ResourceHandle Submit(BaseResource* resource) override;
+            void Cancel(ResourceHandle handle) override;
+            void PrepareForStaging(BaseResource* resource) override;
+        protected:
+            RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor) override;
         private:
-            ResourceHandle SubmitStaticBuffer(Resource<BaseStaticBuffer>& resource);
+            ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);
             void CancelStaticBuffer(ResourceHandle handle);
 
-            ResourceHandle SubmitImage(Resource<Image>& resource);
+            ResourceHandle SubmitImage(Image* resource);
 
             VulkanImplementation* m_implementation;
+
+
         };
     }
 };

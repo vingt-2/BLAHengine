@@ -37,51 +37,5 @@ namespace BLA
             ResourceHandle m_handle;
             EResourceType m_resourceType;
         };
-
-        template<typename T>
-        struct Resource : BaseResource
-        {
-            // TODO Statically check type validity (can be a primitive type, a gpu buffer, a texture ...)
-            friend class Renderer;
-
-            T* Get()
-            {
-                return m_resource;
-            }
-
-            const T* Get() const
-            {
-                return m_resource;
-            }
-
-            T* operator->()
-            {
-                return m_resource;
-            }
-
-            const T* operator->() const
-            {
-                return m_resource;
-            }
-
-            void operator=(T& resource)
-            {
-                Cancel();
-                *this = Resource<T>(resource);
-            }
-
-            Resource() : BaseResource(T::ms_resourceType), m_resource(nullptr) {}
-
-            Resource(T& resource) : BaseResource(T::ms_resourceType), m_resource(&resource)
-            {}
-
-            ~Resource<T>()
-            {
-                Cancel();
-            }
-
-        private:
-            T* m_resource;
-        };
     }
 };

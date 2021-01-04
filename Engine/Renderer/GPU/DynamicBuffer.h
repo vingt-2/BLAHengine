@@ -4,7 +4,6 @@
 
 #include "System.h"
 #include "ResourceTypes.h"
-#include "Resource.h"
 
 namespace BLA
 {
@@ -12,11 +11,9 @@ namespace BLA
     //TODO: this way resources are first memcpied into a staging buffer ready for transfer
     namespace Gpu
     {
-        struct BaseStaticBuffer : public BaseResource
+        struct BaseDynamicBuffer
         {
-            friend class Interface;
-
-            static const EResourceType ms_resourceType = EResourceType::eStaticBuffer;
+            static const EResourceType ms_resourceType = EResourceType::eDynamicBuffer;
 
             const void* GetData() const;
             void* GetData();
@@ -31,24 +28,20 @@ namespace BLA
                 void* pointer;
             } m_allocationHandle;
 
-            union StagingData_t
-            {
-                blaU64 bits64[2];
-                void* pointers[2];
-            } m_StagingData;
-
         protected:
-            BaseStaticBuffer(blaU32 size, blaSize elementSize);
+            BaseDynamicBuffer(blaU32 length, blaSize elementSize);
             blaU32 m_bufferLength;
             blaU32 m_elementSize;
             void* m_dataPointer;
         };
 
         template<typename T>
-        class StaticBuffer : public BaseStaticBuffer
+        class DynamicBuffer : public BaseDynamicBuffer
         {
+            DynamicBuffer(blaU32 length) : BaseDynamicBuffer(length, sizeof(T)) {}
+
         public:
-            StaticBuffer(blaU32 length) : BaseStaticBuffer(length, sizeof(T)) {}
+            ~DynamicBuffer() = delete;
         };
-    };
+    }
 };

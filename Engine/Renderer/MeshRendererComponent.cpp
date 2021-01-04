@@ -96,25 +96,27 @@ void MeshRendererComponent::Update()
             m_camera.AttachCamera(camera);
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
 
-            m_vertPos = *Gpu::StaticBuffer<blaVec3>::New(rd.m_vertPos.size());
+            m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertPos.size()));
             memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
 
-            m_vertNormal = *Gpu::StaticBuffer<blaVec3>::New(rd.m_vertNormal.size());
+            m_vertNormal = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertNormal.size()));
             memcpy_s(m_vertNormal->GetData(), sizeof(blaVec3) * m_vertNormal->GetLength(), rd.m_vertNormal.data(), rd.m_vertNormal.size() * sizeof(blaVec3));
 
-            m_indices = *Gpu::StaticBuffer<blaU32>::New(rd.m_triangleIndices.size());
+            m_indices = new Gpu::StaticBuffer<blaU32>(static_cast<blaU32>(rd.m_triangleIndices.size()));
             memcpy_s(m_indices->GetData(), sizeof(blaVec3) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaVec3));
 
-            m_vertPos.Submit();
-            m_vertNormal.Submit();
-            m_indices.Submit();
+            m_vertPos->Submit();
+            m_vertNormal->Submit();
+            m_indices->Submit();
 
-            const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos.Get(), *m_vertNormal.Get());
+            const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos, *m_vertNormal);
             const MeshTestRenderPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix());
 
-            MeshTestRenderPass::RenderPassInstance renderPassInstance(*m_indices.Get(), meshVAs, meshUniforms);
+            MeshTestRenderPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
 
-            // renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
+            MeshTestRenderPass::GetSingletonInstance()->m_pRenderPassDescriptor->m_pToInstanceRenderPassDescriptorPointer;
+
+            //renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
         }
     }
 

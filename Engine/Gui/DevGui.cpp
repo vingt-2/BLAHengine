@@ -735,7 +735,7 @@ void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
 {
     const GLFWVulkanRenderWindow* renderWindow = dynamic_cast<const GLFWVulkanRenderWindow*>(renderer->GetRenderWindow());
 
-    VkImage offscreenBufferImage = static_cast<VkImage>(renderer->m_offscreenBuffer.m_color.GetHandle().m_impl.pointer);
+    VkImage offscreenBufferImage = static_cast<VkImage>(renderer->m_offscreenBuffer.m_color->GetHandle().m_impl.pointer);
 
     if (offscreenBufferImage == m_renderData->m_currentImage)
         return;
@@ -755,7 +755,7 @@ void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.image = static_cast<VkImage>(renderer->m_offscreenBuffer.m_color.GetHandle().m_impl.pointer);
+    viewInfo.image = m_renderData->m_currentImage;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

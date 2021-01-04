@@ -11,6 +11,7 @@ namespace BLA
         enum class EResourceType : blaU8
         {
             eStaticBuffer = 0,
+            eDynamicBuffer,
             eImage,
             eEnd
         };

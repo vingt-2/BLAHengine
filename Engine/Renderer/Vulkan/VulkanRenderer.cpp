@@ -7,6 +7,8 @@
 #include "Renderer/Vulkan/VulkanRenderer.h"
 #include "System/RenderWindow.h"
 #include <random>
+#include "Renderer/GPU/StaticBuffer.h"
+#include "Renderer/RenderPass.h"
 
 using namespace BLA;
 
@@ -33,42 +35,45 @@ void VulkanRenderer::SetViewportSize(blaIVec2 renderSize)
     }
 }
 
+blaU32 VulkanRenderer::SetupAllRegisteredRenderPasses()
+{
+    RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
+
+    blaVector<blaU32> ids;
+    registry->GetAllRenderPassIDs(ids);
+
+    blaU32 c = 0;
+    for(blaU32 id : ids)
+    {
+        c++;
+
+        registry->GetRenderPassEntry(id)->m_pToInstanceRenderPassDescriptorPointer = new VulkanRenderPass();
+
+    }
+    return c;
+}
+
 void VulkanRenderer::CreateOrUpdateRenderTargets()
 {
-    if(m_offscreenBuffer.m_color.Get())
+    if(m_offscreenBuffer.m_color)
     {
-        m_offscreenBuffer.m_color.Cancel();
-        Gpu::Image::Delete(m_offscreenBuffer.m_color.Get());
+        m_offscreenBuffer.m_color->Cancel();
+        delete m_offscreenBuffer.m_color;
     }
 
-    Gpu::Image * image = Gpu::Image::New(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), sizeof(blaU32));
+    Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y);
 
-    m_offscreenBuffer.m_color = Gpu::Resource<Gpu::Image>(*image);
+    {
+        std::random_device rd;  //Will be used to obtain a seed for the random number engine
+        std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+        std::uniform_int_distribution<> distrib(0xEF, 0xFF);
+
+        memset(buffer.GetData(), distrib(gen) << 8 | distrib(gen) << 16 | distrib(gen) << 24 | 0xFF, buffer.GetLength() * buffer.GetElementSize());
+    }
+    m_offscreenBuffer.m_color = new Gpu::Image(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), &buffer);
 
     // Submit for now is blocking, so we good ...
-    m_offscreenBuffer.m_color.Submit();
-
-    //std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    //std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    //std::uniform_int_distribution<> distrib(0xFF, 0xEF);
-
-    //blaVector<blaU32> dummydata(m_viewPortExtents.x * m_viewPortExtents.y, distrib(gen) << 8 | distrib(gen) << 16 | distrib(gen) << 24| 0xFF);
-
-    // VkBuffer stagingBuffer;
-    // VkDeviceMemory stagingBufferMemory;
-
-    //  m_renderWindow->GetVulkanInterface()->CreateBuffer(
-    //    sizeof(blaU32) * dummydata.size(),
-    //    VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-    //    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
-    //    stagingBuffer, stagingBufferMemory);
-
-    //void* data;
-    //vkMapMemory(device, stagingBufferMemory, 0, sizeof(blaU32) * dummydata.size(), 0, &data);
-    //memcpy(data, dummydata.data(), static_cast<size_t>(sizeof(blaU32) * dummydata.size()));
-    //vkUnmapMemory(device, stagingBufferMemory);
-
-    // m_renderWindow->GetVulkanInterface()->CopyBufferToImage(stagingBuffer, m_offscreenBuffer.m_color.m_image, m_viewPortExtents.x, m_viewPortExtents.y);
+    m_offscreenBuffer.m_color->Submit();
 }
 
 RenderWindow* VulkanRenderer::GetRenderWindow()

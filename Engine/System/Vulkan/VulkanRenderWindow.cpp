@@ -290,6 +290,7 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
         m_vulkanWindowInfo->m_extent = extent;
 
         m_vulkanWindowInfo->m_frames.resize(m_vulkanWindowInfo->m_imageCount);
+
         for (blaU32 i = 0; i < m_vulkanWindowInfo->m_imageCount; i++)
         {
             m_vulkanWindowInfo->m_frames[i].m_backbuffer = swapChainImages[i];
