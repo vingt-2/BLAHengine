@@ -5,21 +5,37 @@
 #include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
 #include "Assets/AssetsManager.h"
+#include "Gpu/Interface.h"
 
 using namespace BLA;
 
 #include "Core/CameraComponent.h"
-#include "Renderer/Vulkan/VulkanRenderer.h"
 
 DeclareRenderPass(
-    MeshTestRenderPass,
+    MeshGeometryPass,
     VertexAttributes(
-        blaVec3, // Model Pos
-        blaVec3), // normal 
-    UniformValues(blaMat4),
+        blaVec3, // ModelPos
+        blaVec2, // uv
+        blaVec3, // normal
+        blaVec3,  // tangent
+        blaVec3), // bi-tangent
+    UniformValues(
+        blaMat4, // mvp
+        blaMat4), // model
     1)
 
-RegisterRenderPass(MeshTestRenderPass)
+RegisterRenderPass(MeshGeometryPass);
+
+DeclareRenderPass(
+    TestMeshPass,
+    VertexAttributes(
+        blaVec3), // ModelPos
+    UniformValues(
+        blaMat4, // mvp
+        blaMat4), // model
+    1)
+
+RegisterRenderPass(TestMeshPass)
 
 // TODO: Find a better way to register the rendering components ...
 #include "Core/Scene.h"
@@ -88,9 +104,8 @@ void MeshRendererComponent::Update()
 
     if(m_renderTicket == 0 && render)
     {
-        int renderTicket = 1;
-        VulkanRenderer* renderer = nullptr;
-        if(renderer)
+        m_renderTicket = 1;
+
         {
             CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
             m_camera.AttachCamera(camera);
@@ -98,30 +113,31 @@ void MeshRendererComponent::Update()
 
             m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertPos.size()));
             memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
-
-            m_vertNormal = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertNormal.size()));
-            memcpy_s(m_vertNormal->GetData(), sizeof(blaVec3) * m_vertNormal->GetLength(), rd.m_vertNormal.data(), rd.m_vertNormal.size() * sizeof(blaVec3));
-
+            
             m_indices = new Gpu::StaticBuffer<blaU32>(static_cast<blaU32>(rd.m_triangleIndices.size()));
-            memcpy_s(m_indices->GetData(), sizeof(blaVec3) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaVec3));
+            memcpy_s(m_indices->GetData(), sizeof(blaU32) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaU32));
 
             m_vertPos->Submit();
-            m_vertNormal->Submit();
             m_indices->Submit();
 
-            const MeshTestRenderPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos, *m_vertNormal);
-            const MeshTestRenderPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix());
+            const TestMeshPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos);
+            const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix(), *GetTransformMatrix());
 
-            MeshTestRenderPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
-
-            MeshTestRenderPass::GetSingletonInstance()->m_pRenderPassDescriptor->m_pToInstanceRenderPassDescriptorPointer;
-
-            //renderer->GetRenderPassManager()->AddRenderPassInstance<MeshTestRenderPass>(renderPassInstance);
+            TestMeshPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
+        	
+            Gpu::Interface::GetSingletonInstance()->RegisterRenderPassInstance<TestMeshPass>(renderPassInstance);
         }
     }
 
+    blaMat4 transformMatrix;
     if (!GetOwnerObject().IsValid())
-        m_modelTransformMatrix = blaMat4(0);
+    {
+        transformMatrix = blaMat4(0);
+    }
     else
-        GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(m_modelTransformMatrix);
+    {
+        GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(transformMatrix);
+    }
+
+	*m_modelTransformMatrix.GetData() = 
 }

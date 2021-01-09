@@ -13,6 +13,7 @@ namespace BLA
             eStaticBuffer = 0,
             eDynamicBuffer,
             eImage,
+			eShaderProgram,
             eEnd
         };
     }

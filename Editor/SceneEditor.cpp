@@ -2,6 +2,7 @@
 
 #include "SceneEditor.h"
 
+#include "Rendering/Renderer.h"
 #include "System.h"
 #include "Maths/Maths.h"
 #include "Core/Timer.h"
@@ -13,16 +14,14 @@
 #include "Physics/ColliderComponent.h"
 #include "Geometry/PrimitiveGeometry.h"
 #include "System/FileSystem/Files.h"
-//#include "Renderer/MeshRendererComponent.h"
 #include "EditorComponentLibrariesManager.h"
 #include "AssetsImport/OBJImport.h"
 #include "Core/TransformComponent.h"
 #include "Assets/Texture.h"
+#include "Assets/AssetsManager.h"
 #include "System/RenderWindow.h"
 #include "Gui/DevGuiManager.h"
 #include "Gui/DevGuiMenu.h"
-
-#include "Renderer/Vulkan/VulkanRenderer.h"
 
 using namespace BLA;
 

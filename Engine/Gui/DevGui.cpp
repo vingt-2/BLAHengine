@@ -11,9 +11,10 @@
 #include "backends/imgui_impl_vulkan.h"
 
 #include "System/Vulkan/Context.h"
-#include "Renderer/Vulkan/VulkanRenderer.h"
-#include "Renderer/Gpu/Resource.h"
-#include "Renderer/Gpu/Image.h"
+#include "Rendering/Renderer.h"
+#include "Rendering/Gpu/Interface.h"
+#include "Rendering/Gpu/Resource.h"
+#include "Rendering/Gpu/Image.h"
 
 #include "System/RenderWindow.h"
 #include "System/InputManager.h"
@@ -730,9 +731,11 @@ struct BLA::RenderWindowData
     VkSampler m_currentRenderTargetSampler;
 };
 
+#include "Rendering/Gpu/Vulkan.h"
 
-void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
+void DevGuiRenderViewportWindow::UpdateDisplayTexture(Renderer* renderer)
 {
+    //TODO: Why is this vulkan specific ?
     const GLFWVulkanRenderWindow* renderWindow = dynamic_cast<const GLFWVulkanRenderWindow*>(renderer->GetRenderWindow());
 
     VkImage offscreenBufferImage = static_cast<VkImage>(renderer->m_offscreenBuffer.m_color->GetHandle().m_impl.pointer);
@@ -789,7 +792,7 @@ void DevGuiRenderViewportWindow::UpdateDisplayTexture(VulkanRenderer* renderer)
     m_renderData->m_offscreenImageTextureId = ImGui_ImplVulkan_AddTexture(m_renderData->m_currentRenderTargetSampler, m_renderData->m_currentImageView, VK_IMAGE_LAYOUT_GENERAL);
 }
 
-DevGuiRenderViewportWindow::DevGuiRenderViewportWindow(VulkanRenderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
+DevGuiRenderViewportWindow::DevGuiRenderViewportWindow(Renderer* renderer, const blaString& windowName, const blaIVec2& windowPosition):
     DevGuiWindow(windowName, windowPosition), m_pRenderer(renderer), m_cursorScreenSpacePosition(), m_renderData(new RenderWindowData())
 {
     UpdateDisplayTexture(renderer);
@@ -797,9 +800,9 @@ DevGuiRenderViewportWindow::DevGuiRenderViewportWindow(VulkanRenderer* renderer,
 
 void DevGuiRenderViewportWindow::Render()
 {
-    if (VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(m_pRenderer))
+    if (m_pRenderer)
     {
-        UpdateDisplayTexture(renderer);   
+        UpdateDisplayTexture(m_pRenderer);
 
         // BEGIN OCornut's Dear ImGui Specific Code Now
         ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);

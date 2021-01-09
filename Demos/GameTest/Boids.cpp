@@ -15,7 +15,7 @@
 
 #include <random>
 #include "Geometry/PrimitiveGeometry.h"
-#include "Renderer/PointLightComponent.h"
+#include "Rendering/PointLightComponent.h"
 #include "Assets/AssetsManager.h"
 
 namespace BLA

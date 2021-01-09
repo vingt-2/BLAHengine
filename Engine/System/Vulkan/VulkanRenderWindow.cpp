@@ -1,8 +1,8 @@
 #include "Context.h"
 #include "System/RenderWindow.h"
 // TODO: Fix this spaghetto
-#include "Renderer/Gpu/Interface.h"
-#include "Renderer/Gpu/Vulkan.h"
+#include "Rendering/Gpu/Interface.h"
+#include "Rendering/Gpu/Vulkan.h"
 #include <GLFW/glfw3.h>
 
 using namespace BLA;

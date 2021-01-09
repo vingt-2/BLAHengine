@@ -14,7 +14,6 @@ namespace BLA
         class ComponentLibrariesManager;
     }
     class Console;
-    class VulkanRenderer;
     class AssetManager;
     class SceneManager;
     class DebugDraw;
@@ -22,6 +21,7 @@ namespace BLA
     class Timer;
     class InputManager;
     class DevGuiManager;
+    class Renderer;
 
     class EngineInstance
     {
@@ -75,7 +75,7 @@ namespace BLA
         // Required Engine Modules
         Console*      m_console;
 
-        VulkanRenderer* m_renderer;
+        Renderer*     m_renderer;
    
         AssetManager* m_assetManager;
         Core::ComponentLibrariesManager* m_componentLibrariesManager;

@@ -53,6 +53,9 @@ endmacro()
 
 find_path(glm_INCLUDE_DIR glm ${PROJECT_EXTERNAL_DIR}/glm)
 
+# Set the msvc runtime library as Non DLL !
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 if(NOT glm_INCLUDE_DIR OR (NOT EXISTS ${glm_INCLUDE_DIR}))
     # we couldn't find the header files for GLM or they don't exist
     message("Unable to find GLM, fetching the git submodule...")

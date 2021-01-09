@@ -18,8 +18,8 @@
 #include "Core/ComponentLibraries.h"
 #include "Core/ComponentSystems.h"
 #include "EngineInstance.h"
-
-#include "Renderer/Vulkan/VulkanRenderer.h"
+#include "Rendering/Renderer.h"
+#include "Assets/AssetsManager.h"
 
 using namespace BLA;
 
@@ -96,7 +96,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     blaVector<blaU32> rpIds;
     RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
-    m_renderer = new VulkanRenderer(static_cast<GLFWVulkanRenderWindow*>(m_renderWindow));
+    m_renderer = new Renderer(static_cast<GLFWRenderWindow*>(m_renderWindow));
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Renderer/RenderPass.h"
+#include "Rendering/RenderPass.h"
 
 namespace BLA
 {

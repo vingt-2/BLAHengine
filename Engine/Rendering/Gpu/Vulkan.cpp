@@ -1,7 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "Vulkan.h"
-#include "Renderer/GPU/VulkanRenderPass.h"
+#include "Rendering/GPU/VulkanRenderPass.h"
 #include "System/Vulkan/Context.h"
 
 #define VMA_IMPLEMENTATION
@@ -11,6 +11,7 @@
 #include "Resource.h"
 #include "StaticBuffer.h"
 #include "Image.h"
+#include "System/FileSystem/Files.h"
 
 #pragma optimize("", off)
 
@@ -65,6 +66,8 @@ namespace BLA::Gpu
             VkBuffer& buffer, VmaAllocation& allocation) const;
 
         void CreateImage(blaIVec2 size, VkImage& image, VmaAllocation& allocation) const;
+
+        void LoadShaderCode(blaVector<blaU8> shaderCodeBlob, VkShaderModule& shaderModule);
     };
 
     Vulkan::Vulkan(const System::Vulkan::Context* context)
@@ -83,6 +86,10 @@ namespace BLA::Gpu
         case EResourceType::eImage:
         {
             return SubmitImage(static_cast<Image*>(resource));
+        }
+        case EResourceType::eShaderProgram:
+        {
+            return SubmitShaderProgram(static_cast<ShaderProgram*>(resource));
         }
         case EResourceType::eEnd: break;
         default: ;
@@ -129,19 +136,26 @@ namespace BLA::Gpu
         }
     }
 
-    RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor)
+    RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program)
     {
         VulkanRenderPass* renderPass = new VulkanRenderPass();
         renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
 
-       /* renderPass->CreatePipeline(
-            renderPassDescriptor, 
-            m_implementation->m_vulkanContext->m_device, 
-            nullptr, 
+        renderPass->CreatePipeline(
+            renderPassDescriptor,
+            m_implementation->m_vulkanContext->m_device,
+            nullptr,
             m_implementation->m_vulkanContext->m_pipelineCache,
-            VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT, */
+            VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+            static_cast<VkShaderModule>(program.m_shaders[0].GetHandle().m_impl.pointer),
+            static_cast<VkShaderModule>(program.m_shaders[1].GetHandle().m_impl.pointer));
 
         return renderPass;
+    }
+
+    void Vulkan::RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance)
+    {
+        static_cast<VulkanRenderPass*>(descriptor.m_pToInstanceRenderPassDescriptorPointer)->RegisterRenderPassInstance(m_implementation->m_vulkanContext, instance);
     }
 
     ResourceHandle Vulkan::SubmitStaticBuffer(BaseStaticBuffer* resource)
@@ -181,6 +195,19 @@ namespace BLA::Gpu
 
         ResourceHandle retVal;
         retVal.m_impl.pointer = image;
+
+        return retVal;
+    }
+
+    ResourceHandle Vulkan::SubmitShaderProgram(ShaderProgram* program)
+    {
+        blaVector<blaU8> shaderBlob = ReadBlob(program->m_pathToBinaries);
+
+        VkShaderModule shaderModule;
+    	m_implementation->LoadShaderCode(shaderBlob, shaderModule);
+    	
+        ResourceHandle retVal;
+        retVal.m_impl.pointer = shaderModule;
 
         return retVal;
     }
@@ -366,5 +393,18 @@ namespace BLA::Gpu
         allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
         vmaCreateImage(m_allocator, &imageCreateInfo, &allocInfo, &image, &allocation, nullptr);
+    }
+
+    void Vulkan::VulkanImplementation::LoadShaderCode(blaVector<blaU8> shaderCodeBlob, VkShaderModule& shaderModule)
+    {
+        VkShaderModuleCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        createInfo.codeSize = shaderCodeBlob.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCodeBlob.data());
+
+        if (vkCreateShaderModule(m_vulkanContext->m_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) 
+        {
+            throw std::runtime_error("failed to create shader module!");
+        }
     }
 }

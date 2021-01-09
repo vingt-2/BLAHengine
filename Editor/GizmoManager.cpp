@@ -4,7 +4,7 @@
 #include "EditorCommands.h"
 #include "Core/DebugDraw.h"
 #include "Core/Scene.h"
-#include "Renderer/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "SceneEditor.h"
 #include "System/Console.h"
 #include "System/InputManager.h"

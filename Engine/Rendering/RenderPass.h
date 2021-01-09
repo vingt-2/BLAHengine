@@ -7,6 +7,7 @@
 #include "BLASingleton.h"
 #include "GPU/RenderPassDescription.h"
 #include "GPU/StaticBuffer.h"
+#include "GPU/DynamicBuffer.h"
 #include "SillyMacros.h"
 #include "ProjectExport.h"
 
@@ -36,33 +37,34 @@ namespace BLA
     class BaseRenderPassInstance
     {
         friend class Renderer;
-
-        blaU16 m_vaCount;
-        blaU16 m_uvCount;
-
+    
     protected:
-        const Gpu::StaticBuffer<blaU32>* m_indices;
-
+    	
         BaseRenderPassInstance(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount) :
             m_vaCount(vaCount), m_uvCount(uvCount), m_indices(&indices) {}
 
     public:
-        void GetVertexAttribute(blaU32 i, const void*& pointerToData, blaSize& bufferLength)
+    	
+        void GetVertexAttributeBuffer(blaU32 i, const Gpu::BaseStaticBuffer*& buffer) const
         {
             //TODO fatal assert i <= vaCount
 
-            const Gpu::BaseStaticBuffer* buffer = reinterpret_cast<const Gpu::BaseStaticBuffer*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * i);
-
-            pointerToData = buffer->GetData();
-            bufferLength = buffer->GetLength();
+            buffer = reinterpret_cast<const Gpu::BaseStaticBuffer*>(reinterpret_cast<const blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * i);  
         }
 
-        void GetUniformValuePtr(int i, const void*& pointerToData)
+
+    	// Really should  be a dynamic buffer ...
+        void GetUniformValueBuffer(int i, const Gpu::BaseStaticBuffer*& buffer) const
         {
             //TODO: fatal assert i <= uvCount
 
-            pointerToData = reinterpret_cast<const void*>(reinterpret_cast<blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * m_vaCount + sizeof(const void*) * i);
+            buffer = reinterpret_cast<const Gpu::BaseStaticBuffer*>(reinterpret_cast<const blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * m_vaCount + sizeof(const void*) * i);
         }
+
+        const blaU16 m_vaCount;
+        const blaU16 m_uvCount;
+
+        const Gpu::StaticBuffer<blaU32>* m_indices;
     };
 
     // Only inspectable types should be template arguments to a render pass.
@@ -146,7 +148,7 @@ namespace BLA
     class _RenderPassInstanceUVs<T, Ts...> : public _RenderPassInstanceUVs<Ts...>
     {
     public:
-        _RenderPassInstanceUVs(const T& uniformValue, const Ts&... uniformValues) :
+        _RenderPassInstanceUVs(const Gpu::DynamicBuffer<T>& uniformValue, const Gpu::DynamicBuffer<Ts>&... uniformValues) :
             _RenderPassInstanceUVs<Ts...>(uniformValues...),
             m_uniformValue(&uniformValue)
         {
@@ -161,7 +163,7 @@ namespace BLA
         }
 
         template <size_t k>
-        const typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>::type>::type& GetUniformValue() const
+        const Gpu::DynamicBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>::type>::type>& GetUniformValue() const
         {
             return _RenderPassInstanceUVs<Ts...>::template GetUniformValue<k - 1>();
         }
@@ -173,13 +175,13 @@ namespace BLA
         }
 
         template <size_t k>
-        typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>::type>::type& GetUniformValue()
+        Gpu::DynamicBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassInstanceUVs<T, Ts...>>::type>::type>& GetUniformValue()
         {
             return _RenderPassInstanceUVs<Ts...>::template GetUniformValue<k - 1>();
         }
 
     protected:
-        const T* m_uniformValue;
+        const Gpu::DynamicBuffer<T>* m_uniformValue;
     };
 
     template<typename _RenderPass, class VertexAttributes, class ShaderUniforms>
@@ -188,6 +190,8 @@ namespace BLA
     template<typename _RenderPass, typename... VAs, typename... UVs>
     class _RenderPassInstance<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : BaseRenderPassInstance, public _RenderPassInstanceVAs<VAs...>, public _RenderPassInstanceUVs<UVs...>
     {
+        friend class Gpu::Interface;
+
     public:
         typedef _RenderPassInstanceVAs<VAs...> InstanceVertexAttributes;
         typedef _RenderPassInstanceUVs<UVs...> InstanceUniformValues;
@@ -333,7 +337,7 @@ namespace BLA
 
     public:
 
-        void __RegisterRenderPass(
+        BLACORE_API void __RegisterRenderPass(
             blaStringId name,
             blaU32 id,
             blaU32 attachmentCount,

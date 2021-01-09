@@ -4,14 +4,14 @@
 #include "StdInclude.h"
 #include "Assets/MeshAsset.h"
 #include "Assets/Material.h"
-#include "Renderer/GPU/StaticBuffer.h"
+#include "Rendering/GPU/StaticBuffer.h"
 
 #include "Core/BehaviorComponent.h"
 
 #define BLA_LINE_RENDER 0x0003
 
-#include "Renderer/Renderer.h"
-#include "Renderer\RenderCamera.h"
+#include "Rendering/Renderer.h"
+#include "Rendering\RenderCamera.h"
 
 namespace BLA
 {
@@ -35,13 +35,16 @@ namespace BLA
         bool AssignTriangleMesh(MeshAsset* mesh);
  
         MeshAsset* m_mesh = nullptr;
-        blaMat4 m_modelTransformMatrix;
+        Gpu::DynamicBuffer<blaMat4> m_modelTransformMatrix;
 
         bool init = false;
         PerspectiveCamera m_camera;
 
         Gpu::StaticBuffer<blaVec3>* m_vertPos;
+        Gpu::StaticBuffer<blaVec2>* m_vertUV;
         Gpu::StaticBuffer<blaVec3>* m_vertNormal;
+        Gpu::StaticBuffer<blaVec3>* m_vertTangent;
+        Gpu::StaticBuffer<blaVec3>* m_vertBiTangent;
         Gpu::StaticBuffer<blaU32>* m_indices;
 
     EndBehaviorDeclaration()

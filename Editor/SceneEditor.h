@@ -24,12 +24,7 @@ namespace BLA
     class TriangleMesh;
     struct EditorState;
     class DevGuiTextEditor;
-    /*
-     * Vulkan Test
-     */
-    class VulkanRenderer;
-    class GLFWRenderWindow;
-	
+
     class SceneEditor : public EngineInstance
     {
     public:

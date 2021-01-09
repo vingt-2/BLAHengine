@@ -7,6 +7,7 @@
 #include "Gui/DevGuiTextEditor.h"
 #include "EditorCommands.h"
 #include "Core/Scene.h"
+#include "Rendering/ShaderGenerator.h"
 
 using namespace BLA;
 
@@ -33,6 +34,12 @@ void RenderPassEditorGui::UpdateRenderPassEditor()
     {
         if(const Gpu::RenderPassDescriptor* entry = registry->GetRenderPassEntry(id))
         {
+            ShaderGenerator s;
+            s.m_pDescriptor = entry;
+
+            ShaderCode code;
+            s.GenerateVertexShader(code);
+            m_textEditor->SetText(code.m_code);
             DevGuiElement* rpElement = new DevGuiCollapsibleElement(blaString(entry->m_name), RENDER_PASS_ELEMENT_GROUP_ID);
             m_renderPassList->AddChild(rpElement);
         }

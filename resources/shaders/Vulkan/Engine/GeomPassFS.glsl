@@ -1,17 +1,19 @@
-#version 330
+#version 450
 
-in vec2 TexCoord0;
-in vec3 WorldPos0;
-in mat3 TangentSpace0;
+#extension GL_ARB_separate_shader_objects : enable
+
+layout(location = 0) in vec2 TexCoord0;
+layout(location = 1) in vec3 WorldPos0;
+layout(location = 2) in mat3 TangentSpace0;
 
 layout (location = 0) out vec3 DiffuseOut;
 layout (location = 1) out vec3 NormalOut;
 layout (location = 2) out vec3 WorldPosOut;
 layout (location = 3) out vec3 TexCoordOut;
 
-uniform sampler2D diffuseMap;
-uniform sampler2D normalMap;
-uniform sampler2D alphaMap;
+layout(set = 0, binding = 1) uniform sampler2D diffuseMap;
+layout(set = 0, binding = 2) uniform sampler2D normalMap;
+layout(set = 0, binding = 3) uniform sampler2D alphaMap;
 
 void main()
 {

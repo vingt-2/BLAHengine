@@ -7,6 +7,8 @@
 
 #define VK_CHECK_RESULT(x) x
 
+#pragma optimize("", off)
+
 using namespace BLA;
 
 blaMap<blaStringId, VkFormat> g_typeToFormat =
@@ -63,21 +65,7 @@ VkRect2D BLA::MakeRect2D(
     return rect2D;
 }
 
-void VulkanRenderPassInstance::UpdateUniformBuffersOnDevice(VkDevice device, int frameIndex)
-{
-    for (auto& uniformBuffer : m_uniformBuffers)
-    {
-        void* data;
-        vkMapMemory(device, uniformBuffer.bufferMemories[frameIndex].second, 0, uniformBuffer.size, 0, &data);
-        // We are never using this memory mapping to write on data, it is therefore safe
-
-        memcpy(data, uniformBuffer.data, uniformBuffer.size);
-        vkUnmapMemory(device, uniformBuffer.bufferMemories[frameIndex].second);
-    }
-}
-
-void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::WindowInfo* vulkanWindoInfo,
-                                                  const System::Vulkan::Context* vulkanInterface, VkDevice device,
+void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::Context* vulkanInterface, 
                                                   const BaseRenderPassInstance& rpInstance)
 {
     m_currentInstances.push_back(VulkanRenderPassInstance());
@@ -85,57 +73,42 @@ void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::WindowIn
     VulkanRenderPassInstance& vulkanRenderPassInstance = m_currentInstances[m_currentInstances.size() - 1];
     vulkanRenderPassInstance.m_renderPassInstancePtr = &rpInstance;
 
-    // Create a Vertex Buffer for each Vertex Attribute
-    // This will also copy the vertex data into resident memory
-    /*VulkanRenderPassHelpers::CreateVertexBuffer<typename RenderPass::RenderPassInstance, RenderPass::ms_VACount, RenderPass::ms_VACount>::
-        Create(vulkanInterface, device, rpInstance, vulkanRenderPassInstance.m_vertexBuffers, vulkanRenderPassInstance.m_vertexBufferMemories);*/
-
-    // Create the uniform buffers
-    /*VulkanRenderPassHelpers::CreateUniformBuffers<typename RenderPass::RenderPassInstance, RenderPass::ms_UVCount, RenderPass::ms_UVCount>::
-        Create(static_cast<int>(vulkanWindoInfo->m_frames.size()), vulkanInterface, device, rpInstance, vulkanRenderPassInstance.m_uniformBuffers);*/
-
-    // Create the index buffer
-    // CreateIndexBuffer(vulkanInterface, device, rpInstance, vulkanRenderPassInstance);
-
     // Allocate the descriptor sets for all the uniform
-    std::vector<VkDescriptorSetLayout> layouts(vulkanWindoInfo->m_frames.size(), m_vkDescriptorSetLayout);
+    // std::vector<VkDescriptorSetLayout> layouts(vulkanWindoInfo->m_frames.size(), m_vkDescriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = vulkanInterface->m_descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(vulkanWindoInfo->m_frames.size());
-    allocInfo.pSetLayouts = layouts.data();
+    allocInfo.descriptorSetCount = 1; // ONLY 1 DESCRIPTOR SET (needs to change for several frames in flight)
+    allocInfo.pSetLayouts = &m_vkDescriptorSetLayout;
 
-    vulkanRenderPassInstance.m_descriptorSets.resize(vulkanWindoInfo->m_frames.size());
+    VkResult err = vkAllocateDescriptorSets(vulkanInterface->m_device, &allocInfo, &vulkanRenderPassInstance.m_descriptorSets);
 
-    VkResult err = vkAllocateDescriptorSets(device, &allocInfo, vulkanRenderPassInstance.m_descriptorSets.data());
-
-    for (blaSize i = 0; i < vulkanWindoInfo->m_frames.size(); i++)
+    blaVector<VkDescriptorBufferInfo> bufferInfos(rpInstance.m_uvCount);
+    blaVector<VkWriteDescriptorSet> descriptorWrites(rpInstance.m_uvCount);
+    for (blaU32 i = 0; i < descriptorWrites.size(); i++)
     {
-        blaVector<VkDescriptorBufferInfo> bufferInfos(vulkanRenderPassInstance.m_uniformBuffers.size());
-        blaVector<VkWriteDescriptorSet> descriptorWrites(vulkanRenderPassInstance.m_uniformBuffers.size());
-        for (blaSize j = 0; j < descriptorWrites.size(); j++)
-        {
-            VkDescriptorBufferInfo& bufferInfo = bufferInfos[j];
-            bufferInfo.buffer = vulkanRenderPassInstance.m_uniformBuffers[j].bufferMemories[i].first;
-            bufferInfo.offset = 0;
-            bufferInfo.range = sizeof(vulkanRenderPassInstance.m_uniformBuffers[j].size);
+        const Gpu::BaseStaticBuffer* buffer;
+        rpInstance.GetUniformValueBuffer(i, buffer);
+    	
+        VkDescriptorBufferInfo& bufferInfo = bufferInfos[i];
+        bufferInfo.buffer = reinterpret_cast<VkBuffer>(buffer->GetHandle().m_impl.pointer);
+        bufferInfo.offset = 0;
+        bufferInfo.range = VK_WHOLE_SIZE;
 
-            VkWriteDescriptorSet& descriptorWrite = descriptorWrites[j];
-            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrite.dstSet = vulkanRenderPassInstance.m_descriptorSets[i];
-            descriptorWrite.dstBinding = static_cast<blaU32>(j);
-            // the buffers are ordered in the order they should appear in the shader
-            descriptorWrite.dstArrayElement = 0;
-            descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrite.descriptorCount = 1;
-            descriptorWrite.pBufferInfo = &bufferInfo;
-            descriptorWrite.pImageInfo = nullptr; // Optional
-            descriptorWrite.pTexelBufferView = nullptr; // Optional
-        }
-
-        vkUpdateDescriptorSets(device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0,
-                               nullptr);
+        VkWriteDescriptorSet& descriptorWrite = descriptorWrites[i];
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = vulkanRenderPassInstance.m_descriptorSets;
+        descriptorWrite.dstBinding = static_cast<blaU32>(i);
+        // the buffers are ordered in the order they should appear in the shader
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.pImageInfo = nullptr; // Optional
+        descriptorWrite.pTexelBufferView = nullptr; // Optional
     }
+
+    vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
 
 void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescriptor, VkDevice device,
@@ -342,8 +315,8 @@ void VulkanRenderPass::BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& 
 
         vkCmdBeginRenderPass(vkWindow->m_frames[i].m_commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        VkViewport viewport = MakeViewport((float)vkWindow->m_extent.width, (float)vkWindow->m_extent.height, 0.0f,
-                                           1.0f);
+        VkViewport viewport = MakeViewport(static_cast<float>(vkWindow->m_extent.width), static_cast<float>(vkWindow->m_extent.height), 0.0f, 1.0f);
+    	
         vkCmdSetViewport(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &viewport);
 
         VkRect2D scissor = MakeRect2D(vkWindow->m_extent.width, (blaS32)vkWindow->m_extent.height, 0, 0);
@@ -353,16 +326,23 @@ void VulkanRenderPass::BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& 
 
         for (VulkanRenderPassInstance& instance : renderPassInstance)
         {
-            vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, (blaU32)instance.m_vertexBuffers.size(),
-                                   instance.m_vertexBuffers.data(), nullptr);
+            blaVector<VkBuffer> vertexBuffers(instance.m_renderPassInstancePtr->m_vaCount);
+        	for(blaU16 j = 0; j < instance.m_renderPassInstancePtr->m_vaCount; j++)
+        	{
+                const Gpu::BaseStaticBuffer* b;
+                instance.m_renderPassInstancePtr->GetVertexAttributeBuffer(j, b);
+                vertexBuffers[j] = static_cast<VkBuffer>(b->GetHandle().m_impl.pointer);
+        	}
+        	
+            vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, (blaU32)vertexBuffers.size(), vertexBuffers.data(), nullptr);
 
-            vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, instance.m_indexBuffer.first, 0,
-                                 VkIndexType::VK_INDEX_TYPE_UINT32);
+            VkBuffer indexBuffer = static_cast<VkBuffer>(instance.m_renderPassInstancePtr->m_indices->GetHandle().m_impl.pointer);
+            vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
 
             vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    m_vkPipelineLayout, 0, 1, &instance.m_descriptorSets[i], 0, nullptr);
+                                    m_vkPipelineLayout, 0, 1, &instance.m_descriptorSets, 0, nullptr);
 
-            vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_indexCount, 1, 0, 0, 0);
+            vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_renderPassInstancePtr->m_indices->GetLength(), 1, 0, 0, 0);
         }
 
         vkCmdEndRenderPass(vkWindow->m_frames[i].m_commandBuffer);

@@ -220,3 +220,21 @@ FileEntry BLA::ParseFilePath(const blaString &filepath)
 
     return file;
 }
+
+blaVector<blaU8> BLA::ReadBlob(const blaString filepath)
+{
+    std::ifstream file(filepath, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("failed to open file!");
+    }
+    size_t fileSize = (size_t)file.tellg();
+    std::vector<blaU8> buffer(fileSize);
+
+    file.seekg(0);
+    file.read(reinterpret_cast<char*>(buffer.data()), fileSize);
+
+    file.close();
+
+    return buffer;
+}

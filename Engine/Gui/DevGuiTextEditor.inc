@@ -1118,7 +1118,7 @@ void DevGuiTextEditor::Render()
 		HandleMouseInputs();
 
 	ColorizeInternal();
-	ImGui::SetWindowFontScale(1.15f);
+	ImGui::SetWindowFontScale(1.20f);
 	RenderInternal();
 	ImGui::SetWindowFontScale(1.0f);
 

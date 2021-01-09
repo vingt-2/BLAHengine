@@ -4,6 +4,7 @@
 
 #include "StdInclude.h"
 #include "BLAStringID.h"
+
 namespace BLA
 {
     namespace Core::InspectableVariables

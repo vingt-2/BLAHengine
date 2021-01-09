@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Interface.h"
+#include "RenderPassProgram.h"
 
 // TODO: This public interface isn't very necessary, probably best to be hidden away in the vulkan impl abstract
 namespace BLA
@@ -13,7 +14,7 @@ namespace BLA
     }
 
     namespace Gpu
-    {
+    {    	
         struct BaseStaticBuffer;
         struct Image;
         class RenderPassImplementation;
@@ -28,16 +29,23 @@ namespace BLA
             void Cancel(ResourceHandle handle) override;
             void PrepareForStaging(BaseResource* resource) override;
         protected:
-            RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor) override;
+            RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) override;
+			void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) override;
+        
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);
             void CancelStaticBuffer(ResourceHandle handle);
 
             ResourceHandle SubmitImage(Image* resource);
 
+            ResourceHandle SubmitShaderProgram(ShaderProgram* shaderProgram);
+
             VulkanImplementation* m_implementation;
 
+        public:
+        	// Vulkan specific public stuff that I call externallyt as a temporary wiring
 
+        	
         };
     }
 };

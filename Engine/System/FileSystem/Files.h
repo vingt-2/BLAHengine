@@ -49,4 +49,6 @@ namespace BLA
     blaString BLACORE_API GetWorkingDir();
 
     FileEntry BLACORE_API ParseFilePath(const blaString &filepath);
+
+    blaVector<blaU8> BLACORE_API ReadBlob(const blaString filepath);
 }
