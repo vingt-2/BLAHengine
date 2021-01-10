@@ -30,7 +30,7 @@ namespace BLA
             virtual void Cancel(ResourceHandle handle) = 0;
             virtual void PrepareForStaging(BaseResource* resource) = 0;
 
-            virtual void PrepareDynamicBuffer(BaseResource* resource) = 0;
+            virtual ResourceHandle PrepareDynamicBuffer(BaseResource* resource) = 0;
 
             template<class RenderPass>
             void RegisterRenderPassInstance(const typename RenderPass::RenderPassInstance& instance)

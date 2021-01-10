@@ -28,7 +28,7 @@ namespace BLA
             ResourceHandle Submit(BaseResource* resource) override;
             void Cancel(ResourceHandle handle) override;
             void PrepareForStaging(BaseResource* resource) override;
-			void PrepareDynamicBuffer(BaseResource* resource) override;
+            ResourceHandle PrepareDynamicBuffer(BaseResource* resource) override;
         	
         protected:
             RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) override;

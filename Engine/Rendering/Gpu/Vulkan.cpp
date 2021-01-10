@@ -133,36 +133,40 @@ namespace BLA::Gpu
         }
     }
 
-    void Vulkan::PrepareDynamicBuffer(BaseResource* resource)
+    ResourceHandle Vulkan::PrepareDynamicBuffer(BaseResource* resource)
     {
         switch (resource->GetType())
         {
-        case EResourceType::eDynamicBuffer:
-        {
-            BaseStaticBuffer* bufferResource = static_cast<BaseStaticBuffer*>(resource);
+            case EResourceType::eDynamicBuffer:
+            {
+                BaseDynamicBuffer* bufferResource = static_cast<BaseDynamicBuffer*>(resource);
 
-            VkBuffer& stagingBuffer = reinterpret_cast<VkBuffer&>(bufferResource->m_StagingData.pointers[0]);
-            VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_StagingData.pointers[1]);
+                VkBuffer stagingBuffer;
+                VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_allocationHandle.pointer);
 
-            blaU32 bufferSize = bufferResource->GetElementSize() * bufferResource->GetLength();
+                m_implementation->CreateBuffer(
+                    VMA_MEMORY_USAGE_CPU_TO_GPU,
+                    bufferResource->GetSize(),
+                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                    stagingBuffer, stagingAlloc);
 
-            m_implementation->CreateBuffer(
-                VMA_MEMORY_USAGE_CPU_TO_GPU,
-                bufferSize,
-                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                stagingBuffer, stagingAlloc);
+                void* pointer;
+                vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &pointer);
+                SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
 
-            void* pointer;
-            vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &pointer);
-            Interface::SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
+                ResourceHandle retVal;
+                retVal.m_impl.pointer = stagingBuffer;
 
-            // memcpy(data, resource->GetData(), bufferSize);
-            // vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
+                return retVal;
+                // memcpy(data, resource->GetData(), bufferSize);
+                // vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
 
+            }
+            case EResourceType::eEnd: break;
+            default:;
         }
-        case EResourceType::eEnd: break;
-        default:;
-        }
+
+        return ResourceHandle();
     }
 
     RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program)

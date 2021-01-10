@@ -31,6 +31,6 @@ namespace BLA::Gpu
 
         BLA_ASSERT(gpuInterface);
 
-        gpuInterface->PrepareDynamicBuffer(this);
+        m_handle = gpuInterface->PrepareDynamicBuffer(this);
     }
 }
