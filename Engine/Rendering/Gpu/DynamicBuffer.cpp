@@ -1,6 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "DynamicBuffer.h"
+#include "Interface.h"
 
 // Handle alignment concerns when required
 
@@ -15,18 +16,21 @@ namespace BLA::Gpu
     {
         return m_dataPointer;
     }
-
-    blaU32 BaseDynamicBuffer::GetLength() const
+	
+    blaU32 BaseDynamicBuffer::GetSize() const
     {
-        return m_bufferLength;
+        return m_size;
     }
 
-    blaU32 BaseDynamicBuffer::GetElementSize() const
+    BaseDynamicBuffer::BaseDynamicBuffer(blaSize elementSize) :
+	BaseResource(EResourceType::eDynamicBuffer),
+	m_size(static_cast<blaU32>(elementSize))
     {
-        return m_elementSize;
-    }
+        memset(&m_allocationHandle, 0, sizeof(AllocationHandle_t));
+        Interface* gpuInterface = Interface::GetSingletonInstance();
 
-    BaseDynamicBuffer::BaseDynamicBuffer(blaU32 length, blaSize elementSize) : m_bufferLength(length), m_elementSize(static_cast<blaU32>(elementSize))
-    {
+        BLA_ASSERT(gpuInterface);
+
+        gpuInterface->PrepareDynamicBuffer(this);
     }
 }

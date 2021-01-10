@@ -2,6 +2,7 @@
 
 #include "Interface.h"
 #include "StaticBuffer.h"
+#include "DynamicBuffer.h"
 #include "Image.h"
 
 namespace BLA::Gpu
@@ -9,6 +10,11 @@ namespace BLA::Gpu
     BLA_IMPLEMENT_THREAD_LOCAL_SINGLETON(Interface)
 
     void Interface::SetBufferDataPointer(BaseStaticBuffer* buffer, blaU8* pointer)
+    {
+        buffer->m_dataPointer = pointer;
+    }
+
+    void Interface::SetBufferDataPointer(BaseDynamicBuffer* buffer, blaU8* pointer)
     {
         buffer->m_dataPointer = pointer;
     }

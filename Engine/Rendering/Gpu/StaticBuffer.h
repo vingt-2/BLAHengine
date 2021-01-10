@@ -12,7 +12,7 @@ namespace BLA
     //TODO: this way resources are first memcpied into a staging buffer ready for transfer
     namespace Gpu
     {
-        struct BaseStaticBuffer : public BaseResource
+        struct BaseStaticBuffer : BaseResource
         {
             friend class Interface;
 

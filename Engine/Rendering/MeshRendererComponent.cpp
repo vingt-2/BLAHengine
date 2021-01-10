@@ -58,7 +58,7 @@ bool MeshRendererComponent::AssignTriangleMesh(MeshAsset* mesh)
 
 const blaMat4* MeshRendererComponent::GetTransformMatrix() const
 {
-    return &m_modelTransformMatrix;
+    return m_modelTransformMatrix.GetData();
 }
 
 void MeshRendererComponent::Shutdown()
@@ -121,7 +121,7 @@ void MeshRendererComponent::Update()
             m_indices->Submit();
 
             const TestMeshPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos);
-            const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(*GetTransformMatrix(), *GetTransformMatrix());
+            const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_modelTransformMatrix);
 
             TestMeshPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
         	
@@ -139,5 +139,5 @@ void MeshRendererComponent::Update()
         GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(transformMatrix);
     }
 
-	*m_modelTransformMatrix.GetData() = 
+    *m_modelTransformMatrix.GetData() = transformMatrix;
 }

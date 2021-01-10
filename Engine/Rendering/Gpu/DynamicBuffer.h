@@ -3,22 +3,23 @@
 #pragma once
 
 #include "System.h"
+#include "Resource.h"
 #include "ResourceTypes.h"
 
 namespace BLA
 {
-    //TODO: This honestly should directly be a staging buffer, 
-    //TODO: this way resources are first memcpied into a staging buffer ready for transfer
     namespace Gpu
     {
-        struct BaseDynamicBuffer
+        struct BaseDynamicBuffer : BaseResource
         {
+            friend class Interface;
+
             static const EResourceType ms_resourceType = EResourceType::eDynamicBuffer;
 
             const void* GetData() const;
             void* GetData();
-            blaU32 GetLength() const;
-            blaU32 GetElementSize() const;
+
+            blaU32 GetSize() const;
 
             //TODO Set by current backend
             static blaU32 ms_allocationHandleSize;
@@ -29,19 +30,20 @@ namespace BLA
             } m_allocationHandle;
 
         protected:
-            BaseDynamicBuffer(blaU32 length, blaSize elementSize);
-            blaU32 m_bufferLength;
-            blaU32 m_elementSize;
+            BaseDynamicBuffer(blaSize elementSize);
+
+            blaU32 m_size;
             void* m_dataPointer;
         };
 
         template<typename T>
         class DynamicBuffer : public BaseDynamicBuffer
         {
-            DynamicBuffer(blaU32 length) : BaseDynamicBuffer(length, sizeof(T)) {}
-
         public:
-            ~DynamicBuffer() = delete;
+            DynamicBuffer() : BaseDynamicBuffer(sizeof(T)) {}
+
+            T* GetData() { return static_cast<T*>(m_dataPointer); }
+            const T* GetData() const { return static_cast<const T*>(m_dataPointer); }
         };
     }
 };

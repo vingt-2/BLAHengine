@@ -55,12 +55,8 @@ namespace BLA::Gpu
 
         void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) const;
 
-        void CreateDeviceOnlyBuffer(
-            VkDeviceSize size,
-            VkBufferUsageFlags usage,
-            VkBuffer& buffer, VmaAllocation& allocation) const;
-
-        void CreateStagingBuffer(
+        void CreateBuffer(
+            VmaMemoryUsage memoryUsage,
             VkDeviceSize size,
             VkBufferUsageFlags usage,
             VkBuffer& buffer, VmaAllocation& allocation) const;
@@ -118,7 +114,40 @@ namespace BLA::Gpu
 
             blaU32 bufferSize = bufferResource->GetElementSize() * bufferResource->GetLength();
 
-            m_implementation->CreateStagingBuffer(
+            m_implementation->CreateBuffer(
+                VMA_MEMORY_USAGE_CPU_TO_GPU,
+                bufferSize,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                stagingBuffer, stagingAlloc);
+
+            void* pointer;
+            vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &pointer);
+            Interface::SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
+
+            // memcpy(data, resource->GetData(), bufferSize);
+            // vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
+
+        }
+        case EResourceType::eEnd: break;
+        default:;
+        }
+    }
+
+    void Vulkan::PrepareDynamicBuffer(BaseResource* resource)
+    {
+        switch (resource->GetType())
+        {
+        case EResourceType::eDynamicBuffer:
+        {
+            BaseStaticBuffer* bufferResource = static_cast<BaseStaticBuffer*>(resource);
+
+            VkBuffer& stagingBuffer = reinterpret_cast<VkBuffer&>(bufferResource->m_StagingData.pointers[0]);
+            VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_StagingData.pointers[1]);
+
+            blaU32 bufferSize = bufferResource->GetElementSize() * bufferResource->GetLength();
+
+            m_implementation->CreateBuffer(
+                VMA_MEMORY_USAGE_CPU_TO_GPU,
                 bufferSize,
                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                 stagingBuffer, stagingAlloc);
@@ -165,8 +194,9 @@ namespace BLA::Gpu
         VkBuffer deviceLocalResourceBuffer;
 
         blaU32 bufferSize = resource->GetElementSize() * resource->GetLength();
-
-        m_implementation->CreateDeviceOnlyBuffer(
+        
+        m_implementation->CreateBuffer(
+            VMA_MEMORY_USAGE_GPU_ONLY,
             bufferSize,
             VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             deviceLocalResourceBuffer, reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
@@ -340,11 +370,12 @@ namespace BLA::Gpu
         EndSingleTimeCommands(commandBuffer);
     }
 
-    // TODO: Factor out create buffer logic with the memtype parameter
-    void Vulkan::VulkanImplementation::CreateDeviceOnlyBuffer(
+    void Vulkan::VulkanImplementation::CreateBuffer(
+        VmaMemoryUsage memoryUsage,
         VkDeviceSize size,
         VkBufferUsageFlags usage,
-        VkBuffer& buffer, VmaAllocation& allocation) const
+        VkBuffer& buffer, 
+        VmaAllocation& allocation) const
     {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -353,21 +384,7 @@ namespace BLA::Gpu
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-
-        vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
-    }
-
-    void Vulkan::VulkanImplementation::CreateStagingBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkBuffer& buffer, VmaAllocation& allocation) const
-    {
-        VkBufferCreateInfo bufferInfo{};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = size;
-        bufferInfo.usage = usage;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+        allocInfo.usage = memoryUsage;
 
         vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
     }

@@ -15,6 +15,7 @@ namespace BLA
     {
         struct Image;
         struct BaseStaticBuffer;
+        struct BaseDynamicBuffer;
         struct RenderPassDescriptor;
         struct RenderPassProgram;
     	
@@ -29,6 +30,8 @@ namespace BLA
             virtual void Cancel(ResourceHandle handle) = 0;
             virtual void PrepareForStaging(BaseResource* resource) = 0;
 
+            virtual void PrepareDynamicBuffer(BaseResource* resource) = 0;
+
             template<class RenderPass>
             void RegisterRenderPassInstance(const typename RenderPass::RenderPassInstance& instance)
             {
@@ -37,6 +40,7 @@ namespace BLA
         
         protected:
             static void SetBufferDataPointer(BaseStaticBuffer* buffer, blaU8* pointer);
+            static void SetBufferDataPointer(BaseDynamicBuffer* buffer, blaU8* pointer);
             static BaseStaticBuffer* GetImageBuffer(Image* image);
 
             virtual RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) = 0;
