@@ -49,16 +49,17 @@ namespace BLA
         {
             //TODO fatal assert i <= vaCount
 
-            buffer = reinterpret_cast<const Gpu::BaseStaticBuffer*>(reinterpret_cast<const blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * i);  
+            buffer = *reinterpret_cast<const Gpu::BaseStaticBuffer**>((blaU8*)(this + 1) + sizeof(const Gpu::BaseStaticBuffer**) * i);
         }
 
 
     	// Really should  be a dynamic buffer ...
-        void GetUniformValueBuffer(int i, const Gpu::BaseStaticBuffer*& buffer) const
+        void GetUniformValueBuffer(int i, const Gpu::BaseDynamicBuffer*& buffer) const
         {
             //TODO: fatal assert i <= uvCount
 
-            buffer = reinterpret_cast<const Gpu::BaseStaticBuffer*>(reinterpret_cast<const blaU8*>(this + 1) + sizeof(const Gpu::BaseStaticBuffer*) * m_vaCount + sizeof(const void*) * i);
+            buffer = *reinterpret_cast<const Gpu::BaseDynamicBuffer**>((blaU8*)(this + 1) + sizeof(const Gpu::BaseStaticBuffer**) * m_vaCount + 8 /*Holy shit that's a huge hack. Gotta find a less retarded way to address each buffer*/
+                + sizeof(const Gpu::BaseDynamicBuffer**) * i);
         }
 
         const blaU16 m_vaCount;

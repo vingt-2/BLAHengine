@@ -4,15 +4,17 @@
 
 namespace BLA::System::Vulkan
 {
-    Context::Context(const char** extensions, uint32_t extensions_count)
+    Context::Context(const blaVector<const char*>& extensions, const blaVector<const char*>& layers)
     {
         VkResult err;
         // Create Vulkan Instance
         {
             VkInstanceCreateInfo create_info = {};
             create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-            create_info.enabledExtensionCount = extensions_count;
-            create_info.ppEnabledExtensionNames = extensions;
+            create_info.enabledExtensionCount = static_cast<blaU32>(extensions.size());
+            create_info.ppEnabledExtensionNames = extensions.data();
+            create_info.enabledLayerCount= static_cast<blaU32>(layers.size());
+            create_info.ppEnabledLayerNames = layers.data();
 
             // Create Vulkan Instance without any debug feature
             err = vkCreateInstance(&create_info, m_allocator, &m_instance);

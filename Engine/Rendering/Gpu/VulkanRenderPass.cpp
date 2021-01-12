@@ -87,11 +87,11 @@ void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::Context*
     blaVector<VkWriteDescriptorSet> descriptorWrites(rpInstance.m_uvCount);
     for (blaU32 i = 0; i < descriptorWrites.size(); i++)
     {
-        const Gpu::BaseStaticBuffer* buffer;
+        const Gpu::BaseDynamicBuffer* buffer;
         rpInstance.GetUniformValueBuffer(i, buffer);
     	
         VkDescriptorBufferInfo& bufferInfo = bufferInfos[i];
-        bufferInfo.buffer = reinterpret_cast<VkBuffer>(buffer->GetHandle().m_impl.pointer);
+        bufferInfo.buffer = static_cast<VkBuffer>(buffer->GetHandle().m_impl.pointer);
         bufferInfo.offset = 0;
         bufferInfo.range = VK_WHOLE_SIZE;
 
@@ -207,7 +207,7 @@ void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescr
     {
         Core::InspectableVariables::ExposedVarTypeDescriptor* uvType = renderPassDescriptor.m_uniformValuesDescriptors[i];
         VkDescriptorSetLayoutBinding& descSetLayoutBinding = descSetLayoutBindings[i];
-
+        descSetLayoutBinding.binding = i;
         descSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // TODO: Support other types ...
         descSetLayoutBinding.descriptorCount = 1;
         descSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;

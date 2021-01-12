@@ -8,6 +8,11 @@
 using namespace BLA;
 using namespace System;
 
+
+bool g_enableValidationLayers = true;
+
+#pragma optimize("",off)
+
 struct SwapChainSupportDetails
 {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -86,15 +91,87 @@ static VkExtent2D ChooseSwapExtent(blaU32 desiredHeight, blaU32 desiredWidth, co
     return actualExtent;
 }
 
-Vulkan::Context* GLFWVulkanRenderWindow::SetupVulkanInterface(const char** extensions, uint32_t extensions_count)
-{
-    Vulkan::Context* vulkanInterface = new Vulkan::Context(extensions, extensions_count);
-    return vulkanInterface;
-}
-
 GLFWVulkanRenderWindow::~GLFWVulkanRenderWindow()
 {
     vkDestroySurfaceKHR(m_vulkanContext->m_instance, m_vulkanWindowInfo->m_surface, nullptr);
+}
+
+VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+{
+    PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    if (func != nullptr) 
+    {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }
+    return VK_ERROR_EXTENSION_NOT_PRESENT;
+}
+
+void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    if (func != nullptr) {
+        func(instance, debugMessenger, pAllocator);
+    }
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+
+    return VK_FALSE;
+}
+
+VkDebugUtilsMessengerEXT debugMessenger;
+
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+    createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = debugCallback;
+}
+
+void setupDebugMessenger(VkInstance instance)
+{
+    if (!g_enableValidationLayers) return;
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    populateDebugMessengerCreateInfo(createInfo);
+
+    if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to set up debug messenger!");
+    }
+}
+
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+bool checkValidationLayerSupport()
+{
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    for (const char* layerName : validationLayers) 
+    {
+        bool layerFound = false;
+
+        for (const auto& layerProperties : availableLayers)
+        {
+            if (strcmp(layerName, layerProperties.layerName) == 0) 
+            {
+                layerFound = true;
+                break;
+            }
+        }
+
+        if (!layerFound)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX, int sizeY, bool isFullScreen)
@@ -141,14 +218,41 @@ void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX
     }
     uint32_t extensions_count = 0;
     const char** extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
-    m_vulkanContext = new Vulkan::Context(extensions, extensions_count);
 
+    blaVector<const char*> allExtensions(extensions_count);
+    memcpy_s(allExtensions.data(), sizeof(const char*) * extensions_count, extensions, extensions_count * sizeof(const char*));
+
+    // allExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+	
+	if(g_enableValidationLayers)
+	{
+        allExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+		allExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+		m_vulkanContext = new Vulkan::Context(allExtensions, validationLayers);
+		
+        setupDebugMessenger(m_vulkanContext->m_instance);
+	}
+    else
+    {
+        m_vulkanContext = new Vulkan::Context(allExtensions, blaVector<const char*>());
+    }
+    
     VkSurfaceKHR surface;
     if (glfwCreateWindowSurface(m_vulkanContext->m_instance, window, nullptr, &surface) != VK_SUCCESS)
     {
         //TODO: Remove runtime_error throwing
         throw std::runtime_error("failed to create window surface!");
     }
+
+    VkBool32 res;
+    vkGetPhysicalDeviceSurfaceSupportKHR(m_vulkanContext->m_physicalDevice, m_vulkanContext->m_queueFamily, surface, &res);
+    if (res != VK_TRUE)
+    {
+        throw std::runtime_error("Surface unsupported !");
+        return;
+    }
+
 
     m_vulkanWindowInfo = new Vulkan::WindowInfo(surface);
     CreateSwapChain();
@@ -325,24 +429,6 @@ void GLFWVulkanRenderWindow::CreateSwapChain()
             {
                 throw std::runtime_error("failed to create image views!");
             }
-        }
-    }
-
-    {
-        VkImageView attachment[1];
-        VkFramebufferCreateInfo info = {};
-        info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        info.renderPass = m_vulkanWindowInfo->m_renderWindowPresentationPass;
-        info.attachmentCount = 1;
-        info.pAttachments = attachment;
-        info.width = m_vulkanWindowInfo->m_extent.width;
-        info.height = m_vulkanWindowInfo->m_extent.height;
-        info.layers = 1;
-        for (uint32_t i = 0; i < m_vulkanWindowInfo->m_imageCount; i++)
-        {
-            attachment[0] = m_vulkanWindowInfo->m_frames[i].m_backBufferView;
-            VkResult err = vkCreateFramebuffer(m_vulkanContext->m_device, &info, nullptr, &m_vulkanWindowInfo->m_frames[i].m_framebuffer);
-            Vulkan::Context::HandleError(err);
         }
     }
 }

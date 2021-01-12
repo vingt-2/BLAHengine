@@ -67,7 +67,7 @@ namespace BLA
 
             public:
 
-                Context(const char** extensions, uint32_t extensions_count);
+                Context(const blaVector<const char*>& extensions, const blaVector<const char*>& layers);
 
                 VkAllocationCallbacks*   m_allocator = NULL;
                 VkInstance               m_instance = VK_NULL_HANDLE;

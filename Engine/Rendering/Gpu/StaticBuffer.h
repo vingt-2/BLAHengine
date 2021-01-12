@@ -49,6 +49,11 @@ namespace BLA
         {
         public:
             StaticBuffer(blaU32 length) : BaseStaticBuffer(length, sizeof(T)) {}
+
+        	T& operator[](int i)
+        	{
+                return *(static_cast<T*>(GetData()) + i);
+        	}
         };
     };
 };

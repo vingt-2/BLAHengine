@@ -82,6 +82,20 @@ void MeshRendererComponent::Update()
         }
     }
 
+
+    blaMat4 transformMatrix;
+    if (!GetOwnerObject().IsValid())
+    {
+        transformMatrix = blaMat4(0);
+    }
+    else
+    {
+        GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(transformMatrix);
+    }
+
+    *m_modelTransformMatrix.GetData() = transformMatrix;
+    *m_MVP.GetData() = transformMatrix;
+
     //if(!m_material || m_material->GetName() != MaterialName)
     //{
     //    Asset* materialAsset = nullptr;
@@ -121,23 +135,11 @@ void MeshRendererComponent::Update()
             m_indices->Submit();
 
             const TestMeshPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos);
-            const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_modelTransformMatrix);
+            const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
 
             TestMeshPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
         	
             Gpu::Interface::GetSingletonInstance()->RegisterRenderPassInstance<TestMeshPass>(renderPassInstance);
         }
     }
-
-    blaMat4 transformMatrix;
-    if (!GetOwnerObject().IsValid())
-    {
-        transformMatrix = blaMat4(0);
-    }
-    else
-    {
-        GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(transformMatrix);
-    }
-
-    *m_modelTransformMatrix.GetData() = transformMatrix;
 }

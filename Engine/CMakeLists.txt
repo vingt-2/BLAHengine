@@ -18,8 +18,6 @@ ${cereal_INCLUDE_DIR}
 ${imgui_INCLUDE_DIR}
 ${VulkanHeaders_INCLUDE_DIR})
 
-find_package(OpenGL REQUIRED)
-
 # Gotta do the following here because glew with glew-cmake will build the target in build/lib which is otherwise unreachable
     link_directories(${CMAKE_BINARY_DIR}/lib)
 #

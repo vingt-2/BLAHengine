@@ -4,16 +4,19 @@
 #include "Rendering/GPU/VulkanRenderPass.h"
 #include "System/Vulkan/Context.h"
 
+#pragma optimize("", off)
+
 #define VMA_IMPLEMENTATION
+
 #define VMA_STATIC_VULKAN_FUNCTIONS 1
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
+
 #include "vk_mem_alloc.h"
 
 #include "Resource.h"
 #include "StaticBuffer.h"
 #include "Image.h"
 #include "System/FileSystem/Files.h"
-
-#pragma optimize("", off)
 
 namespace BLA::Gpu
 { 
@@ -22,7 +25,7 @@ namespace BLA::Gpu
         VulkanImplementation(const System::Vulkan::Context* context) : m_vulkanContext(context)
         {
             VmaAllocatorCreateInfo allocatorInfo = {};
-            allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+            allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_0;
             allocatorInfo.physicalDevice = m_vulkanContext->m_physicalDevice;
             allocatorInfo.device = m_vulkanContext->m_device;
             allocatorInfo.instance = m_vulkanContext->m_instance;
@@ -141,21 +144,21 @@ namespace BLA::Gpu
             {
                 BaseDynamicBuffer* bufferResource = static_cast<BaseDynamicBuffer*>(resource);
 
-                VkBuffer stagingBuffer;
-                VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_allocationHandle.pointer);
+                VkBuffer hostVisibleBuffer;
+                VmaAllocation& bufferAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_allocationHandle.pointer);
 
                 m_implementation->CreateBuffer(
                     VMA_MEMORY_USAGE_CPU_TO_GPU,
                     bufferResource->GetSize(),
-                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                    stagingBuffer, stagingAlloc);
+                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    hostVisibleBuffer, bufferAlloc);
 
                 void* pointer;
-                vmaMapMemory(m_implementation->m_allocator, stagingAlloc, &pointer);
+                vmaMapMemory(m_implementation->m_allocator, bufferAlloc, &pointer);
                 SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
 
                 ResourceHandle retVal;
-                retVal.m_impl.pointer = stagingBuffer;
+                retVal.m_impl.pointer = hostVisibleBuffer;
 
                 return retVal;
                 // memcpy(data, resource->GetData(), bufferSize);
@@ -202,7 +205,7 @@ namespace BLA::Gpu
         m_implementation->CreateBuffer(
             VMA_MEMORY_USAGE_GPU_ONLY,
             bufferSize,
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             deviceLocalResourceBuffer, reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
 
         // Blocking copy call from host visible memory to gpu local (Creates and wait on the command on this thread's queue)
@@ -222,11 +225,15 @@ namespace BLA::Gpu
             image,
             reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
 
+        m_implementation->TransitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
         m_implementation->CopyBufferToImage(
             static_cast<VkBuffer>(GetImageBuffer(resource)->m_StagingData.pointers[0]), // <---- Needs a bunch of helper function to extract api specific shit form there ...
             image,
             resource->GetSize().x, resource->GetSize().y);
 
+        m_implementation->TransitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+    	
         ResourceHandle retVal;
         retVal.m_impl.pointer = image;
 
@@ -320,7 +327,7 @@ namespace BLA::Gpu
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)// && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
         {
             barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;

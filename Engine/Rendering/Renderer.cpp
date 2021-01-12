@@ -127,9 +127,15 @@ void Renderer::CreateOrUpdateRenderTargets()
     {
         std::random_device rd;  //Will be used to obtain a seed for the random number engine
         std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-        std::uniform_int_distribution<> distrib(0xEF, 0xFF);
-
-        memset(buffer.GetData(), distrib(gen) << 8 | distrib(gen) << 16 | distrib(gen) << 24 | 0xFF, buffer.GetLength() * buffer.GetElementSize());
+        std::uniform_int_distribution<> distrib(125, 255);
+       
+    	for(blaU32 i = 0; i < buffer.GetLength(); i++)
+    	{
+            blaU32 color = distrib(gen) << 8 | distrib(gen) << 16 | distrib(gen) << 24 | 0xFF;
+            buffer[i] = color;
+    	}
+    	
+        //memset(buffer.GetData(), color, buffer.GetLength() * buffer.GetElementSize());
     }
     m_offscreenBuffer.m_color = new Gpu::Image(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), &buffer);
 

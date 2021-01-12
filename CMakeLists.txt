@@ -53,8 +53,8 @@ endmacro()
 
 find_path(glm_INCLUDE_DIR glm ${PROJECT_EXTERNAL_DIR}/glm)
 
-# Set the msvc runtime library as Non DLL !
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+## Set the msvc runtime library as Non DLL !
+#set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(NOT glm_INCLUDE_DIR OR (NOT EXISTS ${glm_INCLUDE_DIR}))
     # we couldn't find the header files for GLM or they don't exist
@@ -148,7 +148,7 @@ set(SHADERC_LIBRARY ${PROJECT_EXTERNAL_DIR}/shaderc CACHE PATH "shaderc director
 set(SHADERC_SKIP_INSTALL ON)
 set(SHADERC_ENABLE_SPVC OFF)
 set(SHADERC_SKIP_TESTS ON)
-set(SHADERC_ENABLE_SHARED_CRT OFF)
+set(SHADERC_ENABLE_SHARED_CRT ON)
 add_subdirectory(${SHADERC_LIBRARY})
 
 link_directories(${LIBRARY_OUTPUT_PATH})

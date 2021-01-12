@@ -122,7 +122,5 @@ namespace BLA
 
         System::Vulkan::Context* m_vulkanContext;
         System::Vulkan::WindowInfo* m_vulkanWindowInfo;
-
-        static System::Vulkan::Context* SetupVulkanInterface(const char** extensions, uint32_t extensions_count);
     };
 }

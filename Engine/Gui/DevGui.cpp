@@ -135,7 +135,7 @@ void DevGuiManager::OpenWindow(blaString name, DevGuiWindow* window)
     m_openWindows.insert(blaPair<blaString, DevGuiWindow*>(name, window));
 }
 
-static void CreateImGuiVulkanRenderPass(const Vulkan::Context* vulkanInterface, Vulkan::WindowInfo* vulkanWindowInfo)
+static void CreateImGuiVulkanRenderPass(const Vulkan::Context* vulkanContext, Vulkan::WindowInfo* vulkanWindowInfo)
 {
     VkAttachmentDescription attachment = {};
     attachment.format = vulkanWindowInfo->m_surfaceFormat.format;
@@ -168,8 +168,26 @@ static void CreateImGuiVulkanRenderPass(const Vulkan::Context* vulkanInterface, 
     info.pSubpasses = &subpass;
     info.dependencyCount = 1;
     info.pDependencies = &dependency;
-    VkResult err = vkCreateRenderPass(vulkanInterface->m_device, &info, nullptr, &vulkanWindowInfo->m_renderWindowPresentationPass);
+    VkResult err = vkCreateRenderPass(vulkanContext->m_device, &info, nullptr, &vulkanWindowInfo->m_renderWindowPresentationPass);
     Vulkan::Context::HandleError(err);
+
+    {
+        VkImageView attachment[1];
+        VkFramebufferCreateInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        info.renderPass = vulkanWindowInfo->m_renderWindowPresentationPass;
+        info.attachmentCount = 1;
+        info.pAttachments = attachment;
+        info.width = vulkanWindowInfo->m_extent.width;
+        info.height = vulkanWindowInfo->m_extent.height;
+        info.layers = 1;
+        for (uint32_t i = 0; i < vulkanWindowInfo->m_imageCount; i++)
+        {
+            attachment[0] = vulkanWindowInfo->m_frames[i].m_backBufferView;
+            VkResult err = vkCreateFramebuffer(vulkanContext->m_device, &info, nullptr, &vulkanWindowInfo->m_frames[i].m_framebuffer);
+            Vulkan::Context::HandleError(err);
+        }
+    }
 }
 
 void DevGuiManager::Init()
@@ -760,7 +778,7 @@ void DevGuiRenderViewportWindow::UpdateDisplayTexture(Renderer* renderer)
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = m_renderData->m_currentImage;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    viewInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;

@@ -13,7 +13,7 @@ layout(set = 0, binding = 1) uniform modelTransformUbo
 	mat4 modelTransform;
 };
 
-layout(location = 1) out vec3 WorldPos0;
+layout(location = 0) out vec3 WorldPos0;
 
 void main()
 {   
