@@ -31,7 +31,8 @@ namespace BLA
             ResourceHandle PrepareDynamicBuffer(BaseResource* resource) override;
         	
         protected:
-            RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) override;
+            RenderPassImplementation* SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program, RenderAttachment& attachment) override;
+        	void Render(RenderPassDescriptor& renderPassDescriptor) override;
 			void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) override;
         
         private:

@@ -125,10 +125,10 @@ void MeshRendererComponent::Update()
             m_camera.AttachCamera(camera);
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
 
-            m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertPos.size()));
+            m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertPos.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
             memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
             
-            m_indices = new Gpu::StaticBuffer<blaU32>(static_cast<blaU32>(rd.m_triangleIndices.size()));
+            m_indices = new Gpu::StaticBuffer<blaU32>(static_cast<blaU32>(rd.m_triangleIndices.size()), Gpu::BaseStaticBuffer::Usage::IndexBuffer);
             memcpy_s(m_indices->GetData(), sizeof(blaU32) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaU32));
 
             m_vertPos->Submit();
@@ -137,9 +137,10 @@ void MeshRendererComponent::Update()
             const TestMeshPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos);
             const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
 
-            TestMeshPass::RenderPassInstance renderPassInstance(*m_indices, meshVAs, meshUniforms);
+        	// Leak ... of course !
+            TestMeshPass::RenderPassInstance* renderPassInstance = new TestMeshPass::RenderPassInstance(*m_indices, meshVAs, meshUniforms);
         	
-            Gpu::Interface::GetSingletonInstance()->RegisterRenderPassInstance<TestMeshPass>(renderPassInstance);
+            Gpu::Interface::GetSingletonInstance()->RegisterRenderPassInstance<TestMeshPass>(*renderPassInstance);
         }
     }
 }

@@ -172,18 +172,18 @@ static void CreateImGuiVulkanRenderPass(const Vulkan::Context* vulkanContext, Vu
     Vulkan::Context::HandleError(err);
 
     {
-        VkImageView attachment[1];
+        VkImageView imageViewAttachments[1];
         VkFramebufferCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         info.renderPass = vulkanWindowInfo->m_renderWindowPresentationPass;
         info.attachmentCount = 1;
-        info.pAttachments = attachment;
+        info.pAttachments = imageViewAttachments;
         info.width = vulkanWindowInfo->m_extent.width;
         info.height = vulkanWindowInfo->m_extent.height;
         info.layers = 1;
         for (uint32_t i = 0; i < vulkanWindowInfo->m_imageCount; i++)
         {
-            attachment[0] = vulkanWindowInfo->m_frames[i].m_backBufferView;
+            imageViewAttachments[0] = vulkanWindowInfo->m_frames[i].m_backBufferView;
             VkResult err = vkCreateFramebuffer(vulkanContext->m_device, &info, nullptr, &vulkanWindowInfo->m_frames[i].m_framebuffer);
             Vulkan::Context::HandleError(err);
         }

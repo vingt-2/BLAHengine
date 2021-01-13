@@ -22,7 +22,7 @@
 
 namespace BLA
 {
-    class BLACORE_API RenderPassAttachment
+    class BLACORE_API AttachmentDescription
     {
 
     };
@@ -230,7 +230,7 @@ namespace BLA
 
         static_assert(attachmentCount > 0, "Number of attachments on a RenderPass < 1 is invalid");
 
-        RenderPassAttachment m_attachment[attachmentCount];
+        AttachmentDescription m_attachment[attachmentCount];
 
     public:
         const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;

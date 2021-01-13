@@ -4,7 +4,6 @@
 #include "Core/InspectableVariables.h"
 #include "Gpu/Image.h"
 #include "Gpu/Resource.h"
-#include "Rendering/RenderAttachment.h"
 #include "Rendering/RenderPass.h"
 #include "System/RenderWindow.h"
 
@@ -31,8 +30,6 @@ namespace BLA
         ~Renderer(void) = default;
 
         OffscreenRenderTarget m_offscreenBuffer;
-
-        RenderAttachment<BLARgba>* m_renderAttachment;
 
         void SetupRenderPassInstances();
 

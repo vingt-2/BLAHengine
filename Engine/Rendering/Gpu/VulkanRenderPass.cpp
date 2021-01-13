@@ -3,6 +3,10 @@
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "VulkanRenderPass.h"
+
+
+#include "Image.h"
+#include "RenderAttachment.h"
 #include "System/GraphicsAdapter.h"
 
 #define VK_CHECK_RESULT(x) x
@@ -111,9 +115,11 @@ void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::Context*
     vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
 
-void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescriptor, VkDevice device,
-                                      const VkAllocationCallbacks* allocator, VkPipelineCache pipelineCache,
-                                      VkSampleCountFlagBits MSAASamples,
+void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescriptor, 
+									  Gpu::RenderAttachment& attachment,
+									  VkDevice device,
+                                      const VkAllocationCallbacks* allocator, 
+									  VkPipelineCache pipelineCache,
                                       VkShaderModule vertexModule, VkShaderModule fragmentModule)
 {
     VkPipelineShaderStageCreateInfo stage[2] = {};
@@ -175,7 +181,33 @@ void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescr
 
     VkPipelineMultisampleStateCreateInfo ms_info = {};
     ms_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    ms_info.rasterizationSamples = (MSAASamples != 0) ? MSAASamples : VK_SAMPLE_COUNT_1_BIT;
+    ms_info.rasterizationSamples = static_cast<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_1_BIT << (attachment.m_sampleCount - 1));
+
+	// Ok let's make the framebuffer here ...
+
+    VkImageViewCreateInfo imageViewCreateInfo = {};
+    imageViewCreateInfo.image = static_cast<VkImage>(attachment.m_image->GetHandle().m_impl.pointer);
+    imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: customize asap
+    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+    imageViewCreateInfo.subresourceRange.levelCount = 1;
+    imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+    imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+    vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachmentImageView);
+	
+    VkFramebufferCreateInfo frameBufferCreateInfo = {};
+    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    frameBufferCreateInfo.renderPass = m_vkRenderPass;
+    frameBufferCreateInfo.attachmentCount = 1;
+    frameBufferCreateInfo.pAttachments = &m_attachmentImageView;
+    frameBufferCreateInfo.width = attachment.m_image->GetSize().x;
+    frameBufferCreateInfo.height = attachment.m_image->GetSize().y;
+    frameBufferCreateInfo.layers = 1;
+	
+    vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_frameBuffer);
 
     VkPipelineColorBlendAttachmentState color_attachment[1] = {};
     color_attachment[0].blendEnable = VK_TRUE;
@@ -257,7 +289,7 @@ void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescr
 void VulkanRenderPass::CreateVKRenderPass(VkDevice device)
 {
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = VK_FORMAT_R8G8B8A8_UNORM;
+    colorAttachment.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: customize asap
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -287,9 +319,10 @@ void VulkanRenderPass::CreateVKRenderPass(VkDevice device)
     //VulkanRenderPassHelpers::check_vk_result(err);
 }
 
-void VulkanRenderPass::BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& renderPassInstance,
-                                           System::Vulkan::WindowInfo* vkWindow) const
+void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Context* vulkanContext) const
 {
+    System::Vulkan::WindowInfo* vkWindow = vulkanContext->m_window;
+	
     VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
     cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     cmdBufferBeginInfo.pNext = NULL;
@@ -298,90 +331,57 @@ void VulkanRenderPass::BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& 
     clearValues[0].color = {{0.0f, 0.0f, 0.2f, 0.0f}};
     clearValues[1].depthStencil = {1.0f, 0};
 
-    VkRenderPassBeginInfo renderPassBeginInfo;
-    renderPassBeginInfo.renderPass = vkWindow->m_renderWindowPresentationPass;
+    VkRenderPassBeginInfo renderPassBeginInfo = {};
+    renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassBeginInfo.renderPass = m_vkRenderPass;
     renderPassBeginInfo.renderArea.offset.x = 0;
     renderPassBeginInfo.renderArea.offset.y = 0;
-    renderPassBeginInfo.renderArea.extent.width = vkWindow->m_extent.width;
-    renderPassBeginInfo.renderArea.extent.height = vkWindow->m_extent.height;
+    renderPassBeginInfo.renderArea.extent.width = 20;
+    renderPassBeginInfo.renderArea.extent.height = 20;
     renderPassBeginInfo.clearValueCount = 2;
     renderPassBeginInfo.pClearValues = clearValues;
 
-    for (int32_t i = 0; i < vkWindow->m_frames.size(); ++i)
+    int i = vkWindow->m_frameIndex;
+	
+    renderPassBeginInfo.framebuffer = m_frameBuffer;
+
+    vkBeginCommandBuffer(vkWindow->m_frames[i].m_commandBuffer, &cmdBufferBeginInfo);
+
+    vkCmdBeginRenderPass(vkWindow->m_frames[i].m_commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    VkViewport viewport = MakeViewport(static_cast<float>(vkWindow->m_extent.width), static_cast<float>(vkWindow->m_extent.height), 0.0f, 1.0f);
+    
+    vkCmdSetViewport(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &viewport);
+
+    VkRect2D scissor = MakeRect2D(vkWindow->m_extent.width, (blaS32)vkWindow->m_extent.height, 0, 0);
+    vkCmdSetScissor(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &scissor);
+
+    vkCmdBindPipeline(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_vkPipeline);
+
+    for (const VulkanRenderPassInstance& instance : m_currentInstances)
     {
-        renderPassBeginInfo.framebuffer = vkWindow->m_frames[i].m_framebuffer;
-
-        vkBeginCommandBuffer(vkWindow->m_frames[i].m_commandBuffer, &cmdBufferBeginInfo);
-
-        vkCmdBeginRenderPass(vkWindow->m_frames[i].m_commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkViewport viewport = MakeViewport(static_cast<float>(vkWindow->m_extent.width), static_cast<float>(vkWindow->m_extent.height), 0.0f, 1.0f);
-    	
-        vkCmdSetViewport(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &viewport);
-
-        VkRect2D scissor = MakeRect2D(vkWindow->m_extent.width, (blaS32)vkWindow->m_extent.height, 0, 0);
-        vkCmdSetScissor(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &scissor);
-
-        vkCmdBindPipeline(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_vkPipeline);
-
-        for (VulkanRenderPassInstance& instance : renderPassInstance)
+        blaVector<VkBuffer> vertexBuffers(instance.m_renderPassInstancePtr->m_vaCount);
+        blaVector<VkDeviceSize> offsets(instance.m_renderPassInstancePtr->m_vaCount);
+        for (blaU16 j = 0; j < instance.m_renderPassInstancePtr->m_vaCount; j++)
         {
-            blaVector<VkBuffer> vertexBuffers(instance.m_renderPassInstancePtr->m_vaCount);
-        	for(blaU16 j = 0; j < instance.m_renderPassInstancePtr->m_vaCount; j++)
-        	{
-                const Gpu::BaseStaticBuffer* b;
-                instance.m_renderPassInstancePtr->GetVertexAttributeBuffer(j, b);
-                vertexBuffers[j] = static_cast<VkBuffer>(b->GetHandle().m_impl.pointer);
-        	}
-        	
-            vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, (blaU32)vertexBuffers.size(), vertexBuffers.data(), nullptr);
-
-            VkBuffer indexBuffer = static_cast<VkBuffer>(instance.m_renderPassInstancePtr->m_indices->GetHandle().m_impl.pointer);
-            vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
-
-            vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    m_vkPipelineLayout, 0, 1, &instance.m_descriptorSets, 0, nullptr);
-
-            vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_renderPassInstancePtr->m_indices->GetLength(), 1, 0, 0, 0);
+            const Gpu::BaseStaticBuffer* b;
+            instance.m_renderPassInstancePtr->GetVertexAttributeBuffer(j, b);
+            vertexBuffers[j] = static_cast<VkBuffer>(b->GetHandle().m_impl.pointer);
+            offsets[j] = 0;
         }
 
-        vkCmdEndRenderPass(vkWindow->m_frames[i].m_commandBuffer);
+        vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, (blaU32)vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 
-        vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
+        VkBuffer indexBuffer = static_cast<VkBuffer>(instance.m_renderPassInstancePtr->m_indices->GetHandle().m_impl.pointer);
+        vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
+
+        vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_vkPipelineLayout, 0, 1, &instance.m_descriptorSets, 0, nullptr);
+
+        vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_renderPassInstancePtr->m_indices->GetLength(), 1, 0, 0, 0);
     }
-}
 
-//void VulkanRenderPass::CreateIndexBuffer(const Vulkan::Context* vulkanInterface, VkDevice device,
-//                                         blaVector<blaU32>& indices, VulkanRenderPassInstance& vulkanRenderPassInstance)
-//{
-//    vulkanRenderPassInstance.m_indexCount = static_cast<blaU32>(indices.size());
-//
-//    VkBuffer& indexBuffer = vulkanRenderPassInstance.m_indexBuffer.first;
-//
-//    VkBufferCreateInfo bufferInfo{};
-//    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-//    bufferInfo.size = sizeof(blaU32) * vulkanRenderPassInstance.m_indexCount;
-//    bufferInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-//    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-//
-//    VkResult err = vkCreateBuffer(device, &bufferInfo, nullptr, &indexBuffer);
-//
-//    VkMemoryRequirements memRequirements;
-//    vkGetBufferMemoryRequirements(device, indexBuffer, &memRequirements);
-//
-//    VkMemoryAllocateInfo allocInfo{};
-//    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-//    allocInfo.allocationSize = memRequirements.size;
-//    allocInfo.memoryTypeIndex = vulkanInterface->GetMemoryType(memRequirements.memoryTypeBits,
-//                                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-//                                                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-//
-//    VkDeviceMemory& memory = vulkanRenderPassInstance.m_indexBuffer.second;
-//
-//    err = vkAllocateMemory(device, &allocInfo, nullptr, &memory);
-//
-//    void* data;
-//    vkMapMemory(device, memory, 0, bufferInfo.size, 0, &data);
-//    memcpy(data, indices.data(), (size_t)bufferInfo.size);
-//    vkUnmapMemory(device, memory);
-//}
+    vkCmdEndRenderPass(vkWindow->m_frames[i].m_commandBuffer);
+
+    vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
+}

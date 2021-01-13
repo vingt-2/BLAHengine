@@ -5,6 +5,7 @@
 #include <random>
 #include "GPU/Interface.h"
 #include "RenderPass.h"
+#include "Gpu/RenderAttachment.h"
 
 using namespace BLA;
 
@@ -47,13 +48,11 @@ void RenderPassRegistry::GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const
     }
 }
 
-Renderer::Renderer(GLFWRenderWindow* pRenderWindow): m_renderWindow(pRenderWindow), m_renderAttachment(nullptr)
+Renderer::Renderer(GLFWRenderWindow* pRenderWindow): m_renderWindow(pRenderWindow)
 {
     m_renderWindow->GetSize(m_viewPortExtents.x, m_viewPortExtents.y);
 
     CreateOrUpdateRenderTargets();
-
-    m_renderAttachment = new RenderAttachment<BLARgba>(*m_offscreenBuffer.m_color);
 	
     // Setup Test Render Pass...
     SetupRenderPassInstances();
@@ -61,6 +60,13 @@ Renderer::Renderer(GLFWRenderWindow* pRenderWindow): m_renderWindow(pRenderWindo
 
 bool Renderer::Update()
 {
+    RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
+
+    if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
+    {
+        Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
+        gpu->Render(*geometryPassDesc);
+    }
     return true;
 }
 
@@ -91,7 +97,9 @@ void Renderer::SetupRenderPassInstances()
         program.m_shaders.push_back(vertexShader);
         program.m_shaders.push_back(fragmentShader);
 
-        geometryPassDesc->m_pToInstanceRenderPassDescriptorPointer = Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program);
+		Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
+
+        geometryPassDesc->m_pToInstanceRenderPassDescriptorPointer = Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program, attachment);
     }
 }
 
@@ -122,7 +130,7 @@ void Renderer::CreateOrUpdateRenderTargets()
         delete m_offscreenBuffer.m_color;
     }
 
-    Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y);
+    Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
 
     {
         std::random_device rd;  //Will be used to obtain a seed for the random number engine

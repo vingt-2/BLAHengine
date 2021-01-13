@@ -21,6 +21,11 @@ namespace BLA
         VkDescriptorSet m_descriptorSets;
     };
 
+	namespace Gpu
+	{
+        struct RenderAttachment;
+	}
+
     class VulkanRenderPass : public Gpu::RenderPassImplementation
     {
     protected:
@@ -28,24 +33,27 @@ namespace BLA
         VkPipelineLayout m_vkPipelineLayout = VK_NULL_HANDLE;
         VkPipeline m_vkPipeline = VK_NULL_HANDLE;
         VkDescriptorSetLayout m_vkDescriptorSetLayout = VK_NULL_HANDLE;
+
+        VkImageView m_attachmentImageView = VK_NULL_HANDLE;
+        VkFramebuffer m_frameBuffer = VK_NULL_HANDLE; // framebuffer used to draw the instances for this vulkanrenderpass
+    	
         blaVector<VulkanRenderPassInstance> m_currentInstances;
     
     public:
 
-    void RegisterRenderPassInstance(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassInstance& rpInstance);
+		void RegisterRenderPassInstance(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassInstance& rpInstance);
 
         void CreatePipeline(
             Gpu::RenderPassDescriptor& renderPassDescriptor,
+            Gpu::RenderAttachment& attachment,
             VkDevice device,
             const VkAllocationCallbacks* allocator,
             VkPipelineCache pipelineCache,
-            VkSampleCountFlagBits MSAASamples,
             VkShaderModule vertexModule,
             VkShaderModule fragmentModule);
 
         void CreateVKRenderPass(VkDevice device);
 
-        void BuildCommandBuffers(blaVector<VulkanRenderPassInstance>& renderPassInstance,
-                                 System::Vulkan::WindowInfo* vkWindow) const;
+        void BuildCommandBuffersThisFrame(const System::Vulkan::Context* vulkanContext) const;
     };
 }

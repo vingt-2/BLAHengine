@@ -16,6 +16,7 @@
 #include "Resource.h"
 #include "StaticBuffer.h"
 #include "Image.h"
+#include "RenderAttachment.h"
 #include "System/FileSystem/Files.h"
 
 namespace BLA::Gpu
@@ -172,21 +173,26 @@ namespace BLA::Gpu
         return ResourceHandle();
     }
 
-    RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program)
+    RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program, RenderAttachment& attachment)
     {
         VulkanRenderPass* renderPass = new VulkanRenderPass();
         renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
 
         renderPass->CreatePipeline(
             renderPassDescriptor,
+            attachment,
             m_implementation->m_vulkanContext->m_device,
             nullptr,
             m_implementation->m_vulkanContext->m_pipelineCache,
-            VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
             static_cast<VkShaderModule>(program.m_shaders[0].GetHandle().m_impl.pointer),
             static_cast<VkShaderModule>(program.m_shaders[1].GetHandle().m_impl.pointer));
 
         return renderPass;
+    }
+
+    void Vulkan::Render(RenderPassDescriptor& renderPassDescriptor)
+    {
+        static_cast<VulkanRenderPass*>(renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer)->BuildCommandBuffersThisFrame(m_implementation->m_vulkanContext);
     }
 
     void Vulkan::RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance)
@@ -201,11 +207,27 @@ namespace BLA::Gpu
         VkBuffer deviceLocalResourceBuffer;
 
         blaU32 bufferSize = resource->GetElementSize() * resource->GetLength();
-        
+
+        VkBufferUsageFlagBits usageFlag;
+
+    	switch(resource->m_usage)
+    	{
+        case BaseStaticBuffer::Usage::VertexBuffer:
+            usageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            break;
+		case BaseStaticBuffer::Usage::IndexBuffer:
+            usageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+            break;
+        default:
+            usageFlag = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
+            BLA_TRAP(false);
+    		break;
+    	}
+    	
         m_implementation->CreateBuffer(
             VMA_MEMORY_USAGE_GPU_ONLY,
             bufferSize,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            usageFlag | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             deviceLocalResourceBuffer, reinterpret_cast<VmaAllocation&>(resource->m_allocationHandle));
 
         // Blocking copy call from host visible memory to gpu local (Creates and wait on the command on this thread's queue)
@@ -413,7 +435,7 @@ namespace BLA::Gpu
         imageCreateInfo.arrayLayers = 1;
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 

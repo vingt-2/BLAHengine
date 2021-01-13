@@ -26,8 +26,8 @@ namespace BLA::Gpu
         return m_elementSize;
     }
 
-    BaseStaticBuffer::BaseStaticBuffer(blaU32 length, blaSize elementSize) : 
-        BaseResource(EResourceType::eStaticBuffer), 
+    BaseStaticBuffer::BaseStaticBuffer(blaU32 length, blaSize elementSize, Usage usage) : 
+        m_usage(usage), BaseResource(EResourceType::eStaticBuffer), 
         m_bufferLength(length), 
         m_elementSize(static_cast<blaU32>(elementSize))
     {
