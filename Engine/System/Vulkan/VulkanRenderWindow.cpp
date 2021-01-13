@@ -307,6 +307,8 @@ void GLFWVulkanRenderWindow::UpdateWindowAndBuffers()
     VkResult err = vkQueuePresentKHR(m_vulkanContext->m_queue, &info);
     Vulkan::Context::HandleError(err);
     m_vulkanWindowInfo->m_semaphoreIndex = (m_vulkanWindowInfo->m_semaphoreIndex + 1) % m_vulkanWindowInfo->m_imageCount; // Now we can use the next set of semaphores
+
+    m_vulkanWindowInfo->m_frameIndex = (m_vulkanWindowInfo->m_frameIndex + 1) % m_vulkanWindowInfo->m_imageCount;
 }
 
 Vulkan::Context* GLFWVulkanRenderWindow::GetVulkanInterface() const

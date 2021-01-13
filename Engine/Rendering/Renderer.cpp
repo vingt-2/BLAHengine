@@ -65,7 +65,7 @@ bool Renderer::Update()
     if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
     {
         Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
-        gpu->Render(*geometryPassDesc);
+       gpu->Render(*geometryPassDesc);
     }
     return true;
 }
@@ -76,6 +76,7 @@ void Renderer::SetViewportSize(blaIVec2 renderSize)
     {
         m_viewPortExtents = renderSize;
         CreateOrUpdateRenderTargets();
+        SetupRenderPassInstances();
     }
 }
 

@@ -185,6 +185,8 @@ void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescr
 
 	// Ok let's make the framebuffer here ...
 
+    m_attachmentSize = attachment.m_image->GetSize();
+	
     VkImageViewCreateInfo imageViewCreateInfo = {};
     imageViewCreateInfo.image = static_cast<VkImage>(attachment.m_image->GetHandle().m_impl.pointer);
     imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -296,7 +298,7 @@ void VulkanRenderPass::CreateVKRenderPass(VkDevice device)
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
 
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
@@ -328,7 +330,7 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
     cmdBufferBeginInfo.pNext = NULL;
 
     VkClearValue clearValues[2];
-    clearValues[0].color = {{0.0f, 0.0f, 0.2f, 0.0f}};
+    clearValues[0].color = {{1.0f, 0.0f, 0.2f, 1.0f}};
     clearValues[1].depthStencil = {1.0f, 0};
 
     VkRenderPassBeginInfo renderPassBeginInfo = {};
@@ -336,12 +338,16 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
     renderPassBeginInfo.renderPass = m_vkRenderPass;
     renderPassBeginInfo.renderArea.offset.x = 0;
     renderPassBeginInfo.renderArea.offset.y = 0;
-    renderPassBeginInfo.renderArea.extent.width = 20;
-    renderPassBeginInfo.renderArea.extent.height = 20;
+    renderPassBeginInfo.renderArea.extent.width = static_cast<blaU32>(m_attachmentSize.x);
+    renderPassBeginInfo.renderArea.extent.height = static_cast<blaU32>(m_attachmentSize.y);
     renderPassBeginInfo.clearValueCount = 2;
     renderPassBeginInfo.pClearValues = clearValues;
 
     int i = vkWindow->m_frameIndex;
+
+	vkWaitForFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
+
+	vkResetFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence);
 	
     renderPassBeginInfo.framebuffer = m_frameBuffer;
 
@@ -349,7 +355,7 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
 
     vkCmdBeginRenderPass(vkWindow->m_frames[i].m_commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    VkViewport viewport = MakeViewport(static_cast<float>(vkWindow->m_extent.width), static_cast<float>(vkWindow->m_extent.height), 0.0f, 1.0f);
+    VkViewport viewport = MakeViewport(m_attachmentSize.x, m_attachmentSize.y, 0.0f, 1.0f);
     
     vkCmdSetViewport(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &viewport);
 
@@ -383,5 +389,14 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
 
     vkCmdEndRenderPass(vkWindow->m_frames[i].m_commandBuffer);
 
-    vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
+    VkSubmitInfo end_info = {};
+    end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    end_info.commandBufferCount = 1;
+    end_info.pCommandBuffers = &vkWindow->m_frames[i].m_commandBuffer;
+
+	vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
+
+	vkQueueSubmit(vulkanContext->m_queue, 1, &end_info, vulkanContext->m_window->m_frames[i].m_imageFence);
+
+    vkWaitForFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
 }

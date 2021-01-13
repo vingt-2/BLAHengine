@@ -36,7 +36,8 @@ namespace BLA
 
         VkImageView m_attachmentImageView = VK_NULL_HANDLE;
         VkFramebuffer m_frameBuffer = VK_NULL_HANDLE; // framebuffer used to draw the instances for this vulkanrenderpass
-    	
+        
+        blaVec2 m_attachmentSize;
         blaVector<VulkanRenderPassInstance> m_currentInstances;
     
     public:
