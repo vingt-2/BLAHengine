@@ -1,6 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "RenderCamera.h"
+#include "Core/CameraComponent.h"
 
 using namespace BLA;
 
@@ -29,8 +30,8 @@ static blaMat4 GetPerspective(blaF32 horizontalFovRad, blaF32 verticalFovRad, bl
 
 void PerspectiveCamera::Update()
 {
-    this->m_attachedCamera->Update();
-
+    SetAspect(blaVec2(16, 9));
+	
     blaF32 horFovRad = m_attachedCamera->m_fov * DEG_TO_RAD;
     blaF32 vertFovRad = horFovRad / m_aspectRatio;
     
@@ -57,8 +58,6 @@ void OrthographicCamera::SetOrthographicProj(float left, float right, float bott
 
 void OrthographicCamera::Update()
 {
-    this->m_attachedCamera->Update();
-
     blaMat4 cameraTransformMat;
     m_attachedCamera->m_worldToCamera.GetScaledTransformMatrix(cameraTransformMat);
 

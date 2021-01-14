@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include "Core/CameraComponent.h"
+#include "StdInclude.h"
+#include "Maths/Maths.h"
 
 namespace BLA
 {
+    class CameraComponent;
     class RenderCamera
     {
     public:

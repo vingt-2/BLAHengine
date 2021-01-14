@@ -6,9 +6,11 @@
 #include "Core/TransformComponent.h"
 #include "Assets/AssetsManager.h"
 #include "Gpu/Interface.h"
+#include "Core/Scene.h"
 
 using namespace BLA;
 
+// Todo: move camera component to rendering ...
 #include "Core/CameraComponent.h"
 
 DeclareRenderPass(
@@ -36,9 +38,6 @@ DeclareRenderPass(
     1)
 
 RegisterRenderPass(TestMeshPass)
-
-// TODO: Find a better way to register the rendering components ...
-#include "Core/Scene.h"
 
 BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_meshAssetName)
@@ -68,6 +67,7 @@ void MeshRendererComponent::Shutdown()
 
 void MeshRendererComponent::Update()
 {
+	
     bool validState = true;
     if(m_mesh == nullptr || m_mesh->GetName() != m_meshAssetName)
     {
@@ -83,18 +83,22 @@ void MeshRendererComponent::Update()
     }
 
 
-    blaMat4 transformMatrix;
+    CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
+
+    if (!camera) return;
+	
+    blaMat4 localToWorld;
     if (!GetOwnerObject().IsValid())
     {
-        transformMatrix = blaMat4(0);
+        localToWorld = blaMat4(0);
     }
     else
     {
-        GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(transformMatrix);
+        GetOwnerObject().GetComponent<TransformComponent>()->GetTransform().GetScaledTransformMatrix(localToWorld);
     }
 
-    *m_modelTransformMatrix.GetData() = transformMatrix;
-    *m_MVP.GetData() = transformMatrix;
+    *m_modelTransformMatrix.GetData() = localToWorld;
+    *m_MVP.GetData() = camera->m_camera.m_worldToClipSpace * localToWorld;
 
     //if(!m_material || m_material->GetName() != MaterialName)
     //{

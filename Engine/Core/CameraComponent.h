@@ -4,11 +4,12 @@
 #include "StdInclude.h"
 #include "Maths/Maths.h"
 
-#include "GameComponent.h"
+#include "BehaviorComponent.h"
+#include "Rendering/RenderCamera.h"
 
 namespace BLA
 {
-    BeginComponentDeclaration(BLAEngine, CameraComponent)
+    BeginBehaviorDeclaration(BLAEngine, CameraComponent)
         void Init() override;
 
         blaScaledTransform  m_worldToCamera;
@@ -21,7 +22,8 @@ namespace BLA
     
         // Functions
         void UpdateView();
-        void Update();
 
-    EndComponentDeclaration()
+        PerspectiveCamera m_camera;
+
+    EndBehaviorDeclaration()
 }

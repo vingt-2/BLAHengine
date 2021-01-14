@@ -65,7 +65,7 @@ bool Renderer::Update()
     if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
     {
         Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
-       gpu->Render(*geometryPassDesc);
+		gpu->Render(*geometryPassDesc);
     }
     return true;
 }
@@ -76,7 +76,14 @@ void Renderer::SetViewportSize(blaIVec2 renderSize)
     {
         m_viewPortExtents = renderSize;
         CreateOrUpdateRenderTargets();
-        SetupRenderPassInstances();
+
+        RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
+
+        if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
+        {
+            Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
+            Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
+        }
     }
 }
 
@@ -100,7 +107,8 @@ void Renderer::SetupRenderPassInstances()
 
 		Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
 
-        geometryPassDesc->m_pToInstanceRenderPassDescriptorPointer = Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program, attachment);
+        Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program);
+        Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
     }
 }
 
@@ -131,7 +139,7 @@ void Renderer::CreateOrUpdateRenderTargets()
         delete m_offscreenBuffer.m_color;
     }
 
-    Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
+    Gpu::StaticBuffer<blaVec4> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
 
     {
         std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -140,7 +148,7 @@ void Renderer::CreateOrUpdateRenderTargets()
        
     	for(blaU32 i = 0; i < buffer.GetLength(); i++)
     	{
-            blaU32 color = distrib(gen) << 8 | distrib(gen) << 16 | distrib(gen) << 24 | 0xFF;
+            blaVec4 color(distrib(gen), distrib(gen), distrib(gen), 1.f);
             buffer[i] = color;
     	}
     	

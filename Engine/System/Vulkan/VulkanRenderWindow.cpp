@@ -294,6 +294,9 @@ void GLFWVulkanRenderWindow::UpdateWindowAndBuffers()
         CreateSwapChain();
         CreateSwapChainCommandBuffers();
         m_vulkanWindowInfo->m_frameIndex = 0;
+        m_vulkanWindowInfo->m_semaphoreIndex = 0;
+        m_updated = true;
+        return;
     }
 
     VkSemaphore render_complete_semaphore = m_vulkanWindowInfo->m_frameSemaphores[m_vulkanWindowInfo->m_semaphoreIndex].m_renderCompleteSemaphore;

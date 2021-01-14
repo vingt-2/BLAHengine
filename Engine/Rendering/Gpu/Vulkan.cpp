@@ -173,21 +173,31 @@ namespace BLA::Gpu
         return ResourceHandle();
     }
 
-    RenderPassImplementation* Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program, RenderAttachment& attachment)
+    void Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program)
     {
         VulkanRenderPass* renderPass = new VulkanRenderPass();
-        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
+
+    	renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
 
         renderPass->CreatePipeline(
             renderPassDescriptor,
-            attachment,
             m_implementation->m_vulkanContext->m_device,
             nullptr,
             m_implementation->m_vulkanContext->m_pipelineCache,
             static_cast<VkShaderModule>(program.m_shaders[0].GetHandle().m_impl.pointer),
             static_cast<VkShaderModule>(program.m_shaders[1].GetHandle().m_impl.pointer));
-
-        return renderPass;
+    	
+        renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer = renderPass;
+    }
+	
+    void Vulkan::AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment)
+    {
+        VulkanRenderPass* renderPass = static_cast<VulkanRenderPass*>(renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer);
+    	
+        renderPass->SetAttachment(
+            renderPassDescriptor,
+            attachment,
+            m_implementation->m_vulkanContext->m_device);
     }
 
     void Vulkan::Render(RenderPassDescriptor& renderPassDescriptor)

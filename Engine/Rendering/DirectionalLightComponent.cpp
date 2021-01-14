@@ -14,8 +14,6 @@ EndComponentDescription()
 
 void DirectionalLightComponent::Update()
 {
-    CameraComponent* shadowCamera = GetOwnerObject().GetComponent<CameraComponent>();
-    shadowCamera->Update();
 }
 
 void DirectionalLightComponent::Init()

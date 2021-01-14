@@ -2,6 +2,7 @@
 
 #include "ShadowRender.h"
 #include "Core/TransformComponent.h"
+#include "Core/CameraComponent.h"
 
 using namespace BLA;
 

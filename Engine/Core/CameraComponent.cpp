@@ -3,18 +3,20 @@
 #include "CameraComponent.h"
 #include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
+
 using namespace BLA;
 
-BeginComponentDescription(CameraComponent)
+BeginBehaviorDescription(CameraComponent, Dependencies(RootSystem))
 Expose(m_isShadowMapCamera)
 Expose(m_fov)
 Expose(m_nearClipPlane)
 Expose(m_farClipPlane)
-EndComponentDescription()
+EndBehaviorDescription()
 
 void CameraComponent::Init()
 {
     UpdateView();
+    m_camera.AttachCamera(this);
 }
 
 void CameraComponent::UpdateView()
@@ -31,4 +33,5 @@ void CameraComponent::Update()
 {
     // Regular updates
     UpdateView(); // View TransformComponent update
+    m_camera.Update();
 }

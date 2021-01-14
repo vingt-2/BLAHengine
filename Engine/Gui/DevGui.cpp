@@ -170,23 +170,24 @@ static void CreateImGuiVulkanRenderPass(const Vulkan::Context* vulkanContext, Vu
     info.pDependencies = &dependency;
     VkResult err = vkCreateRenderPass(vulkanContext->m_device, &info, nullptr, &vulkanWindowInfo->m_renderWindowPresentationPass);
     Vulkan::Context::HandleError(err);
+}
 
+static void CreateImGuiFrameBuffer(const Vulkan::Context* vulkanContext, Vulkan::WindowInfo* vulkanWindowInfo)
+{
+    VkImageView imageViewAttachments[1];
+    VkFramebufferCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    info.renderPass = vulkanWindowInfo->m_renderWindowPresentationPass;
+    info.attachmentCount = 1;
+    info.pAttachments = imageViewAttachments;
+    info.width = vulkanWindowInfo->m_extent.width;
+    info.height = vulkanWindowInfo->m_extent.height;
+    info.layers = 1;
+    for (uint32_t i = 0; i < vulkanWindowInfo->m_imageCount; i++)
     {
-        VkImageView imageViewAttachments[1];
-        VkFramebufferCreateInfo info = {};
-        info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        info.renderPass = vulkanWindowInfo->m_renderWindowPresentationPass;
-        info.attachmentCount = 1;
-        info.pAttachments = imageViewAttachments;
-        info.width = vulkanWindowInfo->m_extent.width;
-        info.height = vulkanWindowInfo->m_extent.height;
-        info.layers = 1;
-        for (uint32_t i = 0; i < vulkanWindowInfo->m_imageCount; i++)
-        {
-            imageViewAttachments[0] = vulkanWindowInfo->m_frames[i].m_backBufferView;
-            VkResult err = vkCreateFramebuffer(vulkanContext->m_device, &info, nullptr, &vulkanWindowInfo->m_frames[i].m_framebuffer);
-            Vulkan::Context::HandleError(err);
-        }
+        imageViewAttachments[0] = vulkanWindowInfo->m_frames[i].m_backBufferView;
+        VkResult err = vkCreateFramebuffer(vulkanContext->m_device, &info, nullptr, &vulkanWindowInfo->m_frames[i].m_framebuffer);
+        Vulkan::Context::HandleError(err);
     }
 }
 
@@ -218,7 +219,8 @@ void DevGuiManager::Init()
     Vulkan::WindowInfo* renderWindowInfo = renderWindow->GetVulkanWindowInfo();
 
     CreateImGuiVulkanRenderPass(vulkanInterface, renderWindowInfo);
-
+    CreateImGuiFrameBuffer(vulkanInterface, renderWindowInfo);
+	
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = vulkanInterface->m_instance;
     init_info.PhysicalDevice = vulkanInterface->m_physicalDevice;
@@ -790,8 +792,8 @@ void DevGuiRenderViewportWindow::UpdateDisplayTexture(Renderer* renderer)
 
     VkSamplerCreateInfo samplerInfo = {};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerInfo.magFilter = VK_FILTER_NEAREST;
-    samplerInfo.minFilter = VK_FILTER_NEAREST;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
     samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -922,6 +924,13 @@ static void FrameRender(const Vulkan::Context* vulkanInterface, Vulkan::WindowIn
 
 void DevGuiManager::Update(bool editorBuild)
 {
+    GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
+	
+	if(renderWindow->m_updated)
+	{
+        CreateImGuiFrameBuffer(renderWindow->GetVulkanInterface(), renderWindow->GetVulkanWindowInfo());
+	}
+	
     // Start the Dear ImGui frame
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -1004,7 +1013,6 @@ void DevGuiManager::Update(bool editorBuild)
 
     ImGui::Render();
 
-    GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
     // glfwGetFramebufferSize(renderWindow->GetWindowPointer(), &display_w, &display_h);
     
     ImDrawData* draw_data = ImGui::GetDrawData();

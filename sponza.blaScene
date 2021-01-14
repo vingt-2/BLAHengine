@@ -6,15 +6,21 @@
                 "m_localTransform:2668475925": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
             },
             "CameraComponent:1371827874": {
-                "m_isShadowMapCamera:1567487597": true
+                "m_isShadowMapCamera:1567487597": true,
+                "m_fov:599216102": 120.0,
+                "m_nearClipPlane:2356797840": 0.009999999776482582,
+                "m_farClipPlane:3555248668": 10000.0
             }
         },
         "EditorCamera:1290495955": {
             "TransformComponent:3187546315": {
-                "m_localTransform:2668475925": [1.0, 1.0, 1.0, -3.673287868499756, -1.020760178565979, -0.5378833413124085, -0.21914713084697724, -0.21316663920879365, -0.049129437655210498, 0.950852632522583]
+                "m_localTransform:2668475925": [1.0, 1.0, 1.0, -2.021054267883301, 3.9175362586975099, 0.5124042630195618, 0.4471472203731537, -0.5229548215866089, -0.37721261382102969, -0.6199098229408264]
             },
             "CameraComponent:1371827874": {
-                "m_isShadowMapCamera:1567487597": false
+                "m_isShadowMapCamera:1567487597": false,
+                "m_fov:599216102": 120.0,
+                "m_nearClipPlane:2356797840": 0.009999999776482582,
+                "m_farClipPlane:3555248668": 10000.0
             }
         },
         "Sponza:207878904": {
@@ -23,15 +29,6 @@
             },
             "MeshRendererComponent:4028835888": {
                 "m_meshAssetName:4180281198": "sponza",
-                "m_Render:3647196834": true
-            }
-        },
-        "Sky Sphere:4037688177": {
-            "TransformComponent:3187546315": {
-                "m_localTransform:2668475925": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-            },
-            "MeshRendererComponent:4028835888": {
-                "m_meshAssetName:4180281198": "SkySphere",
                 "m_Render:3647196834": true
             }
         },

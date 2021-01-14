@@ -115,8 +115,38 @@ void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::Context*
     vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
 
+void VulkanRenderPass::SetAttachment(Gpu::RenderPassDescriptor& renderPassDescriptor, Gpu::RenderAttachment& attachment, VkDevice device)
+{
+    // Ok let's make the framebuffer here ...
+
+    m_attachmentSize = attachment.m_image->GetSize();
+
+    VkImageViewCreateInfo imageViewCreateInfo = {};
+    imageViewCreateInfo.image = static_cast<VkImage>(attachment.m_image->GetHandle().m_impl.pointer);
+    imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: customize asap
+    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+    imageViewCreateInfo.subresourceRange.levelCount = 1;
+    imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+    imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+    vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachmentImageView);
+
+    VkFramebufferCreateInfo frameBufferCreateInfo = {};
+    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    frameBufferCreateInfo.renderPass = m_vkRenderPass;
+    frameBufferCreateInfo.attachmentCount = 1;
+    frameBufferCreateInfo.pAttachments = &m_attachmentImageView;
+    frameBufferCreateInfo.width = attachment.m_image->GetSize().x;
+    frameBufferCreateInfo.height = attachment.m_image->GetSize().y;
+    frameBufferCreateInfo.layers = 1;
+
+    vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_frameBuffer);
+}
+
 void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescriptor, 
-									  Gpu::RenderAttachment& attachment,
 									  VkDevice device,
                                       const VkAllocationCallbacks* allocator, 
 									  VkPipelineCache pipelineCache,
@@ -179,37 +209,10 @@ void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescr
     raster_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     raster_info.lineWidth = 1.0f;
 
+    // TODO
     VkPipelineMultisampleStateCreateInfo ms_info = {};
     ms_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    ms_info.rasterizationSamples = static_cast<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_1_BIT << (attachment.m_sampleCount - 1));
-
-	// Ok let's make the framebuffer here ...
-
-    m_attachmentSize = attachment.m_image->GetSize();
-	
-    VkImageViewCreateInfo imageViewCreateInfo = {};
-    imageViewCreateInfo.image = static_cast<VkImage>(attachment.m_image->GetHandle().m_impl.pointer);
-    imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: customize asap
-    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-    imageViewCreateInfo.subresourceRange.levelCount = 1;
-    imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-    imageViewCreateInfo.subresourceRange.layerCount = 1;
-
-    vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachmentImageView);
-	
-    VkFramebufferCreateInfo frameBufferCreateInfo = {};
-    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    frameBufferCreateInfo.renderPass = m_vkRenderPass;
-    frameBufferCreateInfo.attachmentCount = 1;
-    frameBufferCreateInfo.pAttachments = &m_attachmentImageView;
-    frameBufferCreateInfo.width = attachment.m_image->GetSize().x;
-    frameBufferCreateInfo.height = attachment.m_image->GetSize().y;
-    frameBufferCreateInfo.layers = 1;
-	
-    vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_frameBuffer);
+    ms_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT; // TODO static_cast<VkSampleCountFlagBits>(VK_SAMPLE_COUNT_1_BIT << (attachment.m_sampleCount - 1));
 
     VkPipelineColorBlendAttachmentState color_attachment[1] = {};
     color_attachment[0].blendEnable = VK_TRUE;
@@ -217,7 +220,7 @@ void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescr
     color_attachment[0].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     color_attachment[0].colorBlendOp = VK_BLEND_OP_ADD;
     color_attachment[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    color_attachment[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    color_attachment[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
     color_attachment[0].alphaBlendOp = VK_BLEND_OP_ADD;
     color_attachment[0].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
@@ -330,8 +333,8 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
     cmdBufferBeginInfo.pNext = NULL;
 
     VkClearValue clearValues[2];
-    clearValues[0].color = {{1.0f, 0.0f, 0.2f, 1.0f}};
-    clearValues[1].depthStencil = {1.0f, 0};
+    clearValues[0].color = {{1.0f, 1.0f, 1.0f, 1.0f}};
+    // clearValues[1].depthStencil = {1.0f, 0};
 
     VkRenderPassBeginInfo renderPassBeginInfo = {};
     renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -340,7 +343,7 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
     renderPassBeginInfo.renderArea.offset.y = 0;
     renderPassBeginInfo.renderArea.extent.width = static_cast<blaU32>(m_attachmentSize.x);
     renderPassBeginInfo.renderArea.extent.height = static_cast<blaU32>(m_attachmentSize.y);
-    renderPassBeginInfo.clearValueCount = 2;
+    renderPassBeginInfo.clearValueCount = 1;
     renderPassBeginInfo.pClearValues = clearValues;
 
     int i = vkWindow->m_frameIndex;
