@@ -40,4 +40,9 @@ namespace BLA::Gpu
         gpuInterface->PrepareForStaging(this);
     }
 
+    BaseStaticBuffer::~BaseStaticBuffer()
+    {
+        Interface* gpuInterface = Interface::GetSingletonInstance();
+        gpuInterface->Cancel(this);
+    }
 }

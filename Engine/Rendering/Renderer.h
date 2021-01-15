@@ -10,7 +10,7 @@
 namespace BLA
 {
     using BLARgba = blaU32;
-	
+    
     struct OffscreenRenderTarget
     {
         Gpu::Image* m_color = nullptr;

@@ -39,12 +39,12 @@ namespace BLA
         friend class Renderer;
     
     protected:
-    	
+        
         BaseRenderPassInstance(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount) :
             m_vaCount(vaCount), m_uvCount(uvCount), m_indices(&indices) {}
 
     public:
-    	
+        
         void GetVertexAttributeBuffer(blaU32 i, const Gpu::BaseStaticBuffer*& buffer) const
         {
             //TODO fatal assert i <= vaCount
@@ -53,7 +53,7 @@ namespace BLA
         }
 
 
-    	// Really should  be a dynamic buffer ...
+        // Really should  be a dynamic buffer ...
         void GetUniformValueBuffer(int i, const Gpu::BaseDynamicBuffer*& buffer) const
         {
             //TODO: fatal assert i <= uvCount

@@ -16,15 +16,15 @@ namespace BLA::Gpu
     {
         return m_dataPointer;
     }
-	
+    
     blaU32 BaseDynamicBuffer::GetSize() const
     {
         return m_size;
     }
 
     BaseDynamicBuffer::BaseDynamicBuffer(blaSize elementSize) :
-	BaseResource(EResourceType::eDynamicBuffer),
-	m_size(static_cast<blaU32>(elementSize))
+    BaseResource(EResourceType::eDynamicBuffer),
+    m_size(static_cast<blaU32>(elementSize))
     {
         memset(&m_allocationHandle, 0, sizeof(AllocationHandle_t));
         Interface* gpuInterface = Interface::GetSingletonInstance();

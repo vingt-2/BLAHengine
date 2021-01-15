@@ -22,8 +22,8 @@ namespace BLA
 
         struct BaseResource
         {
-            BaseResource(EResourceType type) : m_handle{0}, m_resourceType(type)
-            {}
+            BaseResource(EResourceType type) : m_handle{0}, m_resourceType(type) {}
+            virtual ~BaseResource();
 
             bool IsReady() const { return m_handle.m_impl.bits64 != 0; }
             EResourceType GetType() const { return m_resourceType; }

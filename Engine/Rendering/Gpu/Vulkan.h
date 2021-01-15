@@ -14,7 +14,7 @@ namespace BLA
     }
 
     namespace Gpu
-    {    	
+    {        
         struct BaseStaticBuffer;
         struct Image;
         class RenderPassImplementation;
@@ -26,16 +26,16 @@ namespace BLA
             Vulkan(const System::Vulkan::Context* context);
 
             ResourceHandle Submit(BaseResource* resource) override;
-            void Cancel(ResourceHandle handle) override;
+            void Cancel(BaseResource* resource) override;
             void PrepareForStaging(BaseResource* resource) override;
             ResourceHandle PrepareDynamicBuffer(BaseResource* resource) override;
-        	
+            
         protected:
             void SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) override;
             void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment) override;
 
-        	void Render(RenderPassDescriptor& renderPassDescriptor) override;
-			void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) override;
+            void Render(RenderPassDescriptor& renderPassDescriptor) override;
+            void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) override;
         
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);
@@ -48,9 +48,9 @@ namespace BLA
             VulkanImplementation* m_implementation;
 
         public:
-        	// Vulkan specific public stuff that I call externallyt as a temporary wiring
+            // Vulkan specific public stuff that I call externallyt as a temporary wiring
 
-        	
+            
         };
     }
 };

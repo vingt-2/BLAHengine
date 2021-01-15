@@ -4,8 +4,6 @@
 #include "Rendering/GPU/VulkanRenderPass.h"
 #include "System/Vulkan/Context.h"
 
-#pragma optimize("", off)
-
 #define VMA_IMPLEMENTATION
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 1
@@ -100,9 +98,8 @@ namespace BLA::Gpu
         return ResourceHandle();
     }
 
-    void Vulkan::Cancel(ResourceHandle handle)
+    void Vulkan::Cancel(BaseResource* resource)
     {
-
     }
 
     void Vulkan::PrepareForStaging(BaseResource* resource)
@@ -177,7 +174,7 @@ namespace BLA::Gpu
     {
         VulkanRenderPass* renderPass = new VulkanRenderPass();
 
-    	renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
+        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
 
         renderPass->CreatePipeline(
             renderPassDescriptor,
@@ -186,14 +183,14 @@ namespace BLA::Gpu
             m_implementation->m_vulkanContext->m_pipelineCache,
             static_cast<VkShaderModule>(program.m_shaders[0].GetHandle().m_impl.pointer),
             static_cast<VkShaderModule>(program.m_shaders[1].GetHandle().m_impl.pointer));
-    	
+        
         renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer = renderPass;
     }
-	
+    
     void Vulkan::AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment)
     {
         VulkanRenderPass* renderPass = static_cast<VulkanRenderPass*>(renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer);
-    	
+        
         renderPass->SetAttachment(
             renderPassDescriptor,
             attachment,
@@ -220,20 +217,20 @@ namespace BLA::Gpu
 
         VkBufferUsageFlagBits usageFlag;
 
-    	switch(resource->m_usage)
-    	{
+        switch(resource->m_usage)
+        {
         case BaseStaticBuffer::Usage::VertexBuffer:
             usageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
             break;
-		case BaseStaticBuffer::Usage::IndexBuffer:
+        case BaseStaticBuffer::Usage::IndexBuffer:
             usageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
             break;
         default:
             usageFlag = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
             BLA_TRAP(false);
-    		break;
-    	}
-    	
+            break;
+        }
+        
         m_implementation->CreateBuffer(
             VMA_MEMORY_USAGE_GPU_ONLY,
             bufferSize,
@@ -265,7 +262,7 @@ namespace BLA::Gpu
             resource->GetSize().x, resource->GetSize().y);
 
         m_implementation->TransitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-    	
+        
         ResourceHandle retVal;
         retVal.m_impl.pointer = image;
 
@@ -277,8 +274,8 @@ namespace BLA::Gpu
         blaVector<blaU8> shaderBlob = ReadBlob(program->m_pathToBinaries);
 
         VkShaderModule shaderModule;
-    	m_implementation->LoadShaderCode(shaderBlob, shaderModule);
-    	
+        m_implementation->LoadShaderCode(shaderBlob, shaderModule);
+        
         ResourceHandle retVal;
         retVal.m_impl.pointer = shaderModule;
 

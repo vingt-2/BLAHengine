@@ -11,8 +11,6 @@
 
 #define VK_CHECK_RESULT(x) x
 
-#pragma optimize("", off)
-
 using namespace BLA;
 
 blaMap<blaStringId, VkFormat> g_typeToFormat =
@@ -93,7 +91,7 @@ void VulkanRenderPass::RegisterRenderPassInstance(const System::Vulkan::Context*
     {
         const Gpu::BaseDynamicBuffer* buffer;
         rpInstance.GetUniformValueBuffer(i, buffer);
-    	
+        
         VkDescriptorBufferInfo& bufferInfo = bufferInfos[i];
         bufferInfo.buffer = static_cast<VkBuffer>(buffer->GetHandle().m_impl.pointer);
         bufferInfo.offset = 0;
@@ -147,9 +145,9 @@ void VulkanRenderPass::SetAttachment(Gpu::RenderPassDescriptor& renderPassDescri
 }
 
 void VulkanRenderPass::CreatePipeline(Gpu::RenderPassDescriptor& renderPassDescriptor, 
-									  VkDevice device,
+                                      VkDevice device,
                                       const VkAllocationCallbacks* allocator, 
-									  VkPipelineCache pipelineCache,
+                                      VkPipelineCache pipelineCache,
                                       VkShaderModule vertexModule, VkShaderModule fragmentModule)
 {
     VkPipelineShaderStageCreateInfo stage[2] = {};
@@ -327,7 +325,7 @@ void VulkanRenderPass::CreateVKRenderPass(VkDevice device)
 void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Context* vulkanContext) const
 {
     System::Vulkan::WindowInfo* vkWindow = vulkanContext->m_window;
-	
+    
     VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
     cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     cmdBufferBeginInfo.pNext = NULL;
@@ -348,10 +346,10 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
 
     int i = vkWindow->m_frameIndex;
 
-	vkWaitForFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
+    vkWaitForFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
 
-	vkResetFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence);
-	
+    vkResetFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence);
+    
     renderPassBeginInfo.framebuffer = m_frameBuffer;
 
     vkBeginCommandBuffer(vkWindow->m_frames[i].m_commandBuffer, &cmdBufferBeginInfo);
@@ -397,9 +395,9 @@ void VulkanRenderPass::BuildCommandBuffersThisFrame(const System::Vulkan::Contex
     end_info.commandBufferCount = 1;
     end_info.pCommandBuffers = &vkWindow->m_frames[i].m_commandBuffer;
 
-	vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
+    vkEndCommandBuffer(vkWindow->m_frames[i].m_commandBuffer);
 
-	vkQueueSubmit(vulkanContext->m_queue, 1, &end_info, vulkanContext->m_window->m_frames[i].m_imageFence);
+    vkQueueSubmit(vulkanContext->m_queue, 1, &end_info, vulkanContext->m_window->m_frames[i].m_imageFence);
 
     vkWaitForFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
 }

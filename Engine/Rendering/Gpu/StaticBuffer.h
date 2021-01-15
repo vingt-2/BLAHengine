@@ -18,11 +18,11 @@ namespace BLA
 
             enum class Usage
             {
-	            VertexBuffer,
-            	IndexBuffer,
-            	ImageBuffer
+                VertexBuffer,
+                IndexBuffer,
+                ImageBuffer
             } m_usage;
-        	
+            
             static const EResourceType ms_resourceType = EResourceType::eStaticBuffer;
 
             const void* GetData() const;
@@ -46,6 +46,7 @@ namespace BLA
 
         protected:
             BaseStaticBuffer(blaU32 size, blaSize elementSize, Usage usage);
+            virtual ~BaseStaticBuffer();
             blaU32 m_bufferLength;
             blaU32 m_elementSize;
             void* m_dataPointer;
@@ -57,10 +58,10 @@ namespace BLA
         public:
             StaticBuffer(blaU32 length, Usage usage) : BaseStaticBuffer(length, sizeof(T), usage) {}
 
-        	T& operator[](int i)
-        	{
+            T& operator[](int i)
+            {
                 return *(static_cast<T*>(GetData()) + i);
-        	}
+            }
         };
     };
 };

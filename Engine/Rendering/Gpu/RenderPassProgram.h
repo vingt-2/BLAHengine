@@ -15,18 +15,18 @@ namespace BLA
 
     namespace Gpu
     {
-		struct ShaderProgram : BaseResource 
-		{
+        struct ShaderProgram : BaseResource 
+        {
             enum class Type { VertexShader, FragmentShader } m_type;
-			
-			ShaderProgram(Type type, blaString pathToBinaries /*TODO: Replace with a loaded blaengine asset ...*/) : BaseResource(EResourceType::eShaderProgram), m_type(type), m_pathToBinaries(pathToBinaries) {}
-		
+            
+            ShaderProgram(Type type, blaString pathToBinaries /*TODO: Replace with a loaded blaengine asset ...*/) : BaseResource(EResourceType::eShaderProgram), m_type(type), m_pathToBinaries(pathToBinaries) {}
+        
             blaString m_pathToBinaries; //TODO: Replace with a loaded blaengine asset ...
-		};
+        };
 
-    	struct RenderPassProgram
-    	{
+        struct RenderPassProgram
+        {
             blaVector<ShaderProgram> m_shaders;
-    	};
+        };
     }
 };

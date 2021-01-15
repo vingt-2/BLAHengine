@@ -10,7 +10,7 @@ namespace BLA
 {
     class Renderer;
     class BaseRenderPassInstance;
-	
+    
     namespace Gpu
     {
         struct Image;
@@ -19,16 +19,16 @@ namespace BLA
         struct RenderPassDescriptor;
         struct RenderPassProgram;
         struct RenderAttachment;
-    	
+        
         class RenderPassImplementation;
-    	
+        
         class Interface
         {
             friend class Renderer;
             BLA_DECLARE_THREAD_LOCAL_SINGLETON(Interface)
         public:
             virtual ResourceHandle Submit(BaseResource* resource) = 0;
-            virtual void Cancel(ResourceHandle handle) = 0;
+            virtual void Cancel(BaseResource* handle) = 0;
             virtual void PrepareForStaging(BaseResource* resource) = 0;
 
             virtual ResourceHandle PrepareDynamicBuffer(BaseResource* resource) = 0;
@@ -46,7 +46,7 @@ namespace BLA
 
             virtual void SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) = 0;
             virtual void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment) = 0;
-        	
+            
             virtual void Render(RenderPassDescriptor& renderPassDescriptor) = 0;
             virtual void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) = 0;
         };

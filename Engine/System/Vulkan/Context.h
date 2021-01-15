@@ -65,11 +65,11 @@ namespace BLA
                 VkCommandPool m_currentCommandPool;
                 VkCommandPool m_TransferCommandPool;
 
-            public:            	
+            public:                
                 Context(const blaVector<const char*>& extensions, const blaVector<const char*>& layers);
 
                 WindowInfo* m_window     = nullptr;
-            	
+                
                 VkAllocationCallbacks*   m_allocator = NULL;
                 VkInstance               m_instance = VK_NULL_HANDLE;
                 VkPhysicalDevice         m_physicalDevice = VK_NULL_HANDLE;

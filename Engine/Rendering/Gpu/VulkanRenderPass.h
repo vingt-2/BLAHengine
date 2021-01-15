@@ -21,10 +21,10 @@ namespace BLA
         VkDescriptorSet m_descriptorSets;
     };
 
-	namespace Gpu
-	{
+    namespace Gpu
+    {
         struct RenderAttachment;
-	}
+    }
 
     class VulkanRenderPass : public Gpu::RenderPassImplementation
     {
@@ -42,10 +42,10 @@ namespace BLA
     
     public:
 
-		void RegisterRenderPassInstance(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassInstance& rpInstance);
-		
+        void RegisterRenderPassInstance(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassInstance& rpInstance);
+        
         void SetAttachment(Gpu::RenderPassDescriptor& renderPassDescriptor, Gpu::RenderAttachment& attachment, VkDevice device);
-		
+        
         void CreatePipeline(
             Gpu::RenderPassDescriptor& renderPassDescriptor,
             VkDevice device,

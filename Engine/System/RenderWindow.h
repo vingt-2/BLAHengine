@@ -116,13 +116,13 @@ namespace BLA
         System::Vulkan::WindowInfo* GetVulkanWindowInfo() const;
 
         bool m_updated = false;
-    	
+        
     private:
         void CreateSwapChain();
         void CreateSwapChainCommandBuffers();
 
         void DestroySwapChainAndCommandBuffers();
-    	
+        
         System::Vulkan::Context* m_vulkanContext;
         System::Vulkan::WindowInfo* m_vulkanWindowInfo;
     };

@@ -67,7 +67,7 @@ void MeshRendererComponent::Shutdown()
 
 void MeshRendererComponent::Update()
 {
-	
+    
     bool validState = true;
     if(m_mesh == nullptr || m_mesh->GetName() != m_meshAssetName)
     {
@@ -86,7 +86,7 @@ void MeshRendererComponent::Update()
     CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
 
     if (!camera) return;
-	
+    
     blaMat4 localToWorld;
     if (!GetOwnerObject().IsValid())
     {
@@ -141,9 +141,9 @@ void MeshRendererComponent::Update()
             const TestMeshPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos);
             const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
 
-        	// Leak ... of course !
+            // Leak ... of course !
             TestMeshPass::RenderPassInstance* renderPassInstance = new TestMeshPass::RenderPassInstance(*m_indices, meshVAs, meshUniforms);
-        	
+            
             Gpu::Interface::GetSingletonInstance()->RegisterRenderPassInstance<TestMeshPass>(*renderPassInstance);
         }
     }

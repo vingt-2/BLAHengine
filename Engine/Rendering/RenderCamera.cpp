@@ -31,7 +31,7 @@ static blaMat4 GetPerspective(blaF32 horizontalFovRad, blaF32 verticalFovRad, bl
 void PerspectiveCamera::Update()
 {
     SetAspect(blaVec2(16, 9));
-	
+    
     blaF32 horFovRad = m_attachedCamera->m_fov * DEG_TO_RAD;
     blaF32 vertFovRad = horFovRad / m_aspectRatio;
     

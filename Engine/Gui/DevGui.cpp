@@ -220,7 +220,7 @@ void DevGuiManager::Init()
 
     CreateImGuiVulkanRenderPass(vulkanInterface, renderWindowInfo);
     CreateImGuiFrameBuffer(vulkanInterface, renderWindowInfo);
-	
+    
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = vulkanInterface->m_instance;
     init_info.PhysicalDevice = vulkanInterface->m_physicalDevice;
@@ -833,18 +833,18 @@ void DevGuiRenderViewportWindow::Render()
 
         if (m_renderData->m_offscreenImageTextureId)
         {
-            ImGui::Image(m_renderData->m_offscreenImageTextureId, ImGui::GetWindowSize());
+            ImGui::Image(m_renderData->m_offscreenImageTextureId, ImGui::GetContentRegionMax());
         }
 
         ImVec2 cursorInWindow = ImGui::GetCursorPos();
 
-        m_pRenderer->SetViewportSize(blaIVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
+        m_pRenderer->SetViewportSize(blaIVec2(ImGui::GetContentRegionMax().x, ImGui::GetContentRegionMax().y));
 
         ImVec2 mouse = ImGui::GetMousePos();
 
         m_cursorScreenSpacePosition = blaVec2(
-            1.0f - (mouse.x - windowPos.x) / ImGui::GetWindowWidth(),
-            1.0f - (mouse.y - windowPos.y) / ImGui::GetWindowHeight());
+            1.0f - (mouse.x - windowPos.x) / ImGui::GetContentRegionMax().x,
+            1.0f - (mouse.y - windowPos.y) / ImGui::GetContentRegionMax().y);
 
         m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
 
@@ -925,12 +925,12 @@ static void FrameRender(const Vulkan::Context* vulkanInterface, Vulkan::WindowIn
 void DevGuiManager::Update(bool editorBuild)
 {
     GLFWVulkanRenderWindow* renderWindow = static_cast<GLFWVulkanRenderWindow*>(m_window);
-	
-	if(renderWindow->m_updated)
-	{
+    
+    if(renderWindow->m_updated)
+    {
         CreateImGuiFrameBuffer(renderWindow->GetVulkanInterface(), renderWindow->GetVulkanWindowInfo());
-	}
-	
+    }
+    
     // Start the Dear ImGui frame
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();

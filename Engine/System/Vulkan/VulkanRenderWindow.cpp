@@ -8,10 +8,7 @@
 using namespace BLA;
 using namespace System;
 
-
-bool g_enableValidationLayers = true;
-
-#pragma optimize("",off)
+bool g_enableValidationLayers = false;
 
 struct SwapChainSupportDetails
 {
@@ -224,16 +221,16 @@ void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX
     memcpy_s(allExtensions.data(), sizeof(const char*) * extensions_count, extensions, extensions_count * sizeof(const char*));
 
     // allExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
-	
-	if(g_enableValidationLayers)
-	{
+    
+    if(g_enableValidationLayers)
+    {
         allExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-		allExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        allExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-		m_vulkanContext = new Vulkan::Context(allExtensions, validationLayers);
-		
+        m_vulkanContext = new Vulkan::Context(allExtensions, validationLayers);
+        
         setupDebugMessenger(m_vulkanContext->m_instance);
-	}
+    }
     else
     {
         m_vulkanContext = new Vulkan::Context(allExtensions, blaVector<const char*>());
@@ -258,7 +255,7 @@ void GLFWVulkanRenderWindow::CreateRenderWindow(blaString windowTitle, int sizeX
     m_vulkanWindowInfo = new Vulkan::WindowInfo(surface);
 
     m_vulkanContext->m_window = m_vulkanWindowInfo;
-	
+    
     CreateSwapChain();
     CreateSwapChainCommandBuffers();
 

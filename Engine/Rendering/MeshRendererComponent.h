@@ -37,7 +37,7 @@ namespace BLA
         MeshAsset* m_mesh = nullptr;
         Gpu::DynamicBuffer<blaMat4> m_modelTransformMatrix;
         Gpu::DynamicBuffer<blaMat4> m_MVP;
-	
+    
         bool init = false;
         PerspectiveCamera m_camera;
 

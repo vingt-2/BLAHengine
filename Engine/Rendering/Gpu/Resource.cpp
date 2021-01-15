@@ -5,6 +5,14 @@
 
 namespace BLA::Gpu
 {
+    BaseResource::~BaseResource()
+    {
+        Interface* gpuInterface = Interface::GetSingletonInstance();
+        BLA_ASSERT(gpuInterface);
+
+        gpuInterface->Cancel(this);
+    }
+
     void BaseResource::Submit()
     {
         Interface* gpuInterface = Interface::GetSingletonInstance();
@@ -18,7 +26,7 @@ namespace BLA::Gpu
         Interface* gpuInterface = Interface::GetSingletonInstance();
         BLA_ASSERT(gpuInterface);
 
-        gpuInterface->Cancel(m_handle);
+        gpuInterface->Cancel(this);
         m_handle = ResourceHandle();
     }
 

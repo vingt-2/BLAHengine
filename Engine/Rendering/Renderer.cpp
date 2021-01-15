@@ -53,7 +53,7 @@ Renderer::Renderer(GLFWRenderWindow* pRenderWindow): m_renderWindow(pRenderWindo
     m_renderWindow->GetSize(m_viewPortExtents.x, m_viewPortExtents.y);
 
     CreateOrUpdateRenderTargets();
-	
+    
     // Setup Test Render Pass...
     SetupRenderPassInstances();
 }
@@ -65,7 +65,7 @@ bool Renderer::Update()
     if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
     {
         Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
-		gpu->Render(*geometryPassDesc);
+        gpu->Render(*geometryPassDesc);
     }
     return true;
 }
@@ -105,7 +105,7 @@ void Renderer::SetupRenderPassInstances()
         program.m_shaders.push_back(vertexShader);
         program.m_shaders.push_back(fragmentShader);
 
-		Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
+        Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
 
         Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program);
         Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
@@ -146,12 +146,12 @@ void Renderer::CreateOrUpdateRenderTargets()
         std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
         std::uniform_int_distribution<> distrib(125, 255);
        
-    	for(blaU32 i = 0; i < buffer.GetLength(); i++)
-    	{
+        for(blaU32 i = 0; i < buffer.GetLength(); i++)
+        {
             blaVec4 color(distrib(gen), distrib(gen), distrib(gen), 1.f);
             buffer[i] = color;
-    	}
-    	
+        }
+        
         //memset(buffer.GetData(), color, buffer.GetLength() * buffer.GetElementSize());
     }
     m_offscreenBuffer.m_color = new Gpu::Image(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), &buffer);
