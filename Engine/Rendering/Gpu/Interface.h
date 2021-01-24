@@ -13,7 +13,7 @@ namespace BLA
     
     namespace Gpu
     {
-        struct Image;
+        struct BaseImage;
         struct BaseStaticBuffer;
         struct BaseDynamicBuffer;
         struct RenderPassDescriptor;
@@ -42,7 +42,7 @@ namespace BLA
         protected:
             static void SetBufferDataPointer(BaseStaticBuffer* buffer, blaU8* pointer);
             static void SetBufferDataPointer(BaseDynamicBuffer* buffer, blaU8* pointer);
-            static BaseStaticBuffer* GetImageBuffer(Image* image);
+            static BaseStaticBuffer* GetImageBuffer(BaseImage* image);
 
             virtual void SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) = 0;
             virtual void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment) = 0;

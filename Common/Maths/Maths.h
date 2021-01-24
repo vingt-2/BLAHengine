@@ -10,6 +10,8 @@
 #include <glm/gtx/quaternion.hpp>
 
 typedef glm::ivec2 blaIVec2;
+typedef glm::ivec3 blaIVec3;
+typedef glm::ivec4 blaIVec4;
 typedef glm::vec2 blaVec2;
 typedef glm::vec3 blaVec3;
 typedef glm::vec4 blaVec4;

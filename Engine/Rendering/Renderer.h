@@ -6,6 +6,7 @@
 #include "Gpu/Resource.h"
 #include "Rendering/RenderPass.h"
 #include "System/RenderWindow.h"
+#include "Pointer.h"
 
 namespace BLA
 {
@@ -13,7 +14,7 @@ namespace BLA
     
     struct OffscreenRenderTarget
     {
-        Gpu::Image* m_color = nullptr;
+        blaOwnedPtr<Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>> m_color;
     };
 
     class RenderWindow;

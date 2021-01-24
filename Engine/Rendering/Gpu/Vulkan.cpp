@@ -18,7 +18,141 @@
 #include "System/FileSystem/Files.h"
 
 namespace BLA::Gpu
-{ 
+{
+    blaVector<VkFormat> g_BlaFormatToVulkan =
+    {
+        VK_FORMAT_R4G4_UNORM_PACK8,
+        VK_FORMAT_R4G4B4A4_UNORM_PACK16,
+        VK_FORMAT_B4G4R4A4_UNORM_PACK16,
+        VK_FORMAT_R5G6B5_UNORM_PACK16,
+        VK_FORMAT_B5G6R5_UNORM_PACK16,
+        VK_FORMAT_R5G5B5A1_UNORM_PACK16,
+        VK_FORMAT_B5G5R5A1_UNORM_PACK16,
+        VK_FORMAT_A1R5G5B5_UNORM_PACK16,
+        VK_FORMAT_R8_UNORM,
+        VK_FORMAT_R8_SNORM,
+        VK_FORMAT_R8_USCALED,
+        VK_FORMAT_R8_SSCALED,
+        VK_FORMAT_R8_UINT,
+        VK_FORMAT_R8_SINT,
+        VK_FORMAT_R8_SRGB,
+        VK_FORMAT_R8G8_UNORM,
+        VK_FORMAT_R8G8_SNORM,
+        VK_FORMAT_R8G8_USCALED,
+        VK_FORMAT_R8G8_SSCALED,
+        VK_FORMAT_R8G8_UINT,
+        VK_FORMAT_R8G8_SINT,
+        VK_FORMAT_R8G8_SRGB,
+        VK_FORMAT_R8G8B8_UNORM,
+        VK_FORMAT_R8G8B8_SNORM,
+        VK_FORMAT_R8G8B8_USCALED,
+        VK_FORMAT_R8G8B8_SSCALED,
+        VK_FORMAT_R8G8B8_UINT,
+        VK_FORMAT_R8G8B8_SINT,
+        VK_FORMAT_R8G8B8_SRGB,
+        VK_FORMAT_B8G8R8_UNORM,
+        VK_FORMAT_B8G8R8_SNORM,
+        VK_FORMAT_B8G8R8_USCALED,
+        VK_FORMAT_B8G8R8_SSCALED,
+        VK_FORMAT_B8G8R8_UINT,
+        VK_FORMAT_B8G8R8_SINT,
+        VK_FORMAT_B8G8R8_SRGB,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_FORMAT_R8G8B8A8_SNORM,
+        VK_FORMAT_R8G8B8A8_USCALED,
+        VK_FORMAT_R8G8B8A8_SSCALED,
+        VK_FORMAT_R8G8B8A8_UINT,
+        VK_FORMAT_R8G8B8A8_SINT,
+        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_FORMAT_B8G8R8A8_UNORM,
+        VK_FORMAT_B8G8R8A8_SNORM,
+        VK_FORMAT_B8G8R8A8_USCALED,
+        VK_FORMAT_B8G8R8A8_SSCALED,
+        VK_FORMAT_B8G8R8A8_UINT,
+        VK_FORMAT_B8G8R8A8_SINT,
+        VK_FORMAT_B8G8R8A8_SRGB,
+        VK_FORMAT_A8B8G8R8_UNORM_PACK32,
+        VK_FORMAT_A8B8G8R8_SNORM_PACK32,
+        VK_FORMAT_A8B8G8R8_USCALED_PACK32,
+        VK_FORMAT_A8B8G8R8_SSCALED_PACK32,
+        VK_FORMAT_A8B8G8R8_UINT_PACK32,
+        VK_FORMAT_A8B8G8R8_SINT_PACK32,
+        VK_FORMAT_A8B8G8R8_SRGB_PACK32,
+        VK_FORMAT_A2R10G10B10_UNORM_PACK32,
+        VK_FORMAT_A2R10G10B10_SNORM_PACK32,
+        VK_FORMAT_A2R10G10B10_USCALED_PACK32,
+        VK_FORMAT_A2R10G10B10_SSCALED_PACK32,
+        VK_FORMAT_A2R10G10B10_UINT_PACK32,
+        VK_FORMAT_A2R10G10B10_SINT_PACK32,
+        VK_FORMAT_A2B10G10R10_UNORM_PACK32,
+        VK_FORMAT_A2B10G10R10_SNORM_PACK32,
+        VK_FORMAT_A2B10G10R10_USCALED_PACK32,
+        VK_FORMAT_A2B10G10R10_SSCALED_PACK32,
+        VK_FORMAT_A2B10G10R10_UINT_PACK32,
+        VK_FORMAT_A2B10G10R10_SINT_PACK32,
+        VK_FORMAT_R16_UNORM,
+        VK_FORMAT_R16_SNORM,
+        VK_FORMAT_R16_USCALED,
+        VK_FORMAT_R16_SSCALED,
+        VK_FORMAT_R16_UINT,
+        VK_FORMAT_R16_SINT,
+        VK_FORMAT_R16_SFLOAT,
+        VK_FORMAT_R16G16_UNORM,
+        VK_FORMAT_R16G16_SNORM,
+        VK_FORMAT_R16G16_USCALED,
+        VK_FORMAT_R16G16_SSCALED,
+        VK_FORMAT_R16G16_UINT,
+        VK_FORMAT_R16G16_SINT,
+        VK_FORMAT_R16G16_SFLOAT,
+        VK_FORMAT_R16G16B16_UNORM,
+        VK_FORMAT_R16G16B16_SNORM,
+        VK_FORMAT_R16G16B16_USCALED,
+        VK_FORMAT_R16G16B16_SSCALED,
+        VK_FORMAT_R16G16B16_UINT,
+        VK_FORMAT_R16G16B16_SINT,
+        VK_FORMAT_R16G16B16_SFLOAT,
+        VK_FORMAT_R16G16B16A16_UNORM,
+        VK_FORMAT_R16G16B16A16_SNORM,
+        VK_FORMAT_R16G16B16A16_USCALED,
+        VK_FORMAT_R16G16B16A16_SSCALED,
+        VK_FORMAT_R16G16B16A16_UINT,
+        VK_FORMAT_R16G16B16A16_SINT,
+        VK_FORMAT_R16G16B16A16_SFLOAT,
+        VK_FORMAT_R32_UINT,
+        VK_FORMAT_R32_SINT,
+        VK_FORMAT_R32_SFLOAT,
+        VK_FORMAT_R32G32_UINT,
+        VK_FORMAT_R32G32_SINT,
+        VK_FORMAT_R32G32_SFLOAT,
+        VK_FORMAT_R32G32B32_UINT,
+        VK_FORMAT_R32G32B32_SINT,
+        VK_FORMAT_R32G32B32_SFLOAT,
+        VK_FORMAT_R32G32B32A32_UINT,
+        VK_FORMAT_R32G32B32A32_SINT,
+        VK_FORMAT_R32G32B32A32_SFLOAT,
+        VK_FORMAT_R64_UINT,
+        VK_FORMAT_R64_SINT,
+        VK_FORMAT_R64_SFLOAT,
+        VK_FORMAT_R64G64_UINT,
+        VK_FORMAT_R64G64_SINT,
+        VK_FORMAT_R64G64_SFLOAT,
+        VK_FORMAT_R64G64B64_UINT,
+        VK_FORMAT_R64G64B64_SINT,
+        VK_FORMAT_R64G64B64_SFLOAT,
+        VK_FORMAT_R64G64B64A64_UINT,
+        VK_FORMAT_R64G64B64A64_SINT,
+        VK_FORMAT_R64G64B64A64_SFLOAT,
+        VK_FORMAT_B10G11R11_UFLOAT_PACK32,
+        VK_FORMAT_E5B9G9R9_UFLOAT_PACK32,
+        VK_FORMAT_D16_UNORM,
+        VK_FORMAT_X8_D24_UNORM_PACK32,
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_S8_UINT,
+        VK_FORMAT_D16_UNORM_S8_UINT,
+        VK_FORMAT_D24_UNORM_S8_UINT,
+        VK_FORMAT_D32_SFLOAT_S8_UINT
+    };
+
     struct Vulkan::VulkanImplementation
     {
         VulkanImplementation(const System::Vulkan::Context* context) : m_vulkanContext(context)
@@ -75,7 +209,7 @@ namespace BLA::Gpu
 
     ResourceHandle Vulkan::Submit(BaseResource* resource)
     {
-        switch(resource->GetType())
+        switch (resource->GetType())
         {
         case EResourceType::eStaticBuffer:
         {
@@ -83,14 +217,14 @@ namespace BLA::Gpu
         }
         case EResourceType::eImage:
         {
-            return SubmitImage(static_cast<Image*>(resource));
+            return SubmitImage(static_cast<BaseImage*>(resource));
         }
         case EResourceType::eShaderProgram:
         {
             return SubmitShaderProgram(static_cast<ShaderProgram*>(resource));
         }
         case EResourceType::eEnd: break;
-        default: ;
+        default:;
         }
 
         BLA_TRAP(false);
@@ -109,7 +243,7 @@ namespace BLA::Gpu
         case EResourceType::eStaticBuffer:
         {
             BaseStaticBuffer* bufferResource = static_cast<BaseStaticBuffer*>(resource);
-            
+
             VkBuffer& stagingBuffer = reinterpret_cast<VkBuffer&>(bufferResource->m_StagingData.pointers[0]);
             VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_StagingData.pointers[1]);
 
@@ -138,33 +272,33 @@ namespace BLA::Gpu
     {
         switch (resource->GetType())
         {
-            case EResourceType::eDynamicBuffer:
-            {
-                BaseDynamicBuffer* bufferResource = static_cast<BaseDynamicBuffer*>(resource);
+        case EResourceType::eDynamicBuffer:
+        {
+            BaseDynamicBuffer* bufferResource = static_cast<BaseDynamicBuffer*>(resource);
 
-                VkBuffer hostVisibleBuffer;
-                VmaAllocation& bufferAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_allocationHandle.pointer);
+            VkBuffer hostVisibleBuffer;
+            VmaAllocation& bufferAlloc = reinterpret_cast<VmaAllocation&>(bufferResource->m_allocationHandle.pointer);
 
-                m_implementation->CreateBuffer(
-                    VMA_MEMORY_USAGE_CPU_TO_GPU,
-                    bufferResource->GetSize(),
-                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                    hostVisibleBuffer, bufferAlloc);
+            m_implementation->CreateBuffer(
+                VMA_MEMORY_USAGE_CPU_TO_GPU,
+                bufferResource->GetSize(),
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                hostVisibleBuffer, bufferAlloc);
 
-                void* pointer;
-                vmaMapMemory(m_implementation->m_allocator, bufferAlloc, &pointer);
-                SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
+            void* pointer;
+            vmaMapMemory(m_implementation->m_allocator, bufferAlloc, &pointer);
+            SetBufferDataPointer(bufferResource, reinterpret_cast<blaU8*>(pointer));
 
-                ResourceHandle retVal;
-                retVal.m_impl.pointer = hostVisibleBuffer;
+            ResourceHandle retVal;
+            retVal.m_impl.pointer = hostVisibleBuffer;
 
-                return retVal;
-                // memcpy(data, resource->GetData(), bufferSize);
-                // vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
+            return retVal;
+            // memcpy(data, resource->GetData(), bufferSize);
+            // vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
 
-            }
-            case EResourceType::eEnd: break;
-            default:;
+        }
+        case EResourceType::eEnd: break;
+        default:;
         }
 
         return ResourceHandle();
@@ -183,14 +317,14 @@ namespace BLA::Gpu
             m_implementation->m_vulkanContext->m_pipelineCache,
             static_cast<VkShaderModule>(program.m_shaders[0].GetHandle().m_impl.pointer),
             static_cast<VkShaderModule>(program.m_shaders[1].GetHandle().m_impl.pointer));
-        
+
         renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer = renderPass;
     }
-    
+
     void Vulkan::AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment)
     {
         VulkanRenderPass* renderPass = static_cast<VulkanRenderPass*>(renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer);
-        
+
         renderPass->SetAttachment(
             renderPassDescriptor,
             attachment,
@@ -217,7 +351,7 @@ namespace BLA::Gpu
 
         VkBufferUsageFlagBits usageFlag;
 
-        switch(resource->m_usage)
+        switch (resource->m_usage)
         {
         case BaseStaticBuffer::Usage::VertexBuffer:
             usageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -230,7 +364,7 @@ namespace BLA::Gpu
             BLA_TRAP(false);
             break;
         }
-        
+
         m_implementation->CreateBuffer(
             VMA_MEMORY_USAGE_GPU_ONLY,
             bufferSize,
@@ -246,7 +380,7 @@ namespace BLA::Gpu
         return retVal;
     }
 
-    ResourceHandle Vulkan::SubmitImage(Image* resource)
+    ResourceHandle Vulkan::SubmitImage(BaseImage* resource)
     {
         VkImage image;
         m_implementation->CreateImage(
@@ -262,7 +396,7 @@ namespace BLA::Gpu
             resource->GetSize().x, resource->GetSize().y);
 
         m_implementation->TransitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-        
+
         ResourceHandle retVal;
         retVal.m_impl.pointer = image;
 
@@ -275,7 +409,7 @@ namespace BLA::Gpu
 
         VkShaderModule shaderModule;
         m_implementation->LoadShaderCode(shaderBlob, shaderModule);
-        
+
         ResourceHandle retVal;
         retVal.m_impl.pointer = shaderModule;
 
@@ -348,7 +482,7 @@ namespace BLA::Gpu
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;
 
-        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) 
+        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
         {
             barrier.srcAccessMask = 0;
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -364,7 +498,7 @@ namespace BLA::Gpu
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
-        else 
+        else
         {
             throw std::invalid_argument("unsupported layout transition!");
         }
@@ -414,7 +548,7 @@ namespace BLA::Gpu
         VmaMemoryUsage memoryUsage,
         VkDeviceSize size,
         VkBufferUsageFlags usage,
-        VkBuffer& buffer, 
+        VkBuffer& buffer,
         VmaAllocation& allocation) const
     {
         VkBufferCreateInfo bufferInfo{};
@@ -459,7 +593,7 @@ namespace BLA::Gpu
         createInfo.codeSize = shaderCodeBlob.size();
         createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCodeBlob.data());
 
-        if (vkCreateShaderModule(m_vulkanContext->m_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) 
+        if (vkCreateShaderModule(m_vulkanContext->m_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create shader module!");
         }

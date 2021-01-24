@@ -3,7 +3,7 @@
 #pragma once
 
 #include "System.h"
-#include "Maths/Maths.h"
+#include "Formats.h"
 #include "ResourceTypes.h"
 #include "Resource.h"
 #include "StaticBuffer.h"
@@ -14,14 +14,12 @@ namespace BLA
     {
         struct BaseStaticBuffer;
 
-        struct Image : BaseResource
+        struct BaseImage : BaseResource
         {
             friend class Interface;
 
             static const EResourceType ms_resourceType = EResourceType::eImage;
 
-            const void* GetData() const;
-            void* GetData();
             blaIVec2 GetSize() const;
             blaU32 GetElementSize() const;
 
@@ -33,11 +31,20 @@ namespace BLA
                 void* pointer;
             } m_allocationHandle;
 
-            Image(blaIVec2 size, BaseStaticBuffer* buffer);
         protected:
+            BaseImage(blaIVec2 size, BaseStaticBuffer* buffer);
+
             blaIVec2 m_size;
             blaU32 m_elementSize;
             BaseStaticBuffer* m_buffer;
+        };
+
+        template<typename Format>
+        struct Image : BaseImage
+        {
+            Image(blaIVec2 size, StaticBuffer<typename Format::AssociatedType>& buffer) : BaseImage(size, &buffer) {}
+
+            StaticBuffer<typename Format::AssociatedType>& GetBuffer() { return static_cast<StaticBuffer<typename Format::AssociatedType>>(*m_buffer); }
         };
     }
 };

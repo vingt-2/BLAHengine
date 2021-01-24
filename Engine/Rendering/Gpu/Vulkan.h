@@ -16,7 +16,7 @@ namespace BLA
     namespace Gpu
     {        
         struct BaseStaticBuffer;
-        struct Image;
+        struct BaseImage;
         class RenderPassImplementation;
 
         class Vulkan : public Interface
@@ -41,7 +41,7 @@ namespace BLA
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);
             void CancelStaticBuffer(ResourceHandle handle);
 
-            ResourceHandle SubmitImage(Image* resource);
+            ResourceHandle SubmitImage(BaseImage* resource);
 
             ResourceHandle SubmitShaderProgram(ShaderProgram* shaderProgram);
 

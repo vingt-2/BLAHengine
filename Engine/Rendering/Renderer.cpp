@@ -81,7 +81,7 @@ void Renderer::SetViewportSize(blaIVec2 renderSize)
 
         if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
         {
-            Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
+            Gpu::RenderAttachment attachment(m_offscreenBuffer.m_color);
             Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
         }
     }
@@ -105,7 +105,7 @@ void Renderer::SetupRenderPassInstances()
         program.m_shaders.push_back(vertexShader);
         program.m_shaders.push_back(fragmentShader);
 
-        Gpu::RenderAttachment attachment(*m_offscreenBuffer.m_color);
+        Gpu::RenderAttachment attachment(m_offscreenBuffer.m_color);
 
         Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program);
         Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
@@ -136,25 +136,17 @@ void Renderer::CreateOrUpdateRenderTargets()
     if (m_offscreenBuffer.m_color)
     {
         m_offscreenBuffer.m_color->Cancel();
-        delete m_offscreenBuffer.m_color;
+        m_offscreenBuffer.m_color = nullptr;
     }
 
-    Gpu::StaticBuffer<blaVec4> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
+    Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
 
+    for(blaU32 i = 0; i < buffer.GetLength(); i++)
     {
-        std::random_device rd;  //Will be used to obtain a seed for the random number engine
-        std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-        std::uniform_int_distribution<> distrib(125, 255);
-       
-        for(blaU32 i = 0; i < buffer.GetLength(); i++)
-        {
-            blaVec4 color(distrib(gen), distrib(gen), distrib(gen), 1.f);
-            buffer[i] = color;
-        }
-        
-        //memset(buffer.GetData(), color, buffer.GetLength() * buffer.GetElementSize());
+        buffer[i] = 0;
     }
-    m_offscreenBuffer.m_color = new Gpu::Image(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), &buffer);
+   
+    m_offscreenBuffer.m_color = new Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), buffer);
 
     // Submit for now is blocking, so we good ...
     m_offscreenBuffer.m_color->Submit();

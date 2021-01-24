@@ -6,27 +6,17 @@
 
 namespace BLA::Gpu
 {
-    const void* Image::GetData() const
-    {
-        return static_cast<const void*>(this + 1);
-    }
-
-    void* Image::GetData()
-    {
-        return static_cast<void*>(this + 1);
-    }
-
-    blaIVec2 Image::GetSize() const
+    blaIVec2 BaseImage::GetSize() const
     {
         return m_size;
     }
 
-    blaU32 Image::GetElementSize() const
+    blaU32 BaseImage::GetElementSize() const
     {
         return m_elementSize;
     }
 
-    Image::Image(blaIVec2 size, BaseStaticBuffer* buffer) : BaseResource(EResourceType::eImage), m_size(size), m_buffer(buffer), m_elementSize(buffer->GetElementSize())
+    BaseImage::BaseImage(blaIVec2 size, BaseStaticBuffer* buffer) : BaseResource(EResourceType::eImage), m_size(size), m_buffer(buffer), m_elementSize(buffer->GetElementSize())
     {
         BLA_TRAP(buffer);
         BLA_TRAP(size.x * size.y == buffer->GetLength());

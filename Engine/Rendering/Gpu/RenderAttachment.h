@@ -5,13 +5,13 @@ namespace BLA
 {
     namespace Gpu
     {
-        struct Image;
+        struct BaseImage;
         //template<typename attachmentDataType> // <- The data type describing each entry in the attachment buffer // Also determines sample count for vk ?
         struct RenderAttachment
         {
-            RenderAttachment(Gpu::Image& image) : m_image(&image), m_sampleCount(1) {}
+            RenderAttachment(Gpu::BaseImage* image) : m_image(image), m_sampleCount(1) {}
             
-            Gpu::Image* m_image;
+            Gpu::BaseImage* m_image;
             blaU8 m_sampleCount; // (per pixel)
         };
     }

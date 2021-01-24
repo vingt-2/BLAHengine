@@ -19,7 +19,7 @@ namespace BLA::Gpu
         buffer->m_dataPointer = pointer;
     }
 
-    BaseStaticBuffer* Interface::GetImageBuffer(Image* image)
+    BaseStaticBuffer* Interface::GetImageBuffer(BaseImage* image)
     {
         return image->m_buffer;
     }
