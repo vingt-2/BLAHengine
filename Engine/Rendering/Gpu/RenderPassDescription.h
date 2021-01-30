@@ -14,7 +14,12 @@ namespace BLA
 
     namespace Gpu
     {
-        class RenderPassImplementation
+        class RPAttachmentDescription
+        {
+
+        };
+
+        class RenderPassInstanceImplementation
         {
 
         };
@@ -22,8 +27,8 @@ namespace BLA
         struct RenderPassDescriptor
         {
             blaStringId m_name;
-            blaU32 m_attachmentCount;
-            RenderPassImplementation* m_pToInstanceRenderPassDescriptorPointer;
+            RPAttachmentDescription m_attachmentCount;
+            RenderPassInstanceImplementation* m_pToInstanceRenderPassDescriptorPointer;
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
         };

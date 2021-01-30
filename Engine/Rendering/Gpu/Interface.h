@@ -9,7 +9,7 @@
 namespace BLA
 {
     class Renderer;
-    class BaseRenderPassInstance;
+    class BaseRenderPassObject;
     
     namespace Gpu
     {
@@ -18,9 +18,9 @@ namespace BLA
         struct BaseDynamicBuffer;
         struct RenderPassDescriptor;
         struct RenderPassProgram;
-        struct RenderAttachment;
-        
-        class RenderPassImplementation;
+        struct BaseRenderPassAttachment;
+
+        class RenderPassInstanceImplementation;
         
         class Interface
         {
@@ -34,9 +34,9 @@ namespace BLA
             virtual ResourceHandle PrepareDynamicBuffer(BaseResource* resource) = 0;
 
             template<class RenderPass>
-            void RegisterRenderPassInstance(const typename RenderPass::RenderPassInstance& instance)
+            void RegisterRenderPassObject(const typename RenderPass::RenderPassObject& instance)
             {
-                RegisterRenderPassInstanceBase(*RenderPass::GetSingletonInstance()->m_pRenderPassDescriptor, instance);
+                RegisterRenderPassObjectBase(*RenderPass::GetSingletonInstance()->m_pRenderPassDescriptor, instance);
             }
         
         protected:
@@ -45,10 +45,10 @@ namespace BLA
             static BaseStaticBuffer* GetImageBuffer(BaseImage* image);
 
             virtual void SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) = 0;
-            virtual void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment) = 0;
+            // virtual void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, BaseRenderPassAttachment& attachment) = 0;
             
             virtual void Render(RenderPassDescriptor& renderPassDescriptor) = 0;
-            virtual void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) = 0;
+            virtual void RegisterRenderPassObjectBase(const RenderPassDescriptor& descriptor, const BaseRenderPassObject& instance) = 0;
         };
     }
 };

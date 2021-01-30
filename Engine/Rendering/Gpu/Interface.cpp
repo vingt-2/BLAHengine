@@ -4,6 +4,7 @@
 #include "StaticBuffer.h"
 #include "DynamicBuffer.h"
 #include "Image.h"
+#include "Formats.h"
 
 namespace BLA::Gpu
 {
@@ -23,4 +24,11 @@ namespace BLA::Gpu
     {
         return image->m_buffer;
     }
+
+    blaMap<blaStringId, Formats::Enum::Index> Formats::g_fundamentalTypeToFormat =
+    {
+        { BlaStringId("blaVec3"), Formats::Enum::Index::R32G32B32_SFLOAT },
+        { BlaStringId("blaVec2"), Formats::Enum::Index::R32G32_SFLOAT },
+        { BlaStringId("blaU32"), Formats::Enum::Index::R8G8B8A8_UINT }
+    };
 }

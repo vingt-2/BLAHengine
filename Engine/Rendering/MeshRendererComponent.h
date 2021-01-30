@@ -5,6 +5,7 @@
 #include "Assets/MeshAsset.h"
 #include "Assets/Material.h"
 #include "Rendering/GPU/StaticBuffer.h"
+#include "Rendering/Gpu/DynamicBuffer.h"
 
 #include "Core/BehaviorComponent.h"
 

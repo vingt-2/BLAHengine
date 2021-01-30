@@ -4,7 +4,6 @@
 #include "Core/InspectableVariables.h"
 #include "Gpu/Image.h"
 #include "Gpu/Resource.h"
-#include "Rendering/RenderPass.h"
 #include "System/RenderWindow.h"
 #include "Pointer.h"
 
@@ -15,6 +14,7 @@ namespace BLA
     struct OffscreenRenderTarget
     {
         blaOwnedPtr<Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>> m_color;
+        blaOwnedPtr<Gpu::Image<Gpu::Formats::D32_SFLOAT>> m_depth;
     };
 
     class RenderWindow;
@@ -32,7 +32,7 @@ namespace BLA
 
         OffscreenRenderTarget m_offscreenBuffer;
 
-        void SetupRenderPassInstances();
+        void SetupRenderPassObjects();
 
     protected:
         blaU32 SetupAllRegisteredRenderPasses();

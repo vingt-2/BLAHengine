@@ -17,7 +17,7 @@ namespace BLA
     {        
         struct BaseStaticBuffer;
         struct BaseImage;
-        class RenderPassImplementation;
+        class RenderPassInstanceImplementation;
 
         class Vulkan : public Interface
         {
@@ -32,10 +32,10 @@ namespace BLA
             
         protected:
             void SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) override;
-            void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderAttachment& attachment) override;
+            // void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassAttachment& attachment) override;
 
             void Render(RenderPassDescriptor& renderPassDescriptor) override;
-            void RegisterRenderPassInstanceBase(const RenderPassDescriptor& descriptor, const BaseRenderPassInstance& instance) override;
+            void RegisterRenderPassObjectBase(const RenderPassDescriptor& descriptor, const BaseRenderPassObject& instance) override;
         
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);

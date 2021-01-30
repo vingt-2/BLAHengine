@@ -16,18 +16,6 @@ DLL_PROJECT_DECLARE
 
 namespace BLA
 {
-	DeclareRenderPass(TestRenderPass1, VertexAttributes(blaVec3), UniformValues(float), 1);
-
-	RegisterRenderPass(TestRenderPass1);
-	
-	DeclareRenderPass(TestRenderPass2, VertexAttributes(blaVec3, blaVec3, blaVec3), UniformValues(float), 1);
-
-	RegisterRenderPass(TestRenderPass2);
-
-	DeclareRenderPass(TestRenderPass3, VertexAttributes(blaVec2, blaVec3), UniformValues(blaMat4), 1);
-
-	RegisterRenderPass(TestRenderPass3);
-	
 	BeginBehaviorDeclaration(BLADemos, TestBlaComponent)
 
         blaVec3 color;

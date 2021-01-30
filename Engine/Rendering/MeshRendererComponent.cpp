@@ -1,7 +1,7 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "MeshRendererComponent.h"
-
+#include "Rendering/RenderPass.h"
 #include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
 #include "Assets/AssetsManager.h"
@@ -13,8 +13,11 @@ using namespace BLA;
 // Todo: move camera component to rendering ...
 #include "Core/CameraComponent.h"
 
+class RenderPassAttachmentMesh {};
+
 DeclareRenderPass(
     MeshGeometryPass,
+    RenderPassAttachmentMesh,
     VertexAttributes(
         blaVec3, // ModelPos
         blaVec2, // uv
@@ -23,19 +26,18 @@ DeclareRenderPass(
         blaVec3), // bi-tangent
     UniformValues(
         blaMat4, // mvp
-        blaMat4), // model
-    1)
+        blaMat4)) // model
 
 RegisterRenderPass(MeshGeometryPass);
 
 DeclareRenderPass(
     TestMeshPass,
+    RenderPassAttachmentMesh,
     VertexAttributes(
         blaVec3), // ModelPos
     UniformValues(
         blaMat4, // mvp
-        blaMat4), // model
-    1)
+        blaMat4)) // model
 
 RegisterRenderPass(TestMeshPass)
 
@@ -138,13 +140,13 @@ void MeshRendererComponent::Update()
             m_vertPos->Submit();
             m_indices->Submit();
 
-            const TestMeshPass::RenderPassInstance::InstanceVertexAttributes meshVAs(*m_vertPos);
-            const TestMeshPass::RenderPassInstance::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
+            const TestMeshPass::RenderPassObject::InstanceVertexAttributes meshVAs(*m_vertPos);
+            const TestMeshPass::RenderPassObject::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
 
             // Leak ... of course !
-            TestMeshPass::RenderPassInstance* renderPassInstance = new TestMeshPass::RenderPassInstance(*m_indices, meshVAs, meshUniforms);
+            TestMeshPass::RenderPassObject* renderPassObject = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms);
             
-            Gpu::Interface::GetSingletonInstance()->RegisterRenderPassInstance<TestMeshPass>(*renderPassInstance);
+            Gpu::Interface::GetSingletonInstance()->RegisterRenderPassObject<TestMeshPass>(*renderPassObject);
         }
     }
 }

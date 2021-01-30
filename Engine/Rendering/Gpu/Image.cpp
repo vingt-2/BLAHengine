@@ -16,7 +16,7 @@ namespace BLA::Gpu
         return m_elementSize;
     }
 
-    BaseImage::BaseImage(blaIVec2 size, BaseStaticBuffer* buffer) : BaseResource(EResourceType::eImage), m_size(size), m_buffer(buffer), m_elementSize(buffer->GetElementSize())
+    BaseImage::BaseImage(blaIVec2 size, Formats::Enum::Index format, BaseStaticBuffer* buffer) : BaseResource(EResourceType::eImage), m_size(size), m_format(format), m_buffer(buffer), m_elementSize(buffer->GetElementSize())
     {
         BLA_TRAP(buffer);
         BLA_TRAP(size.x * size.y == buffer->GetLength());

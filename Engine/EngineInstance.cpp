@@ -94,8 +94,6 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     InitializeComponentLibrariesManager();
 
-    blaVector<blaU32> rpIds;
-    RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
     m_renderer = new Renderer(static_cast<GLFWRenderWindow*>(m_renderWindow));
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));

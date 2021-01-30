@@ -31,18 +31,21 @@ namespace BLA
                 void* pointer;
             } m_allocationHandle;
 
+            Formats::Enum::Index GetFormat() { return m_format; }
+
         protected:
-            BaseImage(blaIVec2 size, BaseStaticBuffer* buffer);
+            BaseImage(blaIVec2 size, Formats::Enum::Index format, BaseStaticBuffer* buffer);
 
             blaIVec2 m_size;
             blaU32 m_elementSize;
+            Formats::Enum::Index m_format;
             BaseStaticBuffer* m_buffer;
         };
 
         template<typename Format>
         struct Image : BaseImage
         {
-            Image(blaIVec2 size, StaticBuffer<typename Format::AssociatedType>& buffer) : BaseImage(size, &buffer) {}
+            Image(blaIVec2 size, StaticBuffer<typename Format::AssociatedType>& buffer) : BaseImage(size, Format::ms_formatIndex, &buffer) {}
 
             StaticBuffer<typename Format::AssociatedType>& GetBuffer() { return static_cast<StaticBuffer<typename Format::AssociatedType>>(*m_buffer); }
         };

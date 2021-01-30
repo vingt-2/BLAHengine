@@ -3,6 +3,7 @@
 #pragma once
 
 #include "System.h"
+#include "BLAStringID.h"
 #include "Maths/Maths.h"
 
 #define DECLARE_FORMAT_STRUCT(Name, IndexName, AssociatedStructName, UndefinedAssociatedStruct)    \
@@ -163,6 +164,8 @@ namespace BLA
                 Enum::Index m_index;
             };
 
+            extern blaMap<blaStringId, Enum::Index> g_fundamentalTypeToFormat;
+
             struct UndefinedAssociatedStruct
             {
                 void* m_storage[4];
@@ -295,10 +298,10 @@ namespace BLA
 
             DECLARE_FORMAT_STRUCT(D16_UNORM, D16_UNORM, UndefinedAssociatedStruct)
             DECLARE_FORMAT_STRUCT(X8_D24_UNORM_PACK32, X8_D24_UNORM_PACK32, UndefinedAssociatedStruct)
-            DECLARE_FORMAT_STRUCT(D32_SFLOAT, D32_SFLOAT, UndefinedAssociatedStruct)
+            DECLARE_FORMAT_STRUCT(D32_SFLOAT, D32_SFLOAT, blaF32)
             DECLARE_FORMAT_STRUCT(S8_UINT, S8_UINT, UndefinedAssociatedStruct)
             DECLARE_FORMAT_STRUCT(D16_UNORM_S8_UINT, D16_UNORM_S8_UINT, UndefinedAssociatedStruct)
-            DECLARE_FORMAT_STRUCT(D24_UNORM_S8_UINT, D24_UNORM_S8_UINT, UndefinedAssociatedStruct)
+            DECLARE_FORMAT_STRUCT(D24_UNORM_S8_UINT, D24_UNORM_S8_UINT, blaU32)
             DECLARE_FORMAT_STRUCT(D32_SFLOAT_S8_UINT, D32_SFLOAT_S8_UINT, UndefinedAssociatedStruct)
 
         }
