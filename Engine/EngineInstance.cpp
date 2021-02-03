@@ -94,7 +94,7 @@ bool EngineInstance::InitializeEngine(RenderWindow* renderWindow)
 
     InitializeComponentLibrariesManager();
 
-    m_renderer = new Renderer(static_cast<GLFWRenderWindow*>(m_renderWindow));
+    m_renderer = Renderer::AssignAndReturnSingletonInstance(new Renderer(static_cast<GLFWRenderWindow*>(m_renderWindow)));
 
     m_timer = Timer::AssignAndReturnSingletonInstance(new Timer(10));
 

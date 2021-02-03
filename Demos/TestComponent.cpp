@@ -30,8 +30,6 @@ namespace BLA
 	{
         blaScaledTransform t = GetOwnerObject().GetComponent<TransformComponent>()->GetTransform();
         DebugDraw::DrawOBB(t.GetPosQuat(), t.GetScale() * 0.5f, blaVec3(color));
-
-		
 	}
 
     DefineConsoleCommand(void, SayHi)

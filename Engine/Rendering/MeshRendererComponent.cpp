@@ -5,7 +5,6 @@
 #include "Core/GameObject.h"
 #include "Core/TransformComponent.h"
 #include "Assets/AssetsManager.h"
-#include "Gpu/Interface.h"
 #include "Core/Scene.h"
 
 using namespace BLA;
@@ -13,11 +12,11 @@ using namespace BLA;
 // Todo: move camera component to rendering ...
 #include "Core/CameraComponent.h"
 
-class RenderPassAttachmentMesh {};
+DeclareRenderPassAttachment(TestMeshPassAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), void)
 
 DeclareRenderPass(
     MeshGeometryPass,
-    RenderPassAttachmentMesh,
+    TestMeshPassAttachment,
     VertexAttributes(
         blaVec3, // ModelPos
         blaVec2, // uv
@@ -32,19 +31,21 @@ RegisterRenderPass(MeshGeometryPass);
 
 DeclareRenderPass(
     TestMeshPass,
-    RenderPassAttachmentMesh,
+    TestMeshPassAttachment,
     VertexAttributes(
         blaVec3), // ModelPos
     UniformValues(
         blaMat4, // mvp
         blaMat4)) // model
 
-RegisterRenderPass(TestMeshPass)
+    RegisterRenderPass(TestMeshPass)
 
 BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_meshAssetName)
 Expose(m_Render)
 EndBehaviorDescription()
+
+blaStringId g_testMeshPassId;
 
 void MeshRendererComponent::Init()
 {
@@ -67,8 +68,50 @@ void MeshRendererComponent::Shutdown()
     //Scene::GetSingletonInstance()->GetRenderingManager()->CancelMeshRendererTicket(this);
 }
 
+void OnOffscreenRenderTarget(RenderTarget* rt)
+{
+    OffscreenRenderTarget* offscreenRenderTarget = static_cast<OffscreenRenderTarget*>(rt);
+
+    Renderer* renderer = Renderer::GetSingletonInstance();
+    if (g_testMeshPassId)
+    {
+        if(TestMeshPass::RenderPassInstance* instance = renderer->GetRenderPassInstance<TestMeshPass>(g_testMeshPassId))
+        {
+            TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+            // Make Attachment from renderer offscreen images:
+            TestMeshPass::RenderPassAttachment attachment(colorAttachments);//, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+
+            instance->ResetAttachment(attachment);
+        }
+    }
+}
+
 void MeshRendererComponent::Update()
 {
+    Renderer* renderer = Renderer::GetSingletonInstance();
+
+    if(!g_testMeshPassId)
+    {
+        Gpu::ShaderProgram vertexShader(Gpu::ShaderProgram::Type::VertexShader, "./resources/shaders/Vulkan/Engine/TestMeshPassVert.spv");
+        Gpu::ShaderProgram fragmentShader(Gpu::ShaderProgram::Type::FragmentShader, "./resources/shaders/Vulkan/Engine/TestMeshPassFrag.spv");
+
+        vertexShader.Submit();
+        fragmentShader.Submit();
+
+        Gpu::RenderPassProgram program;
+        program.m_shaders.push_back(vertexShader);
+        program.m_shaders.push_back(fragmentShader);
+
+        TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+        // Make Attachment from renderer offscreen images:
+        TestMeshPass::RenderPassAttachment attachment(colorAttachments);//, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+
+        g_testMeshPassId = BlaStringId("TestMeshPass");
+
+        renderer->AddRenderPassInstance<TestMeshPass>(g_testMeshPassId, attachment, program);
+
+        renderer->m_offscreenBuffer.RegisterOnChangeCallback(OnOffscreenRenderTarget);
+    }
     
     bool validState = true;
     if(m_mesh == nullptr || m_mesh->GetName() != m_meshAssetName)
@@ -143,10 +186,17 @@ void MeshRendererComponent::Update()
             const TestMeshPass::RenderPassObject::InstanceVertexAttributes meshVAs(*m_vertPos);
             const TestMeshPass::RenderPassObject::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
 
-            // Leak ... of course !
+            //TODO:
+            //TODO:
+            //TODO:  Leak ... of course !
+            //TODO:
+            //TODO:
             TestMeshPass::RenderPassObject* renderPassObject = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms);
             
-            Gpu::Interface::GetSingletonInstance()->RegisterRenderPassObject<TestMeshPass>(*renderPassObject);
+            if(TestMeshPass::RenderPassInstance* testMeshPassInstance = renderer->GetRenderPassInstance<TestMeshPass>(g_testMeshPassId))
+            {
+                testMeshPassInstance->RegisterRenderPassObject(*renderPassObject);
+            }
         }
     }
 }

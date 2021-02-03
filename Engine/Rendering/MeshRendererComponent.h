@@ -4,15 +4,12 @@
 #include "StdInclude.h"
 #include "Assets/MeshAsset.h"
 #include "Assets/Material.h"
-#include "Rendering/GPU/StaticBuffer.h"
+#include "Rendering/Gpu/StaticBuffer.h"
 #include "Rendering/Gpu/DynamicBuffer.h"
-
 #include "Core/BehaviorComponent.h"
 
-#define BLA_LINE_RENDER 0x0003
-
 #include "Rendering/Renderer.h"
-#include "Rendering\RenderCamera.h"
+#include "Rendering/RenderCamera.h"
 
 namespace BLA
 {

@@ -8,7 +8,7 @@
 using namespace BLA;
 using namespace System;
 
-bool g_enableValidationLayers = false;
+bool g_enableValidationLayers = true;
 
 struct SwapChainSupportDetails
 {

@@ -21,16 +21,33 @@ namespace BLA
             template <size_t, class> struct InferCAT;
         }
 
-        struct BaseImage;
-
-        struct BaseRenderPassAttachment {};
 
         template<typename AttachmentFormat>
         struct AttachmentDesc
         {
-            AttachmentDesc(Gpu::Image<AttachmentFormat> image) : m_image(image) {}
+            AttachmentDesc(Gpu::Image<AttachmentFormat>* image) : m_image(image) {}
 
-            Gpu::Image<AttachmentFormat> m_image;
+            Gpu::Image<AttachmentFormat>* m_image;
+        };
+
+        struct BaseRenderPassAttachment
+        {
+            BaseRenderPassAttachment(blaU16 colorAttachmentCount) : m_colorCount(colorAttachmentCount) {}
+
+            void GetColorAttachment(blaU32 i, Gpu::BaseImage*& image) const
+            {
+                //TODO fatal assert i <= m_colorCount
+
+                const struct UntypedAttachmentDesc
+                {
+                    Gpu::BaseImage* m_image;
+                } attachmentDesc = *reinterpret_cast<const UntypedAttachmentDesc*>((blaU8*)(this + 1) + sizeof(UntypedAttachmentDesc) * i);
+                image = attachmentDesc.m_image;
+            }
+
+            blaU16 m_colorCount;
+
+            Gpu::BaseImage* m_depthImage = nullptr;
         };
 
         template<typename... Ts>
@@ -110,27 +127,82 @@ namespace BLA
         template<class ColorAttachmentTypes, typename DepthAttachmentType = void>
         struct RenderPassAttachment;
 
-        template<typename DepthAttachmentType, typename... CATs>
-        struct RenderPassAttachment<_RenderPassAttachmentTemplateHelpers::CATS<CATs...>, DepthAttachmentType> :
-            _RenderPassAttachmentCATs<CATs...>, _DepthAttachment<DepthAttachmentType>, BaseRenderPassAttachment
+        template<typename _DepthAttachmentType, typename... CATs>
+        struct RenderPassAttachment<_RenderPassAttachmentTemplateHelpers::CATS<CATs...>, _DepthAttachmentType> : BaseRenderPassAttachment,
+            _RenderPassAttachmentCATs<CATs...>, _DepthAttachment<_DepthAttachmentType>
         {
-            typedef _RenderPassAttachmentCATs<CATs...> ColorAttachments;
+            typedef _RenderPassAttachmentCATs<CATs...> Color;
+            typedef _DepthAttachmentType Depth;
 
-            template<typename U = DepthAttachmentType>
-            RenderPassAttachment(const ColorAttachments& colorAttachments, typename std::enable_if<std::is_same<U, void>::value>::type* = 0) :
+            template<typename U = _DepthAttachmentType>
+            RenderPassAttachment(const Color& colorAttachments, typename std::enable_if<std::is_same<U, void>::value>::type* = 0) : BaseRenderPassAttachment(ms_colorAttachmentCounts), 
                 _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthAttachment<void>()
-            {
+            {}
 
+            template<typename U = _DepthAttachmentType>
+            RenderPassAttachment(const Color& colorAttachments, const AttachmentDesc<_DepthAttachmentType>& depthAttachment, typename std::enable_if<!std::is_same<U, void>::value>::type* = 0):
+                BaseRenderPassAttachment(ms_colorAttachmentCounts), _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthAttachment<_DepthAttachmentType>(depthAttachment)
+            {
+                m_depthImage = depthAttachment.m_image;
             }
 
-            template<typename U = DepthAttachmentType>
-            RenderPassAttachment(const ColorAttachments& colorAttachments, AttachmentDesc<DepthAttachmentType>& depthAttachment, typename std::enable_if<!std::is_same<U, void>::value>::type* = 0):
-            _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthAttachment<DepthAttachmentType>(depthAttachment)
-            {
-                
-            }
-
-            static const size_t ms_ColorAttachmentCounts = sizeof...(CATs);
+            static const size_t ms_colorAttachmentCounts = sizeof...(CATs);
         };
+
+        template<int i, class Attachment>
+        class _GetColorAttachmentDescriptorsInternal
+        {
+        public:
+            static void Get(blaVector<Formats::Enum::Index>& typeDescriptors)
+            {
+                _GetColorAttachmentDescriptorsInternal<i - 1, Attachment>::Get(typeDescriptors);
+                const Formats::Enum::Index format = 
+                    typename _RenderPassAttachmentTemplateHelpers::InferCAT<i, typename Attachment::Color>::type::ms_formatIndex;
+
+                typeDescriptors.push_back(format);
+            }
+        };
+
+        template<class Attachment>
+        class _GetColorAttachmentDescriptorsInternal<0, Attachment>
+        {
+        public:
+            static void Get(blaVector<Formats::Enum::Index>& typeDescriptors)
+            {
+                const Formats::Enum::Index format =
+                    typename _RenderPassAttachmentTemplateHelpers::InferCAT<0, typename Attachment::Color>::type::ms_formatIndex;
+
+                typeDescriptors.push_back(format);
+            }
+        };
+
+        template<class Attachment>
+        blaVector<Formats::Enum::Index> GetColorAttachmentDescriptors()
+        {
+            blaVector<Formats::Enum::Index> formats;
+
+            _GetColorAttachmentDescriptorsInternal<Attachment::ms_colorAttachmentCounts - 1, Attachment>::Get(formats);
+
+            return formats;
+        }
+
+        template<class Attachment>
+        Formats::Enum::Index _GetDepthAttachmentDescriptionInternal(typename std::enable_if<std::is_same<typename Attachment::Depth, void>::value, void>::type*)
+        {
+            return Formats::Enum::Index::INVALID;
+        }
+
+
+        template<class Attachment>
+        Formats::Enum::Index _GetDepthAttachmentDescriptionInternal(typename std::enable_if<!std::is_same<typename Attachment::Depth, void>::value, void>::type*)
+        {
+            return Attachment::Depth::ms_formatIndex;
+        }
+
+        template<class Attachment>
+        Formats::Enum::Index GetDepthAttachmentDescription()
+        {
+            return _GetDepthAttachmentDescriptionInternal<Attachment>(nullptr);
+        }
     }
 }

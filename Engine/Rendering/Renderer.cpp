@@ -3,14 +3,23 @@
 #include "Renderer.h"
 
 #include <random>
-#include "GPU/Interface.h"
+#include "Gpu/Interface.h"
 #include "RenderPass.h"
 #include "Gpu/RenderPassAttachment.h"
-#include "Rendering/RenderPass.h"
 
 using namespace BLA;
 
+BLA_IMPLEMENT_SINGLETON(Renderer)
 BLA_IMPLEMENT_SINGLETON(RenderPassRegistry)
+
+void RenderTarget::OnChangeCalls()
+{
+    for(OnChange cb : m_callbacks)
+    {
+        cb(this);
+    }
+}
+
 
 void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, Gpu::RPAttachmentDescription rpAttachmentDescription,
     blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
@@ -18,7 +27,7 @@ void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, G
 {
     BLA_ASSERT(m_registry.find(id) == m_registry.end());
 
-    m_registry.insert(std::make_pair(id, Gpu::RenderPassDescriptor{ stringId, rpAttachmentDescription, nullptr, vertexAttributesDescriptors, uniformValuesDescriptor }));
+    m_registry.insert(std::make_pair(id, Gpu::RenderPassDescriptor{ stringId, rpAttachmentDescription, vertexAttributesDescriptors, uniformValuesDescriptor }));
 }
 
 Gpu::RenderPassDescriptor* RenderPassRegistry::GetRenderPassEntry(blaU32 id)
@@ -49,28 +58,23 @@ void RenderPassRegistry::GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const
     }
 }
 
+
 Renderer::Renderer(GLFWRenderWindow* pRenderWindow): m_renderWindow(pRenderWindow)
 {
-    blaVector<blaU32> rpIds;
-    RenderPassRegistry::GetSingletonInstanceRead()->GetAllRenderPassIDs(rpIds);
-
     m_renderWindow->GetSize(m_viewPortExtents.x, m_viewPortExtents.y);
 
     CreateOrUpdateRenderTargets();
-    
-    // Setup Test Render Pass...
-    SetupRenderPassObjects();
 }
 
 bool Renderer::Update()
 {
     RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
 
-    if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
+    for(const auto& renderPassInstance : m_renderPassInstances)
     {
         Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
-        gpu->Render(*geometryPassDesc);
-    }
+        gpu->Render(renderPassInstance.second->m_pImplementation);
+    } 
     return true;
 }
 
@@ -85,63 +89,9 @@ void Renderer::SetViewportSize(blaIVec2 renderSize)
 
         if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
         {
-            Gpu::AttachmentDesc<Gpu::Formats::R8G8B8A8_UNORM> colorAttachment(*m_offscreenBuffer.m_color);
-
-            DeclareRenderPassAttachment(OffscreenRenderTargetAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), Gpu::Formats::D32_SFLOAT);
-
-            OffscreenRenderTargetAttachment::ColorAttachments colorAttachments(colorAttachment);
-            Gpu::AttachmentDesc<Gpu::Formats::D32_SFLOAT> depthAttachment(*m_offscreenBuffer.m_depth);
-
-            OffscreenRenderTargetAttachment attachment(colorAttachments, depthAttachment);
-
-            // Gpu::RenderPassAttachment attachment(m_offscreenBuffer.m_color);
-            //Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
+            // Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
         }
     }
-}
-
-#include "Gpu/RenderPassProgram.h"
-#include "Gpu/Vulkan.h"
-void Renderer::SetupRenderPassObjects()
-{
-    RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
-
-    if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
-    {
-        Gpu::ShaderProgram vertexShader(Gpu::ShaderProgram::Type::VertexShader, "./resources/shaders/Vulkan/Engine/TestMeshPassVert.spv");
-        Gpu::ShaderProgram fragmentShader(Gpu::ShaderProgram::Type::FragmentShader, "./resources/shaders/Vulkan/Engine/TestMeshPassFrag.spv");
-
-        vertexShader.Submit();
-        fragmentShader.Submit();
-
-        Gpu::RenderPassProgram program;
-        program.m_shaders.push_back(vertexShader);
-        program.m_shaders.push_back(fragmentShader);
-
-        // Gpu::RenderPassAttachment< attachment(m_offscreenBuffer.m_color);
-
-        Gpu::Interface::GetSingletonInstance()->SetupRenderPass(*geometryPassDesc, program);
-        // Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
-    }
-}
-
-blaU32 Renderer::SetupAllRegisteredRenderPasses()
-{
-    RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
-
-    blaVector<blaU32> ids;
-    registry->GetAllRenderPassIDs(ids);
-
-    Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
-
-    blaU32 c = 0;
-    for (blaU32 id : ids)
-    {
-        c++;
-
-        // registry->GetRenderPassEntry(id)->m_pToInstanceRenderPassDescriptorPointer = gpu->SetupRenderPass(*registry->GetRenderPassEntry(id),);
-    }
-    return c;
 }
 
 void Renderer::CreateOrUpdateRenderTargets()
@@ -150,6 +100,12 @@ void Renderer::CreateOrUpdateRenderTargets()
     {
         m_offscreenBuffer.m_color->Cancel();
         m_offscreenBuffer.m_color = nullptr;
+    }
+
+    if(m_offscreenBuffer.m_depth)
+    {
+        m_offscreenBuffer.m_depth->Cancel();
+        m_offscreenBuffer.m_depth = nullptr;
     }
 
     Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
@@ -161,18 +117,20 @@ void Renderer::CreateOrUpdateRenderTargets()
    
     m_offscreenBuffer.m_color = new Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), buffer);
 
-    Gpu::StaticBuffer<blaF32> depthBuffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
+    //Gpu::StaticBuffer<blaF32> depthBuffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
 
-    for (blaU32 i = 0; i < depthBuffer.GetLength(); i++)
-    {
-        depthBuffer[i] = 0;
-    }
+    //for (blaU32 i = 0; i < depthBuffer.GetLength(); i++)
+    //{
+    //    depthBuffer[i] = 0;
+    //}
 
-    m_offscreenBuffer.m_depth = new Gpu::Image<Gpu::Formats::D32_SFLOAT>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), depthBuffer);
+    //m_offscreenBuffer.m_depth = new Gpu::Image<Gpu::Formats::D32_SFLOAT>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), depthBuffer);
 
     // Submit for now is blocking, so we good ...
     m_offscreenBuffer.m_color->Submit();
-    m_offscreenBuffer.m_depth->Submit();
+    // m_offscreenBuffer.m_depth->Submit();
+
+    m_offscreenBuffer.OnChange();
 }
 
 RenderWindow* Renderer::GetRenderWindow()

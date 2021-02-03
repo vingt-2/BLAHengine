@@ -4,6 +4,7 @@
 
 #include "StdInclude.h"
 #include "BLAStringID.h"
+#include "Formats.h"
 
 namespace BLA
 {
@@ -14,9 +15,11 @@ namespace BLA
 
     namespace Gpu
     {
-        class RPAttachmentDescription
+        struct RPAttachmentDescription
         {
+            blaVector<Gpu::Formats::Enum::Index> m_colorAttachments;
 
+            Gpu::Formats::Enum::Index m_depthAttachment;
         };
 
         class RenderPassInstanceImplementation
@@ -27,8 +30,7 @@ namespace BLA
         struct RenderPassDescriptor
         {
             blaStringId m_name;
-            RPAttachmentDescription m_attachmentCount;
-            RenderPassInstanceImplementation* m_pToInstanceRenderPassDescriptorPointer;
+            RPAttachmentDescription m_attachmentDescription;
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
         };

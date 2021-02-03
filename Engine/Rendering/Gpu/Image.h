@@ -31,7 +31,7 @@ namespace BLA
                 void* pointer;
             } m_allocationHandle;
 
-            Formats::Enum::Index GetFormat() { return m_format; }
+            Formats::Enum::Index GetFormat() const { return m_format; }
 
         protected:
             BaseImage(blaIVec2 size, Formats::Enum::Index format, BaseStaticBuffer* buffer);

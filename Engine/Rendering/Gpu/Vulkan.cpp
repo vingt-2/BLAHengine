@@ -16,7 +16,7 @@
 #include "StaticBuffer.h"
 #include "Image.h"
 #include "RenderPassAttachment.h"
-
+#include "RenderPassDescription.h"
 // TODO: This is problematic, whatever handles renderpasses should probably higher level, meaning I've got to abstract this part
 // So that setting up a renderpass is not Vulkan Specific
 #include "Rendering/RenderPass.h"
@@ -253,10 +253,14 @@ namespace BLA::Gpu
         VkPipeline m_vkPipeline = VK_NULL_HANDLE;
         VkDescriptorSetLayout m_vkDescriptorSetLayout = VK_NULL_HANDLE;
 
-        VkImageView m_attachmentImageView = VK_NULL_HANDLE;
-        VkFramebuffer m_frameBuffer = VK_NULL_HANDLE; // framebuffer used to draw the instances for this vulkanrenderpass
+        struct VulkanAttachment
+        {
+            blaVector<VkImageView> m_attachmentImageViews;
+            VkFramebuffer m_frameBuffer = VK_NULL_HANDLE;
 
-        blaVec2 m_attachmentSize;
+            blaIVec2 m_attachmentSize;
+        } m_attachment;
+
         blaVector<VulkanRenderPassObject> m_currentInstances;
 
     public:
@@ -306,37 +310,43 @@ namespace BLA::Gpu
             vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
 
-        //void SetAttachment(Gpu::RenderPassDescriptor& renderPassDescriptor, Gpu::RenderPassAttachment& attachment, VkDevice device)
-        //{
-        //    m_attachmentSize = attachment.m_image->GetSize();
+        void SetAttachment(const BaseRenderPassAttachment* attachment, VkDevice device)
+        {
+            m_attachment.m_attachmentImageViews = blaVector<VkImageView>(attachment->m_colorCount);
+            for(blaSize i = 0; i < attachment->m_colorCount; i++)
+            {
+                BaseImage* image;
+                attachment->GetColorAttachment((blaU32)i, image);
 
-        //    VkImageViewCreateInfo imageViewCreateInfo = {};
-        //    imageViewCreateInfo.image = static_cast<VkImage>(attachment.m_image->GetHandle().m_impl.pointer);
-        //    imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        //    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        //    imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: customize asap
-        //    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        //    imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-        //    imageViewCreateInfo.subresourceRange.levelCount = 1;
-        //    imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-        //    imageViewCreateInfo.subresourceRange.layerCount = 1;
+                m_attachment.m_attachmentSize = image->GetSize();
 
-        //    vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachmentImageView);
+                VkImageViewCreateInfo imageViewCreateInfo = {};
+                imageViewCreateInfo.image = static_cast<VkImage>(image->GetHandle().m_impl.pointer);
+                imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+                imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+                imageViewCreateInfo.format = g_BlaFormatToVulkan[image->GetFormat()];
+                imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+                imageViewCreateInfo.subresourceRange.levelCount = 1;
+                imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+                imageViewCreateInfo.subresourceRange.layerCount = 1;
+                vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachment.m_attachmentImageViews[i]);
+            }
 
-        //    VkFramebufferCreateInfo frameBufferCreateInfo = {};
-        //    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        //    frameBufferCreateInfo.renderPass = m_vkRenderPass;
-        //    frameBufferCreateInfo.attachmentCount = 1;
-        //    frameBufferCreateInfo.pAttachments = &m_attachmentImageView;
-        //    frameBufferCreateInfo.width = attachment.m_image->GetSize().x;
-        //    frameBufferCreateInfo.height = attachment.m_image->GetSize().y;
-        //    frameBufferCreateInfo.layers = 1;
+            VkFramebufferCreateInfo frameBufferCreateInfo = {};
+            frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            frameBufferCreateInfo.renderPass = m_vkRenderPass;
+            frameBufferCreateInfo.attachmentCount = 1;
+            frameBufferCreateInfo.pAttachments = m_attachment.m_attachmentImageViews.data();
+            frameBufferCreateInfo.width = m_attachment.m_attachmentSize.x;
+            frameBufferCreateInfo.height = m_attachment.m_attachmentSize.y;
+            frameBufferCreateInfo.layers = 1;
 
-        //    vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_frameBuffer);
-        //}
+            vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &m_attachment.m_frameBuffer);
+        }
 
         void CreatePipeline(
-            Gpu::RenderPassDescriptor& renderPassDescriptor,
+            const Gpu::RenderPassDescriptor& renderPassDescriptor,
             VkDevice device,
             const VkAllocationCallbacks* allocator,
             VkPipelineCache pipelineCache,
@@ -482,31 +492,66 @@ namespace BLA::Gpu
             //VulkanRenderPassHelpers::check_vk_result(err);
         }
 
-        void CreateVKRenderPass(VkDevice device)
+        void CreateVKRenderPass(VkDevice device, const RenderPassDescriptor* rpDescriptor)
         {
-            VkAttachmentDescription colorAttachment{};
-            colorAttachment.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: customize asap
-            colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
+            blaVector<VkAttachmentDescription> attachments(rpDescriptor->m_attachmentDescription.m_colorAttachments.size() 
+                + (rpDescriptor->m_attachmentDescription.m_depthAttachment != Formats::Enum::INVALID ? 1 : 0));
 
-            VkAttachmentReference colorAttachmentRef{};
-            colorAttachmentRef.attachment = 0;
-            colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            blaVector<VkAttachmentReference> colorAttachmentsRefs(rpDescriptor->m_attachmentDescription.m_colorAttachments.size());
+
+            for(size_t i = 0; i < colorAttachmentsRefs.size(); i++)
+            {
+                /*
+                 * TODO: Mayw want rpDescriptor->m_attachmentDescription.m_colorAttachments to be more than a format
+                 */
+                Formats::Enum::Index formatIndex = rpDescriptor->m_attachmentDescription.m_colorAttachments[i];
+
+                VkAttachmentDescription& colorAttachment = attachments[i];
+
+                colorAttachment.format = g_BlaFormatToVulkan[formatIndex];
+                colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                colorAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+                VkAttachmentReference& colorAttachmentRef = colorAttachmentsRefs[i];
+
+                colorAttachmentRef.attachment = static_cast<blaU32>(i);
+                colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            }
 
             VkSubpassDescription subpass{};
             subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-            subpass.colorAttachmentCount = 1;
-            subpass.pColorAttachments = &colorAttachmentRef;
+            subpass.colorAttachmentCount = static_cast<blaU32>(colorAttachmentsRefs.size());
+            subpass.pColorAttachments = colorAttachmentsRefs.data();
+
+            VkAttachmentReference depthAttachmentRef{};
+            if(rpDescriptor->m_attachmentDescription.m_depthAttachment != Formats::Enum::INVALID)
+            {
+                VkAttachmentDescription& depthAttachment = attachments[colorAttachmentsRefs.size()];
+
+                depthAttachment.format = g_BlaFormatToVulkan[rpDescriptor->m_attachmentDescription.m_depthAttachment];
+                depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                depthAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+                depthAttachmentRef.attachment = 0;
+                depthAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+                subpass.pDepthStencilAttachment = &depthAttachmentRef;
+            }
 
             VkRenderPassCreateInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-            renderPassInfo.attachmentCount = 1;
-            renderPassInfo.pAttachments = &colorAttachment;
+            renderPassInfo.attachmentCount = static_cast<blaU32>(attachments.size());
+            renderPassInfo.pAttachments = attachments.data();
             renderPassInfo.subpassCount = 1;
             renderPassInfo.pSubpasses = &subpass;
 
@@ -524,7 +569,7 @@ namespace BLA::Gpu
             cmdBufferBeginInfo.pNext = NULL;
 
             VkClearValue clearValues[2];
-            clearValues[0].color = { {1.0f, 1.0f, 1.0f, 1.0f} };
+            clearValues[0].color = { {0.0f, 1.0f, 1.0f, 1.0f} };
             // clearValues[1].depthStencil = {1.0f, 0};
 
             VkRenderPassBeginInfo renderPassBeginInfo = {};
@@ -532,8 +577,8 @@ namespace BLA::Gpu
             renderPassBeginInfo.renderPass = m_vkRenderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.renderArea.extent.width = static_cast<blaU32>(m_attachmentSize.x);
-            renderPassBeginInfo.renderArea.extent.height = static_cast<blaU32>(m_attachmentSize.y);
+            renderPassBeginInfo.renderArea.extent.width = m_attachment.m_attachmentSize.x;
+            renderPassBeginInfo.renderArea.extent.height = m_attachment.m_attachmentSize.y;
             renderPassBeginInfo.clearValueCount = 1;
             renderPassBeginInfo.pClearValues = clearValues;
 
@@ -543,13 +588,13 @@ namespace BLA::Gpu
 
             vkResetFences(vulkanContext->m_device, 1, &vulkanContext->m_window->m_frames[i].m_imageFence);
 
-            renderPassBeginInfo.framebuffer = m_frameBuffer;
+            renderPassBeginInfo.framebuffer = m_attachment.m_frameBuffer;
 
             vkBeginCommandBuffer(vkWindow->m_frames[i].m_commandBuffer, &cmdBufferBeginInfo);
 
             vkCmdBeginRenderPass(vkWindow->m_frames[i].m_commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            VkViewport viewport = MakeViewport(m_attachmentSize.x, m_attachmentSize.y, 0.0f, 1.0f);
+            VkViewport viewport = MakeViewport(m_attachment.m_attachmentSize.x * 1.f, m_attachment.m_attachmentSize.y * 1.f, 0.0f, 1.0f);
 
             vkCmdSetViewport(vkWindow->m_frames[i].m_commandBuffer, 0, 1, &viewport);
 
@@ -698,41 +743,38 @@ namespace BLA::Gpu
         return ResourceHandle();
     }
 
-    void Vulkan::SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program)
+    RenderPassInstanceImplementation* Vulkan::SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program)
     {
         VulkanRenderPass* renderPass = new VulkanRenderPass();
 
-        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device);
+        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device, rpDescriptor);
 
         renderPass->CreatePipeline(
-            renderPassDescriptor,
+            *rpDescriptor,
             m_implementation->m_vulkanContext->m_device,
             nullptr,
             m_implementation->m_vulkanContext->m_pipelineCache,
             static_cast<VkShaderModule>(program.m_shaders[0].GetHandle().m_impl.pointer),
             static_cast<VkShaderModule>(program.m_shaders[1].GetHandle().m_impl.pointer));
 
-        renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer = renderPass;
+       return renderPass;
     }
 
-   /* void Vulkan::AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassAttachment& attachment)
+    void Vulkan::AttachToRenderPass(RenderPassInstanceImplementation* rpImplementation, const BaseRenderPassAttachment* attachment)
     {
-        VulkanRenderPass* renderPass = static_cast<VulkanRenderPass*>(renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer);
+        VulkanRenderPass* renderPass = static_cast<VulkanRenderPass*>(rpImplementation);
 
-        renderPass->SetAttachment(
-            renderPassDescriptor,
-            attachment,
-            m_implementation->m_vulkanContext->m_device);
-    }*/
-
-    void Vulkan::Render(RenderPassDescriptor& renderPassDescriptor)
-    {
-        static_cast<VulkanRenderPass*>(renderPassDescriptor.m_pToInstanceRenderPassDescriptorPointer)->BuildCommandBuffersThisFrame(m_implementation->m_vulkanContext);
+        renderPass->SetAttachment(attachment, m_implementation->m_vulkanContext->m_device);
     }
 
-    void Vulkan::RegisterRenderPassObjectBase(const RenderPassDescriptor& descriptor, const BaseRenderPassObject& instance)
+    void Vulkan::Render(RenderPassInstanceImplementation* renderPassInstanceImplementation)
     {
-        static_cast<VulkanRenderPass*>(descriptor.m_pToInstanceRenderPassDescriptorPointer)->RegisterRenderPassObject(m_implementation->m_vulkanContext, instance);
+        static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->BuildCommandBuffersThisFrame(m_implementation->m_vulkanContext);
+    }
+
+    void Vulkan::RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance)
+    {
+        static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->RegisterRenderPassObject(m_implementation->m_vulkanContext, instance);
     }
 
     ResourceHandle Vulkan::SubmitStaticBuffer(BaseStaticBuffer* resource)
@@ -965,7 +1007,7 @@ namespace BLA::Gpu
         VkImageCreateInfo imageCreateInfo = {};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageCreateInfo.format = g_BlaFormatToVulkan[format];
+        imageCreateInfo.format = format;
         imageCreateInfo.extent.width = size.x;
         imageCreateInfo.extent.height = size.y;
         imageCreateInfo.extent.depth = 1;
@@ -973,7 +1015,7 @@ namespace BLA::Gpu
         imageCreateInfo.arrayLayers = 1;
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; //TODO
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 

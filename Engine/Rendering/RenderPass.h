@@ -5,10 +5,11 @@
 #include "StdInclude.h"
 #include "Core/InspectableVariables.h"
 #include "BLASingleton.h"
-#include "GPU/RenderPassAttachment.h"
-#include "GPU/RenderPassDescription.h"
-#include "GPU/StaticBuffer.h"
-#include "GPU/DynamicBuffer.h"
+#include "Gpu/RenderPassAttachment.h"
+#include "Gpu/RenderPassDescription.h"
+#include "Gpu/RenderPassProgram.h"
+#include "Gpu/StaticBuffer.h"
+#include "Gpu/DynamicBuffer.h"
 #include "SillyMacros.h"
 #include "ProjectExport.h"
 
@@ -30,6 +31,9 @@ namespace BLA
         class RPIS {};
     }
 
+    // TODO: Change me ... 
+    using DefaultTODOToSpecifyRenderProgram = Gpu::RenderPassProgram;
+
     class BaseRenderPassObject
     {
         friend class Renderer;
@@ -48,13 +52,16 @@ namespace BLA
             buffer = *reinterpret_cast<const Gpu::BaseStaticBuffer**>((blaU8*)(this + 1) + sizeof(const Gpu::BaseStaticBuffer**) * i);
         }
 
-
         // Really should  be a dynamic buffer ...
         void GetUniformValueBuffer(int i, const Gpu::BaseDynamicBuffer*& buffer) const
         {
             //TODO: fatal assert i <= uvCount
+            //TODO:
+            ///*Holy shit that's a huge hack. Gotta find a less retarded way to address each buffer*/
+            //TODO:
+            //TODO:
 
-            buffer = *reinterpret_cast<const Gpu::BaseDynamicBuffer**>((blaU8*)(this + 1) + sizeof(const Gpu::BaseStaticBuffer**) * m_vaCount + 8 /*Holy shit that's a huge hack. Gotta find a less retarded way to address each buffer*/
+            buffer = *reinterpret_cast<const Gpu::BaseDynamicBuffer**>((blaU8*)(this + 1) + sizeof(const Gpu::BaseStaticBuffer**) * m_vaCount + 8 /*<---- Holy shit that's a huge hack. Gotta find a less retarded way to address each buffer*/
                 + sizeof(const Gpu::BaseDynamicBuffer**) * i);
         }
 
@@ -62,6 +69,25 @@ namespace BLA
         const blaU16 m_uvCount;
 
         const Gpu::StaticBuffer<blaU32>* m_indices;
+    };
+
+    struct BaseRenderPassInstance
+    {
+        BaseRenderPassInstance(blaU32 typeId) : m_pImplementation(nullptr), m_instanceTypeId(typeId) {}
+
+        virtual ~BaseRenderPassInstance() = default;
+
+        Gpu::RenderPassInstanceImplementation* m_pImplementation;
+
+        const blaU32 m_instanceTypeId;
+
+    protected:
+
+        void Setup(DefaultTODOToSpecifyRenderProgram& program);
+        void BaseResetAttachment(const Gpu::BaseRenderPassAttachment* rpAttachment) const;
+        void BaseRegisterRenderPassObject(const BaseRenderPassObject& object) const;
+
+        const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
     };
 
     // Only inspectable types should be template arguments to a render pass.
@@ -185,7 +211,7 @@ namespace BLA
     class _RenderPassObject;
 
     template<typename _RenderPass, typename... VAs, typename... UVs>
-    class _RenderPassObject<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : BaseRenderPassObject, public _RenderPassObjectVAs<VAs...>, public _RenderPassObjectUVs<UVs...>
+    class _RenderPassObject<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : public BaseRenderPassObject, public _RenderPassObjectVAs<VAs...>, public _RenderPassObjectUVs<UVs...>
     {
         friend class Gpu::Interface;
 
@@ -210,34 +236,65 @@ namespace BLA
             BaseRenderPassObject(indices, RenderPass::ms_VACount, RenderPass::ms_UVCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUVs<UVs...>(shaderUniforms) {}
     };
 
+    template<typename _RenderPass, typename _RenderPassAttachment, typename _RenderPassRenderProgram>
+    struct _RenderPassInstance : BaseRenderPassInstance
+    {
+        typedef _RenderPass RenderPass;
+        typedef _RenderPassAttachment Attachment;
+        typedef _RenderPassRenderProgram RenderProgram;
+
+        void ResetAttachment(const Attachment& attachment)
+        {
+            const Gpu::BaseRenderPassAttachment* renderPassAttachmentAsBase = static_cast<const Gpu::BaseRenderPassAttachment*>(&attachment);
+            BaseResetAttachment(renderPassAttachmentAsBase);
+        }
+
+        _RenderPassInstance(const Attachment& attachment, const RenderProgram& renderProgram) : BaseRenderPassInstance(_RenderPass::ms_renderPassId), m_attachment(attachment), m_renderProgram(renderProgram)
+        {
+            m_pRenderPassDescriptor = RenderPass::GetSingletonInstanceRead()->m_pRenderPassDescriptor;
+
+            Setup(m_renderProgram);
+            ResetAttachment(attachment);
+        }
+
+        void RegisterRenderPassObject(const typename RenderPass::RenderPassObject& object)
+        {
+            BaseRegisterRenderPassObject(object);
+        }
+
+        Attachment m_attachment;
+        RenderProgram m_renderProgram;
+    };
+
     /*
+     *  TODO: Remove this being a singleton and have m_pRenderPassDescritpor be static
      *   RenderPass definition
      *
      */
     template<blaU32 renderPassId, class RenderPassAttachment, class VertexAttributes, class ShaderUniforms>
     class RenderPass;
 
-    template<blaU32 renderPassId, class RenderPassAttachment, typename... VAs, typename... UVs>
-    class RenderPass<renderPassId, RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>
+    template<blaU32 renderPassId, class _RenderPassAttachment, typename... VAs, typename... UVs>
+    class RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>
     {
-        static_assert(!std::is_base_of<Gpu::BaseRenderPassAttachment, RenderPassAttachment>::value, 
+        static_assert(std::is_base_of<Gpu::BaseRenderPassAttachment, _RenderPassAttachment>::value, 
             "Invalid Render Pass Attachment passed to RenderPass. Did you not declare it with DeclareRenderPassAttachment ?");
 
-        using type = RenderPass<renderPassId, RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>;
+        using SelfType = RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>;
 
-        BLA_DECLARE_SINGLETON(type);
-
-        RenderPassAttachment m_attachment;
+        BLA_DECLARE_SINGLETON(SelfType);
 
     public:
-        const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
-
-        typedef _RenderPassObject<RenderPass<renderPassId, RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>,
-                                        _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassObject;
+        
+        typedef _RenderPassAttachment RenderPassAttachment;
+        typedef _RenderPassObject<SelfType, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassObject;
+        typedef _RenderPassInstance<SelfType, _RenderPassAttachment, DefaultTODOToSpecifyRenderProgram> RenderPassInstance;
 
         //TODO: Dev builds only shoudl carry the blaStringid for the render pass constructor ...
-        RenderPass<renderPassId, RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>,
+        RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>,
                    _RenderPassTemplateHelpers::RPIS<UVs...>>(blaStringId id);
+
+        const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
 
         static const blaU32 ms_renderPassId = renderPassId;
         static const size_t ms_VACount = sizeof...(VAs);
@@ -358,10 +415,12 @@ namespace BLA
         {
             registry = BLA::RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());
         }
-        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<type>();
-        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<type>();
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<SelfType>();
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<SelfType>();
 
-        Gpu::RPAttachmentDescription attachmentDescription;
+        const Gpu::RPAttachmentDescription attachmentDescription = 
+            { Gpu::GetColorAttachmentDescriptors<RenderPassAttachment>(), Gpu::GetDepthAttachmentDescription<RenderPassAttachment>() };
+
         registry->__RegisterRenderPass(id, ms_renderPassId, attachmentDescription, vas, uvs);
         m_pRenderPassDescriptor = registry->GetRenderPassEntry(ms_renderPassId);
     }

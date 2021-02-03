@@ -24,7 +24,7 @@ namespace BLA
             {
                 enum Index : blaU32
                 {
-                    R4G4_UNORM_PACK8,
+                    R4G4_UNORM_PACK8 = 0,
                     R4G4B4A4_UNORM_PACK16,
                     B4G4R4A4_UNORM_PACK16,
                     R5G6B5_UNORM_PACK16,
@@ -153,7 +153,8 @@ namespace BLA
                     S8_UINT,
                     D16_UNORM_S8_UINT,
                     D24_UNORM_S8_UINT,
-                    D32_SFLOAT_S8_UINT
+                    D32_SFLOAT_S8_UINT,
+                    INVALID
                 };
             }
 

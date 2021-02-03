@@ -5,12 +5,14 @@
 #include "BLASingleton.h"
 #include "System.h"
 #include "Resource.h"
+#include "Rendering/RenderPass.h"
 
 namespace BLA
 {
     class Renderer;
     class BaseRenderPassObject;
-    
+    struct BaseRenderPassInstance;
+
     namespace Gpu
     {
         struct BaseImage;
@@ -25,30 +27,27 @@ namespace BLA
         class Interface
         {
             friend class Renderer;
+            friend struct BaseRenderPassInstance;
+
             BLA_DECLARE_THREAD_LOCAL_SINGLETON(Interface)
+
         public:
             virtual ResourceHandle Submit(BaseResource* resource) = 0;
             virtual void Cancel(BaseResource* handle) = 0;
             virtual void PrepareForStaging(BaseResource* resource) = 0;
 
             virtual ResourceHandle PrepareDynamicBuffer(BaseResource* resource) = 0;
-
-            template<class RenderPass>
-            void RegisterRenderPassObject(const typename RenderPass::RenderPassObject& instance)
-            {
-                RegisterRenderPassObjectBase(*RenderPass::GetSingletonInstance()->m_pRenderPassDescriptor, instance);
-            }
         
         protected:
             static void SetBufferDataPointer(BaseStaticBuffer* buffer, blaU8* pointer);
             static void SetBufferDataPointer(BaseDynamicBuffer* buffer, blaU8* pointer);
             static BaseStaticBuffer* GetImageBuffer(BaseImage* image);
 
-            virtual void SetupRenderPass(RenderPassDescriptor& renderPassDescriptor, RenderPassProgram& program) = 0;
-            // virtual void AttachToRenderPass(RenderPassDescriptor& renderPassDescriptor, BaseRenderPassAttachment& attachment) = 0;
+            virtual RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program) = 0;
+            virtual void AttachToRenderPass(RenderPassInstanceImplementation* rpInstanceImplementation, const BaseRenderPassAttachment* attachment) = 0;
             
-            virtual void Render(RenderPassDescriptor& renderPassDescriptor) = 0;
-            virtual void RegisterRenderPassObjectBase(const RenderPassDescriptor& descriptor, const BaseRenderPassObject& instance) = 0;
+            virtual void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation) = 0;
+            virtual void RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) = 0;
         };
     }
 };
