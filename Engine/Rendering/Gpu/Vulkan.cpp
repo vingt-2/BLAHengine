@@ -230,9 +230,9 @@ namespace BLA::Gpu
 
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
 
-        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) const;
+        void TransitionImageLayout(VkImage image, Gpu::Formats::Enum::Index format, VkImageLayout oldLayout, VkImageLayout newLayout) const;
 
-        void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) const;
+        void CopyBufferToImage(VkBuffer buffer, Gpu::Formats::Enum::Index format, VkImage image, uint32_t width, uint32_t height) const;
 
         void CreateBuffer(
             VmaMemoryUsage memoryUsage,
@@ -240,7 +240,7 @@ namespace BLA::Gpu
             VkBufferUsageFlags usage,
             VkBuffer& buffer, VmaAllocation& allocation) const;
 
-        void CreateImage(blaIVec2 size, VkFormat format, VkImage& image, VmaAllocation& allocation) const;
+        void CreateImage(blaIVec2 size, Gpu::Formats::Enum::Index  format, VkImage& image, VmaAllocation& allocation) const;
 
         void LoadShaderCode(blaVector<blaU8> shaderCodeBlob, VkShaderModule& shaderModule);
     };
@@ -312,7 +312,7 @@ namespace BLA::Gpu
 
         void SetAttachment(const BaseRenderPassAttachment* attachment, VkDevice device)
         {
-            m_attachment.m_attachmentImageViews = blaVector<VkImageView>(attachment->m_colorCount);
+            m_attachment.m_attachmentImageViews = blaVector<VkImageView>(attachment->m_colorCount + (attachment->m_depthImage ? 1 : 0));
             for(blaSize i = 0; i < attachment->m_colorCount; i++)
             {
                 BaseImage* image;
@@ -333,10 +333,27 @@ namespace BLA::Gpu
                 vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachment.m_attachmentImageViews[i]);
             }
 
+            if(attachment->m_depthImage)
+            {
+                BaseImage* image = attachment->m_depthImage;
+
+                VkImageViewCreateInfo imageViewCreateInfo = {};
+                imageViewCreateInfo.image = static_cast<VkImage>(image->GetHandle().m_impl.pointer);
+                imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+                imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+                imageViewCreateInfo.format = g_BlaFormatToVulkan[image->GetFormat()];
+                imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+                imageViewCreateInfo.subresourceRange.levelCount = 1;
+                imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+                imageViewCreateInfo.subresourceRange.layerCount = 1;
+                vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachment.m_attachmentImageViews[m_attachment.m_attachmentImageViews.size()-1]);
+            }
+
             VkFramebufferCreateInfo frameBufferCreateInfo = {};
             frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             frameBufferCreateInfo.renderPass = m_vkRenderPass;
-            frameBufferCreateInfo.attachmentCount = 1;
+            frameBufferCreateInfo.attachmentCount = (blaU32)m_attachment.m_attachmentImageViews.size();
             frameBufferCreateInfo.pAttachments = m_attachment.m_attachmentImageViews.data();
             frameBufferCreateInfo.width = m_attachment.m_attachmentSize.x;
             frameBufferCreateInfo.height = m_attachment.m_attachmentSize.y;
@@ -427,6 +444,9 @@ namespace BLA::Gpu
 
             VkPipelineDepthStencilStateCreateInfo depth_info = {};
             depth_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+            depth_info.depthTestEnable = VK_TRUE;
+            depth_info.depthWriteEnable = VK_TRUE;
+            depth_info.depthCompareOp = VK_COMPARE_OP_LESS;
 
             VkPipelineColorBlendStateCreateInfo blend_info = {};
             blend_info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -542,8 +562,8 @@ namespace BLA::Gpu
                 depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
                 depthAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-                depthAttachmentRef.attachment = 0;
-                depthAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                depthAttachmentRef.attachment = static_cast<blaU32>(rpDescriptor->m_attachmentDescription.m_colorAttachments.size());
+                depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
                 subpass.pDepthStencilAttachment = &depthAttachmentRef;
             }
@@ -570,7 +590,7 @@ namespace BLA::Gpu
 
             VkClearValue clearValues[2];
             clearValues[0].color = { {0.0f, 1.0f, 1.0f, 1.0f} };
-            // clearValues[1].depthStencil = {1.0f, 0};
+            clearValues[1].depthStencil = {1.0f, 0};
 
             VkRenderPassBeginInfo renderPassBeginInfo = {};
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -579,7 +599,7 @@ namespace BLA::Gpu
             renderPassBeginInfo.renderArea.offset.y = 0;
             renderPassBeginInfo.renderArea.extent.width = m_attachment.m_attachmentSize.x;
             renderPassBeginInfo.renderArea.extent.height = m_attachment.m_attachmentSize.y;
-            renderPassBeginInfo.clearValueCount = 1;
+            renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = clearValues;
 
             int i = vkWindow->m_frameIndex;
@@ -818,7 +838,7 @@ namespace BLA::Gpu
 
     ResourceHandle Vulkan::SubmitImage(BaseImage* resource)
     {
-        VkFormat format = g_BlaFormatToVulkan[resource->GetFormat()];
+        Gpu::Formats::Enum::Index format = resource->GetFormat();
 
         VkImage image;
         m_implementation->CreateImage(
@@ -831,6 +851,7 @@ namespace BLA::Gpu
 
         m_implementation->CopyBufferToImage(
             static_cast<VkBuffer>(GetImageBuffer(resource)->m_StagingData.pointers[0]), // <---- Needs a bunch of helper function to extract api specific shit form there ...
+            format,
             image,
             resource->GetSize().x, resource->GetSize().y);
 
@@ -901,9 +922,11 @@ namespace BLA::Gpu
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) const
+    void Vulkan::Vulkan::VulkanImplementation::TransitionImageLayout(VkImage image, Gpu::Formats::Enum::Index format, VkImageLayout oldLayout, VkImageLayout newLayout) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+        bool isDepth = format >= Gpu::Formats::Enum::D16_UNORM;
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -912,7 +935,7 @@ namespace BLA::Gpu
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = image;
-        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.aspectMask = isDepth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
@@ -954,16 +977,18 @@ namespace BLA::Gpu
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) const
+    void Vulkan::Vulkan::VulkanImplementation::CopyBufferToImage(VkBuffer buffer, Gpu::Formats::Enum::Index format, VkImage image, uint32_t width, uint32_t height) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+        bool isDepth = format >= Gpu::Formats::Enum::D16_UNORM;
 
         VkBufferImageCopy region{};
         region.bufferOffset = 0;
         region.bufferRowLength = 0;
         region.bufferImageHeight = 0;
 
-        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.aspectMask = isDepth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel = 0;
         region.imageSubresource.baseArrayLayer = 0;
         region.imageSubresource.layerCount = 1;
@@ -1002,12 +1027,15 @@ namespace BLA::Gpu
         vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
     }
 
-    void Vulkan::VulkanImplementation::CreateImage(blaIVec2 size, VkFormat format, VkImage& image, VmaAllocation& allocation) const
+    void Vulkan::VulkanImplementation::CreateImage(blaIVec2 size, Gpu::Formats::Enum::Index format, VkImage& image, VmaAllocation& allocation) const
     {
+        // Is it a depth image ?
+        bool isDepth = format >= Formats::Enum::D16_UNORM;
+        
         VkImageCreateInfo imageCreateInfo = {};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageCreateInfo.format = format;
+        imageCreateInfo.format = g_BlaFormatToVulkan[format];
         imageCreateInfo.extent.width = size.x;
         imageCreateInfo.extent.height = size.y;
         imageCreateInfo.extent.depth = 1;
@@ -1015,7 +1043,11 @@ namespace BLA::Gpu
         imageCreateInfo.arrayLayers = 1;
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; //TODO
+
+        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | 
+            (isDepth ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) |
+            VK_IMAGE_USAGE_TRANSFER_DST_BIT; //TODO !!!!!! ????? !!!!!
+
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 

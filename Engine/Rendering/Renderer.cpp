@@ -117,18 +117,18 @@ void Renderer::CreateOrUpdateRenderTargets()
    
     m_offscreenBuffer.m_color = new Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), buffer);
 
-    //Gpu::StaticBuffer<blaF32> depthBuffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
+    Gpu::StaticBuffer<blaF32> depthBuffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
 
-    //for (blaU32 i = 0; i < depthBuffer.GetLength(); i++)
-    //{
-    //    depthBuffer[i] = 0;
-    //}
+    for (blaU32 i = 0; i < depthBuffer.GetLength(); i++)
+    {
+        depthBuffer[i] = 0;
+    }
 
-    //m_offscreenBuffer.m_depth = new Gpu::Image<Gpu::Formats::D32_SFLOAT>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), depthBuffer);
+    m_offscreenBuffer.m_depth = new Gpu::Image<Gpu::Formats::D32_SFLOAT>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), depthBuffer);
 
     // Submit for now is blocking, so we good ...
     m_offscreenBuffer.m_color->Submit();
-    // m_offscreenBuffer.m_depth->Submit();
+    m_offscreenBuffer.m_depth->Submit();
 
     m_offscreenBuffer.OnChange();
 }

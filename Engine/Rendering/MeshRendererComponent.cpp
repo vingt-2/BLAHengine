@@ -12,7 +12,7 @@ using namespace BLA;
 // Todo: move camera component to rendering ...
 #include "Core/CameraComponent.h"
 
-DeclareRenderPassAttachment(TestMeshPassAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), void)
+DeclareRenderPassAttachment(TestMeshPassAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), Gpu::Formats::D32_SFLOAT)
 
 DeclareRenderPass(
     MeshGeometryPass,
@@ -79,7 +79,7 @@ void OnOffscreenRenderTarget(RenderTarget* rt)
         {
             TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
             // Make Attachment from renderer offscreen images:
-            TestMeshPass::RenderPassAttachment attachment(colorAttachments);//, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+            TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
 
             instance->ResetAttachment(attachment);
         }
@@ -104,7 +104,7 @@ void MeshRendererComponent::Update()
 
         TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
         // Make Attachment from renderer offscreen images:
-        TestMeshPass::RenderPassAttachment attachment(colorAttachments);//, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+        TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
 
         g_testMeshPassId = BlaStringId("TestMeshPass");
 
