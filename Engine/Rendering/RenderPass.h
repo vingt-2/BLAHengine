@@ -14,10 +14,11 @@
 #include "ProjectExport.h"
 
 #define VertexAttributes(...) __VA_ARGS__
-#define UniformValues(...) __VA_ARGS__
+#define UniformBufferObjects(...) __VA_ARGS__
+#define OpaqueUniforms(...) __VA_ARGS__
 
-#define DeclareRenderPass(Name, RenderPassAttachment, VertexAttributes, UniformValues) \
-   typedef BLA::RenderPass<COMPILE_TIME_CRC32_STR(#Name), RenderPassAttachment, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformValues)>> Name;
+#define DeclareRenderPass(Name, RenderPassAttachment, VertexAttributes, UniformBufferObjects, OpaqueUniforms) \
+   typedef BLA::RenderPass<COMPILE_TIME_CRC32_STR(#Name), RenderPassAttachment, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(VertexAttributes)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(UniformBufferObjects)>, BLA::_RenderPassTemplateHelpers::RPIS<EXPAND(OpaqueUniforms)>> Name;
 
 #define RegisterRenderPass(Name) \
     BLA_IMPLEMENT_CONSTRUCT_TEMPLATED_SINGLETON(Name, Name(BlaStringId(#Name)))
@@ -53,7 +54,7 @@ namespace BLA
         }
 
         // Really should  be a dynamic buffer ...
-        void GetUniformValueBuffer(int i, const Gpu::BaseDynamicBuffer*& buffer) const
+        void GetUniformBufferObjectBuffer(int i, const Gpu::BaseDynamicBuffer*& buffer) const
         {
             //TODO: fatal assert i <= uvCount
             //TODO:
@@ -101,10 +102,17 @@ namespace BLA
     };
 
     template<typename... Ts>
-    class _RenderPassObjectUVs
+    class _RenderPassObjectUBOs
     {
     public:
-        _RenderPassObjectUVs<Ts...>() {};
+        _RenderPassObjectUBOs<Ts...>() {};
+    };
+
+    template<typename... Ts>
+    class _RenderPassObjectOpaques
+    {
+    public:
+        _RenderPassObjectOpaques<Ts...>() {};
     };
 
     namespace _RenderPassTemplateHelpers
@@ -123,19 +131,34 @@ namespace BLA
             typedef typename InferVAType<k - 1, _RenderPassObjectVAs<Ts...>>::type type;
         };
 
-        template <size_t, class> struct InferUVType;
+        template <size_t, class> struct InferUBOType;
 
         template <typename T, typename... Ts>
-        struct InferUVType<0, _RenderPassObjectUVs<T, Ts...>>
+        struct InferUBOType<0, _RenderPassObjectUBOs<T, Ts...>>
         {
             typedef T type;
         };
 
         template <size_t k, typename T, typename... Ts>
-        struct InferUVType<k, _RenderPassObjectUVs<T, Ts...>>
+        struct InferUBOType<k, _RenderPassObjectUBOs<T, Ts...>>
         {
-            typedef typename InferUVType<k - 1, _RenderPassObjectUVs<Ts...>>::type type;
+            typedef typename InferUBOType<k - 1, _RenderPassObjectUBOs<Ts...>>::type type;
         };
+
+        template <size_t, class> struct InferOpaqueType;
+
+        template <typename T, typename... Ts>
+        struct InferOpaqueType<0, _RenderPassObjectUBOs<T, Ts...>>
+        {
+            typedef T type;
+        };
+
+        template <size_t k, typename T, typename... Ts>
+        struct InferOpaqueType<k, _RenderPassObjectUBOs<T, Ts...>>
+        {
+            typedef typename InferUBOType<k - 1, _RenderPassObjectUBOs<Ts...>>::type type;
+        };
+
     }
 
     template<typename T, typename... Ts>
@@ -168,11 +191,11 @@ namespace BLA
     };
 
     template<typename T, typename... Ts>
-    class _RenderPassObjectUVs<T, Ts...> : public _RenderPassObjectUVs<Ts...>
+    class _RenderPassObjectUBOs<T, Ts...> : public _RenderPassObjectUBOs<Ts...>
     {
     public:
-        _RenderPassObjectUVs(const Gpu::DynamicBuffer<T>& uniformValue, const Gpu::DynamicBuffer<Ts>&... uniformValues) :
-            _RenderPassObjectUVs<Ts...>(uniformValues...),
+        _RenderPassObjectUBOs(const Gpu::DynamicBuffer<T>& uniformValue, const Gpu::DynamicBuffer<Ts>&... uniformValues) :
+            _RenderPassObjectUBOs<Ts...>(uniformValues...),
             m_uniformValue(&uniformValue)
         {
             // TODO: Reason about type, statically check inspectability... Pre-fecth type information
@@ -180,44 +203,87 @@ namespace BLA
         };
 
         template <size_t k>
-        const typename std::enable_if<k == 0, T>::type& GetUniformValue() const
+        Gpu::DynamicBuffer<const typename std::enable_if<k == 0, T>::type>& GetUniformValue() const
         {
             return m_uniformValue;
         }
 
         template <size_t k>
-        const Gpu::DynamicBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassObjectUVs<T, Ts...>>::type>::type>& GetUniformValue() const
+        const Gpu::DynamicBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUBOType<k, _RenderPassObjectUBOs<T, Ts...>>::type>::type>& GetUniformValue() const
         {
-            return _RenderPassObjectUVs<Ts...>::template GetUniformValue<k - 1>();
+            return _RenderPassObjectUBOs<Ts...>::template GetUniformValue<k - 1>();
         }
 
         template <size_t k>
-        typename std::enable_if<k == 0, T>::type& GetUniformValue()
+        Gpu::DynamicBuffer<typename std::enable_if<k == 0, T>::type>& GetUniformValue()
         {
             return m_uniformValue;
         }
 
         template <size_t k>
-        Gpu::DynamicBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUVType<k, _RenderPassObjectUVs<T, Ts...>>::type>::type>& GetUniformValue()
+        Gpu::DynamicBuffer<typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUBOType<k, _RenderPassObjectUBOs<T, Ts...>>::type>::type>& GetUniformValue()
         {
-            return _RenderPassObjectUVs<Ts...>::template GetUniformValue<k - 1>();
+            return _RenderPassObjectUBOs<Ts...>::template GetUniformValue<k - 1>();
         }
 
     protected:
         const Gpu::DynamicBuffer<T>* m_uniformValue;
     };
 
-    template<typename _RenderPass, class VertexAttributes, class ShaderUniforms>
+    template<typename T, typename... Ts>
+    class _RenderPassObjectOpaques<T, Ts...> : public _RenderPassObjectOpaques<Ts...>
+    {
+    public:
+        _RenderPassObjectOpaques(const T& opaqueValue, const Ts&... opaqueValues) :
+            _RenderPassObjectOpaques<Ts...>(opaqueValues...),
+            m_opaqueValue(&opaqueValue)
+        {
+            // TODO: Reason about type, statically check inspectability... Pre-fecth type information
+            // Remember this constructor is executed every time we request a new RenderObject for this RenderPass, so not like it's only registered once yea ?
+        };
+
+        template <size_t k>
+        const typename std::enable_if<k == 0, T>::type& GetOpaqueValue() const
+        {
+            return m_opaqueValue;
+        }
+
+        template <size_t k>
+        const typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUBOType<k, _RenderPassObjectOpaques<T, Ts...>>::type>::type& GetOpaqueValue() const
+        {
+            return _RenderPassObjectOpaques<Ts...>::template GetOpaqueValue<k - 1>();
+        }
+
+        template <size_t k>
+        typename std::enable_if<k == 0, T>::type& GetOpaqueValue()
+        {
+            return m_opaqueValue;
+        }
+
+        template <size_t k>
+        typename std::enable_if<k != 0, typename _RenderPassTemplateHelpers::InferUBOType<k, _RenderPassObjectOpaques<T, Ts...>>::type>::type& GetOpaqueValue()
+        {
+            return _RenderPassObjectOpaques<Ts...>::template GetOpaqueValue<k - 1>();
+        }
+
+    protected:
+        T m_opaqueValue;
+    };
+
+    template<typename _RenderPass, class VertexAttributes, class ShaderUniforms, class OpaqueValues>
     class _RenderPassObject;
 
-    template<typename _RenderPass, typename... VAs, typename... UVs>
-    class _RenderPassObject<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> : public BaseRenderPassObject, public _RenderPassObjectVAs<VAs...>, public _RenderPassObjectUVs<UVs...>
+    template<typename _RenderPass, typename... VAs, typename... UBOs, typename... Opaques>
+    class _RenderPassObject<_RenderPass, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UBOs...>, _RenderPassTemplateHelpers::RPIS<Opaques...>> :
+        public BaseRenderPassObject, public _RenderPassObjectVAs<VAs...>, public _RenderPassObjectUBOs<UBOs...>, public _RenderPassObjectOpaques<Opaques...>
     {
         friend class Gpu::Interface;
 
     public:
         typedef _RenderPassObjectVAs<VAs...> InstanceVertexAttributes;
-        typedef _RenderPassObjectUVs<UVs...> InstanceUniformValues;
+        typedef _RenderPassObjectUBOs<UBOs...> InstanceUniformValues;
+        typedef _RenderPassObjectOpaques<Opaques...> InstanceOpaqueValues;
+
         typedef _RenderPass RenderPass;
 
         template<int n>
@@ -227,13 +293,19 @@ namespace BLA
         };
 
         template<int n>
-        struct GetUVType
+        struct GetUBOType
         {
-            typedef typename _RenderPassTemplateHelpers::InferUVType<n, InstanceUniformValues>::type Type;
+            typedef typename _RenderPassTemplateHelpers::InferUBOType<n, InstanceUniformValues>::type Type;
         };
 
-        _RenderPassObject(const Gpu::StaticBuffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms):
-            BaseRenderPassObject(indices, RenderPass::ms_VACount, RenderPass::ms_UVCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUVs<UVs...>(shaderUniforms) {}
+        template<int n>
+        struct GetOpaqueType
+        {
+            typedef typename _RenderPassTemplateHelpers::InferOpaqueType<n, InstanceUniformValues>::type Type;
+        };
+
+        _RenderPassObject(const Gpu::StaticBuffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms, const InstanceOpaqueValues& opaqueValues):
+            BaseRenderPassObject(indices, RenderPass::ms_VACount, RenderPass::ms_UBOCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUBOs<UBOs...>(shaderUniforms), _RenderPassObjectOpaques<Opaques...>(opaqueValues) {}
     };
 
     template<typename _RenderPass, typename _RenderPassAttachment, typename _RenderPassRenderProgram>
@@ -271,34 +343,35 @@ namespace BLA
      *   RenderPass definition
      *
      */
-    template<blaU32 renderPassId, class RenderPassAttachment, class VertexAttributes, class ShaderUniforms>
+    template<blaU32 renderPassId, class RenderPassAttachment, class VertexAttributes, class ShaderUniforms, class OpaqueValues>
     class RenderPass;
 
-    template<blaU32 renderPassId, class _RenderPassAttachment, typename... VAs, typename... UVs>
-    class RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>
+    template<blaU32 renderPassId, class _RenderPassAttachment, typename... VAs, typename... UBOs, typename... Opaques>
+    class RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UBOs...>, _RenderPassTemplateHelpers::RPIS<Opaques...>>
     {
         static_assert(std::is_base_of<Gpu::BaseRenderPassAttachment, _RenderPassAttachment>::value, 
             "Invalid Render Pass Attachment passed to RenderPass. Did you not declare it with DeclareRenderPassAttachment ?");
 
-        using SelfType = RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>>;
+        using SelfType = RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UBOs...>, _RenderPassTemplateHelpers::RPIS<Opaques...>>;
 
         BLA_DECLARE_SINGLETON(SelfType);
 
     public:
         
         typedef _RenderPassAttachment RenderPassAttachment;
-        typedef _RenderPassObject<SelfType, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UVs...>> RenderPassObject;
+        typedef _RenderPassObject<SelfType, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS<UBOs...>, _RenderPassTemplateHelpers::RPIS<Opaques...>> RenderPassObject;
         typedef _RenderPassInstance<SelfType, _RenderPassAttachment, DefaultTODOToSpecifyRenderProgram> RenderPassInstance;
 
         //TODO: Dev builds only shoudl carry the blaStringid for the render pass constructor ...
         RenderPass<renderPassId, _RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>,
-                   _RenderPassTemplateHelpers::RPIS<UVs...>>(blaStringId id);
+                   _RenderPassTemplateHelpers::RPIS<UBOs...>, _RenderPassTemplateHelpers::RPIS<Opaques...>>(blaStringId id);
 
         const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
 
         static const blaU32 ms_renderPassId = renderPassId;
         static const size_t ms_VACount = sizeof...(VAs);
-        static const size_t ms_UVCount = sizeof...(UVs);
+        static const size_t ms_UBOCount = sizeof...(UBOs);
+        static const size_t ms_OpaquesCount = sizeof...(Opaques);
     };
 
     template<int i, class RenderPass>
@@ -339,27 +412,27 @@ namespace BLA
     }
 
     template<int i, class RenderPass>
-    class _GetRenderPassUVDescriptorsInternal
+    class _GetRenderPassUBODescriptorsInternal
     {
     public:
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
-                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<i, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<i, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
     };
 
     template<class RenderPass>
-    class _GetRenderPassUVDescriptorsInternal<0, RenderPass>
+    class _GetRenderPassUBODescriptorsInternal<0, RenderPass>
     {
     public:
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
-                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUVType<0, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<0, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -370,11 +443,53 @@ namespace BLA
      *
      */
     template<class RenderPass>
-    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUVDescriptors()
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassUBODescriptors()
     {
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
 
-        _GetRenderPassUVDescriptorsInternal<RenderPass::ms_UVCount - 1, RenderPass>::Get(typeDescriptors);
+        _GetRenderPassUBODescriptorsInternal<RenderPass::ms_UBOCount - 1, RenderPass>::Get(typeDescriptors);
+
+        return typeDescriptors;
+    }
+
+
+    template<int i, class RenderPass>
+    class _GetRenderPassOpaqueDescriptorsInternal
+    {
+    public:
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        {
+            _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
+            BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<i, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
+
+            typeDescriptors.push_back(d);
+        }
+    };
+
+    template<class RenderPass>
+    class _GetRenderPassOpaqueDescriptorsInternal<0, RenderPass>
+    {
+    public:
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
+        {
+            BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<0, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
+
+            typeDescriptors.push_back(d);
+        }
+    };
+
+    /*
+     *  RenderPass templated accessors
+     *
+     */
+    template<class RenderPass>
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassOpaqueDescriptors()
+    {
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
+
+        _GetRenderPassOpaqueDescriptorsInternal<RenderPass::ms_OpaquesCount - 1, RenderPass>::Get(typeDescriptors);
 
         return typeDescriptors;
     }
@@ -406,9 +521,9 @@ namespace BLA
         BLACORE_API void GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const;
     };
 
-    template <blaU32 renderPassId, class RenderPassAttachment, typename ... VAs, typename ... UVs>
+    template <blaU32 renderPassId, class RenderPassAttachment, typename ... VAs, typename ... UBOs, typename... Opaques>
     inline RenderPass<renderPassId, RenderPassAttachment, _RenderPassTemplateHelpers::RPIS<VAs...>, _RenderPassTemplateHelpers::RPIS
-                      <UVs...>>::RenderPass(blaStringId id)
+                      <UBOs...>, _RenderPassTemplateHelpers::RPIS<Opaques...>>::RenderPass(blaStringId id)
     {
         BLA::RenderPassRegistry* registry = BLA::RenderPassRegistry::GetSingletonInstance();
         if (!registry)
@@ -416,7 +531,8 @@ namespace BLA
             registry = BLA::RenderPassRegistry::AssignAndReturnSingletonInstance(new RenderPassRegistry());
         }
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<SelfType>();
-        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUVDescriptors<SelfType>();
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUBODescriptors<SelfType>();
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> Opaques = GetRenderPassUBODescriptors<SelfType>();
 
         const Gpu::RPAttachmentDescription attachmentDescription = 
             { Gpu::GetColorAttachmentDescriptors<RenderPassAttachment>(), Gpu::GetDepthAttachmentDescription<RenderPassAttachment>() };

@@ -39,11 +39,12 @@ namespace BLA
         
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);
-            void CancelStaticBuffer(ResourceHandle handle);
-
             ResourceHandle SubmitImage(BaseImage* resource);
-
             ResourceHandle SubmitShaderProgram(ShaderProgram* shaderProgram);
+
+            void CancelStaticBuffer(BaseStaticBuffer* resource);
+            void CancelImage(BaseImage* resource);
+            void CancelShaderProgram(ShaderProgram* shaderProgram);
 
             VulkanImplementation* m_implementation;
 

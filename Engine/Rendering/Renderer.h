@@ -36,6 +36,15 @@ namespace BLA
         blaOwnedPtr<Gpu::Image<Gpu::Formats::D32_SFLOAT>> m_depth;
     };
 
+    struct GeometryBuffer : RenderTarget
+    {
+        void OnChange() { OnChangeCalls(); }
+
+        blaOwnedPtr<Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>> m_diffuse;
+        blaOwnedPtr<Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>> m_normal;
+        blaOwnedPtr<Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>> m_uv;
+    };
+
     class RenderWindow;
     struct BaseRenderPassInstance;
     
@@ -59,6 +68,7 @@ namespace BLA
         ~Renderer(void) = default;
 
         OffscreenRenderTarget m_offscreenBuffer;
+        GeometryBuffer m_geometryBuffer;
 
         template<typename RenderPass>
         void AddRenderPassInstance(blaStringId instanceId, const typename RenderPass::RenderPassAttachment& renderPassAttachment, const DefaultTODOToSpecifyRenderProgram& renderProgram)
@@ -88,6 +98,11 @@ namespace BLA
     protected:
 
         void CreateOrUpdateRenderTargets();
+
+        void CreateOrUpdateOffscreenBuffer();
+
+        void CreateOrUpdateGeometryBuffer();
+
         GLFWRenderWindow* m_renderWindow;
         blaIVec2 m_viewPortExtents;
 

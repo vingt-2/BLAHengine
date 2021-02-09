@@ -14,6 +14,7 @@ namespace BLA
             eDynamicBuffer,
             eImage,
             eShaderProgram,
+            eSampler,
             eEnd
         };
     }

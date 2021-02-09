@@ -27,7 +27,7 @@
 
 namespace BLA::Gpu
 {
-    blaVector<VkFormat> g_BlaFormatToVulkan =
+    VkFormat g_BlaFormatToVulkan[] =
     {
         VK_FORMAT_R4G4_UNORM_PACK8,
         VK_FORMAT_R4G4B4A4_UNORM_PACK16,
@@ -287,7 +287,7 @@ namespace BLA::Gpu
             for (blaU32 i = 0; i < descriptorWrites.size(); i++)
             {
                 const Gpu::BaseDynamicBuffer* buffer;
-                rpInstance.GetUniformValueBuffer(i, buffer);
+                rpInstance.GetUniformBufferObjectBuffer(i, buffer);
 
                 VkDescriptorBufferInfo& bufferInfo = bufferInfos[i];
                 bufferInfo.buffer = static_cast<VkBuffer>(buffer->GetHandle().m_impl.pointer);
@@ -693,6 +693,28 @@ namespace BLA::Gpu
 
     void Vulkan::Cancel(BaseResource* resource)
     {
+        switch (resource->GetType())
+        {
+        case EResourceType::eStaticBuffer:
+        {
+            CancelStaticBuffer(static_cast<BaseStaticBuffer*>(resource));
+            return;
+        }
+        case EResourceType::eImage:
+        {
+            CancelImage(static_cast<BaseImage*>(resource));
+            return;
+        }
+        case EResourceType::eShaderProgram:
+        {
+            CancelShaderProgram(static_cast<ShaderProgram*>(resource));
+            return;
+        }
+        case EResourceType::eEnd: break;
+        default:;
+        }
+
+        BLA_TRAP(false);
     }
 
     void Vulkan::PrepareForStaging(BaseResource* resource)
@@ -876,7 +898,26 @@ namespace BLA::Gpu
         return retVal;
     }
 
-    VkCommandBuffer Vulkan::Vulkan::VulkanImplementation::BeginSingleTimeCommands() const
+    void Vulkan::CancelStaticBuffer(BaseStaticBuffer* resource)
+    {
+
+    }
+
+    void Vulkan::CancelImage(BaseImage* resource)
+    {
+
+    }
+
+    void Vulkan::CancelShaderProgram(ShaderProgram* shaderProgram)
+    {
+
+    }
+
+    /*
+     *  The actual vulkan interface is here
+     */
+
+    VkCommandBuffer Vulkan::VulkanImplementation::BeginSingleTimeCommands() const
     {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -896,7 +937,7 @@ namespace BLA::Gpu
         return commandBuffer;
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::EndSingleTimeCommands(VkCommandBuffer commandBuffer) const
+    void Vulkan::VulkanImplementation::EndSingleTimeCommands(VkCommandBuffer commandBuffer) const
     {
         vkEndCommandBuffer(commandBuffer);
 
@@ -911,7 +952,7 @@ namespace BLA::Gpu
         vkFreeCommandBuffers(m_vulkanContext->m_device, m_commandPool, 1, &commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
+    void Vulkan::VulkanImplementation::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -922,7 +963,7 @@ namespace BLA::Gpu
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::TransitionImageLayout(VkImage image, Gpu::Formats::Enum::Index format, VkImageLayout oldLayout, VkImageLayout newLayout) const
+    void Vulkan::VulkanImplementation::TransitionImageLayout(VkImage image, Gpu::Formats::Enum::Index format, VkImageLayout oldLayout, VkImageLayout newLayout) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -977,7 +1018,7 @@ namespace BLA::Gpu
         EndSingleTimeCommands(commandBuffer);
     }
 
-    void Vulkan::Vulkan::VulkanImplementation::CopyBufferToImage(VkBuffer buffer, Gpu::Formats::Enum::Index format, VkImage image, uint32_t width, uint32_t height) const
+    void Vulkan::VulkanImplementation::CopyBufferToImage(VkBuffer buffer, Gpu::Formats::Enum::Index format, VkImage image, uint32_t width, uint32_t height) const
     {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 

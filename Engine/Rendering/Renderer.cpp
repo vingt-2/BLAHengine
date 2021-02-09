@@ -96,34 +96,28 @@ void Renderer::SetViewportSize(blaIVec2 renderSize)
 
 void Renderer::CreateOrUpdateRenderTargets()
 {
+    CreateOrUpdateOffscreenBuffer();
+
+}
+
+void Renderer::CreateOrUpdateOffscreenBuffer()
+{
     if (m_offscreenBuffer.m_color)
     {
         m_offscreenBuffer.m_color->Cancel();
         m_offscreenBuffer.m_color = nullptr;
     }
 
-    if(m_offscreenBuffer.m_depth)
+    if (m_offscreenBuffer.m_depth)
     {
         m_offscreenBuffer.m_depth->Cancel();
         m_offscreenBuffer.m_depth = nullptr;
     }
 
     Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
-
-    for(blaU32 i = 0; i < buffer.GetLength(); i++)
-    {
-        buffer[i] = 0;
-    }
-   
     m_offscreenBuffer.m_color = new Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), buffer);
 
     Gpu::StaticBuffer<blaF32> depthBuffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
-
-    for (blaU32 i = 0; i < depthBuffer.GetLength(); i++)
-    {
-        depthBuffer[i] = 0;
-    }
-
     m_offscreenBuffer.m_depth = new Gpu::Image<Gpu::Formats::D32_SFLOAT>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), depthBuffer);
 
     // Submit for now is blocking, so we good ...
@@ -131,6 +125,30 @@ void Renderer::CreateOrUpdateRenderTargets()
     m_offscreenBuffer.m_depth->Submit();
 
     m_offscreenBuffer.OnChange();
+}
+
+void Renderer::CreateOrUpdateGeometryBuffer()
+{
+    if (m_geometryBuffer.m_diffuse)
+    {
+        m_geometryBuffer.m_diffuse->Cancel();
+        m_geometryBuffer.m_diffuse = nullptr;
+    }
+
+    Gpu::StaticBuffer<blaU32> buffer(m_viewPortExtents.x * m_viewPortExtents.y, Gpu::BaseStaticBuffer::Usage::ImageBuffer);
+
+    for (blaU32 i = 0; i < buffer.GetLength(); i++)
+    {
+        buffer[i] = 0;
+    }
+
+    m_geometryBuffer.m_diffuse = new Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), buffer);
+
+    // Submit for now is blocking, so we good ...
+    m_geometryBuffer.m_diffuse->Submit();
+    m_geometryBuffer.m_diffuse->Submit();
+
+    m_geometryBuffer.OnChange();
 }
 
 RenderWindow* Renderer::GetRenderWindow()

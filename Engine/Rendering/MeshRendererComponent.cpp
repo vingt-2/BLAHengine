@@ -12,33 +12,9 @@ using namespace BLA;
 // Todo: move camera component to rendering ...
 #include "Core/CameraComponent.h"
 
-DeclareRenderPassAttachment(TestMeshPassAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), Gpu::Formats::D32_SFLOAT)
+RegisterRenderPass(MeshRendererComponent::MeshGeometryPass);
 
-DeclareRenderPass(
-    MeshGeometryPass,
-    TestMeshPassAttachment,
-    VertexAttributes(
-        blaVec3, // ModelPos
-        blaVec2, // uv
-        blaVec3, // normal
-        blaVec3,  // tangent
-        blaVec3), // bi-tangent
-    UniformValues(
-        blaMat4, // mvp
-        blaMat4)) // model
-
-RegisterRenderPass(MeshGeometryPass);
-
-DeclareRenderPass(
-    TestMeshPass,
-    TestMeshPassAttachment,
-    VertexAttributes(
-        blaVec3), // ModelPos
-    UniformValues(
-        blaMat4, // mvp
-        blaMat4)) // model
-
-    RegisterRenderPass(TestMeshPass)
+RegisterRenderPass(MeshRendererComponent::TestMeshPass)
 
 BeginBehaviorDescription(MeshRendererComponent, Dependencies(RootSystem))
 Expose(m_meshAssetName)
@@ -75,11 +51,11 @@ void OnOffscreenRenderTarget(RenderTarget* rt)
     Renderer* renderer = Renderer::GetSingletonInstance();
     if (g_testMeshPassId)
     {
-        if(TestMeshPass::RenderPassInstance* instance = renderer->GetRenderPassInstance<TestMeshPass>(g_testMeshPassId))
+        if(MeshRendererComponent::TestMeshPass::RenderPassInstance* instance = renderer->GetRenderPassInstance<MeshRendererComponent::TestMeshPass>(g_testMeshPassId))
         {
-            TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+            MeshRendererComponent::TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
             // Make Attachment from renderer offscreen images:
-            TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+            MeshRendererComponent::TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
 
             instance->ResetAttachment(attachment);
         }
@@ -126,7 +102,6 @@ void MeshRendererComponent::Update()
             validState = false;
         }
     }
-
 
     CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
 
@@ -176,26 +151,38 @@ void MeshRendererComponent::Update()
 
             m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertPos.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
             memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
+
+            m_vertNormal = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertNormal.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
+            memcpy_s(m_vertNormal->GetData(), sizeof(blaVec3) * m_vertNormal->GetLength(), rd.m_vertNormal.data(), rd.m_vertNormal.size() * sizeof(blaVec3));
+
+            m_vertUV = new Gpu::StaticBuffer<blaVec2>(static_cast<blaU32>(rd.m_vertUVs.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
+            memcpy_s(m_vertUV->GetData(), sizeof(blaVec2) * m_vertUV->GetLength(), rd.m_vertUVs.data(), rd.m_vertUVs.size() * sizeof(blaVec2));
+
+            m_vertTangent = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertTangent.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
+            memcpy_s(m_vertTangent->GetData(), sizeof(blaVec3) * m_vertTangent->GetLength(), rd.m_vertTangent.data(), rd.m_vertTangent.size() * sizeof(blaVec3));
+
+            m_vertBiTangent = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertBiTangent.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
+            memcpy_s(m_vertBiTangent->GetData(), sizeof(blaVec3) * m_vertBiTangent->GetLength(), rd.m_vertBiTangent.data(), rd.m_vertBiTangent.size() * sizeof(blaVec3));
             
             m_indices = new Gpu::StaticBuffer<blaU32>(static_cast<blaU32>(rd.m_triangleIndices.size()), Gpu::BaseStaticBuffer::Usage::IndexBuffer);
             memcpy_s(m_indices->GetData(), sizeof(blaU32) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaU32));
 
             m_vertPos->Submit();
+            m_vertUV->Submit();
+            m_vertNormal->Submit();
+            m_vertTangent->Submit();
+            m_vertBiTangent->Submit();
             m_indices->Submit();
 
             const TestMeshPass::RenderPassObject::InstanceVertexAttributes meshVAs(*m_vertPos);
             const TestMeshPass::RenderPassObject::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
+            const TestMeshPass::RenderPassObject::InstanceOpaqueValues opaques;
 
-            //TODO:
-            //TODO:
-            //TODO:  Leak ... of course !
-            //TODO:
-            //TODO:
-            TestMeshPass::RenderPassObject* renderPassObject = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms);
-            
+            m_renderPassObject = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms, opaques);
+
             if(TestMeshPass::RenderPassInstance* testMeshPassInstance = renderer->GetRenderPassInstance<TestMeshPass>(g_testMeshPassId))
             {
-                testMeshPassInstance->RegisterRenderPassObject(*renderPassObject);
+                testMeshPassInstance->RegisterRenderPassObject(*m_renderPassObject);
             }
         }
     }

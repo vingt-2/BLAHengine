@@ -13,7 +13,6 @@ namespace BLA::Core
     template <>
     void RootSystem::Execute(SystemObjectsIterator& systemObjects) {  }
 
-
     void ComponentSystemsRegistry::FinalizeLoad()
     {
         for (auto s : m_componentSystemsPerLibrary[m_currentRegisteringLibrary])
