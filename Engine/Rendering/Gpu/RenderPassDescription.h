@@ -33,6 +33,7 @@ namespace BLA
             RPAttachmentDescription m_attachmentDescription;
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_vertexAttributesDescriptors;
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_uniformValuesDescriptors;
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> m_opaqueValuesDescriptors;
         };
     }
 };

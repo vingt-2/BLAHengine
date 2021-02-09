@@ -69,6 +69,12 @@ namespace BLA
                 }
             };
 
+            // For template access that resolve to a non type (for example, a non existant template type argument, return an invalid type descriptor
+            inline BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* GetDescriptor()
+            {
+                return nullptr;
+            }
+
             // Declaring Primitive descriptor specialization and TypeResolver Specialization:
             template <typename T1, typename T2>
             struct TypeResolver<blaPair<T1, T2>>

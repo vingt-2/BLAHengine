@@ -23,11 +23,12 @@ void RenderTarget::OnChangeCalls()
 
 void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, Gpu::RPAttachmentDescription rpAttachmentDescription,
     blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
-    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor)
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor,
+    blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& opaqueValuesDescriptor)
 {
     BLA_ASSERT(m_registry.find(id) == m_registry.end());
 
-    m_registry.insert(std::make_pair(id, Gpu::RenderPassDescriptor{ stringId, rpAttachmentDescription, vertexAttributesDescriptors, uniformValuesDescriptor }));
+    m_registry.insert(std::make_pair(id, Gpu::RenderPassDescriptor{ stringId, rpAttachmentDescription, vertexAttributesDescriptors, uniformValuesDescriptor, opaqueValuesDescriptor}));
 }
 
 Gpu::RenderPassDescriptor* RenderPassRegistry::GetRenderPassEntry(blaU32 id)

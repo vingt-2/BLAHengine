@@ -148,13 +148,13 @@ namespace BLA
         template <size_t, class> struct InferOpaqueType;
 
         template <typename T, typename... Ts>
-        struct InferOpaqueType<0, _RenderPassObjectUBOs<T, Ts...>>
+        struct InferOpaqueType<0, _RenderPassObjectOpaques<T, Ts...>>
         {
             typedef T type;
         };
 
         template <size_t k, typename T, typename... Ts>
-        struct InferOpaqueType<k, _RenderPassObjectUBOs<T, Ts...>>
+        struct InferOpaqueType<k, _RenderPassObjectOpaques<T, Ts...>>
         {
             typedef typename InferUBOType<k - 1, _RenderPassObjectUBOs<Ts...>>::type type;
         };
@@ -402,11 +402,18 @@ namespace BLA
     };
 
     template<class RenderPass>
+    class _GetRenderPassVADescriptorsInternal<-1, RenderPass>
+    {
+    public:
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& /*typeDescriptors*/) {}
+    };
+
+    template<class RenderPass>
     blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> GetRenderPassVADescriptors()
     {
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
 
-        _GetRenderPassVADescriptorsInternal<RenderPass::ms_VACount - 1, RenderPass>::Get(typeDescriptors);
+        _GetRenderPassVADescriptorsInternal< static_cast<int>(RenderPass::ms_VACount) - 1, RenderPass>::Get(typeDescriptors);
 
         return typeDescriptors;
     }
@@ -417,7 +424,7 @@ namespace BLA
     public:
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
-            _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
+            _GetRenderPassUBODescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
                 BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<i, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
 
@@ -438,6 +445,13 @@ namespace BLA
         }
     };
 
+    template<class RenderPass>
+    class _GetRenderPassUBODescriptorsInternal<-1, RenderPass>
+    {
+    public:
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& /*typeDescriptors*/) {}
+    };
+
     /*
      *  RenderPass templated accessors
      *
@@ -447,7 +461,7 @@ namespace BLA
     {
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
 
-        _GetRenderPassUBODescriptorsInternal<RenderPass::ms_UBOCount - 1, RenderPass>::Get(typeDescriptors);
+        _GetRenderPassUBODescriptorsInternal<static_cast<int>(RenderPass::ms_UBOCount) - 1, RenderPass>::Get(typeDescriptors);
 
         return typeDescriptors;
     }
@@ -459,9 +473,9 @@ namespace BLA
     public:
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
-            _GetRenderPassVADescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
+            _GetRenderPassOpaqueDescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
-                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<i, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferOpaqueType<i, typename RenderPass::RenderPassObject::InstanceOpaqueValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -474,10 +488,17 @@ namespace BLA
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
-                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferUBOType<0, typename RenderPass::RenderPassObject::InstanceUniformValues>::type>::GetDescriptor();
+                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferOpaqueType<0, typename RenderPass::RenderPassObject::InstanceOpaqueValues>::type>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
+    };
+
+    template<class RenderPass>
+    class _GetRenderPassOpaqueDescriptorsInternal<-1, RenderPass>
+    {
+    public:
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& /*typeDescriptors*/) {}
     };
 
     /*
@@ -489,7 +510,7 @@ namespace BLA
     {
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> typeDescriptors;
 
-        _GetRenderPassOpaqueDescriptorsInternal<RenderPass::ms_OpaquesCount - 1, RenderPass>::Get(typeDescriptors);
+        _GetRenderPassOpaqueDescriptorsInternal<static_cast<int>(RenderPass::ms_OpaquesCount) - 1, RenderPass>::Get(typeDescriptors);
 
         return typeDescriptors;
     }
@@ -512,7 +533,8 @@ namespace BLA
             blaU32 id,
             Gpu::RPAttachmentDescription attachmentDescription,
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
-            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor);
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptors,
+            blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& opaqueDescriptors);
 
         BLACORE_API Gpu::RenderPassDescriptor* GetRenderPassEntry(blaU32 id);
 
@@ -532,12 +554,12 @@ namespace BLA
         }
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> vas = GetRenderPassVADescriptors<SelfType>();
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUBODescriptors<SelfType>();
-        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> Opaques = GetRenderPassUBODescriptors<SelfType>();
+        blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> opaques = GetRenderPassOpaqueDescriptors<SelfType>();
 
         const Gpu::RPAttachmentDescription attachmentDescription = 
             { Gpu::GetColorAttachmentDescriptors<RenderPassAttachment>(), Gpu::GetDepthAttachmentDescription<RenderPassAttachment>() };
 
-        registry->__RegisterRenderPass(id, ms_renderPassId, attachmentDescription, vas, uvs);
+        registry->__RegisterRenderPass(id, ms_renderPassId, attachmentDescription, vas, uvs, opaques);
         m_pRenderPassDescriptor = registry->GetRenderPassEntry(ms_renderPassId);
     }
 }
