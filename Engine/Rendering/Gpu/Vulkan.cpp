@@ -19,6 +19,8 @@
 #include "RenderPassDescription.h"
 // TODO: This is problematic, whatever handles renderpasses should probably higher level, meaning I've got to abstract this part
 // So that setting up a renderpass is not Vulkan Specific
+#include "Texture.h"
+#include "Opaques.h"
 #include "Rendering/RenderPass.h"
 
 #include "System/FileSystem/Files.h"
@@ -193,7 +195,7 @@ namespace BLA::Gpu
     {
         const BaseRenderPassObject* m_RenderPassObjectPtr;
 
-        VkDescriptorSet m_descriptorSets;
+        VkDescriptorSet m_descriptorSet;
     };
 
     struct Vulkan::VulkanImplementation
@@ -240,7 +242,9 @@ namespace BLA::Gpu
             VkBufferUsageFlags usage,
             VkBuffer& buffer, VmaAllocation& allocation) const;
 
-        void CreateImage(blaIVec2 size, Gpu::Formats::Enum::Index  format, VkImage& image, VmaAllocation& allocation) const;
+        void CreateImage(blaIVec2 size, Gpu::Formats::Enum::Index format, VkImage& image, VmaAllocation& allocation) const;
+
+        void CreateImageView(VkImage image, Gpu::Formats::Enum::Index format, VkImageView& imageView) const;
 
         void LoadShaderCode(blaVector<blaU8> shaderCodeBlob, VkShaderModule& shaderModule);
     };
@@ -280,11 +284,11 @@ namespace BLA::Gpu
             allocInfo.descriptorSetCount = 1; // ONLY 1 DESCRIPTOR SET (needs to change for several frames in flight)
             allocInfo.pSetLayouts = &m_vkDescriptorSetLayout;
 
-            VkResult err = vkAllocateDescriptorSets(vulkanInterface->m_device, &allocInfo, &vulkanRenderPassObject.m_descriptorSets);
+            VkResult err = vkAllocateDescriptorSets(vulkanInterface->m_device, &allocInfo, &vulkanRenderPassObject.m_descriptorSet);
 
             blaVector<VkDescriptorBufferInfo> bufferInfos(rpInstance.m_uvCount);
-            blaVector<VkWriteDescriptorSet> descriptorWrites(rpInstance.m_uvCount);
-            for (blaU32 i = 0; i < descriptorWrites.size(); i++)
+            blaVector<VkWriteDescriptorSet> descriptorWrites(rpInstance.m_uvCount + rpInstance.m_opaqueCount);
+            for (blaU32 i = 0; i < bufferInfos.size(); i++)
             {
                 const Gpu::BaseDynamicBuffer* buffer;
                 rpInstance.GetUniformBufferObjectBuffer(i, buffer);
@@ -296,7 +300,7 @@ namespace BLA::Gpu
 
                 VkWriteDescriptorSet& descriptorWrite = descriptorWrites[i];
                 descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                descriptorWrite.dstSet = vulkanRenderPassObject.m_descriptorSets;
+                descriptorWrite.dstSet = vulkanRenderPassObject.m_descriptorSet;
                 descriptorWrite.dstBinding = static_cast<blaU32>(i);
                 // the buffers are ordered in the order they should appear in the shader
                 descriptorWrite.dstArrayElement = 0;
@@ -305,6 +309,21 @@ namespace BLA::Gpu
                 descriptorWrite.pBufferInfo = &bufferInfo;
                 descriptorWrite.pImageInfo = nullptr; // Optional
                 descriptorWrite.pTexelBufferView = nullptr; // Optional
+            }
+
+            for (blaU32 i = (blaU32)bufferInfos.size(); i < descriptorWrites.size(); i++)
+            {
+                const Gpu::Opaque* opaque;
+                rpInstance.GetOpaqueValue(i, opaque);
+
+                switch(opaque->GetType())
+                {
+                    case Opaque::Type::Sampler:
+                    {
+                        const Gpu::Sampler* sampler = static_cast<const Sampler*>(opaque);
+                        break;
+                    }
+                }
             }
 
             vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
@@ -641,7 +660,7 @@ namespace BLA::Gpu
                 vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
 
                 vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_vkPipelineLayout, 0, 1, &instance.m_descriptorSets, 0, nullptr);
+                    m_vkPipelineLayout, 0, 1, &instance.m_descriptorSet, 0, nullptr);
 
                 vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_RenderPassObjectPtr->m_indices->GetLength(), 1, 0, 0, 0);
             }
@@ -677,6 +696,10 @@ namespace BLA::Gpu
         case EResourceType::eImage:
         {
             return SubmitImage(static_cast<BaseImage*>(resource));
+        }
+        case EResourceType::eTexture:
+        {
+            return SubmitTexture(static_cast<BaseTexture*>(resource));
         }
         case EResourceType::eShaderProgram:
         {
@@ -881,6 +904,20 @@ namespace BLA::Gpu
 
         ResourceHandle retVal;
         retVal.m_impl.pointer = image;
+
+        return retVal;
+    }
+
+    ResourceHandle Vulkan::SubmitTexture(BaseTexture* resource)
+    {
+        VkImageView imageView;
+
+        VkImage image = static_cast<VkImage>(resource->GetImage()->GetHandle().m_impl.pointer);
+
+        m_implementation->CreateImageView(image, resource->GetImage()->GetFormat(), imageView);
+
+        ResourceHandle retVal;
+        retVal.m_impl.pointer = imageView;
 
         return retVal;
     }
@@ -1096,6 +1133,22 @@ namespace BLA::Gpu
         allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
         vmaCreateImage(m_allocator, &imageCreateInfo, &allocInfo, &image, &allocation, nullptr);
+    }
+
+    void Vulkan::VulkanImplementation::CreateImageView(VkImage image, Gpu::Formats::Enum::Index format,
+        VkImageView& imageView) const
+    {
+        VkImageViewCreateInfo viewInfo{};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = image;
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.format = g_BlaFormatToVulkan[format];;
+        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; //TODO TODO ... Needs a specification
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+        vkCreateImageView(m_vulkanContext->m_device, &viewInfo, nullptr, &imageView);
     }
 
     void Vulkan::VulkanImplementation::LoadShaderCode(blaVector<blaU8> shaderCodeBlob, VkShaderModule& shaderModule)

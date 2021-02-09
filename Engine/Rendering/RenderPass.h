@@ -10,6 +10,7 @@
 #include "Gpu/RenderPassProgram.h"
 #include "Gpu/StaticBuffer.h"
 #include "Gpu/DynamicBuffer.h"
+#include "Gpu/Opaques.h"
 #include "SillyMacros.h"
 #include "ProjectExport.h"
 
@@ -41,8 +42,8 @@ namespace BLA
     
     protected:
         
-        BaseRenderPassObject(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount) :
-            m_vaCount(vaCount), m_uvCount(uvCount), m_indices(&indices) {}
+        BaseRenderPassObject(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount, blaU16 opaqueCount) :
+            m_vaCount(vaCount), m_uvCount(uvCount), m_opaqueCount(opaqueCount), m_indices(&indices) {}
 
     public:
         
@@ -66,8 +67,23 @@ namespace BLA
                 + sizeof(const Gpu::BaseDynamicBuffer**) * i);
         }
 
+        // Really should  be a dynamic buffer ...
+        void GetOpaqueValue(int i, const Gpu::Opaque*& opaque) const
+        {
+            //TODO: fatal assert i <= uvCount
+            //TODO:
+            ///*Holy shit that's a huge hack. Gotta find a less retarded way to address each buffer*/
+            //TODO:
+            //TODO:
+
+            opaque = *reinterpret_cast<const Gpu::Opaque**>((blaU8*)(this + 1) + sizeof(const Gpu::BaseStaticBuffer**) * m_vaCount + 8 + sizeof(const Gpu::BaseStaticBuffer**) * m_uvCount + 8 /*<---- Holy shit that's a huge hack. Gotta find a less retarded way to address each buffer*/
+                + sizeof(const Gpu::Opaque**) * i);
+        }
+
+        //TODO: Optimize ! This shouldnt be more than a u32
         const blaU16 m_vaCount;
         const blaU16 m_uvCount;
+        const blaU16 m_opaqueCount;
 
         const Gpu::StaticBuffer<blaU32>* m_indices;
     };
@@ -236,7 +252,7 @@ namespace BLA
     public:
         _RenderPassObjectOpaques(const T& opaqueValue, const Ts&... opaqueValues) :
             _RenderPassObjectOpaques<Ts...>(opaqueValues...),
-            m_opaqueValue(&opaqueValue)
+            m_opaqueValue(opaqueValue)
         {
             // TODO: Reason about type, statically check inspectability... Pre-fecth type information
             // Remember this constructor is executed every time we request a new RenderObject for this RenderPass, so not like it's only registered once yea ?
@@ -305,7 +321,7 @@ namespace BLA
         };
 
         _RenderPassObject(const Gpu::StaticBuffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms, const InstanceOpaqueValues& opaqueValues):
-            BaseRenderPassObject(indices, RenderPass::ms_VACount, RenderPass::ms_UBOCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUBOs<UBOs...>(shaderUniforms), _RenderPassObjectOpaques<Opaques...>(opaqueValues) {}
+            BaseRenderPassObject(indices, RenderPass::ms_VACount, RenderPass::ms_UBOCount, RenderPass::ms_OpaquesCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUBOs<UBOs...>(shaderUniforms), _RenderPassObjectOpaques<Opaques...>(opaqueValues) {}
     };
 
     template<typename _RenderPass, typename _RenderPassAttachment, typename _RenderPassRenderProgram>
@@ -405,7 +421,10 @@ namespace BLA
     class _GetRenderPassVADescriptorsInternal<-1, RenderPass>
     {
     public:
-        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& /*typeDescriptors*/) {}
+        static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& /*typeDescriptors*/)
+        {
+            static_assert(false, "A RenderPass must have at least on vertex attribute type to valid");
+        }
     };
 
     template<class RenderPass>
@@ -474,8 +493,13 @@ namespace BLA
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
             _GetRenderPassOpaqueDescriptorsInternal<i - 1, RenderPass>::Get(typeDescriptors);
+
+            using OpaqueType = typename _RenderPassTemplateHelpers::InferOpaqueType<i, typename RenderPass::RenderPassObject::InstanceOpaqueValues>::type;
+
+            static_assert(std::is_base_of<Gpu::Opaque, OpaqueType>::value, "Invalid Opaque type");
+
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
-                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferOpaqueType<i, typename RenderPass::RenderPassObject::InstanceOpaqueValues>::type>::GetDescriptor();
+                BLA::Core::InspectableVariables::TypeResolver<OpaqueType>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }
@@ -487,8 +511,12 @@ namespace BLA
     public:
         static void Get(blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& typeDescriptors)
         {
+            using OpaqueType = typename _RenderPassTemplateHelpers::InferOpaqueType<0, typename RenderPass::RenderPassObject::InstanceOpaqueValues>::type;
+
+            static_assert(std::is_base_of<Gpu::Opaque, OpaqueType>::value, "Invalid Opaque type");
+
             BLA::Core::InspectableVariables::ExposedVarTypeDescriptor* d =
-                BLA::Core::InspectableVariables::TypeResolver<typename _RenderPassTemplateHelpers::InferOpaqueType<0, typename RenderPass::RenderPassObject::InstanceOpaqueValues>::type>::GetDescriptor();
+                BLA::Core::InspectableVariables::TypeResolver<OpaqueType>::GetDescriptor();
 
             typeDescriptors.push_back(d);
         }

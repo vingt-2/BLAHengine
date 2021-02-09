@@ -21,7 +21,11 @@ namespace BLA
 
         DeclareRenderPassAttachment(GeometryPassAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM, Gpu::Formats::R8G8B8A8_UNORM, Gpu::Formats::R8G8B8A8_UNORM, Gpu::Formats::R8G8B8A8_UNORM), Gpu::Formats::D32_SFLOAT)
 
-        typedef BLA::RenderPass<(MM<sizeof("MeshGeometryPass")-1>::crc32("MeshGeometryPass")), TestMeshPassAttachment, BLA::_RenderPassTemplateHelpers::RPIS<blaVec3, blaVec2, blaVec3, blaVec3, blaVec3>, BLA::_RenderPassTemplateHelpers::RPIS<blaMat4, blaMat4>, BLA::_RenderPassTemplateHelpers::RPIS<>> MeshGeometryPass; // model
+        DeclareRenderPass(MeshGeometryPass, 
+            TestMeshPassAttachment, 
+            VertexAttributes(blaVec3 /*Positions*/, blaVec2 /*UVs*/, blaVec3 /*Normals*/, blaVec3 /*Tangents*/, blaVec3 /*Bi-Tangents*/),
+            UniformBufferObjects(blaMat4, blaMat4), 
+            OpaqueUniforms(Gpu::Sampler))
 
         DeclareRenderPass(
             TestMeshPass,
@@ -30,7 +34,8 @@ namespace BLA
                 blaVec3), // ModelPos
             UniformBufferObjects(
                 blaMat4, // mvp
-                blaMat4)) // model
+                blaMat4),
+            OpaqueUniforms(Gpu::Sampler)) // model
 
         int m_renderTicket = 0;
 
@@ -61,6 +66,8 @@ namespace BLA
         Gpu::StaticBuffer<blaVec3>* m_vertTangent;
         Gpu::StaticBuffer<blaVec3>* m_vertBiTangent;
         Gpu::StaticBuffer<blaU32>* m_indices;
+
+        Gpu::Sampler* m_diffuseTextureSampler;
 
         blaOwnedPtr<TestMeshPass::RenderPassObject> m_renderPassObject;
 

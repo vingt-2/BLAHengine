@@ -40,6 +40,7 @@ namespace BLA
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);
             ResourceHandle SubmitImage(BaseImage* resource);
+            ResourceHandle SubmitTexture(BaseTexture* resource);
             ResourceHandle SubmitShaderProgram(ShaderProgram* shaderProgram);
 
             void CancelStaticBuffer(BaseStaticBuffer* resource);

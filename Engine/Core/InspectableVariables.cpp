@@ -75,7 +75,7 @@ BLACORE_API ExposedVarTypeDescriptor* GetPrimitiveDescriptor<TypeName>()        
     };
 
     template <typename T1, typename T2>
-    ExposedVarTypeDescriptor* BLA::Core::InspectableVariables::TypeResolver<blaPair<T1, T2>>::GetDescriptor()
+    ExposedVarTypeDescriptor* BLA::Core::InspectableVariables::TypeResolver<blaPair<T1, T2>>::GetDescriptor() // mmm... Does this work ? Shouldn't this be a primitive descriptor ?
     {
         static PairDescriptor<T1, T2> typeDesc;
         return &typeDesc;
