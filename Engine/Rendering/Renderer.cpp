@@ -20,8 +20,7 @@ void RenderTarget::OnChangeCalls()
     }
 }
 
-
-void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, Gpu::RPAttachmentDescription rpAttachmentDescription,
+void RenderPassRegistry::__RegisterRenderPass(blaStringId stringId, blaU32 id, Gpu::RPAttachmentsDescription rpAttachmentDescription,
     blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
     blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptor,
     blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& opaqueValuesDescriptor)
@@ -59,7 +58,6 @@ void RenderPassRegistry::GetAllRenderPassIDs(blaVector<blaU32>& stringIds) const
     }
 }
 
-
 Renderer::Renderer(GLFWRenderWindow* pRenderWindow): m_renderWindow(pRenderWindow)
 {
     m_renderWindow->GetSize(m_viewPortExtents.x, m_viewPortExtents.y);
@@ -73,8 +71,7 @@ bool Renderer::Update()
 
     for(const auto& renderPassInstance : m_renderPassInstances)
     {
-        Gpu::Interface* gpu = Gpu::Interface::GetSingletonInstance();
-        gpu->Render(renderPassInstance.second->m_pImplementation);
+        renderPassInstance.second->Render();
     } 
     return true;
 }
@@ -85,20 +82,12 @@ void Renderer::SetViewportSize(blaIVec2 renderSize)
     {
         m_viewPortExtents = renderSize;
         CreateOrUpdateRenderTargets();
-
-        RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
-
-        if (Gpu::RenderPassDescriptor* geometryPassDesc = registry->GetRenderPassEntry(BlaStringId("TestMeshPass")))
-        {
-            // Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(*geometryPassDesc, attachment);
-        }
     }
 }
 
 void Renderer::CreateOrUpdateRenderTargets()
 {
     CreateOrUpdateOffscreenBuffer();
-
 }
 
 void Renderer::CreateOrUpdateOffscreenBuffer()

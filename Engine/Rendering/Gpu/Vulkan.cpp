@@ -191,13 +191,6 @@ namespace BLA::Gpu
         return rect2D;
     }
 
-    struct VulkanRenderPassObject
-    {
-        const BaseRenderPassObject* m_RenderPassObjectPtr;
-
-        VkDescriptorSet m_descriptorSet;
-    };
-
     struct Vulkan::VulkanImplementation
     {
         VulkanImplementation(const System::Vulkan::Context* context) : m_vulkanContext(context)
@@ -265,16 +258,11 @@ namespace BLA::Gpu
             blaIVec2 m_attachmentSize;
         } m_attachment;
 
-        blaVector<VulkanRenderPassObject> m_currentInstances;
-
     public:
 
-        void RegisterRenderPassObject(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassObject& rpInstance)
+        RenderPassObjectHandle RegisterRenderPassObject(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassObject& rpObject)
         {
-            m_currentInstances.push_back(VulkanRenderPassObject());
-
-            VulkanRenderPassObject& vulkanRenderPassObject = m_currentInstances[m_currentInstances.size() - 1];
-            vulkanRenderPassObject.m_RenderPassObjectPtr = &rpInstance;
+            VkDescriptorSet rpObjectUniqueDescriptorSet;
 
             // Allocate the descriptor sets for all the uniform
             // std::vector<VkDescriptorSetLayout> layouts(vulkanWindoInfo->m_frames.size(), m_vkDescriptorSetLayout);
@@ -284,14 +272,14 @@ namespace BLA::Gpu
             allocInfo.descriptorSetCount = 1; // ONLY 1 DESCRIPTOR SET (needs to change for several frames in flight)
             allocInfo.pSetLayouts = &m_vkDescriptorSetLayout;
 
-            VkResult err = vkAllocateDescriptorSets(vulkanInterface->m_device, &allocInfo, &vulkanRenderPassObject.m_descriptorSet);
+            VkResult err = vkAllocateDescriptorSets(vulkanInterface->m_device, &allocInfo, &rpObjectUniqueDescriptorSet);
 
-            blaVector<VkDescriptorBufferInfo> bufferInfos(rpInstance.m_uvCount);
-            blaVector<VkWriteDescriptorSet> descriptorWrites(rpInstance.m_uvCount + rpInstance.m_opaqueCount);
+            blaVector<VkDescriptorBufferInfo> bufferInfos(rpObject.m_uvCount);
+            blaVector<VkWriteDescriptorSet> descriptorWrites(rpObject.m_uvCount + rpObject.m_opaqueCount);
             for (blaU32 i = 0; i < bufferInfos.size(); i++)
             {
                 const Gpu::BaseDynamicBuffer* buffer;
-                rpInstance.GetUniformBufferObjectBuffer(i, buffer);
+                rpObject.GetUniformBufferObjectBuffer(i, buffer);
 
                 VkDescriptorBufferInfo& bufferInfo = bufferInfos[i];
                 bufferInfo.buffer = static_cast<VkBuffer>(buffer->GetHandle().m_impl.pointer);
@@ -300,7 +288,7 @@ namespace BLA::Gpu
 
                 VkWriteDescriptorSet& descriptorWrite = descriptorWrites[i];
                 descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                descriptorWrite.dstSet = vulkanRenderPassObject.m_descriptorSet;
+                descriptorWrite.dstSet = rpObjectUniqueDescriptorSet;
                 descriptorWrite.dstBinding = static_cast<blaU32>(i);
                 // the buffers are ordered in the order they should appear in the shader
                 descriptorWrite.dstArrayElement = 0;
@@ -314,19 +302,42 @@ namespace BLA::Gpu
             for (blaU32 i = (blaU32)bufferInfos.size(); i < descriptorWrites.size(); i++)
             {
                 const Gpu::Opaque* opaque;
-                rpInstance.GetOpaqueValue(i, opaque);
+                rpObject.GetOpaqueValue(i, opaque);
 
                 switch(opaque->GetType())
                 {
                     case Opaque::Type::Sampler:
                     {
                         const Gpu::Sampler* sampler = static_cast<const Sampler*>(opaque);
+
+                        VkSamplerCreateInfo samplerInfo = {};
+                        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+                        samplerInfo.magFilter = VK_FILTER_LINEAR;
+                        samplerInfo.minFilter = VK_FILTER_LINEAR;
+                        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                        samplerInfo.anisotropyEnable = VK_FALSE;
+                        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+                        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+                        samplerInfo.compareEnable = VK_FALSE;
+                        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+                        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+                        samplerInfo.mipLodBias = 0.0f;
+                        samplerInfo.minLod = 0.0f;
+                        samplerInfo.maxLod = 0.0f;
+
                         break;
                     }
                 }
             }
 
             vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+
+            Gpu::RenderPassObjectHandle retHandle;
+            retHandle.m_impl.pointer = rpObjectUniqueDescriptorSet;
+
+            return retHandle;
         }
 
         void SetAttachment(const BaseRenderPassAttachment* attachment, VkDevice device)
@@ -599,7 +610,7 @@ namespace BLA::Gpu
             //VulkanRenderPassHelpers::check_vk_result(err);
         }
 
-        void BuildCommandBuffersThisFrame(const System::Vulkan::Context* vulkanContext) const
+        void BuildCommandBuffersThisFrame(const System::Vulkan::Context* vulkanContext, BaseRenderPassInstance::RenderPassObjectIterator& iterator) const
         {
             System::Vulkan::WindowInfo* vkWindow = vulkanContext->m_window;
 
@@ -642,27 +653,32 @@ namespace BLA::Gpu
 
             vkCmdBindPipeline(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_vkPipeline);
 
-            for (const VulkanRenderPassObject& instance : m_currentInstances)
-            {
-                blaVector<VkBuffer> vertexBuffers(instance.m_RenderPassObjectPtr->m_vaCount);
-                blaVector<VkDeviceSize> offsets(instance.m_RenderPassObjectPtr->m_vaCount);
-                for (blaU16 j = 0; j < instance.m_RenderPassObjectPtr->m_vaCount; j++)
+            const BaseRenderPassObject* rpObject = iterator.Get();
+            while(rpObject != nullptr)
+            {           
+                blaVector<VkBuffer> vertexBuffers(rpObject->m_vaCount);
+                blaVector<VkDeviceSize> offsets(rpObject->m_vaCount);
+                for (blaU16 j = 0; j < rpObject->m_vaCount; j++)
                 {
                     const Gpu::BaseStaticBuffer* b;
-                    instance.m_RenderPassObjectPtr->GetVertexAttributeBuffer(j, b);
+                    rpObject->GetVertexAttributeBuffer(j, b);
                     vertexBuffers[j] = static_cast<VkBuffer>(b->GetHandle().m_impl.pointer);
                     offsets[j] = 0;
                 }
 
                 vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, (blaU32)vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 
-                VkBuffer indexBuffer = static_cast<VkBuffer>(instance.m_RenderPassObjectPtr->m_indices->GetHandle().m_impl.pointer);
+                VkBuffer indexBuffer = static_cast<VkBuffer>(rpObject->m_indices->GetHandle().m_impl.pointer);
                 vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
 
-                vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_vkPipelineLayout, 0, 1, &instance.m_descriptorSet, 0, nullptr);
+                const VkDescriptorSet* descriptorSet = reinterpret_cast<const VkDescriptorSet*>(&rpObject->GetHandle().m_impl.pointer);
 
-                vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, instance.m_RenderPassObjectPtr->m_indices->GetLength(), 1, 0, 0, 0);
+                vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_vkPipelineLayout, 0, 1, descriptorSet, 0, nullptr);
+
+                vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, rpObject->m_indices->GetLength(), 1, 0, 0, 0);
+
+                rpObject = iterator.Get();
             }
 
             vkCmdEndRenderPass(vkWindow->m_frames[i].m_commandBuffer);
@@ -832,14 +848,14 @@ namespace BLA::Gpu
         renderPass->SetAttachment(attachment, m_implementation->m_vulkanContext->m_device);
     }
 
-    void Vulkan::Render(RenderPassInstanceImplementation* renderPassInstanceImplementation)
+    void Vulkan::Render(RenderPassInstanceImplementation* renderPassInstanceImplementation, BaseRenderPassInstance::RenderPassObjectIterator& iterator)
     {
-        static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->BuildCommandBuffersThisFrame(m_implementation->m_vulkanContext);
+        static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->BuildCommandBuffersThisFrame(m_implementation->m_vulkanContext, iterator);
     }
 
-    void Vulkan::RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance)
+    RenderPassObjectHandle Vulkan::RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance)
     {
-        static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->RegisterRenderPassObject(m_implementation->m_vulkanContext, instance);
+        return static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->RegisterRenderPassObject(m_implementation->m_vulkanContext, instance);
     }
 
     ResourceHandle Vulkan::SubmitStaticBuffer(BaseStaticBuffer* resource)

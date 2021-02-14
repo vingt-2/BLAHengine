@@ -5,6 +5,11 @@
 
 using namespace BLA;
 
+void BaseRenderPassInstance::Render() const
+{
+    Gpu::Interface::GetSingletonInstance()->Render(m_pImplementation, GetIterator());
+}
+
 void BaseRenderPassInstance::Setup(DefaultTODOToSpecifyRenderProgram& program)
 {
     m_pImplementation = Gpu::Interface::GetSingletonInstance()->SetupRenderPass(m_pRenderPassDescriptor, program);
@@ -15,7 +20,7 @@ void BaseRenderPassInstance::BaseResetAttachment(const Gpu::BaseRenderPassAttach
     Gpu::Interface::GetSingletonInstance()->AttachToRenderPass(m_pImplementation, rpAttachment);
 }
 
-void BaseRenderPassInstance::BaseRegisterRenderPassObject(const BaseRenderPassObject& object) const
+void BaseRenderPassInstance::BaseRegisterRenderPassObject(BaseRenderPassObject& object) const
 {
-    Gpu::Interface::GetSingletonInstance()->RegisterRenderPassObjectBase(m_pImplementation, object);
+    object.m_rpObjectHandle = Gpu::Interface::GetSingletonInstance()->RegisterRenderPassObjectBase(m_pImplementation, object);
 }

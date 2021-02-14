@@ -28,6 +28,7 @@ namespace BLA::Gpu
     blaMap<blaStringId, Formats::Enum::Index> Formats::g_fundamentalTypeToFormat =
     {
         { BlaStringId("blaVec3"), Formats::Enum::Index::R32G32B32_SFLOAT },
+        { BlaStringId("blaVec4"), Formats::Enum::Index::R32G32B32A32_SFLOAT },
         { BlaStringId("blaVec2"), Formats::Enum::Index::R32G32_SFLOAT },
         { BlaStringId("blaU32"), Formats::Enum::Index::R8G8B8A8_UINT }
     };

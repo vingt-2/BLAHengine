@@ -7,7 +7,7 @@
 #include "StdInclude.h"
 #include "BLASingleton.h"
 /*
-TODO: Move this the fuck out of core
+TODO: Move this out of core
 SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
 And Common m_debug asserts
 */
@@ -82,6 +82,8 @@ namespace BLA
 
         bool m_drawDebugLines;
         bool m_drawDebugMeshes;
+
+        bool m_hasSetupRenderPasses = false;
     };
 
 }

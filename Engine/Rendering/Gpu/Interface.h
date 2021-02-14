@@ -46,8 +46,8 @@ namespace BLA
             virtual RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program) = 0;
             virtual void AttachToRenderPass(RenderPassInstanceImplementation* rpInstanceImplementation, const BaseRenderPassAttachment* attachment) = 0;
             
-            virtual void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation) = 0;
-            virtual void RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) = 0;
+            virtual void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation, BaseRenderPassInstance::RenderPassObjectIterator& iterator) = 0;
+            virtual RenderPassObjectHandle RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) = 0;
         };
     }
 };

@@ -83,7 +83,7 @@ namespace BLA
         BLACORE_API void NormalizeModelCoordinates(bool normalizeScale);
         BLACORE_API void ComputePerFaceTangentBasis();
         BLACORE_API void ApplyGeomScaling(blaVec3 scaling);
-        BLACORE_API void ApplyUVScaling(glm::vec2 scaling);
+        BLACORE_API void ApplyUVScaling(blaVec2 scaling);
 
         BLACORE_API void GenerateRenderData();
         BLACORE_API void GenerateTopoTriangleIndices(blaVector<blaU32> &posIndices, blaVector<blaU32> &normalIndices);

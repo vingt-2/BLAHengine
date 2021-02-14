@@ -39,11 +39,14 @@ namespace BLA
     class BaseRenderPassObject
     {
         friend class Renderer;
-    
+        friend struct BaseRenderPassInstance;
+
+        Gpu::RenderPassObjectHandle m_rpObjectHandle;
+
     protected:
         
         BaseRenderPassObject(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount, blaU16 opaqueCount) :
-            m_vaCount(vaCount), m_uvCount(uvCount), m_opaqueCount(opaqueCount), m_indices(&indices) {}
+           m_vaCount(vaCount), m_uvCount(uvCount), m_opaqueCount(opaqueCount), m_indices(&indices) {}
 
     public:
         
@@ -80,6 +83,8 @@ namespace BLA
                 + sizeof(const Gpu::Opaque**) * i);
         }
 
+        const Gpu::RenderPassObjectHandle& GetHandle() const { return m_rpObjectHandle; }
+
         //TODO: Optimize ! This shouldnt be more than a u32
         const blaU16 m_vaCount;
         const blaU16 m_uvCount;
@@ -98,11 +103,40 @@ namespace BLA
 
         const blaU32 m_instanceTypeId;
 
+        struct RenderPassObjectIterator
+        {
+            friend struct BaseRenderPassInstance;
+            const BaseRenderPassObject* Get()
+            {
+                if (m_currentElement >= m_containerSize)
+                    return nullptr;
+
+                const BaseRenderPassObject* current = m_current;
+                m_current = reinterpret_cast<const BaseRenderPassObject*>(reinterpret_cast<const blaU8*>(m_current) + m_objectSize);
+                m_currentElement++;
+                return current;
+            }
+            
+        private:
+            RenderPassObjectIterator(const BaseRenderPassObject* head, blaSize containerSize, blaSize objSize) : m_current(head), m_containerSize(containerSize), m_currentElement(0), m_objectSize(objSize) {}
+
+            const BaseRenderPassObject* m_current;
+            blaSize m_currentElement;
+            const blaSize m_containerSize;
+            const blaSize m_objectSize;
+        };
+
+        void Render() const;
+
     protected:
+
+        virtual RenderPassObjectIterator GetIterator() const = 0;
+
+        static RenderPassObjectIterator GetIterator(const BaseRenderPassObject* head, blaSize containerSize, blaSize objSize) { return RenderPassObjectIterator(head, containerSize, objSize); }
 
         void Setup(DefaultTODOToSpecifyRenderProgram& program);
         void BaseResetAttachment(const Gpu::BaseRenderPassAttachment* rpAttachment) const;
-        void BaseRegisterRenderPassObject(const BaseRenderPassObject& object) const;
+        void BaseRegisterRenderPassObject(BaseRenderPassObject& object) const;
 
         const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
     };
@@ -347,8 +381,13 @@ namespace BLA
 
         void RegisterRenderPassObject(const typename RenderPass::RenderPassObject& object)
         {
-            BaseRegisterRenderPassObject(object);
+            m_renderPassInstances.push_back(object);
+            BaseRegisterRenderPassObject(m_renderPassInstances[m_renderPassInstances.size() - 1]);
         }
+
+        RenderPassObjectIterator GetIterator() const override { return BaseRenderPassInstance::GetIterator( static_cast<const BaseRenderPassObject*>(m_renderPassInstances.data()), m_renderPassInstances.size(), sizeof(typename RenderPass::RenderPassObject));}
+
+        blaVector<typename RenderPass::RenderPassObject> m_renderPassInstances;
 
         Attachment m_attachment;
         RenderProgram m_renderProgram;
@@ -559,7 +598,7 @@ namespace BLA
         BLACORE_API void __RegisterRenderPass(
             blaStringId name,
             blaU32 id,
-            Gpu::RPAttachmentDescription attachmentDescription,
+            Gpu::RPAttachmentsDescription attachmentDescription,
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& vertexAttributesDescriptors,
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& uniformValuesDescriptors,
             blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*>& opaqueDescriptors);
@@ -584,7 +623,7 @@ namespace BLA
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> uvs = GetRenderPassUBODescriptors<SelfType>();
         blaVector<BLA::Core::InspectableVariables::ExposedVarTypeDescriptor*> opaques = GetRenderPassOpaqueDescriptors<SelfType>();
 
-        const Gpu::RPAttachmentDescription attachmentDescription = 
+        const Gpu::RPAttachmentsDescription attachmentDescription = 
             { Gpu::GetColorAttachmentDescriptors<RenderPassAttachment>(), Gpu::GetDepthAttachmentDescription<RenderPassAttachment>() };
 
         registry->__RegisterRenderPass(id, ms_renderPassId, attachmentDescription, vas, uvs, opaques);

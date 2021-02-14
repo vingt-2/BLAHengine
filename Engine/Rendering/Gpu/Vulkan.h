@@ -34,8 +34,8 @@ namespace BLA
             RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program) override;
             void AttachToRenderPass(RenderPassInstanceImplementation* rpInstanceImplementation, const BaseRenderPassAttachment* attachment) override;
 
-            void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation) override;
-            void RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) override;
+            void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation, BaseRenderPassInstance::RenderPassObjectIterator& iterator) override;
+            RenderPassObjectHandle RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) override;
         
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);

@@ -34,8 +34,8 @@ namespace BLA
                 blaVec3), // ModelPos
             UniformBufferObjects(
                 blaMat4, // mvp
-                blaMat4),
-            OpaqueUniforms(Gpu::Sampler)) // model
+                blaMat4))
+            //OpaqueUniforms(Gpu::Sampler)) // model
 
         int m_renderTicket = 0;
 

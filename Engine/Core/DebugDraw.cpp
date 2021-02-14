@@ -1,12 +1,27 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "DebugDraw.h"
-
+#include "Rendering/Renderer.h"
 #include "Geometry/TriangleMesh.h"
+#include "Rendering/Gpu/Formats.h"
 
 using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(DebugDraw)
+
+DeclareRenderPassAttachment(DebugDrawAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), void)
+
+DeclareRenderPass(
+    DebugMeshRenderPass,
+    DebugDrawAttachment,
+    VertexAttributes(
+        blaVec3, // vertices
+        blaVec4 // Vertex colors
+    ))
+
+RegisterRenderPass(DebugMeshRenderPass);
+
+static blaStringId g_debugRenderPassId = BlaStringId("DebugMesh");
 
 DebugDraw::DebugDraw()
 {
@@ -18,8 +33,50 @@ DebugDraw::DebugDraw()
 DebugDraw::~DebugDraw(void)
 {}
 
+void DebugDrawOnOffscreenRenderTarget(RenderTarget* rt)
+{
+    OffscreenRenderTarget* offscreenRenderTarget = static_cast<OffscreenRenderTarget*>(rt);
+
+    Renderer* renderer = Renderer::GetSingletonInstance();
+
+    if (DebugMeshRenderPass::RenderPassInstance* instance = renderer->GetRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId))
+    {
+        DebugMeshRenderPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+        // Make Attachment from renderer offscreen images:
+        DebugMeshRenderPass::RenderPassAttachment attachment(colorAttachments);
+
+        instance->ResetAttachment(attachment);
+    }
+    
+}
+
 void DebugDraw::Update()
 {
+    Renderer* renderer = Renderer::GetSingletonInstance();
+
+    if(!m_hasSetupRenderPasses)
+    {
+        m_hasSetupRenderPasses = true;
+
+        Gpu::ShaderProgram vertexShader(Gpu::ShaderProgram::Type::VertexShader, "./resources/shaders/Vulkan/Engine/DebugMeshShaderVert.spv");
+        Gpu::ShaderProgram fragmentShader(Gpu::ShaderProgram::Type::FragmentShader, "./resources/shaders/Vulkan/Engine/DebugMeshShaderFrag.spv");
+
+        vertexShader.Submit();
+        fragmentShader.Submit();
+
+        Gpu::RenderPassProgram program;
+        program.m_shaders.push_back(vertexShader);
+        program.m_shaders.push_back(fragmentShader);
+
+        DebugMeshRenderPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+        // Make Attachment from renderer offscreen images:
+        DebugMeshRenderPass::RenderPassAttachment attachment(colorAttachments);
+
+        //renderer->AddRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId, attachment, program);
+
+        //renderer->m_offscreenBuffer.RegisterOnChangeCallback(DebugDrawOnOffscreenRenderTarget);
+    }
+
     if (m_drawDebugLines)
     {
         // m_debugRenderManager->m_lineMeshes.clear();

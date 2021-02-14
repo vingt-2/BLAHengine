@@ -176,7 +176,7 @@ void MeshRendererComponent::Update()
 
             const TestMeshPass::RenderPassObject::InstanceVertexAttributes meshVAs(*m_vertPos);
             const TestMeshPass::RenderPassObject::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
-            const TestMeshPass::RenderPassObject::InstanceOpaqueValues opaques(*m_diffuseTextureSampler);
+            const TestMeshPass::RenderPassObject::InstanceOpaqueValues opaques;
 
             m_renderPassObject = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms, opaques);
 
