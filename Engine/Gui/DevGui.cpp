@@ -822,37 +822,33 @@ void DevGuiRenderViewportWindow::Render()
 {
     if (m_pRenderer)
     {
-        //m_windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        // If a scroll bar appears in this window, then something is messed up with the content size (size sent to the renderer ...)
+
         ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
         ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
         ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
 
-        ImVec2 windowSize = ImGui::GetWindowSize();
+        const ImVec2 contentRegionMax = ImGui::GetWindowContentRegionMax();
+        const ImVec2 contentRegionMin = ImGui::GetWindowContentRegionMin();
+        const ImVec2 contentRegionSize(contentRegionMax.x - contentRegionMin.x, contentRegionMax.y - contentRegionMin.y);
 
-        ImVec2 contentSize = ImGui::GetWindowContentRegionMax();
-
-        
-
-        m_pRenderer->SetViewportSize(blaVec2(contentSize.x, contentSize.y));
+        m_pRenderer->SetViewportSize(blaIVec2(contentRegionSize.x, contentRegionSize.y));
 
         // The renderer may have updated it's offscreen buffer after a potential resize, so let's make sure we're up to date !
         UpdateDisplayTexture(m_pRenderer);
 
-        ImVec2 windowPos = ImGui::GetWindowPos();
-
         if (m_renderData->m_offscreenImageTextureId)
         {
-            ImGui::Image(m_renderData->m_offscreenImageTextureId, contentSize);
+            ImGui::Image(m_renderData->m_offscreenImageTextureId, contentRegionSize);
         }
 
-        ImVec2 cursorInWindow = ImGui::GetCursorPos();
-
-        ImVec2 mouse = ImGui::GetMousePos();
+        const ImVec2 mouse = ImGui::GetMousePos();
+        const ImVec2 windowPos = ImGui::GetWindowPos();
 
         m_cursorScreenSpacePosition = blaVec2(
-            1.0f - (mouse.x - windowPos.x) / contentSize.x,
-            1.0f - (mouse.y - windowPos.y) / contentSize.y);
+            1.0f - (mouse.x - windowPos.x - contentRegionMin.x) / contentRegionSize.x,
+            1.0f - (mouse.y - windowPos.y - contentRegionMin.y) / contentRegionSize.y);
 
         m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
 

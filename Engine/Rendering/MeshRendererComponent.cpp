@@ -150,22 +150,22 @@ void MeshRendererComponent::Update()
             RenderData& rd = m_mesh->m_triangleMesh.m_renderData;
 
             m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertPos.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-            memcpy_s(m_vertPos->GetData(), sizeof(blaVec3) * m_vertPos->GetLength(), rd.m_vertPos.data(), rd.m_vertPos.size() * sizeof(blaVec3));
+            m_vertPos->CopyFromVector(rd.m_vertPos);
 
             m_vertNormal = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertNormal.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-            memcpy_s(m_vertNormal->GetData(), sizeof(blaVec3) * m_vertNormal->GetLength(), rd.m_vertNormal.data(), rd.m_vertNormal.size() * sizeof(blaVec3));
+            m_vertNormal->CopyFromVector(rd.m_vertNormal);
 
             m_vertUV = new Gpu::StaticBuffer<blaVec2>(static_cast<blaU32>(rd.m_vertUVs.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-            memcpy_s(m_vertUV->GetData(), sizeof(blaVec2) * m_vertUV->GetLength(), rd.m_vertUVs.data(), rd.m_vertUVs.size() * sizeof(blaVec2));
+            m_vertUV->CopyFromVector(rd.m_vertUVs);
 
             m_vertTangent = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertTangent.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-            memcpy_s(m_vertTangent->GetData(), sizeof(blaVec3) * m_vertTangent->GetLength(), rd.m_vertTangent.data(), rd.m_vertTangent.size() * sizeof(blaVec3));
+            m_vertTangent->CopyFromVector(rd.m_vertTangent);
 
             m_vertBiTangent = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(rd.m_vertBiTangent.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-            memcpy_s(m_vertBiTangent->GetData(), sizeof(blaVec3) * m_vertBiTangent->GetLength(), rd.m_vertBiTangent.data(), rd.m_vertBiTangent.size() * sizeof(blaVec3));
-            
+            m_vertBiTangent->CopyFromVector(rd.m_vertBiTangent);
+
             m_indices = new Gpu::StaticBuffer<blaU32>(static_cast<blaU32>(rd.m_triangleIndices.size()), Gpu::BaseStaticBuffer::Usage::IndexBuffer);
-            memcpy_s(m_indices->GetData(), sizeof(blaU32) * m_indices->GetLength(), rd.m_triangleIndices.data(), rd.m_triangleIndices.size() * sizeof(blaU32));
+            m_indices->CopyFromVector(rd.m_triangleIndices);
 
             m_vertPos->Submit();
             m_vertUV->Submit();

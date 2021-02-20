@@ -112,10 +112,10 @@ void DebugDraw::Update()
     if (m_drawDebugMeshes && m_debugTrianglesVertsAndColorA.first.size() != 0)
     {
         g_debugMeshVertexData->m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(m_debugTrianglesVertsAndColorA.first.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-        memcpy_s(g_debugMeshVertexData->m_vertPos->GetData(), sizeof(blaVec3) * g_debugMeshVertexData->m_vertPos->GetLength(), m_debugTrianglesVertsAndColorA.first.data(), m_debugTrianglesVertsAndColorA.first.size() * sizeof(blaVec3));
+        g_debugMeshVertexData->m_vertPos->CopyFromVector(m_debugTrianglesVertsAndColorA.first);
 
         g_debugMeshVertexData->m_vertColor = new Gpu::StaticBuffer<blaVec4>(static_cast<blaU32>(m_debugTrianglesVertsAndColorA.first.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
-        memcpy_s(g_debugMeshVertexData->m_vertColor->GetData(), sizeof(blaVec4) * g_debugMeshVertexData->m_vertColor->GetLength(), m_debugTrianglesVertsAndColorA.second.data(), m_debugTrianglesVertsAndColorA.second.size() * sizeof(blaVec4));
+        g_debugMeshVertexData->m_vertColor->CopyFromVector(m_debugTrianglesVertsAndColorA.second);
 
         *g_debugMeshVertexData->m_worldToClipSpace.GetData() = camera->m_camera.m_worldToClipSpace;
 

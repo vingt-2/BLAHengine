@@ -5,6 +5,7 @@
 #include "System.h"
 #include "ResourceTypes.h"
 #include "Resource.h"
+#include "StdInclude.h"
 
 namespace BLA
 {
@@ -61,6 +62,12 @@ namespace BLA
             T& operator[](int i)
             {
                 return *(static_cast<T*>(GetData()) + i);
+            }
+
+            void CopyFromVector(const blaVector<T>& dataVector)
+            {
+                BLA_ASSERT(dataVector.size() == GetLength());
+                memcpy_s(m_dataPointer, sizeof(T) * m_bufferLength, dataVector.data(), dataVector.size() * sizeof(T));
             }
         };
     };
