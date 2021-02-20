@@ -2,7 +2,7 @@
 
 #include "GizmoManager.h"
 #include "EditorCommands.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "Core/Scene.h"
 #include "Rendering/Renderer.h"
 #include "SceneEditor.h"
@@ -11,6 +11,7 @@
 #include "Geometry/PrimitiveGeometry.h"
 #include "Physics/ColliderComponent.h"
 #include "Core/TransformComponent.h"
+#include "Core/CameraComponent.h"
 #include "External/libcoldet/coldet.h"
 #include "Gui/DevGuiManager.h"
 
@@ -174,7 +175,7 @@ void TranslationGizmoControl::Update()
     GizmoControl::Update();
 
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    CameraComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
         return;
@@ -191,9 +192,8 @@ void TranslationGizmoControl::Update()
     Ray screenRay;
     if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
-        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
-        // screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+        blaVec2 renderWindowCursorPos = guiRenderWindow->GetMousePointerScreenSpaceCoordinates();
+        screenRay = camera->ClipSpaceToWorldRay(renderWindowCursorPos);
     }
     else
     {
@@ -354,18 +354,18 @@ void TranslationGizmoControl::Update()
     blaVec3 color = currentScreenAxis == X_AXIS ? BLA::WHITE : BLA::RED;
     DebugDraw::DrawLine(transform.GetPosition(), transform.GetPosition() + objectX * d, color);
     blaVec3 coneSize = coneVerticalScaling * halfArrowThickness;
-    DebugDraw::DrawArbitraryGeometry(xT, coneSize, cone, blaVec4(color, 0.8f));
+    DebugDraw::DrawArbitraryGeometry(xT, coneSize, cone, blaVec4(color, 1.f));
 
     color = currentScreenAxis == Y_AXIS ? BLA::WHITE : BLA::GREEN;
     DebugDraw::DrawLine(transform.GetPosition(), transform.GetPosition() + objectY * d, color);
-    DebugDraw::DrawArbitraryGeometry(yT, coneSize, cone, blaVec4(color, 0.8f));
+    DebugDraw::DrawArbitraryGeometry(yT, coneSize, cone, blaVec4(color, 1.f));
 
     color = currentScreenAxis == Z_AXIS ? BLA::WHITE : BLA::BLUE;
     DebugDraw::DrawLine(transform.GetPosition(), transform.GetPosition() + objectZ * d, color);
-    DebugDraw::DrawArbitraryGeometry(zT, coneSize, cone, blaVec4(color, 0.8f));
+    DebugDraw::DrawArbitraryGeometry(zT, coneSize, cone, blaVec4(color, 1.f));
 
     color = currentScreenAxis == CENTER_AXIS ? BLA::WHITE : BLA::YELLOW;
-    DebugDraw::DrawPlainOBB(transform.GetPosQuat(), blaVec3(0.94f * halfArrowThickness), blaVec4(color, 0.8f));
+    DebugDraw::DrawPlainOBB(transform.GetPosQuat(), blaVec3(0.94f * halfArrowThickness), blaVec4(color, 1.f));
     DebugDraw::DrawOBB(transform.GetPosQuat(), blaVec3(0.95f * halfArrowThickness), color);
 
     controlledTransform->SetTransform(transform);
@@ -376,7 +376,7 @@ void ScaleGizmoControl::Update()
     GizmoControl::Update();
 
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    CameraComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
         return;
@@ -393,9 +393,8 @@ void ScaleGizmoControl::Update()
     Ray screenRay;
     if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
-        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
-        // screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates
+        blaVec2 renderWindowCursorPos = guiRenderWindow->GetMousePointerScreenSpaceCoordinates();
+        screenRay = camera->ClipSpaceToWorldRay(renderWindowCursorPos);
     }
     else
     {
@@ -527,21 +526,21 @@ void ScaleGizmoControl::Update()
 
     blaVec3 color = currentScreenAxis == X_AXIS ? BLA::WHITE : BLA::RED;
     DebugDraw::DrawLine(transform.GetPosition(), xT.GetTranslation3() - objectX * halfScale, color);
-    DebugDraw::DrawPlainOBB(xT, 0.99f * blaVec3(halfScale), blaVec4(color, 0.8f));
+    DebugDraw::DrawPlainOBB(xT, 0.99f * blaVec3(halfScale), blaVec4(color, 1.f));
     DebugDraw::DrawOBB(xT, blaVec3(halfScale), color);
 
     color = currentScreenAxis == Y_AXIS ? BLA::WHITE : BLA::GREEN;
     DebugDraw::DrawLine(transform.GetPosition(), yT.GetTranslation3() - objectY * halfScale, color);
-    DebugDraw::DrawPlainOBB(yT, 0.99f * blaVec3(halfScale), blaVec4(color, 0.8f));
+    DebugDraw::DrawPlainOBB(yT, 0.99f * blaVec3(halfScale), blaVec4(color, 1.f));
     DebugDraw::DrawOBB(yT, blaVec3(halfScale), color);
 
     color = currentScreenAxis == Z_AXIS ? BLA::WHITE : BLA::BLUE;
     DebugDraw::DrawLine(transform.GetPosition(), zT.GetTranslation3() - objectZ * halfScale, color);
-    DebugDraw::DrawPlainOBB(zT, 0.99f * blaVec3(halfScale), blaVec4(color, 0.8f));
+    DebugDraw::DrawPlainOBB(zT, 0.99f * blaVec3(halfScale), blaVec4(color, 1.f));
     DebugDraw::DrawOBB(zT, blaVec3(halfScale), color);
 
     color = currentScreenAxis == CENTER_AXIS ? BLA::WHITE : BLA::YELLOW;
-    DebugDraw::DrawPlainOBB(transform.GetPosQuat(), blaVec3(halfScale), blaVec4(color, 0.8f));
+    DebugDraw::DrawPlainOBB(transform.GetPosQuat(), blaVec3(halfScale), blaVec4(color, 1.f));
     DebugDraw::DrawOBB(transform.GetPosQuat(), blaVec3(halfScale), color);
 
     controlledTransform->SetTransform(transform);
@@ -552,7 +551,7 @@ void RotationGizmoControl::Update()
     GizmoControl::Update();
 
     SceneEditor* editorSess = dynamic_cast<SceneEditor*>(EngineInstance::GetSingletonInstance());
-    Core::GameComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
+    CameraComponent* camera = editorSess->GetWorkingScene()->GetMainCamera();
 
     if (!editorSess)
         return;
@@ -568,9 +567,8 @@ void RotationGizmoControl::Update()
     Ray screenRay;
     if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(DevGuiManager::GetSingletonInstance()->GetWindow("Editor Window")))
     {
-        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
-        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
-        // screenRay = editorSess->GetRenderer()->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates
+        blaVec2 renderWindowCursorPos = guiRenderWindow->GetMousePointerScreenSpaceCoordinates();
+        screenRay = camera->ClipSpaceToWorldRay(renderWindowCursorPos);
     }
     else
     {

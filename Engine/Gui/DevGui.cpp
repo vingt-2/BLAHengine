@@ -822,36 +822,45 @@ void DevGuiRenderViewportWindow::Render()
 {
     if (m_pRenderer)
     {
-        UpdateDisplayTexture(m_pRenderer);
-
-        m_windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-
-        // BEGIN OCornut's Dear ImGui Specific Code Now
+        //m_windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         ImVec2 position((float)m_windowPosition.x, (float)m_windowPosition.y);
         ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin(m_windowName.c_str(), &m_bOpenWindow, m_windowFlags);
 
-        ImVec2 windowPos = ImGui::GetWindowPos();
         ImVec2 windowSize = ImGui::GetWindowSize();
+
+        ImVec2 contentSize = ImGui::GetWindowContentRegionMax();
+
+        
+
+        m_pRenderer->SetViewportSize(blaVec2(contentSize.x, contentSize.y));
+
+        // The renderer may have updated it's offscreen buffer after a potential resize, so let's make sure we're up to date !
+        UpdateDisplayTexture(m_pRenderer);
+
+        ImVec2 windowPos = ImGui::GetWindowPos();
 
         if (m_renderData->m_offscreenImageTextureId)
         {
-            ImGui::Image(m_renderData->m_offscreenImageTextureId, windowSize);
+            ImGui::Image(m_renderData->m_offscreenImageTextureId, contentSize);
         }
 
         ImVec2 cursorInWindow = ImGui::GetCursorPos();
 
-        m_pRenderer->SetViewportSize(blaIVec2(windowSize.x, windowSize.y));
-
         ImVec2 mouse = ImGui::GetMousePos();
 
         m_cursorScreenSpacePosition = blaVec2(
-            1.0f - (mouse.x - windowPos.x) / windowSize.x,
-            1.0f - (mouse.y - windowPos.y) / windowSize.y);
+            1.0f - (mouse.x - windowPos.x) / contentSize.x,
+            1.0f - (mouse.y - windowPos.y) / contentSize.y);
 
         m_hasFocus = ImGui::IsWindowFocused(ImGuiFocusedFlags_None);
 
         ImGui::End();
+    }
+    else
+    {
+        Console::LogError("No renderer for this DevGuiRenderViewportWindow");
     }
 }
 

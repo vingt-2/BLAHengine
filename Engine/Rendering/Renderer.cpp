@@ -69,9 +69,9 @@ bool Renderer::Update()
 {
     RenderPassRegistry* registry = RenderPassRegistry::GetSingletonInstance();
 
-    for(const auto& renderPassInstance : m_renderPassInstances)
+    for(const auto& renderPass : m_renderPassInstances)
     {
-        renderPassInstance.second->Render();
+        renderPass.second->Render();
     } 
     return true;
 }
@@ -94,13 +94,11 @@ void Renderer::CreateOrUpdateOffscreenBuffer()
 {
     if (m_offscreenBuffer.m_color)
     {
-        m_offscreenBuffer.m_color->Cancel();
         m_offscreenBuffer.m_color = nullptr;
     }
 
     if (m_offscreenBuffer.m_depth)
     {
-        m_offscreenBuffer.m_depth->Cancel();
         m_offscreenBuffer.m_depth = nullptr;
     }
 
@@ -121,7 +119,6 @@ void Renderer::CreateOrUpdateGeometryBuffer()
 {
     if (m_geometryBuffer.m_diffuse)
     {
-        m_geometryBuffer.m_diffuse->Cancel();
         m_geometryBuffer.m_diffuse = nullptr;
     }
 
@@ -135,7 +132,6 @@ void Renderer::CreateOrUpdateGeometryBuffer()
     m_geometryBuffer.m_diffuse = new Gpu::Image<Gpu::Formats::R8G8B8A8_UNORM>(blaIVec2(m_viewPortExtents.x, m_viewPortExtents.y), buffer);
 
     // Submit for now is blocking, so we good ...
-    m_geometryBuffer.m_diffuse->Submit();
     m_geometryBuffer.m_diffuse->Submit();
 
     m_geometryBuffer.OnChange();

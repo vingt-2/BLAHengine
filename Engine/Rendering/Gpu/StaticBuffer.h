@@ -46,7 +46,6 @@ namespace BLA
 
         protected:
             BaseStaticBuffer(blaU32 size, blaSize elementSize, Usage usage);
-            virtual ~BaseStaticBuffer();
             blaU32 m_bufferLength;
             blaU32 m_elementSize;
             void* m_dataPointer;
@@ -56,6 +55,7 @@ namespace BLA
         class StaticBuffer : public BaseStaticBuffer
         {
         public:
+            //TODO: Crashes when length is 0
             StaticBuffer(blaU32 length, Usage usage) : BaseStaticBuffer(length, sizeof(T), usage) {}
 
             T& operator[](int i)

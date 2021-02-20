@@ -5,7 +5,7 @@
 #include "EngineInstance.h"
 #include "System/InputManager.h"
 #include "Core/Timer.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "Core/Scene.h"
 
 using namespace BLA;

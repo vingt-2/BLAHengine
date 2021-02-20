@@ -3,7 +3,7 @@
 #include "SimpleHairComponent.h"
 #include "EngineInstance.h"
 #include "Core/GameObject.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "Core/TransformComponent.h"
 
 #include <random>

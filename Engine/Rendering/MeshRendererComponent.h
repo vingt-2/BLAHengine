@@ -69,7 +69,7 @@ namespace BLA
 
         Gpu::Sampler* m_diffuseTextureSampler;
 
-        blaOwnedPtr<TestMeshPass::RenderPassObject> m_renderPassObject;
+        blaOwnedPtr<TestMeshPass::RenderPassObject> m_renderPassObjects;
 
     EndBehaviorDeclaration()
 }

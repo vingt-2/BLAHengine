@@ -46,6 +46,16 @@ void PerspectiveCamera::Update()
         m_worldToClipSpace = blaMat4(1);
 }
 
+blaVec3 PerspectiveCamera::ClipSpaceToCameraDirection(blaVec2 clipSpaceCoord)
+{
+    blaVec3 direction(1.f);
+    direction.x = (2.0f * clipSpaceCoord.x - 1.f) / m_perspectiveProjection[0][0];
+    direction.y = -(2.0f * clipSpaceCoord.y - 1.f) / m_perspectiveProjection[1][1];
+    direction *= -1.f;
+    SafeNormalize(direction);
+    return direction;
+}
+
 RenderCamera::RenderCamera()
 {
     this->m_attachedCamera = nullptr;
@@ -65,4 +75,9 @@ void OrthographicCamera::Update()
         m_worldToClipSpace = m_orthographicProjection * cameraTransformMat;
     else
         m_worldToClipSpace = blaMat4(1);
+}
+
+blaVec3 OrthographicCamera::ClipSpaceToCameraDirection(blaVec2 clipSpaceCoord)
+{
+    return blaVec3(0.f);
 }

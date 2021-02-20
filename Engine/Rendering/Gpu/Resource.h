@@ -29,7 +29,6 @@ namespace BLA
             EResourceType GetType() const { return m_resourceType; }
 
             void Submit();
-            void Cancel();
 
             ResourceHandle GetHandle() const { return m_handle; }
 

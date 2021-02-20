@@ -6,7 +6,7 @@
 #include "System.h"
 #include "Maths/Maths.h"
 #include "Core/Timer.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "Assets/SceneManager.h"
 #include "CameraControl.h"
 #include "System/Console.h"
@@ -351,6 +351,8 @@ SceneEditor::~SceneEditor()
     EngineInstance::~EngineInstance();
 }
 
+blaVector<blaVec3> g_debugSpherePos;
+
 void SceneEditor::EditorUpdate()
 {
     const InputManager* inputs = InputManager::GetSingletonInstanceRead();
@@ -370,10 +372,10 @@ void SceneEditor::EditorUpdate()
     Ray screenRay;
     if (const DevGuiRenderViewportWindow* guiRenderWindow = dynamic_cast<const DevGuiRenderViewportWindow*>(m_guiManager->OpenWindow("Editor Window")))
     {
+        CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
 
-        // Screen to ray should be two steps: QUerry the camera of interest to get clipspace coord
-        // externally figure out the relationship with the screen size ... (or texture size or whatever size really)
-        // screenRay = m_renderer->ScreenToRay(guiRenderWindow->GetMousePointerScreenSpaceCoordinates());
+        blaVec2 renderWindowCursorPos = guiRenderWindow->GetMousePointerScreenSpaceCoordinates();
+        screenRay = camera->ClipSpaceToWorldRay(renderWindowCursorPos);
 
         // ColliderComponent::CollisionContact contactPoint;
         Core::GameObject hoverObject;// = m_scene->PickGameObjectInScene(screenRay, contactPoint);
@@ -381,8 +383,14 @@ void SceneEditor::EditorUpdate()
         auto leftMouseButton = inputs->GetMouseButtonState(BLA_MOUSE_BUTTON_LEFT);
         if (leftMouseButton.IsRisingEdge())
         {
+            g_debugSpherePos.push_back(screenRay.m_origin + screenRay.m_direction);
             SetSelectedObject(hoverObject);
         }
+    }
+
+    for(auto v : g_debugSpherePos)
+    {
+        DebugDraw::DrawPlainSphere(v, 0.1f, blaVec4(1, 1, 1, 1));
     }
 
     if (m_selectedObject.IsValid())

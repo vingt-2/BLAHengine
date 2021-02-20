@@ -9,7 +9,7 @@
 #include "System/Console.h"
 #include "Physics/RigidBodyComponent.h"
 #include "Core/TransformComponent.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "CircularBuffer.h"
 #include "Core/BehaviorComponent.h"
 

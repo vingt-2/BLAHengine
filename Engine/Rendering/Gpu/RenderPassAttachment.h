@@ -8,6 +8,13 @@
 #define DeclareRenderPassAttachment(Name, ColorAttachments, DepthAttachment) \
    typedef BLA::Gpu::RenderPassAttachment<BLA::Gpu::_RenderPassAttachmentTemplateHelpers::CATS<EXPAND(ColorAttachments)>, DepthAttachment> Name;
 
+
+// TODO:
+// It'd be nice to move the should clear decision to compile time templating ... That is because
+// I originally wanted to have 1 c++ type == 1 VKRenderPass descriptor
+// and right now you could set a different clear parameter to subsequent attachment assignments ... Which would not reflect the change ...
+// Not good 
+
 namespace BLA
 {
     namespace Gpu
@@ -21,34 +28,58 @@ namespace BLA
             template <size_t, class> struct InferCAT;
         }
 
-
-        template<typename AttachmentFormat>
-        struct AttachmentDesc
-        {
-            AttachmentDesc(Gpu::Image<AttachmentFormat>* image) : m_image(image) {}
-
-            Gpu::Image<AttachmentFormat>* m_image;
-        };
-
         struct BaseRenderPassAttachment
         {
             BaseRenderPassAttachment(blaU16 colorAttachmentCount) : m_colorCount(colorAttachmentCount) {}
 
-            void GetColorAttachment(blaU32 i, Gpu::BaseImage*& image) const
+            struct ClearSetting
+            {
+                blaVec4 m_clearValue;
+                bool m_shouldClear = false;
+            };
+
+            struct UntypedAttachmentDesc
+            {
+                ClearSetting m_clear;
+                Gpu::BaseImage* m_image = nullptr;
+            };
+
+            void GetColorAttachment(blaU32 i, UntypedAttachmentDesc& untypedAttachmentDesc) const
             {
                 //TODO fatal assert i <= m_colorCount
-
-                const struct UntypedAttachmentDesc
-                {
-                    Gpu::BaseImage* m_image;
-                } attachmentDesc = *reinterpret_cast<const UntypedAttachmentDesc*>((blaU8*)(this + 1) + sizeof(UntypedAttachmentDesc) * i);
-                image = attachmentDesc.m_image;
+                untypedAttachmentDesc = *reinterpret_cast<const UntypedAttachmentDesc*>((blaU8*)(this + 1) + sizeof(UntypedAttachmentDesc) * i);
             }
 
             blaU16 m_colorCount;
 
-            Gpu::BaseImage* m_depthImage = nullptr;
+            UntypedAttachmentDesc m_depth;
         };
+
+        template<typename AttachmentFormat>
+        struct ColorAttachmentDesc
+        {
+            ColorAttachmentDesc(Gpu::Image<AttachmentFormat>* image) : m_image(image) {}
+
+            ColorAttachmentDesc(Gpu::Image<AttachmentFormat>* image, float redClearValue, float greenClearValue, float blueClearValue, float alphaClearValue) :
+                m_image(image), m_clearSettings({ {redClearValue , greenClearValue, blueClearValue, alphaClearValue}, true }) {}
+
+            BaseRenderPassAttachment::ClearSetting m_clearSettings;
+
+            Gpu::Image<AttachmentFormat>* m_image;
+        };
+
+        template<typename AttachmentFormat>
+        struct DepthStencilAttachmentDesc
+        {
+            DepthStencilAttachmentDesc(Gpu::Image<AttachmentFormat>* image) : m_image(image) {}
+
+            DepthStencilAttachmentDesc(Gpu::Image<AttachmentFormat>* image, float depthClearValue, float stencilClearValue): m_image(image), m_clearSettings({ {depthClearValue , stencilClearValue, 0.f, 0.f}, true }) {}
+
+            BaseRenderPassAttachment::ClearSetting m_clearSettings;
+
+            Gpu::Image<AttachmentFormat>* m_image;
+        };
+
 
         template<typename... Ts>
         class _RenderPassAttachmentCATs
@@ -76,20 +107,20 @@ namespace BLA
         class _RenderPassAttachmentCATs<T, Ts...> : public _RenderPassAttachmentCATs<Ts...>
         {
         public:
-            _RenderPassAttachmentCATs(const AttachmentDesc<T>& attachmentDesc, const AttachmentDesc<Ts>&... attachmentDescs) :
+            _RenderPassAttachmentCATs(const ColorAttachmentDesc<T>& attachmentDesc, const ColorAttachmentDesc<Ts>&... attachmentDescs) :
                 _RenderPassAttachmentCATs<Ts...>(attachmentDescs...), m_colorAttachment(attachmentDesc) {};
 
             /*
              * Const accessor to Color Attachment
              */
             template <size_t k>
-            const AttachmentDesc<typename std::enable_if<k == 0, T>::type>& GetColorAttachment() const
+            const ColorAttachmentDesc<typename std::enable_if<k == 0, T>::type>& GetColorAttachment() const
             {
                 return m_colorAttachment;
             }
 
             template <size_t k>
-            const AttachmentDesc<typename std::enable_if<k != 0, typename _RenderPassAttachmentTemplateHelpers::InferCAT<k, _RenderPassAttachmentCATs<T, Ts...>>::type>::type>& GetColorAttachment() const
+            const ColorAttachmentDesc<typename std::enable_if<k != 0, typename _RenderPassAttachmentTemplateHelpers::InferCAT<k, _RenderPassAttachmentCATs<T, Ts...>>::type>::type>& GetColorAttachment() const
             {
                 return _RenderPassAttachmentCATs<Ts...>::template GetColorAttachment<k - 1>();
             }
@@ -98,52 +129,54 @@ namespace BLA
              * Non-Const Accessor to Color Attachment
              */
             template <size_t k>
-            AttachmentDesc<typename std::enable_if<k == 0, T>::type>& GetColorAttachment()
+            ColorAttachmentDesc<typename std::enable_if<k == 0, T>::type>& GetColorAttachment()
             {
                 return m_colorAttachment;
             }
 
             template <size_t k>
-            AttachmentDesc<typename std::enable_if<k != 0, typename _RenderPassAttachmentTemplateHelpers::InferCAT<k, _RenderPassAttachmentCATs<T, Ts...>>::type>::type>& GetColorAttachment()
+            ColorAttachmentDesc<typename std::enable_if<k != 0, typename _RenderPassAttachmentTemplateHelpers::InferCAT<k, _RenderPassAttachmentCATs<T, Ts...>>::type>::type>& GetColorAttachment()
             {
                 return _RenderPassAttachmentCATs<Ts...>::template GetColorAttachment<k - 1>();
             }
 
         protected:
-            const AttachmentDesc<T> m_colorAttachment;
+            const ColorAttachmentDesc<T> m_colorAttachment;
         };
 
         template<typename DepthFormat>
-        struct _DepthAttachment
+        struct _DepthStencilAttachment
         {
-            _DepthAttachment(const AttachmentDesc<DepthFormat>& depthAttachmentDesc) : m_depthAttachment(depthAttachmentDesc) {}
+            _DepthStencilAttachment(const DepthStencilAttachmentDesc<DepthFormat>& depthAttachmentDesc) : m_depthStencilAttachment(depthAttachmentDesc) {}
 
-            AttachmentDesc<DepthFormat> m_depthAttachment;
+            DepthStencilAttachmentDesc<DepthFormat> m_depthStencilAttachment;
         };
 
         template<>
-        class _DepthAttachment<void> {};
+        class _DepthStencilAttachment<void> {};
 
         template<class ColorAttachmentTypes, typename DepthAttachmentType = void>
         struct RenderPassAttachment;
 
         template<typename _DepthAttachmentType, typename... CATs>
         struct RenderPassAttachment<_RenderPassAttachmentTemplateHelpers::CATS<CATs...>, _DepthAttachmentType> : BaseRenderPassAttachment,
-            _RenderPassAttachmentCATs<CATs...>, _DepthAttachment<_DepthAttachmentType>
+            _RenderPassAttachmentCATs<CATs...>, _DepthStencilAttachment<_DepthAttachmentType>
         {
             typedef _RenderPassAttachmentCATs<CATs...> Color;
             typedef _DepthAttachmentType Depth;
 
             template<typename U = _DepthAttachmentType>
             RenderPassAttachment(const Color& colorAttachments, typename std::enable_if<std::is_same<U, void>::value>::type* = 0) : BaseRenderPassAttachment(ms_colorAttachmentCounts), 
-                _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthAttachment<void>()
+                _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthStencilAttachment<void>()
             {}
 
             template<typename U = _DepthAttachmentType>
-            RenderPassAttachment(const Color& colorAttachments, const AttachmentDesc<_DepthAttachmentType>& depthAttachment, typename std::enable_if<!std::is_same<U, void>::value>::type* = 0):
-                BaseRenderPassAttachment(ms_colorAttachmentCounts), _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthAttachment<_DepthAttachmentType>(depthAttachment)
+            RenderPassAttachment(const Color& colorAttachments, const DepthStencilAttachmentDesc<_DepthAttachmentType>& depthAttachment, typename std::enable_if<!std::is_same<U, void>::value>::type* = 0):
+                BaseRenderPassAttachment(ms_colorAttachmentCounts), _RenderPassAttachmentCATs<CATs...>(colorAttachments), _DepthStencilAttachment<_DepthAttachmentType>(depthAttachment)
             {
-                m_depthImage = depthAttachment.m_image;
+                static_assert(sizeof(UntypedAttachmentDesc) == sizeof(DepthStencilAttachmentDesc<_DepthAttachmentType>));
+
+                memcpy_s(&m_depth, sizeof(UntypedAttachmentDesc), &depthAttachment, sizeof(DepthStencilAttachmentDesc<_DepthAttachmentType>));
             }
 
             static const size_t ms_colorAttachmentCounts = sizeof...(CATs);

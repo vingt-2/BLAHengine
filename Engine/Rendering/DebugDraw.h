@@ -6,11 +6,6 @@
 
 #include "StdInclude.h"
 #include "BLASingleton.h"
-/*
-TODO: Move this out of core
-SEPARATE render m_debug, for a specific CONTEXT (when added multiple windows and context)
-And Common m_debug asserts
-*/
 
 namespace BLA
 {

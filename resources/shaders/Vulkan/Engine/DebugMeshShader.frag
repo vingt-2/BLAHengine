@@ -4,9 +4,9 @@
 
 layout(location = 0) in vec4 outVertexRGBA;
 
-layout (location = 0) out vec3 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 void main()
 {
-    fragColor = outVertexRGBA.xyz;
+    fragColor = outVertexRGBA;
 }

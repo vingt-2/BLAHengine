@@ -19,6 +19,15 @@ void CameraComponent::Init()
     m_camera.AttachCamera(this);
 }
 
+Ray CameraComponent::ClipSpaceToWorldRay(blaVec2 clipSpaceCoord)
+{
+    blaVec3 dirInCamera = m_camera.ClipSpaceToCameraDirection(clipSpaceCoord);
+
+    blaPosQuat cameraToWorld = m_worldToCamera.GetPosQuat().GetInverse();
+
+    return Ray(cameraToWorld.GetTranslation3(), cameraToWorld.GetRotation() * dirInCamera, MAX_NORMAL_FLOAT);
+}
+
 void CameraComponent::UpdateView()
 {
     if (!GetOwnerObject().IsValid())

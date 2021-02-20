@@ -235,7 +235,11 @@ namespace BLA::Gpu
             VkBufferUsageFlags usage,
             VkBuffer& buffer, VmaAllocation& allocation) const;
 
+        void DeleteBuffer(VkBuffer buffer, VmaAllocation allocation) const;
+
         void CreateImage(blaIVec2 size, Gpu::Formats::Enum::Index format, VkImage& image, VmaAllocation& allocation) const;
+
+        void DeleteImage(VkImage image, VmaAllocation allocation) const;
 
         void CreateImageView(VkImage image, Gpu::Formats::Enum::Index format, VkImageView& imageView) const;
 
@@ -253,6 +257,8 @@ namespace BLA::Gpu
         struct VulkanAttachment
         {
             blaVector<VkImageView> m_attachmentImageViews;
+            blaVector< BaseRenderPassAttachment::ClearSetting> m_clearSettings;
+
             VkFramebuffer m_frameBuffer = VK_NULL_HANDLE;
 
             blaIVec2 m_attachmentSize;
@@ -260,7 +266,11 @@ namespace BLA::Gpu
 
     public:
 
-        RenderPassObjectHandle RegisterRenderPassObject(const System::Vulkan::Context* vulkanInterface, const BaseRenderPassObject& rpObject)
+        // TODO: Each instnce of a render pass should have its own descriptor pool...
+        // TODO: Each instnce of a render pass should have its own descriptor pool...
+        // Not in the vulkanContext ...
+
+        RenderPassObjectHandle RegisterRenderPassObject(const System::Vulkan::Context* vulkanContext, const BaseRenderPassObject& rpObject)
         {
             VkDescriptorSet rpObjectUniqueDescriptorSet;
 
@@ -268,11 +278,11 @@ namespace BLA::Gpu
             // std::vector<VkDescriptorSetLayout> layouts(vulkanWindoInfo->m_frames.size(), m_vkDescriptorSetLayout);
             VkDescriptorSetAllocateInfo allocInfo{};
             allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-            allocInfo.descriptorPool = vulkanInterface->m_descriptorPool;
+            allocInfo.descriptorPool = vulkanContext->m_descriptorPool;
             allocInfo.descriptorSetCount = 1; // ONLY 1 DESCRIPTOR SET (needs to change for several frames in flight)
             allocInfo.pSetLayouts = &m_vkDescriptorSetLayout;
 
-            VkResult err = vkAllocateDescriptorSets(vulkanInterface->m_device, &allocInfo, &rpObjectUniqueDescriptorSet);
+            VkResult err = vkAllocateDescriptorSets(vulkanContext->m_device, &allocInfo, &rpObjectUniqueDescriptorSet);
 
             blaVector<VkDescriptorBufferInfo> bufferInfos(rpObject.m_uvCount);
             blaVector<VkWriteDescriptorSet> descriptorWrites(rpObject.m_uvCount + rpObject.m_opaqueCount);
@@ -332,7 +342,7 @@ namespace BLA::Gpu
                 }
             }
 
-            vkUpdateDescriptorSets(vulkanInterface->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+            vkUpdateDescriptorSets(vulkanContext->m_device, static_cast<blaU32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
             Gpu::RenderPassObjectHandle retHandle;
             retHandle.m_impl.pointer = rpObjectUniqueDescriptorSet;
@@ -340,32 +350,42 @@ namespace BLA::Gpu
             return retHandle;
         }
 
+        void CancelRenderPassObject(const System::Vulkan::Context* vulkanContext, RenderPassObjectHandle handle)
+        {
+            // TODO: Each instnce of a render pass should have its own descriptor pool...
+            VkDescriptorSet descriptorSet = reinterpret_cast<VkDescriptorSet>(handle.m_impl.pointer);
+            vkFreeDescriptorSets(vulkanContext->m_device, vulkanContext->m_descriptorPool, 1, &descriptorSet);
+        }
+
         void SetAttachment(const BaseRenderPassAttachment* attachment, VkDevice device)
         {
-            m_attachment.m_attachmentImageViews = blaVector<VkImageView>(attachment->m_colorCount + (attachment->m_depthImage ? 1 : 0));
+            m_attachment.m_attachmentImageViews = blaVector <VkImageView> (attachment->m_colorCount + (attachment->m_depth.m_image ? 1 : 0));
+            m_attachment.m_clearSettings = blaVector<BaseRenderPassAttachment::ClearSetting>(attachment->m_colorCount + (attachment->m_depth.m_image ? 1 : 0));
             for(blaSize i = 0; i < attachment->m_colorCount; i++)
             {
-                BaseImage* image;
-                attachment->GetColorAttachment((blaU32)i, image);
+                BaseRenderPassAttachment::UntypedAttachmentDesc attachmentDesc{};
+                attachment->GetColorAttachment((blaU32)i, attachmentDesc);
 
-                m_attachment.m_attachmentSize = image->GetSize();
+                m_attachment.m_attachmentSize = attachmentDesc.m_image->GetSize();
 
                 VkImageViewCreateInfo imageViewCreateInfo = {};
-                imageViewCreateInfo.image = static_cast<VkImage>(image->GetHandle().m_impl.pointer);
+                imageViewCreateInfo.image = static_cast<VkImage>(attachmentDesc.m_image->GetHandle().m_impl.pointer);
                 imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
                 imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                imageViewCreateInfo.format = g_BlaFormatToVulkan[image->GetFormat()];
+                imageViewCreateInfo.format = g_BlaFormatToVulkan[attachmentDesc.m_image->GetFormat()];
                 imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
                 imageViewCreateInfo.subresourceRange.levelCount = 1;
                 imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
                 imageViewCreateInfo.subresourceRange.layerCount = 1;
                 vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachment.m_attachmentImageViews[i]);
+
+                m_attachment.m_clearSettings[i] = attachmentDesc.m_clear;
             }
 
-            if(attachment->m_depthImage)
+            if(attachment->m_depth.m_image)
             {
-                BaseImage* image = attachment->m_depthImage;
+                BaseImage* image = attachment->m_depth.m_image;
 
                 VkImageViewCreateInfo imageViewCreateInfo = {};
                 imageViewCreateInfo.image = static_cast<VkImage>(image->GetHandle().m_impl.pointer);
@@ -378,6 +398,8 @@ namespace BLA::Gpu
                 imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
                 imageViewCreateInfo.subresourceRange.layerCount = 1;
                 vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_attachment.m_attachmentImageViews[m_attachment.m_attachmentImageViews.size()-1]);
+
+                m_attachment.m_clearSettings[m_attachment.m_clearSettings.size() - 1] = attachment->m_depth.m_clear;
             }
 
             VkFramebufferCreateInfo frameBufferCreateInfo = {};
@@ -424,6 +446,7 @@ namespace BLA::Gpu
             {
                 Core::InspectableVariables::ExposedVarTypeDescriptor* vaType = renderPassDescriptor.m_vertexAttributesDescriptors[i];
                 VkVertexInputBindingDescription& bindingDescriptor = bindingDescriptions[i];
+                bindingDescriptor.binding = i;
                 bindingDescriptor.stride = static_cast<blaU32>(vaType->size);
                 bindingDescriptor.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
@@ -542,29 +565,29 @@ namespace BLA::Gpu
             //VulkanRenderPassHelpers::check_vk_result(err);
         }
 
-        void CreateVKRenderPass(VkDevice device, const RenderPassDescriptor* rpDescriptor)
+        void CreateVKRenderPass(VkDevice device, /*const RenderPassDescriptor* TODOThisSHouldbeADescriptorNotInstanceData*/ const BaseRenderPassAttachment* attachment)
         {
-            blaVector<VkAttachmentDescription> attachments(rpDescriptor->m_attachmentDescription.m_colorAttachments.size() 
-                + (rpDescriptor->m_attachmentDescription.m_depthAttachment != Formats::Enum::INVALID ? 1 : 0));
+            blaVector<VkAttachmentDescription> attachments(attachment->m_colorCount + (attachment->m_depth.m_image != nullptr ? 1 : 0));
 
-            blaVector<VkAttachmentReference> colorAttachmentsRefs(rpDescriptor->m_attachmentDescription.m_colorAttachments.size());
+            blaVector<VkAttachmentReference> colorAttachmentsRefs(attachment->m_colorCount);
 
             for(size_t i = 0; i < colorAttachmentsRefs.size(); i++)
             {
                 /*
                  * TODO: Mayw want rpDescriptor->m_attachmentDescription.m_colorAttachments to be more than a format
                  */
-                Formats::Enum::Index formatIndex = rpDescriptor->m_attachmentDescription.m_colorAttachments[i];
+                BaseRenderPassAttachment::UntypedAttachmentDesc attachmentDesc;
+                attachment->GetColorAttachment((blaU32)i, attachmentDesc);
 
                 VkAttachmentDescription& colorAttachment = attachments[i];
 
-                colorAttachment.format = g_BlaFormatToVulkan[formatIndex];
+                colorAttachment.format = g_BlaFormatToVulkan[attachmentDesc.m_image->GetFormat()];
                 colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                colorAttachment.loadOp = attachmentDesc.m_clear.m_shouldClear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
                 colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
                 colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
                 colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                colorAttachment.initialLayout = VK_IMAGE_LAYOUT_GENERAL;
                 colorAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
 
                 VkAttachmentReference& colorAttachmentRef = colorAttachmentsRefs[i];
@@ -579,20 +602,20 @@ namespace BLA::Gpu
             subpass.pColorAttachments = colorAttachmentsRefs.data();
 
             VkAttachmentReference depthAttachmentRef{};
-            if(rpDescriptor->m_attachmentDescription.m_depthAttachment != Formats::Enum::INVALID)
+            if(attachment->m_depth.m_image != nullptr)
             {
                 VkAttachmentDescription& depthAttachment = attachments[colorAttachmentsRefs.size()];
 
-                depthAttachment.format = g_BlaFormatToVulkan[rpDescriptor->m_attachmentDescription.m_depthAttachment];
+                depthAttachment.format = g_BlaFormatToVulkan[attachment->m_depth.m_image->GetFormat()];
                 depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                depthAttachment.loadOp = attachment->m_depth.m_clear.m_shouldClear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
                 depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
                 depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
                 depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                depthAttachment.initialLayout = VK_IMAGE_LAYOUT_GENERAL;
                 depthAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-                depthAttachmentRef.attachment = static_cast<blaU32>(rpDescriptor->m_attachmentDescription.m_colorAttachments.size());
+                depthAttachmentRef.attachment = static_cast<blaU32>(attachment->m_colorCount);
                 depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
                 subpass.pDepthStencilAttachment = &depthAttachmentRef;
@@ -618,9 +641,17 @@ namespace BLA::Gpu
             cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
             cmdBufferBeginInfo.pNext = NULL;
 
-            VkClearValue clearValues[2];
-            clearValues[0].color = { {0.0f, 1.0f, 1.0f, 1.0f} };
-            clearValues[1].depthStencil = {1.0f, 0};
+            blaVector<VkClearValue> clearValues;
+
+            for(blaSize i = 0; i < m_attachment.m_clearSettings.size(); i++)
+            {
+                if(m_attachment.m_clearSettings[i].m_shouldClear)
+                {
+                    clearValues.push_back(VkClearValue());
+                    // Doesn't matter if we write to DepthStencil (blaVec2) or color (blaVec4) in the union ...
+                    *reinterpret_cast<blaVec4*>(&clearValues[clearValues.size()-1].color) = m_attachment.m_clearSettings[i].m_clearValue;
+                }
+            }
 
             VkRenderPassBeginInfo renderPassBeginInfo = {};
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -629,8 +660,8 @@ namespace BLA::Gpu
             renderPassBeginInfo.renderArea.offset.y = 0;
             renderPassBeginInfo.renderArea.extent.width = m_attachment.m_attachmentSize.x;
             renderPassBeginInfo.renderArea.extent.height = m_attachment.m_attachmentSize.y;
-            renderPassBeginInfo.clearValueCount = 2;
-            renderPassBeginInfo.pClearValues = clearValues;
+            renderPassBeginInfo.clearValueCount = (blaU32)clearValues.size();
+            renderPassBeginInfo.pClearValues = clearValues.data();
 
             int i = vkWindow->m_frameIndex;
 
@@ -661,23 +692,38 @@ namespace BLA::Gpu
                 for (blaU16 j = 0; j < rpObject->m_vaCount; j++)
                 {
                     const Gpu::BaseStaticBuffer* b;
-                    rpObject->GetVertexAttributeBuffer(j, b);
+                    rpObject->GetVertexAttributeBuffer(rpObject->m_vaCount - 1 - j, b);
                     vertexBuffers[j] = static_cast<VkBuffer>(b->GetHandle().m_impl.pointer);
                     offsets[j] = 0;
                 }
 
                 vkCmdBindVertexBuffers(vkWindow->m_frames[i].m_commandBuffer, 0, (blaU32)vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 
-                VkBuffer indexBuffer = static_cast<VkBuffer>(rpObject->m_indices->GetHandle().m_impl.pointer);
-                vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
+                if(rpObject->m_indices != nullptr)
+                {
+                    VkBuffer indexBuffer = static_cast<VkBuffer>(rpObject->m_indices->GetHandle().m_impl.pointer);
+                    vkCmdBindIndexBuffer(vkWindow->m_frames[i].m_commandBuffer, indexBuffer, 0, VkIndexType::VK_INDEX_TYPE_UINT32);
+                }
 
                 const VkDescriptorSet* descriptorSet = reinterpret_cast<const VkDescriptorSet*>(&rpObject->GetHandle().m_impl.pointer);
 
                 vkCmdBindDescriptorSets(vkWindow->m_frames[i].m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                     m_vkPipelineLayout, 0, 1, descriptorSet, 0, nullptr);
 
-                vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, rpObject->m_indices->GetLength(), 1, 0, 0, 0);
+                if(rpObject->m_indices != nullptr)
+                {
+                    vkCmdDrawIndexed(vkWindow->m_frames[i].m_commandBuffer, rpObject->m_indices->GetLength(), 1, 0, 0, 0);
+                }
+                else
+                {
+                    //TODO: Ewww.. More... better... perhaps ? It'd be great for a rpobject to know how many vertices it sends to the input assembly...
+                    //TODO: And it should probably ensure that all vertex attributes buffer have the same size
+                    const Gpu::BaseStaticBuffer* b;
+                    rpObject->GetVertexAttributeBuffer(0, b);
 
+                    vkCmdDraw(vkWindow->m_frames[i].m_commandBuffer, b->GetLength(), 1, 0, 0);
+                }
+                
                 rpObject = iterator.Get();
             }
 
@@ -824,11 +870,11 @@ namespace BLA::Gpu
         return ResourceHandle();
     }
 
-    RenderPassInstanceImplementation* Vulkan::SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program)
+    RenderPassInstanceImplementation* Vulkan::SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program, const BaseRenderPassAttachment* rpAttachmnet /*TODO: Remove, see RPattachment.h*/)
     {
         VulkanRenderPass* renderPass = new VulkanRenderPass();
 
-        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device, rpDescriptor);
+        renderPass->CreateVKRenderPass(m_implementation->m_vulkanContext->m_device, rpAttachmnet);
 
         renderPass->CreatePipeline(
             *rpDescriptor,
@@ -856,6 +902,12 @@ namespace BLA::Gpu
     RenderPassObjectHandle Vulkan::RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance)
     {
         return static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->RegisterRenderPassObject(m_implementation->m_vulkanContext, instance);
+    }
+
+    void Vulkan::CancelRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation,
+        RenderPassObjectHandle handle)
+    {
+        return static_cast<VulkanRenderPass*>(renderPassInstanceImplementation)->CancelRenderPassObject(m_implementation->m_vulkanContext, handle);
     }
 
     ResourceHandle Vulkan::SubmitStaticBuffer(BaseStaticBuffer* resource)
@@ -953,12 +1005,32 @@ namespace BLA::Gpu
 
     void Vulkan::CancelStaticBuffer(BaseStaticBuffer* resource)
     {
+        if (!resource->GetHandle().m_impl.pointer)
+            return;
 
+        VkBuffer& stagingBuffer = reinterpret_cast<VkBuffer&>(resource->m_StagingData.pointers[0]);
+        VmaAllocation& stagingAlloc = reinterpret_cast<VmaAllocation&>(resource->m_StagingData.pointers[1]);
+        
+        vmaUnmapMemory(m_implementation->m_allocator, stagingAlloc);
+        Interface::SetBufferDataPointer(resource, nullptr);
+
+        m_implementation->DeleteBuffer(
+            stagingBuffer,
+            stagingAlloc);
+
+        m_implementation->DeleteBuffer(
+            static_cast<VkBuffer>(resource->GetHandle().m_impl.pointer), 
+            static_cast<VmaAllocation>(resource->m_allocationHandle.pointer));
     }
 
     void Vulkan::CancelImage(BaseImage* resource)
     {
+        if (!resource->GetHandle().m_impl.pointer)
+            return;
 
+        m_implementation->DeleteImage(
+            static_cast<VkImage>(resource->GetHandle().m_impl.pointer),
+            static_cast<VmaAllocation>(resource->m_allocationHandle.pointer));
     }
 
     void Vulkan::CancelShaderProgram(ShaderProgram* shaderProgram)
@@ -1121,6 +1193,11 @@ namespace BLA::Gpu
         vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
     }
 
+    void Vulkan::VulkanImplementation::DeleteBuffer(VkBuffer buffer, VmaAllocation allocation) const
+    {
+        vmaDestroyBuffer(m_allocator, buffer, allocation);
+    }
+
     void Vulkan::VulkanImplementation::CreateImage(blaIVec2 size, Gpu::Formats::Enum::Index format, VkImage& image, VmaAllocation& allocation) const
     {
         // Is it a depth image ?
@@ -1151,8 +1228,13 @@ namespace BLA::Gpu
         vmaCreateImage(m_allocator, &imageCreateInfo, &allocInfo, &image, &allocation, nullptr);
     }
 
+    void Vulkan::VulkanImplementation::DeleteImage(VkImage image, VmaAllocation allocation) const
+    {
+        vmaDestroyImage(m_allocator, image, allocation);
+    }
+
     void Vulkan::VulkanImplementation::CreateImageView(VkImage image, Gpu::Formats::Enum::Index format,
-        VkImageView& imageView) const
+                                                       VkImageView& imageView) const
     {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

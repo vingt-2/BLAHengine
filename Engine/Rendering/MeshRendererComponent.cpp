@@ -53,9 +53,9 @@ void OnOffscreenRenderTarget(RenderTarget* rt)
     {
         if(MeshRendererComponent::TestMeshPass::RenderPassInstance* instance = renderer->GetRenderPassInstance<MeshRendererComponent::TestMeshPass>(g_testMeshPassId))
         {
-            MeshRendererComponent::TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+            MeshRendererComponent::TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::ColorAttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p, 0.f, 0.f, 0.f, 1.f));
             // Make Attachment from renderer offscreen images:
-            MeshRendererComponent::TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+            MeshRendererComponent::TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::DepthStencilAttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p, 1.f, 0.f));
 
             instance->ResetAttachment(attachment);
         }
@@ -78,9 +78,9 @@ void MeshRendererComponent::Update()
         program.m_shaders.push_back(vertexShader);
         program.m_shaders.push_back(fragmentShader);
 
-        TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+        TestMeshPass::RenderPassAttachment::Color colorAttachments(Gpu::ColorAttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p, 0.f, 0.f, 0.f, 1.f));
         // Make Attachment from renderer offscreen images:
-        TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p));
+        TestMeshPass::RenderPassAttachment attachment(colorAttachments, Gpu::DepthStencilAttachmentDesc(renderer->m_offscreenBuffer.m_depth.m_p, 1.f, 0.f));
 
         g_testMeshPassId = BlaStringId("TestMeshPass");
 
@@ -178,11 +178,11 @@ void MeshRendererComponent::Update()
             const TestMeshPass::RenderPassObject::InstanceUniformValues meshUniforms(m_modelTransformMatrix, m_MVP);
             const TestMeshPass::RenderPassObject::InstanceOpaqueValues opaques;
 
-            m_renderPassObject = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms, opaques);
+            m_renderPassObjects = new TestMeshPass::RenderPassObject(*m_indices, meshVAs, meshUniforms, opaques);
 
             if(TestMeshPass::RenderPassInstance* testMeshPassInstance = renderer->GetRenderPassInstance<TestMeshPass>(g_testMeshPassId))
             {
-                testMeshPassInstance->RegisterRenderPassObject(*m_renderPassObject);
+                testMeshPassInstance->RegisterRenderPassObject(*m_renderPassObjects);
             }
         }
     }

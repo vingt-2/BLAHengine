@@ -6,7 +6,7 @@
 #include "Maths/Maths.h"
 
 #include "Core/Timer.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "Core/GameComponent.h"
 #include "Assets/SceneManager.h"
 #include "System/Console.h"

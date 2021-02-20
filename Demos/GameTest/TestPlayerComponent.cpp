@@ -1,5 +1,5 @@
 #include "TestPlayerComponent.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "EngineInstance.h"
 #include "System/InputManager.h"
 #include "Core/Scene.h"

@@ -48,6 +48,9 @@ namespace BLA
         BaseRenderPassObject(const Gpu::StaticBuffer<blaU32>& indices, blaU16 vaCount, blaU16 uvCount, blaU16 opaqueCount) :
            m_vaCount(vaCount), m_uvCount(uvCount), m_opaqueCount(opaqueCount), m_indices(&indices) {}
 
+        BaseRenderPassObject(blaU16 vaCount, blaU16 uvCount, blaU16 opaqueCount) :
+            m_vaCount(vaCount), m_uvCount(uvCount), m_opaqueCount(opaqueCount), m_indices(nullptr) {}
+
     public:
         
         void GetVertexAttributeBuffer(blaU32 i, const Gpu::BaseStaticBuffer*& buffer) const
@@ -134,9 +137,10 @@ namespace BLA
 
         static RenderPassObjectIterator GetIterator(const BaseRenderPassObject* head, blaSize containerSize, blaSize objSize) { return RenderPassObjectIterator(head, containerSize, objSize); }
 
-        void Setup(DefaultTODOToSpecifyRenderProgram& program);
+        void Setup(DefaultTODOToSpecifyRenderProgram& program, const Gpu::BaseRenderPassAttachment* TODORemoveMe);
         void BaseResetAttachment(const Gpu::BaseRenderPassAttachment* rpAttachment) const;
         void BaseRegisterRenderPassObject(BaseRenderPassObject& object) const;
+        void BaseCancelRenderPassObject(const BaseRenderPassObject& object) const;
 
         const Gpu::RenderPassDescriptor* m_pRenderPassDescriptor;
     };
@@ -356,6 +360,10 @@ namespace BLA
 
         _RenderPassObject(const Gpu::StaticBuffer<blaU32>&indices, const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms, const InstanceOpaqueValues& opaqueValues):
             BaseRenderPassObject(indices, RenderPass::ms_VACount, RenderPass::ms_UBOCount, RenderPass::ms_OpaquesCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUBOs<UBOs...>(shaderUniforms), _RenderPassObjectOpaques<Opaques...>(opaqueValues) {}
+
+        _RenderPassObject(const InstanceVertexAttributes& vertexAttributes, const InstanceUniformValues& shaderUniforms, const InstanceOpaqueValues& opaqueValues) :
+            BaseRenderPassObject(RenderPass::ms_VACount, RenderPass::ms_UBOCount, RenderPass::ms_OpaquesCount), _RenderPassObjectVAs<VAs...>(vertexAttributes), _RenderPassObjectUBOs<UBOs...>(shaderUniforms), _RenderPassObjectOpaques<Opaques...>(opaqueValues) {}
+
     };
 
     template<typename _RenderPass, typename _RenderPassAttachment, typename _RenderPassRenderProgram>
@@ -375,19 +383,28 @@ namespace BLA
         {
             m_pRenderPassDescriptor = RenderPass::GetSingletonInstanceRead()->m_pRenderPassDescriptor;
 
-            Setup(m_renderProgram);
+            Setup(m_renderProgram, &attachment /*TODO: REMOVE ME*/);
             ResetAttachment(attachment);
         }
 
         void RegisterRenderPassObject(const typename RenderPass::RenderPassObject& object)
         {
-            m_renderPassInstances.push_back(object);
-            BaseRegisterRenderPassObject(m_renderPassInstances[m_renderPassInstances.size() - 1]);
+            m_renderPassObjects.push_back(object);
+            BaseRegisterRenderPassObject(m_renderPassObjects[m_renderPassObjects.size() - 1]);
         }
 
-        RenderPassObjectIterator GetIterator() const override { return BaseRenderPassInstance::GetIterator( static_cast<const BaseRenderPassObject*>(m_renderPassInstances.data()), m_renderPassInstances.size(), sizeof(typename RenderPass::RenderPassObject));}
+        void ClearAllObjects()
+        {
+            for(const auto& object : m_renderPassObjects)
+            {
+                BaseCancelRenderPassObject(object);
+            }
+            m_renderPassObjects.clear();
+        }
 
-        blaVector<typename RenderPass::RenderPassObject> m_renderPassInstances;
+        RenderPassObjectIterator GetIterator() const override { return BaseRenderPassInstance::GetIterator( static_cast<const BaseRenderPassObject*>(m_renderPassObjects.data()), m_renderPassObjects.size(), sizeof(typename RenderPass::RenderPassObject));}
+
+        blaVector<typename RenderPass::RenderPassObject> m_renderPassObjects;
 
         Attachment m_attachment;
         RenderProgram m_renderProgram;

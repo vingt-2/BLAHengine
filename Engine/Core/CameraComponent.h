@@ -3,7 +3,7 @@
 #pragma once
 #include "StdInclude.h"
 #include "Maths/Maths.h"
-
+#include "Maths/Ray.h"
 #include "BehaviorComponent.h"
 #include "Rendering/RenderCamera.h"
 
@@ -19,6 +19,8 @@ namespace BLA
         blaF32 m_fov = 120.f;
         blaF32 m_nearClipPlane = 0.01f;
         blaF32 m_farClipPlane = 10000.f;
+
+        BLACORE_API Ray ClipSpaceToWorldRay(blaVec2 clipSpaceCoord);
     
         // Functions
         void UpdateView();

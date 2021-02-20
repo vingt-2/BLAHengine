@@ -1,15 +1,18 @@
 // BLAEngine Copyright (C) 2016-2020 Vincent Petrella. All rights reserved.
 
 #include "DebugDraw.h"
+#include "Pointer.h"
+#include "Core/Scene.h"
 #include "Rendering/Renderer.h"
 #include "Geometry/TriangleMesh.h"
 #include "Rendering/Gpu/Formats.h"
+#include "Core/CameraComponent.h"
 
 using namespace BLA;
 
 BLA_IMPLEMENT_SINGLETON(DebugDraw)
 
-DeclareRenderPassAttachment(DebugDrawAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), void)
+DeclareRenderPassAttachment(DebugDrawAttachment, ColorAttachments(Gpu::Formats::R8G8B8A8_UNORM), Gpu::Formats::D32_SFLOAT)
 
 DeclareRenderPass(
     DebugMeshRenderPass,
@@ -17,11 +20,20 @@ DeclareRenderPass(
     VertexAttributes(
         blaVec3, // vertices
         blaVec4 // Vertex colors
-    ))
+    ),
+    UniformBufferObjects(blaMat4) // WorldToClipSpace
+    )
 
 RegisterRenderPass(DebugMeshRenderPass);
 
 static blaStringId g_debugRenderPassId = BlaStringId("DebugMesh");
+
+struct DebugMeshVertexData
+{
+    blaOwnedPtr<Gpu::StaticBuffer<blaVec3>> m_vertPos;
+    blaOwnedPtr<Gpu::StaticBuffer<blaVec4>> m_vertColor;
+    Gpu::DynamicBuffer<blaMat4> m_worldToClipSpace;
+} *g_debugMeshVertexData = nullptr;
 
 DebugDraw::DebugDraw()
 {
@@ -41,9 +53,9 @@ void DebugDrawOnOffscreenRenderTarget(RenderTarget* rt)
 
     if (DebugMeshRenderPass::RenderPassInstance* instance = renderer->GetRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId))
     {
-        DebugMeshRenderPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+        DebugMeshRenderPass::RenderPassAttachment::Color colorAttachments(Gpu::ColorAttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
         // Make Attachment from renderer offscreen images:
-        DebugMeshRenderPass::RenderPassAttachment attachment(colorAttachments);
+        DebugMeshRenderPass::RenderPassAttachment attachment(colorAttachments, renderer->m_offscreenBuffer.m_depth.m_p);
 
         instance->ResetAttachment(attachment);
     }
@@ -68,13 +80,27 @@ void DebugDraw::Update()
         program.m_shaders.push_back(vertexShader);
         program.m_shaders.push_back(fragmentShader);
 
-        DebugMeshRenderPass::RenderPassAttachment::Color colorAttachments(Gpu::AttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
+        DebugMeshRenderPass::RenderPassAttachment::Color colorAttachments(Gpu::ColorAttachmentDesc(renderer->m_offscreenBuffer.m_color.m_p));
         // Make Attachment from renderer offscreen images:
-        DebugMeshRenderPass::RenderPassAttachment attachment(colorAttachments);
+        DebugMeshRenderPass::RenderPassAttachment attachment(colorAttachments, renderer->m_offscreenBuffer.m_depth.m_p);
 
-        //renderer->AddRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId, attachment, program);
+        renderer->AddRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId, attachment, program);
+        renderer->m_offscreenBuffer.RegisterOnChangeCallback(DebugDrawOnOffscreenRenderTarget);
 
-        //renderer->m_offscreenBuffer.RegisterOnChangeCallback(DebugDrawOnOffscreenRenderTarget);
+        if(!g_debugMeshVertexData)
+        {
+            g_debugMeshVertexData = new DebugMeshVertexData;
+        }
+    }
+
+    //TODO: EEWWWWWWW
+    CameraComponent* camera = Core::Scene::GetSingletonInstance()->GetMainCamera();
+
+    if (!camera) return;
+
+    if (DebugMeshRenderPass::RenderPassInstance* testMeshPassInstance = renderer->GetRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId))
+    {
+        testMeshPassInstance->ClearAllObjects();
     }
 
     if (m_drawDebugLines)
@@ -83,10 +109,29 @@ void DebugDraw::Update()
         // m_debugRenderManager->LoadDebugLineMesh(m_lineMeshVertsAndColor);*/
     }
 
-    if (m_drawDebugMeshes)
+    if (m_drawDebugMeshes && m_debugTrianglesVertsAndColorA.first.size() != 0)
     {
-        //m_debugRenderManager->m_filledMeshes.clear();
-        //m_debugRenderManager->LoadDebugFilledMesh(m_debugTrianglesVertsAndColorA);
+        g_debugMeshVertexData->m_vertPos = new Gpu::StaticBuffer<blaVec3>(static_cast<blaU32>(m_debugTrianglesVertsAndColorA.first.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
+        memcpy_s(g_debugMeshVertexData->m_vertPos->GetData(), sizeof(blaVec3) * g_debugMeshVertexData->m_vertPos->GetLength(), m_debugTrianglesVertsAndColorA.first.data(), m_debugTrianglesVertsAndColorA.first.size() * sizeof(blaVec3));
+
+        g_debugMeshVertexData->m_vertColor = new Gpu::StaticBuffer<blaVec4>(static_cast<blaU32>(m_debugTrianglesVertsAndColorA.first.size()), Gpu::BaseStaticBuffer::Usage::VertexBuffer);
+        memcpy_s(g_debugMeshVertexData->m_vertColor->GetData(), sizeof(blaVec4) * g_debugMeshVertexData->m_vertColor->GetLength(), m_debugTrianglesVertsAndColorA.second.data(), m_debugTrianglesVertsAndColorA.second.size() * sizeof(blaVec4));
+
+        *g_debugMeshVertexData->m_worldToClipSpace.GetData() = camera->m_camera.m_worldToClipSpace;
+
+        const DebugMeshRenderPass::RenderPassObject::InstanceVertexAttributes vertexAttributes(*g_debugMeshVertexData->m_vertPos, *g_debugMeshVertexData->m_vertColor);
+        const DebugMeshRenderPass::RenderPassObject::InstanceUniformValues uniformValues(g_debugMeshVertexData->m_worldToClipSpace);
+        const DebugMeshRenderPass::RenderPassObject::InstanceOpaqueValues opaques;
+
+        DebugMeshRenderPass::RenderPassObject rpObject(vertexAttributes, uniformValues, opaques);
+
+        g_debugMeshVertexData->m_vertPos->Submit();
+        g_debugMeshVertexData->m_vertColor->Submit();
+
+        if (DebugMeshRenderPass::RenderPassInstance* testMeshPassInstance = renderer->GetRenderPassInstance<DebugMeshRenderPass>(g_debugRenderPassId))
+        {
+            testMeshPassInstance->RegisterRenderPassObject(rpObject);
+        }
     }
 
     m_lineMeshVertsAndColor.first.clear();

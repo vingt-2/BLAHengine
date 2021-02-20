@@ -14,6 +14,8 @@ namespace BLA
         // Hold the View Projection matrix (updated each frame)
         blaMat4 m_worldToClipSpace;
 
+        BLACORE_API virtual blaVec3 ClipSpaceToCameraDirection(blaVec2 clipSpaceCoord) = 0;
+
         BLACORE_API virtual void AttachCamera(CameraComponent* camera);
         BLACORE_API virtual void Update() = 0;
 
@@ -31,6 +33,7 @@ namespace BLA
 
         BLACORE_API void SetAspect(glm::vec2 renderSize);
         BLACORE_API void Update();
+        blaVec3 ClipSpaceToCameraDirection(blaVec2 clipSpaceCoord) override;
     };
 
     class OrthographicCamera : public RenderCamera
@@ -40,5 +43,6 @@ namespace BLA
 
         BLACORE_API void SetOrthographicProj(float left, float right, float bottom, float top);
         BLACORE_API void Update();
+        blaVec3 ClipSpaceToCameraDirection(blaVec2 clipSpaceCoord) override;
     };
 }

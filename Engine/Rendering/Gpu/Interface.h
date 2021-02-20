@@ -43,11 +43,12 @@ namespace BLA
             static void SetBufferDataPointer(BaseDynamicBuffer* buffer, blaU8* pointer);
             static BaseStaticBuffer* GetImageBuffer(BaseImage* image);
 
-            virtual RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program) = 0;
+            virtual RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program, const BaseRenderPassAttachment* attachment) = 0;
             virtual void AttachToRenderPass(RenderPassInstanceImplementation* rpInstanceImplementation, const BaseRenderPassAttachment* attachment) = 0;
             
             virtual void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation, BaseRenderPassInstance::RenderPassObjectIterator& iterator) = 0;
             virtual RenderPassObjectHandle RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) = 0;
+            virtual void CancelRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, RenderPassObjectHandle handle) = 0;
         };
     }
 };

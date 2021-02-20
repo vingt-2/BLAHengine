@@ -31,11 +31,12 @@ namespace BLA
             ResourceHandle PrepareDynamicBuffer(BaseResource* resource) override;
             
         protected:
-            RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program) override;
+            RenderPassInstanceImplementation* SetupRenderPass(const RenderPassDescriptor* rpDescriptor, RenderPassProgram& program, const BaseRenderPassAttachment* attachment) override;
             void AttachToRenderPass(RenderPassInstanceImplementation* rpInstanceImplementation, const BaseRenderPassAttachment* attachment) override;
 
             void Render(RenderPassInstanceImplementation* renderPassInstanceImplementation, BaseRenderPassInstance::RenderPassObjectIterator& iterator) override;
             RenderPassObjectHandle RegisterRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, const BaseRenderPassObject& instance) override;
+            void CancelRenderPassObjectBase(RenderPassInstanceImplementation* renderPassInstanceImplementation, RenderPassObjectHandle handle) override;
         
         private:
             ResourceHandle SubmitStaticBuffer(BaseStaticBuffer* resource);

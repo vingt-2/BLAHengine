@@ -10,9 +10,9 @@ void BaseRenderPassInstance::Render() const
     Gpu::Interface::GetSingletonInstance()->Render(m_pImplementation, GetIterator());
 }
 
-void BaseRenderPassInstance::Setup(DefaultTODOToSpecifyRenderProgram& program)
+void BaseRenderPassInstance::Setup(DefaultTODOToSpecifyRenderProgram& program, const Gpu::BaseRenderPassAttachment* TODORemoveMe)
 {
-    m_pImplementation = Gpu::Interface::GetSingletonInstance()->SetupRenderPass(m_pRenderPassDescriptor, program);
+    m_pImplementation = Gpu::Interface::GetSingletonInstance()->SetupRenderPass(m_pRenderPassDescriptor, program, TODORemoveMe);
 }
 
 void BaseRenderPassInstance::BaseResetAttachment(const Gpu::BaseRenderPassAttachment* rpAttachment) const
@@ -23,4 +23,9 @@ void BaseRenderPassInstance::BaseResetAttachment(const Gpu::BaseRenderPassAttach
 void BaseRenderPassInstance::BaseRegisterRenderPassObject(BaseRenderPassObject& object) const
 {
     object.m_rpObjectHandle = Gpu::Interface::GetSingletonInstance()->RegisterRenderPassObjectBase(m_pImplementation, object);
+}
+
+void BaseRenderPassInstance::BaseCancelRenderPassObject(const BaseRenderPassObject& object) const
+{
+    Gpu::Interface::GetSingletonInstance()->CancelRenderPassObjectBase(m_pImplementation, object.GetHandle());
 }

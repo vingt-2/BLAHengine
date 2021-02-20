@@ -4,7 +4,7 @@
 #include <immintrin.h>
 #include "Maths/Maths.h"
 #include "System/Console.h"
-#include "Core/DebugDraw.h"
+#include "Rendering/DebugDraw.h"
 #include "Core/TransformComponent.h"
 #include "Core/BehaviorComponent.h"
 
